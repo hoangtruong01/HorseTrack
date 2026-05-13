@@ -1,0 +1,17 @@
+name: CD
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        run: |
+          echo "Add your deployment steps here (e.g., Vercel, Heroku, AWS, etc.)"
+          echo "You will need to set secrets like SSH_KEY, DEPLOY_TOKEN, etc. in GitHub repository settings."
