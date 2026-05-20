@@ -6,13 +6,13 @@ export type HorseDocument = Horse & Document;
 @Schema()
 export class Horse {
   @Prop({ required: true })
-  name: string;
+  name!: string;
 
   @Prop()
-  breed: string;
+  breed?: string;
 
   @Prop()
-  age: number;
+  age?: number;
 }
 
 export const HorseSchema = SchemaFactory.createForClass(Horse);

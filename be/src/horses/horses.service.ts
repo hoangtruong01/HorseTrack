@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateHorseDto } from './dto/create-horse.dto';
+import { UpdateHorseDto } from './dto/update-horse.dto';
 import { Horse, HorseDocument } from './schemas/horse.schema';
 
 @Injectable()
@@ -23,7 +24,7 @@ export class HorsesService {
     return `This action returns a #${id} horse`;
   }
 
-  update(id: number) {
+  update(id: number, _updateHorseDto: UpdateHorseDto) {
     return `This action updates a #${id} horse`;
   }
 
