@@ -10,5 +10,6 @@ import { Horse, HorseSchema } from './schemas/horse.schema';
   ],
   controllers: [HorsesController],
   providers: [HorsesService],
+  exports: [HorsesService],
 })
 export class HorsesModule {}
