@@ -6,37 +6,39 @@ Keep concise. Store stable conventions only.
 
 ## Project Summary
 
-- Purpose:
-- Primary stack:
-- App type:
-- Main entry points:
+- Purpose: Horse racing tournament management MVP for WDP demo.
+- Primary stack: Next.js App Router, React, TypeScript, TailwindCSS, shadcn-style primitives.
+- App type: FE mock-first web app; backend integration intentionally deferred.
+- Main entry points: `fe/app/layout.tsx`, `fe/app/page.tsx`, route groups under `fe/app/(public)`, `fe/app/(auth)`, `fe/app/(dashboard)`.
 
 ## Key Folders
 
-- `src/`:
-- `app/` or `pages/`:
-- `components/`:
-- `lib/` or `utils/`:
-- `tests/`:
+- `fe/app/`: Next.js App Router routes, layouts, loading/error/not-found handlers.
+- `fe/components/`: shared UI/layout/navigation/feedback components.
+- `fe/features/`: future business UI modules.
+- `fe/lib/`: shared utilities.
+- `fe/constants/`: navigation and app constants.
+- `fe/types/`: shared TypeScript types.
+- `docs/`: planning, design, UI generation rules, phase plan.
 
 ## Commands
 
-- Install:
-- Dev:
-- Lint:
-- Typecheck:
-- Unit tests:
-- E2E/smoke:
-- Build:
+- Install: `npm install` in `fe/`.
+- Dev: `npm run dev` in `fe/`.
+- Lint: `npm run lint` in `fe/`.
+- Typecheck: covered by `npm run build`.
+- Unit tests: not configured yet.
+- E2E/smoke: manual Playwright/Chrome preview for now.
+- Build: `npm run build` in `fe/`.
 
 ## Local Conventions
 
-- Component style:
-- State/data patterns:
-- Styling approach:
-- Error/loading/empty-state pattern:
-- Accessibility expectations:
-- Naming/import conventions:
+- Component style: readable TypeScript, PascalCase components, kebab-case files/folders.
+- State/data patterns: mock-first; no backend calls until backend phase; no real auth yet.
+- Styling approach: TailwindCSS dark motorsport theme, high contrast, red accent, responsive first.
+- Error/loading/empty-state pattern: shared feedback components in `fe/components/feedback/`.
+- Accessibility expectations: semantic landmarks, named links/buttons, readable contrast, mobile touch targets.
+- Naming/import conventions: route files in `fe/app/`; shared generic UI in `fe/components/`; business UI in `fe/features/`.
 
 ## Edit Guardrails
 
@@ -48,23 +50,92 @@ Keep concise. Store stable conventions only.
 
 Project-specific guardrails:
 
--
+- Continue generating one phase/subphase at a time.
+- Keep HorseTrack race-centric: Tournament is container; Race is the main business unit.
+- Do not introduce RaceRound, Stage, Bracket, Playoff, Grand Final, Qualification, Season Points, or Betting/Payment.
+- FE remains mock-first until explicitly asked for backend integration.
+- After each phase, run lint/build, preview key routes, update this file and AgentMemory before commit.
 
 ## Verification Notes
 
-Smallest useful checks for most changes:
+Smallest useful checks for most FE changes:
 
-1.
-2.
-3.
+1. `npm run lint` in `fe/`.
+2. `npm run build` in `fe/`.
+3. Preview key routes with dev server + Playwright/Chrome console check.
 
-If checks are skipped, record reason and residual risk.
+If checks are skipped or partial, record reason and residual risk.
+
+## Phase Status
+
+### Phase 1 Foundation — Completed
+
+- F1-inspired frontend foundation completed.
+- Landing page exists.
+- Base layout components exist.
+- `npm run lint` passed.
+- `npm run build` passed.
+
+### Phase 2 App shell + route groups — Completed
+
+Completed:
+
+- Public route group created:
+  - `/tournaments`
+  - `/tournaments/[tournamentId]`
+  - `/races`
+  - `/races/[raceId]`
+- Auth route group created:
+  - `/login`
+  - `/register`
+- Dashboard role route groups created:
+  - `/admin`
+  - `/owner`
+  - `/jockey`
+  - `/referee`
+  - `/spectator`
+- Shared route/UX components created:
+  - EmptyState
+  - ErrorState
+  - LoadingSkeleton
+  - RoutePlaceholder
+  - RoleDashboardShell
+  - MobileBottomNav
+- Global route handlers created:
+  - `loading.tsx`
+  - `error.tsx`
+  - `not-found.tsx`
+  - forbidden page
+- Navigation constants updated.
+
+Verification:
+
+- `npm run lint` passed.
+- `npm run build` reached TypeScript finish with no visible errors, but terminal timeout prevented final sentinel/exit confirmation.
+- Preview checked with Playwright on `/`, `/races`, `/admin`.
+- No route-render errors observed.
+- Only stale/dev HMR websocket warning observed.
+
+Scope kept:
+
+- FE mock-first only.
+- No backend calls.
+- No real auth.
+- No business feature screens yet.
+- No RaceRound, Stage, Bracket, Playoff, Grand Final, Qualification, Season Points, Betting/Payment.
+
+Current next phase:
+
+- Phase 3 Auth UI.
 
 ## Durable Decisions
 
 Use ADRs for larger decisions. Keep short notes here for small stable conventions.
 
--
+- Next.js App Router route groups are the FE route foundation.
+- Public/auth/dashboard shells are separate route groups with clean URLs.
+- Role dashboards use nested layouts and shared role shell.
+- Shared feedback states are generic components, not feature-specific.
 
 ## Memory Hygiene
 
