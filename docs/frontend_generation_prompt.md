@@ -84,3 +84,20 @@ After generating, summarize:
 - changed files
 - created components
 - how to run/check
+
+## Testing rule update:
+
+Do not use Playwright/Chrome DevTools for every phase because it is token-expensive.
+Default verification:
+
+- npm run lint
+- npm run build
+
+## Use Playwright/Chrome DevTools only for important visual or flow checkpoints:
+
+- App shell/route groups
+- Admin race management
+- Owner race registration
+- Referee result entry
+- Spectator prediction
+- Final polish/testing

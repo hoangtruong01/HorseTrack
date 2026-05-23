@@ -1,21 +1,17 @@
-import Link from "next/link";
-
-import { EmptyState } from "@/components/feedback/empty-state";
-import { Button } from "@/components/ui/button";
+import { AuthCard } from "@/features/auth/components/auth-card";
+import { RegisterForm } from "@/features/auth/components/register-form";
 
 export default function RegisterPage() {
   return (
-    <EmptyState
-      title="Register shell"
-      description="Role-aware registration UI is deferred to Phase 3. No account creation, no backend call."
-      action={
-        <Button
-          asChild
-          className="rounded-full bg-primary font-bold hover:bg-[#B80500]"
-        >
-          <Link href="/login">View login shell</Link>
-        </Button>
-      }
-    />
+    <AuthCard
+      eyebrow="Register"
+      title="Claim your grid slot"
+      description="Create a mock profile request, select the intended role, and preview where each cockpit enters the HorseTrack MVP."
+      footerLabel="Already have a demo profile?"
+      footerHref="/login"
+      footerCta="Login"
+    >
+      <RegisterForm />
+    </AuthCard>
   );
 }

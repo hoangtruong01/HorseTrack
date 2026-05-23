@@ -124,9 +124,59 @@ Scope kept:
 - No business feature screens yet.
 - No RaceRound, Stage, Bracket, Playoff, Grand Final, Qualification, Season Points, Betting/Payment.
 
+### Phase 3 Auth UI — Completed
+
+Completed:
+
+- Refined auth route group layout.
+- Implemented premium motorsport-inspired mock auth UI.
+- Implemented login page, register page, auth card, login form, register form, role preview cards.
+- Added role showcase for Admin, Horse Owner, Jockey, Referee, Spectator.
+- Added mock loading/disabled form states where useful.
+- Added login/register CTA navigation.
+- Added security copy: future auth uses secure httpOnly cookies; no localStorage JWT usage.
+- Kept auth flow mock-first only.
+
+Verification:
+
+- `npm run lint` passed.
+- `npm run build` passed or reached successful TypeScript completion with no visible errors.
+- `/login` and `/register` previewed manually.
+- No backend integration, token handling, or auth middleware complexity added.
+
+Architecture status:
+
+- FE foundation stable.
+- Route groups stable.
+- Auth UI foundation stable.
+- Project remains FE-first and mock-data-first.
+
+Current FE strategy:
+
+- Build one phase/subphase at a time.
+- Avoid Playwright/Chrome DevTools for every phase because of token cost.
+- Default verification: `npm run lint`, `npm run build`.
+- Use Playwright/Chrome DevTools only for major visual checkpoints: app shell, race management, owner registration flow, referee result entry, spectator prediction, final polish.
+
+Planned FE leadership strategy:
+
+- Current FE lead continues Phase 4A Admin dashboard foundation, Phase 4C Race management, Phase 4D Registration approval + result publish, Phase 7 Referee result entry, Phase 9 final polish/review.
+- Secondary FE member later focuses Phase 4B Tournament management, Phase 5 Owner horse + registration, Phase 6 Jockey assignment, Phase 8A Public race detail, Phase 8B Spectator prediction.
+
+Important rules remain:
+
+- Race-centric MVP only.
+- Tournament is only a container.
+- No RaceRound.
+- No Stage progression.
+- No Bracket/Playoff/Grand Final.
+- No Qualification system.
+- No Season points.
+- No betting/payment flow.
+
 Current next phase:
 
-- Phase 3 Auth UI.
+- Phase 4A — Admin dashboard foundation.
 
 ## Durable Decisions
 

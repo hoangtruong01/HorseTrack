@@ -1,21 +1,17 @@
-import Link from "next/link";
-
-import { EmptyState } from "@/components/feedback/empty-state";
-import { Button } from "@/components/ui/button";
+import { AuthCard } from "@/features/auth/components/auth-card";
+import { LoginForm } from "@/features/auth/components/login-form";
 
 export default function LoginPage() {
   return (
-    <EmptyState
-      title="Login shell"
-      description="Mock-first auth route only. Real form, validation, session hydrate, and role redirect are Phase 3."
-      action={
-        <Button
-          asChild
-          className="rounded-full bg-primary font-bold hover:bg-[#B80500]"
-        >
-          <Link href="/register">View register shell</Link>
-        </Button>
-      }
-    />
+    <AuthCard
+      eyebrow="Login"
+      title="Enter race control"
+      description="Use the demo credentials, choose a role cockpit, and continue through a mock session redirect. No API call, no token storage."
+      footerLabel="New to the paddock?"
+      footerHref="/register"
+      footerCta="Create mock profile"
+    >
+      <LoginForm />
+    </AuthCard>
   );
 }
