@@ -2,10 +2,15 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateRegistrationDto {
-  @ApiProperty({ example: '665abc123def456789012345' })
+  @ApiPropertyOptional({ example: '665abc123def456789012345' })
+  @IsOptional()
+  @IsMongoId()
+  tournamentId?: string;
+
+  @ApiProperty({ example: '665abc123def456789012348' })
   @IsNotEmpty()
   @IsMongoId()
-  tournamentId: string;
+  raceId: string;
 
   @ApiProperty({ example: '665abc123def456789012346' })
   @IsNotEmpty()

@@ -41,11 +41,13 @@ export class RegistrationsController {
   findAll(
     @Query() pagination: PaginationDto,
     @Query('tournamentId') tournamentId?: string,
+    @Query('raceId') raceId?: string,
   ) {
     return this.registrationsService.findAll(
       pagination.page,
       pagination.limit,
       tournamentId,
+      raceId,
     );
   }
 

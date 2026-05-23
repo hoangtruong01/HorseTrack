@@ -21,6 +21,10 @@ import {
   JockeyInvitation,
   JockeyInvitationSchema,
 } from '../jockey-invitations/schemas/jockey-invitation.schema';
+import {
+  RefereeReport,
+  RefereeReportSchema,
+} from '../referee-reports/schemas/referee-report.schema';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
 
@@ -36,6 +40,7 @@ import { DashboardService } from './dashboard.service';
       { name: Bet.name, schema: BetSchema },
       { name: RaceResult.name, schema: RaceResultSchema },
       { name: JockeyInvitation.name, schema: JockeyInvitationSchema },
+      { name: RefereeReport.name, schema: RefereeReportSchema },
     ]),
   ],
   controllers: [DashboardController],

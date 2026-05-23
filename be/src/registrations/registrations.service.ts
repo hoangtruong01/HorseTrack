@@ -9,6 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { HorsesService } from '../horses/horses.service';
 import { TournamentsService } from '../tournaments/tournaments.service';
+import { RacesService } from '../races/races.service';
 import { HorseHealthStatus, HorseStatus } from '../horses/schemas/horse.schema';
 import { TournamentStatus } from '../tournaments/schemas/tournament.schema';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
@@ -28,6 +29,7 @@ export class RegistrationsService {
     private registrationModel: Model<RegistrationDocument>,
     private horsesService: HorsesService,
     private tournamentsService: TournamentsService,
+    private racesService: RacesService,
     private notificationsService: NotificationsService,
   ) {}
 
@@ -35,8 +37,12 @@ export class RegistrationsService {
     dto: CreateRegistrationDto,
     ownerId: string,
   ): Promise<RegistrationDocument> {
+    // 0. Fetch the race
+    const race = await this.racesService.findOne(dto.raceId);
+    const tournamentId = dto.tournamentId || String(race.tournamentId._id || race.tournamentId);
+
     // 1. Tournament must be OPEN_REGISTRATION
-    const tournament = await this.tournamentsService.findOne(dto.tournamentId);
+    const tournament = await this.tournamentsService.findOne(tournamentId);
     if (tournament.status !== TournamentStatus.OPEN_REGISTRATION) {
       throw new BadRequestException(
         'Tournament is not open for registration',
@@ -57,33 +63,36 @@ export class RegistrationsService {
       throw new BadRequestException('Horse must be ACTIVE to register');
     }
 
-    // 4. No duplicate registration
+    // 4. No duplicate registration for the same race
     const existing = await this.registrationModel.findOne({
-      tournamentId: dto.tournamentId,
+      raceId: dto.raceId,
       horseId: dto.horseId,
       status: { $ne: RegistrationStatus.CANCELLED },
     });
     if (existing) {
       throw new ConflictException(
-        'This horse is already registered for this tournament',
+        'This horse is already registered for this race',
       );
     }
 
     return this.registrationModel.create({
       ...dto,
+      tournamentId,
       ownerId,
       registeredAt: new Date(),
     });
   }
 
-  async findAll(page = 1, limit = 20, tournamentId?: string) {
+  async findAll(page = 1, limit = 20, tournamentId?: string, raceId?: string) {
     const filter: Record<string, unknown> = {};
     if (tournamentId) filter.tournamentId = tournamentId;
+    if (raceId) filter.raceId = raceId;
 
     const [data, total] = await Promise.all([
       this.registrationModel
         .find(filter)
         .populate('tournamentId', 'name status')
+        .populate('raceId', 'name scheduledAt status')
         .populate('horseId', 'name breed')
         .populate('ownerId', 'fullName email')
         .populate('jockeyId', 'fullName email')
@@ -105,6 +114,7 @@ export class RegistrationsService {
       this.registrationModel
         .find(filter)
         .populate('tournamentId', 'name status')
+        .populate('raceId', 'name scheduledAt status')
         .populate('horseId', 'name breed')
         .populate('jockeyId', 'fullName email')
         .skip((page - 1) * limit)
@@ -123,6 +133,7 @@ export class RegistrationsService {
     const reg = await this.registrationModel
       .findById(id)
       .populate('tournamentId', 'name status')
+      .populate('raceId', 'name scheduledAt status')
       .populate('horseId', 'name breed')
       .populate('ownerId', 'fullName email')
       .populate('jockeyId', 'fullName email')

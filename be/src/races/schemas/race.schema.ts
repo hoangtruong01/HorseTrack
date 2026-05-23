@@ -8,8 +8,18 @@ export enum RaceStatus {
   CHECKING = 'CHECKING',
   ONGOING = 'ONGOING',
   FINISHED = 'FINISHED',
+  RESULT_PUBLISHED = 'RESULT_PUBLISHED',
   CANCELLED = 'CANCELLED',
 }
+
+export const RACE_STATUS_FLOW: Record<RaceStatus, RaceStatus[]> = {
+  [RaceStatus.SCHEDULED]: [RaceStatus.CHECKING, RaceStatus.ONGOING, RaceStatus.CANCELLED],
+  [RaceStatus.CHECKING]: [RaceStatus.ONGOING, RaceStatus.CANCELLED],
+  [RaceStatus.ONGOING]: [RaceStatus.FINISHED, RaceStatus.CANCELLED],
+  [RaceStatus.FINISHED]: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED],
+  [RaceStatus.RESULT_PUBLISHED]: [],
+  [RaceStatus.CANCELLED]: [],
+};
 
 @Schema({ _id: false })
 export class RaceHorseEntry {

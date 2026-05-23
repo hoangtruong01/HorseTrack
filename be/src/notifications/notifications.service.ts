@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -6,12 +6,15 @@ import {
   NotificationDocument,
   NotificationType,
 } from './schemas/notification.schema';
+import { NotificationsGateway } from './notifications.gateway';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     @InjectModel(Notification.name)
     private notificationModel: Model<NotificationDocument>,
+    @Inject(forwardRef(() => NotificationsGateway))
+    private gateway: NotificationsGateway,
   ) {}
 
   /** Programmatic method to send inside other services */
@@ -21,13 +24,18 @@ export class NotificationsService {
     message: string,
     type: NotificationType = NotificationType.INFO,
   ): Promise<NotificationDocument> {
-    return this.notificationModel.create({
+    const notif = await this.notificationModel.create({
       userId,
       title,
       message,
       type,
       isRead: false,
     });
+
+    // Send realtime event!
+    this.gateway.sendToUser(userId, 'notification', notif);
+
+    return notif;
   }
 
   async findMyNotifications(userId: string, page = 1, limit = 20) {

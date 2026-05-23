@@ -35,4 +35,18 @@ export class DashboardController {
   getJockeyStats(@CurrentUser() user: JwtUser) {
     return this.dashboardService.getJockeyStats(user.id);
   }
+
+  @Get('referee')
+  @Roles(RoleName.REFEREE)
+  @ApiOperation({ summary: 'Get dashboard statistics for Referee' })
+  getRefereeStats(@CurrentUser() user: JwtUser) {
+    return this.dashboardService.getRefereeStats(user.id);
+  }
+
+  @Get('spectator')
+  @Roles(RoleName.SPECTATOR)
+  @ApiOperation({ summary: 'Get dashboard statistics for Spectator' })
+  getSpectatorStats(@CurrentUser() user: JwtUser) {
+    return this.dashboardService.getSpectatorStats(user.id);
+  }
 }

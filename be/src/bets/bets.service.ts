@@ -40,8 +40,14 @@ export class BetsService {
       throw new BadRequestException('Target horse is not participating in this race');
     }
 
-    // Simple odds logic: mock random odds between 1.5 and 5.0
-    const odds = parseFloat((Math.random() * (5.0 - 1.5) + 1.5).toFixed(2));
+    // Deterministic mock odds based on horseId and raceId string hash:
+    const hashStr = String(dto.horseId) + String(dto.raceId);
+    let hash = 0;
+    for (let i = 0; i < hashStr.length; i++) {
+      hash = hashStr.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // Normalize to a float between 1.50 and 5.50
+    const odds = parseFloat((1.5 + (Math.abs(hash) % 401) / 100).toFixed(2));
 
     return this.betModel.create({
       ...dto,

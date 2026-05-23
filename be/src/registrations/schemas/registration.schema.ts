@@ -15,6 +15,9 @@ export class Registration {
   @Prop({ type: Types.ObjectId, ref: 'Tournament', required: true })
   tournamentId!: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'Race', required: true })
+  raceId!: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'Horse', required: true })
   horseId!: Types.ObjectId;
 
@@ -46,7 +49,8 @@ export class Registration {
 
 export const RegistrationSchema = SchemaFactory.createForClass(Registration);
 
-// A horse can only register once per tournament
-RegistrationSchema.index({ tournamentId: 1, horseId: 1 }, { unique: true });
+// A horse can only register once per race
+RegistrationSchema.index({ raceId: 1, horseId: 1 }, { unique: true });
 RegistrationSchema.index({ ownerId: 1 });
 RegistrationSchema.index({ tournamentId: 1, status: 1 });
+RegistrationSchema.index({ raceId: 1, status: 1 });

@@ -43,6 +43,15 @@ export class RaceResultsController {
     return this.raceResultsService.findByTournament(tournamentId);
   }
 
+  @Patch('race/:raceId/confirm')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.REFEREE)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Confirm results for a race (Referee)' })
+  confirm(@Param('raceId') raceId: string, @CurrentUser() user: JwtUser) {
+    return this.raceResultsService.confirmResultsForRace(raceId, user.id);
+  }
+
   @Patch('race/:raceId/publish')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)

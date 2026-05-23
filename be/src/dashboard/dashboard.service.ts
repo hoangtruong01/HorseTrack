@@ -10,6 +10,7 @@ import { Prize, PrizeDocument, PrizePaymentStatus } from '../prizes/schemas/priz
 import { Bet, BetDocument } from '../bets/schemas/bet.schema';
 import { RaceResult, RaceResultDocument, RaceResultStatus } from '../race-results/schemas/race-result.schema';
 import { JockeyInvitation, JockeyInvitationDocument, InvitationStatus } from '../jockey-invitations/schemas/jockey-invitation.schema';
+import { RefereeReport, RefereeReportDocument } from '../referee-reports/schemas/referee-report.schema';
 
 @Injectable()
 export class DashboardService {
@@ -23,6 +24,7 @@ export class DashboardService {
     @InjectModel(Bet.name) private betModel: Model<BetDocument>,
     @InjectModel(RaceResult.name) private resultModel: Model<RaceResultDocument>,
     @InjectModel(JockeyInvitation.name) private invitationModel: Model<JockeyInvitationDocument>,
+    @InjectModel(RefereeReport.name) private reportModel: Model<RefereeReportDocument>,
   ) {}
 
   async getAdminStats() {
@@ -143,6 +145,62 @@ export class DashboardService {
       totalPoints,
       invitations: {
         pendingCount: pendingInvites,
+      },
+    };
+  }
+
+  async getRefereeStats(refereeId: string) {
+    const [assignedRacesCount, reportsSubmittedCount] = await Promise.all([
+      this.raceModel.countDocuments({ refereeIds: refereeId as any, deletedAt: { $exists: false } }),
+      this.reportModel.countDocuments({ refereeId }),
+    ]);
+
+    return {
+      races: { assignedCount: assignedRacesCount },
+      reports: { submittedCount: reportsSubmittedCount },
+    };
+  }
+
+  async getSpectatorStats(userId: string) {
+    const [betsResult, activeBetsCount] = await Promise.all([
+      this.betModel.aggregate([
+        { $match: { userId: userId as any } },
+        {
+          $group: {
+            _id: '$status',
+            totalAmount: { $sum: '$amount' },
+            totalPayout: { $sum: '$payout' },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      this.betModel.countDocuments({ userId: userId as any, status: 'PENDING' as any }),
+    ]);
+
+    const stats = betsResult.reduce(
+      (acc, item) => {
+        acc.totalAmount += item.totalAmount;
+        acc.totalPayout += item.totalPayout;
+        acc.totalBets += item.count;
+        if (item._id === 'WON') acc.wonCount += item.count;
+        if (item._id === 'LOST') acc.lostCount += item.count;
+        return acc;
+      },
+      { totalAmount: 0, totalPayout: 0, totalBets: 0, wonCount: 0, lostCount: 0 },
+    );
+
+    const winRate =
+      stats.wonCount + stats.lostCount > 0
+        ? parseFloat(((stats.wonCount / (stats.wonCount + stats.lostCount)) * 100).toFixed(2))
+        : 0;
+
+    return {
+      bets: {
+        total: stats.totalBets,
+        active: activeBetsCount,
+        totalAmountBet: stats.totalAmount,
+        totalPayoutReceived: stats.totalPayout,
+        winRate,
       },
     };
   }

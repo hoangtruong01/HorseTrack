@@ -38,6 +38,13 @@ export class RaceResultsService {
   ): Promise<RaceResultDocument> {
     const race = await this.racesService.findOne(dto.raceId);
 
+    // Race must be ONGOING or FINISHED to record results
+    if (race.status !== RaceStatus.ONGOING && race.status !== RaceStatus.FINISHED) {
+      throw new BadRequestException(
+        'Can only record results for ONGOING or FINISHED races',
+      );
+    }
+
     // Only assigned referee can record
     const isAssigned = race.refereeIds.some(
       (r) => String(r) === recordedBy,
@@ -100,10 +107,24 @@ export class RaceResultsService {
 
   async publishByRace(raceId: string, publishedBy: string) {
     const race = await this.racesService.findOne(raceId);
+
+    // Race must be FINISHED before publishing results
+    if (race.status !== RaceStatus.FINISHED) {
+      throw new BadRequestException(
+        'Race must be in FINISHED status before results can be published',
+      );
+    }
+
     const results = await this.resultModel.find({ raceId });
 
     if (results.length === 0) {
       throw new BadRequestException('No results to publish for this race');
+    }
+
+    // Verify all results are CONFIRMED
+    const unconfirmed = results.some((r) => r.status !== RaceResultStatus.CONFIRMED);
+    if (unconfirmed) {
+      throw new BadRequestException('Cannot publish results: some results are not confirmed by the referee yet');
     }
 
     // Update all results to PUBLISHED
@@ -116,8 +137,8 @@ export class RaceResultsService {
       },
     );
 
-    // Update race status to FINISHED
-    await this.racesService.updateStatus(raceId, RaceStatus.FINISHED);
+    // Update race status to RESULT_PUBLISHED
+    await this.racesService.updateStatus(raceId, RaceStatus.RESULT_PUBLISHED);
 
     // Auto-create prizes
     await this.prizesService.createPrizesForRace(raceId);
@@ -125,6 +146,38 @@ export class RaceResultsService {
     // Resolve bets
     await this.betsService.payoutBetsForRace(raceId);
 
-    return { message: 'Results published, race marked as FINISHED, prizes generated, and bets resolved' };
+    return { message: 'Results published, race marked as RESULT_PUBLISHED, prizes generated, and bets resolved' };
+  }
+
+  async confirmResultsForRace(raceId: string, refereeId: string) {
+    const race = await this.racesService.findOne(raceId);
+
+    // Only assigned referee can confirm
+    const isAssigned = race.refereeIds.some(
+      (r) => String(r) === refereeId,
+    );
+    if (!isAssigned) {
+      throw new ForbiddenException('You are not assigned to this race');
+    }
+
+    const results = await this.resultModel.find({ raceId });
+    if (results.length === 0) {
+      throw new BadRequestException('No results recorded for this race yet');
+    }
+
+    // Verify all horses have results
+    if (results.length < race.horses.length) {
+      throw new BadRequestException(
+        `Results are incomplete. Recorded ${results.length}/${race.horses.length} horses.`,
+      );
+    }
+
+    // Update all results to CONFIRMED
+    await this.resultModel.updateMany(
+      { raceId },
+      { status: RaceResultStatus.CONFIRMED },
+    );
+
+    return { message: 'Results confirmed by referee' };
   }
 }
