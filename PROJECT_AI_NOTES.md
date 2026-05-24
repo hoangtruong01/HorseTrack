@@ -177,6 +177,51 @@ Architecture status:
 - Admin dashboard foundation stable.
 - Project remains FE-first and mock-data-first.
 
+### Phase 4C Race management — Completed
+
+Completed:
+
+- Admin race list page implemented.
+- Admin race create page implemented.
+- Admin race detail page implemented.
+- Admin race participants page implemented.
+- Admin race assignments placeholder page implemented.
+- Mock race data isolated in `fe/features/races/mock-races.ts`.
+- Shared generic `StatusBadge` added in `fe/components/ui/status-badge.tsx`.
+- Reusable race components created:
+  - `RaceCard`
+  - `RaceForm`
+  - `RaceTable`
+  - `RaceDetailPanel`
+  - `RaceScheduleCard`
+  - `RaceStatusTimeline`
+  - `ParticipantTable`
+  - `StatusBadge`
+
+Verification:
+
+- `npm run lint` passed.
+- `npm run build` passed with `BUILD_OK` sentinel confirmed.
+
+Scope kept:
+
+- Mock data only.
+- No API calls.
+- No sockets.
+- No registration approval workflow.
+- No result publish workflow.
+- No tournament progression concepts.
+- No RaceRound, Stage, Bracket, Playoff, Grand Final, Qualification, Season Points, Betting/Payment.
+
+Architecture status:
+
+- Race-management boundary is stable.
+- Race is the main reusable business UI boundary.
+- Business UI is isolated in `fe/features/races/components/`.
+- Mock data is separated from UI.
+- Owner, jockey, referee, and public modules can reuse race card/table/schedule/timeline/participant components.
+- No backend coupling introduced.
+
 Current FE strategy:
 
 - Build one phase/subphase at a time.
@@ -184,10 +229,21 @@ Current FE strategy:
 - Default verification: `npm run lint`, `npm run build`.
 - Use Playwright/Chrome DevTools only for major visual checkpoints: app shell, race management, owner registration flow, referee result entry, spectator prediction, final polish.
 
-Planned FE leadership strategy:
+Team split status:
 
-- Current FE lead continues Phase 4C Race management, Phase 4D Registration approval + result publish, Phase 7 Referee result entry, Phase 9 final polish/review.
-- Secondary FE member later focuses Phase 4B Tournament management, Phase 5 Owner horse + registration, Phase 6 Jockey assignment, Phase 8A Public race detail, Phase 8B Spectator prediction.
+- Project is ready to split FE work.
+- FE lead should keep architecture/review ownership.
+- Secondary FE can start reusable feature work using existing race components.
+
+Recommended next:
+
+- Create `docs/fe_team_rules.md`.
+- Secondary FE assignment candidates:
+  - Phase 4B Tournament management.
+  - Phase 5 Owner horse + race registration.
+  - Phase 6 Jockey assignment.
+  - Phase 8A Public race browsing + detail.
+  - Phase 8B Spectator prediction.
 
 Important rules remain:
 
@@ -202,7 +258,8 @@ Important rules remain:
 
 Current next phase:
 
-- Phase 4C — Race management, before handing work to second FE member.
+- Create `docs/fe_team_rules.md` before parallel FE work.
+- FE lead can continue architecture/review ownership and high-risk phases.
 
 ## Durable Decisions
 
@@ -213,6 +270,8 @@ Use ADRs for larger decisions. Keep short notes here for small stable convention
 - Role dashboards use nested layouts and shared role shell.
 - Shared feedback states are generic components, not feature-specific.
 - Admin dashboard uses separated mock data in `fe/features/dashboard/mock-admin-dashboard.ts` and business UI in `fe/features/dashboard/components/`.
+- Race management uses separated mock data in `fe/features/races/mock-races.ts` and business UI in `fe/features/races/components/`.
+- `StatusBadge` is the shared generic status primitive in `fe/components/ui/status-badge.tsx`; domain-specific status mapping should stay near each feature.
 
 ## Memory Hygiene
 
