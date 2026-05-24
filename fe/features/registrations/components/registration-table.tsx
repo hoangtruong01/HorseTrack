@@ -21,9 +21,18 @@ const meta: Record<
   rejected: { label: "Rejected", tone: "red" },
 };
 
-export type RegistrationTableProps = { registrations: RaceRegistration[] };
+const DEMO_ROW_LIMIT = 8;
 
-export function RegistrationTable({ registrations }: RegistrationTableProps) {
+export type RegistrationTableProps = {
+  registrations: RaceRegistration[];
+  limit?: number;
+};
+
+export function RegistrationTable({
+  registrations,
+  limit = DEMO_ROW_LIMIT,
+}: RegistrationTableProps) {
+  const visibleRegistrations = registrations.slice(0, limit);
   const [selected, setSelected] = useState<RaceRegistration | null>(null);
   const [action, setAction] = useState<"approve" | "reject" | null>(null);
 
@@ -47,7 +56,7 @@ export function RegistrationTable({ registrations }: RegistrationTableProps) {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Approve/reject dialogs are UI-only
+          UI-only · showing {visibleRegistrations.length}/{registrations.length}
         </p>
       </div>
       <div className="mt-5 overflow-x-auto rounded-xl border border-white/10">
@@ -64,7 +73,7 @@ export function RegistrationTable({ registrations }: RegistrationTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10 bg-black/10">
-            {registrations.map((registration) => (
+            {visibleRegistrations.map((registration) => (
               <tr
                 key={registration.id}
                 className="transition hover:bg-white/[0.04]"

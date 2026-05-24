@@ -6,15 +6,13 @@ import { RegistrationTable } from "@/features/registrations/components/registrat
 import { mockRegistrations } from "@/features/registrations/mock-registrations";
 
 export default function AdminRegistrationsPage() {
-  const pending = mockRegistrations.filter(
-    (registration) => registration.status === "pending",
-  ).length;
-  const approved = mockRegistrations.filter(
-    (registration) => registration.status === "approved",
-  ).length;
-  const rejected = mockRegistrations.filter(
-    (registration) => registration.status === "rejected",
-  ).length;
+  const counts = mockRegistrations.reduce(
+    (acc, registration) => {
+      acc[registration.status] += 1;
+      return acc;
+    },
+    { approved: 0, pending: 0, rejected: 0 },
+  );
 
   return (
     <main className="space-y-6">
@@ -30,7 +28,7 @@ export default function AdminRegistrationsPage() {
             Pending
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-white">
-            {pending}
+            {counts.pending}
           </p>
           <StatusBadge
             className="mt-3"
@@ -44,7 +42,7 @@ export default function AdminRegistrationsPage() {
             Approved
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-white">
-            {approved}
+            {counts.approved}
           </p>
           <StatusBadge className="mt-3" label="Ready queue" tone="green" />
         </div>
@@ -53,7 +51,7 @@ export default function AdminRegistrationsPage() {
             Rejected
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-white">
-            {rejected}
+            {counts.rejected}
           </p>
           <StatusBadge className="mt-3" label="Reason required" tone="red" />
         </div>

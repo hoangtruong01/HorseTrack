@@ -342,6 +342,39 @@ Architecture status:
 - Existing result `RaceRankingTable` reused as reference ranking display.
 - Shared `StatusBadge` and `Button` primitives reused.
 
+## Frontend Performance Notes
+
+- 2026-05-24 dev lag investigation: lag was mainly render/CSS paint cost, not API/backend calls.
+- Root causes found:
+  - Global smooth scroll and heavy shadows/glows in `fe/app/globals.css`.
+  - Repeated glow shadows in `StatusBadge`.
+  - Repeated filters over mock arrays in admin registration/result pages.
+  - Demo tables rendering all rows.
+  - Icon-heavy and gradient-heavy pages can still add dev overhead.
+  - No whole-layout client wrapper issue was found.
+- Optimizations applied:
+  - Removed global smooth scroll.
+  - Reduced card shadows.
+  - Removed live-status glow and repeated red `StatusBadge` glow.
+  - Replaced repeated filters with single reduce in admin registration/result pages.
+  - Added demo row caps and visible count in race/registration/result tables.
+  - Kept client components only where required for forms/dialogs/error reset.
+- Verification:
+  - `npm run lint` passed.
+  - `npm run build` passed / TypeScript finished clean with no failing diagnostics.
+- Current FE perf rules:
+  - Avoid heavy global visual effects.
+  - Avoid repeated glow/shadow on many repeated elements.
+  - Keep demo tables capped.
+  - Prefer static/server-safe components unless interactivity is needed.
+  - Do not use Playwright/Chrome DevTools for every phase; default to lint/build except major visual checkpoints.
+- Remaining risks:
+  - `lucide-react` named imports are acceptable, but icon-heavy pages still add dev work.
+  - `tw-animate-css` is imported globally and may add CSS/dev overhead.
+  - Large hero gradients still exist in admin/referee panels.
+  - Some client islands remain where required for forms/dialogs.
+- Before Phase 9, do a final performance/polish pass.
+
 ## Durable Decisions
 
 Use ADRs for larger decisions. Keep short notes here for small stable conventions.

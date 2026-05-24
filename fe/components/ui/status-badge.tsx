@@ -10,7 +10,7 @@ export type StatusBadgeProps = {
 };
 
 const toneClass: Record<StatusBadgeTone, string> = {
-  red: "border-primary/50 bg-primary text-primary-foreground shadow-[0_0_18px_rgba(225,6,0,0.36)]",
+  red: "border-primary/50 bg-primary text-primary-foreground",
   yellow: "border-[#F8CD46]/50 bg-[#F8CD46] text-[#1C1C25]",
   green: "border-emerald-400/40 bg-emerald-400/15 text-emerald-200",
   slate: "border-white/15 bg-white/10 text-white/80",

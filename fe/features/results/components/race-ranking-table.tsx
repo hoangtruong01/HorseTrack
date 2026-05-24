@@ -25,15 +25,20 @@ const resultMeta: Record<
   published: { label: "Published", tone: "teal" },
 };
 
+const DEMO_ROW_LIMIT = 8;
+
 export type RaceRankingTableProps = {
   rankings: RaceRanking[];
   raceName: string;
+  limit?: number;
 };
 
 export function RaceRankingTable({
   rankings,
   raceName,
+  limit = DEMO_ROW_LIMIT,
 }: RaceRankingTableProps) {
+  const visibleRankings = rankings.slice(0, limit);
   return (
     <section className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-4 sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -46,7 +51,8 @@ export function RaceRankingTable({
           </h2>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Trophy className="size-4 text-primary" /> Per-race ranking only
+          <Trophy className="size-4 text-primary" /> Showing{" "}
+          {visibleRankings.length}/{rankings.length}
         </div>
       </div>
       <div className="mt-5 overflow-x-auto rounded-xl border border-white/10">
@@ -62,7 +68,7 @@ export function RaceRankingTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10 bg-black/10">
-            {rankings.map((row) => (
+            {visibleRankings.map((row) => (
               <tr key={row.id} className="transition hover:bg-white/[0.04]">
                 <td className="px-4 py-4">
                   <span className="font-mono text-2xl font-black text-white">

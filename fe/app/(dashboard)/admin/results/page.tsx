@@ -7,12 +7,13 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { mockRaceResults } from "@/features/results/mock-results";
 
 export default function AdminResultsPage() {
-  const ready = mockRaceResults.filter(
-    (result) => result.status === "referee_confirmed",
-  ).length;
-  const published = mockRaceResults.filter(
-    (result) => result.status === "published",
-  ).length;
+  const counts = mockRaceResults.reduce(
+    (acc, result) => {
+      acc[result.status] += 1;
+      return acc;
+    },
+    { draft: 0, published: 0, referee_confirmed: 0 },
+  );
 
   return (
     <main className="space-y-6">
@@ -28,7 +29,7 @@ export default function AdminResultsPage() {
             Ready
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-white">
-            {ready}
+            {counts.referee_confirmed}
           </p>
           <StatusBadge
             className="mt-3"
@@ -42,7 +43,7 @@ export default function AdminResultsPage() {
             Published
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-white">
-            {published}
+            {counts.published}
           </p>
           <StatusBadge className="mt-3" label="Public state" tone="teal" />
         </div>
