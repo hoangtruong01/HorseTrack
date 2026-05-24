@@ -261,6 +261,120 @@ Current next phase:
 - Create `docs/fe_team_rules.md` before parallel FE work.
 - FE lead can continue architecture/review ownership and high-risk phases.
 
+### Phase 4D Registration approval + result publish — Completed
+
+Completed:
+
+- Admin registration queue route implemented.
+- Admin registration detail/review route implemented.
+- Admin result queue route implemented.
+- Admin result detail/review route implemented.
+- Mock registration data isolated in `fe/features/registrations/mock-registrations.ts`.
+- Mock result data isolated in `fe/features/results/mock-results.ts`.
+- Reusable moderation/result components created:
+  - `RegistrationTable`
+  - `RegistrationReviewPanel`
+  - `ApprovalDialog`
+  - `RaceRankingTable`
+  - `ResultReviewPanel`
+  - `PublishResultDialog`
+- Navigation copy updated for active registration/result queues.
+
+Verification:
+
+- `npm run lint` passed with `LINT_OK` sentinel confirmed.
+- `npm run build` reached TypeScript finish with no visible errors, but terminal output stopped before final sentinel/exit confirmation.
+
+Scope kept:
+
+- Mock data only.
+- No API calls.
+- No realtime/socket integration.
+- No notification system.
+- No auto ranking calculations.
+- No tournament progression concepts.
+- No RaceRound, Stage, Bracket, Playoff, Grand Final, Qualification, Season Points, Betting/Payment.
+
+Architecture status:
+
+- Registration moderation and result publish are isolated in feature folders.
+- Existing shared `StatusBadge` and `Button` primitives reused.
+- Race/result ranking remains per race only.
+
+### Phase 7 Referee result entry — Completed
+
+Completed:
+
+- Referee dashboard/action center implemented.
+- Assigned race list route implemented.
+- Referee race checklist/detail route implemented.
+- Violation log route implemented.
+- Result entry route implemented with tablet-first sticky action bar.
+- Referee report summary route implemented.
+- Mock referee data isolated in `fe/features/referee-reports/mock-referee-data.ts`.
+- Reusable referee workflow components created:
+  - `RefereeActionCenter`
+  - `RaceChecklist`
+  - `ViolationQuickAdd`
+  - `ViolationList`
+  - `ResultEntryForm`
+  - `RefereeReportSummary`
+
+Verification:
+
+- `npm run lint` passed with exit code 0.
+- `npm run build` reached TypeScript finish with no visible errors, but terminal output stopped before final sentinel/exit confirmation.
+
+Scope kept:
+
+- Mock data only.
+- No API calls.
+- No realtime/socket integration.
+- No actual result calculation.
+- Race result/ranking remains per race only.
+- Referee confirmed state remains visually distinct from published state.
+- No RaceRound, Stage, Bracket, Playoff, Grand Final, Qualification, Season Points, Betting/Payment.
+
+Architecture status:
+
+- Referee workflow is isolated in `fe/features/referee-reports/`.
+- Existing race components reused for race detail/participant/status context.
+- Existing result `RaceRankingTable` reused as reference ranking display.
+- Shared `StatusBadge` and `Button` primitives reused.
+
+## Frontend Performance Notes
+
+- 2026-05-24 dev lag investigation: lag was mainly render/CSS paint cost, not API/backend calls.
+- Root causes found:
+  - Global smooth scroll and heavy shadows/glows in `fe/app/globals.css`.
+  - Repeated glow shadows in `StatusBadge`.
+  - Repeated filters over mock arrays in admin registration/result pages.
+  - Demo tables rendering all rows.
+  - Icon-heavy and gradient-heavy pages can still add dev overhead.
+  - No whole-layout client wrapper issue was found.
+- Optimizations applied:
+  - Removed global smooth scroll.
+  - Reduced card shadows.
+  - Removed live-status glow and repeated red `StatusBadge` glow.
+  - Replaced repeated filters with single reduce in admin registration/result pages.
+  - Added demo row caps and visible count in race/registration/result tables.
+  - Kept client components only where required for forms/dialogs/error reset.
+- Verification:
+  - `npm run lint` passed.
+  - `npm run build` passed / TypeScript finished clean with no failing diagnostics.
+- Current FE perf rules:
+  - Avoid heavy global visual effects.
+  - Avoid repeated glow/shadow on many repeated elements.
+  - Keep demo tables capped.
+  - Prefer static/server-safe components unless interactivity is needed.
+  - Do not use Playwright/Chrome DevTools for every phase; default to lint/build except major visual checkpoints.
+- Remaining risks:
+  - `lucide-react` named imports are acceptable, but icon-heavy pages still add dev work.
+  - `tw-animate-css` is imported globally and may add CSS/dev overhead.
+  - Large hero gradients still exist in admin/referee panels.
+  - Some client islands remain where required for forms/dialogs.
+- Before Phase 9, do a final performance/polish pass.
+
 ## Durable Decisions
 
 Use ADRs for larger decisions. Keep short notes here for small stable conventions.

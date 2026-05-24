@@ -123,7 +123,7 @@
   }
 
   html {
-    @apply scroll-smooth font-sans;
+    @apply font-sans;
     color-scheme: dark;
   }
 
@@ -164,7 +164,7 @@
   }
 
   .f1-card {
-    @apply rounded-lg border border-border bg-card p-4 text-card-foreground shadow-[0_8px_24px_rgba(0,0,0,0.28)] transition duration-200 hover:border-white/25 hover:shadow-[0_12px_36px_rgba(0,0,0,0.36)] sm:p-6;
+    @apply rounded-lg border border-border bg-card p-4 text-card-foreground shadow-[0_4px_16px_rgba(0,0,0,0.22)] transition-colors duration-150 hover:border-white/25 sm:p-6;
   }
 
   .f1-gradient {
@@ -184,7 +184,7 @@
   }
 
   .f1-status-live {
-    @apply bg-primary text-primary-foreground shadow-[0_0_18px_rgba(225,6,0,0.42)];
+    @apply bg-primary text-primary-foreground;
   }
 
   .f1-status-finished {

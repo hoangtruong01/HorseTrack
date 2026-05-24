@@ -19,9 +19,12 @@ const meta: Record<
   result_published: { label: "Published", tone: "teal" },
 };
 
-export type RaceTableProps = { races: Race[] };
+const DEMO_ROW_LIMIT = 6;
 
-export function RaceTable({ races }: RaceTableProps) {
+export type RaceTableProps = { races: Race[]; limit?: number };
+
+export function RaceTable({ races, limit = DEMO_ROW_LIMIT }: RaceTableProps) {
+  const visibleRaces = races.slice(0, limit);
   return (
     <section className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-4 sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -34,7 +37,7 @@ export function RaceTable({ races }: RaceTableProps) {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Mock data · no API calls
+          Mock data · showing {visibleRaces.length}/{races.length}
         </p>
       </div>
       <div className="mt-5 overflow-x-auto rounded-xl border border-white/10">
@@ -50,7 +53,7 @@ export function RaceTable({ races }: RaceTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10 bg-black/10">
-            {races.map((race) => (
+            {visibleRaces.map((race) => (
               <tr key={race.id} className="transition hover:bg-white/[0.04]">
                 <td className="px-4 py-4">
                   <p className="font-black uppercase text-white">{race.name}</p>
