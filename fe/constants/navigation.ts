@@ -1,8 +1,11 @@
 import {
   Bell,
+  ClipboardCheck,
   Flag,
   Gauge,
   Home,
+  ListChecks,
+  PlusCircle,
   ShieldCheck,
   Trophy,
   Users,
@@ -25,6 +28,34 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Gauge,
     description:
       "Race control shell for tournaments, races, registrations, results.",
+  },
+  {
+    title: "Create tournament",
+    href: "/admin/tournaments/new",
+    role: "Admin",
+    icon: PlusCircle,
+    description: "Future entry for tournament container creation.",
+  },
+  {
+    title: "Create race",
+    href: "/admin/races/new",
+    role: "Admin",
+    icon: Flag,
+    description: "Future entry for independent race scheduling.",
+  },
+  {
+    title: "Registrations",
+    href: "/admin/registrations",
+    role: "Admin",
+    icon: ClipboardCheck,
+    description: "Future queue for horse registration review.",
+  },
+  {
+    title: "Results",
+    href: "/admin/results",
+    role: "Admin",
+    icon: ListChecks,
+    description: "Future queue for per-race result publishing.",
   },
   {
     title: "Owner home",
