@@ -48,14 +48,14 @@ export const dashboardNavigation: NavigationItem[] = [
     href: "/admin/registrations",
     role: "Admin",
     icon: ClipboardCheck,
-    description: "Future queue for horse registration review.",
+    description: "Horse registration moderation queue.",
   },
   {
     title: "Results",
     href: "/admin/results",
     role: "Admin",
     icon: ListChecks,
-    description: "Future queue for per-race result publishing.",
+    description: "Per-race result review and publish queue.",
   },
   {
     title: "Owner home",

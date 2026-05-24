@@ -261,6 +261,46 @@ Current next phase:
 - Create `docs/fe_team_rules.md` before parallel FE work.
 - FE lead can continue architecture/review ownership and high-risk phases.
 
+### Phase 4D Registration approval + result publish — Completed
+
+Completed:
+
+- Admin registration queue route implemented.
+- Admin registration detail/review route implemented.
+- Admin result queue route implemented.
+- Admin result detail/review route implemented.
+- Mock registration data isolated in `fe/features/registrations/mock-registrations.ts`.
+- Mock result data isolated in `fe/features/results/mock-results.ts`.
+- Reusable moderation/result components created:
+  - `RegistrationTable`
+  - `RegistrationReviewPanel`
+  - `ApprovalDialog`
+  - `RaceRankingTable`
+  - `ResultReviewPanel`
+  - `PublishResultDialog`
+- Navigation copy updated for active registration/result queues.
+
+Verification:
+
+- `npm run lint` passed with `LINT_OK` sentinel confirmed.
+- `npm run build` reached TypeScript finish with no visible errors, but terminal output stopped before final sentinel/exit confirmation.
+
+Scope kept:
+
+- Mock data only.
+- No API calls.
+- No realtime/socket integration.
+- No notification system.
+- No auto ranking calculations.
+- No tournament progression concepts.
+- No RaceRound, Stage, Bracket, Playoff, Grand Final, Qualification, Season Points, Betting/Payment.
+
+Architecture status:
+
+- Registration moderation and result publish are isolated in feature folders.
+- Existing shared `StatusBadge` and `Button` primitives reused.
+- Race/result ranking remains per race only.
+
 ## Durable Decisions
 
 Use ADRs for larger decisions. Keep short notes here for small stable conventions.
