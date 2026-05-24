@@ -144,11 +144,37 @@ Verification:
 - `/login` and `/register` previewed manually.
 - No backend integration, token handling, or auth middleware complexity added.
 
+### Phase 4A Admin dashboard foundation — Completed
+
+Completed:
+
+- Admin dashboard overview page implemented.
+- Reusable `StatCard` added for KPI/status cards.
+- `AdminOverview` composition added for admin entry page.
+- `QuickActionGrid` added as navigation entry points for future admin modules.
+- `RaceStatusOverview` added for live/upcoming/finished race visibility.
+- Mock admin dashboard data separated in `fe/features/dashboard/mock-admin-dashboard.ts`.
+- Navigation constants updated with admin future module entry points.
+
+Verification:
+
+- `npm run lint` passed.
+- `npm run build` reached TypeScript finish with no visible errors, but terminal stopped before final sentinel/exit confirmation.
+
+Scope kept:
+
+- Mock data only.
+- No backend calls.
+- No CRUD.
+- No realtime/socket integration.
+- No out-of-MVP concepts.
+
 Architecture status:
 
 - FE foundation stable.
 - Route groups stable.
 - Auth UI foundation stable.
+- Admin dashboard foundation stable.
 - Project remains FE-first and mock-data-first.
 
 Current FE strategy:
@@ -160,7 +186,7 @@ Current FE strategy:
 
 Planned FE leadership strategy:
 
-- Current FE lead continues Phase 4A Admin dashboard foundation, Phase 4C Race management, Phase 4D Registration approval + result publish, Phase 7 Referee result entry, Phase 9 final polish/review.
+- Current FE lead continues Phase 4C Race management, Phase 4D Registration approval + result publish, Phase 7 Referee result entry, Phase 9 final polish/review.
 - Secondary FE member later focuses Phase 4B Tournament management, Phase 5 Owner horse + registration, Phase 6 Jockey assignment, Phase 8A Public race detail, Phase 8B Spectator prediction.
 
 Important rules remain:
@@ -176,7 +202,7 @@ Important rules remain:
 
 Current next phase:
 
-- Phase 4A — Admin dashboard foundation.
+- Phase 4C — Race management, before handing work to second FE member.
 
 ## Durable Decisions
 
@@ -186,6 +212,7 @@ Use ADRs for larger decisions. Keep short notes here for small stable convention
 - Public/auth/dashboard shells are separate route groups with clean URLs.
 - Role dashboards use nested layouts and shared role shell.
 - Shared feedback states are generic components, not feature-specific.
+- Admin dashboard uses separated mock data in `fe/features/dashboard/mock-admin-dashboard.ts` and business UI in `fe/features/dashboard/components/`.
 
 ## Memory Hygiene
 
