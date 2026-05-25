@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from '../users/dto/user-response.dto';
-import { UserDocument } from '../users/schemas/user.schema';
+import { UserDocument, UserStatus } from '../users/schemas/user.schema';
 import { UsersService } from '../users/users.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { ChangePasswordDto } from '../users/dto/change-password.dto';
@@ -72,6 +72,53 @@ export class AuthService {
       dto.oldPassword,
       dto.newPassword,
     );
+  }
+
+  async googleLogin(credential: string): Promise<AuthResponseDto> {
+    try {
+      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+      if (!response.ok) {
+        throw new UnauthorizedException('Mã xác thực Google không hợp lệ hoặc đã hết hạn.');
+      }
+      const googleProfile = await response.json() as {
+        email?: string;
+        name?: string;
+        picture?: string;
+        sub?: string;
+      };
+
+      const email = googleProfile.email;
+      if (!email) {
+        throw new UnauthorizedException('Không thể lấy email từ tài khoản Google.');
+      }
+
+      let user = await this.usersService.findByEmail(email);
+      if (!user) {
+        // Tự động đăng ký tài khoản mới nếu chưa tồn tại
+        const placeholderPassword = 'google-auth-placeholder-' + Math.random().toString(36).substring(2);
+        user = await this.usersService.create({
+          fullName: googleProfile.name || 'Người dùng Google',
+          email,
+          password: placeholderPassword,
+          phone: '',
+          avatar: googleProfile.picture,
+        });
+      }
+
+      if (user.status === UserStatus.BANNED || user.status === UserStatus.DELETED) {
+        throw new UnauthorizedException('Tài khoản đã bị khóa hoặc bị xóa khỏi hệ thống.');
+      }
+
+      const tokens = this.buildTokens(user);
+      return {
+        ...tokens,
+        user: plainToInstance(UserResponseDto, user.toObject(), {
+          excludeExtraneousValues: true,
+        }),
+      };
+    } catch (err: any) {
+      throw new UnauthorizedException(err.message || 'Xác thực Google thất bại.');
+    }
   }
 
   private buildTokens(user: UserDocument): { accessToken: string; refreshToken: string } {

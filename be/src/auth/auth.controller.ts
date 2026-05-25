@@ -27,6 +27,7 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -47,6 +48,14 @@ export class AuthController {
   @ApiResponse({ status: 200, type: AuthResponseDto })
   login(@Request() req: { user: UserDocument }): AuthResponseDto {
     return this.authService.login(req.user);
+  }
+
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with Google OAuth2 ID Token' })
+  @ApiResponse({ status: 200, type: AuthResponseDto })
+  googleLogin(@Body() dto: GoogleLoginDto): Promise<AuthResponseDto> {
+    return this.authService.googleLogin(dto.credential);
   }
 
   @Post('refresh')

@@ -47,6 +47,10 @@ export class UsersService {
     return user;
   }
 
+  findByEmail(email: string): Promise<UserDocument | null> {
+    return this.usersRepository.findByEmail(email);
+  }
+
   findAll(page = 1, limit = 20): Promise<UserDocument[]> {
     return this.usersRepository.findAll(page, limit);
   }
