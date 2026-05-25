@@ -18,6 +18,24 @@ export interface RankingEntry {
   rank?: number;
 }
 
+export interface HorseAggregateRanking {
+  horseId: string;
+  horseName?: string;
+  totalPoints: number;
+  totalRaces: number;
+  wins: number;
+  totalFinishTime: number;
+}
+
+export interface JockeyAggregateRanking {
+  jockeyId: string;
+  jockeyName?: string;
+  totalPoints: number;
+  totalRaces: number;
+  wins: number;
+  totalFinishTime: number;
+}
+
 @Injectable()
 export class RankingsService {
   constructor(
@@ -81,10 +99,12 @@ export class RankingsService {
     const results = await this.resultModel.aggregate(pipeline);
 
     // Assign rank
-    return results.map((entry, index) => ({
-      ...entry,
-      rank: index + 1,
-    }));
+    return results.map(
+      (entry: HorseAggregateRanking, index): RankingEntry => ({
+        ...entry,
+        rank: index + 1,
+      }),
+    );
   }
 
   async getJockeyRankings(tournamentId: string) {
@@ -139,7 +159,7 @@ export class RankingsService {
     ];
 
     const results = await this.resultModel.aggregate(pipeline);
-    return results.map((entry, index) => ({
+    return results.map((entry: JockeyAggregateRanking, index) => ({
       ...entry,
       rank: index + 1,
     }));

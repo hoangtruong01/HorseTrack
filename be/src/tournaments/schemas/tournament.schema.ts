@@ -13,11 +13,26 @@ export enum TournamentStatus {
 }
 
 /** Valid status transitions */
-export const TOURNAMENT_STATUS_FLOW: Record<TournamentStatus, TournamentStatus[]> = {
-  [TournamentStatus.DRAFT]: [TournamentStatus.OPEN_REGISTRATION, TournamentStatus.CANCELLED],
-  [TournamentStatus.OPEN_REGISTRATION]: [TournamentStatus.CLOSED_REGISTRATION, TournamentStatus.CANCELLED],
-  [TournamentStatus.CLOSED_REGISTRATION]: [TournamentStatus.ONGOING, TournamentStatus.CANCELLED],
-  [TournamentStatus.ONGOING]: [TournamentStatus.COMPLETED, TournamentStatus.CANCELLED],
+export const TOURNAMENT_STATUS_FLOW: Record<
+  TournamentStatus,
+  TournamentStatus[]
+> = {
+  [TournamentStatus.DRAFT]: [
+    TournamentStatus.OPEN_REGISTRATION,
+    TournamentStatus.CANCELLED,
+  ],
+  [TournamentStatus.OPEN_REGISTRATION]: [
+    TournamentStatus.CLOSED_REGISTRATION,
+    TournamentStatus.CANCELLED,
+  ],
+  [TournamentStatus.CLOSED_REGISTRATION]: [
+    TournamentStatus.ONGOING,
+    TournamentStatus.CANCELLED,
+  ],
+  [TournamentStatus.ONGOING]: [
+    TournamentStatus.COMPLETED,
+    TournamentStatus.CANCELLED,
+  ],
   [TournamentStatus.COMPLETED]: [],
   [TournamentStatus.CANCELLED]: [],
 };

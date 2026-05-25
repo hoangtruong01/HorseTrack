@@ -8,7 +8,12 @@ import { Model } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
-import { Race, RaceDocument, RaceStatus, RACE_STATUS_FLOW } from './schemas/race.schema';
+import {
+  Race,
+  RaceDocument,
+  RaceStatus,
+  RACE_STATUS_FLOW,
+} from './schemas/race.schema';
 
 @Injectable()
 export class RacesService {
@@ -32,10 +37,12 @@ export class RacesService {
       .filter((h) => h.jockeyId)
       .map((h) => h.jockeyId!);
     if (new Set(jockeyIds).size !== jockeyIds.length) {
-      throw new BadRequestException('A jockey cannot ride two horses in the same race');
+      throw new BadRequestException(
+        'A jockey cannot ride two horses in the same race',
+      );
     }
 
-    return this.raceModel.create(dto as any);
+    return this.raceModel.create(dto as unknown as Partial<RaceDocument>);
   }
 
   async findAll(page = 1, limit = 20) {
@@ -116,8 +123,13 @@ export class RacesService {
 
   async update(id: string, dto: UpdateRaceDto): Promise<RaceDocument> {
     const race = await this.findOne(id);
-    if (race.status === RaceStatus.FINISHED || race.status === RaceStatus.RESULT_PUBLISHED) {
-      throw new BadRequestException('Cannot update a finished or result published race');
+    if (
+      race.status === RaceStatus.FINISHED ||
+      race.status === RaceStatus.RESULT_PUBLISHED
+    ) {
+      throw new BadRequestException(
+        'Cannot update a finished or result published race',
+      );
     }
     Object.assign(race, dto);
     return race.save();
@@ -125,7 +137,7 @@ export class RacesService {
 
   async updateStatus(id: string, status: RaceStatus): Promise<RaceDocument> {
     const race = await this.findOne(id);
-    
+
     // Validate status transition
     const allowedTransitions = RACE_STATUS_FLOW[race.status] || [];
     if (!allowedTransitions.includes(status)) {
@@ -140,8 +152,13 @@ export class RacesService {
 
   async softDelete(id: string): Promise<void> {
     const race = await this.findOne(id);
-    if (race.status === RaceStatus.FINISHED || race.status === RaceStatus.RESULT_PUBLISHED) {
-      throw new BadRequestException('Cannot delete a finished or result published race');
+    if (
+      race.status === RaceStatus.FINISHED ||
+      race.status === RaceStatus.RESULT_PUBLISHED
+    ) {
+      throw new BadRequestException(
+        'Cannot delete a finished or result published race',
+      );
     }
     race.deletedAt = new Date();
     await race.save();

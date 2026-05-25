@@ -3,7 +3,6 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -39,16 +38,17 @@ export class RaceResultsService {
     const race = await this.racesService.findOne(dto.raceId);
 
     // Race must be ONGOING or FINISHED to record results
-    if (race.status !== RaceStatus.ONGOING && race.status !== RaceStatus.FINISHED) {
+    if (
+      race.status !== RaceStatus.ONGOING &&
+      race.status !== RaceStatus.FINISHED
+    ) {
       throw new BadRequestException(
         'Can only record results for ONGOING or FINISHED races',
       );
     }
 
     // Only assigned referee can record
-    const isAssigned = race.refereeIds.some(
-      (r) => String(r) === recordedBy,
-    );
+    const isAssigned = race.refereeIds.some((r) => String(r) === recordedBy);
     if (!isAssigned) {
       throw new ForbiddenException('You are not assigned to this race');
     }
@@ -59,7 +59,9 @@ export class RaceResultsService {
       horseId: dto.horseId,
     });
     if (existingHorse) {
-      throw new ConflictException('Result already exists for this horse in this race');
+      throw new ConflictException(
+        'Result already exists for this horse in this race',
+      );
     }
 
     // Duplicate rank check
@@ -68,12 +70,12 @@ export class RaceResultsService {
       rank: dto.rank,
     });
     if (existingRank) {
-      throw new BadRequestException(`Rank ${dto.rank} is already taken in this race`);
+      throw new BadRequestException(
+        `Rank ${dto.rank} is already taken in this race`,
+      );
     }
 
-    const points = dto.violation
-      ? 0
-      : (POINTS_MAP[dto.rank] ?? DEFAULT_POINTS);
+    const points = dto.violation ? 0 : (POINTS_MAP[dto.rank] ?? DEFAULT_POINTS);
 
     return this.resultModel.create({
       ...dto,
@@ -94,7 +96,11 @@ export class RaceResultsService {
 
   async findByTournament(tournamentId: string) {
     // Get all race ids for this tournament
-    const racesResult = await this.racesService.findByTournament(tournamentId, 1, 1000);
+    const racesResult = await this.racesService.findByTournament(
+      tournamentId,
+      1,
+      1000,
+    );
     const raceIds = racesResult.data.map((r) => r._id);
     return this.resultModel
       .find({ raceId: { $in: raceIds } })
@@ -122,9 +128,13 @@ export class RaceResultsService {
     }
 
     // Verify all results are CONFIRMED
-    const unconfirmed = results.some((r) => r.status !== RaceResultStatus.CONFIRMED);
+    const unconfirmed = results.some(
+      (r) => r.status !== RaceResultStatus.CONFIRMED,
+    );
     if (unconfirmed) {
-      throw new BadRequestException('Cannot publish results: some results are not confirmed by the referee yet');
+      throw new BadRequestException(
+        'Cannot publish results: some results are not confirmed by the referee yet',
+      );
     }
 
     // Update all results to PUBLISHED
@@ -146,16 +156,17 @@ export class RaceResultsService {
     // Resolve bets
     await this.betsService.payoutBetsForRace(raceId);
 
-    return { message: 'Results published, race marked as RESULT_PUBLISHED, prizes generated, and bets resolved' };
+    return {
+      message:
+        'Results published, race marked as RESULT_PUBLISHED, prizes generated, and bets resolved',
+    };
   }
 
   async confirmResultsForRace(raceId: string, refereeId: string) {
     const race = await this.racesService.findOne(raceId);
 
     // Only assigned referee can confirm
-    const isAssigned = race.refereeIds.some(
-      (r) => String(r) === refereeId,
-    );
+    const isAssigned = race.refereeIds.some((r) => String(r) === refereeId);
     if (!isAssigned) {
       throw new ForbiddenException('You are not assigned to this race');
     }

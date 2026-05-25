@@ -4,7 +4,6 @@ import {
   ArrayMinSize,
   IsArray,
   IsDateString,
-  IsEnum,
   IsMongoId,
   IsNotEmpty,
   IsNumber,

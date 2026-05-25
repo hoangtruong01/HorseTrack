@@ -49,10 +49,7 @@ export class PrizesController {
   @Patch(':id/status')
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Update prize payment status (Admin only)' })
-  updateStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdatePrizeStatusDto,
-  ) {
+  updateStatus(@Param('id') id: string, @Body() dto: UpdatePrizeStatusDto) {
     return this.prizesService.updateStatus(id, dto.status);
   }
 }

@@ -78,10 +78,7 @@ export class JockeysController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change jockey profile status (Admin)' })
-  updateStatus(
-    @Param('id') id: string,
-    @Body('status') status: JockeyStatus,
-  ) {
+  updateStatus(@Param('id') id: string, @Body('status') status: JockeyStatus) {
     return this.jockeysService.changeStatus(id, status);
   }
 }

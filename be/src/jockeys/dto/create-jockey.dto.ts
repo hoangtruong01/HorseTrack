@@ -20,7 +20,9 @@ export class CreateJockeyProfileDto {
   @Min(0)
   experienceYears?: number;
 
-  @ApiPropertyOptional({ example: 'Professional jockey with 5 years experience.' })
+  @ApiPropertyOptional({
+    example: 'Professional jockey with 5 years experience.',
+  })
   @IsOptional()
   @IsString()
   bio?: string;

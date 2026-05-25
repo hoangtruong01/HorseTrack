@@ -3,7 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { HorsesModule } from '../horses/horses.module';
 import { TournamentsModule } from '../tournaments/tournaments.module';
 import { RacesModule } from '../races/races.module';
-import { Registration, RegistrationSchema } from './schemas/registration.schema';
+import {
+  Registration,
+  RegistrationSchema,
+} from './schemas/registration.schema';
 import { RegistrationsController } from './registrations.controller';
 import { RegistrationsService } from './registrations.service';
 import { NotificationsModule } from '../notifications/notifications.module';

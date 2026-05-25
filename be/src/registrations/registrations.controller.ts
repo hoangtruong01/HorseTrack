@@ -81,10 +81,7 @@ export class RegistrationsController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Reject registration (Admin)' })
-  reject(
-    @Param('id') id: string,
-    @Body('reason') reason?: string,
-  ) {
+  reject(@Param('id') id: string, @Body('reason') reason?: string) {
     return this.registrationsService.reject(id, reason);
   }
 

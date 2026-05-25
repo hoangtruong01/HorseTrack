@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from '../users/dto/user-response.dto';
@@ -47,13 +51,16 @@ export class AuthService {
     };
   }
 
-  async refresh(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refresh(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      const payload: JwtPayload = await this.jwtService.verifyAsync(refreshToken);
+      const payload: JwtPayload =
+        await this.jwtService.verifyAsync(refreshToken);
       const user = await this.usersService.findById(payload.sub);
       if (!user) throw new UnauthorizedException('User not found');
       return this.buildTokens(user);
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }
@@ -76,11 +83,15 @@ export class AuthService {
 
   async googleLogin(credential: string): Promise<AuthResponseDto> {
     try {
-      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+      const response = await fetch(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`,
+      );
       if (!response.ok) {
-        throw new UnauthorizedException('Mã xác thực Google không hợp lệ hoặc đã hết hạn.');
+        throw new UnauthorizedException(
+          'Mã xác thực Google không hợp lệ hoặc đã hết hạn.',
+        );
       }
-      const googleProfile = await response.json() as {
+      const googleProfile = (await response.json()) as {
         email?: string;
         name?: string;
         picture?: string;
@@ -89,13 +100,16 @@ export class AuthService {
 
       const email = googleProfile.email;
       if (!email) {
-        throw new UnauthorizedException('Không thể lấy email từ tài khoản Google.');
+        throw new UnauthorizedException(
+          'Không thể lấy email từ tài khoản Google.',
+        );
       }
 
       let user = await this.usersService.findByEmail(email);
       if (!user) {
         // Tự động đăng ký tài khoản mới nếu chưa tồn tại
-        const placeholderPassword = 'google-auth-placeholder-' + Math.random().toString(36).substring(2);
+        const placeholderPassword =
+          'google-auth-placeholder-' + Math.random().toString(36).substring(2);
         user = await this.usersService.create({
           fullName: googleProfile.name || 'Người dùng Google',
           email,
@@ -105,8 +119,13 @@ export class AuthService {
         });
       }
 
-      if (user.status === UserStatus.BANNED || user.status === UserStatus.DELETED) {
-        throw new UnauthorizedException('Tài khoản đã bị khóa hoặc bị xóa khỏi hệ thống.');
+      if (
+        user.status === UserStatus.BANNED ||
+        user.status === UserStatus.DELETED
+      ) {
+        throw new UnauthorizedException(
+          'Tài khoản đã bị khóa hoặc bị xóa khỏi hệ thống.',
+        );
       }
 
       const tokens = this.buildTokens(user);
@@ -116,12 +135,17 @@ export class AuthService {
           excludeExtraneousValues: true,
         }),
       };
-    } catch (err: any) {
-      throw new UnauthorizedException(err.message || 'Xác thực Google thất bại.');
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Xác thực Google thất bại.';
+      throw new UnauthorizedException(message);
     }
   }
 
-  private buildTokens(user: UserDocument): { accessToken: string; refreshToken: string } {
+  private buildTokens(user: UserDocument): {
+    accessToken: string;
+    refreshToken: string;
+  } {
     const payload: JwtPayload = {
       sub: String(user._id),
       email: user.email,

@@ -13,7 +13,11 @@ export enum RaceStatus {
 }
 
 export const RACE_STATUS_FLOW: Record<RaceStatus, RaceStatus[]> = {
-  [RaceStatus.SCHEDULED]: [RaceStatus.CHECKING, RaceStatus.ONGOING, RaceStatus.CANCELLED],
+  [RaceStatus.SCHEDULED]: [
+    RaceStatus.CHECKING,
+    RaceStatus.ONGOING,
+    RaceStatus.CANCELLED,
+  ],
   [RaceStatus.CHECKING]: [RaceStatus.ONGOING, RaceStatus.CANCELLED],
   [RaceStatus.ONGOING]: [RaceStatus.FINISHED, RaceStatus.CANCELLED],
   [RaceStatus.FINISHED]: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED],
@@ -33,7 +37,8 @@ export class RaceHorseEntry {
   gateNumber?: number;
 }
 
-export const RaceHorseEntrySchema = SchemaFactory.createForClass(RaceHorseEntry);
+export const RaceHorseEntrySchema =
+  SchemaFactory.createForClass(RaceHorseEntry);
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class Race {

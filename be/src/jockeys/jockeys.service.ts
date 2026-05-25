@@ -33,7 +33,9 @@ export class JockeysService {
     // 2. Check if profile already exists
     const existing = await this.jockeyModel.findOne({ userId });
     if (existing) {
-      throw new ConflictException('Jockey profile already exists for this user');
+      throw new ConflictException(
+        'Jockey profile already exists for this user',
+      );
     }
 
     return this.jockeyModel.create({
@@ -96,7 +98,10 @@ export class JockeysService {
     return jockey.save();
   }
 
-  async changeStatus(id: string, status: JockeyStatus): Promise<JockeyDocument> {
+  async changeStatus(
+    id: string,
+    status: JockeyStatus,
+  ): Promise<JockeyDocument> {
     const jockey = await this.findOne(id);
     jockey.status = status;
     return jockey.save();

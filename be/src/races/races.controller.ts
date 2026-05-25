@@ -93,10 +93,7 @@ export class RacesController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change race status (Admin)' })
-  updateStatus(
-    @Param('id') id: string,
-    @Body('status') status: RaceStatus,
-  ) {
+  updateStatus(@Param('id') id: string, @Body('status') status: RaceStatus) {
     return this.racesService.updateStatus(id, status);
   }
 

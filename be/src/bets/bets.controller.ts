@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -26,7 +19,9 @@ export class BetsController {
 
   @Post()
   @Roles(RoleName.SPECTATOR, RoleName.ADMIN)
-  @ApiOperation({ summary: 'Place a bet on a horse in a race (Spectator / Admin)' })
+  @ApiOperation({
+    summary: 'Place a bet on a horse in a race (Spectator / Admin)',
+  })
   create(@Body() dto: CreateBetDto, @CurrentUser() user: JwtUser) {
     return this.betsService.create(dto, user.id);
   }
@@ -34,10 +29,7 @@ export class BetsController {
   @Get('my-bets')
   @Roles(RoleName.SPECTATOR, RoleName.ADMIN)
   @ApiOperation({ summary: 'List my placed bets (Spectator / Admin)' })
-  findMyBets(
-    @Query() pagination: PaginationDto,
-    @CurrentUser() user: JwtUser,
-  ) {
+  findMyBets(@Query() pagination: PaginationDto, @CurrentUser() user: JwtUser) {
     return this.betsService.findMyBets(
       user.id,
       pagination.page,

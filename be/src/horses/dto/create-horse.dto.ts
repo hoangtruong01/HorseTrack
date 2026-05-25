@@ -54,7 +54,10 @@ export class CreateHorseDto {
   @IsDateString()
   dateOfBirth?: string;
 
-  @ApiPropertyOptional({ enum: HorseHealthStatus, default: HorseHealthStatus.HEALTHY })
+  @ApiPropertyOptional({
+    enum: HorseHealthStatus,
+    default: HorseHealthStatus.HEALTHY,
+  })
   @IsOptional()
   @IsEnum(HorseHealthStatus)
   healthStatus?: HorseHealthStatus;

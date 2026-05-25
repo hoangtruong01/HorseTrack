@@ -22,10 +22,7 @@ export class NotificationsController {
 
   @Get('my-notifications')
   @ApiOperation({ summary: 'List my notifications' })
-  findMine(
-    @Query() pagination: PaginationDto,
-    @CurrentUser() user: JwtUser,
-  ) {
+  findMine(@Query() pagination: PaginationDto, @CurrentUser() user: JwtUser) {
     return this.notificationsService.findMyNotifications(
       user.id,
       pagination.page,

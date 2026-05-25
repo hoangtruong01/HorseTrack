@@ -38,12 +38,16 @@ export class JockeyInvitationsService {
     ownerId: string,
   ): Promise<JockeyInvitationDocument> {
     // 1. Verify registration exists and belongs to the owner
-    const registration = await this.registrationModel.findById(dto.registrationId);
+    const registration = await this.registrationModel.findById(
+      dto.registrationId,
+    );
     if (!registration) {
       throw new NotFoundException('Registration not found');
     }
     if (String(registration.ownerId) !== ownerId) {
-      throw new ForbiddenException('You can only invite a jockey for your own registered horse');
+      throw new ForbiddenException(
+        'You can only invite a jockey for your own registered horse',
+      );
     }
 
     // 2. Verify target jockey exists and has JOCKEY role
@@ -59,7 +63,9 @@ export class JockeyInvitationsService {
       status: InvitationStatus.PENDING,
     });
     if (existing) {
-      throw new BadRequestException('A pending invitation already exists for this jockey and registration');
+      throw new BadRequestException(
+        'A pending invitation already exists for this jockey and registration',
+      );
     }
 
     const invitation = await this.invitationModel.create({
@@ -90,7 +96,9 @@ export class JockeyInvitationsService {
 
     // Verify jockey owns the invitation
     if (String(invitation.jockeyId) !== jockeyUserId) {
-      throw new ForbiddenException('You can only respond to invitations sent to you');
+      throw new ForbiddenException(
+        'You can only respond to invitations sent to you',
+      );
     }
 
     if (invitation.status !== InvitationStatus.PENDING) {
@@ -111,9 +119,12 @@ export class JockeyInvitationsService {
 
     // If accepted, bind jockey to registration officially!
     if (status === InvitationStatus.ACCEPTED) {
-      await this.registrationModel.findByIdAndUpdate(invitation.registrationId, {
-        jockeyId: invitation.jockeyId,
-      });
+      await this.registrationModel.findByIdAndUpdate(
+        invitation.registrationId,
+        {
+          jockeyId: invitation.jockeyId,
+        },
+      );
     }
 
     return invitation;

@@ -6,11 +6,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { HorsesService } from '../horses/horses.service';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { RacesService } from '../races/races.service';
-import { HorseHealthStatus, HorseStatus } from '../horses/schemas/horse.schema';
+import {
+  HorseDocument,
+  HorseHealthStatus,
+  HorseStatus,
+} from '../horses/schemas/horse.schema';
 import { TournamentStatus } from '../tournaments/schemas/tournament.schema';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import {
@@ -39,14 +43,13 @@ export class RegistrationsService {
   ): Promise<RegistrationDocument> {
     // 0. Fetch the race
     const race = await this.racesService.findOne(dto.raceId);
-    const tournamentId = dto.tournamentId || String(race.tournamentId._id || race.tournamentId);
+    const tournamentId =
+      dto.tournamentId || String(race.tournamentId._id || race.tournamentId);
 
     // 1. Tournament must be OPEN_REGISTRATION
     const tournament = await this.tournamentsService.findOne(tournamentId);
     if (tournament.status !== TournamentStatus.OPEN_REGISTRATION) {
-      throw new BadRequestException(
-        'Tournament is not open for registration',
-      );
+      throw new BadRequestException('Tournament is not open for registration');
     }
 
     // 2. Horse must belong to owner
@@ -145,41 +148,46 @@ export class RegistrationsService {
   async approve(id: string, adminId: string): Promise<RegistrationDocument> {
     const reg = await this.findOne(id);
     if (reg.status !== RegistrationStatus.PENDING) {
-      throw new BadRequestException('Only PENDING registrations can be approved');
+      throw new BadRequestException(
+        'Only PENDING registrations can be approved',
+      );
     }
     reg.status = RegistrationStatus.APPROVED;
     reg.approvedAt = new Date();
-    reg.approvedBy = adminId as any;
+    reg.approvedBy = adminId as unknown as Types.ObjectId;
     const saved = await reg.save();
 
     // Notify the owner!
+    const horse = reg.horseId as unknown as HorseDocument;
+    const owner = reg.ownerId as unknown as { _id?: string };
     await this.notificationsService.send(
-      String(reg.ownerId._id ?? reg.ownerId),
+      String(owner._id ?? reg.ownerId),
       'Registration Approved',
-      `Your registration for horse "${(reg.horseId as any).name}" has been approved!`,
+      `Your registration for horse "${horse.name}" has been approved!`,
       NotificationType.REGISTRATION,
     );
 
     return saved;
   }
 
-  async reject(
-    id: string,
-    reason?: string,
-  ): Promise<RegistrationDocument> {
+  async reject(id: string, reason?: string): Promise<RegistrationDocument> {
     const reg = await this.findOne(id);
     if (reg.status !== RegistrationStatus.PENDING) {
-      throw new BadRequestException('Only PENDING registrations can be rejected');
+      throw new BadRequestException(
+        'Only PENDING registrations can be rejected',
+      );
     }
     reg.status = RegistrationStatus.REJECTED;
     reg.rejectReason = reason;
     const saved = await reg.save();
 
     // Notify the owner!
+    const horse = reg.horseId as unknown as HorseDocument;
+    const owner = reg.ownerId as unknown as { _id?: string };
     await this.notificationsService.send(
-      String(reg.ownerId._id ?? reg.ownerId),
+      String(owner._id ?? reg.ownerId),
       'Registration Rejected',
-      `Your registration for horse "${(reg.horseId as any).name}" has been rejected. Reason: ${reason ?? 'None specified'}`,
+      `Your registration for horse "${horse.name}" has been rejected. Reason: ${reason ?? 'None specified'}`,
       NotificationType.REGISTRATION,
     );
 
@@ -189,7 +197,9 @@ export class RegistrationsService {
   async cancel(id: string, ownerId: string): Promise<RegistrationDocument> {
     const reg = await this.findOne(id);
     if (String(reg.ownerId._id ?? reg.ownerId) !== ownerId) {
-      throw new ForbiddenException('You can only cancel your own registrations');
+      throw new ForbiddenException(
+        'You can only cancel your own registrations',
+      );
     }
     if (reg.status === RegistrationStatus.APPROVED) {
       throw new BadRequestException('Cannot cancel an approved registration');

@@ -19,7 +19,8 @@ export class BetsService {
   constructor(
     @InjectModel(Bet.name) private betModel: Model<BetDocument>,
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
-    @InjectModel(RaceResult.name) private resultModel: Model<RaceResultDocument>,
+    @InjectModel(RaceResult.name)
+    private resultModel: Model<RaceResultDocument>,
   ) {}
 
   async create(dto: CreateBetDto, userId: string): Promise<BetDocument> {
@@ -28,7 +29,10 @@ export class BetsService {
     if (!race) {
       throw new NotFoundException('Race not found');
     }
-    if (race.status !== RaceStatus.SCHEDULED && race.status !== RaceStatus.CHECKING) {
+    if (
+      race.status !== RaceStatus.SCHEDULED &&
+      race.status !== RaceStatus.CHECKING
+    ) {
       throw new BadRequestException('Betting is closed for this race');
     }
 
@@ -37,7 +41,9 @@ export class BetsService {
       (h) => String(h.horseId) === dto.horseId,
     );
     if (!participates) {
-      throw new BadRequestException('Target horse is not participating in this race');
+      throw new BadRequestException(
+        'Target horse is not participating in this race',
+      );
     }
 
     // Deterministic mock odds based on horseId and raceId string hash:

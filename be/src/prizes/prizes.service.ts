@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -11,17 +7,26 @@ import {
   RaceResultStatus,
 } from '../race-results/schemas/race-result.schema';
 import { Race, RaceDocument } from '../races/schemas/race.schema';
-import { Tournament, TournamentDocument } from '../tournaments/schemas/tournament.schema';
+import {
+  Tournament,
+  TournamentDocument,
+} from '../tournaments/schemas/tournament.schema';
 import { Horse, HorseDocument } from '../horses/schemas/horse.schema';
-import { Prize, PrizeDocument, PrizePaymentStatus } from './schemas/prize.schema';
+import {
+  Prize,
+  PrizeDocument,
+  PrizePaymentStatus,
+} from './schemas/prize.schema';
 
 @Injectable()
 export class PrizesService {
   constructor(
     @InjectModel(Prize.name) private prizeModel: Model<PrizeDocument>,
-    @InjectModel(RaceResult.name) private resultModel: Model<RaceResultDocument>,
+    @InjectModel(RaceResult.name)
+    private resultModel: Model<RaceResultDocument>,
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
-    @InjectModel(Tournament.name) private tournamentModel: Model<TournamentDocument>,
+    @InjectModel(Tournament.name)
+    private tournamentModel: Model<TournamentDocument>,
     @InjectModel(Horse.name) private horseModel: Model<HorseDocument>,
   ) {}
 

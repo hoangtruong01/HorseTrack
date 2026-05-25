@@ -9,18 +9,26 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: (process.env.CORS_ORIGIN ?? 'http://localhost:3000,http://localhost:3001,http://localhost:8081').split(','),
+    origin: (
+      process.env.CORS_ORIGIN ??
+      'http://localhost:3000,http://localhost:3001,http://localhost:8081'
+    ).split(','),
     credentials: true,
   },
 })
-export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class NotificationsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server!: Server;
 
   handleConnection(client: Socket) {
-    const userId = client.handshake.query.userId;
-    if (userId) {
-      client.join(`user_${userId}`);
+    let userId = client.handshake.query.userId;
+    if (Array.isArray(userId)) {
+      userId = userId[0];
+    }
+    if (userId && typeof userId === 'string') {
+      void client.join(`user_${userId}`);
       console.log(`Socket client ${client.id} joined room: user_${userId}`);
     }
   }
@@ -32,8 +40,10 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   @SubscribeMessage('subscribe')
   handleSubscribe(client: Socket, payload: { userId: string }) {
     if (payload?.userId) {
-      client.join(`user_${payload.userId}`);
-      console.log(`Socket client ${client.id} manually subscribed to: user_${payload.userId}`);
+      void client.join(`user_${payload.userId}`);
+      console.log(
+        `Socket client ${client.id} manually subscribed to: user_${payload.userId}`,
+      );
       return { status: 'success', room: `user_${payload.userId}` };
     }
     return { status: 'error', message: 'Invalid userId' };

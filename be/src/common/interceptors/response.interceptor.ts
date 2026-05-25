@@ -15,27 +15,38 @@ export interface ApiResponse<T> {
 }
 
 @Injectable()
-export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+export class ResponseInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
     return next.handle().pipe(
-      map((data) => {
+      map((data: unknown): ApiResponse<T> => {
         // If the response already has a success property, return as-is
         if (data && typeof data === 'object' && 'success' in data) {
-          return data;
+          return data as unknown as ApiResponse<T>;
         }
 
         // Extract meta if present
-        const meta = data?.meta;
-        const responseData = data?.meta ? data.data ?? data : data;
+        let meta: Record<string, unknown> | undefined;
+        let responseData: unknown = data;
+
+        if (data && typeof data === 'object') {
+          const obj = data as Record<string, unknown>;
+          if ('meta' in obj && obj.meta && typeof obj.meta === 'object') {
+            meta = obj.meta as Record<string, unknown>;
+            responseData = 'data' in obj ? obj.data : obj;
+          }
+        }
 
         return {
           success: true,
           message: 'Success',
-          data: meta ? responseData : data,
-          ...(meta && { meta }),
+          data: responseData as T,
+          ...(meta ? { meta } : {}),
         };
       }),
     );

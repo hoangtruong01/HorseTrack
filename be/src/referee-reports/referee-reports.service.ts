@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RacesService } from '../races/races.service';
@@ -26,9 +22,7 @@ export class RefereeReportsService {
   ): Promise<RefereeReportDocument> {
     // 1. Verify race exists and referee is assigned to it
     const race = await this.racesService.findOne(dto.raceId);
-    const isAssigned = race.refereeIds.some(
-      (rId) => String(rId) === refereeId,
-    );
+    const isAssigned = race.refereeIds.some((rId) => String(rId) === refereeId);
     if (!isAssigned) {
       throw new ForbiddenException('You are not assigned to this race');
     }

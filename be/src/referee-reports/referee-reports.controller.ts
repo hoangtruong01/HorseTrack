@@ -46,6 +46,9 @@ export class RefereeReportsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all reports (Admin only)' })
   findAll(@Query() pagination: PaginationDto) {
-    return this.refereeReportsService.findAll(pagination.page, pagination.limit);
+    return this.refereeReportsService.findAll(
+      pagination.page,
+      pagination.limit,
+    );
   }
 }

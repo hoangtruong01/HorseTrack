@@ -24,7 +24,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       } else if (typeof exResponse === 'object' && exResponse !== null) {
         const obj = exResponse as Record<string, unknown>;
         const raw = obj.message ?? exception.message;
-        message = Array.isArray(raw) ? raw.join('; ') : String(raw);
+        message = Array.isArray(raw)
+          ? raw.join('; ')
+          : typeof raw === 'object' && raw !== null
+            ? JSON.stringify(raw)
+            : // eslint-disable-next-line @typescript-eslint/no-base-to-string
+              String(raw);
       }
     } else if (exception instanceof Error) {
       message = exception.message;

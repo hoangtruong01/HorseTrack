@@ -12,7 +12,10 @@ export class CreateInvitationDto {
   @IsMongoId()
   jockeyId: string;
 
-  @ApiPropertyOptional({ example: 'Hey, I would like you to ride my horse Thunder Bolt in the tournament!' })
+  @ApiPropertyOptional({
+    example:
+      'Hey, I would like you to ride my horse Thunder Bolt in the tournament!',
+  })
   @IsOptional()
   @IsString()
   message?: string;
