@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { ArrowUpRight, RadioTower, ShieldCheck, Timer } from "lucide-react";
-
-import { authStats, rolePreviews } from "@/features/auth/mock-auth-data";
-import { RolePreviewCard } from "@/features/auth/components/role-preview-card";
+import {
+  CalendarDays,
+  Compass,
+  UserCheck,
+  Trophy,
+  Target,
+  ArrowUpRight,
+} from "lucide-react";
 
 export default function AuthLayout({
   children,
@@ -10,118 +14,186 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#07070A] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_16%_8%,rgba(225,6,0,0.22),transparent_24rem),radial-gradient(circle_at_86%_28%,rgba(6,126,106,0.12),transparent_26rem),linear-gradient(135deg,rgba(255,255,255,0.045)_0_1px,transparent_1px_42px)]" />
-      <div className="pointer-events-none fixed inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/15 to-transparent" />
+    <main className="min-h-screen overflow-x-hidden bg-[#07070A] text-white">
+      {/* Background gradients and grid lines to build F1 cockpit depth */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_16%_8%,rgba(225,6,0,0.18),transparent_28rem),radial-gradient(circle_at_86%_28%,rgba(6,126,106,0.08),transparent_26rem),linear-gradient(135deg,rgba(255,255,255,0.03)_0_1px,transparent_1px_48px)] opacity-60" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-48 bg-gradient-to-b from-[#E10600]/8 to-transparent" />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-5 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between gap-4 py-3">
+      <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <header className="flex items-center justify-between gap-4 py-4 border-b border-white/5">
           <Link
             href="/"
-            className="group flex items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+            className="group flex items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E10600]/70"
             aria-label="HorseTrack home"
           >
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[0_0_36px_rgba(225,6,0,0.35)] transition group-hover:scale-105">
-              <RadioTower className="size-5" aria-hidden="true" />
+            {/* Custom high-fidelity horse head SVG outline logo */}
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-[#E10600]/10 text-[#E10600] border border-[#E10600]/20 shadow-[0_0_24px_rgba(225,6,0,0.22)] transition group-hover:scale-105">
+              <svg
+                viewBox="0 0 100 100"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="7.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-7"
+              >
+                <path
+                  d="M15 80 C25 65, 30 45, 55 35 C55 35, 48 20, 60 10 C70 22, 75 35, 70 45 C75 42, 85 48, 88 58 C90 68, 78 78, 72 75 C66 72, 60 78, 55 82 C45 88, 30 88, 15 80 Z"
+                  fill="rgba(225, 6, 0, 0.08)"
+                />
+                <circle cx="62" cy="38" r="4.5" fill="#E10600" />
+              </svg>
             </span>
             <span>
-              <span className="block text-base font-black uppercase tracking-[0.2em] text-white">
+              <span className="block text-lg font-black uppercase tracking-[0.2em] text-white leading-none">
                 HorseTrack
               </span>
-              <span className="block text-[0.68rem] font-bold uppercase tracking-[0.24em] text-white/42">
-                Race control auth
+              <span className="block text-[0.66rem] font-bold uppercase tracking-[0.22em] text-white/40 mt-1">
+                Race Control System
               </span>
             </span>
           </Link>
 
           <Link
             href="/races"
-            className="hidden items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-sm font-bold text-white/72 transition hover:border-primary/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 sm:inline-flex"
+            className="flex items-center gap-1.5 text-sm font-bold text-white/60 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E10600]/70"
           >
-            Preview races
-            <ArrowUpRight className="size-4" aria-hidden="true" />
+            Preview race
+            <ArrowUpRight className="size-4" />
           </Link>
         </header>
 
-        <div className="grid flex-1 gap-8 py-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:py-12">
-          <aside className="space-y-6">
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#15151E]/82 p-6 shadow-[0_24px_90px_rgba(0,0,0,0.46)] sm:p-8">
-              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
-              <div className="absolute -right-16 -top-16 size-52 rounded-full bg-primary/12 blur-3xl" />
-              <div className="relative">
-                <p className="text-xs font-black uppercase tracking-[0.28em] text-primary">
-                  Phase 3 · Mock auth
-                </p>
-                <h1 className="mt-4 text-4xl font-black uppercase leading-[0.95] tracking-tight text-white sm:text-5xl">
-                  Role entry before the race lights.
-                </h1>
-                <p className="mt-5 max-w-xl text-sm leading-6 text-white/68">
-                  Polished authentication UI for demo navigation only. The
-                  session handoff is a placeholder redirect by selected role;
-                  real backend auth remains deferred.
-                </p>
-
-                <div className="mt-6 grid grid-cols-3 gap-3">
-                  {authStats.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="rounded-2xl border border-white/10 bg-white/[0.045] p-3"
-                    >
-                      <p className="text-2xl font-black text-white">
-                        {stat.value}
-                      </p>
-                      <p className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-white/45">
-                        {stat.label}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {/* Two-Column Split Screen Panel */}
+        <div className="grid flex-1 gap-12 py-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:py-14">
+          
+          {/* Left Panel: Race operations bento highlights */}
+          <aside className="space-y-8">
+            <div className="space-y-6">
+              <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl uppercase">
+                Horse Racing <br />
+                Tournament <br />
+                <span className="text-[#E10600]">Management</span> System
+              </h1>
+              
+              <p className="max-w-xl text-sm sm:text-base leading-7 text-white/55">
+                Manage tournaments, horse registrations, jockey assignments, race schedules, referee reports, results, rankings and prediction rewards in one platform.
+              </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                <div className="flex items-center gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                    <ShieldCheck className="size-5" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-black uppercase text-white">
-                      Security copy
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-white/55">
-                      Future auth: httpOnly cookie session. Never localStorage
-                      JWT.
-                    </p>
-                  </div>
+            {/* Bento Grid layout matching the mockup */}
+            <div className="grid gap-4 sm:grid-cols-2 max-w-2xl">
+              
+              {/* Card 1: Tournament Scheduling */}
+              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-white/[0.04] bg-white/[0.02] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-white/10 hover:bg-white/[0.03] transition-all duration-300">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#E10600]/10 text-[#E10600] border border-[#E10600]/15 group-hover:scale-105 transition-transform">
+                  <CalendarDays className="size-5.5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm uppercase text-white tracking-wide">
+                    Tournament Scheduling
+                  </h3>
+                  <p className="mt-2 text-xs text-white/50 leading-relaxed font-medium">
+                    Create and manage race tournaments, rounds and race schedules.
+                  </p>
                 </div>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                <div className="flex items-center gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                    <Timer className="size-5" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-black uppercase text-white">
-                      Fast demo
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-white/55">
-                      Pick a role → mock loading → dashboard placeholder.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <div className="hidden gap-3 xl:grid xl:grid-cols-1">
-              {rolePreviews.slice(0, 3).map((role) => (
-                <RolePreviewCard key={role.role} role={role} compact />
-              ))}
+              {/* Card 2: Horse Registration */}
+              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-white/[0.04] bg-white/[0.02] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-white/10 hover:bg-white/[0.03] transition-all duration-300">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#E10600]/10 text-[#E10600] border border-[#E10600]/15 group-hover:scale-105 transition-transform">
+                  <Compass className="size-5.5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm uppercase text-white tracking-wide">
+                    Horse Registration
+                  </h3>
+                  <p className="mt-2 text-xs text-white/50 leading-relaxed font-medium">
+                    Register horses, manage profiles, history and performance.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3: Jockey Assignment */}
+              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-white/[0.04] bg-white/[0.02] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-white/10 hover:bg-white/[0.03] transition-all duration-300">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#E10600]/10 text-[#E10600] border border-[#E10600]/15 group-hover:scale-105 transition-transform">
+                  <UserCheck className="size-5.5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm uppercase text-white tracking-wide">
+                    Jockey Assignment
+                  </h3>
+                  <p className="mt-2 text-xs text-white/50 leading-relaxed font-medium">
+                    Invite jockeys, assign rides and manage participation.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 4: Race Results */}
+              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-white/[0.04] bg-white/[0.02] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-white/10 hover:bg-white/[0.03] transition-all duration-300">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#E10600]/10 text-[#E10600] border border-[#E10600]/15 group-hover:scale-105 transition-transform">
+                  <Trophy className="size-5.5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm uppercase text-white tracking-wide">
+                    Race Results
+                  </h3>
+                  <p className="mt-2 text-xs text-white/50 leading-relaxed font-medium">
+                    Record results, calculate rankings and manage prize money.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 5: Full Width Prediction Management */}
+              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-white/[0.04] bg-white/[0.02] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-white/10 hover:bg-white/[0.03] transition-all duration-300 sm:col-span-2">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#E10600]/10 text-[#E10600] border border-[#E10600]/15 group-hover:scale-105 transition-transform">
+                  <Target className="size-5.5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm uppercase text-white tracking-wide">
+                    Prediction Management
+                  </h3>
+                  <p className="mt-2 text-xs text-white/50 leading-relaxed font-medium">
+                    Allow spectators to make predictions and reward accurate predictors.
+                  </p>
+                </div>
+              </div>
+
             </div>
           </aside>
 
-          <div>{children}</div>
+          {/* Right Panel: Glassmorphic Auth Form */}
+          <div className="w-full flex justify-center lg:justify-end">
+            <div className="w-full max-w-[460px]">
+              {children}
+            </div>
+          </div>
+          
         </div>
+
+        {/* Footer info bars */}
+        <footer className="py-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs font-semibold text-white/35 uppercase tracking-[0.16em]">
+          <span className="flex items-center gap-1.5">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-3.5 text-[#067E6A]"
+            >
+              <rect width="20" height="11" x="2" y="9" rx="2" ry="2" />
+              <path d="M5 9V7a7 7 0 0 1 14 0v2" />
+            </svg>
+            Secure login
+          </span>
+          <span className="hidden sm:inline">•</span>
+          <span>Protected by JWT</span>
+          <span className="hidden sm:inline">•</span>
+          <span>Your data is safe with us</span>
+        </footer>
+
       </div>
     </main>
   );
