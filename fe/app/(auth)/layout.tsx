@@ -28,23 +28,11 @@ export default function AuthLayout({
             aria-label="HorseTrack home"
           >
             {/* Custom high-fidelity horse head SVG outline logo */}
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-[#E10600]/10 text-[#E10600] border border-[#E10600]/20 shadow-[0_0_24px_rgba(225,6,0,0.22)] transition group-hover:scale-105">
-              <svg
-                viewBox="0 0 100 100"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="7.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-7"
-              >
-                <path
-                  d="M15 80 C25 65, 30 45, 55 35 C55 35, 48 20, 60 10 C70 22, 75 35, 70 45 C75 42, 85 48, 88 58 C90 68, 78 78, 72 75 C66 72, 60 78, 55 82 C45 88, 30 88, 15 80 Z"
-                  fill="rgba(225, 6, 0, 0.08)"
-                />
-                <circle cx="62" cy="38" r="4.5" fill="#E10600" />
-              </svg>
-            </span>
+            <img
+              src="/logo.png"
+              alt="HorseTrack Logo"
+              className="size-11 rounded-2xl object-cover border border-white/10 shadow-[0_0_24px_rgba(225,6,0,0.22)] transition group-hover:scale-105"
+            />
             <span>
               <span className="block text-lg font-black uppercase tracking-[0.2em] text-white leading-none">
                 HorseTrack
@@ -198,3 +186,4 @@ export default function AuthLayout({
     </main>
   );
 }
+
