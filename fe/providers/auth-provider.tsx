@@ -10,6 +10,9 @@ export type AuthUser = {
   avatar?: string;
   roles: string[];
   status: string;
+  phone?: string;
+  address?: string;
+  dob?: string;
 };
 
 type AuthContextType = {

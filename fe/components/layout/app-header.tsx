@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, User } from "lucide-react";
 
 import { publicNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
@@ -62,23 +62,19 @@ export function AppHeader({
 
         <div className="hidden items-center gap-4 lg:flex">
           {user ? (
-            <div className="flex items-center gap-4">
+            <Link href="/profile" className="flex items-center gap-3 group focus:outline-none">
               <div className="flex flex-col items-end">
-                <span className="text-[11px] font-black uppercase tracking-wider text-white">
+                <span className="text-[11px] font-black uppercase tracking-wider text-white group-hover:text-[#E10600] transition">
                   {user.fullName}
                 </span>
-                <span className="text-[9px] font-black uppercase tracking-wider text-[#E10600]">
+                <span className="text-[9px] font-black uppercase tracking-wider text-[#E10600]/80">
                   {user.roles[0] || "spectator"}
                 </span>
               </div>
-              <button
-                onClick={logout}
-                className="flex items-center gap-2 rounded-xl bg-[#E10600] px-5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-[0_4px_20px_rgba(225,6,0,0.25)] transition hover:scale-[1.02] hover:bg-[#B80500] active:scale-[0.98] cursor-pointer"
-              >
-                <LogOut className="size-3.5" />
-                Đăng xuất
-              </button>
-            </div>
+              <div className="flex size-9 items-center justify-center rounded-xl bg-white/[0.03] border border-white/5 text-white/60 group-hover:border-[#E10600]/30 group-hover:text-white transition">
+                <User className="size-4.5" />
+              </div>
+            </Link>
           ) : (
             <Link
               href="/login"
