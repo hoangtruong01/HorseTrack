@@ -26,6 +26,9 @@ export class AuthService {
       email: dto.email,
       password: dto.password,
       phone: dto.phone,
+      address: dto.address,
+      dob: dto.dob,
+      roles: dto.roles,
     });
 
     const tokens = this.buildTokens(user);

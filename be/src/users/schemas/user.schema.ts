@@ -33,6 +33,12 @@ export class User {
   phone?: string;
 
   @Prop()
+  address?: string;
+
+  @Prop()
+  dob?: Date;
+
+  @Prop()
   avatar?: string;
 
   @Prop({ required: true, enum: UserStatus, default: UserStatus.ACTIVE })

@@ -2,20 +2,33 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  Loader2,
+  AlertTriangle,
+  User,
+  Mail,
+  Lock,
+  Phone,
+  Calendar,
+  MapPin,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
 import { defaultDemoRole, rolePreviews } from "../mock-auth-data";
-import type { AuthRole, MockRegisterPayload } from "../types";
+import type { AuthRole } from "../types";
 
 const fieldClass =
-  "h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 disabled:cursor-not-allowed disabled:opacity-60";
 const labelClass =
   "text-xs font-black uppercase tracking-[0.16em] text-white/55";
 
 export function RegisterForm() {
+  const { register } = useAuth();
   const [selectedRole, setSelectedRole] = useState<AuthRole>(defaultDemoRole);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const filteredRolePreviews = useMemo(
     () => rolePreviews.filter((preview) => preview.role !== "admin"),
@@ -29,63 +42,124 @@ export function RegisterForm() {
     [selectedRole],
   );
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setErrorMsg("");
+    setIsSubmitting(true);
+
     const data = new FormData(event.currentTarget);
-    const payload: MockRegisterPayload = {
+    const payload = {
       fullName: String(data.get("fullName") ?? ""),
       email: String(data.get("email") ?? ""),
-      role: selectedRole,
+      phone: String(data.get("phone") ?? ""),
+      address: String(data.get("address") ?? ""),
+      dob: String(data.get("dob") ?? ""),
+      roles: [selectedRole],
       password: String(data.get("password") ?? ""),
-      acceptPolicy: data.get("acceptPolicy") === "on",
     };
 
-    setIsSubmitting(true);
-    window.setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await register(payload);
       window.location.href = selectedPreview.entryPath;
-    }, 700);
-
-    void payload;
+    } catch (err: any) {
+      setErrorMsg(err.message || "Đăng ký tài khoản thất bại.");
+      setIsSubmitting(false);
+    }
   }
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
+      {errorMsg && (
+        <div className="flex items-start gap-3 rounded-xl border border-[#E10600] bg-[#E10600]/10 p-4 shadow-[0_0_15px_rgba(225,6,0,0.15)] animate-[shake_0.4s_ease-in-out]">
+          <AlertTriangle className="size-5 shrink-0 text-[#E10600] mt-0.5" />
+          <div>
+            <p className="text-xs font-black uppercase text-[#E10600] tracking-[0.1em]">Lỗi đăng ký</p>
+            <p className="mt-1 text-sm text-[#E0DEDC] leading-5">{errorMsg}</p>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-2 sm:col-span-2">
-          <span className={labelClass}>Full name</span>
-          <input
-            name="fullName"
-            required
-            autoComplete="name"
-            className={fieldClass}
-            placeholder="Stable Manager"
-          />
+          <span className={labelClass}>Họ và tên</span>
+          <div className="relative">
+            <User className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <input
+              name="fullName"
+              required
+              autoComplete="name"
+              className={fieldClass}
+              placeholder="Ví dụ: Nguyễn Văn A"
+            />
+          </div>
         </label>
 
         <label className="space-y-2">
           <span className={labelClass}>Email</span>
-          <input
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            className={fieldClass}
-            placeholder="you@horsetrack.local"
-          />
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <input
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className={fieldClass}
+              placeholder="you@horsetrack.local"
+            />
+          </div>
         </label>
 
         <label className="space-y-2">
-          <span className={labelClass}>Password</span>
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={6}
-            autoComplete="new-password"
-            className={fieldClass}
-            placeholder="Minimum 6 chars"
-          />
+          <span className={labelClass}>Mật khẩu</span>
+          <div className="relative">
+            <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={6}
+              autoComplete="new-password"
+              className={fieldClass}
+              placeholder="Tối thiểu 6 ký tự"
+            />
+          </div>
+        </label>
+
+        <label className="space-y-2">
+          <span className={labelClass}>Số điện thoại</span>
+          <div className="relative">
+            <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <input
+              name="phone"
+              type="tel"
+              className={fieldClass}
+              placeholder="Ví dụ: 0912345678"
+            />
+          </div>
+        </label>
+
+        <label className="space-y-2">
+          <span className={labelClass}>Ngày sinh</span>
+          <div className="relative">
+            <Calendar className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <input
+              name="dob"
+              type="date"
+              className={cn(fieldClass, "[&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert")}
+            />
+          </div>
+        </label>
+
+        <label className="space-y-2 sm:col-span-2">
+          <span className={labelClass}>Địa chỉ</span>
+          <div className="relative">
+            <MapPin className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <input
+              name="address"
+              className={fieldClass}
+              placeholder="Ví dụ: Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội"
+            />
+          </div>
         </label>
       </div>
 

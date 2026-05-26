@@ -18,11 +18,19 @@ export class UserResponseDto {
 
   @Expose()
   @ApiPropertyOptional()
-  phone: string;
+  phone?: string;
 
   @Expose()
   @ApiPropertyOptional()
-  avatar: string;
+  address?: string;
+
+  @Expose()
+  @ApiPropertyOptional()
+  dob?: Date;
+
+  @Expose()
+  @ApiPropertyOptional()
+  avatar?: string;
 
   @Expose()
   @ApiProperty({ enum: UserStatus })
