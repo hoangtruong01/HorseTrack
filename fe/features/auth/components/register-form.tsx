@@ -109,7 +109,7 @@ export function RegisterForm() {
               >
                 <Icon className="size-4 shrink-0" />
                 <span className="text-[9px] font-black uppercase tracking-wide leading-none">
-                  {preview.role === "spectator" ? "Watcher" : preview.label.split(" ").pop()}
+                  {preview.role === "spectator" ? "Spectator" : preview.label.split(" ").pop()}
                 </span>
               </button>
             );

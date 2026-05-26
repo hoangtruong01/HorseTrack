@@ -27,7 +27,7 @@ const labelClass =
 
 export function LoginForm() {
   const { login, loginWithGoogle } = useAuth();
-  
+
   const [email, setEmail] = useState("owner@horsetrack.local");
   const [password, setPassword] = useState("password123");
   const [showPassword, setShowPassword] = useState(false);
@@ -65,10 +65,10 @@ export function LoginForm() {
         });
         (window as any).google.accounts.id.renderButton(
           document.getElementById("google-native-btn"),
-          { 
-            theme: "dark", 
-            size: "large", 
-            width: "380", 
+          {
+            theme: "dark",
+            size: "large",
+            width: "380",
             shape: "pill",
             text: "continue_with"
           }
@@ -91,10 +91,10 @@ export function LoginForm() {
     try {
       const user = await login(email, password);
       // Điều hướng vào cockpit phù hợp đầu tiên
-      const targetRole = user.roles.includes(selectedDemoRole) 
-        ? selectedDemoRole 
+      const targetRole = user.roles.includes(selectedDemoRole)
+        ? selectedDemoRole
         : (user.roles[0] || "spectator");
-      
+
       window.location.href = `/${targetRole}`;
     } catch (err: any) {
       setErrorMsg(err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
@@ -124,7 +124,7 @@ export function LoginForm() {
 
       {/* Inputs fields */}
       <div className="space-y-4">
-        
+
         {/* Email Address */}
         <div className="space-y-2">
           <label className={labelClass}>Email address</label>
@@ -316,7 +316,7 @@ export function LoginForm() {
               )}
             >
               <Tv className="size-4.5 shrink-0" />
-              <span className="text-[9px] font-black uppercase tracking-wide leading-none">Watcher</span>
+              <span className="text-[9px] font-black uppercase tracking-wide leading-none">Spectator</span>
             </button>
           </div>
         </div>
