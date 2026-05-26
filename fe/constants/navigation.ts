@@ -17,7 +17,10 @@ export const publicNavigation: NavigationItem[] = [
   { title: "Home", href: "/", icon: Home },
   { title: "Tournaments", href: "/tournaments", icon: Trophy },
   { title: "Races", href: "/races", icon: Flag },
-  { title: "Login", href: "/login", icon: Gauge },
+  { title: "Rankings", href: "#", icon: Gauge },
+  { title: "Predictions", href: "#", icon: Bell },
+  { title: "News", href: "#", icon: ClipboardCheck },
+  { title: "Contact", href: "/#contact", icon: Users },
 ];
 
 export const dashboardNavigation: NavigationItem[] = [

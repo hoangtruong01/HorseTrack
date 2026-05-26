@@ -10,8 +10,6 @@ import {
   UserCheck,
   Trophy,
   Target,
-  Menu,
-  X,
   CalendarClock,
   Sparkles,
   Users,
@@ -21,6 +19,7 @@ import {
   Clock,
   Tv,
 } from "lucide-react";
+import { AppHeader } from "@/components/layout/app-header";
 
 // Định nghĩa thông số dữ liệu cho Giao diện
 const quickStats = [
@@ -183,8 +182,6 @@ const coreFeatures = [
 ];
 
 export default function Home() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("Home");
   const [countdown, setCountdown] = useState("02:45:30");
 
   // Giả lập đồng hồ đếm ngược trực quan cho Upcoming Race
@@ -217,113 +214,10 @@ export default function Home() {
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_16%_8%,rgba(225,6,0,0.14),transparent_32rem),radial-gradient(circle_at_86%_28%,rgba(6,126,106,0.06),transparent_28rem)] opacity-40 z-0" />
 
       {/* 1. Header (Navbar) */}
-      <header className="sticky top-0 z-40 border-b border-white/5 bg-[#07070A]/90 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex min-h-[76px] items-center justify-between gap-4">
-          
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 group focus:outline-none"
-          >
-            <img
-              src="/logo.png"
-              alt="HorseTrack Logo"
-              className="size-11 rounded-2xl object-cover border border-white/10 shadow-[0_0_20px_rgba(225,6,0,0.25)] transition group-hover:scale-105"
-            />
-            <span className="text-xl font-black uppercase tracking-[0.16em]">
-              Horse<span className="text-[#E10600]">Track</span>
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1 font-semibold text-sm tracking-wide">
-            {["Home", "Tournaments", "Races", "Rankings", "Predictions", "News", "Contact"].map((item) => (
-              <button
-                key={item}
-                onClick={() => setActiveTab(item)}
-                className={cn(
-                  "relative px-4 py-2.5 rounded-full transition-all duration-150 uppercase tracking-widest text-[11px] font-black",
-                  activeTab === item
-                    ? "text-[#E10600]"
-                    : "text-white/60 hover:text-white"
-                )}
-              >
-                {item}
-                {activeTab === item && (
-                  <span className="absolute bottom-0 inset-x-5 h-[2px] bg-[#E10600]" />
-                )}
-              </button>
-            ))}
-          </nav>
-
-          {/* Auth Action Buttons */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Link
-              href="/login"
-              className="px-5 py-2 rounded-xl text-sm font-bold text-white/70 hover:text-white border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="px-5 py-2 rounded-xl text-sm font-black uppercase tracking-wider bg-[#E10600] text-white hover:bg-[#B80500] hover:scale-[1.02] active:scale-[0.98] transition shadow-[0_4px_20px_rgba(225,6,0,0.25)]"
-            >
-              Get Started
-            </Link>
-          </div>
-
-          {/* Hamburger Mobile Menu */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex lg:hidden size-10 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-white hover:bg-white/[0.05]"
-          >
-            {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </button>
-        </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-white/5 bg-[#07070A] px-4 py-5 space-y-4">
-            <nav className="flex flex-col gap-2">
-              {["Home", "Tournaments", "Races", "Rankings", "Predictions", "News", "Contact"].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => {
-                    setActiveTab(item);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={cn(
-                    "text-left px-4 py-3 rounded-xl font-bold uppercase tracking-wider text-xs",
-                    activeTab === item
-                      ? "bg-[#E10600]/10 text-[#E10600]"
-                      : "text-white/60 hover:bg-white/[0.02] hover:text-white"
-                  )}
-                >
-                  {item}
-                </button>
-              ))}
-            </nav>
-            <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
-              <Link
-                href="/login"
-                className="w-full flex h-11 items-center justify-center rounded-xl border border-white/5 text-sm font-bold text-white/70"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="w-full flex h-11 items-center justify-center rounded-xl bg-[#E10600] text-sm font-bold text-white"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
-        )}
-      </header>
+      <AppHeader />
 
       {/* 2. Hero Section */}
       <section className="relative min-h-[580px] lg:min-h-[660px] border-b border-white/5 flex items-center py-16">
-        
         {/* Generated Action Jockey image masked in background */}
         <div
           className="absolute inset-0 bg-cover bg-right lg:bg-center bg-no-repeat opacity-[0.16] pointer-events-none mix-blend-lighten"
@@ -333,21 +227,24 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#07070A] via-[#07070A]/85 to-transparent pointer-events-none" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full grid gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
-          
           {/* Left Hero Text block */}
           <div className="space-y-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#E10600]/30 bg-[#E10600]/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-white">
               <span className="size-2 rounded-full bg-[#E10600] animate-ping" />
               Live Tournament Platform
             </span>
-            
+
             <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl uppercase">
               Manage Horse Racing <br />
-              Tournaments <span className="text-[#E10600] drop-shadow-[0_0_15px_rgba(225,6,0,0.3)]">Smarter</span>
+              Tournaments{" "}
+              <span className="text-[#E10600] drop-shadow-[0_0_15px_rgba(225,6,0,0.3)]">
+                Smarter
+              </span>
             </h1>
-            
+
             <p className="max-w-xl text-base sm:text-lg leading-7 text-white/55 font-medium">
-              Register horses, assign jockeys, schedule races, record results, track rankings and create predictions – all in one platform.
+              Register horses, assign jockeys, schedule races, record results,
+              track rankings and create predictions – all in one platform.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -384,7 +281,6 @@ export default function Home() {
             </div>
 
             <div className="space-y-3.5">
-              
               {/* Card 1: LIVE */}
               <div className="group relative rounded-2xl border border-white/[0.04] bg-[#07070A]/90 p-4 hover:border-[#E10600]/30 transition-all duration-300">
                 <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-[#E10600]/10 border border-[#E10600]/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[#E10600]">
@@ -437,10 +333,8 @@ export default function Home() {
                   <span className="text-[#067E6A] font-bold">Finished</span>
                 </div>
               </div>
-
             </div>
           </div>
-
         </div>
       </section>
 
@@ -455,10 +349,16 @@ export default function Home() {
                   key={stat.label}
                   className={cn(
                     "group flex items-center gap-4 rounded-2xl border p-5 transition hover:bg-white/[0.02]",
-                    stat.border
+                    stat.border,
                   )}
                 >
-                  <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-xl border border-white/5", stat.bg, stat.color)}>
+                  <div
+                    className={cn(
+                      "flex size-12 shrink-0 items-center justify-center rounded-xl border border-white/5",
+                      stat.bg,
+                      stat.color,
+                    )}
+                  >
                     <Icon className="size-6" />
                   </div>
                   <div>
@@ -482,7 +382,6 @@ export default function Home() {
       {/* 4. Upcoming Races Section */}
       <section className="py-20 border-b border-white/5">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-          
           <div className="flex items-end justify-between">
             <div className="space-y-2">
               <span className="text-xs font-black uppercase tracking-[0.24em] text-[#E10600]">
@@ -528,8 +427,13 @@ export default function Home() {
                         </span>
                       </div>
                     </div>
-                    
-                    <span className={cn("rounded-md border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider", race.badgeClass)}>
+
+                    <span
+                      className={cn(
+                        "rounded-md border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider",
+                        race.badgeClass,
+                      )}
+                    >
                       {race.badge}
                     </span>
                   </div>
@@ -542,9 +446,7 @@ export default function Home() {
                     <p className="text-xs font-bold text-white/40 leading-none">
                       🏆 {race.tournament}
                     </p>
-                    <p className="text-xs text-white/55">
-                      📍 {race.location}
-                    </p>
+                    <p className="text-xs text-white/55">📍 {race.location}</p>
                   </div>
                 </div>
 
@@ -552,7 +454,7 @@ export default function Home() {
                   <span className="text-xs font-black uppercase tracking-wider text-white/60">
                     👥 {race.horses}
                   </span>
-                  
+
                   <Link
                     href={`/races/detail`}
                     className="flex items-center gap-1 text-xs font-black uppercase tracking-wider text-[#E10600] border border-[#E10600]/20 bg-[#E10600]/5 hover:bg-[#E10600]/15 rounded-lg px-3 py-1.5 transition"
@@ -564,14 +466,12 @@ export default function Home() {
               </article>
             ))}
           </div>
-
         </div>
       </section>
 
       {/* 5. Choose Your Role Section */}
       <section className="py-20 border-b border-white/5 bg-[#111118]/15">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-          
           <div className="flex items-end justify-between">
             <div className="space-y-2">
               <span className="text-xs font-black uppercase tracking-[0.24em] text-[#E10600]">
@@ -599,7 +499,12 @@ export default function Home() {
                   className="group flex flex-col justify-between rounded-2xl border border-white/[0.04] bg-[#111118]/70 p-5 hover:border-white/15 transition-all duration-300"
                 >
                   <div className="space-y-4">
-                    <div className={cn("flex size-11 items-center justify-center rounded-xl border", role.color)}>
+                    <div
+                      className={cn(
+                        "flex size-11 items-center justify-center rounded-xl border",
+                        role.color,
+                      )}
+                    >
                       <Icon className="size-5.5" />
                     </div>
                     <div>
@@ -616,7 +521,7 @@ export default function Home() {
                     href={`/login?role=${role.name.toLowerCase().replace(" ", "")}`}
                     className={cn(
                       "mt-5 flex h-9 w-full items-center justify-center rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
-                      role.btnClass
+                      role.btnClass,
                     )}
                   >
                     Explore
@@ -625,14 +530,12 @@ export default function Home() {
               );
             })}
           </div>
-
         </div>
       </section>
 
       {/* 6. Core Features Section */}
       <section className="py-20 border-b border-white/5">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
-          
           <div className="space-y-2 text-center">
             <span className="text-xs font-black uppercase tracking-[0.24em] text-[#E10600]">
               Operational Abstractions
@@ -665,19 +568,17 @@ export default function Home() {
               );
             })}
           </div>
-
         </div>
       </section>
 
       {/* 7. Newsletter Subscription Section */}
-      <section className="py-16">
+      <section id="contact" className="scroll-mt-24 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative overflow-hidden rounded-[2.5rem] border border-white/[0.05] bg-[#111118]/85 p-6 sm:p-10 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl">
             {/* Glowing gold border lines */}
             <div className="absolute inset-y-12 left-0 w-[2px] bg-gradient-to-b from-transparent via-[#F8CD46] to-transparent shadow-[0_0_10px_rgba(248,205,70,0.8)] opacity-70" />
-            
+
             <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-center relative z-10">
-              
               {/* Left side: Champion Cup Image */}
               <div className="flex items-center gap-6">
                 <div
@@ -713,7 +614,6 @@ export default function Home() {
                   Subscribe
                 </button>
               </div>
-
             </div>
           </div>
         </div>
@@ -722,7 +622,6 @@ export default function Home() {
       {/* 8. Footer Section */}
       <footer className="bg-[#07070A] border-t border-white/5 py-16 text-xs sm:text-sm text-white/40 font-semibold tracking-wide">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 pb-12 border-b border-white/5">
-          
           {/* Logo & Desc */}
           <div className="space-y-4">
             <Link
@@ -749,11 +648,17 @@ export default function Home() {
               Quick Links
             </h4>
             <div className="flex flex-col gap-2 text-xs">
-              {["Tournaments", "Races", "Rankings", "Predictions"].map((link) => (
-                <Link key={link} href={`/${link.toLowerCase()}`} className="text-white/40 hover:text-white transition">
-                  {link}
-                </Link>
-              ))}
+              {["Tournaments", "Races", "Rankings", "Predictions"].map(
+                (link) => (
+                  <Link
+                    key={link}
+                    href={`/${link.toLowerCase()}`}
+                    className="text-white/40 hover:text-white transition"
+                  >
+                    {link}
+                  </Link>
+                ),
+              )}
             </div>
           </div>
 
@@ -764,7 +669,11 @@ export default function Home() {
             </h4>
             <div className="flex flex-col gap-2 text-xs">
               {["Help Center", "Guides", "FAQ", "Contact Us"].map((link) => (
-                <Link key={link} href={`/support`} className="text-white/40 hover:text-white transition">
+                <Link
+                  key={link}
+                  href={`/support`}
+                  className="text-white/40 hover:text-white transition"
+                >
                   {link}
                 </Link>
               ))}
@@ -777,48 +686,80 @@ export default function Home() {
               Follow Us
             </h4>
             <div className="flex items-center gap-3">
-              <Link href="https://facebook.com" className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition">
-                <svg className="size-4.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
+              <Link
+                href="https://facebook.com"
+                className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition"
+              >
+                <svg
+                  className="size-4.5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z" />
                 </svg>
               </Link>
-              <Link href="https://twitter.com" className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition">
-                <svg className="size-4.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              <Link
+                href="https://twitter.com"
+                className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition"
+              >
+                <svg
+                  className="size-4.5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
               </Link>
-              <Link href="https://instagram.com" className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition">
-                <svg className="size-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <Link
+                href="https://instagram.com"
+                className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition"
+              >
+                <svg
+                  className="size-4.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  viewBox="0 0 24 24"
+                >
                   <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                   <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                 </svg>
               </Link>
-              <Link href="https://youtube.com" className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition">
-                <svg className="size-4.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.507 9.388.507 9.388.507s7.518 0 9.388-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              <Link
+                href="https://youtube.com"
+                className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition"
+              >
+                <svg
+                  className="size-4.5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.507 9.388.507 9.388.507s7.518 0 9.388-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                 </svg>
               </Link>
             </div>
           </div>
-
         </div>
 
         {/* Bottom copyright row */}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <span>
-            © 2026 Horse Racing Tournament Management System. All rights reserved.
+            © 2026 Horse Racing Tournament Management System. All rights
+            reserved.
           </span>
           <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-white transition">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-white transition">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-white transition">
+              Terms of Service
+            </Link>
           </div>
         </div>
       </footer>
-
     </main>
   );
 }
-
-
-
