@@ -86,11 +86,3 @@ Hệ thống hướng tới các kết quả sau:
 * Hỗ trợ trọng tài lập biên bản vi phạm nhanh chóng bằng Tags và thu thập chữ ký điện tử trực tiếp.
 * Đồng bộ đa ngôn ngữ (i18n): Tự động đổi URL và hiển thị giao diện Anh - Việt theo ngôn ngữ người dùng.
 
-_ Tích hợp giao diện lịch kéo thả (@dnd-kit) và Kanban Board giúp tự động hóa luồng xếp chặng thi đấu, loại bỏ hoàn toàn tình trạng trùng lịch giữa ngựa, Jockey và trọng tài.
-_ Hệ thống tự động cập nhật bảng xếp hạng giải đấu và phân phối phần thưởng ngay sau khi Admin xác nhận kết quả chặng đua chính thức.
-_ 
-_ 
-_ Cung cấp app di động với Toggle switch lớn để kiểm tra nhanh trước giờ đua và Canvas để ký điện tử trực tiếp tại hiện trường
-_ Track UI cập nhật vị trí ngựa qua WebSocket với tần suất 100–200ms, giúp xem trực tiếp mượt mà mà không cần tải lại trang.
-_ Tích hợp mô hình ANN 8-5-7-1 dựa trên dữ liệu môi trường, đạt độ chính xác dự đoán thứ hạng khoảng 77%.
-_ Hệ thống tự động chuyển đổi giao diện Anh – Việt và điều hướng URL bằng next-intl để tối ưu trải nghiệm người dùng.
