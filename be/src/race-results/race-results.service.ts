@@ -14,8 +14,8 @@ import {
   RaceResultDocument,
   RaceResultStatus,
 } from './schemas/race-result.schema';
+import { PredictionsService } from '../predictions/predictions.service';
 import { PrizesService } from '../prizes/prizes.service';
-import { BetsService } from '../bets/bets.service';
 
 /** Points by rank */
 const POINTS_MAP: Record<number, number> = { 1: 10, 2: 7, 3: 5, 4: 3 };
@@ -28,7 +28,7 @@ export class RaceResultsService {
     private resultModel: Model<RaceResultDocument>,
     private racesService: RacesService,
     private prizesService: PrizesService,
-    private betsService: BetsService,
+    private predictionsService: PredictionsService,
   ) {}
 
   async create(
@@ -153,12 +153,12 @@ export class RaceResultsService {
     // Auto-create prizes
     await this.prizesService.createPrizesForRace(raceId);
 
-    // Resolve bets
-    await this.betsService.payoutBetsForRace(raceId);
+    // Resolve predictions
+    await this.predictionsService.payoutBetsForRace(raceId);
 
     return {
       message:
-        'Results published, race marked as RESULT_PUBLISHED, prizes generated, and bets resolved',
+        'Results published, race marked as RESULT_PUBLISHED, prizes generated, and predictions resolved',
     };
   }
 

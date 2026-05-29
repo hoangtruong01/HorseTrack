@@ -5,7 +5,7 @@ import { RaceResult, RaceResultSchema } from './schemas/race-result.schema';
 import { RaceResultsController } from './race-results.controller';
 import { RaceResultsService } from './race-results.service';
 import { PrizesModule } from '../prizes/prizes.module';
-import { BetsModule } from '../bets/bets.module';
+import { PredictionsModule } from '../predictions/predictions.module';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { BetsModule } from '../bets/bets.module';
     ]),
     RacesModule,
     PrizesModule,
-    BetsModule,
+    PredictionsModule,
   ],
   controllers: [RaceResultsController],
   providers: [RaceResultsService],

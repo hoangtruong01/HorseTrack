@@ -12,7 +12,7 @@ import {
   RegistrationSchema,
 } from '../registrations/schemas/registration.schema';
 import { Prize, PrizeSchema } from '../prizes/schemas/prize.schema';
-import { Bet, BetSchema } from '../bets/schemas/bet.schema';
+import { Prediction, PredictionSchema } from '../predictions/schemas/prediction.schema';
 import {
   RaceResult,
   RaceResultSchema,
@@ -37,7 +37,7 @@ import { DashboardService } from './dashboard.service';
       { name: Race.name, schema: RaceSchema },
       { name: Registration.name, schema: RegistrationSchema },
       { name: Prize.name, schema: PrizeSchema },
-      { name: Bet.name, schema: BetSchema },
+      { name: Prediction.name, schema: PredictionSchema },
       { name: RaceResult.name, schema: RaceResultSchema },
       { name: JockeyInvitation.name, schema: JockeyInvitationSchema },
       { name: RefereeReport.name, schema: RefereeReportSchema },

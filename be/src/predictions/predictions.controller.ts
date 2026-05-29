@@ -7,30 +7,33 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { BetsService } from './bets.service';
-import { CreateBetDto } from './dto/create-bet.dto';
+import { PredictionsService } from './predictions.service';
+import { CreatePredictionDto } from './dto/create-prediction.dto';
 
-@ApiTags('Bets')
+@ApiTags('Predictions')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
-@Controller('bets')
-export class BetsController {
-  constructor(private readonly betsService: BetsService) {}
+@Controller('predictions')
+export class PredictionsController {
+  constructor(private readonly predictionsService: PredictionsService) {}
 
   @Post()
   @Roles(RoleName.SPECTATOR, RoleName.ADMIN)
   @ApiOperation({
-    summary: 'Place a bet on a horse in a race (Spectator / Admin)',
+    summary: 'Place a prediction on a horse in a race (Spectator / Admin)',
   })
-  create(@Body() dto: CreateBetDto, @CurrentUser() user: JwtUser) {
-    return this.betsService.create(dto, user.id);
+  create(@Body() dto: CreatePredictionDto, @CurrentUser() user: JwtUser) {
+    return this.predictionsService.create(dto, user.id);
   }
 
-  @Get('my-bets')
+  @Get('my-predictions')
   @Roles(RoleName.SPECTATOR, RoleName.ADMIN)
-  @ApiOperation({ summary: 'List my placed bets (Spectator / Admin)' })
-  findMyBets(@Query() pagination: PaginationDto, @CurrentUser() user: JwtUser) {
-    return this.betsService.findMyBets(
+  @ApiOperation({ summary: 'List my predictions (Spectator / Admin)' })
+  findMyPredictions(
+    @Query() pagination: PaginationDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.predictionsService.findMyPredictions(
       user.id,
       pagination.page,
       pagination.limit,
@@ -39,8 +42,8 @@ export class BetsController {
 
   @Get()
   @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'List all placed bets (Admin only)' })
+  @ApiOperation({ summary: 'List all predictions (Admin only)' })
   findAll(@Query() pagination: PaginationDto) {
-    return this.betsService.findAll(pagination.page, pagination.limit);
+    return this.predictionsService.findAll(pagination.page, pagination.limit);
   }
 }

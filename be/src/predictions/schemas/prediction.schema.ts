@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-export type BetDocument = Bet & Document;
+export type PredictionDocument = Prediction & Document;
 
-export enum BetStatus {
+export enum PredictionStatus {
   PENDING = 'PENDING',
   WON = 'WON',
   LOST = 'LOST',
@@ -11,7 +11,7 @@ export enum BetStatus {
 }
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
-export class Bet {
+export class Prediction {
   @Prop({ type: Types.ObjectId, ref: 'Race', required: true, index: true })
   raceId!: Types.ObjectId;
 
@@ -21,21 +21,21 @@ export class Bet {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   userId!: Types.ObjectId;
 
-  @Prop({ required: true, min: 1 })
-  amount!: number;
+  @Prop({ required: true, default: 1 })
+  predictedPosition!: number;
 
   @Prop({
     required: true,
-    enum: BetStatus,
-    default: BetStatus.PENDING,
+    enum: PredictionStatus,
+    default: PredictionStatus.PENDING,
   })
-  status!: BetStatus;
+  status!: PredictionStatus;
 
-  @Prop({ default: 2.0 })
-  odds!: number;
+  @Prop({ default: false })
+  isCorrect?: boolean;
 
   @Prop({ default: 0 })
-  payout!: number;
+  pointsEarned!: number;
 }
 
-export const BetSchema = SchemaFactory.createForClass(Bet);
+export const PredictionSchema = SchemaFactory.createForClass(Prediction);

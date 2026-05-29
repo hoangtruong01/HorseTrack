@@ -15,7 +15,10 @@ import { JockeysModule } from './jockeys/jockeys.module';
 import { JockeyInvitationsModule } from './jockey-invitations/jockey-invitations.module';
 import { RefereeReportsModule } from './referee-reports/referee-reports.module';
 import { PrizesModule } from './prizes/prizes.module';
-import { BetsModule } from './bets/bets.module';
+import { PredictionsModule } from './predictions/predictions.module';
+import { WalletModule } from './wallet/wallet.module';
+import { AiModule } from './ai/ai.module';
+import { RaceRecordsModule } from './race-records/race-records.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UploadsModule } from './uploads/uploads.module';
@@ -44,7 +47,10 @@ import { UploadsModule } from './uploads/uploads.module';
     JockeyInvitationsModule,
     RefereeReportsModule,
     PrizesModule,
-    BetsModule,
+    PredictionsModule,
+    WalletModule,
+    AiModule,
+    RaceRecordsModule,
     NotificationsModule,
     DashboardModule,
     UploadsModule,

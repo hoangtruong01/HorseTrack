@@ -36,6 +36,12 @@ export class Jockey {
   })
   status!: JockeyStatus;
 
+  @Prop({ default: 0 })
+  skillBonus?: number;
+
+  @Prop()
+  rank?: string;
+
   @Prop()
   bio?: string;
 }
