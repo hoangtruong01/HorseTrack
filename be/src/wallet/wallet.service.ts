@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import {
   WalletTransaction,
@@ -115,9 +115,9 @@ export class WalletService {
     request.status = status;
 
     if (status === CashoutStatus.APPROVED) {
-      request.approvedBy = new Object(handlerId) as any;
+      request.approvedBy = new Types.ObjectId(handlerId);
     } else if (status === CashoutStatus.PAID) {
-      request.paidBy = new Object(handlerId) as any;
+      request.paidBy = new Types.ObjectId(handlerId);
       request.paidAt = new Date();
 
       // Complete the pending transaction
@@ -131,7 +131,7 @@ export class WalletService {
         { status: TransactionStatus.SUCCESS },
       );
     } else if (status === CashoutStatus.REJECTED) {
-      request.approvedBy = new Object(handlerId) as any;
+      request.approvedBy = new Types.ObjectId(handlerId);
 
       // Refund points back to user
       await this.userModel.findByIdAndUpdate(request.userId, {

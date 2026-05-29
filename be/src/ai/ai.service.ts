@@ -87,7 +87,7 @@ export class AiService {
     });
 
     // 3. Record Payment
-    const payment = await this.paymentModel.create({
+    await this.paymentModel.create({
       userId,
       packageId,
       amount: pkg.price,
