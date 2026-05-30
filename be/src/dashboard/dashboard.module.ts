@@ -25,9 +25,9 @@ import {
   JockeyInvitationSchema,
 } from '../jockey-invitations/schemas/jockey-invitation.schema';
 import {
-  RefereeReport,
-  RefereeReportSchema,
-} from '../referee-reports/schemas/referee-report.schema';
+  RefereeAssignment,
+  RefereeAssignmentSchema,
+} from '../referee-assignments/schemas/referee-assignment.schema';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
 
@@ -43,7 +43,7 @@ import { DashboardService } from './dashboard.service';
       { name: Prediction.name, schema: PredictionSchema },
       { name: RaceResult.name, schema: RaceResultSchema },
       { name: JockeyInvitation.name, schema: JockeyInvitationSchema },
-      { name: RefereeReport.name, schema: RefereeReportSchema },
+      { name: RefereeAssignment.name, schema: RefereeAssignmentSchema },
     ]),
   ],
   controllers: [DashboardController],

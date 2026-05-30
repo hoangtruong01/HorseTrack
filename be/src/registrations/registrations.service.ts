@@ -25,6 +25,7 @@ import {
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
 export class RegistrationsService {
@@ -35,6 +36,7 @@ export class RegistrationsService {
     private tournamentsService: TournamentsService,
     private racesService: RacesService,
     private notificationsService: NotificationsService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async create(
@@ -218,6 +220,14 @@ export class RegistrationsService {
     reg.approvedBy = adminId as unknown as Types.ObjectId;
     const saved = await reg.save();
 
+    await this.auditLogsService.log({
+      actorId: adminId,
+      action: 'registration.approve',
+      entityType: 'Registration',
+      entityId: id,
+      after: { status: RegistrationStatus.APPROVED },
+    });
+
     // Notify the owner!
     const horse = reg.horseId as unknown as HorseDocument;
     const owner = reg.ownerId as unknown as { _id?: string };
@@ -266,8 +276,23 @@ export class RegistrationsService {
       throw new BadRequestException('Cannot cancel an approved registration');
     }
     reg.status = RegistrationStatus.CANCELLED;
-    const saved = await reg.save();
+    return reg.save();
+  }
 
-    return saved;
+  /** Owner withdraws an APPROVED registration (different semantic from cancel) */
+  async withdraw(id: string, ownerId: string): Promise<RegistrationDocument> {
+    const reg = await this.findOne(id);
+    if (String(reg.ownerId._id ?? reg.ownerId) !== ownerId) {
+      throw new ForbiddenException(
+        'You can only withdraw your own registrations',
+      );
+    }
+    if (reg.status !== RegistrationStatus.APPROVED) {
+      throw new BadRequestException(
+        'Only APPROVED registrations can be withdrawn',
+      );
+    }
+    reg.status = RegistrationStatus.WITHDRAWN;
+    return reg.save();
   }
 }

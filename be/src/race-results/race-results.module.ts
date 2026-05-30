@@ -10,10 +10,11 @@ import {
   RefereeAssignment,
   RefereeAssignmentSchema,
 } from '../referee-assignments/schemas/referee-assignment.schema';
-import { RaceResultsController } from './race-results.controller';
-import { RaceResultsService } from './race-results.service';
 import { PrizesModule } from '../prizes/prizes.module';
 import { PredictionsModule } from '../predictions/predictions.module';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { RaceResultsController } from './race-results.controller';
+import { RaceResultsService } from './race-results.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PredictionsModule } from '../predictions/predictions.module';
     RacesModule,
     PrizesModule,
     PredictionsModule,
+    AuditLogsModule,
   ],
   controllers: [RaceResultsController],
   providers: [RaceResultsService],

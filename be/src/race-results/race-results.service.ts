@@ -27,6 +27,7 @@ import {
 } from './schemas/race-result.schema';
 import { PredictionsService } from '../predictions/predictions.service';
 import { PrizesService } from '../prizes/prizes.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 /** Points by finishing rank */
 const POINTS_MAP: Record<number, number> = { 1: 10, 2: 7, 3: 5, 4: 3 };
@@ -44,6 +45,7 @@ export class RaceResultsService {
     private racesService: RacesService,
     private prizesService: PrizesService,
     private predictionsService: PredictionsService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   private async validateRefereeAssigned(
@@ -261,6 +263,14 @@ export class RaceResultsService {
 
     // Resolve predictions
     await this.predictionsService.payoutBetsForRace(raceId);
+
+    await this.auditLogsService.log({
+      actorId: publishedBy,
+      action: 'race_result.publish',
+      entityType: 'Race',
+      entityId: raceId,
+      after: { status: 'RESULT_PUBLISHED', resultCount: results.length },
+    });
 
     return {
       message:

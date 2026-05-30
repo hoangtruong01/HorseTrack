@@ -23,8 +23,9 @@ import {
   PredictionStatus,
 } from './schemas/prediction.schema';
 import { CreatePredictionDto } from './dto/create-prediction.dto';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
-/** Points for correct prediction per position */
 const POSITION_POINTS = { first: 50, second: 30, third: 20 };
 
 @Injectable()
@@ -37,13 +38,13 @@ export class PredictionsService {
     private resultModel: Model<RaceResultDocument>,
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
+    private ledgerService: RewardPointLedgerService,
   ) {}
 
   async create(
     dto: CreatePredictionDto,
     userId: string,
   ): Promise<PredictionDocument> {
-    // 1. Race must be SCHEDULED or CHECKING — predictions close when race is READY
     const race = await this.raceModel.findById(dto.raceId);
     if (!race) throw new NotFoundException('Race not found');
     if (
@@ -55,7 +56,6 @@ export class PredictionsService {
       );
     }
 
-    // 2. At least one horse must be predicted
     const predicted = [
       dto.predictedFirstHorseId,
       dto.predictedSecondHorseId,
@@ -67,7 +67,6 @@ export class PredictionsService {
       );
     }
 
-    // 3. Each predicted horse must have an APPROVED registration in this race
     for (const horseId of predicted) {
       const reg = await this.registrationModel.findOne({
         raceId: dto.raceId,
@@ -81,7 +80,6 @@ export class PredictionsService {
       }
     }
 
-    // 4. One prediction per user per race
     const existing = await this.predictionModel.findOne({
       raceId: dto.raceId,
       userId,
@@ -144,7 +142,6 @@ export class PredictionsService {
     };
   }
 
-  /** Cancel all pending predictions when a race is cancelled */
   async cancelPredictionsForRace(raceId: string): Promise<void> {
     await this.predictionModel.updateMany(
       { raceId, status: PredictionStatus.PENDING },
@@ -152,9 +149,7 @@ export class PredictionsService {
     );
   }
 
-  /** Evaluate top-3 predictions against published results */
   async payoutBetsForRace(raceId: string): Promise<void> {
-    // 1. Get published results ranked 1-3
     const results = await this.resultModel
       .find({ raceId, status: RaceResultStatus.PUBLISHED })
       .sort({ rank: 1 });
@@ -171,6 +166,12 @@ export class PredictionsService {
     if (predictions.length === 0) return;
 
     const now = new Date();
+    const winners: {
+      predictionId: string;
+      userId: string;
+      rewardPoints: number;
+    }[] = [];
+
     const bulkOps = predictions.map((prediction) => {
       let rewardPoints = 0;
 
@@ -197,6 +198,14 @@ export class PredictionsService {
         rewardPoints += POSITION_POINTS.third;
       }
 
+      if (rewardPoints > 0) {
+        winners.push({
+          predictionId: String(prediction._id),
+          userId: String(prediction.userId),
+          rewardPoints,
+        });
+      }
+
       return {
         updateOne: {
           filter: { _id: prediction._id },
@@ -213,5 +222,18 @@ export class PredictionsService {
     });
 
     await this.predictionModel.bulkWrite(bulkOps);
+
+    // Credit reward points to winners via ledger
+    await Promise.all(
+      winners.map((winner) =>
+        this.ledgerService.credit({
+          userId: winner.userId,
+          points: winner.rewardPoints,
+          sourceType: LedgerSourceType.PREDICTION_REWARD,
+          sourceId: winner.predictionId,
+          note: `Prediction reward for race ${raceId}`,
+        }),
+      ),
+    );
   }
 }

@@ -18,6 +18,8 @@ import {
   CashoutStatus,
 } from './schemas/cashout-request.schema';
 import { CreateCashoutDto } from './dto/create-cashout.dto';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
 // 1 point = 100 cash units
 const POINT_CONVERSION_RATE = 100;
@@ -30,6 +32,7 @@ export class WalletService {
     private transactionModel: Model<WalletTransactionDocument>,
     @InjectModel(CashoutRequest.name)
     private cashoutModel: Model<CashoutRequestDocument>,
+    private ledgerService: RewardPointLedgerService,
   ) {}
 
   async deposit(
@@ -37,16 +40,12 @@ export class WalletService {
     amount: number,
   ): Promise<WalletTransactionDocument> {
     const user = await this.userModel.findById(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    if (!user) throw new NotFoundException('User not found');
 
-    // Increment user balance
     await this.userModel.findByIdAndUpdate(userId, {
       $inc: { balance: amount },
     });
 
-    // Record transaction
     return this.transactionModel.create({
       userId,
       type: TransactionType.DEPOSIT,
@@ -61,21 +60,15 @@ export class WalletService {
     dto: CreateCashoutDto,
     userId: string,
   ): Promise<CashoutRequestDocument> {
-    const user = await this.userModel.findById(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    if ((user.points ?? 0) < dto.pointsToRedeem) {
-      throw new BadRequestException('Insufficient points to redeem');
+    // Use ledger as source of truth for points balance
+    const currentPoints = await this.ledgerService.getBalance(userId);
+    if (currentPoints < dto.pointsToRedeem) {
+      throw new BadRequestException(
+        `Insufficient points. Available: ${currentPoints}, required: ${dto.pointsToRedeem}`,
+      );
     }
 
     const requestedAmount = dto.pointsToRedeem * POINT_CONVERSION_RATE;
-
-    // Deduct points from user immediately
-    await this.userModel.findByIdAndUpdate(userId, {
-      $inc: { points: -dto.pointsToRedeem },
-    });
 
     // Create cashout request
     const request = await this.cashoutModel.create({
@@ -85,13 +78,22 @@ export class WalletService {
       status: CashoutStatus.PENDING,
     });
 
-    // Create transaction in pending state, linked to the cashout request
+    // Debit points via ledger
+    await this.ledgerService.debit({
+      userId,
+      points: dto.pointsToRedeem,
+      sourceType: LedgerSourceType.REDEMPTION,
+      sourceId: String(request._id),
+      note: `Cashout request: redeem ${dto.pointsToRedeem} points for ${requestedAmount} VND`,
+    });
+
+    // Record wallet transaction
     await this.transactionModel.create({
       userId,
       type: TransactionType.REWARD_CASHOUT,
       amount: requestedAmount,
       points: dto.pointsToRedeem,
-      description: `Cashout request of ${requestedAmount} by redeeming ${dto.pointsToRedeem} points.`,
+      description: `Cashout request of ${requestedAmount} VND (${dto.pointsToRedeem} points).`,
       status: TransactionStatus.PENDING,
       cashoutRequestId: request._id,
     });
@@ -105,9 +107,7 @@ export class WalletService {
     handlerId: string,
   ): Promise<CashoutRequestDocument> {
     const request = await this.cashoutModel.findById(id);
-    if (!request) {
-      throw new NotFoundException('Cashout request not found');
-    }
+    if (!request) throw new NotFoundException('Cashout request not found');
 
     if (
       request.status === CashoutStatus.PAID ||
@@ -123,8 +123,6 @@ export class WalletService {
     } else if (status === CashoutStatus.PAID) {
       request.paidBy = new Types.ObjectId(handlerId);
       request.paidAt = new Date();
-
-      // Complete the pending transaction — look up by cashoutRequestId for precision
       await this.transactionModel.findOneAndUpdate(
         { cashoutRequestId: request._id, status: TransactionStatus.PENDING },
         { status: TransactionStatus.SUCCESS },
@@ -132,12 +130,16 @@ export class WalletService {
     } else if (status === CashoutStatus.REJECTED) {
       request.approvedBy = new Types.ObjectId(handlerId);
 
-      // Refund points back to user
-      await this.userModel.findByIdAndUpdate(request.userId, {
-        $inc: { points: request.pointsRedeemed },
+      // Refund points via ledger
+      await this.ledgerService.credit({
+        userId: String(request.userId),
+        points: request.pointsRedeemed,
+        sourceType: LedgerSourceType.REDEMPTION,
+        sourceId: String(request._id),
+        note: `Refund: cashout request ${id} rejected`,
+        createdBy: handlerId,
       });
 
-      // Fail the pending transaction — look up by cashoutRequestId for precision
       await this.transactionModel.findOneAndUpdate(
         { cashoutRequestId: request._id, status: TransactionStatus.PENDING },
         { status: TransactionStatus.FAILED },
@@ -159,11 +161,12 @@ export class WalletService {
       this.transactionModel.countDocuments(filter),
     ]);
 
-    const user = await this.userModel.findById(userId, 'points balance');
+    const user = await this.userModel.findById(userId, 'balance');
+    const pointBalance = await this.ledgerService.getBalance(userId);
 
     return {
       balance: user?.balance ?? 0,
-      points: user?.points ?? 0,
+      points: pointBalance,
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };

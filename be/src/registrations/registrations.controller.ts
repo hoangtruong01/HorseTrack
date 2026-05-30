@@ -88,8 +88,18 @@ export class RegistrationsController {
   @Patch(':id/cancel')
   @UseGuards(RolesGuard)
   @Roles(RoleName.OWNER)
-  @ApiOperation({ summary: 'Cancel own registration (Owner)' })
+  @ApiOperation({
+    summary: 'Cancel own registration (Owner) — only PENDING/REJECTED',
+  })
   cancel(@Param('id') id: string, @CurrentUser() user: JwtUser) {
     return this.registrationsService.cancel(id, user.id);
+  }
+
+  @Patch(':id/withdraw')
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.OWNER)
+  @ApiOperation({ summary: 'Withdraw approved registration (Owner)' })
+  withdraw(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+    return this.registrationsService.withdraw(id, user.id);
   }
 }

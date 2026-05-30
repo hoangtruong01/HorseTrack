@@ -12,6 +12,12 @@ import {
 } from '../registrations/schemas/registration.schema';
 import { UsersService } from '../users/users.service';
 import { RoleName } from '../users/schemas/user.schema';
+import {
+  Jockey,
+  JockeyDocument,
+  JockeyStatus,
+} from '../jockeys/schemas/jockey.schema';
+import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import {
   InvitationStatus,
@@ -22,6 +28,15 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
 
 const INVITATION_EXPIRY_DAYS = 3;
+const CONFLICT_WINDOW_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+/** Race statuses where jockey assignment is locked */
+const LOCKED_RACE_STATUSES = [
+  RaceStatus.READY,
+  RaceStatus.LIVE,
+  RaceStatus.FINISHED,
+  RaceStatus.RESULT_PUBLISHED,
+];
 
 @Injectable()
 export class JockeyInvitationsService {
@@ -30,6 +45,10 @@ export class JockeyInvitationsService {
     private invitationModel: Model<JockeyInvitationDocument>,
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
+    @InjectModel(Jockey.name)
+    private jockeyModel: Model<JockeyDocument>,
+    @InjectModel(Race.name)
+    private raceModel: Model<RaceDocument>,
     private usersService: UsersService,
     private notificationsService: NotificationsService,
   ) {}
@@ -49,13 +68,35 @@ export class JockeyInvitationsService {
       );
     }
 
-    // 2. Verify target jockey exists and has JOCKEY role
+    // 2. Verify race is not locked for jockey changes
+    const race = await this.raceModel.findById(registration.raceId);
+    if (!race) throw new NotFoundException('Race not found');
+    if (LOCKED_RACE_STATUSES.includes(race.status)) {
+      throw new BadRequestException(
+        `Cannot invite a jockey when race is in ${race.status} status`,
+      );
+    }
+
+    // 3. Verify target user has JOCKEY role
     const jockeyUser = await this.usersService.findById(dto.jockeyId);
     if (!jockeyUser.roles.includes(RoleName.JOCKEY)) {
       throw new BadRequestException('Target user does not have JOCKEY role');
     }
 
-    // 3. Prevent duplicate active invitation
+    // 4. Verify jockey profile exists and is AVAILABLE
+    const jockeyProfile = await this.jockeyModel.findOne({
+      userId: dto.jockeyId,
+    });
+    if (!jockeyProfile) {
+      throw new BadRequestException('Jockey profile not found');
+    }
+    if (jockeyProfile.status !== JockeyStatus.AVAILABLE) {
+      throw new BadRequestException(
+        `Jockey is ${jockeyProfile.status} and cannot accept race invitations`,
+      );
+    }
+
+    // 5. Prevent duplicate active invitation
     const existing = await this.invitationModel.findOne({
       registrationId: dto.registrationId,
       jockeyUserId: dto.jockeyId,
@@ -115,6 +156,57 @@ export class JockeyInvitationsService {
       throw new BadRequestException('Invitation has expired');
     }
 
+    // When accepting, run additional checks
+    if (status === InvitationStatus.ACCEPTED) {
+      // Check race is not locked (READY or beyond)
+      const race = await this.raceModel.findById(invitation.raceId);
+      if (race && LOCKED_RACE_STATUSES.includes(race.status)) {
+        throw new BadRequestException(
+          `Cannot accept invitation — race is already in ${race.status} status`,
+        );
+      }
+
+      // Check schedule conflict: jockey already accepted another race within 4-hour window
+      if (race) {
+        const acceptedInvitations = await this.invitationModel.find({
+          jockeyUserId,
+          status: InvitationStatus.ACCEPTED,
+          _id: { $ne: id },
+        });
+
+        if (acceptedInvitations.length > 0) {
+          const conflictRaceIds = acceptedInvitations.map((inv) => inv.raceId);
+          const windowStart = new Date(
+            race.startTime.getTime() - CONFLICT_WINDOW_MS,
+          );
+          const windowEnd = new Date(
+            race.startTime.getTime() + CONFLICT_WINDOW_MS,
+          );
+          const conflicting = await this.raceModel.findOne({
+            _id: { $in: conflictRaceIds },
+            startTime: { $gte: windowStart, $lte: windowEnd },
+            status: {
+              $nin: [RaceStatus.CANCELLED, RaceStatus.RESULT_PUBLISHED],
+            },
+          });
+
+          if (conflicting) {
+            throw new BadRequestException(
+              'You already have an accepted race within the same time window (4-hour conflict)',
+            );
+          }
+        }
+      }
+
+      // Bind jockey to registration
+      await this.registrationModel.findByIdAndUpdate(
+        invitation.registrationId,
+        {
+          jockeyUserId: invitation.jockeyUserId,
+        },
+      );
+    }
+
     invitation.status = status;
     invitation.respondedAt = new Date();
     await invitation.save();
@@ -126,16 +218,6 @@ export class JockeyInvitationsService {
       `Jockey ${jockeyUser.fullName} has ${status.toLowerCase()} your race invitation.`,
       NotificationType.RACE,
     );
-
-    // If accepted, bind jockey to registration
-    if (status === InvitationStatus.ACCEPTED) {
-      await this.registrationModel.findByIdAndUpdate(
-        invitation.registrationId,
-        {
-          jockeyUserId: invitation.jockeyUserId,
-        },
-      );
-    }
 
     return invitation;
   }
