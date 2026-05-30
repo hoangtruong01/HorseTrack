@@ -6,6 +6,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
+import { UsersRepository } from '../users/users.repository';
+import { RoleName } from '../users/schemas/user.schema';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
 import {
@@ -15,16 +17,41 @@ import {
   RACE_STATUS_FLOW,
 } from './schemas/race.schema';
 
+const LOCKED_STATUSES = [
+  RaceStatus.ONGOING,
+  RaceStatus.FINISHED,
+  RaceStatus.RESULT_PUBLISHED,
+];
+
 @Injectable()
 export class RacesService {
   constructor(
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
     private tournamentsService: TournamentsService,
+    private usersRepository: UsersRepository,
   ) {}
 
   async create(dto: CreateRaceDto): Promise<RaceDocument> {
-    // Validate tournament exists
-    await this.tournamentsService.findOne(dto.tournamentId);
+    const tournament = await this.tournamentsService.findOne(dto.tournamentId);
+
+    // Validate scheduledAt is within tournament dates
+    const scheduledAt = new Date(dto.scheduledAt);
+    if (
+      scheduledAt < tournament.startDate ||
+      scheduledAt > tournament.endDate
+    ) {
+      throw new BadRequestException(
+        'Race scheduledAt must be within tournament startDate and endDate',
+      );
+    }
+
+    // Validate horse count against slot limit
+    const slotLimit = dto.maxHorses ?? tournament.maxHorses ?? 20;
+    if (dto.horses.length > slotLimit) {
+      throw new BadRequestException(
+        `Race cannot have more than ${slotLimit} horses`,
+      );
+    }
 
     // Check duplicate horse ids
     const horseIds = dto.horses.map((h) => h.horseId);
@@ -41,6 +68,18 @@ export class RacesService {
         'A jockey cannot ride two horses in the same race',
       );
     }
+
+    // Validate all refereeIds have REFEREE role
+    await Promise.all(
+      dto.refereeIds.map(async (refereeId) => {
+        const user = await this.usersRepository.findById(refereeId);
+        if (!user || !user.roles.includes(RoleName.REFEREE)) {
+          throw new BadRequestException(
+            `User ${refereeId} does not have REFEREE role`,
+          );
+        }
+      }),
+    );
 
     return this.raceModel.create(dto as unknown as Partial<RaceDocument>);
   }
@@ -123,12 +162,9 @@ export class RacesService {
 
   async update(id: string, dto: UpdateRaceDto): Promise<RaceDocument> {
     const race = await this.findOne(id);
-    if (
-      race.status === RaceStatus.FINISHED ||
-      race.status === RaceStatus.RESULT_PUBLISHED
-    ) {
+    if (LOCKED_STATUSES.includes(race.status)) {
       throw new BadRequestException(
-        'Cannot update a finished or result published race',
+        'Cannot update a race that is ongoing, finished, or has published results',
       );
     }
     Object.assign(race, dto);

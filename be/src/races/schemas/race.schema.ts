@@ -76,6 +76,9 @@ export class Race {
   @Prop()
   trackCondition?: string;
 
+  @Prop({ default: 20 })
+  maxHorses!: number;
+
   @Prop()
   deletedAt?: Date;
 }

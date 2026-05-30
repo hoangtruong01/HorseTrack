@@ -52,13 +52,28 @@ export class RegistrationsService {
       throw new BadRequestException('Tournament is not open for registration');
     }
 
-    // 2. Horse must belong to owner
+    // 2. Validate registration window dates
+    const now = new Date();
+    if (
+      tournament.registrationStartDate &&
+      now < tournament.registrationStartDate
+    ) {
+      throw new BadRequestException('Registration window has not opened yet');
+    }
+    if (
+      tournament.registrationEndDate &&
+      now > tournament.registrationEndDate
+    ) {
+      throw new BadRequestException('Registration window has closed');
+    }
+
+    // 3. Horse must belong to owner
     const horse = await this.horsesService.findOne(dto.horseId);
     if (String(horse.ownerId) !== ownerId) {
       throw new ForbiddenException('You can only register your own horses');
     }
 
-    // 3. Horse must be HEALTHY and ACTIVE
+    // 4. Horse must be HEALTHY and ACTIVE
     if (horse.healthStatus !== HorseHealthStatus.HEALTHY) {
       throw new BadRequestException('Horse must be HEALTHY to register');
     }
@@ -66,7 +81,7 @@ export class RegistrationsService {
       throw new BadRequestException('Horse must be ACTIVE to register');
     }
 
-    // 4. No duplicate registration for the same race
+    // 5. No duplicate registration for the same race
     const existing = await this.registrationModel.findOne({
       raceId: dto.raceId,
       horseId: dto.horseId,
@@ -76,6 +91,35 @@ export class RegistrationsService {
       throw new ConflictException(
         'This horse is already registered for this race',
       );
+    }
+
+    // 6a. Per-race slot check: pending + approved for this race
+    const raceSlot = race.maxHorses ?? 20;
+    const perRaceCount = await this.registrationModel.countDocuments({
+      raceId: dto.raceId,
+      status: {
+        $in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED],
+      },
+    });
+    if (perRaceCount >= raceSlot) {
+      throw new BadRequestException(
+        `Race slot is full (max ${raceSlot} horses per race)`,
+      );
+    }
+
+    // 6b. Tournament-wide slot check: total entries across all races in this tournament
+    if (tournament.maxHorses) {
+      const totalCount = await this.registrationModel.countDocuments({
+        tournamentId,
+        status: {
+          $in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED],
+        },
+      });
+      if (totalCount >= tournament.maxHorses) {
+        throw new BadRequestException(
+          `Tournament is full (max ${tournament.maxHorses} total horse entries)`,
+        );
+      }
     }
 
     return this.registrationModel.create({
@@ -152,6 +196,24 @@ export class RegistrationsService {
         'Only PENDING registrations can be approved',
       );
     }
+
+    // Check per-race approved count (hard limit — tournament.maxHorses is total across races,
+    // not a per-race constraint, so only race.maxHorses applies here)
+    const raceIdStr = String(
+      (reg.raceId as unknown as { _id: string })?._id ?? reg.raceId,
+    );
+    const race = await this.racesService.findOne(raceIdStr);
+    const raceSlot = race.maxHorses ?? 20;
+    const approvedCount = await this.registrationModel.countDocuments({
+      raceId: reg.raceId,
+      status: RegistrationStatus.APPROVED,
+    });
+    if (approvedCount >= raceSlot) {
+      throw new BadRequestException(
+        `Race slot is full (max ${raceSlot} approved horses per race)`,
+      );
+    }
+
     reg.status = RegistrationStatus.APPROVED;
     reg.approvedAt = new Date();
     reg.approvedBy = adminId as unknown as Types.ObjectId;

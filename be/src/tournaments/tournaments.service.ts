@@ -13,12 +13,27 @@ import {
   TournamentStatus,
   TOURNAMENT_STATUS_FLOW,
 } from './schemas/tournament.schema';
+import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
+import {
+  Registration,
+  RegistrationDocument,
+  RegistrationStatus,
+} from '../registrations/schemas/registration.schema';
+
+const TERMINAL_RACE_STATUSES = [
+  RaceStatus.FINISHED,
+  RaceStatus.RESULT_PUBLISHED,
+  RaceStatus.CANCELLED,
+];
 
 @Injectable()
 export class TournamentsService {
   constructor(
     @InjectModel(Tournament.name)
     private tournamentModel: Model<TournamentDocument>,
+    @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
+    @InjectModel(Registration.name)
+    private registrationModel: Model<RegistrationDocument>,
   ) {}
 
   async create(
@@ -106,6 +121,26 @@ export class TournamentsService {
       throw new BadRequestException(
         `Cannot transition from ${tournament.status} to ${newStatus}`,
       );
+    }
+
+    // Cascade cancel races and registrations when tournament is cancelled
+    if (newStatus === TournamentStatus.CANCELLED) {
+      await Promise.all([
+        this.raceModel.updateMany(
+          {
+            tournamentId: id,
+            status: { $nin: TERMINAL_RACE_STATUSES },
+          },
+          { $set: { status: RaceStatus.CANCELLED } },
+        ),
+        this.registrationModel.updateMany(
+          {
+            tournamentId: id,
+            status: { $ne: RegistrationStatus.CANCELLED },
+          },
+          { $set: { status: RegistrationStatus.CANCELLED } },
+        ),
+      ]);
     }
 
     tournament.status = newStatus;
