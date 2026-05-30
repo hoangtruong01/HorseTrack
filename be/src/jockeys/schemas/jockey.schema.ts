@@ -4,9 +4,16 @@ import { Document, Types } from 'mongoose';
 export type JockeyDocument = Jockey & Document;
 
 export enum JockeyStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  SUSPENDED = 'SUSPENDED',
+  AVAILABLE = 'available',
+  UNAVAILABLE = 'unavailable',
+  SUSPENDED = 'suspended',
+}
+
+export enum JockeySkillLevel {
+  BEGINNER = 'beginner',
+  INTERMEDIATE = 'intermediate',
+  ADVANCED = 'advanced',
+  PROFESSIONAL = 'professional',
 }
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
@@ -20,30 +27,24 @@ export class Jockey {
   })
   userId!: Types.ObjectId;
 
-  @Prop({ required: true })
-  height!: number; // in cm
+  @Prop({ required: true, min: 100 })
+  heightCm!: number;
 
-  @Prop({ required: true })
-  weight!: number; // in kg
+  @Prop({ required: true, min: 30 })
+  weightKg!: number;
 
   @Prop({ default: 0 })
   experienceYears?: number;
 
-  @Prop({
-    required: true,
-    enum: JockeyStatus,
-    default: JockeyStatus.ACTIVE,
-  })
+  @Prop({ required: true, enum: JockeyStatus, default: JockeyStatus.AVAILABLE })
   status!: JockeyStatus;
 
-  @Prop({ default: 0 })
-  skillBonus?: number;
-
-  @Prop()
-  rank?: string;
+  @Prop({ enum: JockeySkillLevel })
+  skillLevel?: JockeySkillLevel;
 
   @Prop()
   bio?: string;
 }
 
 export const JockeySchema = SchemaFactory.createForClass(Jockey);
+JockeySchema.index({ status: 1 });

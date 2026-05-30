@@ -18,9 +18,10 @@ import {
   JockeyInvitation,
   JockeyInvitationDocument,
 } from './schemas/jockey-invitation.schema';
-
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
+
+const INVITATION_EXPIRY_DAYS = 3;
 
 @Injectable()
 export class JockeyInvitationsService {
@@ -38,12 +39,10 @@ export class JockeyInvitationsService {
     ownerId: string,
   ): Promise<JockeyInvitationDocument> {
     // 1. Verify registration exists and belongs to the owner
-    const registration = await this.registrationModel.findById(
-      dto.registrationId,
-    );
-    if (!registration) {
-      throw new NotFoundException('Registration not found');
-    }
+    const registration = await this.registrationModel
+      .findById(dto.registrationId)
+      .exec();
+    if (!registration) throw new NotFoundException('Registration not found');
     if (String(registration.ownerId) !== ownerId) {
       throw new ForbiddenException(
         'You can only invite a jockey for your own registered horse',
@@ -59,7 +58,7 @@ export class JockeyInvitationsService {
     // 3. Prevent duplicate active invitation
     const existing = await this.invitationModel.findOne({
       registrationId: dto.registrationId,
-      jockeyId: dto.jockeyId,
+      jockeyUserId: dto.jockeyId,
       status: InvitationStatus.PENDING,
     });
     if (existing) {
@@ -68,17 +67,24 @@ export class JockeyInvitationsService {
       );
     }
 
+    const expiredAt = new Date();
+    expiredAt.setDate(expiredAt.getDate() + INVITATION_EXPIRY_DAYS);
+
     const invitation = await this.invitationModel.create({
-      ...dto,
+      registrationId: dto.registrationId,
+      raceId: registration.raceId,
+      horseId: registration.horseId,
       ownerId,
+      jockeyUserId: dto.jockeyId,
+      message: dto.message,
+      expiredAt,
     });
 
-    // Notify the jockey!
     await this.notificationsService.send(
       dto.jockeyId,
       'New Race Invitation',
-      `You have been invited by an owner to ride in a race registration. Message: ${dto.message ?? ''}`,
-      NotificationType.INVITATION,
+      `You have been invited to ride in a race. Message: ${dto.message ?? ''}`,
+      NotificationType.RACE,
     );
 
     return invitation;
@@ -90,12 +96,9 @@ export class JockeyInvitationsService {
     jockeyUserId: string,
   ): Promise<JockeyInvitationDocument> {
     const invitation = await this.invitationModel.findById(id);
-    if (!invitation) {
-      throw new NotFoundException('Invitation not found');
-    }
+    if (!invitation) throw new NotFoundException('Invitation not found');
 
-    // Verify jockey owns the invitation
-    if (String(invitation.jockeyId) !== jockeyUserId) {
+    if (String(invitation.jockeyUserId) !== jockeyUserId) {
       throw new ForbiddenException(
         'You can only respond to invitations sent to you',
       );
@@ -105,24 +108,31 @@ export class JockeyInvitationsService {
       throw new BadRequestException('Invitation has already been responded to');
     }
 
+    // Check if expired
+    if (invitation.expiredAt && new Date() > invitation.expiredAt) {
+      invitation.status = InvitationStatus.EXPIRED;
+      await invitation.save();
+      throw new BadRequestException('Invitation has expired');
+    }
+
     invitation.status = status;
+    invitation.respondedAt = new Date();
     await invitation.save();
 
-    // Notify the owner of the response!
     const jockeyUser = await this.usersService.findById(jockeyUserId);
     await this.notificationsService.send(
       String(invitation.ownerId),
       `Invitation ${status.toLowerCase()}`,
       `Jockey ${jockeyUser.fullName} has ${status.toLowerCase()} your race invitation.`,
-      NotificationType.INVITATION,
+      NotificationType.RACE,
     );
 
-    // If accepted, bind jockey to registration officially!
+    // If accepted, bind jockey to registration
     if (status === InvitationStatus.ACCEPTED) {
       await this.registrationModel.findByIdAndUpdate(
         invitation.registrationId,
         {
-          jockeyId: invitation.jockeyId,
+          jockeyUserId: invitation.jockeyUserId,
         },
       );
     }
@@ -130,12 +140,29 @@ export class JockeyInvitationsService {
     return invitation;
   }
 
+  async cancel(id: string, ownerId: string): Promise<JockeyInvitationDocument> {
+    const invitation = await this.invitationModel.findById(id);
+    if (!invitation) throw new NotFoundException('Invitation not found');
+    if (String(invitation.ownerId) !== ownerId) {
+      throw new ForbiddenException('You can only cancel your own invitations');
+    }
+    if (invitation.status !== InvitationStatus.PENDING) {
+      throw new BadRequestException(
+        'Only pending invitations can be cancelled',
+      );
+    }
+    invitation.status = InvitationStatus.CANCELLED;
+    return invitation.save();
+  }
+
   async findMyReceived(jockeyUserId: string, page = 1, limit = 20) {
-    const filter = { jockeyId: jockeyUserId };
+    const filter = { jockeyUserId };
     const [data, total] = await Promise.all([
       this.invitationModel
         .find(filter)
         .populate('registrationId')
+        .populate('raceId', 'name startTime status')
+        .populate('horseId', 'name breed')
         .populate('ownerId', 'fullName email phone')
         .skip((page - 1) * limit)
         .limit(limit)
@@ -155,7 +182,9 @@ export class JockeyInvitationsService {
       this.invitationModel
         .find(filter)
         .populate('registrationId')
-        .populate('jockeyId', 'fullName email phone')
+        .populate('raceId', 'name startTime status')
+        .populate('horseId', 'name breed')
+        .populate('jockeyUserId', 'fullName email phone')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })

@@ -94,7 +94,7 @@ export class RegistrationsService {
     }
 
     // 6a. Per-race slot check: pending + approved for this race
-    const raceSlot = race.maxHorses ?? 20;
+    const raceSlot = race.maxParticipants ?? 20;
     const perRaceCount = await this.registrationModel.countDocuments({
       raceId: dto.raceId,
       status: {
@@ -126,7 +126,6 @@ export class RegistrationsService {
       ...dto,
       tournamentId,
       ownerId,
-      registeredAt: new Date(),
     });
   }
 
@@ -203,7 +202,7 @@ export class RegistrationsService {
       (reg.raceId as unknown as { _id: string })?._id ?? reg.raceId,
     );
     const race = await this.racesService.findOne(raceIdStr);
-    const raceSlot = race.maxHorses ?? 20;
+    const raceSlot = race.maxParticipants ?? 20;
     const approvedCount = await this.registrationModel.countDocuments({
       raceId: reg.raceId,
       status: RegistrationStatus.APPROVED,
@@ -226,7 +225,7 @@ export class RegistrationsService {
       String(owner._id ?? reg.ownerId),
       'Registration Approved',
       `Your registration for horse "${horse.name}" has been approved!`,
-      NotificationType.REGISTRATION,
+      NotificationType.RACE,
     );
 
     return saved;
@@ -240,7 +239,7 @@ export class RegistrationsService {
       );
     }
     reg.status = RegistrationStatus.REJECTED;
-    reg.rejectReason = reason;
+    reg.rejectedReason = reason;
     const saved = await reg.save();
 
     // Notify the owner!
@@ -250,7 +249,7 @@ export class RegistrationsService {
       String(owner._id ?? reg.ownerId),
       'Registration Rejected',
       `Your registration for horse "${horse.name}" has been rejected. Reason: ${reason ?? 'None specified'}`,
-      NotificationType.REGISTRATION,
+      NotificationType.RACE,
     );
 
     return saved;

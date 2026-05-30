@@ -6,39 +6,22 @@ export type RaceDocument = Race & Document;
 export enum RaceStatus {
   SCHEDULED = 'SCHEDULED',
   CHECKING = 'CHECKING',
-  ONGOING = 'ONGOING',
+  READY = 'READY',
+  LIVE = 'LIVE',
   FINISHED = 'FINISHED',
   RESULT_PUBLISHED = 'RESULT_PUBLISHED',
   CANCELLED = 'CANCELLED',
 }
 
 export const RACE_STATUS_FLOW: Record<RaceStatus, RaceStatus[]> = {
-  [RaceStatus.SCHEDULED]: [
-    RaceStatus.CHECKING,
-    RaceStatus.ONGOING,
-    RaceStatus.CANCELLED,
-  ],
-  [RaceStatus.CHECKING]: [RaceStatus.ONGOING, RaceStatus.CANCELLED],
-  [RaceStatus.ONGOING]: [RaceStatus.FINISHED, RaceStatus.CANCELLED],
+  [RaceStatus.SCHEDULED]: [RaceStatus.CHECKING, RaceStatus.CANCELLED],
+  [RaceStatus.CHECKING]: [RaceStatus.READY, RaceStatus.CANCELLED],
+  [RaceStatus.READY]: [RaceStatus.LIVE, RaceStatus.CANCELLED],
+  [RaceStatus.LIVE]: [RaceStatus.FINISHED, RaceStatus.CANCELLED],
   [RaceStatus.FINISHED]: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED],
   [RaceStatus.RESULT_PUBLISHED]: [],
   [RaceStatus.CANCELLED]: [],
 };
-
-@Schema({ _id: false })
-export class RaceHorseEntry {
-  @Prop({ type: Types.ObjectId, ref: 'Horse', required: true })
-  horseId!: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  jockeyId?: Types.ObjectId;
-
-  @Prop()
-  gateNumber?: number;
-}
-
-export const RaceHorseEntrySchema =
-  SchemaFactory.createForClass(RaceHorseEntry);
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class Race {
@@ -49,35 +32,49 @@ export class Race {
   name!: string;
 
   @Prop()
+  description?: string;
+
+  @Prop()
   raceNumber?: number;
 
   @Prop({ required: true })
-  scheduledAt!: Date;
+  startTime!: Date;
+
+  @Prop()
+  endTime?: Date;
 
   @Prop()
   location?: string;
 
-  @Prop()
-  distance?: number;
+  @Prop({ required: true, min: 100 })
+  distanceMeters!: number;
 
-  @Prop({
-    required: true,
-    enum: RaceStatus,
-    default: RaceStatus.SCHEDULED,
-  })
+  @Prop({ default: 1, min: 1 })
+  lapCount!: number;
+
+  @Prop({ default: 20, min: 2 })
+  maxParticipants!: number;
+
+  @Prop({ default: 0 })
+  totalPrize?: number;
+
+  @Prop({ default: 0 })
+  prizeFirst?: number;
+
+  @Prop({ default: 0 })
+  prizeSecond?: number;
+
+  @Prop({ default: 0 })
+  prizeThird?: number;
+
+  @Prop({ required: true, enum: RaceStatus, default: RaceStatus.SCHEDULED })
   status!: RaceStatus;
-
-  @Prop({ type: [RaceHorseEntrySchema], default: [] })
-  horses!: RaceHorseEntry[];
-
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
-  refereeIds!: Types.ObjectId[];
 
   @Prop()
   trackCondition?: string;
 
-  @Prop({ default: 20 })
-  maxHorses!: number;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  createdBy!: Types.ObjectId;
 
   @Prop()
   deletedAt?: Date;
@@ -86,5 +83,6 @@ export class Race {
 export const RaceSchema = SchemaFactory.createForClass(Race);
 
 RaceSchema.index({ tournamentId: 1 });
-RaceSchema.index({ scheduledAt: 1 });
+RaceSchema.index({ startTime: 1 });
 RaceSchema.index({ status: 1 });
+RaceSchema.index({ tournamentId: 1, startTime: 1 });

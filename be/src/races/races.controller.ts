@@ -34,30 +34,14 @@ export class RacesController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create race (Admin)' })
-  create(@Body() dto: CreateRaceDto) {
-    return this.racesService.create(dto);
+  create(@Body() dto: CreateRaceDto, @CurrentUser() user: JwtUser) {
+    return this.racesService.create(dto, user.id);
   }
 
   @Get()
   @ApiOperation({ summary: 'List all races (public)' })
   findAll(@Query() pagination: PaginationDto) {
     return this.racesService.findAll(pagination.page, pagination.limit);
-  }
-
-  @Get('my-assigned')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleName.REFEREE)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'List races assigned to me (Referee)' })
-  findMyAssigned(
-    @Query() pagination: PaginationDto,
-    @CurrentUser() user: JwtUser,
-  ) {
-    return this.racesService.findMyAssigned(
-      user.id,
-      pagination.page,
-      pagination.limit,
-    );
   }
 
   @Get('tournament/:tournamentId')

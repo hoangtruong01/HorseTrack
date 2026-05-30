@@ -21,6 +21,7 @@ import {
 } from '../registrations/schemas/registration.schema';
 
 const TERMINAL_RACE_STATUSES = [
+  RaceStatus.LIVE,
   RaceStatus.FINISHED,
   RaceStatus.RESULT_PUBLISHED,
   RaceStatus.CANCELLED,
