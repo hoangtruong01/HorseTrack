@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   ForbiddenException,
   NotFoundException,
@@ -8,6 +9,11 @@ import { Model } from 'mongoose';
 import { CreateHorseDto } from './dto/create-horse.dto';
 import { UpdateHorseDto } from './dto/update-horse.dto';
 import { Horse, HorseDocument, HorseStatus } from './schemas/horse.schema';
+import {
+  Registration,
+  RegistrationDocument,
+  RegistrationStatus,
+} from '../registrations/schemas/registration.schema';
 
 type HorseJson = Horse & { id: string };
 
@@ -15,6 +21,8 @@ type HorseJson = Horse & { id: string };
 export class HorsesService {
   constructor(
     @InjectModel(Horse.name) private horseModel: Model<HorseDocument>,
+    @InjectModel(Registration.name)
+    private registrationModel: Model<RegistrationDocument>,
   ) {}
 
   /** Owner creates a horse – ownerId comes from JWT */
@@ -86,6 +94,20 @@ export class HorsesService {
     if (!isAdmin && String(horse.ownerId) !== requestingUserId) {
       throw new ForbiddenException('You can only update your own horses');
     }
+
+    // Prevent changing healthStatus while horse has an active approved registration
+    if (dto.healthStatus !== undefined) {
+      const activeReg = await this.registrationModel.findOne({
+        horseId: id,
+        status: RegistrationStatus.APPROVED,
+      });
+      if (activeReg) {
+        throw new BadRequestException(
+          'Cannot change horse health status while it has an active approved registration',
+        );
+      }
+    }
+
     Object.assign(horse, dto);
     return (await horse.save()).toJSON() as HorseJson;
   }
@@ -100,6 +122,18 @@ export class HorsesService {
     if (!isAdmin && String(horse.ownerId) !== requestingUserId) {
       throw new ForbiddenException('You can only delete your own horses');
     }
+
+    // Prevent deleting horse with an active approved registration
+    const activeReg = await this.registrationModel.findOne({
+      horseId: id,
+      status: RegistrationStatus.APPROVED,
+    });
+    if (activeReg) {
+      throw new BadRequestException(
+        'Cannot delete a horse with an active approved registration',
+      );
+    }
+
     horse.status = HorseStatus.DELETED;
     horse.deletedAt = new Date();
     await horse.save();

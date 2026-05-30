@@ -79,4 +79,14 @@ export class CreateRaceDto {
   @IsOptional()
   @IsString()
   trackCondition?: string;
+
+  @ApiPropertyOptional({
+    example: 12,
+    description:
+      'Max horses allowed in this race (overrides tournament maxHorses)',
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(2)
+  maxHorses?: number;
 }
