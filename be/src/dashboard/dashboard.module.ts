@@ -12,7 +12,10 @@ import {
   RegistrationSchema,
 } from '../registrations/schemas/registration.schema';
 import { Prize, PrizeSchema } from '../prizes/schemas/prize.schema';
-import { Prediction, PredictionSchema } from '../predictions/schemas/prediction.schema';
+import {
+  Prediction,
+  PredictionSchema,
+} from '../predictions/schemas/prediction.schema';
 import {
   RaceResult,
   RaceResultSchema,

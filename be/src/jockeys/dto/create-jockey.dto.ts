@@ -6,13 +6,13 @@ export class CreateJockeyProfileDto {
   @IsNotEmpty()
   @IsInt()
   @Min(100)
-  height: number;
+  height!: number;
 
   @ApiProperty({ example: 52 })
   @IsNotEmpty()
   @IsInt()
   @Min(30)
-  weight: number;
+  weight!: number;
 
   @ApiPropertyOptional({ example: 5 })
   @IsOptional()

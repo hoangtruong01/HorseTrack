@@ -44,6 +44,13 @@ export class WalletTransaction {
     default: TransactionStatus.SUCCESS,
   })
   status!: TransactionStatus;
+
+  // Links a REWARD_CASHOUT transaction to its CashoutRequest for unambiguous lookup
+  @Prop({ type: Types.ObjectId, ref: 'CashoutRequest' })
+  cashoutRequestId?: Types.ObjectId;
 }
 
-export const WalletTransactionSchema = SchemaFactory.createForClass(WalletTransaction);
+export const WalletTransactionSchema =
+  SchemaFactory.createForClass(WalletTransaction);
+
+WalletTransactionSchema.index({ userId: 1, type: 1, status: 1 });

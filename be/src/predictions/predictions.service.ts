@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
 import {
   RaceResult,
@@ -12,19 +12,28 @@ import {
   RaceResultStatus,
 } from '../race-results/schemas/race-result.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
-import { Prediction, PredictionDocument, PredictionStatus } from './schemas/prediction.schema';
+import {
+  Prediction,
+  PredictionDocument,
+  PredictionStatus,
+} from './schemas/prediction.schema';
 import { CreatePredictionDto } from './dto/create-prediction.dto';
 
 @Injectable()
 export class PredictionsService {
   constructor(
-    @InjectModel(Prediction.name) private predictionModel: Model<PredictionDocument>,
+    @InjectModel(Prediction.name)
+    private predictionModel: Model<PredictionDocument>,
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
-    @InjectModel(RaceResult.name) private resultModel: Model<RaceResultDocument>,
+    @InjectModel(RaceResult.name)
+    private resultModel: Model<RaceResultDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async create(dto: CreatePredictionDto, userId: string): Promise<PredictionDocument> {
+  async create(
+    dto: CreatePredictionDto,
+    userId: string,
+  ): Promise<PredictionDocument> {
     // 1. Verify race exists and is open for predictions
     const race = await this.raceModel.findById(dto.raceId);
     if (!race) {
@@ -56,7 +65,9 @@ export class PredictionsService {
       horseId: dto.horseId,
     });
     if (existing) {
-      throw new BadRequestException('You already predicted this horse in this race');
+      throw new BadRequestException(
+        'You already predicted this horse in this race',
+      );
     }
 
     return this.predictionModel.create({
@@ -114,9 +125,13 @@ export class PredictionsService {
     });
 
     if (results.length === 0) {
-      // If no published results, we cannot resolve predictions yet
       return;
     }
+
+    // Build a map: horseId → rank for O(1) lookup
+    const rankByHorse = new Map<string, number>(
+      results.map((r) => [String(r.horseId), r.rank]),
+    );
 
     // 2. Fetch all pending predictions for the race
     const predictions = await this.predictionModel.find({
@@ -124,37 +139,44 @@ export class PredictionsService {
       status: PredictionStatus.PENDING,
     });
 
-    for (const prediction of predictions) {
-      // Find the result corresponding to the horse
-      const horseResult = results.find(
-        (r) => String(r.horseId) === String(prediction.horseId),
-      );
+    if (predictions.length === 0) return;
 
-      if (horseResult) {
-        // If the horse's rank matches the predicted position
-        const isCorrect = horseResult.rank === prediction.predictedPosition;
-        if (isCorrect) {
-          prediction.status = PredictionStatus.WON;
-          prediction.isCorrect = true;
-          // Award 100 points for a correct prediction
-          prediction.pointsEarned = 100;
-          
-          // Increment spectator points
-          await this.userModel.findByIdAndUpdate(prediction.userId, {
-            $inc: { points: 100 },
-          });
-        } else {
-          prediction.status = PredictionStatus.LOST;
-          prediction.isCorrect = false;
-          prediction.pointsEarned = 0;
-        }
-      } else {
-        // Horse did not finish/no result
-        prediction.status = PredictionStatus.LOST;
-        prediction.isCorrect = false;
-        prediction.pointsEarned = 0;
+    const POINTS_AWARD = 100;
+    const winnerIds: Types.ObjectId[] = [];
+
+    // 3. Build bulk update operations
+    const predictionOps = predictions.map((prediction) => {
+      const rank = rankByHorse.get(String(prediction.horseId));
+      const isCorrect =
+        rank !== undefined && rank === prediction.predictedPosition;
+
+      if (isCorrect) {
+        winnerIds.push(prediction.userId);
       }
-      await prediction.save();
-    }
+
+      return {
+        updateOne: {
+          filter: { _id: prediction._id },
+          update: {
+            $set: {
+              status: isCorrect ? PredictionStatus.WON : PredictionStatus.LOST,
+              isCorrect,
+              pointsEarned: isCorrect ? POINTS_AWARD : 0,
+            },
+          },
+        },
+      };
+    });
+
+    // 4. Execute bulk writes in parallel
+    await Promise.all([
+      this.predictionModel.bulkWrite(predictionOps),
+      winnerIds.length > 0
+        ? this.userModel.updateMany(
+            { _id: { $in: winnerIds } },
+            { $inc: { points: POINTS_AWARD } },
+          )
+        : Promise.resolve(),
+    ]);
   }
 }

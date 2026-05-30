@@ -6,15 +6,15 @@ import { RoleName, UserStatus } from '../schemas/user.schema';
 export class UserResponseDto {
   @Expose()
   @ApiProperty()
-  id: string;
+  id!: string;
 
   @Expose()
   @ApiProperty()
-  fullName: string;
+  fullName!: string;
 
   @Expose()
   @ApiProperty()
-  email: string;
+  email!: string;
 
   @Expose()
   @ApiPropertyOptional()
@@ -34,17 +34,17 @@ export class UserResponseDto {
 
   @Expose()
   @ApiProperty({ enum: UserStatus })
-  status: UserStatus;
+  status!: UserStatus;
 
   @Expose()
   @ApiProperty({ enum: RoleName, isArray: true })
-  roles: RoleName[];
+  roles!: RoleName[];
 
   @Expose()
   @ApiProperty()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Expose()
   @ApiProperty()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

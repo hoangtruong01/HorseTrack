@@ -32,7 +32,10 @@ export class WalletService {
     private cashoutModel: Model<CashoutRequestDocument>,
   ) {}
 
-  async deposit(userId: string, amount: number): Promise<WalletTransactionDocument> {
+  async deposit(
+    userId: string,
+    amount: number,
+  ): Promise<WalletTransactionDocument> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -82,7 +85,7 @@ export class WalletService {
       status: CashoutStatus.PENDING,
     });
 
-    // Create transaction in pending state
+    // Create transaction in pending state, linked to the cashout request
     await this.transactionModel.create({
       userId,
       type: TransactionType.REWARD_CASHOUT,
@@ -90,6 +93,7 @@ export class WalletService {
       points: dto.pointsToRedeem,
       description: `Cashout request of ${requestedAmount} by redeeming ${dto.pointsToRedeem} points.`,
       status: TransactionStatus.PENDING,
+      cashoutRequestId: request._id,
     });
 
     return request;
@@ -120,14 +124,9 @@ export class WalletService {
       request.paidBy = new Types.ObjectId(handlerId);
       request.paidAt = new Date();
 
-      // Complete the pending transaction
+      // Complete the pending transaction — look up by cashoutRequestId for precision
       await this.transactionModel.findOneAndUpdate(
-        {
-          userId: request.userId,
-          type: TransactionType.REWARD_CASHOUT,
-          points: request.pointsRedeemed,
-          status: TransactionStatus.PENDING,
-        },
+        { cashoutRequestId: request._id, status: TransactionStatus.PENDING },
         { status: TransactionStatus.SUCCESS },
       );
     } else if (status === CashoutStatus.REJECTED) {
@@ -138,14 +137,9 @@ export class WalletService {
         $inc: { points: request.pointsRedeemed },
       });
 
-      // Fail the pending transaction
+      // Fail the pending transaction — look up by cashoutRequestId for precision
       await this.transactionModel.findOneAndUpdate(
-        {
-          userId: request.userId,
-          type: TransactionType.REWARD_CASHOUT,
-          points: request.pointsRedeemed,
-          status: TransactionStatus.PENDING,
-        },
+        { cashoutRequestId: request._id, status: TransactionStatus.PENDING },
         { status: TransactionStatus.FAILED },
       );
     }

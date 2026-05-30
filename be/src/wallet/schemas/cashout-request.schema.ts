@@ -38,4 +38,5 @@ export class CashoutRequest {
   paidAt?: Date;
 }
 
-export const CashoutRequestSchema = SchemaFactory.createForClass(CashoutRequest);
+export const CashoutRequestSchema =
+  SchemaFactory.createForClass(CashoutRequest);

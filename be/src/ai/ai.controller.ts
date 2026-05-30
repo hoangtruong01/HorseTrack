@@ -19,6 +19,7 @@ import { CreateAiPackageDto } from './dto/create-package.dto';
 import { SubscribePackageDto } from './dto/subscribe-package.dto';
 import { CreateAiPredictionSuggestionDto } from './dto/create-prediction-suggestion.dto';
 import { CreateAiArrangementSuggestionDto } from './dto/create-arrangement-suggestion.dto';
+import { UpdateArrangementStatusDto } from './dto/update-arrangement-status.dto';
 
 @ApiTags('AI Features')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -42,13 +43,17 @@ export class AiController {
 
   @Post('subscribe')
   @Roles(RoleName.SPECTATOR)
-  @ApiOperation({ summary: 'Subscribe/Purchase an AI package (Spectator only)' })
+  @ApiOperation({
+    summary: 'Subscribe/Purchase an AI package (Spectator only)',
+  })
   subscribe(@Body() dto: SubscribePackageDto, @CurrentUser() user: JwtUser) {
     return this.aiService.subscribe(dto.packageId, user.id);
   }
 
   @Get('check-subscription')
-  @ApiOperation({ summary: 'Check if current spectator has active AI subscription' })
+  @ApiOperation({
+    summary: 'Check if current spectator has active AI subscription',
+  })
   checkSubscription(@CurrentUser() user: JwtUser) {
     return this.aiService.checkSubscriptionActive(user.id);
   }
@@ -56,7 +61,8 @@ export class AiController {
   @Post('predictions')
   @Roles(RoleName.ADMIN)
   @ApiOperation({
-    summary: 'Generate/Publish AI prediction suggestion for a race (Admin only)',
+    summary:
+      'Generate/Publish AI prediction suggestion for a race (Admin only)',
   })
   createPredictionSuggestion(@Body() dto: CreateAiPredictionSuggestionDto) {
     return this.aiService.createPredictionSuggestion(dto);
@@ -81,7 +87,8 @@ export class AiController {
   @Post('arrangements')
   @Roles(RoleName.ADMIN)
   @ApiOperation({
-    summary: 'Generate AI race arrangements suggestion for a tournament (Admin only)',
+    summary:
+      'Generate AI race arrangements suggestion for a tournament (Admin only)',
   })
   createArrangementSuggestion(@Body() dto: CreateAiArrangementSuggestionDto) {
     return this.aiService.createArrangementSuggestion(dto);
@@ -90,7 +97,8 @@ export class AiController {
   @Get('arrangements/tournament/:tournamentId')
   @Roles(RoleName.ADMIN)
   @ApiOperation({
-    summary: 'List AI race arrangements suggestions for a tournament (Admin only)',
+    summary:
+      'List AI race arrangements suggestions for a tournament (Admin only)',
   })
   getArrangementSuggestions(@Param('tournamentId') tournamentId: string) {
     return this.aiService.getArrangementSuggestions(tournamentId);
@@ -103,7 +111,7 @@ export class AiController {
   })
   updateArrangementStatus(
     @Param('id') id: string,
-    @Body() dto: { status: 'APPLIED' | 'REJECTED' },
+    @Body() dto: UpdateArrangementStatusDto,
   ) {
     return this.aiService.updateArrangementSuggestionStatus(id, dto.status);
   }

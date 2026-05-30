@@ -12,7 +12,7 @@ export class CreateTournamentDto {
   @ApiProperty({ example: 'Spring Cup 2026' })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({ example: 'Annual spring horse racing tournament' })
   @IsOptional()
@@ -27,12 +27,12 @@ export class CreateTournamentDto {
   @ApiProperty({ example: '2026-06-01' })
   @IsNotEmpty()
   @IsDateString()
-  startDate: string;
+  startDate!: string;
 
   @ApiProperty({ example: '2026-06-15' })
   @IsNotEmpty()
   @IsDateString()
-  endDate: string;
+  endDate!: string;
 
   @ApiPropertyOptional({ example: '2026-05-20' })
   @IsOptional()

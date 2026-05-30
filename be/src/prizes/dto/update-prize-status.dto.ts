@@ -6,5 +6,5 @@ export class UpdatePrizeStatusDto {
   @ApiProperty({ enum: PrizePaymentStatus })
   @IsNotEmpty()
   @IsEnum(PrizePaymentStatus)
-  status: PrizePaymentStatus;
+  status!: PrizePaymentStatus;
 }

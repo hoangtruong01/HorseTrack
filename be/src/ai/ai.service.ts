@@ -16,9 +16,18 @@ import {
 import {
   AIPredictionPackage,
   AIPredictionPackageDocument,
+  PackageStatus,
 } from './schemas/ai-prediction-package.schema';
-import { Payment, PaymentDocument, PaymentStatus } from './schemas/payment.schema';
-import { UserSubscription, UserSubscriptionDocument } from './schemas/user-subscription.schema';
+import {
+  Payment,
+  PaymentDocument,
+  PaymentStatus,
+} from './schemas/payment.schema';
+import {
+  UserSubscription,
+  UserSubscriptionDocument,
+  SubscriptionStatus,
+} from './schemas/user-subscription.schema';
 import {
   AIPredictionSuggestion,
   AIPredictionSuggestionDocument,
@@ -26,6 +35,7 @@ import {
 import {
   AIRaceArrangementSuggestion,
   AIRaceArrangementSuggestionDocument,
+  ArrangementStatus,
 } from './schemas/ai-race-arrangement-suggestion.schema';
 import { CreateAiPackageDto } from './dto/create-package.dto';
 import { CreateAiPredictionSuggestionDto } from './dto/create-prediction-suggestion.dto';
@@ -48,17 +58,22 @@ export class AiService {
     private arrangementModel: Model<AIRaceArrangementSuggestionDocument>,
   ) {}
 
-  async createPackage(dto: CreateAiPackageDto): Promise<AIPredictionPackageDocument> {
+  async createPackage(
+    dto: CreateAiPackageDto,
+  ): Promise<AIPredictionPackageDocument> {
     return this.packageModel.create(dto);
   }
 
   async findAllPackages(): Promise<AIPredictionPackageDocument[]> {
-    return this.packageModel.find({ status: 'ACTIVE' }).exec();
+    return this.packageModel.find({ status: PackageStatus.ACTIVE }).exec();
   }
 
-  async subscribe(packageId: string, userId: string): Promise<UserSubscriptionDocument> {
+  async subscribe(
+    packageId: string,
+    userId: string,
+  ): Promise<UserSubscriptionDocument> {
     const pkg = await this.packageModel.findById(packageId);
-    if (!pkg || pkg.status !== 'ACTIVE') {
+    if (!pkg || pkg.status !== PackageStatus.ACTIVE) {
       throw new NotFoundException('Prediction package not found or inactive');
     }
 
@@ -93,7 +108,7 @@ export class AiService {
       amount: pkg.price,
       paymentMethod: 'WALLET',
       status: PaymentStatus.SUCCESS,
-      transactionId: `TX_${Date.now()}`,
+      transactionId: `TX_${userId}_${new Types.ObjectId().toHexString()}`,
     });
 
     // 4. Create or extend Subscription
@@ -101,26 +116,25 @@ export class AiService {
     const existingSub = await this.subscriptionModel.findOne({
       userId,
       packageId,
-      status: 'ACTIVE',
+      status: SubscriptionStatus.ACTIVE,
       endDate: { $gt: now },
     });
 
-    let startDate = now;
-    let endDate = new Date(now.getTime() + pkg.durationDays * 24 * 60 * 60 * 1000);
+    const durationMs = pkg.durationDays * 24 * 60 * 60 * 1000;
 
     if (existingSub) {
-      startDate = existingSub.startDate;
-      endDate = new Date(existingSub.endDate.getTime() + pkg.durationDays * 24 * 60 * 60 * 1000);
-      existingSub.endDate = endDate;
+      existingSub.endDate = new Date(
+        existingSub.endDate.getTime() + durationMs,
+      );
       return existingSub.save();
     }
 
     return this.subscriptionModel.create({
       userId,
       packageId,
-      startDate,
-      endDate,
-      status: 'ACTIVE',
+      startDate: now,
+      endDate: new Date(now.getTime() + durationMs),
+      status: SubscriptionStatus.ACTIVE,
     });
   }
 
@@ -128,7 +142,7 @@ export class AiService {
     const now = new Date();
     const sub = await this.subscriptionModel.findOne({
       userId,
-      status: 'ACTIVE',
+      status: SubscriptionStatus.ACTIVE,
       endDate: { $gt: now },
     });
     return !!sub;
@@ -138,11 +152,10 @@ export class AiService {
     dto: CreateAiPredictionSuggestionDto,
   ): Promise<AIPredictionSuggestionDocument> {
     // Upsert so there is only one suggestion per race
-    return this.predictionModel.findOneAndUpdate(
-      { raceId: dto.raceId },
-      dto,
-      { upsert: true, new: true },
-    );
+    return this.predictionModel.findOneAndUpdate({ raceId: dto.raceId }, dto, {
+      upsert: true,
+      new: true,
+    });
   }
 
   async getPredictionSuggestionForRace(
@@ -158,7 +171,9 @@ export class AiService {
         .populate('suggestedPlaceIds', 'name breed')
         .exec();
       if (!suggestion) {
-        throw new NotFoundException('No AI suggestions generated for this race');
+        throw new NotFoundException(
+          'No AI suggestions generated for this race',
+        );
       }
       return suggestion;
     }
@@ -211,7 +226,7 @@ export class AiService {
 
   async updateArrangementSuggestionStatus(
     id: string,
-    status: 'APPLIED' | 'REJECTED',
+    status: ArrangementStatus.APPLIED | ArrangementStatus.REJECTED,
   ): Promise<AIRaceArrangementSuggestionDocument> {
     const suggestion = await this.arrangementModel.findById(id);
     if (!suggestion) {

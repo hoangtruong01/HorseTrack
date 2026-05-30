@@ -33,7 +33,10 @@ import { AiService } from './ai.service';
       { name: AIPredictionPackage.name, schema: AIPredictionPackageSchema },
       { name: Payment.name, schema: PaymentSchema },
       { name: UserSubscription.name, schema: UserSubscriptionSchema },
-      { name: AIPredictionSuggestion.name, schema: AIPredictionSuggestionSchema },
+      {
+        name: AIPredictionSuggestion.name,
+        schema: AIPredictionSuggestionSchema,
+      },
       {
         name: AIRaceArrangementSuggestion.name,
         schema: AIRaceArrangementSuggestionSchema,

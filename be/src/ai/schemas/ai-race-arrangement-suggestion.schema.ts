@@ -1,7 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-export type AIRaceArrangementSuggestionDocument = AIRaceArrangementSuggestion & Document;
+export enum ArrangementStatus {
+  PENDING = 'PENDING',
+  APPLIED = 'APPLIED',
+  REJECTED = 'REJECTED',
+}
+
+export type AIRaceArrangementSuggestionDocument = AIRaceArrangementSuggestion &
+  Document;
 
 @Schema({ _id: false })
 export class ProposedRaceInfo {
@@ -20,7 +27,12 @@ export class ProposedRaceInfo {
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class AIRaceArrangementSuggestion {
-  @Prop({ type: Types.ObjectId, ref: 'Tournament', required: true, index: true })
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Tournament',
+    required: true,
+    index: true,
+  })
   tournamentId!: Types.ObjectId;
 
   @Prop({ type: [ProposedRaceInfo], required: true })
@@ -29,8 +41,12 @@ export class AIRaceArrangementSuggestion {
   @Prop()
   reasoning?: string; // why the AI generated this pairing/referee assignment
 
-  @Prop({ required: true, default: 'PENDING' })
-  status!: 'PENDING' | 'APPLIED' | 'REJECTED';
+  @Prop({
+    required: true,
+    enum: ArrangementStatus,
+    default: ArrangementStatus.PENDING,
+  })
+  status!: ArrangementStatus;
 }
 
 export const AIRaceArrangementSuggestionSchema = SchemaFactory.createForClass(

@@ -12,12 +12,12 @@ export class CreateRaceResultDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsMongoId()
-  raceId: string;
+  raceId!: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsMongoId()
-  horseId: string;
+  horseId!: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -28,7 +28,7 @@ export class CreateRaceResultDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
-  rank: number;
+  rank!: number;
 
   @ApiPropertyOptional({ example: 72.5, description: 'Finish time in seconds' })
   @IsOptional()

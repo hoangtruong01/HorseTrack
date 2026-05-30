@@ -9,6 +9,8 @@ import { CreateHorseDto } from './dto/create-horse.dto';
 import { UpdateHorseDto } from './dto/update-horse.dto';
 import { Horse, HorseDocument, HorseStatus } from './schemas/horse.schema';
 
+type HorseJson = Horse & { id: string };
+
 @Injectable()
 export class HorsesService {
   constructor(
@@ -20,45 +22,7 @@ export class HorsesService {
     return this.horseModel.create({ ...dto, ownerId });
   }
 
-  /** Admin: list all non-deleted horses with pagination */
-  async findAll(page = 1, limit = 20) {
-    const filter = { status: { $ne: HorseStatus.DELETED } };
-    const [data, total] = await Promise.all([
-      this.horseModel
-        .find(filter)
-        .populate('ownerId', 'fullName email')
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .sort({ createdAt: -1 })
-        .exec(),
-      this.horseModel.countDocuments(filter),
-    ]);
-    return {
-      data,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
-    };
-  }
-
-  /** Owner: list own horses */
-  async findMyHorses(ownerId: string, page = 1, limit = 20) {
-    const filter = { ownerId, status: { $ne: HorseStatus.DELETED } };
-    const [data, total] = await Promise.all([
-      this.horseModel
-        .find(filter)
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .sort({ createdAt: -1 })
-        .exec(),
-      this.horseModel.countDocuments(filter),
-    ]);
-    return {
-      data,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
-    };
-  }
-
-  /** Get single horse by id */
-  async findOne(id: string): Promise<HorseDocument> {
+  private async findDocument(id: string): Promise<HorseDocument> {
     const horse = await this.horseModel
       .findById(id)
       .populate('ownerId', 'fullName email')
@@ -69,19 +33,61 @@ export class HorsesService {
     return horse;
   }
 
+  /** Admin: list all non-deleted horses with pagination */
+  async findAll(page = 1, limit = 20) {
+    const filter = { status: { $ne: HorseStatus.DELETED } };
+    const [docs, total] = await Promise.all([
+      this.horseModel
+        .find(filter)
+        .populate('ownerId', 'fullName email')
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.horseModel.countDocuments(filter),
+    ]);
+    return {
+      data: docs.map((d) => d.toJSON()),
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  /** Owner: list own horses */
+  async findMyHorses(ownerId: string, page = 1, limit = 20) {
+    const filter = { ownerId, status: { $ne: HorseStatus.DELETED } };
+    const [docs, total] = await Promise.all([
+      this.horseModel
+        .find(filter)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.horseModel.countDocuments(filter),
+    ]);
+    return {
+      data: docs.map((d) => d.toJSON()),
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  /** Get single horse by id */
+  async findOne(id: string): Promise<HorseJson> {
+    return (await this.findDocument(id)).toJSON() as HorseJson;
+  }
+
   /** Owner updates own horse, admin can update any */
   async update(
     id: string,
     dto: UpdateHorseDto,
     requestingUserId: string,
     isAdmin: boolean,
-  ): Promise<HorseDocument> {
-    const horse = await this.findOne(id);
+  ): Promise<HorseJson> {
+    const horse = await this.findDocument(id);
     if (!isAdmin && String(horse.ownerId) !== requestingUserId) {
       throw new ForbiddenException('You can only update your own horses');
     }
     Object.assign(horse, dto);
-    return horse.save();
+    return (await horse.save()).toJSON() as HorseJson;
   }
 
   /** Soft delete – owner or admin */
@@ -90,7 +96,7 @@ export class HorsesService {
     requestingUserId: string,
     isAdmin: boolean,
   ): Promise<void> {
-    const horse = await this.findOne(id);
+    const horse = await this.findDocument(id);
     if (!isAdmin && String(horse.ownerId) !== requestingUserId) {
       throw new ForbiddenException('You can only delete your own horses');
     }

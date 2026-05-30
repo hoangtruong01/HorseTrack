@@ -23,7 +23,10 @@ export enum HorseStatus {
   DELETED = 'DELETED',
 }
 
-@Schema({ timestamps: true, toObject: { virtuals: true } })
+@Schema({
+  timestamps: true,
+  toObject: { virtuals: true },
+})
 export class Horse {
   @Prop({ required: true })
   name!: string;

@@ -46,7 +46,8 @@ export class WalletController {
   @Patch('cashout/:id/process')
   @Roles(RoleName.ADMIN, RoleName.COUNTER_STAFF)
   @ApiOperation({
-    summary: 'Process, Approve, Reject or Pay out cashout requests (Admin / Counter Staff)',
+    summary:
+      'Process, Approve, Reject or Pay out cashout requests (Admin / Counter Staff)',
   })
   processCashout(
     @Param('id') id: string,
@@ -57,7 +58,9 @@ export class WalletController {
   }
 
   @Get('history')
-  @ApiOperation({ summary: 'Get current user transaction history and balances' })
+  @ApiOperation({
+    summary: 'Get current user transaction history and balances',
+  })
   findMyHistory(
     @Query() pagination: PaginationDto,
     @CurrentUser() user: JwtUser,
@@ -89,6 +92,9 @@ export class WalletController {
     summary: 'List all cashout requests (Admin / Counter Staff only)',
   })
   findAllCashouts(@Query() pagination: PaginationDto) {
-    return this.walletService.findAllCashouts(pagination.page, pagination.limit);
+    return this.walletService.findAllCashouts(
+      pagination.page,
+      pagination.limit,
+    );
   }
 }
