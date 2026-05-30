@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import {
   Horse,
@@ -17,7 +17,11 @@ import {
   RegistrationDocument,
 } from '../registrations/schemas/registration.schema';
 import { Prize, PrizeDocument } from '../prizes/schemas/prize.schema';
-import { Prediction, PredictionDocument } from '../predictions/schemas/prediction.schema';
+import {
+  Prediction,
+  PredictionDocument,
+  PredictionStatus,
+} from '../predictions/schemas/prediction.schema';
 import {
   RaceResult,
   RaceResultDocument,
@@ -67,7 +71,8 @@ export class DashboardService {
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
     @InjectModel(Prize.name) private prizeModel: Model<PrizeDocument>,
-    @InjectModel(Prediction.name) private predictionModel: Model<PredictionDocument>,
+    @InjectModel(Prediction.name)
+    private predictionModel: Model<PredictionDocument>,
     @InjectModel(RaceResult.name)
     private resultModel: Model<RaceResultDocument>,
     @InjectModel(JockeyInvitation.name)
@@ -143,14 +148,15 @@ export class DashboardService {
   }
 
   async getOwnerStats(ownerId: string) {
+    const ownerObjectId = new Types.ObjectId(ownerId);
     const [myHorsesCount, prizesResult, registrationsCount] = await Promise.all(
       [
         this.horseModel.countDocuments({
-          ownerId,
+          ownerId: ownerObjectId,
           status: { $ne: HorseStatus.DELETED },
         }),
         this.prizeModel.aggregate([
-          { $match: { ownerId } },
+          { $match: { ownerId: ownerObjectId } },
           {
             $group: {
               _id: '$status',
@@ -158,7 +164,7 @@ export class DashboardService {
             },
           },
         ]),
-        this.registrationModel.countDocuments({ ownerId }),
+        this.registrationModel.countDocuments({ ownerId: ownerObjectId }),
       ],
     );
 
@@ -182,9 +188,11 @@ export class DashboardService {
   }
 
   async getJockeyStats(jockeyUserId: string) {
+    const jockeyObjectId = new Types.ObjectId(jockeyUserId);
+
     // 1. Find jockey results
     const results = await this.resultModel.find({
-      jockeyId: jockeyUserId,
+      jockeyId: jockeyObjectId,
       status: RaceResultStatus.PUBLISHED,
     });
 
@@ -194,7 +202,7 @@ export class DashboardService {
 
     // 2. Count active invitations
     const pendingInvites = await this.invitationModel.countDocuments({
-      jockeyId: jockeyUserId,
+      jockeyId: jockeyObjectId,
       status: InvitationStatus.PENDING,
     });
 
@@ -215,12 +223,13 @@ export class DashboardService {
   }
 
   async getRefereeStats(refereeId: string) {
+    const refereeObjectId = new Types.ObjectId(refereeId);
     const [assignedRacesCount, reportsSubmittedCount] = await Promise.all([
       this.raceModel.countDocuments({
-        refereeIds: refereeId,
+        refereeIds: refereeObjectId,
         deletedAt: { $exists: false },
       }),
-      this.reportModel.countDocuments({ refereeId }),
+      this.reportModel.countDocuments({ refereeId: refereeObjectId }),
     ]);
 
     return {
@@ -230,9 +239,10 @@ export class DashboardService {
   }
 
   async getSpectatorStats(userId: string) {
+    const userObjectId = new Types.ObjectId(userId);
     const [predictionsResult, activePredictionsCount] = await Promise.all([
       this.predictionModel.aggregate([
-        { $match: { userId } },
+        { $match: { userId: userObjectId } },
         {
           $group: {
             _id: '$status',
@@ -242,12 +252,13 @@ export class DashboardService {
         },
       ]),
       this.predictionModel.countDocuments({
-        userId,
-        status: 'PENDING',
-      } as unknown as Record<string, unknown>),
+        userId: userObjectId,
+        status: PredictionStatus.PENDING,
+      }),
     ]);
 
-    const typedPredictions = predictionsResult as SpectatorPredictionAggregateResult[];
+    const typedPredictions =
+      predictionsResult as SpectatorPredictionAggregateResult[];
 
     const stats = typedPredictions.reduce(
       (acc, item) => {

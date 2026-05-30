@@ -14,7 +14,7 @@ export class CreateHorseDto {
   @ApiProperty({ example: 'Thunder Bolt' })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({ example: 'Thoroughbred' })
   @IsOptional()

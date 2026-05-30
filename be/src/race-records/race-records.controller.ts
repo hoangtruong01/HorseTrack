@@ -17,20 +17,25 @@ export class RaceRecordsController {
   @Post()
   @Roles(RoleName.ADMIN, RoleName.REFEREE)
   @ApiOperation({
-    summary: 'Record or update horse detailed performance metrics (Admin / Referee only)',
+    summary:
+      'Record or update horse detailed performance metrics (Admin / Referee only)',
   })
   create(@Body() dto: CreateRaceRecordDto) {
     return this.recordsService.create(dto);
   }
 
   @Get('race/:raceId')
-  @ApiOperation({ summary: 'Get detailed performance records for a specific race' })
+  @ApiOperation({
+    summary: 'Get detailed performance records for a specific race',
+  })
   findByRace(@Param('raceId') raceId: string) {
     return this.recordsService.findByRace(raceId);
   }
 
   @Get('horse/:horseId')
-  @ApiOperation({ summary: 'Get historical performance records for a specific horse' })
+  @ApiOperation({
+    summary: 'Get historical performance records for a specific horse',
+  })
   findByHorse(@Param('horseId') horseId: string) {
     return this.recordsService.findByHorse(horseId);
   }

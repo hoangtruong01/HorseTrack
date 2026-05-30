@@ -6,5 +6,5 @@ export class CreateCashoutDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(100)
-  pointsToRedeem: number;
+  pointsToRedeem!: number;
 }

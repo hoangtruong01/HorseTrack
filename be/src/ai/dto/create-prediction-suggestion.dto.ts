@@ -1,22 +1,31 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsArray,
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class CreateAiPredictionSuggestionDto {
   @ApiProperty({ example: '665abc123def456789012345' })
   @IsNotEmpty()
   @IsMongoId()
-  raceId: string;
+  raceId!: string;
 
   @ApiProperty({ example: '665abc123def456789012346' })
   @IsNotEmpty()
   @IsMongoId()
-  suggestedWinnerId: string;
+  suggestedWinnerId!: string;
 
   @ApiProperty({ example: ['665abc123def456789012347'] })
   @IsNotEmpty()
   @IsArray()
   @IsMongoId({ each: true })
-  suggestedPlaceIds: string[];
+  suggestedPlaceIds!: string[];
 
   @ApiPropertyOptional({ example: 'This horse has higher speed in mud track.' })
   @IsOptional()

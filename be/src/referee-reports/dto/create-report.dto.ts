@@ -12,12 +12,12 @@ export class CreateRefereeReportDto {
   @ApiProperty({ example: '665abc123def456789012345' })
   @IsNotEmpty()
   @IsMongoId()
-  raceId: string;
+  raceId!: string;
 
   @ApiProperty({ example: '665abc123def456789012346' })
   @IsNotEmpty()
   @IsMongoId()
-  horseId: string;
+  horseId!: string;
 
   @ApiPropertyOptional({ enum: ReportType, default: ReportType.POST_RACE })
   @IsOptional()
@@ -27,7 +27,7 @@ export class CreateRefereeReportDto {
   @ApiProperty({ example: 'Horse did not follow designated path' })
   @IsNotEmpty()
   @IsString()
-  description: string;
+  description!: string;
 
   @ApiPropertyOptional({ example: 'Lane crossing' })
   @IsOptional()

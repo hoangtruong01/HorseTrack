@@ -16,7 +16,7 @@ import {
 export class HorseEntryDto {
   @ApiProperty()
   @IsMongoId()
-  horseId: string;
+  horseId!: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -34,12 +34,12 @@ export class CreateRaceDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsMongoId()
-  tournamentId: string;
+  tournamentId!: string;
 
   @ApiProperty({ example: 'Race 1 - Quarter Final' })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()
@@ -49,7 +49,7 @@ export class CreateRaceDto {
   @ApiProperty({ example: '2026-06-05T14:00:00Z' })
   @IsNotEmpty()
   @IsDateString()
-  scheduledAt: string;
+  scheduledAt!: string;
 
   @ApiPropertyOptional({ example: 'Hanoi Racecourse' })
   @IsOptional()
@@ -67,13 +67,13 @@ export class CreateRaceDto {
   @ArrayMinSize(2)
   @ValidateNested({ each: true })
   @Type(() => HorseEntryDto)
-  horses: HorseEntryDto[];
+  horses!: HorseEntryDto[];
 
   @ApiProperty({ type: [String], minItems: 1 })
   @IsArray()
   @ArrayMinSize(1)
   @IsMongoId({ each: true })
-  refereeIds: string[];
+  refereeIds!: string[];
 
   @ApiPropertyOptional({ example: 'Dry' })
   @IsOptional()

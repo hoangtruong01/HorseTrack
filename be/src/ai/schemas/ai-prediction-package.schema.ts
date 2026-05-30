@@ -3,6 +3,11 @@ import { Document } from 'mongoose';
 
 export type AIPredictionPackageDocument = AIPredictionPackage & Document;
 
+export enum PackageStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+}
+
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class AIPredictionPackage {
   @Prop({ required: true })
@@ -12,16 +17,17 @@ export class AIPredictionPackage {
   description?: string;
 
   @Prop({ required: true, default: 0 })
-  price!: number; // cash/money price
+  price!: number;
 
   @Prop({ required: true, default: 30 })
-  durationDays!: number; // subscription duration in days
+  durationDays!: number;
 
   @Prop({ default: 80 })
-  accuracyRate!: number; // represented accuracy percentage
+  accuracyRate!: number;
 
-  @Prop({ required: true, default: 'ACTIVE' })
-  status!: 'ACTIVE' | 'INACTIVE';
+  @Prop({ required: true, enum: PackageStatus, default: PackageStatus.ACTIVE })
+  status!: PackageStatus;
 }
 
-export const AIPredictionPackageSchema = SchemaFactory.createForClass(AIPredictionPackage);
+export const AIPredictionPackageSchema =
+  SchemaFactory.createForClass(AIPredictionPackage);

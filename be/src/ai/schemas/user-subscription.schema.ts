@@ -3,6 +3,12 @@ import { Document, Types } from 'mongoose';
 
 export type UserSubscriptionDocument = UserSubscription & Document;
 
+export enum SubscriptionStatus {
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
+}
+
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class UserSubscription {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
@@ -17,8 +23,16 @@ export class UserSubscription {
   @Prop({ required: true })
   endDate!: Date;
 
-  @Prop({ required: true, default: 'ACTIVE' })
-  status!: 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
+  @Prop({
+    required: true,
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.ACTIVE,
+  })
+  status!: SubscriptionStatus;
 }
 
-export const UserSubscriptionSchema = SchemaFactory.createForClass(UserSubscription);
+export const UserSubscriptionSchema =
+  SchemaFactory.createForClass(UserSubscription);
+
+// Compound index for checkSubscriptionActive query
+UserSubscriptionSchema.index({ userId: 1, status: 1, endDate: 1 });

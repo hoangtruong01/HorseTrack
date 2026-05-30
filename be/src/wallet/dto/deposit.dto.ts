@@ -6,5 +6,5 @@ export class DepositDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(1000)
-  amount: number;
+  amount!: number;
 }

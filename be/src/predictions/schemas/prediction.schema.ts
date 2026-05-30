@@ -39,3 +39,6 @@ export class Prediction {
 }
 
 export const PredictionSchema = SchemaFactory.createForClass(Prediction);
+
+// Unique constraint: one prediction per user per horse per race
+PredictionSchema.index({ raceId: 1, userId: 1, horseId: 1 }, { unique: true });

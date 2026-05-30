@@ -9,5 +9,5 @@ export class ProcessCashoutDto {
   })
   @IsNotEmpty()
   @IsEnum(CashoutStatus)
-  status: CashoutStatus;
+  status!: CashoutStatus;
 }
