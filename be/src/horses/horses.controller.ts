@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,10 +10,16 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -23,29 +30,94 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
+import { HorseGender, HorseHealthStatus } from './schemas/horse.schema';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { HorsesService } from './horses.service';
 import { CreateHorseDto } from './dto/create-horse.dto';
 import { UpdateHorseDto } from './dto/update-horse.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
+
+const imageUploadOptions = {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  storage: memoryStorage(),
+  fileFilter: (
+    _req: unknown,
+    file: MulterFile,
+    cb: (err: Error | null, accept: boolean) => void,
+  ) => {
+    if (!file.mimetype.match(/\/(jpg|jpeg|png|webp|gif)$/)) {
+      cb(new BadRequestException('Only image files are allowed'), false);
+      return;
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 },
+};
+
+const CREATE_HORSE_SCHEMA = {
+  type: 'object',
+  required: ['name'],
+  properties: {
+    name: { type: 'string', example: 'Thunder Bolt' },
+    breed: { type: 'string', example: 'Thoroughbred' },
+    age: { type: 'number', example: 5 },
+    gender: { type: 'string', enum: Object.values(HorseGender) },
+    color: { type: 'string', example: 'Bay' },
+    weightKg: { type: 'number', example: 500 },
+    heightCm: { type: 'number', example: 160 },
+    dateOfBirth: { type: 'string', example: '2020-03-15' },
+    healthStatus: { type: 'string', enum: Object.values(HorseHealthStatus) },
+    description: { type: 'string', example: 'Fast and strong horse' },
+    image: {
+      type: 'string',
+      format: 'binary',
+      description: 'Horse image (jpg/jpeg/png/webp/gif, max 5MB)',
+    },
+  },
+};
+
+const UPDATE_HORSE_SCHEMA = {
+  type: 'object',
+  properties: { ...CREATE_HORSE_SCHEMA.properties },
+};
 
 @ApiTags('Horses')
 @ApiBearerAuth()
 @Controller('horses')
 @UseGuards(JwtAuthGuard)
 export class HorsesController {
-  constructor(private readonly horsesService: HorsesService) {}
+  constructor(
+    private readonly horsesService: HorsesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
-  /** Horse Owner creates a new horse */
   @Post()
   @UseGuards(RolesGuard)
   @Roles(RoleName.OWNER, RoleName.ADMIN)
+  @UseInterceptors(FileInterceptor('image', imageUploadOptions))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ schema: CREATE_HORSE_SCHEMA })
   @ApiOperation({ summary: 'Create a new horse (Owner / Admin)' })
   @ApiResponse({ status: 201 })
-  create(@Body() dto: CreateHorseDto, @CurrentUser() user: JwtUser) {
-    return this.horsesService.create(dto, user.id);
+  async create(
+    @Body() dto: CreateHorseDto,
+    @UploadedFile() file: MulterFile | undefined,
+    @CurrentUser() user: JwtUser,
+  ) {
+    const imageUrl = file
+      ? (await this.cloudinaryService.uploadFile(file.buffer)).secure_url
+      : undefined;
+    return this.horsesService.create(dto, user.id, imageUrl);
   }
 
-  /** Admin: list all horses */
   @Get()
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
@@ -54,7 +126,6 @@ export class HorsesController {
     return this.horsesService.findAll(pagination.page, pagination.limit);
   }
 
-  /** Owner: list own horses */
   @Get('my-horses')
   @UseGuards(RolesGuard)
   @Roles(RoleName.OWNER, RoleName.ADMIN)
@@ -70,28 +141,32 @@ export class HorsesController {
     );
   }
 
-  /** Get horse by id – any authenticated user */
   @Get(':id')
   @ApiOperation({ summary: 'Get horse detail' })
   findOne(@Param('id') id: string) {
     return this.horsesService.findOne(id);
   }
 
-  /** Update horse – owner of the horse or admin */
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(RoleName.OWNER, RoleName.ADMIN)
-  @ApiOperation({ summary: 'Update horse (Owner of the horse / Admin)' })
-  update(
+  @UseInterceptors(FileInterceptor('image', imageUploadOptions))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ schema: UPDATE_HORSE_SCHEMA })
+  @ApiOperation({ summary: 'Update horse (Owner / Admin)' })
+  async update(
     @Param('id') id: string,
     @Body() dto: UpdateHorseDto,
+    @UploadedFile() file: MulterFile | undefined,
     @CurrentUser() user: JwtUser,
   ) {
     const isAdmin = user.roles.includes(RoleName.ADMIN);
-    return this.horsesService.update(id, dto, user.id, isAdmin);
+    const imageUrl = file
+      ? (await this.cloudinaryService.uploadFile(file.buffer)).secure_url
+      : undefined;
+    return this.horsesService.update(id, dto, user.id, isAdmin, imageUrl);
   }
 
-  /** Soft-delete horse – owner of the horse or admin */
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(RoleName.OWNER, RoleName.ADMIN)

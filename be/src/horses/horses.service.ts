@@ -26,9 +26,14 @@ export class HorsesService {
   ) {}
 
   /** Owner creates a horse – ownerId comes from JWT */
-  async create(dto: CreateHorseDto, ownerId: string): Promise<HorseDocument> {
+  async create(
+    dto: CreateHorseDto,
+    ownerId: string,
+    imageUrl?: string,
+  ): Promise<HorseDocument> {
     return this.horseModel.create({
       ...dto,
+      ...(imageUrl && { image: imageUrl }),
       ownerId: new Types.ObjectId(ownerId),
     });
   }
@@ -104,6 +109,7 @@ export class HorsesService {
     dto: UpdateHorseDto,
     requestingUserId: string,
     isAdmin: boolean,
+    imageUrl?: string,
   ): Promise<HorseJson> {
     const horse = await this.findDocument(id);
     const ownerId = String(
@@ -127,6 +133,7 @@ export class HorsesService {
     }
 
     Object.assign(horse, dto);
+    if (imageUrl) horse.image = imageUrl;
     return (await horse.save()).toJSON() as HorseJson;
   }
 

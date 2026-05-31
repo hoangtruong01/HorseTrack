@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsEnum,
@@ -23,6 +24,7 @@ export class CreateHorseDto {
 
   @ApiPropertyOptional({ example: 5 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   age?: number;
@@ -39,12 +41,14 @@ export class CreateHorseDto {
 
   @ApiPropertyOptional({ example: 500 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   weightKg?: number;
 
   @ApiPropertyOptional({ example: 160 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   heightCm?: number;
@@ -61,11 +65,6 @@ export class CreateHorseDto {
   @IsOptional()
   @IsEnum(HorseHealthStatus)
   healthStatus?: HorseHealthStatus;
-
-  @ApiPropertyOptional({ example: 'https://example.com/horse.jpg' })
-  @IsOptional()
-  @IsString()
-  image?: string;
 
   @ApiPropertyOptional({ example: 'Fast and strong horse' })
   @IsOptional()
