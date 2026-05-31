@@ -12,7 +12,7 @@ export enum LedgerSourceType {
 
 @Schema({ timestamps: true })
 export class RewardPointLedger {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId!: Types.ObjectId;
 
   @Prop({ required: true, enum: LedgerSourceType })
