@@ -72,7 +72,9 @@ export class PredictionsService {
       userId,
     });
     if (existing) {
-      throw new ConflictException('You already have a prediction for this race');
+      throw new ConflictException(
+        'You already have a prediction for this race',
+      );
     }
 
     return this.predictionModel.create({
