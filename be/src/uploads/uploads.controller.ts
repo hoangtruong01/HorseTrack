@@ -1,10 +1,10 @@
 import {
+  BadRequestException,
   Controller,
   Post,
   UploadedFile,
-  UseInterceptors,
-  BadRequestException,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -14,47 +14,34 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 interface MulterFile {
   fieldname: string;
   originalname: string;
-  encoding: string;
   mimetype: string;
   size: number;
-  destination: string;
-  filename: string;
-  path: string;
   buffer: Buffer;
 }
 
 @ApiTags('Uploads')
 @Controller('uploads')
 export class UploadsController {
+  constructor(private readonly cloudinaryService: CloudinaryService) {}
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @UseInterceptors(
     FileInterceptor('file', {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      storage: diskStorage({
-        destination: './public/uploads',
-        filename: (
-          req,
-          file: MulterFile,
-          cb: (error: Error | null, filename: string) => void,
-        ) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (
-        req,
+        _req,
         file: MulterFile,
-        cb: (error: Error | null, acceptFile: boolean) => void,
+        cb: (err: Error | null, accept: boolean) => void,
       ) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|webp|gif)$/)) {
           return cb(
@@ -64,9 +51,7 @@ export class UploadsController {
         }
         cb(null, true);
       },
-      limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
-      },
+      limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
   @ApiConsumes('multipart/form-data')
@@ -75,24 +60,18 @@ export class UploadsController {
     schema: {
       type: 'object',
       properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
+        file: { type: 'string', format: 'binary' },
       },
     },
   })
-  uploadFile(@UploadedFile() file: MulterFile) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
-    const host = process.env.HOST_URL ?? 'http://localhost:3000';
-    const filePath = `/uploads/${file.filename}`;
+  async uploadFile(@UploadedFile() file: MulterFile) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const result = await this.cloudinaryService.uploadFile(file.buffer);
     return {
       success: true,
       message: 'File uploaded successfully',
-      url: `${host}${filePath}`,
-      path: filePath,
+      url: result.secure_url,
+      publicId: result.public_id,
     };
   }
 }

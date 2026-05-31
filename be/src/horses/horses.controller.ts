@@ -15,6 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -23,40 +24,30 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Roles } from '../common/decorators/roles.decorator';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
+import { HorseGender, HorseHealthStatus } from './schemas/horse.schema';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { HorsesService } from './horses.service';
 import { CreateHorseDto } from './dto/create-horse.dto';
 import { UpdateHorseDto } from './dto/update-horse.dto';
-import { HorsesService } from './horses.service';
-import { HorseGender, HorseHealthStatus } from './schemas/horse.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 interface MulterFile {
   fieldname: string;
   originalname: string;
   mimetype: string;
   size: number;
-  filename: string;
+  buffer: Buffer;
 }
 
 const imageUploadOptions = {
-  storage: diskStorage({
-    destination: './public/uploads',
-    filename: (
-      _req: unknown,
-      file: MulterFile,
-      cb: (err: Error | null, filename: string) => void,
-    ) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-    },
-  }),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  storage: memoryStorage(),
   fileFilter: (
     _req: unknown,
     file: MulterFile,
@@ -88,7 +79,7 @@ const CREATE_HORSE_SCHEMA = {
     image: {
       type: 'string',
       format: 'binary',
-      description: 'Horse image file (jpg/jpeg/png/webp/gif, max 5MB)',
+      description: 'Horse image (jpg/jpeg/png/webp/gif, max 5MB)',
     },
   },
 };
@@ -103,7 +94,10 @@ const UPDATE_HORSE_SCHEMA = {
 @Controller('horses')
 @UseGuards(JwtAuthGuard)
 export class HorsesController {
-  constructor(private readonly horsesService: HorsesService) {}
+  constructor(
+    private readonly horsesService: HorsesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post()
   @UseGuards(RolesGuard)
@@ -113,13 +107,13 @@ export class HorsesController {
   @ApiBody({ schema: CREATE_HORSE_SCHEMA })
   @ApiOperation({ summary: 'Create a new horse (Owner / Admin)' })
   @ApiResponse({ status: 201 })
-  create(
+  async create(
     @Body() dto: CreateHorseDto,
     @UploadedFile() file: MulterFile | undefined,
     @CurrentUser() user: JwtUser,
   ) {
     const imageUrl = file
-      ? `${process.env.HOST_URL ?? 'http://localhost:3000'}/uploads/${file.filename}`
+      ? (await this.cloudinaryService.uploadFile(file.buffer)).secure_url
       : undefined;
     return this.horsesService.create(dto, user.id, imageUrl);
   }
@@ -160,7 +154,7 @@ export class HorsesController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ schema: UPDATE_HORSE_SCHEMA })
   @ApiOperation({ summary: 'Update horse (Owner / Admin)' })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() dto: UpdateHorseDto,
     @UploadedFile() file: MulterFile | undefined,
@@ -168,7 +162,7 @@ export class HorsesController {
   ) {
     const isAdmin = user.roles.includes(RoleName.ADMIN);
     const imageUrl = file
-      ? `${process.env.HOST_URL ?? 'http://localhost:3000'}/uploads/${file.filename}`
+      ? (await this.cloudinaryService.uploadFile(file.buffer)).secure_url
       : undefined;
     return this.horsesService.update(id, dto, user.id, isAdmin, imageUrl);
   }
