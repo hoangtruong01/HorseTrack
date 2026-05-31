@@ -230,20 +230,20 @@ export class RacesService {
 
       if (!check) {
         throw new BadRequestException(
-          `Race cannot be marked READY: Pre-race check for horse registration ${reg._id} not found`,
+          `Race cannot be marked READY: Pre-race check for horse registration ${String(reg._id)} not found`,
         );
       }
 
       if (check.status !== RaceCheckStatus.PASSED) {
         throw new BadRequestException(
-          `Race cannot be marked READY: Horse check status is ${check.status} (not PASSED) for registration ${reg._id}`,
+          `Race cannot be marked READY: Horse check status is ${check.status} (not PASSED) for registration ${String(reg._id)}`,
         );
       }
 
       // If there's an assigned Jockey, verify that they are checked in / roll-called
       if (reg.jockeyUserId && !check.jockeyCheckedIn) {
         throw new BadRequestException(
-          `Race cannot be marked READY: Jockey for registration ${reg._id} has not been checked in / roll-called`,
+          `Race cannot be marked READY: Jockey for registration ${String(reg._id)} has not been checked in / roll-called`,
         );
       }
     }

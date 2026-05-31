@@ -80,10 +80,15 @@ export class RaceResultsService {
     }
   }
 
-  async simulateRaceResults(raceId: string, refereeId: string): Promise<RaceResultDocument[]> {
+  async simulateRaceResults(
+    raceId: string,
+    refereeId: string,
+  ): Promise<RaceResultDocument[]> {
     const race = await this.racesService.findOne(raceId);
     if (race.status !== RaceStatus.LIVE) {
-      throw new BadRequestException('Chỉ có thể giả lập kết quả cho cuộc đua có trạng thái LIVE');
+      throw new BadRequestException(
+        'Chỉ có thể giả lập kết quả cho cuộc đua có trạng thái LIVE',
+      );
     }
     await this.validateRefereeAssigned(raceId, refereeId);
 
@@ -91,39 +96,73 @@ export class RaceResultsService {
     await this.resultModel.deleteMany({ raceId });
 
     // Lấy các đăng ký đã duyệt
-    const registrations = await this.registrationModel.find({
-      raceId,
-      status: RegistrationStatus.APPROVED,
-    }).populate('horseId').exec();
+    const registrations = await this.registrationModel
+      .find({
+        raceId,
+        status: RegistrationStatus.APPROVED,
+      })
+      .populate('horseId')
+      .exec();
 
     if (registrations.length === 0) {
-      throw new BadRequestException('Không có ngựa nào đăng ký hợp lệ trong cuộc đua này');
+      throw new BadRequestException(
+        'Không có ngựa nào đăng ký hợp lệ trong cuộc đua này',
+      );
     }
 
-    const simulatedPerformances: any[] = [];
+    interface SimulatedPerformance {
+      registrationId: Types.ObjectId;
+      horseId: Types.ObjectId;
+      ownerId: Types.ObjectId;
+      jockeyUserId?: Types.ObjectId;
+      finishTimeMs?: number;
+      incident: RaceIncident;
+      outcome: RaceResultOutcome;
+      rank?: number;
+    }
+
+    const simulatedPerformances: SimulatedPerformance[] = [];
     const distance = race.distanceMeters;
 
     // Thời gian chạy cơ sở (BaseTimeMs) = (distance / 15) * 1000
     const baseTimeMs = Math.round((distance / 15) * 1000);
 
     for (const reg of registrations) {
-      const horse = reg.horseId as any;
-      
+      const horse = reg.horseId as unknown as {
+        _id: Types.ObjectId;
+        baseSpeed?: number;
+        staminaScore?: number;
+        weightKg?: number;
+      };
+
       // 1. Điểm thưởng sức mạnh ngựa (HorseMetricsBonus)
       const horseSpeed = horse.baseSpeed || 60;
       const horseStamina = horse.staminaScore || 70;
-      const horseBonusMs = (horseSpeed * 100) + (horseStamina * 50);
+      const horseBonusMs = horseSpeed * 100 + horseStamina * 50;
 
       // 2. Điểm thưởng kỹ năng Jockey (JockeySkillBonus)
       let jockeyBonusMs = 0;
       if (reg.jockeyUserId) {
-        const jockeyProfile = await this.jockeyModel.findOne({ userId: reg.jockeyUserId });
+        const jockeyProfile = (await this.jockeyModel.findOne({
+          userId: reg.jockeyUserId,
+        })) as unknown as {
+          skillLevel?: string;
+          experienceYears?: number;
+        } | null;
         if (jockeyProfile) {
-          switch (jockeyProfile.skillLevel) {
-            case 'professional': jockeyBonusMs += 3000; break;
-            case 'advanced': jockeyBonusMs += 2000; break;
-            case 'intermediate': jockeyBonusMs += 1000; break;
-            case 'beginner': jockeyBonusMs += 200; break;
+          switch (jockeyProfile.skillLevel as string) {
+            case 'professional':
+              jockeyBonusMs += 3000;
+              break;
+            case 'advanced':
+              jockeyBonusMs += 2000;
+              break;
+            case 'intermediate':
+              jockeyBonusMs += 1000;
+              break;
+            case 'beginner':
+              jockeyBonusMs += 200;
+              break;
           }
           const exp = jockeyProfile.experienceYears || 0;
           jockeyBonusMs += Math.min(exp * 100, 1000);
@@ -143,7 +182,7 @@ export class RaceResultsService {
 
       if (track === 'Muddy') {
         const weight = horse.weightKg || 450;
-        conditionBonusMs -= (weight < 450) ? 4000 : 1000; // Ngựa nhẹ bị phạt nặng hơn
+        conditionBonusMs -= weight < 450 ? 4000 : 1000; // Ngựa nhẹ bị phạt nặng hơn
       }
 
       // 4. Phong độ ngẫu nhiên trong ngày (DailyFormBonus: từ -2000ms đến +2000ms)
@@ -155,27 +194,37 @@ export class RaceResultsService {
       let outcome = RaceResultOutcome.FINISHED;
 
       const rand = Math.random() * 100;
-      if (rand < 1) { // 1% Disqualified
+      if (rand < 1) {
+        // 1% Disqualified
         incident = RaceIncident.DISQUALIFIED;
         outcome = RaceResultOutcome.DISQUALIFIED;
-      } else if (rand < 6) { // 5% Tired finish
+      } else if (rand < 6) {
+        // 5% Tired finish
         incident = RaceIncident.TIRED_FINISH;
         incidentDelayMs = 6000;
-      } else if (rand < 13) { // 7% Lose rhythm
+      } else if (rand < 13) {
+        // 7% Lose rhythm
         incident = RaceIncident.LOSE_RHYTHM;
         incidentDelayMs = 4500;
-      } else if (rand < 20) { // 7% Bad start
+      } else if (rand < 20) {
+        // 7% Bad start
         incident = RaceIncident.BAD_START;
         incidentDelayMs = 3000;
       }
 
       // 6. Tính toán trực tiếp thời gian hoàn thành (Finish Time Ms)
       let finishTimeMs: number | undefined = undefined;
-      
+
       if (outcome === RaceResultOutcome.FINISHED) {
         // Công thức tính trực tiếp thời gian
-        const calculatedTime = baseTimeMs - horseBonusMs - jockeyBonusMs - conditionBonusMs - dailyFormBonusMs + incidentDelayMs;
-        
+        const calculatedTime =
+          baseTimeMs -
+          horseBonusMs -
+          jockeyBonusMs -
+          conditionBonusMs -
+          dailyFormBonusMs +
+          incidentDelayMs;
+
         // Giới hạn thời gian chạy tối thiểu để tránh bất hợp lý (Tốc độ tối đa không quá 22 m/s)
         const minAllowedTime = Math.round((distance / 22) * 1000);
         finishTimeMs = Math.max(minAllowedTime, calculatedTime);
@@ -193,11 +242,17 @@ export class RaceResultsService {
     }
 
     // 7. Sắp xếp thứ hạng tự động
-    const finishedHorses = simulatedPerformances.filter(h => h.outcome === RaceResultOutcome.FINISHED);
-    const disqualifiedHorses = simulatedPerformances.filter(h => h.outcome !== RaceResultOutcome.FINISHED);
+    const finishedHorses = simulatedPerformances.filter(
+      (h) => h.outcome === RaceResultOutcome.FINISHED,
+    );
+    const disqualifiedHorses = simulatedPerformances.filter(
+      (h) => h.outcome !== RaceResultOutcome.FINISHED,
+    );
 
     // Sắp xếp tăng dần theo thời gian chạy (ngắn nhất lên đầu)
-    finishedHorses.sort((a, b) => (a.finishTimeMs || 0) - (b.finishTimeMs || 0));
+    finishedHorses.sort(
+      (a, b) => (a.finishTimeMs || 0) - (b.finishTimeMs || 0),
+    );
 
     finishedHorses.forEach((horse, idx) => {
       horse.rank = idx + 1;
@@ -206,7 +261,7 @@ export class RaceResultsService {
     const finalResults = [...finishedHorses, ...disqualifiedHorses];
 
     // 8. Lưu kết quả vào DB dưới dạng DRAFT
-    const createdResults = await Promise.all(
+    await Promise.all(
       finalResults.map((res) => {
         const points = res.rank ? (POINTS_MAP[res.rank] ?? DEFAULT_POINTS) : 0;
         let note = 'Tự động giả lập kết quả.';
@@ -231,7 +286,7 @@ export class RaceResultsService {
           recordedBy: new Types.ObjectId(refereeId),
           note,
         });
-      })
+      }),
     );
 
     // Cập nhật trạng thái cuộc đua sang FINISHED
@@ -514,7 +569,9 @@ export class RaceResultsService {
         } else if (vio.penalty === ViolationPenalty.TIME_PENALTY) {
           const penalty = PENALTY_TIME_RULES[vio.severity] ?? 0;
           penaltyTimeMs += penalty;
-          notes.push(`+${penalty / 1000}s phạt do lỗi: ${vio.type} (${vio.severity})`);
+          notes.push(
+            `+${penalty / 1000}s phạt do lỗi: ${vio.type} (${vio.severity})`,
+          );
         }
       }
 
@@ -523,7 +580,10 @@ export class RaceResultsService {
         result.rank = undefined;
         result.finishTimeMs = undefined;
         result.points = 0;
-      } else if (penaltyTimeMs > 0 && result.outcome === RaceResultOutcome.FINISHED) {
+      } else if (
+        penaltyTimeMs > 0 &&
+        result.outcome === RaceResultOutcome.FINISHED
+      ) {
         // If it was simulated or recorded with a time, apply the penalty
         if (result.finishTimeMs) {
           result.finishTimeMs += penaltyTimeMs;

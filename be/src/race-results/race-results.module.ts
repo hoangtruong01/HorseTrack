@@ -15,7 +15,10 @@ import { PredictionsModule } from '../predictions/predictions.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { Jockey, JockeySchema } from '../jockeys/schemas/jockey.schema';
-import { RaceViolation, RaceViolationSchema } from '../race-violations/schemas/race-violation.schema';
+import {
+  RaceViolation,
+  RaceViolationSchema,
+} from '../race-violations/schemas/race-violation.schema';
 import { RaceResultsController } from './race-results.controller';
 import { RaceResultsService } from './race-results.service';
 
