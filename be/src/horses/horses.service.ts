@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateHorseDto } from './dto/create-horse.dto';
 import { UpdateHorseDto } from './dto/update-horse.dto';
 import { Horse, HorseDocument, HorseStatus } from './schemas/horse.schema';
@@ -27,7 +27,10 @@ export class HorsesService {
 
   /** Owner creates a horse – ownerId comes from JWT */
   async create(dto: CreateHorseDto, ownerId: string): Promise<HorseDocument> {
-    return this.horseModel.create({ ...dto, ownerId });
+    return this.horseModel.create({
+      ...dto,
+      ownerId: new Types.ObjectId(ownerId),
+    });
   }
 
   private async findDocument(id: string): Promise<HorseDocument> {

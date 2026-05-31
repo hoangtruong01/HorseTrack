@@ -4,8 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
+import { PredictionsService } from '../predictions/predictions.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
 import {
@@ -47,6 +48,7 @@ export class RacesService {
     @InjectModel(RefereeAssignment.name)
     private refereeAssignmentModel: Model<RefereeAssignmentDocument>,
     private tournamentsService: TournamentsService,
+    private predictionsService: PredictionsService,
   ) {}
 
   async create(dto: CreateRaceDto, createdBy: string): Promise<RaceDocument> {
@@ -60,9 +62,29 @@ export class RacesService {
       );
     }
 
+    // Validate prize does not exceed tournament budget
+    if (dto.prize !== undefined) {
+      const [agg] = await this.raceModel.aggregate<{ total: number }>([
+        {
+          $match: {
+            tournamentId: new Types.ObjectId(dto.tournamentId),
+            deletedAt: { $exists: false },
+          },
+        },
+        { $group: { _id: null, total: { $sum: '$prize' } } },
+      ]);
+      const usedPrize = agg?.total ?? 0;
+      if (usedPrize + dto.prize > (tournament.prizePool ?? 0)) {
+        throw new BadRequestException(
+          `Prize exceeds tournament budget. Used: ${usedPrize}, Available: ${(tournament.prizePool ?? 0) - usedPrize}`,
+        );
+      }
+    }
+
     return this.raceModel.create({
       ...dto,
-      createdBy,
+      tournamentId: new Types.ObjectId(dto.tournamentId),
+      createdBy: new Types.ObjectId(createdBy),
     } as unknown as Partial<RaceDocument>);
   }
 
@@ -122,6 +144,30 @@ export class RacesService {
         'Cannot update a race that is live, finished, or has published results',
       );
     }
+
+    // Validate prize does not exceed tournament budget
+    if (dto.prize !== undefined) {
+      const tournament = await this.tournamentsService.findOne(
+        race.tournamentId.toString(),
+      );
+      const [agg] = await this.raceModel.aggregate<{ total: number }>([
+        {
+          $match: {
+            tournamentId: race.tournamentId,
+            deletedAt: { $exists: false },
+            _id: { $ne: race._id },
+          },
+        },
+        { $group: { _id: null, total: { $sum: '$prize' } } },
+      ]);
+      const usedPrize = agg?.total ?? 0;
+      if (usedPrize + dto.prize > (tournament.prizePool ?? 0)) {
+        throw new BadRequestException(
+          `Prize exceeds tournament budget. Used by other races: ${usedPrize}, Available: ${(tournament.prizePool ?? 0) - usedPrize}`,
+        );
+      }
+    }
+
     Object.assign(race, dto);
     return race.save();
   }
@@ -139,6 +185,10 @@ export class RacesService {
     // Guard: CHECKING → READY requires all checks passed + at least 1 referee accepted
     if (status === RaceStatus.READY) {
       await this.validateReadyConditions(id);
+    }
+
+    if (status === RaceStatus.CANCELLED) {
+      await this.predictionsService.cancelPredictionsForRace(id);
     }
 
     race.status = status;

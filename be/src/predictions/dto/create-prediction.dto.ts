@@ -1,23 +1,14 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class CreatePredictionDto {
+  @ApiProperty({ description: 'Race ID to place prediction for' })
   @IsNotEmpty()
   @IsMongoId()
   raceId!: string;
 
-  @ApiPropertyOptional({ description: 'Predicted 1st place horse' })
-  @IsOptional()
+  @ApiProperty({ description: 'Predicted winner horse ID' })
+  @IsNotEmpty()
   @IsMongoId()
-  predictedFirstHorseId?: string;
-
-  @ApiPropertyOptional({ description: 'Predicted 2nd place horse' })
-  @IsOptional()
-  @IsMongoId()
-  predictedSecondHorseId?: string;
-
-  @ApiPropertyOptional({ description: 'Predicted 3rd place horse' })
-  @IsOptional()
-  @IsMongoId()
-  predictedThirdHorseId?: string;
+  predictedHorseId!: string;
 }

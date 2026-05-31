@@ -4,7 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { RacesService } from '../races/races.service';
 import { RaceStatus } from '../races/schemas/race.schema';
 import {
@@ -55,7 +55,18 @@ export class RaceViolationsService {
       );
     }
 
-    return this.violationModel.create({ ...dto, reportedBy });
+    return this.violationModel.create({
+      ...dto,
+      raceId: new Types.ObjectId(dto.raceId),
+      raceRegistrationId: dto.raceRegistrationId
+        ? new Types.ObjectId(dto.raceRegistrationId)
+        : undefined,
+      horseId: dto.horseId ? new Types.ObjectId(dto.horseId) : undefined,
+      jockeyUserId: dto.jockeyUserId
+        ? new Types.ObjectId(dto.jockeyUserId)
+        : undefined,
+      reportedBy: new Types.ObjectId(reportedBy),
+    });
   }
 
   async findByRace(raceId: string) {

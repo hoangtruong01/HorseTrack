@@ -72,23 +72,5 @@ export class CreateRaceDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  totalPrize?: number;
-
-  @ApiPropertyOptional({ example: 5000000 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  prizeFirst?: number;
-
-  @ApiPropertyOptional({ example: 3000000 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  prizeSecond?: number;
-
-  @ApiPropertyOptional({ example: 2000000 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  prizeThird?: number;
+  prize?: number;
 }

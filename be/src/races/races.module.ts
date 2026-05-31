@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TournamentsModule } from '../tournaments/tournaments.module';
+import { PredictionsModule } from '../predictions/predictions.module';
 import { Race, RaceSchema } from './schemas/race.schema';
 import {
   Registration,
@@ -26,6 +27,7 @@ import { RacesService } from './races.service';
       { name: RefereeAssignment.name, schema: RefereeAssignmentSchema },
     ]),
     TournamentsModule,
+    PredictionsModule,
   ],
   controllers: [RacesController],
   providers: [RacesService],

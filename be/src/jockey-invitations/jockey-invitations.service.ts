@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   Registration,
   RegistrationDocument,
@@ -112,11 +112,11 @@ export class JockeyInvitationsService {
     expiredAt.setDate(expiredAt.getDate() + INVITATION_EXPIRY_DAYS);
 
     const invitation = await this.invitationModel.create({
-      registrationId: dto.registrationId,
+      registrationId: new Types.ObjectId(dto.registrationId),
       raceId: registration.raceId,
       horseId: registration.horseId,
-      ownerId,
-      jockeyUserId: dto.jockeyId,
+      ownerId: new Types.ObjectId(ownerId),
+      jockeyUserId: new Types.ObjectId(dto.jockeyId),
       message: dto.message,
       expiredAt,
     });

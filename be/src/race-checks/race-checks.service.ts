@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { RacesService } from '../races/races.service';
 import { RaceStatus } from '../races/schemas/race.schema';
 import {
@@ -105,10 +105,10 @@ export class RaceChecksService {
     }
 
     return this.checkModel.create({
-      raceId: dto.raceId,
-      raceRegistrationId: dto.raceRegistrationId,
-      horseId: dto.horseId,
-      checkedBy,
+      raceId: new Types.ObjectId(dto.raceId),
+      raceRegistrationId: new Types.ObjectId(dto.raceRegistrationId),
+      horseId: new Types.ObjectId(dto.horseId),
+      checkedBy: new Types.ObjectId(checkedBy),
     });
   }
 

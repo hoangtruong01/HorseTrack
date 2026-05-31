@@ -56,16 +56,7 @@ export class Race {
   maxParticipants!: number;
 
   @Prop({ default: 0 })
-  totalPrize?: number;
-
-  @Prop({ default: 0 })
-  prizeFirst?: number;
-
-  @Prop({ default: 0 })
-  prizeSecond?: number;
-
-  @Prop({ default: 0 })
-  prizeThird?: number;
+  prize?: number;
 
   @Prop({ required: true, enum: RaceStatus, default: RaceStatus.SCHEDULED })
   status!: RaceStatus;
