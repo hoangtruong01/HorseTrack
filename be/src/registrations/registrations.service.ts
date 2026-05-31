@@ -69,8 +69,9 @@ export class RegistrationsService {
       throw new BadRequestException('Registration window has closed');
     }
 
-    // 3. Horse must belong to owner
-    const horse = await this.horsesService.findOne(dto.horseId);
+    // 3. Horse must belong to owner — use raw (unpopulated) document so that
+    //    String(horse.ownerId) reliably returns the hex ObjectId string.
+    const horse = await this.horsesService.findRaw(dto.horseId);
     if (String(horse.ownerId) !== ownerId) {
       throw new ForbiddenException('You can only register your own horses');
     }
@@ -140,10 +141,10 @@ export class RegistrationsService {
       this.registrationModel
         .find(filter)
         .populate('tournamentId', 'name status')
-        .populate('raceId', 'name scheduledAt status')
+        .populate('raceId', 'name startTime status')
         .populate('horseId', 'name breed')
         .populate('ownerId', 'fullName email')
-        .populate('jockeyId', 'fullName email')
+        .populate('jockeyUserId', 'fullName email')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -162,9 +163,9 @@ export class RegistrationsService {
       this.registrationModel
         .find(filter)
         .populate('tournamentId', 'name status')
-        .populate('raceId', 'name scheduledAt status')
+        .populate('raceId', 'name startTime status')
         .populate('horseId', 'name breed')
-        .populate('jockeyId', 'fullName email')
+        .populate('jockeyUserId', 'fullName email')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -181,10 +182,10 @@ export class RegistrationsService {
     const reg = await this.registrationModel
       .findById(id)
       .populate('tournamentId', 'name status')
-      .populate('raceId', 'name scheduledAt status')
+      .populate('raceId', 'name startTime status')
       .populate('horseId', 'name breed')
       .populate('ownerId', 'fullName email')
-      .populate('jockeyId', 'fullName email')
+      .populate('jockeyUserId', 'fullName email')
       .exec();
     if (!reg) throw new NotFoundException('Registration not found');
     return reg;

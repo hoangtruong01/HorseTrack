@@ -83,6 +83,18 @@ export class RaceResultsService {
     // Only accepted referee can record
     await this.validateRefereeAssigned(dto.raceId, recordedBy);
 
+    // Cross-field validation: rank ↔ outcome
+    if (dto.outcome === RaceResultOutcome.FINISHED && !dto.rank) {
+      throw new BadRequestException(
+        'rank is required when outcome is FINISHED',
+      );
+    }
+    if (dto.outcome !== RaceResultOutcome.FINISHED && dto.rank) {
+      throw new BadRequestException(
+        'rank must not be set for non-FINISHED outcomes',
+      );
+    }
+
     // Validate registration exists and is APPROVED
     const registration = await this.registrationModel.findById(
       dto.raceRegistrationId,

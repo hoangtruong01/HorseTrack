@@ -37,6 +37,14 @@ import {
   RefereeAssignmentDocument,
   RefereeAssignmentStatus,
 } from '../referee-assignments/schemas/referee-assignment.schema';
+import {
+  RaceCheck,
+  RaceCheckDocument,
+} from '../race-checks/schemas/race-check.schema';
+import {
+  RaceViolation,
+  RaceViolationDocument,
+} from '../race-violations/schemas/race-violation.schema';
 
 interface PrizeAggregateResult {
   _id: string;
@@ -80,6 +88,10 @@ export class DashboardService {
     private invitationModel: Model<JockeyInvitationDocument>,
     @InjectModel(RefereeAssignment.name)
     private assignmentModel: Model<RefereeAssignmentDocument>,
+    @InjectModel(RaceCheck.name)
+    private checkModel: Model<RaceCheckDocument>,
+    @InjectModel(RaceViolation.name)
+    private violationModel: Model<RaceViolationDocument>,
   ) {}
 
   async getAdminStats() {
@@ -220,16 +232,23 @@ export class DashboardService {
 
   async getRefereeStats(refereeId: string) {
     const refereeObjectId = new Types.ObjectId(refereeId);
-    const [assignedCount, acceptedCount] = await Promise.all([
-      this.assignmentModel.countDocuments({ refereeUserId: refereeObjectId }),
-      this.assignmentModel.countDocuments({
-        refereeUserId: refereeObjectId,
-        status: RefereeAssignmentStatus.ACCEPTED,
-      }),
-    ]);
+    const [assignedCount, acceptedCount, checksCount, violationsCount] =
+      await Promise.all([
+        this.assignmentModel.countDocuments({
+          refereeUserId: refereeObjectId,
+        }),
+        this.assignmentModel.countDocuments({
+          refereeUserId: refereeObjectId,
+          status: RefereeAssignmentStatus.ACCEPTED,
+        }),
+        this.checkModel.countDocuments({ checkedBy: refereeObjectId }),
+        this.violationModel.countDocuments({ reportedBy: refereeObjectId }),
+      ]);
 
     return {
       races: { assignedCount, acceptedCount },
+      checks: { total: checksCount },
+      violations: { total: violationsCount },
     };
   }
 

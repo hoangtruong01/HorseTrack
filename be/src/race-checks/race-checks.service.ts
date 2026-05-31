@@ -10,15 +10,15 @@ import { Model } from 'mongoose';
 import { RacesService } from '../races/races.service';
 import { RaceStatus } from '../races/schemas/race.schema';
 import {
-  Registration,
-  RegistrationDocument,
-  RegistrationStatus,
-} from '../registrations/schemas/registration.schema';
-import {
   RefereeAssignment,
   RefereeAssignmentDocument,
   RefereeAssignmentStatus,
 } from '../referee-assignments/schemas/referee-assignment.schema';
+import {
+  Registration,
+  RegistrationDocument,
+  RegistrationStatus,
+} from '../registrations/schemas/registration.schema';
 import { CreateRaceCheckDto } from './dto/create-race-check.dto';
 import { UpdateRaceCheckDto } from './dto/update-race-check.dto';
 import {
@@ -63,17 +63,33 @@ export class RaceChecksService {
       );
     }
 
-    // 3. Registration must be APPROVED and belong to this race
+    // 3. Registration must exist, belong to this race, and be APPROVED
     const registration = await this.registrationModel.findById(
       dto.raceRegistrationId,
     );
-    if (
-      !registration ||
-      String(registration.raceId) !== dto.raceId ||
-      registration.status !== RegistrationStatus.APPROVED
-    ) {
+    if (!registration) {
+      throw new BadRequestException('Registration not found');
+    }
+
+    const registrationRaceId = String(
+      (registration.raceId as unknown as { _id?: string })?._id ??
+        registration.raceId,
+    );
+    if (registrationRaceId !== dto.raceId) {
       throw new BadRequestException(
-        'Registration not found, not approved, or does not belong to this race',
+        'Registration does not belong to this race',
+      );
+    }
+
+    if (registration.status !== RegistrationStatus.APPROVED) {
+      throw new BadRequestException(
+        'Registration is not approved for race checks',
+      );
+    }
+
+    if (String(registration.horseId) !== dto.horseId) {
+      throw new BadRequestException(
+        'Horse does not match the selected registration',
       );
     }
 

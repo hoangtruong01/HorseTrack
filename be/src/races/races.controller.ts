@@ -22,7 +22,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { RacesService } from './races.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
-import { RaceStatus } from './schemas/race.schema';
+import { UpdateRaceStatusDto } from './dto/update-race-status.dto';
 
 @ApiTags('Races')
 @Controller('races')
@@ -77,8 +77,8 @@ export class RacesController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change race status (Admin)' })
-  updateStatus(@Param('id') id: string, @Body('status') status: RaceStatus) {
-    return this.racesService.updateStatus(id, status);
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateRaceStatusDto) {
+    return this.racesService.updateStatus(id, dto.status);
   }
 
   @Delete(':id')

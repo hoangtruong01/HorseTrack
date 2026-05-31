@@ -97,7 +97,10 @@ export class RefereeProfilesService {
     isAdmin: boolean,
   ): Promise<RefereeProfileDocument> {
     const profile = await this.findOne(id);
-    if (!isAdmin && String(profile.userId) !== requestingUserId) {
+    const profileUserId = String(
+      (profile.userId as unknown as { _id?: string })?._id ?? profile.userId,
+    );
+    if (!isAdmin && profileUserId !== requestingUserId) {
       throw new ForbiddenException('You can only update your own profile');
     }
     Object.assign(profile, dto);

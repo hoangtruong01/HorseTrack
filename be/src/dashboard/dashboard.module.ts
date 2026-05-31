@@ -28,6 +28,14 @@ import {
   RefereeAssignment,
   RefereeAssignmentSchema,
 } from '../referee-assignments/schemas/referee-assignment.schema';
+import {
+  RaceCheck,
+  RaceCheckSchema,
+} from '../race-checks/schemas/race-check.schema';
+import {
+  RaceViolation,
+  RaceViolationSchema,
+} from '../race-violations/schemas/race-violation.schema';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
 
@@ -44,6 +52,8 @@ import { DashboardService } from './dashboard.service';
       { name: RaceResult.name, schema: RaceResultSchema },
       { name: JockeyInvitation.name, schema: JockeyInvitationSchema },
       { name: RefereeAssignment.name, schema: RefereeAssignmentSchema },
+      { name: RaceCheck.name, schema: RaceCheckSchema },
+      { name: RaceViolation.name, schema: RaceViolationSchema },
     ]),
   ],
   controllers: [DashboardController],

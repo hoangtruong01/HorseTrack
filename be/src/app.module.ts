@@ -22,7 +22,6 @@ import { RacesModule } from './races/races.module';
 import { RankingsModule } from './rankings/rankings.module';
 import { RefereeAssignmentsModule } from './referee-assignments/referee-assignments.module';
 import { RefereeProfilesModule } from './referee-profiles/referee-profiles.module';
-import { RefereeReportsModule } from './referee-reports/referee-reports.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { RewardPointLedgerModule } from './reward-point-ledger/reward-point-ledger.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
@@ -52,7 +51,6 @@ import { WalletModule } from './wallet/wallet.module';
     RankingsModule,
     JockeysModule,
     JockeyInvitationsModule,
-    RefereeReportsModule,
     PrizesModule,
     PredictionsModule,
     WalletModule,
