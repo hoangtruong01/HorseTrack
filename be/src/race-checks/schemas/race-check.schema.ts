@@ -36,6 +36,12 @@ export class RaceCheck {
   @Prop()
   equipmentNote?: string;
 
+  @Prop({ default: false })
+  jockeyCheckedIn!: boolean;
+
+  @Prop()
+  jockeyNote?: string;
+
   @Prop()
   checkedAt?: Date;
 }

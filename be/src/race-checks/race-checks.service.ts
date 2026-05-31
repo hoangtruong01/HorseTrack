@@ -128,6 +128,9 @@ export class RaceChecksService {
     if (dto.healthNote !== undefined) check.healthNote = dto.healthNote;
     if (dto.equipmentNote !== undefined)
       check.equipmentNote = dto.equipmentNote;
+    if (dto.jockeyCheckedIn !== undefined)
+      check.jockeyCheckedIn = dto.jockeyCheckedIn;
+    if (dto.jockeyNote !== undefined) check.jockeyNote = dto.jockeyNote;
     if (dto.status !== RaceCheckStatus.PENDING) {
       check.checkedAt = new Date();
     }

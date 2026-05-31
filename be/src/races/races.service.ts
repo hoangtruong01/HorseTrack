@@ -208,7 +208,7 @@ export class RacesService {
       );
     }
 
-    // 2. All APPROVED registrations must have a PASSED race_check
+    // 2. All APPROVED registrations must have a PASSED race_check and Jockey roll-called (if assigned)
     const approvedRegs = await this.registrationModel.find({
       raceId,
       status: RegistrationStatus.APPROVED,
@@ -219,14 +219,33 @@ export class RacesService {
       );
     }
 
-    const passedChecks = await this.raceCheckModel.countDocuments({
+    const checks = await this.raceCheckModel.find({
       raceId,
-      status: RaceCheckStatus.PASSED,
     });
-    if (passedChecks < approvedRegs.length) {
-      throw new BadRequestException(
-        `Race cannot be marked READY: ${approvedRegs.length - passedChecks} horse(s) have not passed pre-race check`,
+
+    for (const reg of approvedRegs) {
+      const check = checks.find(
+        (c) => String(c.raceRegistrationId) === String(reg._id),
       );
+
+      if (!check) {
+        throw new BadRequestException(
+          `Race cannot be marked READY: Pre-race check for horse registration ${reg._id} not found`,
+        );
+      }
+
+      if (check.status !== RaceCheckStatus.PASSED) {
+        throw new BadRequestException(
+          `Race cannot be marked READY: Horse check status is ${check.status} (not PASSED) for registration ${reg._id}`,
+        );
+      }
+
+      // If there's an assigned Jockey, verify that they are checked in / roll-called
+      if (reg.jockeyUserId && !check.jockeyCheckedIn) {
+        throw new BadRequestException(
+          `Race cannot be marked READY: Jockey for registration ${reg._id} has not been checked in / roll-called`,
+        );
+      }
     }
   }
 

@@ -33,6 +33,13 @@ import { Jockey } from '../jockeys/schemas/jockey.schema';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
 
+import {
+  RaceViolation,
+  RaceViolationDocument,
+  ViolationPenalty,
+  ViolationSeverity,
+} from '../race-violations/schemas/race-violation.schema';
+
 /** Points by finishing rank */
 const POINTS_MAP: Record<number, number> = { 1: 10, 2: 7, 3: 5, 4: 3 };
 const DEFAULT_POINTS = 1;
@@ -48,6 +55,8 @@ export class RaceResultsService {
     private assignmentModel: Model<RefereeAssignmentDocument>,
     @InjectModel(Jockey.name)
     private jockeyModel: Model<Jockey>,
+    @InjectModel(RaceViolation.name)
+    private violationModel: Model<RaceViolationDocument>,
     private racesService: RacesService,
     private prizesService: PrizesService,
     private predictionsService: PredictionsService,
@@ -228,7 +237,16 @@ export class RaceResultsService {
     // Cập nhật trạng thái cuộc đua sang FINISHED
     await this.racesService.updateStatus(raceId, RaceStatus.FINISHED);
 
-    return createdResults;
+    // Áp dụng các vi phạm thực tế đã ghi nhận trước/trong cuộc đua vào kết quả nháp
+    await this.applyViolationsToResults(raceId);
+
+    return this.resultModel
+      .find({ raceId })
+      .populate('horseId', 'name breed')
+      .populate('jockeyUserId', 'fullName')
+      .populate('recordedBy', 'fullName')
+      .sort({ rank: 1 })
+      .exec();
   }
 
   async create(
@@ -366,6 +384,9 @@ export class RaceResultsService {
       );
     }
 
+    // Quy đổi và cộng dồn tất cả các vi phạm đã ghi nhận vào kết quả trước khi trọng tài xác nhận
+    await this.applyViolationsToResults(raceId);
+
     await this.resultModel.updateMany(
       { raceId, status: RaceResultStatus.DRAFT },
       {
@@ -459,5 +480,90 @@ export class RaceResultsService {
       message:
         'Results published, race marked as RESULT_PUBLISHED, prizes generated, predictions resolved',
     };
+  }
+
+  async applyViolationsToResults(raceId: string): Promise<void> {
+    const results = await this.resultModel.find({ raceId });
+    if (results.length === 0) return;
+
+    // Fetch all violations recorded for this race
+    const violations = await this.violationModel.find({ raceId });
+
+    const PENALTY_TIME_RULES: Record<ViolationSeverity, number> = {
+      [ViolationSeverity.MINOR]: 3000,
+      [ViolationSeverity.MAJOR]: 6000,
+      [ViolationSeverity.CRITICAL]: 12000,
+    };
+
+    for (const result of results) {
+      // Find violations for this registration or horse
+      const horseViolations = violations.filter(
+        (v) =>
+          String(v.horseId) === String(result.horseId) ||
+          String(v.raceRegistrationId) === String(result.raceRegistrationId),
+      );
+
+      let penaltyTimeMs = 0;
+      let isDisqualified = false;
+      const notes: string[] = [];
+
+      for (const vio of horseViolations) {
+        if (vio.penalty === ViolationPenalty.DISQUALIFIED) {
+          isDisqualified = true;
+          notes.push(`Bị loại do lỗi: ${vio.type}`);
+        } else if (vio.penalty === ViolationPenalty.TIME_PENALTY) {
+          const penalty = PENALTY_TIME_RULES[vio.severity] ?? 0;
+          penaltyTimeMs += penalty;
+          notes.push(`+${penalty / 1000}s phạt do lỗi: ${vio.type} (${vio.severity})`);
+        }
+      }
+
+      if (isDisqualified) {
+        result.outcome = RaceResultOutcome.DISQUALIFIED;
+        result.rank = undefined;
+        result.finishTimeMs = undefined;
+        result.points = 0;
+      } else if (penaltyTimeMs > 0 && result.outcome === RaceResultOutcome.FINISHED) {
+        // If it was simulated or recorded with a time, apply the penalty
+        if (result.finishTimeMs) {
+          result.finishTimeMs += penaltyTimeMs;
+        }
+      }
+
+      if (notes.length > 0) {
+        const violationNotes = notes.join(', ');
+        result.note = result.note
+          ? `${result.note} | Quy đổi phạt: ${violationNotes}`
+          : `Quy đổi phạt: ${violationNotes}`;
+      }
+
+      await result.save();
+    }
+
+    // Recalculate ranks for all FINISHED outcomes in this race
+    const finishedResults = await this.resultModel
+      .find({
+        raceId,
+        outcome: RaceResultOutcome.FINISHED,
+      })
+      .sort({ finishTimeMs: 1 });
+
+    for (let i = 0; i < finishedResults.length; i++) {
+      const newRank = i + 1;
+      finishedResults[i].rank = newRank;
+      finishedResults[i].points = POINTS_MAP[newRank] ?? DEFAULT_POINTS;
+      await finishedResults[i].save();
+    }
+
+    // Double check disqualified results
+    const dqResults = await this.resultModel.find({
+      raceId,
+      outcome: RaceResultOutcome.DISQUALIFIED,
+    });
+    for (const dq of dqResults) {
+      dq.rank = undefined;
+      dq.points = 0;
+      await dq.save();
+    }
   }
 }
