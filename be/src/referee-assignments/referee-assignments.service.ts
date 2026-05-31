@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { UsersService } from '../users/users.service';
 import { RoleName } from '../users/schemas/user.schema';
 import { RefereeProfilesService } from '../referee-profiles/referee-profiles.service';
@@ -111,9 +111,9 @@ export class RefereeAssignmentsService {
     }
 
     return this.assignmentModel.create({
-      raceId: dto.raceId,
-      refereeUserId: dto.refereeUserId,
-      assignedBy,
+      raceId: new Types.ObjectId(dto.raceId),
+      refereeUserId: new Types.ObjectId(dto.refereeUserId),
+      assignedBy: new Types.ObjectId(assignedBy),
       role: dto.role ?? RefereeRole.MAIN,
     });
   }

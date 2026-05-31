@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
 import {
@@ -65,7 +65,7 @@ export class TournamentsService {
         'registrationStartDate must be before registrationEndDate',
       );
     }
-    return this.tournamentModel.create({ ...dto, createdBy });
+    return this.tournamentModel.create({ ...dto, createdBy: new Types.ObjectId(createdBy) });
   }
 
   async findAll(page = 1, limit = 20) {

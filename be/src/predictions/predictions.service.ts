@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
 import {
   RaceResult,
@@ -91,11 +91,11 @@ export class PredictionsService {
     }
 
     return this.predictionModel.create({
-      raceId: dto.raceId,
-      userId,
-      predictedFirstHorseId: dto.predictedFirstHorseId,
-      predictedSecondHorseId: dto.predictedSecondHorseId,
-      predictedThirdHorseId: dto.predictedThirdHorseId,
+      raceId: new Types.ObjectId(dto.raceId),
+      userId: new Types.ObjectId(userId),
+      predictedFirstHorseId: dto.predictedFirstHorseId ? new Types.ObjectId(dto.predictedFirstHorseId) : undefined,
+      predictedSecondHorseId: dto.predictedSecondHorseId ? new Types.ObjectId(dto.predictedSecondHorseId) : undefined,
+      predictedThirdHorseId: dto.predictedThirdHorseId ? new Types.ObjectId(dto.predictedThirdHorseId) : undefined,
       status: PredictionStatus.PENDING,
     });
   }

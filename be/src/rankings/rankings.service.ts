@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   RaceResult,
   RaceResultDocument,
   RaceResultStatus,
 } from '../race-results/schemas/race-result.schema';
-import { RacesService } from '../races/races.service';
 
 export interface RankingEntry {
   horseId: string;
@@ -33,21 +32,13 @@ export class RankingsService {
   constructor(
     @InjectModel(RaceResult.name)
     private resultModel: Model<RaceResultDocument>,
-    private racesService: RacesService,
   ) {}
 
   async getHorseRankings(tournamentId: string): Promise<RankingEntry[]> {
-    const racesResult = await this.racesService.findByTournament(
-      tournamentId,
-      1,
-      1000,
-    );
-    const raceIds = racesResult.data.map((r) => r._id);
-
     const pipeline = [
       {
         $match: {
-          raceId: { $in: raceIds },
+          tournamentId: new Types.ObjectId(tournamentId),
           status: RaceResultStatus.PUBLISHED,
         },
       },
@@ -96,17 +87,10 @@ export class RankingsService {
   }
 
   async getJockeyRankings(tournamentId: string): Promise<JockeyRankingEntry[]> {
-    const racesResult = await this.racesService.findByTournament(
-      tournamentId,
-      1,
-      1000,
-    );
-    const raceIds = racesResult.data.map((r) => r._id);
-
     const pipeline = [
       {
         $match: {
-          raceId: { $in: raceIds },
+          tournamentId: new Types.ObjectId(tournamentId),
           status: RaceResultStatus.PUBLISHED,
           jockeyUserId: { $exists: true, $ne: null },
         },

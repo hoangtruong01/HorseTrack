@@ -127,8 +127,10 @@ export class RegistrationsService {
 
     return this.registrationModel.create({
       ...dto,
-      tournamentId,
-      ownerId,
+      raceId: new Types.ObjectId(dto.raceId),
+      horseId: new Types.ObjectId(dto.horseId),
+      tournamentId: new Types.ObjectId(tournamentId),
+      ownerId: new Types.ObjectId(ownerId),
     });
   }
 

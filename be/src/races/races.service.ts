@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
@@ -62,7 +62,8 @@ export class RacesService {
 
     return this.raceModel.create({
       ...dto,
-      createdBy,
+      tournamentId: new Types.ObjectId(dto.tournamentId),
+      createdBy: new Types.ObjectId(createdBy),
     } as unknown as Partial<RaceDocument>);
   }
 

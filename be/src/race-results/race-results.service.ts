@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { RacesService } from '../races/races.service';
 import { RaceStatus } from '../races/schemas/race.schema';
 import {
@@ -136,9 +136,10 @@ export class RaceResultsService {
         : 0;
 
     return this.resultModel.create({
-      raceId: dto.raceId,
-      raceRegistrationId: dto.raceRegistrationId,
-      horseId: dto.horseId,
+      tournamentId: race.tournamentId,
+      raceId: new Types.ObjectId(dto.raceId),
+      raceRegistrationId: new Types.ObjectId(dto.raceRegistrationId),
+      horseId: new Types.ObjectId(dto.horseId),
       ownerId: registration.ownerId,
       jockeyUserId: registration.jockeyUserId,
       rank: dto.rank,
@@ -147,13 +148,13 @@ export class RaceResultsService {
       points,
       prizeAmount: 0,
       note: dto.note,
-      recordedBy,
+      recordedBy: new Types.ObjectId(recordedBy),
     });
   }
 
   async findByRace(raceId: string) {
     return this.resultModel
-      .find({ raceId })
+      .find({ raceId, status: RaceResultStatus.PUBLISHED })
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
       .populate('recordedBy', 'fullName')
@@ -162,14 +163,8 @@ export class RaceResultsService {
   }
 
   async findByTournament(tournamentId: string) {
-    const racesResult = await this.racesService.findByTournament(
-      tournamentId,
-      1,
-      1000,
-    );
-    const raceIds = racesResult.data.map((r) => r._id);
     return this.resultModel
-      .find({ raceId: { $in: raceIds } })
+      .find({ tournamentId, status: RaceResultStatus.PUBLISHED })
       .populate('raceId', 'name raceNumber')
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')

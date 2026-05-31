@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   RaceResult,
   RaceResultDocument,
@@ -69,7 +69,7 @@ export class PrizesService {
         if (!existing) {
           const prize = await this.prizeModel.create({
             tournamentId: race.tournamentId,
-            raceId,
+            raceId: new Types.ObjectId(raceId),
             horseId: res.horseId,
             ownerId: horse.ownerId,
             rank: res.rank,
