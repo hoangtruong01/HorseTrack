@@ -10,6 +10,7 @@ import {
 import { RegistrationsController } from './registrations.controller';
 import { RegistrationsService } from './registrations.service';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     TournamentsModule,
     RacesModule,
     NotificationsModule,
+    AuditLogsModule,
   ],
   controllers: [RegistrationsController],
   providers: [RegistrationsService],

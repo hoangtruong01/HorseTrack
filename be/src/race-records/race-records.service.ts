@@ -57,7 +57,7 @@ export class RaceRecordsService {
 
     return this.recordModel
       .find({ horseId })
-      .populate('raceId', 'name scheduledAt trackCondition')
+      .populate('raceId', 'name startTime trackCondition')
       .sort({ createdAt: -1 })
       .exec();
   }

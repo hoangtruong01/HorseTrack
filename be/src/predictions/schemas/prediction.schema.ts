@@ -15,14 +15,17 @@ export class Prediction {
   @Prop({ type: Types.ObjectId, ref: 'Race', required: true, index: true })
   raceId!: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Horse', required: true })
-  horseId!: Types.ObjectId;
-
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   userId!: Types.ObjectId;
 
-  @Prop({ required: true, default: 1 })
-  predictedPosition!: number;
+  @Prop({ type: Types.ObjectId, ref: 'Horse' })
+  predictedFirstHorseId?: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Horse' })
+  predictedSecondHorseId?: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Horse' })
+  predictedThirdHorseId?: Types.ObjectId;
 
   @Prop({
     required: true,
@@ -31,14 +34,15 @@ export class Prediction {
   })
   status!: PredictionStatus;
 
-  @Prop({ default: false })
-  isCorrect?: boolean;
-
   @Prop({ default: 0 })
-  pointsEarned!: number;
+  rewardPoints!: number;
+
+  @Prop()
+  evaluatedAt?: Date;
 }
 
 export const PredictionSchema = SchemaFactory.createForClass(Prediction);
 
-// Unique constraint: one prediction per user per horse per race
-PredictionSchema.index({ raceId: 1, userId: 1, horseId: 1 }, { unique: true });
+// One prediction per user per race
+PredictionSchema.index({ raceId: 1, userId: 1 }, { unique: true });
+PredictionSchema.index({ status: 1 });

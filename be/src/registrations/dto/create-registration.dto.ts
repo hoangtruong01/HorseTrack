@@ -16,9 +16,4 @@ export class CreateRegistrationDto {
   @IsNotEmpty()
   @IsMongoId()
   horseId!: string;
-
-  @ApiPropertyOptional({ example: '665abc123def456789012347' })
-  @IsOptional()
-  @IsMongoId()
-  jockeyId?: string;
 }

@@ -6,6 +6,12 @@ import {
   Registration,
   RegistrationSchema,
 } from '../registrations/schemas/registration.schema';
+import {
+  Prediction,
+  PredictionSchema,
+} from '../predictions/schemas/prediction.schema';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 import { TournamentsController } from './tournaments.controller';
 import { TournamentsService } from './tournaments.service';
 
@@ -15,7 +21,10 @@ import { TournamentsService } from './tournaments.service';
       { name: Tournament.name, schema: TournamentSchema },
       { name: Race.name, schema: RaceSchema },
       { name: Registration.name, schema: RegistrationSchema },
+      { name: Prediction.name, schema: PredictionSchema },
     ]),
+    NotificationsModule,
+    AuditLogsModule,
   ],
   controllers: [TournamentsController],
   providers: [TournamentsService],

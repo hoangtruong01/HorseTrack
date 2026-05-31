@@ -83,6 +83,18 @@ export class HorsesService {
     return (await this.findDocument(id)).toJSON() as HorseJson;
   }
 
+  /**
+   * Fetch raw (unpopulated) horse document for ownership/status checks.
+   * ownerId is a raw ObjectId here — String(ObjectId) gives reliable hex string.
+   */
+  async findRaw(id: string): Promise<HorseDocument> {
+    const horse = await this.horseModel.findById(id).exec();
+    if (!horse || horse.status === HorseStatus.DELETED) {
+      throw new NotFoundException('Horse not found');
+    }
+    return horse;
+  }
+
   /** Owner updates own horse, admin can update any */
   async update(
     id: string,
@@ -91,7 +103,10 @@ export class HorsesService {
     isAdmin: boolean,
   ): Promise<HorseJson> {
     const horse = await this.findDocument(id);
-    if (!isAdmin && String(horse.ownerId) !== requestingUserId) {
+    const ownerId = String(
+      (horse.ownerId as unknown as { _id?: string })?._id ?? horse.ownerId,
+    );
+    if (!isAdmin && ownerId !== requestingUserId) {
       throw new ForbiddenException('You can only update your own horses');
     }
 
@@ -119,7 +134,10 @@ export class HorsesService {
     isAdmin: boolean,
   ): Promise<void> {
     const horse = await this.findDocument(id);
-    if (!isAdmin && String(horse.ownerId) !== requestingUserId) {
+    const ownerId = String(
+      (horse.ownerId as unknown as { _id?: string })?._id ?? horse.ownerId,
+    );
+    if (!isAdmin && ownerId !== requestingUserId) {
       throw new ForbiddenException('You can only delete your own horses');
     }
 

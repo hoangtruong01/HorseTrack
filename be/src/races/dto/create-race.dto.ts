@@ -1,8 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import {
-  ArrayMinSize,
-  IsArray,
   IsDateString,
   IsMongoId,
   IsNotEmpty,
@@ -10,25 +7,7 @@ import {
   IsOptional,
   IsString,
   Min,
-  ValidateNested,
 } from 'class-validator';
-
-export class HorseEntryDto {
-  @ApiProperty()
-  @IsMongoId()
-  horseId!: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsMongoId()
-  jockeyId?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(1)
-  gateNumber?: number;
-}
 
 export class CreateRaceDto {
   @ApiProperty()
@@ -41,6 +20,11 @@ export class CreateRaceDto {
   @IsString()
   name!: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  description?: string;
+
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()
   @IsNumber()
@@ -49,44 +33,62 @@ export class CreateRaceDto {
   @ApiProperty({ example: '2026-06-05T14:00:00Z' })
   @IsNotEmpty()
   @IsDateString()
-  scheduledAt!: string;
+  startTime!: string;
+
+  @ApiPropertyOptional({ example: '2026-06-05T15:00:00Z' })
+  @IsOptional()
+  @IsDateString()
+  endTime?: string;
 
   @ApiPropertyOptional({ example: 'Hanoi Racecourse' })
   @IsOptional()
   @IsString()
   location?: string;
 
-  @ApiPropertyOptional({ example: 1200 })
-  @IsOptional()
+  @ApiProperty({ example: 1200, description: 'Distance in meters' })
+  @IsNotEmpty()
   @IsNumber()
   @Min(100)
-  distance?: number;
+  distanceMeters!: number;
 
-  @ApiProperty({ type: [HorseEntryDto], minItems: 2 })
-  @IsArray()
-  @ArrayMinSize(2)
-  @ValidateNested({ each: true })
-  @Type(() => HorseEntryDto)
-  horses!: HorseEntryDto[];
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  lapCount?: number;
 
-  @ApiProperty({ type: [String], minItems: 1 })
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsMongoId({ each: true })
-  refereeIds!: string[];
+  @ApiPropertyOptional({ example: 20 })
+  @IsOptional()
+  @IsNumber()
+  @Min(2)
+  maxParticipants?: number;
 
   @ApiPropertyOptional({ example: 'Dry' })
   @IsOptional()
   @IsString()
   trackCondition?: string;
 
-  @ApiPropertyOptional({
-    example: 12,
-    description:
-      'Max horses allowed in this race (overrides tournament maxHorses)',
-  })
+  @ApiPropertyOptional({ example: 10000000 })
   @IsOptional()
   @IsNumber()
-  @Min(2)
-  maxHorses?: number;
+  @Min(0)
+  totalPrize?: number;
+
+  @ApiPropertyOptional({ example: 5000000 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  prizeFirst?: number;
+
+  @ApiPropertyOptional({ example: 3000000 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  prizeSecond?: number;
+
+  @ApiPropertyOptional({ example: 2000000 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  prizeThird?: number;
 }

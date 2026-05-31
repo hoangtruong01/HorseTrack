@@ -33,9 +33,18 @@ import {
   InvitationStatus,
 } from '../jockey-invitations/schemas/jockey-invitation.schema';
 import {
-  RefereeReport,
-  RefereeReportDocument,
-} from '../referee-reports/schemas/referee-report.schema';
+  RefereeAssignment,
+  RefereeAssignmentDocument,
+  RefereeAssignmentStatus,
+} from '../referee-assignments/schemas/referee-assignment.schema';
+import {
+  RaceCheck,
+  RaceCheckDocument,
+} from '../race-checks/schemas/race-check.schema';
+import {
+  RaceViolation,
+  RaceViolationDocument,
+} from '../race-violations/schemas/race-violation.schema';
 
 interface PrizeAggregateResult {
   _id: string;
@@ -45,7 +54,7 @@ interface PrizeAggregateResult {
 
 interface PredictionAggregateResult {
   _id: string;
-  totalPointsEarned: number;
+  totalRewardPoints: number;
   count: number;
 }
 
@@ -56,7 +65,7 @@ interface OwnerPrizeAggregateResult {
 
 interface SpectatorPredictionAggregateResult {
   _id: string;
-  totalPointsEarned: number;
+  totalRewardPoints: number;
   count: number;
 }
 
@@ -77,8 +86,12 @@ export class DashboardService {
     private resultModel: Model<RaceResultDocument>,
     @InjectModel(JockeyInvitation.name)
     private invitationModel: Model<JockeyInvitationDocument>,
-    @InjectModel(RefereeReport.name)
-    private reportModel: Model<RefereeReportDocument>,
+    @InjectModel(RefereeAssignment.name)
+    private assignmentModel: Model<RefereeAssignmentDocument>,
+    @InjectModel(RaceCheck.name)
+    private checkModel: Model<RaceCheckDocument>,
+    @InjectModel(RaceViolation.name)
+    private violationModel: Model<RaceViolationDocument>,
   ) {}
 
   async getAdminStats() {
@@ -108,7 +121,7 @@ export class DashboardService {
           $group: {
             _id: '$status',
             count: { $sum: 1 },
-            totalPointsEarned: { $sum: '$pointsEarned' },
+            totalRewardPoints: { $sum: '$rewardPoints' },
           },
         },
       ]),
@@ -138,11 +151,11 @@ export class DashboardService {
         (acc, item) => {
           acc[item._id.toLowerCase()] = {
             count: item.count,
-            pointsEarned: item.totalPointsEarned,
+            rewardPoints: item.totalRewardPoints,
           };
           return acc;
         },
-        {} as Record<string, { count: number; pointsEarned: number }>,
+        {} as Record<string, { count: number; rewardPoints: number }>,
       ),
     };
   }
@@ -169,7 +182,6 @@ export class DashboardService {
     );
 
     const typedPrizes = prizesResult as OwnerPrizeAggregateResult[];
-
     const prizes = typedPrizes.reduce(
       (acc, item) => {
         const key = item._id.toLowerCase();
@@ -190,9 +202,8 @@ export class DashboardService {
   async getJockeyStats(jockeyUserId: string) {
     const jockeyObjectId = new Types.ObjectId(jockeyUserId);
 
-    // 1. Find jockey results
     const results = await this.resultModel.find({
-      jockeyId: jockeyObjectId,
+      jockeyUserId: jockeyObjectId,
       status: RaceResultStatus.PUBLISHED,
     });
 
@@ -200,9 +211,8 @@ export class DashboardService {
     const wins = results.filter((r) => r.rank === 1).length;
     const totalPoints = results.reduce((sum, r) => sum + (r.points ?? 0), 0);
 
-    // 2. Count active invitations
     const pendingInvites = await this.invitationModel.countDocuments({
-      jockeyId: jockeyObjectId,
+      jockeyUserId: jockeyObjectId,
       status: InvitationStatus.PENDING,
     });
 
@@ -216,25 +226,29 @@ export class DashboardService {
             : 0,
       },
       totalPoints,
-      invitations: {
-        pendingCount: pendingInvites,
-      },
+      invitations: { pendingCount: pendingInvites },
     };
   }
 
   async getRefereeStats(refereeId: string) {
     const refereeObjectId = new Types.ObjectId(refereeId);
-    const [assignedRacesCount, reportsSubmittedCount] = await Promise.all([
-      this.raceModel.countDocuments({
-        refereeIds: refereeObjectId,
-        deletedAt: { $exists: false },
-      }),
-      this.reportModel.countDocuments({ refereeId: refereeObjectId }),
-    ]);
+    const [assignedCount, acceptedCount, checksCount, violationsCount] =
+      await Promise.all([
+        this.assignmentModel.countDocuments({
+          refereeUserId: refereeObjectId,
+        }),
+        this.assignmentModel.countDocuments({
+          refereeUserId: refereeObjectId,
+          status: RefereeAssignmentStatus.ACCEPTED,
+        }),
+        this.checkModel.countDocuments({ checkedBy: refereeObjectId }),
+        this.violationModel.countDocuments({ reportedBy: refereeObjectId }),
+      ]);
 
     return {
-      races: { assignedCount: assignedRacesCount },
-      reports: { submittedCount: reportsSubmittedCount },
+      races: { assignedCount, acceptedCount },
+      checks: { total: checksCount },
+      violations: { total: violationsCount },
     };
   }
 
@@ -246,7 +260,7 @@ export class DashboardService {
         {
           $group: {
             _id: '$status',
-            totalPointsEarned: { $sum: '$pointsEarned' },
+            totalRewardPoints: { $sum: '$rewardPoints' },
             count: { $sum: 1 },
           },
         },
@@ -262,18 +276,13 @@ export class DashboardService {
 
     const stats = typedPredictions.reduce(
       (acc, item) => {
-        acc.totalPointsEarned += item.totalPointsEarned;
+        acc.totalRewardPoints += item.totalRewardPoints;
         acc.totalPredictions += item.count;
         if (item._id === 'WON') acc.wonCount += item.count;
         if (item._id === 'LOST') acc.lostCount += item.count;
         return acc;
       },
-      {
-        totalPointsEarned: 0,
-        totalPredictions: 0,
-        wonCount: 0,
-        lostCount: 0,
-      },
+      { totalRewardPoints: 0, totalPredictions: 0, wonCount: 0, lostCount: 0 },
     );
 
     const winRate =
@@ -290,7 +299,7 @@ export class DashboardService {
       predictions: {
         total: stats.totalPredictions,
         active: activePredictionsCount,
-        totalPointsEarned: stats.totalPointsEarned,
+        totalRewardPoints: stats.totalRewardPoints,
         winRate,
       },
     };

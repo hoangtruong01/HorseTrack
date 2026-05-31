@@ -9,6 +9,7 @@ import {
   CashoutRequest,
   CashoutRequestSchema,
 } from './schemas/cashout-request.schema';
+import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
 import { WalletController } from './wallet.controller';
 import { WalletService } from './wallet.service';
 
@@ -19,6 +20,7 @@ import { WalletService } from './wallet.service';
       { name: WalletTransaction.name, schema: WalletTransactionSchema },
       { name: CashoutRequest.name, schema: CashoutRequestSchema },
     ]),
+    RewardPointLedgerModule,
   ],
   controllers: [WalletController],
   providers: [WalletService],

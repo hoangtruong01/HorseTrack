@@ -5,8 +5,12 @@ import {
   RaceResult,
   RaceResultSchema,
 } from '../race-results/schemas/race-result.schema';
-import { User, UserSchema } from '../users/schemas/user.schema';
+import {
+  Registration,
+  RegistrationSchema,
+} from '../registrations/schemas/registration.schema';
 import { Prediction, PredictionSchema } from './schemas/prediction.schema';
+import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
 import { PredictionsController } from './predictions.controller';
 import { PredictionsService } from './predictions.service';
 
@@ -16,8 +20,9 @@ import { PredictionsService } from './predictions.service';
       { name: Prediction.name, schema: PredictionSchema },
       { name: Race.name, schema: RaceSchema },
       { name: RaceResult.name, schema: RaceResultSchema },
-      { name: User.name, schema: UserSchema },
+      { name: Registration.name, schema: RegistrationSchema },
     ]),
+    RewardPointLedgerModule,
   ],
   controllers: [PredictionsController],
   providers: [PredictionsService],

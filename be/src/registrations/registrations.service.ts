@@ -25,6 +25,7 @@ import {
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
 export class RegistrationsService {
@@ -35,6 +36,7 @@ export class RegistrationsService {
     private tournamentsService: TournamentsService,
     private racesService: RacesService,
     private notificationsService: NotificationsService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async create(
@@ -67,8 +69,9 @@ export class RegistrationsService {
       throw new BadRequestException('Registration window has closed');
     }
 
-    // 3. Horse must belong to owner
-    const horse = await this.horsesService.findOne(dto.horseId);
+    // 3. Horse must belong to owner — use raw (unpopulated) document so that
+    //    String(horse.ownerId) reliably returns the hex ObjectId string.
+    const horse = await this.horsesService.findRaw(dto.horseId);
     if (String(horse.ownerId) !== ownerId) {
       throw new ForbiddenException('You can only register your own horses');
     }
@@ -94,7 +97,7 @@ export class RegistrationsService {
     }
 
     // 6a. Per-race slot check: pending + approved for this race
-    const raceSlot = race.maxHorses ?? 20;
+    const raceSlot = race.maxParticipants ?? 20;
     const perRaceCount = await this.registrationModel.countDocuments({
       raceId: dto.raceId,
       status: {
@@ -126,7 +129,6 @@ export class RegistrationsService {
       ...dto,
       tournamentId,
       ownerId,
-      registeredAt: new Date(),
     });
   }
 
@@ -139,10 +141,10 @@ export class RegistrationsService {
       this.registrationModel
         .find(filter)
         .populate('tournamentId', 'name status')
-        .populate('raceId', 'name scheduledAt status')
+        .populate('raceId', 'name startTime status')
         .populate('horseId', 'name breed')
         .populate('ownerId', 'fullName email')
-        .populate('jockeyId', 'fullName email')
+        .populate('jockeyUserId', 'fullName email')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -161,9 +163,9 @@ export class RegistrationsService {
       this.registrationModel
         .find(filter)
         .populate('tournamentId', 'name status')
-        .populate('raceId', 'name scheduledAt status')
+        .populate('raceId', 'name startTime status')
         .populate('horseId', 'name breed')
-        .populate('jockeyId', 'fullName email')
+        .populate('jockeyUserId', 'fullName email')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -180,10 +182,10 @@ export class RegistrationsService {
     const reg = await this.registrationModel
       .findById(id)
       .populate('tournamentId', 'name status')
-      .populate('raceId', 'name scheduledAt status')
+      .populate('raceId', 'name startTime status')
       .populate('horseId', 'name breed')
       .populate('ownerId', 'fullName email')
-      .populate('jockeyId', 'fullName email')
+      .populate('jockeyUserId', 'fullName email')
       .exec();
     if (!reg) throw new NotFoundException('Registration not found');
     return reg;
@@ -203,7 +205,7 @@ export class RegistrationsService {
       (reg.raceId as unknown as { _id: string })?._id ?? reg.raceId,
     );
     const race = await this.racesService.findOne(raceIdStr);
-    const raceSlot = race.maxHorses ?? 20;
+    const raceSlot = race.maxParticipants ?? 20;
     const approvedCount = await this.registrationModel.countDocuments({
       raceId: reg.raceId,
       status: RegistrationStatus.APPROVED,
@@ -219,6 +221,14 @@ export class RegistrationsService {
     reg.approvedBy = adminId as unknown as Types.ObjectId;
     const saved = await reg.save();
 
+    await this.auditLogsService.log({
+      actorId: adminId,
+      action: 'registration.approve',
+      entityType: 'Registration',
+      entityId: id,
+      after: { status: RegistrationStatus.APPROVED },
+    });
+
     // Notify the owner!
     const horse = reg.horseId as unknown as HorseDocument;
     const owner = reg.ownerId as unknown as { _id?: string };
@@ -226,7 +236,7 @@ export class RegistrationsService {
       String(owner._id ?? reg.ownerId),
       'Registration Approved',
       `Your registration for horse "${horse.name}" has been approved!`,
-      NotificationType.REGISTRATION,
+      NotificationType.RACE,
     );
 
     return saved;
@@ -240,7 +250,7 @@ export class RegistrationsService {
       );
     }
     reg.status = RegistrationStatus.REJECTED;
-    reg.rejectReason = reason;
+    reg.rejectedReason = reason;
     const saved = await reg.save();
 
     // Notify the owner!
@@ -250,7 +260,7 @@ export class RegistrationsService {
       String(owner._id ?? reg.ownerId),
       'Registration Rejected',
       `Your registration for horse "${horse.name}" has been rejected. Reason: ${reason ?? 'None specified'}`,
-      NotificationType.REGISTRATION,
+      NotificationType.RACE,
     );
 
     return saved;
@@ -267,8 +277,23 @@ export class RegistrationsService {
       throw new BadRequestException('Cannot cancel an approved registration');
     }
     reg.status = RegistrationStatus.CANCELLED;
-    const saved = await reg.save();
+    return reg.save();
+  }
 
-    return saved;
+  /** Owner withdraws an APPROVED registration (different semantic from cancel) */
+  async withdraw(id: string, ownerId: string): Promise<RegistrationDocument> {
+    const reg = await this.findOne(id);
+    if (String(reg.ownerId._id ?? reg.ownerId) !== ownerId) {
+      throw new ForbiddenException(
+        'You can only withdraw your own registrations',
+      );
+    }
+    if (reg.status !== RegistrationStatus.APPROVED) {
+      throw new BadRequestException(
+        'Only APPROVED registrations can be withdrawn',
+      );
+    }
+    reg.status = RegistrationStatus.WITHDRAWN;
+    return reg.save();
   }
 }

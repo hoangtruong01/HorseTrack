@@ -44,10 +44,10 @@ export class Horse {
   color?: string;
 
   @Prop()
-  weight?: number;
+  weightKg?: number;
 
   @Prop()
-  height?: number;
+  heightCm?: number;
 
   @Prop()
   dateOfBirth?: Date;
