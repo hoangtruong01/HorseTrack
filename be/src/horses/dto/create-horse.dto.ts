@@ -41,13 +41,13 @@ export class CreateHorseDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  weight?: number;
+  weightKg?: number;
 
   @ApiPropertyOptional({ example: 160 })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  height?: number;
+  heightCm?: number;
 
   @ApiPropertyOptional({ example: '2020-03-15' })
   @IsOptional()
