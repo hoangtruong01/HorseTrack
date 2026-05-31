@@ -64,6 +64,9 @@ export class Race {
   @Prop()
   trackCondition?: string;
 
+  @Prop({ default: 'Sunny' })
+  weatherSnapshot?: string;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy!: Types.ObjectId;
 

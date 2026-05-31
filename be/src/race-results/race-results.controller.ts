@@ -22,6 +22,15 @@ import { CreateRaceResultDto } from './dto/create-race-result.dto';
 export class RaceResultsController {
   constructor(private readonly raceResultsService: RaceResultsService) {}
 
+  @Post('race/:raceId/simulate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.REFEREE, RoleName.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Simulate results for a race (Referee/Admin)' })
+  simulate(@Param('raceId') raceId: string, @CurrentUser() user: JwtUser) {
+    return this.raceResultsService.simulateRaceResults(raceId, user.id);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.REFEREE)

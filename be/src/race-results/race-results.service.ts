@@ -24,10 +24,14 @@ import {
   RaceResultDocument,
   RaceResultOutcome,
   RaceResultStatus,
+  RaceIncident,
 } from './schemas/race-result.schema';
 import { PredictionsService } from '../predictions/predictions.service';
 import { PrizesService } from '../prizes/prizes.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { Jockey } from '../jockeys/schemas/jockey.schema';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/schemas/notification.schema';
 
 /** Points by finishing rank */
 const POINTS_MAP: Record<number, number> = { 1: 10, 2: 7, 3: 5, 4: 3 };
@@ -42,10 +46,13 @@ export class RaceResultsService {
     private registrationModel: Model<RegistrationDocument>,
     @InjectModel(RefereeAssignment.name)
     private assignmentModel: Model<RefereeAssignmentDocument>,
+    @InjectModel(Jockey.name)
+    private jockeyModel: Model<Jockey>,
     private racesService: RacesService,
     private prizesService: PrizesService,
     private predictionsService: PredictionsService,
     private auditLogsService: AuditLogsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   private async validateRefereeAssigned(
@@ -62,6 +69,166 @@ export class RaceResultsService {
         'You are not an accepted referee for this race',
       );
     }
+  }
+
+  async simulateRaceResults(raceId: string, refereeId: string): Promise<RaceResultDocument[]> {
+    const race = await this.racesService.findOne(raceId);
+    if (race.status !== RaceStatus.LIVE) {
+      throw new BadRequestException('Chỉ có thể giả lập kết quả cho cuộc đua có trạng thái LIVE');
+    }
+    await this.validateRefereeAssigned(raceId, refereeId);
+
+    // Xóa kết quả nháp cũ nếu có
+    await this.resultModel.deleteMany({ raceId });
+
+    // Lấy các đăng ký đã duyệt
+    const registrations = await this.registrationModel.find({
+      raceId,
+      status: RegistrationStatus.APPROVED,
+    }).populate('horseId').exec();
+
+    if (registrations.length === 0) {
+      throw new BadRequestException('Không có ngựa nào đăng ký hợp lệ trong cuộc đua này');
+    }
+
+    const simulatedPerformances: any[] = [];
+    const distance = race.distanceMeters;
+
+    // Thời gian chạy cơ sở (BaseTimeMs) = (distance / 15) * 1000
+    const baseTimeMs = Math.round((distance / 15) * 1000);
+
+    for (const reg of registrations) {
+      const horse = reg.horseId as any;
+      
+      // 1. Điểm thưởng sức mạnh ngựa (HorseMetricsBonus)
+      const horseSpeed = horse.baseSpeed || 60;
+      const horseStamina = horse.staminaScore || 70;
+      const horseBonusMs = (horseSpeed * 100) + (horseStamina * 50);
+
+      // 2. Điểm thưởng kỹ năng Jockey (JockeySkillBonus)
+      let jockeyBonusMs = 0;
+      if (reg.jockeyUserId) {
+        const jockeyProfile = await this.jockeyModel.findOne({ userId: reg.jockeyUserId });
+        if (jockeyProfile) {
+          switch (jockeyProfile.skillLevel) {
+            case 'professional': jockeyBonusMs += 3000; break;
+            case 'advanced': jockeyBonusMs += 2000; break;
+            case 'intermediate': jockeyBonusMs += 1000; break;
+            case 'beginner': jockeyBonusMs += 200; break;
+          }
+          const exp = jockeyProfile.experienceYears || 0;
+          jockeyBonusMs += Math.min(exp * 100, 1000);
+        }
+      }
+
+      // 3. Điểm thưởng thích ứng môi trường (RaceConditionBonus)
+      let conditionBonusMs = 0;
+      const track = race.trackCondition || 'Dry';
+      const weather = race.weatherSnapshot || 'Sunny';
+
+      if (weather === 'Sunny' && track === 'Dry') {
+        conditionBonusMs += 2000; // Chạy nhanh hơn 2s
+      } else if (weather === 'Rainy' || weather === 'Stormy') {
+        conditionBonusMs -= 6000; // Chạy chậm đi 6s
+      }
+
+      if (track === 'Muddy') {
+        const weight = horse.weightKg || 450;
+        conditionBonusMs -= (weight < 450) ? 4000 : 1000; // Ngựa nhẹ bị phạt nặng hơn
+      }
+
+      // 4. Phong độ ngẫu nhiên trong ngày (DailyFormBonus: từ -2000ms đến +2000ms)
+      const dailyFormBonusMs = Math.floor(Math.random() * 4001) - 2000;
+
+      // 5. Xác định Biến cố ngẫu nhiên (Incident & IncidentDelayMs)
+      let incident = RaceIncident.NONE;
+      let incidentDelayMs = 0;
+      let outcome = RaceResultOutcome.FINISHED;
+
+      const rand = Math.random() * 100;
+      if (rand < 1) { // 1% Disqualified
+        incident = RaceIncident.DISQUALIFIED;
+        outcome = RaceResultOutcome.DISQUALIFIED;
+      } else if (rand < 6) { // 5% Tired finish
+        incident = RaceIncident.TIRED_FINISH;
+        incidentDelayMs = 6000;
+      } else if (rand < 13) { // 7% Lose rhythm
+        incident = RaceIncident.LOSE_RHYTHM;
+        incidentDelayMs = 4500;
+      } else if (rand < 20) { // 7% Bad start
+        incident = RaceIncident.BAD_START;
+        incidentDelayMs = 3000;
+      }
+
+      // 6. Tính toán trực tiếp thời gian hoàn thành (Finish Time Ms)
+      let finishTimeMs: number | undefined = undefined;
+      
+      if (outcome === RaceResultOutcome.FINISHED) {
+        // Công thức tính trực tiếp thời gian
+        const calculatedTime = baseTimeMs - horseBonusMs - jockeyBonusMs - conditionBonusMs - dailyFormBonusMs + incidentDelayMs;
+        
+        // Giới hạn thời gian chạy tối thiểu để tránh bất hợp lý (Tốc độ tối đa không quá 22 m/s)
+        const minAllowedTime = Math.round((distance / 22) * 1000);
+        finishTimeMs = Math.max(minAllowedTime, calculatedTime);
+      }
+
+      simulatedPerformances.push({
+        registrationId: reg._id,
+        horseId: horse._id,
+        ownerId: reg.ownerId,
+        jockeyUserId: reg.jockeyUserId,
+        finishTimeMs,
+        incident,
+        outcome,
+      });
+    }
+
+    // 7. Sắp xếp thứ hạng tự động
+    const finishedHorses = simulatedPerformances.filter(h => h.outcome === RaceResultOutcome.FINISHED);
+    const disqualifiedHorses = simulatedPerformances.filter(h => h.outcome !== RaceResultOutcome.FINISHED);
+
+    // Sắp xếp tăng dần theo thời gian chạy (ngắn nhất lên đầu)
+    finishedHorses.sort((a, b) => (a.finishTimeMs || 0) - (b.finishTimeMs || 0));
+
+    finishedHorses.forEach((horse, idx) => {
+      horse.rank = idx + 1;
+    });
+
+    const finalResults = [...finishedHorses, ...disqualifiedHorses];
+
+    // 8. Lưu kết quả vào DB dưới dạng DRAFT
+    const createdResults = await Promise.all(
+      finalResults.map((res) => {
+        const points = res.rank ? (POINTS_MAP[res.rank] ?? DEFAULT_POINTS) : 0;
+        let note = 'Tự động giả lập kết quả.';
+        if (res.incident !== RaceIncident.NONE) {
+          note += ` Biến cố xảy ra: ${res.incident}.`;
+        }
+
+        return this.resultModel.create({
+          tournamentId: race.tournamentId,
+          raceId: new Types.ObjectId(raceId),
+          raceRegistrationId: res.registrationId,
+          horseId: res.horseId,
+          ownerId: res.ownerId,
+          jockeyUserId: res.jockeyUserId,
+          rank: res.rank,
+          finishTimeMs: res.finishTimeMs,
+          outcome: res.outcome,
+          incident: res.incident,
+          points,
+          prizeAmount: 0,
+          status: RaceResultStatus.DRAFT,
+          recordedBy: new Types.ObjectId(refereeId),
+          note,
+        });
+      })
+    );
+
+    // Cập nhật trạng thái cuộc đua sang FINISHED
+    await this.racesService.updateStatus(raceId, RaceStatus.FINISHED);
+
+    return createdResults;
   }
 
   async create(
@@ -268,6 +435,17 @@ export class RaceResultsService {
 
     // Resolve predictions
     await this.predictionsService.payoutBetsForRace(raceId);
+
+    // Send notifications to the winning horse owner
+    const winnerResult = results.find((r) => r.rank === 1);
+    if (winnerResult) {
+      await this.notificationsService.send(
+        String(winnerResult.ownerId),
+        'Chiến thắng vang dội!',
+        `Chúc mừng! Chú ngựa của bạn đã giành chiến thắng vị trí thứ nhất trong cuộc đua ${race.name}.`,
+        NotificationType.REWARD,
+      );
+    }
 
     await this.auditLogsService.log({
       actorId: publishedBy,

@@ -17,6 +17,14 @@ export enum RaceResultOutcome {
   DID_NOT_FINISH = 'did_not_finish',
 }
 
+export enum RaceIncident {
+  NONE = 'NONE',
+  BAD_START = 'BAD_START',
+  LOSE_RHYTHM = 'LOSE_RHYTHM',
+  TIRED_FINISH = 'TIRED_FINISH',
+  DISQUALIFIED = 'DISQUALIFIED',
+}
+
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class RaceResult {
   @Prop({
@@ -56,6 +64,12 @@ export class RaceResult {
 
   @Prop({ required: true, enum: RaceResultOutcome })
   outcome!: RaceResultOutcome;
+
+  @Prop({ required: true, enum: RaceIncident, default: RaceIncident.NONE })
+  incident!: RaceIncident;
+
+  @Prop()
+  finalScore?: number;
 
   @Prop({
     required: true,

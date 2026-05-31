@@ -11,6 +11,7 @@ import {
 } from '../registrations/schemas/registration.schema';
 import { Prediction, PredictionSchema } from './schemas/prediction.schema';
 import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PredictionsController } from './predictions.controller';
 import { PredictionsService } from './predictions.service';
 
@@ -23,6 +24,7 @@ import { PredictionsService } from './predictions.service';
       { name: Registration.name, schema: RegistrationSchema },
     ]),
     RewardPointLedgerModule,
+    NotificationsModule,
   ],
   controllers: [PredictionsController],
   providers: [PredictionsService],

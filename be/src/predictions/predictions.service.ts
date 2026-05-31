@@ -25,8 +25,8 @@ import {
 import { CreatePredictionDto } from './dto/create-prediction.dto';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
-
-const WINNER_POINTS = 50;
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/schemas/notification.schema';
 
 @Injectable()
 export class PredictionsService {
@@ -39,6 +39,7 @@ export class PredictionsService {
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
     private ledgerService: RewardPointLedgerService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -144,7 +145,8 @@ export class PredictionsService {
     if (predictions.length === 0) return;
 
     const now = new Date();
-    const winnerIds: { predictionId: string; userId: string }[] = [];
+    const winnersList: { predictionId: string; userId: string }[] = [];
+    const losersList: { predictionId: string; userId: string }[] = [];
 
     const bulkOps = predictions.map((prediction) => {
       const won =
@@ -152,7 +154,12 @@ export class PredictionsService {
         String(prediction.predictedHorseId) === String(winner.horseId);
 
       if (won) {
-        winnerIds.push({
+        winnersList.push({
+          predictionId: String(prediction._id),
+          userId: String(prediction.userId),
+        });
+      } else {
+        losersList.push({
           predictionId: String(prediction._id),
           userId: String(prediction.userId),
         });
@@ -164,7 +171,7 @@ export class PredictionsService {
           update: {
             $set: {
               status: won ? PredictionStatus.WON : PredictionStatus.LOST,
-              rewardPoints: won ? WINNER_POINTS : 0,
+              rewardPoints: won ? 1 : -1,
               evaluatedAt: now,
             },
           },
@@ -174,16 +181,67 @@ export class PredictionsService {
 
     await this.predictionModel.bulkWrite(bulkOps);
 
+    // 1. Reward winner: +1 point & send notification
     await Promise.all(
-      winnerIds.map((w) =>
-        this.ledgerService.credit({
+      winnersList.map(async (w) => {
+        await this.ledgerService.credit({
           userId: w.userId,
-          points: WINNER_POINTS,
+          points: 1,
           sourceType: LedgerSourceType.PREDICTION_REWARD,
           sourceId: w.predictionId,
-          note: `Prediction reward for race ${raceId}`,
-        }),
-      ),
+          note: `Prediction reward (+1 point) for race ${raceId}`,
+        });
+
+        // Send realtime notification
+        await this.notificationsService.send(
+          w.userId,
+          'Dự đoán chính xác!',
+          `Chúc mừng! Bạn đã dự đoán đúng chú ngựa vô địch trong cuộc đua và nhận được 1 điểm thưởng.`,
+          NotificationType.PREDICTION,
+        );
+      }),
+    );
+
+    // 2. Penalize loser: -1 point (with safe wallet check) & send notification
+    await Promise.all(
+      losersList.map(async (l) => {
+        const currentPoints = await this.ledgerService.getBalance(l.userId);
+
+        if (currentPoints >= 1) {
+          await this.ledgerService.debit({
+            userId: l.userId,
+            points: 1,
+            sourceType: LedgerSourceType.PREDICTION_REWARD,
+            sourceId: l.predictionId,
+            note: `Prediction deduction (-1 point) for incorrect guess in race ${raceId}`,
+          });
+
+          // Send realtime notification
+          await this.notificationsService.send(
+            l.userId,
+            'Dự đoán không chính xác',
+            `Rất tiếc, chú ngựa bạn dự đoán đã không thể về nhất. Bạn bị trừ 1 điểm.`,
+            NotificationType.PREDICTION,
+          );
+        } else {
+          // If 0 points, create a ledger entry with 0 delta to record transaction history safely without error
+          await this.ledgerService.credit({
+            userId: l.userId,
+            points: 0,
+            sourceType: LedgerSourceType.PREDICTION_REWARD,
+            sourceId: l.predictionId,
+            note: `No points deducted as your balance is already 0 (race ${raceId})`,
+          });
+
+          // Send realtime notification
+          await this.notificationsService.send(
+            l.userId,
+            'Dự đoán không chính xác',
+            `Rất tiếc, chú ngựa bạn dự đoán đã không thể về nhất.`,
+            NotificationType.PREDICTION,
+          );
+        }
+      }),
     );
   }
 }

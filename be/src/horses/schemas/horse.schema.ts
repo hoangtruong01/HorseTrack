@@ -69,6 +69,12 @@ export class Horse {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   ownerId!: Types.ObjectId;
 
+  @Prop({ default: 60, min: 30, max: 100 })
+  baseSpeed!: number;
+
+  @Prop({ default: 70, min: 30, max: 100 })
+  staminaScore!: number;
+
   @Prop()
   image?: string;
 

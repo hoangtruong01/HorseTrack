@@ -13,6 +13,8 @@ import {
 import { PrizesModule } from '../prizes/prizes.module';
 import { PredictionsModule } from '../predictions/predictions.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { Jockey, JockeySchema } from '../jockeys/schemas/jockey.schema';
 import { RaceResultsController } from './race-results.controller';
 import { RaceResultsService } from './race-results.service';
 
@@ -22,11 +24,13 @@ import { RaceResultsService } from './race-results.service';
       { name: RaceResult.name, schema: RaceResultSchema },
       { name: Registration.name, schema: RegistrationSchema },
       { name: RefereeAssignment.name, schema: RefereeAssignmentSchema },
+      { name: Jockey.name, schema: JockeySchema },
     ]),
     RacesModule,
     PrizesModule,
     PredictionsModule,
     AuditLogsModule,
+    NotificationsModule,
   ],
   controllers: [RaceResultsController],
   providers: [RaceResultsService],

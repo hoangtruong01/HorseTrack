@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsString,
   Min,
+  Max,
 } from 'class-validator';
 import { HorseGender, HorseHealthStatus } from '../schemas/horse.schema';
 
@@ -70,4 +71,20 @@ export class CreateHorseDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ example: 60, minimum: 30, maximum: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(30)
+  @Max(100)
+  baseSpeed?: number;
+
+  @ApiPropertyOptional({ example: 70, minimum: 30, maximum: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(30)
+  @Max(100)
+  staminaScore?: number;
 }

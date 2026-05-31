@@ -68,6 +68,11 @@ export class CreateRaceDto {
   @IsString()
   trackCondition?: string;
 
+  @ApiPropertyOptional({ example: 'Sunny' })
+  @IsOptional()
+  @IsString()
+  weatherSnapshot?: string;
+
   @ApiPropertyOptional({ example: 10000000 })
   @IsOptional()
   @IsNumber()
