@@ -60,6 +60,25 @@ export class RacesService {
       );
     }
 
+    // Validate prize does not exceed tournament budget
+    if (dto.prize !== undefined) {
+      const [agg] = await this.raceModel.aggregate<{ total: number }>([
+        {
+          $match: {
+            tournamentId: new Types.ObjectId(dto.tournamentId),
+            deletedAt: { $exists: false },
+          },
+        },
+        { $group: { _id: null, total: { $sum: '$prize' } } },
+      ]);
+      const usedPrize = agg?.total ?? 0;
+      if (usedPrize + dto.prize > (tournament.prizePool ?? 0)) {
+        throw new BadRequestException(
+          `Prize exceeds tournament budget. Used: ${usedPrize}, Available: ${(tournament.prizePool ?? 0) - usedPrize}`,
+        );
+      }
+    }
+
     return this.raceModel.create({
       ...dto,
       tournamentId: new Types.ObjectId(dto.tournamentId),
@@ -123,6 +142,30 @@ export class RacesService {
         'Cannot update a race that is live, finished, or has published results',
       );
     }
+
+    // Validate prize does not exceed tournament budget
+    if (dto.prize !== undefined) {
+      const tournament = await this.tournamentsService.findOne(
+        race.tournamentId.toString(),
+      );
+      const [agg] = await this.raceModel.aggregate<{ total: number }>([
+        {
+          $match: {
+            tournamentId: race.tournamentId,
+            deletedAt: { $exists: false },
+            _id: { $ne: race._id },
+          },
+        },
+        { $group: { _id: null, total: { $sum: '$prize' } } },
+      ]);
+      const usedPrize = agg?.total ?? 0;
+      if (usedPrize + dto.prize > (tournament.prizePool ?? 0)) {
+        throw new BadRequestException(
+          `Prize exceeds tournament budget. Used by other races: ${usedPrize}, Available: ${(tournament.prizePool ?? 0) - usedPrize}`,
+        );
+      }
+    }
+
     Object.assign(race, dto);
     return race.save();
   }

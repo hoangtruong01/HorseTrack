@@ -27,7 +27,10 @@ export class HorsesService {
 
   /** Owner creates a horse – ownerId comes from JWT */
   async create(dto: CreateHorseDto, ownerId: string): Promise<HorseDocument> {
-    return this.horseModel.create({ ...dto, ownerId: new Types.ObjectId(ownerId) });
+    return this.horseModel.create({
+      ...dto,
+      ownerId: new Types.ObjectId(ownerId),
+    });
   }
 
   private async findDocument(id: string): Promise<HorseDocument> {

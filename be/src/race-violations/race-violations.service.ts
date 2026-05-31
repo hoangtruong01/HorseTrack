@@ -58,9 +58,13 @@ export class RaceViolationsService {
     return this.violationModel.create({
       ...dto,
       raceId: new Types.ObjectId(dto.raceId),
-      raceRegistrationId: dto.raceRegistrationId ? new Types.ObjectId(dto.raceRegistrationId) : undefined,
+      raceRegistrationId: dto.raceRegistrationId
+        ? new Types.ObjectId(dto.raceRegistrationId)
+        : undefined,
       horseId: dto.horseId ? new Types.ObjectId(dto.horseId) : undefined,
-      jockeyUserId: dto.jockeyUserId ? new Types.ObjectId(dto.jockeyUserId) : undefined,
+      jockeyUserId: dto.jockeyUserId
+        ? new Types.ObjectId(dto.jockeyUserId)
+        : undefined,
       reportedBy: new Types.ObjectId(reportedBy),
     });
   }

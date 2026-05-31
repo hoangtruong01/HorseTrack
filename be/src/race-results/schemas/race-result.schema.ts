@@ -19,7 +19,12 @@ export enum RaceResultOutcome {
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class RaceResult {
-  @Prop({ type: Types.ObjectId, ref: 'Tournament', required: true, index: true })
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Tournament',
+    required: true,
+    index: true,
+  })
   tournamentId!: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'Race', required: true })

@@ -65,7 +65,10 @@ export class TournamentsService {
         'registrationStartDate must be before registrationEndDate',
       );
     }
-    return this.tournamentModel.create({ ...dto, createdBy: new Types.ObjectId(createdBy) });
+    return this.tournamentModel.create({
+      ...dto,
+      createdBy: new Types.ObjectId(createdBy),
+    });
   }
 
   async findAll(page = 1, limit = 20) {

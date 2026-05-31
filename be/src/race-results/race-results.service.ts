@@ -237,11 +237,9 @@ export class RaceResultsService {
       );
     }
 
-    // Calculate prize amounts from race prize fields
+    // Only the winner receives the prize
     const prizeByRank: Record<number, number> = {
-      1: race.prizeFirst ?? 0,
-      2: race.prizeSecond ?? 0,
-      3: race.prizeThird ?? 0,
+      1: race.prize ?? 0,
     };
 
     const now = new Date();
