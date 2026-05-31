@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
+import { PredictionsService } from '../predictions/predictions.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
 import {
@@ -47,6 +48,7 @@ export class RacesService {
     @InjectModel(RefereeAssignment.name)
     private refereeAssignmentModel: Model<RefereeAssignmentDocument>,
     private tournamentsService: TournamentsService,
+    private predictionsService: PredictionsService,
   ) {}
 
   async create(dto: CreateRaceDto, createdBy: string): Promise<RaceDocument> {
@@ -183,6 +185,10 @@ export class RacesService {
     // Guard: CHECKING → READY requires all checks passed + at least 1 referee accepted
     if (status === RaceStatus.READY) {
       await this.validateReadyConditions(id);
+    }
+
+    if (status === RaceStatus.CANCELLED) {
+      await this.predictionsService.cancelPredictionsForRace(id);
     }
 
     race.status = status;

@@ -18,14 +18,8 @@ export class Prediction {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   userId!: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Horse' })
-  predictedFirstHorseId?: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId, ref: 'Horse' })
-  predictedSecondHorseId?: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId, ref: 'Horse' })
-  predictedThirdHorseId?: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Horse', required: true })
+  predictedHorseId!: Types.ObjectId;
 
   @Prop({
     required: true,

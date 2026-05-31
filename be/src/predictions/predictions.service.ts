@@ -26,7 +26,7 @@ import { CreatePredictionDto } from './dto/create-prediction.dto';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
-const POSITION_POINTS = { first: 50, second: 30, third: 20 };
+const WINNER_POINTS = 50;
 
 @Injectable()
 export class PredictionsService {
@@ -56,28 +56,15 @@ export class PredictionsService {
       );
     }
 
-    const predicted = [
-      dto.predictedFirstHorseId,
-      dto.predictedSecondHorseId,
-      dto.predictedThirdHorseId,
-    ].filter(Boolean);
-    if (predicted.length === 0) {
+    const reg = await this.registrationModel.findOne({
+      raceId: dto.raceId,
+      horseId: dto.predictedHorseId,
+      status: RegistrationStatus.APPROVED,
+    });
+    if (!reg) {
       throw new BadRequestException(
-        'At least one predicted horse must be provided',
+        'Horse does not have an approved registration in this race',
       );
-    }
-
-    for (const horseId of predicted) {
-      const reg = await this.registrationModel.findOne({
-        raceId: dto.raceId,
-        horseId,
-        status: RegistrationStatus.APPROVED,
-      });
-      if (!reg) {
-        throw new BadRequestException(
-          `Horse ${horseId} does not have an approved registration in this race`,
-        );
-      }
     }
 
     const existing = await this.predictionModel.findOne({
@@ -85,23 +72,13 @@ export class PredictionsService {
       userId,
     });
     if (existing) {
-      throw new ConflictException(
-        'You already have a prediction for this race',
-      );
+      throw new ConflictException('You already have a prediction for this race');
     }
 
     return this.predictionModel.create({
       raceId: new Types.ObjectId(dto.raceId),
       userId: new Types.ObjectId(userId),
-      predictedFirstHorseId: dto.predictedFirstHorseId
-        ? new Types.ObjectId(dto.predictedFirstHorseId)
-        : undefined,
-      predictedSecondHorseId: dto.predictedSecondHorseId
-        ? new Types.ObjectId(dto.predictedSecondHorseId)
-        : undefined,
-      predictedThirdHorseId: dto.predictedThirdHorseId
-        ? new Types.ObjectId(dto.predictedThirdHorseId)
-        : undefined,
+      predictedHorseId: new Types.ObjectId(dto.predictedHorseId),
       status: PredictionStatus.PENDING,
     });
   }
@@ -112,9 +89,7 @@ export class PredictionsService {
       this.predictionModel
         .find(filter)
         .populate('raceId', 'name startTime status')
-        .populate('predictedFirstHorseId', 'name breed')
-        .populate('predictedSecondHorseId', 'name breed')
-        .populate('predictedThirdHorseId', 'name breed')
+        .populate('predictedHorseId', 'name breed')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -133,9 +108,7 @@ export class PredictionsService {
         .find()
         .populate('raceId', 'name startTime status')
         .populate('userId', 'fullName email')
-        .populate('predictedFirstHorseId', 'name')
-        .populate('predictedSecondHorseId', 'name')
-        .populate('predictedThirdHorseId', 'name')
+        .populate('predictedHorseId', 'name breed')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -156,59 +129,30 @@ export class PredictionsService {
   }
 
   async payoutBetsForRace(raceId: string): Promise<void> {
-    const results = await this.resultModel
-      .find({ raceId, status: RaceResultStatus.PUBLISHED })
-      .sort({ rank: 1 });
-
-    const actualFirst = results.find((r) => r.rank === 1);
-    const actualSecond = results.find((r) => r.rank === 2);
-    const actualThird = results.find((r) => r.rank === 3);
+    const winner = await this.resultModel.findOne({
+      raceId,
+      status: RaceResultStatus.PUBLISHED,
+      rank: 1,
+    });
 
     const predictions = await this.predictionModel.find({
       raceId,
       status: PredictionStatus.PENDING,
     });
-
     if (predictions.length === 0) return;
 
     const now = new Date();
-    const winners: {
-      predictionId: string;
-      userId: string;
-      rewardPoints: number;
-    }[] = [];
+    const winnerIds: { predictionId: string; userId: string }[] = [];
 
     const bulkOps = predictions.map((prediction) => {
-      let rewardPoints = 0;
+      const won =
+        winner != null &&
+        String(prediction.predictedHorseId) === String(winner.horseId);
 
-      if (
-        actualFirst &&
-        prediction.predictedFirstHorseId &&
-        String(prediction.predictedFirstHorseId) === String(actualFirst.horseId)
-      ) {
-        rewardPoints += POSITION_POINTS.first;
-      }
-      if (
-        actualSecond &&
-        prediction.predictedSecondHorseId &&
-        String(prediction.predictedSecondHorseId) ===
-          String(actualSecond.horseId)
-      ) {
-        rewardPoints += POSITION_POINTS.second;
-      }
-      if (
-        actualThird &&
-        prediction.predictedThirdHorseId &&
-        String(prediction.predictedThirdHorseId) === String(actualThird.horseId)
-      ) {
-        rewardPoints += POSITION_POINTS.third;
-      }
-
-      if (rewardPoints > 0) {
-        winners.push({
+      if (won) {
+        winnerIds.push({
           predictionId: String(prediction._id),
           userId: String(prediction.userId),
-          rewardPoints,
         });
       }
 
@@ -217,9 +161,8 @@ export class PredictionsService {
           filter: { _id: prediction._id },
           update: {
             $set: {
-              status:
-                rewardPoints > 0 ? PredictionStatus.WON : PredictionStatus.LOST,
-              rewardPoints,
+              status: won ? PredictionStatus.WON : PredictionStatus.LOST,
+              rewardPoints: won ? WINNER_POINTS : 0,
               evaluatedAt: now,
             },
           },
@@ -229,14 +172,13 @@ export class PredictionsService {
 
     await this.predictionModel.bulkWrite(bulkOps);
 
-    // Credit reward points to winners via ledger
     await Promise.all(
-      winners.map((winner) =>
+      winnerIds.map((w) =>
         this.ledgerService.credit({
-          userId: winner.userId,
-          points: winner.rewardPoints,
+          userId: w.userId,
+          points: WINNER_POINTS,
           sourceType: LedgerSourceType.PREDICTION_REWARD,
-          sourceId: winner.predictionId,
+          sourceId: w.predictionId,
           note: `Prediction reward for race ${raceId}`,
         }),
       ),
