@@ -10,6 +10,9 @@ export type AuthUser = {
   avatar?: string;
   roles: string[];
   status: string;
+  phone?: string;
+  address?: string;
+  dob?: string;
 };
 
 type AuthContextType = {
@@ -18,6 +21,15 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<AuthUser>;
   loginWithGoogle: (credential: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
+  register: (payload: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    dob?: string;
+    roles?: string[];
+    password?: string;
+  }) => Promise<AuthUser>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -104,8 +116,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const register = async (payload: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    dob?: string;
+    roles?: string[];
+    password?: string;
+  }): Promise<AuthUser> => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Đăng ký thất bại.");
+      }
+
+      setUser(data.user);
+      return data.user;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

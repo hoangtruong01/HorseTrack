@@ -5,7 +5,6 @@ import {
   UserCheck,
   Trophy,
   Target,
-  ArrowUpRight,
 } from "lucide-react";
 
 export default function AuthLayout({
@@ -41,14 +40,6 @@ export default function AuthLayout({
                 Race Control System
               </span>
             </span>
-          </Link>
-
-          <Link
-            href="/races"
-            className="flex items-center gap-1.5 text-sm font-bold text-white/60 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E10600]/70"
-          >
-            Preview race
-            <ArrowUpRight className="size-4" />
           </Link>
         </header>
 

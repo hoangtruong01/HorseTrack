@@ -1,22 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   RaceResult,
   RaceResultDocument,
   RaceResultStatus,
 } from '../race-results/schemas/race-result.schema';
 import { Race, RaceDocument } from '../races/schemas/race.schema';
-import {
-  Tournament,
-  TournamentDocument,
-} from '../tournaments/schemas/tournament.schema';
 import { Horse, HorseDocument } from '../horses/schemas/horse.schema';
 import {
   Prize,
   PrizeDocument,
   PrizePaymentStatus,
 } from './schemas/prize.schema';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
 @Injectable()
 export class PrizesService {
@@ -25,63 +23,99 @@ export class PrizesService {
     @InjectModel(RaceResult.name)
     private resultModel: Model<RaceResultDocument>,
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
-    @InjectModel(Tournament.name)
-    private tournamentModel: Model<TournamentDocument>,
     @InjectModel(Horse.name) private horseModel: Model<HorseDocument>,
+    private ledgerService: RewardPointLedgerService,
   ) {}
 
-  /** Automatically generate prizes when a race result is published */
+  /** Generate prize for the race winner when results are published and credit wallets */
   async createPrizesForRace(raceId: string): Promise<PrizeDocument[]> {
     const race = await this.raceModel.findById(raceId);
     if (!race) throw new NotFoundException('Race not found');
 
-    const tournament = await this.tournamentModel.findById(race.tournamentId);
-    if (!tournament) throw new NotFoundException('Tournament not found');
+    const totalPrize = race.prize ?? 0;
+    if (totalPrize === 0) return [];
 
-    const results = await this.resultModel.find({
+    const winnerResult = await this.resultModel.findOne({
       raceId,
       status: RaceResultStatus.PUBLISHED,
+      rank: 1,
     });
+    if (!winnerResult) return [];
 
-    const pool = tournament.prizePool ?? 0;
-    const prizes: PrizeDocument[] = [];
+    const horse = await this.horseModel.findById(winnerResult.horseId);
+    if (!horse) return [];
 
-    for (const res of results) {
-      // Look up horse owner
-      const horse = await this.horseModel.findById(res.horseId);
-      if (!horse) continue;
+    const createdPrizes: PrizeDocument[] = [];
 
-      let amount = 0;
-      if (res.rank === 1) {
-        amount = pool > 0 ? Math.round(pool * 0.5) : 5000;
-      } else if (res.rank === 2) {
-        amount = pool > 0 ? Math.round(pool * 0.3) : 3000;
-      } else if (res.rank === 3) {
-        amount = pool > 0 ? Math.round(pool * 0.2) : 2000;
-      }
+    // Calculate 70/30 split
+    const ownerAmount = Math.round(totalPrize * 0.7);
+    const jockeyAmount = totalPrize - ownerAmount;
 
-      if (amount > 0) {
-        // Prevent duplicate prize for the same horse and race
-        const existing = await this.prizeModel.findOne({
-          raceId,
-          horseId: res.horseId,
+    // 1. Process Horse Owner Prize (70%)
+    if (ownerAmount > 0 && horse.ownerId) {
+      const existingOwnerPrize = await this.prizeModel.findOne({
+        raceId,
+        horseId: winnerResult.horseId,
+        ownerId: horse.ownerId,
+      });
+
+      if (!existingOwnerPrize) {
+        // Credit owner's ledger directly
+        await this.ledgerService.credit({
+          userId: String(horse.ownerId),
+          points: ownerAmount,
+          sourceType: LedgerSourceType.RACE_WIN_REWARD,
+          sourceId: raceId,
+          note: `Received 70% winner reward for race "${race.name}" (Horse: ${horse.name})`,
         });
-        if (!existing) {
-          const prize = await this.prizeModel.create({
-            tournamentId: race.tournamentId,
-            raceId,
-            horseId: res.horseId,
-            ownerId: horse.ownerId,
-            rank: res.rank,
-            amount,
-            status: PrizePaymentStatus.PENDING,
-          });
-          prizes.push(prize);
-        }
+
+        const ownerPrize = await this.prizeModel.create({
+          tournamentId: race.tournamentId,
+          raceId: new Types.ObjectId(raceId),
+          horseId: winnerResult.horseId,
+          ownerId: horse.ownerId,
+          rank: 1,
+          amount: ownerAmount,
+          status: PrizePaymentStatus.PAID,
+          paidAt: new Date(),
+        });
+        createdPrizes.push(ownerPrize);
       }
     }
 
-    return prizes;
+    // 2. Process Jockey Prize (30%)
+    if (jockeyAmount > 0 && winnerResult.jockeyUserId) {
+      const existingJockeyPrize = await this.prizeModel.findOne({
+        raceId,
+        horseId: winnerResult.horseId,
+        ownerId: winnerResult.jockeyUserId,
+      });
+
+      if (!existingJockeyPrize) {
+        // Credit jockey's ledger directly
+        await this.ledgerService.credit({
+          userId: String(winnerResult.jockeyUserId),
+          points: jockeyAmount,
+          sourceType: LedgerSourceType.RACE_WIN_REWARD,
+          sourceId: raceId,
+          note: `Received 30% winner reward for race "${race.name}" (Jockey share)`,
+        });
+
+        const jockeyPrize = await this.prizeModel.create({
+          tournamentId: race.tournamentId,
+          raceId: new Types.ObjectId(raceId),
+          horseId: winnerResult.horseId,
+          ownerId: winnerResult.jockeyUserId,
+          rank: 1,
+          amount: jockeyAmount,
+          status: PrizePaymentStatus.PAID,
+          paidAt: new Date(),
+        });
+        createdPrizes.push(jockeyPrize);
+      }
+    }
+
+    return createdPrizes;
   }
 
   async findAll(page = 1, limit = 20) {

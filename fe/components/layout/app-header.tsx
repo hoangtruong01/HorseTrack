@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, User } from "lucide-react";
 
 import { publicNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
+
 export type AppHeaderProps = {
   className?: string;
   ctaHref?: string;
@@ -18,6 +20,7 @@ export function AppHeader({
   ctaLabel = "Get Started",
 }: AppHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header
@@ -57,19 +60,29 @@ export function AppHeader({
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            href="/login"
-            className="rounded-xl border border-white/5 bg-white/[0.02] px-5 py-2 text-sm font-bold text-white/70 transition hover:bg-white/[0.04] hover:text-white"
-          >
-            Login
-          </Link>
-          <Link
-            href={ctaHref}
-            className="rounded-xl bg-[#E10600] px-5 py-2 text-sm font-black uppercase tracking-wider text-white shadow-[0_4px_20px_rgba(225,6,0,0.25)] transition hover:scale-[1.02] hover:bg-[#B80500] active:scale-[0.98]"
-          >
-            {ctaLabel}
-          </Link>
+        <div className="hidden items-center gap-4 lg:flex">
+          {user ? (
+            <Link href="/profile" className="flex items-center gap-3 group focus:outline-none">
+              <div className="flex flex-col items-end">
+                <span className="text-[11px] font-black uppercase tracking-wider text-white group-hover:text-[#E10600] transition">
+                  {user.fullName}
+                </span>
+                <span className="text-[9px] font-black uppercase tracking-wider text-[#E10600]/80">
+                  {user.roles[0] || "spectator"}
+                </span>
+              </div>
+              <div className="flex size-9 items-center justify-center rounded-xl bg-white/[0.03] border border-white/5 text-white/60 group-hover:border-[#E10600]/30 group-hover:text-white transition">
+                <User className="size-4.5" />
+              </div>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-xl border border-white/5 bg-white/[0.02] px-5 py-2 text-sm font-bold text-white/70 transition hover:bg-white/[0.04] hover:text-white"
+            >
+              Login
+            </Link>
+          )}
         </div>
 
         <button
@@ -107,20 +120,36 @@ export function AppHeader({
             ))}
           </nav>
           <div className="mt-4 flex flex-col gap-2 border-t border-white/5 pt-4">
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex h-11 w-full items-center justify-center rounded-xl border border-white/5 text-sm font-bold text-white/70"
-            >
-              Login
-            </Link>
-            <Link
-              href={ctaHref}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex h-11 w-full items-center justify-center rounded-xl bg-[#E10600] text-sm font-bold text-white"
-            >
-              {ctaLabel}
-            </Link>
+            {user ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-white">
+                    {user.fullName}
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#E10600]">
+                    {user.roles[0] || "spectator"}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    logout();
+                  }}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#E10600] text-sm font-bold text-white cursor-pointer"
+                >
+                  <LogOut className="size-4" />
+                  Đăng xuất
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex h-11 w-full items-center justify-center rounded-xl border border-white/5 text-sm font-bold text-white/70"
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       )}

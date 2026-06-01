@@ -1,6 +1,12 @@
+"use client";
+
+import Link from "next/link";
+import { LogOut, User } from "lucide-react";
+
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav";
 import { dashboardNavigation } from "@/constants/navigation";
+import { useAuth } from "@/providers/auth-provider";
 import type { NavigationRole } from "@/types/navigation";
 
 export type RoleDashboardShellProps = {
@@ -24,9 +30,10 @@ export function RoleDashboardShell({
   children,
 }: RoleDashboardShellProps) {
   const roleItems = dashboardNavigation.filter((item) => item.role === role);
+  const { user, logout } = useAuth();
 
   return (
-    <div className="flex min-h-[calc(100vh-72px)]">
+    <div className="flex min-h-[calc(100vh-76px)]">
       <AppSidebar role={role} />
       <section className="min-w-0 flex-1 pb-24 lg:pb-0">
         <div className="border-b border-white/10 bg-white/[0.02]">

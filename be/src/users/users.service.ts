@@ -26,7 +26,10 @@ export class UsersService {
       email: dto.email,
       passwordHash,
       phone: dto.phone,
+      address: dto.address,
+      dob: dto.dob ? new Date(dto.dob) : undefined,
       avatar: dto.avatar,
+      roles: dto.roles,
     });
   }
 

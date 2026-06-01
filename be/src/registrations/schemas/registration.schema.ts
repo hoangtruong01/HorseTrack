@@ -8,6 +8,7 @@ export enum RegistrationStatus {
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
   CANCELLED = 'CANCELLED',
+  WITHDRAWN = 'WITHDRAWN',
 }
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
@@ -25,7 +26,7 @@ export class Registration {
   ownerId!: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
-  jockeyId?: Types.ObjectId;
+  jockeyUserId?: Types.ObjectId;
 
   @Prop({
     required: true,
@@ -35,10 +36,10 @@ export class Registration {
   status!: RegistrationStatus;
 
   @Prop()
-  rejectReason?: string;
+  note?: string;
 
   @Prop()
-  registeredAt?: Date;
+  rejectedReason?: string;
 
   @Prop()
   approvedAt?: Date;

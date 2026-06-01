@@ -2,6 +2,11 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RacesService } from '../races/races.service';
+import {
+  RefereeAssignment,
+  RefereeAssignmentDocument,
+  RefereeAssignmentStatus,
+} from '../referee-assignments/schemas/referee-assignment.schema';
 import { CreateRefereeReportDto } from './dto/create-report.dto';
 import {
   RefereeReport,
@@ -13,6 +18,8 @@ export class RefereeReportsService {
   constructor(
     @InjectModel(RefereeReport.name)
     private reportModel: Model<RefereeReportDocument>,
+    @InjectModel(RefereeAssignment.name)
+    private assignmentModel: Model<RefereeAssignmentDocument>,
     private racesService: RacesService,
   ) {}
 
@@ -20,17 +27,20 @@ export class RefereeReportsService {
     dto: CreateRefereeReportDto,
     refereeId: string,
   ): Promise<RefereeReportDocument> {
-    // 1. Verify race exists and referee is assigned to it
-    const race = await this.racesService.findOne(dto.raceId);
-    const isAssigned = race.refereeIds.some((rId) => String(rId) === refereeId);
-    if (!isAssigned) {
-      throw new ForbiddenException('You are not assigned to this race');
+    // Verify race exists and referee has an accepted assignment
+    await this.racesService.findOne(dto.raceId);
+    const assignment = await this.assignmentModel.findOne({
+      raceId: dto.raceId,
+      refereeUserId: refereeId,
+      status: RefereeAssignmentStatus.ACCEPTED,
+    });
+    if (!assignment) {
+      throw new ForbiddenException(
+        'You are not an accepted referee for this race',
+      );
     }
 
-    return this.reportModel.create({
-      ...dto,
-      refereeId,
-    });
+    return this.reportModel.create({ ...dto, refereeId });
   }
 
   async findByRace(raceId: string) {

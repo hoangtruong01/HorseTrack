@@ -1,0 +1,36 @@
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RoleName } from '../users/schemas/user.schema';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { AuditLogsService } from './audit-logs.service';
+
+@ApiTags('Audit Logs')
+@Controller('audit-logs')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RoleName.ADMIN)
+@ApiBearerAuth()
+export class AuditLogsController {
+  constructor(private readonly auditLogsService: AuditLogsService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'List audit logs (Admin)' })
+  @ApiQuery({ name: 'entityType', required: false })
+  findAll(
+    @Query() pagination: PaginationDto,
+    @Query('entityType') entityType?: string,
+  ) {
+    return this.auditLogsService.findAll(
+      pagination.page,
+      pagination.limit,
+      entityType,
+    );
+  }
+}

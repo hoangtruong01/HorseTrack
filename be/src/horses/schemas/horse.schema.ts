@@ -23,7 +23,10 @@ export enum HorseStatus {
   DELETED = 'DELETED',
 }
 
-@Schema({ timestamps: true, toObject: { virtuals: true } })
+@Schema({
+  timestamps: true,
+  toObject: { virtuals: true },
+})
 export class Horse {
   @Prop({ required: true })
   name!: string;
@@ -41,10 +44,10 @@ export class Horse {
   color?: string;
 
   @Prop()
-  weight?: number;
+  weightKg?: number;
 
   @Prop()
-  height?: number;
+  heightCm?: number;
 
   @Prop()
   dateOfBirth?: Date;
@@ -65,6 +68,12 @@ export class Horse {
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   ownerId!: Types.ObjectId;
+
+  @Prop({ default: 60, min: 30, max: 100 })
+  baseSpeed!: number;
+
+  @Prop({ default: 70, min: 30, max: 100 })
+  staminaScore!: number;
 
   @Prop()
   image?: string;

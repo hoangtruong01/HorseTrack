@@ -6,37 +6,45 @@ import { RoleName, UserStatus } from '../schemas/user.schema';
 export class UserResponseDto {
   @Expose()
   @ApiProperty()
-  id: string;
+  id!: string;
 
   @Expose()
   @ApiProperty()
-  fullName: string;
+  fullName!: string;
 
   @Expose()
   @ApiProperty()
-  email: string;
+  email!: string;
 
   @Expose()
   @ApiPropertyOptional()
-  phone: string;
+  phone?: string;
 
   @Expose()
   @ApiPropertyOptional()
-  avatar: string;
+  address?: string;
+
+  @Expose()
+  @ApiPropertyOptional()
+  dob?: Date;
+
+  @Expose()
+  @ApiPropertyOptional()
+  avatar?: string;
 
   @Expose()
   @ApiProperty({ enum: UserStatus })
-  status: UserStatus;
+  status!: UserStatus;
 
   @Expose()
   @ApiProperty({ enum: RoleName, isArray: true })
-  roles: RoleName[];
+  roles!: RoleName[];
 
   @Expose()
   @ApiProperty()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Expose()
   @ApiProperty()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

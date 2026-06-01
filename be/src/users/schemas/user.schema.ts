@@ -16,6 +16,7 @@ export enum RoleName {
   JOCKEY = 'jockey',
   REFEREE = 'referee',
   SPECTATOR = 'spectator',
+  COUNTER_STAFF = 'counter_staff',
 }
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
@@ -33,6 +34,12 @@ export class User {
   phone?: string;
 
   @Prop()
+  address?: string;
+
+  @Prop()
+  dob?: Date;
+
+  @Prop()
   avatar?: string;
 
   @Prop({ required: true, enum: UserStatus, default: UserStatus.ACTIVE })
@@ -40,6 +47,12 @@ export class User {
 
   @Prop({ type: [String], enum: RoleName, default: [RoleName.SPECTATOR] })
   roles!: RoleName[];
+
+  @Prop({ default: 0 })
+  points!: number;
+
+  @Prop({ default: 0 })
+  balance!: number;
 
   @Prop()
   deletedAt?: Date;

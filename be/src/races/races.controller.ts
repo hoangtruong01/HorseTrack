@@ -22,7 +22,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { RacesService } from './races.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
-import { RaceStatus } from './schemas/race.schema';
+import { UpdateRaceStatusDto } from './dto/update-race-status.dto';
 
 @ApiTags('Races')
 @Controller('races')
@@ -34,30 +34,14 @@ export class RacesController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create race (Admin)' })
-  create(@Body() dto: CreateRaceDto) {
-    return this.racesService.create(dto);
+  create(@Body() dto: CreateRaceDto, @CurrentUser() user: JwtUser) {
+    return this.racesService.create(dto, user.id);
   }
 
   @Get()
   @ApiOperation({ summary: 'List all races (public)' })
   findAll(@Query() pagination: PaginationDto) {
     return this.racesService.findAll(pagination.page, pagination.limit);
-  }
-
-  @Get('my-assigned')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleName.REFEREE)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'List races assigned to me (Referee)' })
-  findMyAssigned(
-    @Query() pagination: PaginationDto,
-    @CurrentUser() user: JwtUser,
-  ) {
-    return this.racesService.findMyAssigned(
-      user.id,
-      pagination.page,
-      pagination.limit,
-    );
   }
 
   @Get('tournament/:tournamentId')
@@ -93,8 +77,8 @@ export class RacesController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change race status (Admin)' })
-  updateStatus(@Param('id') id: string, @Body('status') status: RaceStatus) {
-    return this.racesService.updateStatus(id, status);
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateRaceStatusDto) {
+    return this.racesService.updateStatus(id, dto.status);
   }
 
   @Delete(':id')
