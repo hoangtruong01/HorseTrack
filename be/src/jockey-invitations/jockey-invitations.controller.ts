@@ -71,4 +71,11 @@ export class JockeyInvitationsController {
       pagination.limit,
     );
   }
+
+  @Patch(':id/cancel')
+  @Roles(RoleName.OWNER)
+  @ApiOperation({ summary: 'Cancel sent invitation (Owner only)' })
+  cancel(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+    return this.jockeyInvitationsService.cancel(id, user.id);
+  }
 }
