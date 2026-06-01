@@ -14,10 +14,10 @@ export class CreateRefereeReportDto {
   @IsMongoId()
   raceId!: string;
 
-  @ApiProperty({ example: '665abc123def456789012346' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ example: '665abc123def456789012346' })
+  @IsOptional()
   @IsMongoId()
-  horseId!: string;
+  horseId?: string;
 
   @ApiPropertyOptional({ enum: ReportType, default: ReportType.POST_RACE })
   @IsOptional()

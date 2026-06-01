@@ -16,6 +16,8 @@ import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
 import { RaceResultsService } from './race-results.service';
 import { CreateRaceResultDto } from './dto/create-race-result.dto';
+import { UpdateRaceResultDto } from './dto/update-race-result.dto';
+import { BulkRaceResultsDto } from './dto/bulk-race-results.dto';
 
 @ApiTags('Race Results')
 @Controller('race-results')
@@ -68,5 +70,31 @@ export class RaceResultsController {
   @ApiOperation({ summary: 'Publish results for a race (Admin)' })
   publish(@Param('raceId') raceId: string, @CurrentUser() user: JwtUser) {
     return this.raceResultsService.publishByRace(raceId, user.id);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.REFEREE, RoleName.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a race result (Referee/Admin)' })
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateRaceResultDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.raceResultsService.update(id, dto, user.id);
+  }
+
+  @Post('race/:raceId/bulk')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.REFEREE, RoleName.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Bulk record/update results for a race (Referee/Admin)' })
+  bulkCreate(
+    @Param('raceId') raceId: string,
+    @Body() dto: BulkRaceResultsDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.raceResultsService.bulkSave(raceId, dto, user.id);
   }
 }

@@ -16,8 +16,8 @@ export class RefereeReport {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   refereeId!: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Horse', required: true })
-  horseId!: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Horse' })
+  horseId?: Types.ObjectId;
 
   @Prop({
     required: true,

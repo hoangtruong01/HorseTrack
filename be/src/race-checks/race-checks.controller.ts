@@ -50,4 +50,15 @@ export class RaceChecksController {
   findByRace(@Param('raceId') raceId: string) {
     return this.service.findByRace(raceId);
   }
+
+  @Post('race/:raceId/initialize')
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.REFEREE)
+  @ApiOperation({ summary: 'Auto-initialize race checks for all approved registrations (Referee)' })
+  initialize(
+    @Param('raceId') raceId: string,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.service.initializeChecksForRace(raceId, user.id);
+  }
 }

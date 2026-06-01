@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -19,6 +20,8 @@ import {
   RefereeAssignmentStatus,
 } from '../referee-assignments/schemas/referee-assignment.schema';
 import { CreateRaceResultDto } from './dto/create-race-result.dto';
+import { UpdateRaceResultDto } from './dto/update-race-result.dto';
+import { BulkRaceResultsDto } from './dto/bulk-race-results.dto';
 import {
   RaceResult,
   RaceResultDocument,
@@ -625,5 +628,147 @@ export class RaceResultsService {
       dq.points = 0;
       await dq.save();
     }
+  }
+
+  async update(
+    id: string,
+    dto: UpdateRaceResultDto,
+    refereeUserId: string,
+  ): Promise<RaceResultDocument> {
+    const result = await this.resultModel.findById(id);
+    if (!result) {
+      throw new NotFoundException('Race result not found');
+    }
+
+    await this.validateRefereeAssigned(String(result.raceId), refereeUserId);
+
+    if (result.status !== RaceResultStatus.DRAFT) {
+      throw new BadRequestException('Only DRAFT results can be updated');
+    }
+
+    // Cross-field validation: rank ↔ outcome
+    if (dto.outcome !== undefined || dto.rank !== undefined) {
+      const outcome = dto.outcome ?? result.outcome;
+      const rank = dto.rank !== undefined ? dto.rank : result.rank;
+
+      if (outcome === RaceResultOutcome.FINISHED && !rank) {
+        throw new BadRequestException('rank is required when outcome is FINISHED');
+      }
+      if (outcome !== RaceResultOutcome.FINISHED && rank) {
+        throw new BadRequestException('rank must not be set for non-FINISHED outcomes');
+      }
+    }
+
+    if (dto.outcome !== undefined) result.outcome = dto.outcome;
+    if (dto.incident !== undefined) result.incident = dto.incident;
+    if (dto.rank !== undefined) result.rank = dto.rank;
+    if (dto.finishTimeMs !== undefined) result.finishTimeMs = dto.finishTimeMs;
+    if (dto.note !== undefined) result.note = dto.note;
+
+    if (result.outcome === RaceResultOutcome.FINISHED && result.rank) {
+      result.points = POINTS_MAP[result.rank] ?? DEFAULT_POINTS;
+    } else {
+      result.points = 0;
+      result.rank = undefined;
+      result.finishTimeMs = undefined;
+    }
+
+    return result.save();
+  }
+
+  async bulkSave(
+    raceId: string,
+    dto: BulkRaceResultsDto,
+    refereeUserId: string,
+  ): Promise<RaceResultDocument[]> {
+    const race = await this.racesService.findOne(raceId);
+
+    if (
+      race.status !== RaceStatus.LIVE &&
+      race.status !== RaceStatus.FINISHED
+    ) {
+      throw new BadRequestException(
+        'Can only record results for LIVE or FINISHED races',
+      );
+    }
+
+    await this.validateRefereeAssigned(raceId, refereeUserId);
+
+    // Save/update each result
+    for (const item of dto.results) {
+      // Find existing result
+      let result = await this.resultModel.findOne({
+        raceId,
+        horseId: item.horseId,
+      });
+
+      const points =
+        item.outcome === RaceResultOutcome.FINISHED && item.rank
+          ? (POINTS_MAP[item.rank] ?? DEFAULT_POINTS)
+          : 0;
+
+      if (result) {
+        if (result.status !== RaceResultStatus.DRAFT) {
+          throw new BadRequestException(
+            `Result for horse ${item.horseId} has already been confirmed/published and cannot be updated`,
+          );
+        }
+
+        result.outcome = item.outcome;
+        result.incident = item.incident ?? RaceIncident.NONE;
+        result.rank = item.rank;
+        result.finishTimeMs = item.finishTimeMs;
+        result.note = item.note;
+        result.points = points;
+        await result.save();
+      } else {
+        // Validate registration
+        const registration = await this.registrationModel.findById(
+          item.raceRegistrationId,
+        );
+        if (
+          !registration ||
+          registration.status !== RegistrationStatus.APPROVED
+        ) {
+          throw new BadRequestException(
+            `Registration ${item.raceRegistrationId} not found or not approved for this race`,
+          );
+        }
+
+        await this.resultModel.create({
+          tournamentId: race.tournamentId,
+          raceId: new Types.ObjectId(raceId),
+          raceRegistrationId: new Types.ObjectId(item.raceRegistrationId),
+          horseId: new Types.ObjectId(item.horseId),
+          ownerId: registration.ownerId,
+          jockeyUserId: registration.jockeyUserId,
+          rank: item.rank,
+          finishTimeMs: item.finishTimeMs,
+          outcome: item.outcome,
+          incident: item.incident ?? RaceIncident.NONE,
+          points,
+          prizeAmount: 0,
+          status: RaceResultStatus.DRAFT,
+          recordedBy: new Types.ObjectId(refereeUserId),
+          note: item.note,
+        });
+      }
+    }
+
+    // Auto-update race status to FINISHED if it was LIVE
+    if (race.status === RaceStatus.LIVE) {
+      await this.racesService.updateStatus(raceId, RaceStatus.FINISHED);
+    }
+
+    // Apply violations and recalculate ranks
+    await this.applyViolationsToResults(raceId);
+
+    return this.resultModel
+      .find({ raceId })
+      .populate('horseId', 'name breed')
+      .populate('jockeyUserId', 'fullName')
+      .populate('recordedBy', 'fullName')
+      .sort({ rank: 1 })
+      .exec();
   }
 }

@@ -164,4 +164,47 @@ export class RaceChecksService {
 
     return passedCount >= approvedCount;
   }
+
+  async initializeChecksForRace(
+    raceId: string,
+    refereeUserId: string,
+  ): Promise<RaceCheckDocument[]> {
+    // Validate referee is assigned to this race
+    const assignment = await this.assignmentModel.findOne({
+      raceId,
+      refereeUserId,
+      status: RefereeAssignmentStatus.ACCEPTED,
+    });
+    if (!assignment) {
+      throw new ForbiddenException(
+        'You must have an accepted referee assignment to initialize race checks',
+      );
+    }
+
+    const registrations = await this.registrationModel.find({
+      raceId,
+      status: RegistrationStatus.APPROVED,
+    });
+
+    const checks: RaceCheckDocument[] = [];
+    for (const reg of registrations) {
+      let check = await this.checkModel.findOne({
+        raceId,
+        raceRegistrationId: reg._id,
+      });
+
+      if (!check) {
+        check = await this.checkModel.create({
+          raceId: new Types.ObjectId(raceId),
+          raceRegistrationId: reg._id,
+          horseId: reg.horseId,
+          checkedBy: new Types.ObjectId(refereeUserId),
+          status: RaceCheckStatus.PENDING,
+          jockeyCheckedIn: false,
+        });
+      }
+      checks.push(check);
+    }
+    return checks;
+  }
 }

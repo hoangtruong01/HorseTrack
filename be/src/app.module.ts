@@ -28,6 +28,7 @@ import { TournamentsModule } from './tournaments/tournaments.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { UsersModule } from './users/users.module';
 import { WalletModule } from './wallet/wallet.module';
+import { RefereeReportsModule } from './referee-reports/referee-reports.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { WalletModule } from './wallet/wallet.module';
     RaceViolationsModule,
     RewardPointLedgerModule,
     BankTransactionsModule,
+    RefereeReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -74,9 +74,9 @@ export class RacesController {
 
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.REFEREE)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Change race status (Admin)' })
+  @ApiOperation({ summary: 'Change race status (Admin/Referee)' })
   updateStatus(@Param('id') id: string, @Body() dto: UpdateRaceStatusDto) {
     return this.racesService.updateStatus(id, dto.status);
   }
