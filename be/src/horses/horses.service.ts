@@ -72,17 +72,17 @@ export class HorsesService {
 
     const data = await Promise.all(
       docs.map(async (d) => {
-        const json = d.toJSON() as any;
+        const json = d.toJSON() as unknown as HorseJson;
         const [totalRaces, wins] = await Promise.all([
           this.resultModel.countDocuments({
             horseId: d._id,
             status: RaceResultStatus.PUBLISHED,
-          } as any),
+          }),
           this.resultModel.countDocuments({
             horseId: d._id,
             status: RaceResultStatus.PUBLISHED,
             rank: 1,
-          } as any),
+          }),
         ]);
         json.totalRaces = totalRaces;
         json.wins = wins;
@@ -111,17 +111,17 @@ export class HorsesService {
 
     const data = await Promise.all(
       docs.map(async (d) => {
-        const json = d.toJSON() as any;
+        const json = d.toJSON() as unknown as HorseJson;
         const [totalRaces, wins] = await Promise.all([
           this.resultModel.countDocuments({
             horseId: d._id,
             status: RaceResultStatus.PUBLISHED,
-          } as any),
+          }),
           this.resultModel.countDocuments({
             horseId: d._id,
             status: RaceResultStatus.PUBLISHED,
             rank: 1,
-          } as any),
+          }),
         ]);
         json.totalRaces = totalRaces;
         json.wins = wins;
@@ -138,21 +138,21 @@ export class HorsesService {
   /** Get single horse by id */
   async findOne(id: string): Promise<HorseJson> {
     const doc = await this.findDocument(id);
-    const json = doc.toJSON();
+    const json = doc.toJSON() as unknown as HorseJson;
     const [totalRaces, wins] = await Promise.all([
       this.resultModel.countDocuments({
         horseId: new Types.ObjectId(id),
         status: RaceResultStatus.PUBLISHED,
-      } as any),
+      }),
       this.resultModel.countDocuments({
         horseId: new Types.ObjectId(id),
         status: RaceResultStatus.PUBLISHED,
         rank: 1,
-      } as any),
+      }),
     ]);
     json.totalRaces = totalRaces;
     json.wins = wins;
-    return json as HorseJson;
+    return json;
   }
 
   /**
