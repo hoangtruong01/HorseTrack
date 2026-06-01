@@ -30,7 +30,17 @@ Do not generate:
 - Grand Final
 - Season points
 - Complex leaderboard aggregation
-- Betting/payment flow unless explicitly requested
+- Gambling/betting flow (spectators can predict, but no real money betting, though deposit simulations and wallet points ledgers are included)
+- Traditional credit card payment flow
+
+**Allowed / Required Scope:**
+- Reward points ledger & wallet transactions (1 point = 100 VND)
+- Owner & Jockey Cashout request submission (mock points validation)
+- Admin Cashout approval queue
+- Pre-race checklist (Jockey roll-call, horse health, equipment)
+- Referee violations panel (Minor, Major, Critical time penalties + Disqualified)
+- Race automatic simulation button
+- Google Login integration
 
 ## UI style
 
@@ -84,6 +94,13 @@ Create reusable components:
 - RaceStatusTimeline
 - RaceRankingTable
 - PredictionPanel
+- WalletBalance
+- TransactionHistory
+- CashoutRequestForm
+- CashoutApprovalQueue
+- AuditLogsViewer
+- RaceChecklist
+- ViolationQuickAdd
 
 Keep:
 

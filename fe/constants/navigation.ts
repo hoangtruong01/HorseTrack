@@ -1,6 +1,7 @@
 import {
   Bell,
   ClipboardCheck,
+  FileText,
   Flag,
   Gauge,
   Home,
@@ -9,6 +10,7 @@ import {
   ShieldCheck,
   Trophy,
   Users,
+  Wallet,
 } from "lucide-react";
 
 import type { NavigationItem } from "@/types/navigation";
@@ -61,6 +63,20 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Per-race result review and publish queue.",
   },
   {
+    title: "Cashout Queue",
+    href: "/admin/cashouts",
+    role: "Admin",
+    icon: Wallet,
+    description: "Process points redemption requests for Owners and Jockeys.",
+  },
+  {
+    title: "Audit Logs",
+    href: "/admin/audit-logs",
+    role: "Admin",
+    icon: FileText,
+    description: "View system operations and secure transactions trails.",
+  },
+  {
     title: "Owner home",
     href: "/owner",
     role: "Owner",
@@ -68,11 +84,25 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Stable shell for horses, registration, jockey handoff.",
   },
   {
+    title: "My Wallet",
+    href: "/owner/wallet",
+    role: "Owner",
+    icon: Wallet,
+    description: "View rewards ledger, split earnings, and request cashouts.",
+  },
+  {
     title: "Jockey home",
     href: "/jockey",
     role: "Jockey",
     icon: Flag,
     description: "Mobile-first assignment and schedule shell.",
+  },
+  {
+    title: "My Wallet",
+    href: "/jockey/wallet",
+    role: "Jockey",
+    icon: Wallet,
+    description: "View jockey splitting rewards ledger and cashouts.",
   },
   {
     title: "Referee home",

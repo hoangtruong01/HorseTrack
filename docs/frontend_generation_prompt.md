@@ -22,9 +22,13 @@ Each Race has:
 - participants
 - jockey assignment
 - referee
-- live status
-- result
-- ranking
+- pre-race checklist (Jockey roll-call, horse health, equipment check)
+- violations (Minor, Major, Critical time penalties + Disqualified)
+- live status & automatic result simulation
+- result & ranking
+- winner reward split (70% Horse Owner, 30% Jockey)
+
+Wallet, Reward Points Ledger (1 point = 100 VND) and Cashout Request (withdrawal) management for Owner, Jockey, and Admin ARE in MVP scope.
 
 Do not create RaceRound, Stage, Bracket, Playoff, Grand Final, Qualification, or Season Point flow.
 
