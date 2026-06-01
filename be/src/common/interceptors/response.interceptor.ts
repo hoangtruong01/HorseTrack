@@ -14,12 +14,25 @@ export interface ApiResponse<T> {
   meta?: Record<string, unknown>;
 }
 
+interface WithToJSON {
+  toJSON(): unknown;
+}
+
+function hasToJSON(val: unknown): val is WithToJSON {
+  return (
+    val !== null &&
+    typeof val === 'object' &&
+    'toJSON' in val &&
+    typeof (val as WithToJSON).toJSON === 'function'
+  );
+}
+
 function toPlainObject(val: unknown): unknown {
   if (!val) return val;
 
   // If it's a Mongoose Document, convert to JSON
-  if (val && typeof val === 'object' && typeof (val as any).toJSON === 'function') {
-    return (val as any).toJSON();
+  if (hasToJSON(val)) {
+    return val.toJSON();
   }
 
   // If it's an array, map over its elements
