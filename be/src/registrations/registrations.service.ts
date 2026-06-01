@@ -134,10 +134,11 @@ export class RegistrationsService {
     });
   }
 
-  async findAll(page = 1, limit = 20, tournamentId?: string, raceId?: string) {
+  async findAll(page = 1, limit = 20, tournamentId?: string, raceId?: string, status?: string) {
     const filter: Record<string, unknown> = {};
     if (tournamentId) filter.tournamentId = tournamentId;
     if (raceId) filter.raceId = raceId;
+    if (status) filter.status = status;
 
     const [data, total] = await Promise.all([
       this.registrationModel

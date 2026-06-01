@@ -14,8 +14,13 @@ import {
   RegistrationDocument,
   RegistrationStatus,
 } from '../registrations/schemas/registration.schema';
+import {
+  RaceResult,
+  RaceResultDocument,
+  RaceResultStatus,
+} from '../race-results/schemas/race-result.schema';
 
-type HorseJson = Horse & { id: string };
+type HorseJson = Horse & { id: string; totalRaces?: number; wins?: number };
 
 @Injectable()
 export class HorsesService {
@@ -23,6 +28,8 @@ export class HorsesService {
     @InjectModel(Horse.name) private horseModel: Model<HorseDocument>,
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
+    @InjectModel(RaceResult.name)
+    private resultModel: Model<RaceResultDocument>,
   ) {}
 
   /** Owner creates a horse – ownerId comes from JWT */
@@ -62,8 +69,22 @@ export class HorsesService {
         .exec(),
       this.horseModel.countDocuments(filter),
     ]);
+
+    const data = await Promise.all(
+      docs.map(async (d) => {
+        const json = d.toJSON() as any;
+        const [totalRaces, wins] = await Promise.all([
+          this.resultModel.countDocuments({ horseId: d._id, status: RaceResultStatus.PUBLISHED } as any),
+          this.resultModel.countDocuments({ horseId: d._id, status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+        ]);
+        json.totalRaces = totalRaces;
+        json.wins = wins;
+        return json;
+      }),
+    );
+
     return {
-      data: docs.map((d) => d.toJSON()),
+      data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
@@ -80,15 +101,37 @@ export class HorsesService {
         .exec(),
       this.horseModel.countDocuments(filter),
     ]);
+
+    const data = await Promise.all(
+      docs.map(async (d) => {
+        const json = d.toJSON() as any;
+        const [totalRaces, wins] = await Promise.all([
+          this.resultModel.countDocuments({ horseId: d._id, status: RaceResultStatus.PUBLISHED } as any),
+          this.resultModel.countDocuments({ horseId: d._id, status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+        ]);
+        json.totalRaces = totalRaces;
+        json.wins = wins;
+        return json;
+      }),
+    );
+
     return {
-      data: docs.map((d) => d.toJSON()),
+      data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
 
   /** Get single horse by id */
   async findOne(id: string): Promise<HorseJson> {
-    return (await this.findDocument(id)).toJSON() as HorseJson;
+    const doc = await this.findDocument(id);
+    const json = doc.toJSON() as any;
+    const [totalRaces, wins] = await Promise.all([
+      this.resultModel.countDocuments({ horseId: new Types.ObjectId(id), status: RaceResultStatus.PUBLISHED } as any),
+      this.resultModel.countDocuments({ horseId: new Types.ObjectId(id), status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+    ]);
+    json.totalRaces = totalRaces;
+    json.wins = wins;
+    return json as HorseJson;
   }
 
   /**

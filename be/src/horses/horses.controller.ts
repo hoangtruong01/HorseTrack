@@ -120,8 +120,8 @@ export class HorsesController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'List all horses (Admin)' })
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
+  @ApiOperation({ summary: 'List all horses (Admin & Spectators)' })
   findAll(@Query() pagination: PaginationDto) {
     return this.horsesService.findAll(pagination.page, pagination.limit);
   }

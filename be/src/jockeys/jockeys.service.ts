@@ -12,11 +12,18 @@ import { RoleName } from '../users/schemas/user.schema';
 import { CreateJockeyProfileDto } from './dto/create-jockey.dto';
 import { UpdateJockeyProfileDto } from './dto/update-jockey.dto';
 import { Jockey, JockeyDocument, JockeyStatus } from './schemas/jockey.schema';
+import {
+  RaceResult,
+  RaceResultDocument,
+  RaceResultStatus,
+} from '../race-results/schemas/race-result.schema';
 
 @Injectable()
 export class JockeysService {
   constructor(
     @InjectModel(Jockey.name) private jockeyModel: Model<JockeyDocument>,
+    @InjectModel(RaceResult.name)
+    private resultModel: Model<RaceResultDocument>,
     private usersService: UsersService,
   ) {}
 
@@ -46,7 +53,7 @@ export class JockeysService {
 
   async findAll(page = 1, limit = 20) {
     const filter = { status: { $ne: JockeyStatus.UNAVAILABLE } };
-    const [data, total] = await Promise.all([
+    const [docs, total] = await Promise.all([
       this.jockeyModel
         .find(filter)
         .populate('userId', 'fullName email phone avatar')
@@ -56,13 +63,28 @@ export class JockeysService {
         .exec(),
       this.jockeyModel.countDocuments(filter),
     ]);
+
+    const data = await Promise.all(
+      docs.map(async (d) => {
+        const json = d.toJSON() as any;
+        const userId = d.userId?._id || d.userId;
+        const [totalRaces, wins] = await Promise.all([
+          this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED } as any),
+          this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+        ]);
+        json.totalRaces = totalRaces;
+        json.wins = wins;
+        return json;
+      }),
+    );
+
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
 
-  async findByUserId(userId: string): Promise<JockeyDocument> {
+  async findByUserId(userId: string): Promise<any> {
     const jockey = await this.jockeyModel
       .findOne({ userId })
       .populate('userId', 'fullName email phone avatar')
@@ -70,10 +92,19 @@ export class JockeysService {
     if (!jockey) {
       throw new NotFoundException('Jockey profile not found');
     }
-    return jockey;
+
+    const [totalRaces, wins] = await Promise.all([
+      this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED } as any),
+      this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+    ]);
+
+    const json = jockey.toJSON() as any;
+    json.totalRaces = totalRaces;
+    json.wins = wins;
+    return json;
   }
 
-  async findOne(id: string): Promise<JockeyDocument> {
+  async findOne(id: string): Promise<any> {
     const jockey = await this.jockeyModel
       .findById(id)
       .populate('userId', 'fullName email phone avatar')
@@ -81,7 +112,17 @@ export class JockeysService {
     if (!jockey) {
       throw new NotFoundException('Jockey profile not found');
     }
-    return jockey;
+
+    const userId = jockey.userId?._id || jockey.userId;
+    const [totalRaces, wins] = await Promise.all([
+      this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED } as any),
+      this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+    ]);
+
+    const json = jockey.toJSON() as any;
+    json.totalRaces = totalRaces;
+    json.wins = wins;
+    return json;
   }
 
   async update(

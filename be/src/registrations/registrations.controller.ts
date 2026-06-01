@@ -42,20 +42,23 @@ export class RegistrationsController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'List all registrations (Admin)' })
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
+  @ApiOperation({ summary: 'List all registrations (Admin / Spectators)' })
   @ApiQuery({ name: 'tournamentId', required: false })
   @ApiQuery({ name: 'raceId', required: false })
+  @ApiQuery({ name: 'status', required: false })
   findAll(
     @Query() pagination: PaginationDto,
     @Query('tournamentId') tournamentId?: string,
     @Query('raceId') raceId?: string,
+    @Query('status') status?: string,
   ) {
     return this.registrationsService.findAll(
       pagination.page,
       pagination.limit,
       tournamentId,
       raceId,
+      status,
     );
   }
 
