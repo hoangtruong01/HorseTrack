@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { LogOut, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { dashboardNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,24 @@ export function AppSidebar({
   role,
 }: AppSidebarProps) {
   const { user, logout } = useAuth();
+  const pathname = usePathname();
+  const [currentHref, setCurrentHref] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Hàm cập nhật URL bao gồm cả query params
+      const updateHref = () => {
+        setCurrentHref(window.location.pathname + window.location.search);
+      };
+      
+      updateHref();
+      
+      // Lắng nghe các sự kiện thay đổi URL (chuyển đổi trang)
+      window.addEventListener("popstate", updateHref);
+      return () => window.removeEventListener("popstate", updateHref);
+    }
+  }, [pathname]);
+
   const visibleItems = role
     ? items.filter((item) => item.role === role)
     : items;
@@ -51,7 +71,11 @@ export function AppSidebar({
         <nav className="space-y-2">
           {visibleItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeHref === item.href;
+            // Xác định active dựa trên cả path và query param
+            const isActive =
+              currentHref === item.href ||
+              activeHref === item.href ||
+              (item.href === pathname && !currentHref.includes("?tab="));
 
             return (
               <Link

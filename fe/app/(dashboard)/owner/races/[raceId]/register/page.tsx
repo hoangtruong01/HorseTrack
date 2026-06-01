@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 import { RaceRegistrationForm } from "@/features/registrations/components/race-registration-form";
 import type { Horse } from "@/features/horses/components/horse-card";
 import { toast } from "sonner";
