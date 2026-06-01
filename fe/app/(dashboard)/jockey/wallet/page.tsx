@@ -19,8 +19,8 @@ export default function JockeyWalletPage() {
   const [transactions, setTransactions] = useState([...mockTransactions]);
   const [showCashoutForm, setShowCashoutForm] = useState(false);
 
-  const handleCashoutSubmit = (points: number, bankAccount: string, bankName: string) => {
-    addCashoutRequest(userId, userFullName, "Jockey", points, bankAccount, bankName);
+  const handleCashoutSubmit = (points: number) => {
+    addCashoutRequest(userId, userFullName, "Jockey", points);
     // Refresh states
     setBalance(mockWalletBalances[userId]);
     setTransactions([...mockTransactions]);

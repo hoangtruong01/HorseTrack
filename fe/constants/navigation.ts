@@ -118,4 +118,11 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Bell,
     description: "Race view, prediction, notification shell.",
   },
+  {
+    title: "My Wallet",
+    href: "/spectator/wallet",
+    role: "Spectator",
+    icon: Wallet,
+    description: "Xem điểm thưởng free tích lũy từ dự đoán và đổi thưởng tại quầy.",
+  },
 ];

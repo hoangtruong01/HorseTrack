@@ -102,7 +102,7 @@ export function AuditLogsViewer({ logs }: AuditLogsViewerProps) {
 
                     {/* Date */}
                     <td className="px-4 py-4 text-white/60">
-                      {new Date(log.createdAt).toLocaleString()}
+                      {new Date(log.createdAt).toLocaleString('vi-VN')}
                     </td>
                   </tr>
                 );

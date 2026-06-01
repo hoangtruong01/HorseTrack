@@ -14,6 +14,31 @@ export interface ApiResponse<T> {
   meta?: Record<string, unknown>;
 }
 
+function toPlainObject(val: unknown): unknown {
+  if (!val) return val;
+
+  // If it's a Mongoose Document, convert to JSON
+  if (val && typeof val === 'object' && typeof (val as any).toJSON === 'function') {
+    return (val as any).toJSON();
+  }
+
+  // If it's an array, map over its elements
+  if (Array.isArray(val)) {
+    return val.map(toPlainObject);
+  }
+
+  // If it's a plain object, recursively map its keys
+  if (val && typeof val === 'object' && val.constructor === Object) {
+    const res: Record<string, unknown> = {};
+    for (const key of Object.keys(val)) {
+      res[key] = toPlainObject((val as Record<string, unknown>)[key]);
+    }
+    return res;
+  }
+
+  return val;
+}
+
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<
   T,
@@ -45,10 +70,11 @@ export class ResponseInterceptor<T> implements NestInterceptor<
         return {
           success: true,
           message: 'Success',
-          data: responseData as T,
+          data: toPlainObject(responseData) as T,
           ...(meta ? { meta } : {}),
         };
       }),
     );
   }
 }
+

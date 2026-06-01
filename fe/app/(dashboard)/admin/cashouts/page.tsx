@@ -21,9 +21,9 @@ export default function AdminCashoutsPage() {
   return (
     <main className="space-y-6 max-w-6xl mx-auto">
       <PageHeader
-        eyebrow="Redemptions"
-        title="Points Cashout Management"
-        description="Verify owner/jockey bank withdrawal requests, audit points conversions, and record wire transfer completions."
+        eyebrow="Đổi Thưởng Vật Lý"
+        title="Quản Lý Quầy Đổi Thưởng"
+        description="Xác nhận mã quy đổi thưởng của Khán giả, Chủ ngựa, Nài ngựa tại quầy giao dịch vật lý và đối soát điểm Ledger hệ thống."
       />
       <CashoutApprovalQueue requests={requests} onAction={handleAction} />
     </main>

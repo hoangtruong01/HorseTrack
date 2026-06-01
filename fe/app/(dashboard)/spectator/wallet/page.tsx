@@ -12,15 +12,15 @@ import {
   addCashoutRequest,
 } from "@/features/wallet/mock-wallet";
 
-export default function OwnerWalletPage() {
-  const userId = "user-owner-1";
-  const userFullName = "Hoàng Trường";
+export default function SpectatorWalletPage() {
+  const userId = "user-spectator-1";
+  const userFullName = "Khán giả Đẹp Trai";
   const [balance, setBalance] = useState(mockWalletBalances[userId] || 0);
   const [transactions, setTransactions] = useState([...mockTransactions]);
   const [showCashoutForm, setShowCashoutForm] = useState(false);
 
   const handleCashoutSubmit = (points: number) => {
-    addCashoutRequest(userId, userFullName, "Owner", points);
+    addCashoutRequest(userId, userFullName, "Spectator", points);
     // Refresh states
     setBalance(mockWalletBalances[userId]);
     setTransactions([...mockTransactions]);
@@ -31,15 +31,15 @@ export default function OwnerWalletPage() {
     <main className="space-y-6 max-w-5xl mx-auto">
       <PageHeader
         eyebrow="My Wallet"
-        title="Owner Earnings"
-        description="Check your reward point balance from independent race winnings (70% split) and request cashout withdrawals."
+        title="Spectator Points"
+        description="Theo dõi điểm thưởng tích lũy từ các lượt dự đoán miễn phí (Đúng +1 điểm, Sai -1 điểm) và tiến hành tạo mã quy đổi nhận quà tại quầy vật lý."
       />
 
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         <div className="lg:col-span-5 space-y-6">
           <WalletBalance
             points={balance}
-            role="Owner"
+            role="Spectator"
             onRefresh={() => setBalance(mockWalletBalances[userId])}
             onRequestCashout={() => setShowCashoutForm(true)}
           />

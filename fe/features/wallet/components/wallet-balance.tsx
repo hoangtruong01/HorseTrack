@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, DollarSign, RefreshCw, TrendingUp } from "lucide-react";
+import { Award, Gift, RefreshCw, Star } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -10,12 +10,11 @@ export type WalletBalanceProps = {
   points: number;
   onRefresh?: () => void;
   onRequestCashout?: () => void;
-  role: "Owner" | "Jockey";
+  role: "Owner" | "Jockey" | "Spectator";
 };
 
 export function WalletBalance({ points, onRefresh, onRequestCashout, role }: WalletBalanceProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const vndValue = points * 100;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -23,22 +22,37 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
     // Simulate API latency
     await new Promise((resolve) => setTimeout(resolve, 800));
     setIsRefreshing(false);
-    toast.success("Wallet balance refreshed successfully!");
+    toast.success("Đã làm mới số dư điểm thưởng!");
+  };
+
+  const getRoleLabel = () => {
+    switch (role) {
+      case "Owner":
+        return "Chủ ngựa (Owner)";
+      case "Jockey":
+        return "Nài ngựa (Jockey)";
+      case "Spectator":
+        return "Khán giả (Spectator)";
+      default:
+        return role;
+    }
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(21,21,30,0.95),rgba(28,28,37,0.95))] p-6 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
-      {/* Decorative accent */}
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(21,21,30,0.95),rgba(28,28,37,0.95))] p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
+      {/* Decorative radial gradients */}
       <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
-      <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
+      <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-emerald-500/5 blur-3xl" />
+      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
 
-      <div className="flex items-center justify-between">
+      {/* Wallet Header */}
+      <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">
-            Reward Point Wallet
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">
+            Ví Điểm Thưởng Free
           </p>
-          <p className="text-[10px] mt-1 text-muted-foreground uppercase tracking-widest">
-            Role: {role}
+          <p className="text-[10px] mt-1 text-muted-foreground uppercase tracking-widest font-bold">
+            Vai trò: {getRoleLabel()}
           </p>
         </div>
         <Button
@@ -47,64 +61,61 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
           onClick={handleRefresh}
           className="size-9 rounded-full border border-white/10 text-white/60 hover:text-white hover:bg-white/5"
           disabled={isRefreshing}
-          aria-label="Refresh wallet balance"
+          aria-label="Làm mới số dư"
         >
           <RefreshCw className={`size-4 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
         </Button>
       </div>
 
-      <div className="mt-6 grid gap-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-            Available Rewards Balance
+      {/* Stacked Balance Cards to prevent overflow */}
+      <div className="mt-5 space-y-4">
+        {/* Available Points card */}
+        <div className="relative overflow-hidden rounded-xl border border-white/5 bg-white/[0.02] p-5">
+          <span className="text-[10px] font-black uppercase tracking-wider text-white/50 flex items-center gap-1.5">
+            <Star className="size-3.5 text-primary fill-primary animate-pulse" /> Điểm thưởng khả dụng hiện tại
           </span>
-          <div className="flex items-baseline gap-2">
+          <div className="mt-1 flex items-baseline gap-2">
             <span className="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono">
-              {points.toLocaleString()}
+              {points.toLocaleString('vi-VN')}
             </span>
             <span className="text-xs font-black uppercase tracking-widest text-primary">
-              Points
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-1 border-t border-white/10 pt-4 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
-          <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <TrendingUp className="size-3.5 text-emerald-500" /> Estimated Value (1 pt = 100 VND)
-          </span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl sm:text-4xl font-black tracking-tight text-emerald-400 font-mono">
-              {vndValue.toLocaleString()}
-            </span>
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-500">
-              VND
+              Điểm
             </span>
           </div>
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      {/* Buttons Actions */}
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         {onRequestCashout && (
           <Button
             onClick={onRequestCashout}
-            className="h-12 flex-1 rounded-full font-black uppercase tracking-wider text-white shadow-[0_4px_16px_rgba(225,6,0,0.3)] bg-primary hover:bg-[#B80500] hover:shadow-[0_4px_20px_rgba(225,6,0,0.5)] transition"
+            disabled={points <= 0}
+            className="h-12 flex-1 rounded-full font-black uppercase tracking-wider text-white shadow-[0_4px_16px_rgba(225,6,0,0.3)] bg-primary hover:bg-[#B80500] hover:shadow-[0_4px_20px_rgba(225,6,0,0.5)] transition disabled:opacity-50"
           >
-            <CreditCard className="mr-2 size-4" /> Request Cashout
+            <Gift className="mr-2 size-4" /> Đổi thưởng tại quầy
           </Button>
         )}
         <Button
           variant="outline"
-          className="h-12 flex-1 rounded-full border-white/15 text-white bg-white/5 hover:bg-white/10 transition"
-          onClick={() => toast.info("Loyalty details loaded. Check Section 7 of topic.md for details.")}
+          className="h-12 flex-1 rounded-full border-white/10 text-white bg-white/5 hover:bg-white/10 transition"
+          onClick={() =>
+            toast.info(
+              "Tích lũy điểm để nhận mã quà tặng. Đưa mã cho nhân viên quầy kiểm tra và trao quà vật lý tương ứng!"
+            )
+          }
         >
-          <DollarSign className="mr-2 size-4" /> Exchange Rules
+          <Award className="mr-2 size-4" /> Thể lệ đổi thưởng
         </Button>
       </div>
 
-      <div className="mt-4 rounded-xl border border-primary/10 bg-primary/5 p-3">
+      {/* Notice Card */}
+      <div className="mt-4 rounded-xl border border-primary/10 bg-primary/5 p-3.5">
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          <strong className="text-primary font-black uppercase tracking-wide mr-1.5">Note:</strong>
-          Any winnings (70% for Owner, 30% for Jockey) are instantly deposited into this wallet upon race results publication. Point redemptions take up to 24 hours to clear bank checks.
+          <strong className="text-primary font-black uppercase tracking-wide mr-1.5">Lưu ý:</strong>
+          {role === "Spectator"
+            ? "Khán giả tham gia dự đoán cuộc đua miễn phí: dự đoán đúng được +1 điểm, dự đoán sai bị trừ 1 điểm (nếu số dư lớn hơn 0). Tích lũy điểm thưởng để đổi các phần quà giá trị tại quầy."
+            : "Chủ ngựa (nhận 70% chia sẻ) và Nài ngựa (nhận 30% chia sẻ) nhận điểm thưởng tự động sau khi kết quả đua được công bố chính thức. Đổi thưởng được thực hiện trực tiếp thông qua mã xác nhận."}
         </p>
       </div>
     </div>

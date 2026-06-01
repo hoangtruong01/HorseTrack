@@ -68,32 +68,34 @@ export class WalletService {
       );
     }
 
-    const requestedAmount = dto.pointsToRedeem * POINT_CONVERSION_RATE;
+    // Generate unique 6-digit uppercase alphanumeric redemption code
+    let redemptionCode = '';
+    let isUnique = false;
+    while (!isUnique) {
+      redemptionCode =
+        'RWD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const existing = await this.cashoutModel.findOne({ redemptionCode });
+      if (!existing) {
+        isUnique = true;
+      }
+    }
 
-    // Create cashout request
+    // Create cashout request (do not debit points yet)
     const request = await this.cashoutModel.create({
       userId,
-      requestedAmount,
+      requestedAmount: 0,
+      redemptionCode,
       pointsRedeemed: dto.pointsToRedeem,
       status: CashoutStatus.PENDING,
     });
 
-    // Debit points via ledger
-    await this.ledgerService.debit({
-      userId,
-      points: dto.pointsToRedeem,
-      sourceType: LedgerSourceType.REDEMPTION,
-      sourceId: String(request._id),
-      note: `Cashout request: redeem ${dto.pointsToRedeem} points for ${requestedAmount} VND`,
-    });
-
-    // Record wallet transaction
+    // Record pending wallet transaction
     await this.transactionModel.create({
       userId,
       type: TransactionType.REWARD_CASHOUT,
-      amount: requestedAmount,
+      amount: 0,
       points: dto.pointsToRedeem,
-      description: `Cashout request of ${requestedAmount} VND (${dto.pointsToRedeem} points).`,
+      description: `Yêu cầu quy đổi ${dto.pointsToRedeem} điểm thưởng (Mã: ${redemptionCode}). mang mã này ra quầy để nhận thưởng.`,
       status: TransactionStatus.PENDING,
       cashoutRequestId: request._id,
     });
@@ -116,32 +118,65 @@ export class WalletService {
       throw new BadRequestException('Request has already been processed');
     }
 
+    // Debit points only when transitioning from PENDING to APPROVED or PAID
+    if (
+      request.status === CashoutStatus.PENDING &&
+      (status === CashoutStatus.APPROVED || status === CashoutStatus.PAID)
+    ) {
+      const currentPoints = await this.ledgerService.getBalance(
+        String(request.userId),
+      );
+      if (currentPoints < request.pointsRedeemed) {
+        throw new BadRequestException(
+          `User does not have enough points. Current: ${currentPoints}, required: ${request.pointsRedeemed}`,
+        );
+      }
+
+      // Debit points via ledger
+      await this.ledgerService.debit({
+        userId: String(request.userId),
+        points: request.pointsRedeemed,
+        sourceType: LedgerSourceType.REDEMPTION,
+        sourceId: String(request._id),
+        note: `Đổi thưởng thành công (Mã: ${request.redemptionCode})`,
+        createdBy: handlerId,
+      });
+    }
+
+    // Update status
+    const previousStatus = request.status;
     request.status = status;
 
     if (status === CashoutStatus.APPROVED) {
       request.approvedBy = new Types.ObjectId(handlerId);
+      await this.transactionModel.findOneAndUpdate(
+        { cashoutRequestId: request._id, status: TransactionStatus.PENDING },
+        { status: TransactionStatus.SUCCESS },
+      );
     } else if (status === CashoutStatus.PAID) {
       request.paidBy = new Types.ObjectId(handlerId);
       request.paidAt = new Date();
       await this.transactionModel.findOneAndUpdate(
-        { cashoutRequestId: request._id, status: TransactionStatus.PENDING },
+        { cashoutRequestId: request._id },
         { status: TransactionStatus.SUCCESS },
       );
     } else if (status === CashoutStatus.REJECTED) {
       request.approvedBy = new Types.ObjectId(handlerId);
 
-      // Refund points via ledger
-      await this.ledgerService.credit({
-        userId: String(request.userId),
-        points: request.pointsRedeemed,
-        sourceType: LedgerSourceType.REDEMPTION,
-        sourceId: String(request._id),
-        note: `Refund: cashout request ${id} rejected`,
-        createdBy: handlerId,
-      });
+      // Refund points only if they were already debited (i.e. status was APPROVED)
+      if (previousStatus === CashoutStatus.APPROVED) {
+        await this.ledgerService.credit({
+          userId: String(request.userId),
+          points: request.pointsRedeemed,
+          sourceType: LedgerSourceType.REDEMPTION,
+          sourceId: String(request._id),
+          note: `Refund: cashout request ${id} rejected after approval`,
+          createdBy: handlerId,
+        });
+      }
 
       await this.transactionModel.findOneAndUpdate(
-        { cashoutRequestId: request._id, status: TransactionStatus.PENDING },
+        { cashoutRequestId: request._id },
         { status: TransactionStatus.FAILED },
       );
     }
