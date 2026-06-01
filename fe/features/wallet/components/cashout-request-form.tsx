@@ -124,7 +124,7 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
             variant="outline"
             onClick={onCancel}
             disabled={isLoading}
-            className="h-12 flex-1 rounded-full border-white/10 text-white bg-transparent hover:bg-white/5"
+            className="h-12 flex-1 rounded-full font-black uppercase tracking-wider border-white/10 text-white bg-transparent hover:bg-white/5"
           >
             Hủy Bỏ
           </Button>

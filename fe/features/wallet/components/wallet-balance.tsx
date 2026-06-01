@@ -98,7 +98,7 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
         )}
         <Button
           variant="outline"
-          className="h-12 flex-1 rounded-full border-white/10 text-white bg-white/5 hover:bg-white/10 transition"
+          className="h-12 flex-1 rounded-full font-black uppercase tracking-wider border-white/10 text-white bg-white/5 hover:bg-white/10 transition"
           onClick={() =>
             toast.info(
               "Tích lũy điểm để nhận mã quà tặng. Đưa mã cho nhân viên quầy kiểm tra và trao quà vật lý tương ứng!"
