@@ -35,9 +35,9 @@ export class WalletController {
   }
 
   @Post('cashout')
-  @Roles(RoleName.SPECTATOR, RoleName.OWNER)
+  @Roles(RoleName.SPECTATOR, RoleName.OWNER, RoleName.JOCKEY)
   @ApiOperation({
-    summary: 'Request to redeem points for cash (Spectator or Owner)',
+    summary: 'Request to redeem points for cash (Spectator, Owner, or Jockey)',
   })
   requestCashout(@Body() dto: CreateCashoutDto, @CurrentUser() user: JwtUser) {
     return this.walletService.requestCashout(dto, user.id);
@@ -73,7 +73,7 @@ export class WalletController {
   }
 
   @Get('cashout/my-requests')
-  @Roles(RoleName.SPECTATOR, RoleName.OWNER)
+  @Roles(RoleName.SPECTATOR, RoleName.OWNER, RoleName.JOCKEY)
   @ApiOperation({ summary: 'Get current user cashout/redemption request list' })
   findMyCashouts(
     @Query() pagination: PaginationDto,

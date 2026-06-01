@@ -9,6 +9,7 @@ import { Race, RaceSchema } from '../races/schemas/race.schema';
 import { Horse, HorseSchema } from '../horses/schemas/horse.schema';
 import { PrizesController } from './prizes.controller';
 import { PrizesService } from './prizes.service';
+import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PrizesService } from './prizes.service';
       { name: Race.name, schema: RaceSchema },
       { name: Horse.name, schema: HorseSchema },
     ]),
+    RewardPointLedgerModule,
   ],
   controllers: [PrizesController],
   providers: [PrizesService],

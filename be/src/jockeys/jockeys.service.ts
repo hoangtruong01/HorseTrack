@@ -69,8 +69,15 @@ export class JockeysService {
         const json = d.toJSON() as any;
         const userId = d.userId?._id || d.userId;
         const [totalRaces, wins] = await Promise.all([
-          this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED } as any),
-          this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+          this.resultModel.countDocuments({
+            jockeyUserId: userId,
+            status: RaceResultStatus.PUBLISHED,
+          } as any),
+          this.resultModel.countDocuments({
+            jockeyUserId: userId,
+            status: RaceResultStatus.PUBLISHED,
+            rank: 1,
+          } as any),
         ]);
         json.totalRaces = totalRaces;
         json.wins = wins;
@@ -94,8 +101,15 @@ export class JockeysService {
     }
 
     const [totalRaces, wins] = await Promise.all([
-      this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED } as any),
-      this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+      this.resultModel.countDocuments({
+        jockeyUserId: userId,
+        status: RaceResultStatus.PUBLISHED,
+      } as any),
+      this.resultModel.countDocuments({
+        jockeyUserId: userId,
+        status: RaceResultStatus.PUBLISHED,
+        rank: 1,
+      } as any),
     ]);
 
     const json = jockey.toJSON() as any;
@@ -115,8 +129,15 @@ export class JockeysService {
 
     const userId = jockey.userId?._id || jockey.userId;
     const [totalRaces, wins] = await Promise.all([
-      this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED } as any),
-      this.resultModel.countDocuments({ jockeyUserId: userId, status: RaceResultStatus.PUBLISHED, rank: 1 } as any),
+      this.resultModel.countDocuments({
+        jockeyUserId: userId,
+        status: RaceResultStatus.PUBLISHED,
+      } as any),
+      this.resultModel.countDocuments({
+        jockeyUserId: userId,
+        status: RaceResultStatus.PUBLISHED,
+        rank: 1,
+      } as any),
     ]);
 
     const json = jockey.toJSON() as any;

@@ -8,6 +8,7 @@ export enum LedgerSourceType {
   REDEMPTION = 'redemption',
   ADMIN_ADJUSTMENT = 'admin_adjustment',
   EXPIRED = 'expired',
+  RACE_WIN_REWARD = 'race_win_reward',
 }
 
 @Schema({ timestamps: true })
