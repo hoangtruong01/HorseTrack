@@ -91,21 +91,21 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
           <Button
             onClick={onRequestCashout}
             disabled={points <= 0}
-            className="h-12 flex-1 rounded-full font-black uppercase tracking-wider text-white shadow-[0_4px_16px_rgba(225,6,0,0.3)] bg-primary hover:bg-[#B80500] hover:shadow-[0_4px_20px_rgba(225,6,0,0.5)] transition disabled:opacity-50"
+            className="h-12 flex-1 rounded-full text-xs font-black uppercase tracking-wider text-white shadow-[0_4px_16px_rgba(225,6,0,0.3)] bg-primary hover:bg-[#B80500] hover:shadow-[0_4px_20px_rgba(225,6,0,0.5)] transition disabled:opacity-50"
           >
-            <Gift className="mr-2 size-4" /> Đổi thưởng tại quầy
+            <Gift className="mr-1.5 size-3.5 shrink-0" /> Đổi thưởng
           </Button>
         )}
         <Button
           variant="outline"
-          className="h-12 flex-1 rounded-full font-black uppercase tracking-wider border-white/10 text-white bg-white/5 hover:bg-white/10 transition"
+          className="h-12 flex-1 rounded-full text-xs font-black uppercase tracking-wider border-white/10 text-white bg-white/5 hover:bg-white/10 transition"
           onClick={() =>
             toast.info(
               "Tích lũy điểm để nhận mã quà tặng. Đưa mã cho nhân viên quầy kiểm tra và trao quà vật lý tương ứng!"
             )
           }
         >
-          <Award className="mr-2 size-4" /> Thể lệ đổi thưởng
+          <Award className="mr-1.5 size-3.5 shrink-0" /> Thể lệ đổi
         </Button>
       </div>
 
