@@ -31,16 +31,55 @@ export class UsersRepository {
     return query.exec();
   }
 
-  findAll(page = 1, limit = 20): Promise<UserDocument[]> {
-    return this.userModel
-      .find()
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .exec();
+  async findAll(
+    page = 1,
+    limit = 20,
+    search?: string,
+    role?: RoleName,
+    status?: UserStatus,
+  ): Promise<{
+    data: UserDocument[];
+    meta: { total: number; page: number; limit: number; totalPages: number };
+  }> {
+    const filter: Record<string, unknown> = {};
+
+    if (search) {
+      filter.$or = [
+        { fullName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+    if (role) {
+      filter.roles = role;
+    }
+    if (status) {
+      filter.status = status;
+    }
+
+    const [data, total] = await Promise.all([
+      this.userModel
+        .find(filter)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.userModel.countDocuments(filter),
+    ]);
+
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
   }
 
   update(id: string, data: Partial<User>): Promise<UserDocument | null> {
     return this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
+  }
+
+  updateStatus(id: string, status: UserStatus): Promise<UserDocument | null> {
+    return this.userModel
+      .findByIdAndUpdate(id, { status }, { new: true })
+      .exec();
   }
 
   softDelete(id: string): Promise<UserDocument | null> {

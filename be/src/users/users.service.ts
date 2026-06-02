@@ -54,8 +54,14 @@ export class UsersService {
     return this.usersRepository.findByEmail(email);
   }
 
-  findAll(page = 1, limit = 20): Promise<UserDocument[]> {
-    return this.usersRepository.findAll(page, limit);
+  async findAll(
+    page = 1,
+    limit = 20,
+    search?: string,
+    role?: RoleName,
+    status?: UserStatus,
+  ) {
+    return this.usersRepository.findAll(page, limit, search, role, status);
   }
 
   async findById(id: string): Promise<UserDocument> {
@@ -100,6 +106,16 @@ export class UsersService {
 
   async softDelete(id: string): Promise<void> {
     const result = await this.usersRepository.softDelete(id);
+    if (!result) throw new NotFoundException('User not found');
+  }
+
+  async ban(id: string): Promise<void> {
+    const result = await this.usersRepository.updateStatus(id, UserStatus.BANNED);
+    if (!result) throw new NotFoundException('User not found');
+  }
+
+  async unban(id: string): Promise<void> {
+    const result = await this.usersRepository.updateStatus(id, UserStatus.ACTIVE);
     if (!result) throw new NotFoundException('User not found');
   }
 

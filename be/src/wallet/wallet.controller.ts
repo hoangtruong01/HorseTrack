@@ -29,9 +29,20 @@ export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
   @Post('deposit')
-  @ApiOperation({ summary: 'Deposit money to user wallet' })
+  @Roles(RoleName.ADMIN, RoleName.COUNTER_STAFF)
+  @ApiOperation({ summary: 'Deposit money to user wallet (Admin / Counter Staff only)' })
   deposit(@Body() dto: DepositDto, @CurrentUser() user: JwtUser) {
     return this.walletService.deposit(user.id, dto.amount);
+  }
+
+  @Post('deposit/for-user/:userId')
+  @Roles(RoleName.ADMIN, RoleName.COUNTER_STAFF)
+  @ApiOperation({ summary: 'Admin deposits money to a specific user wallet' })
+  depositForUser(
+    @Param('userId') userId: string,
+    @Body() dto: DepositDto,
+  ) {
+    return this.walletService.deposit(userId, dto.amount);
   }
 
   @Post('cashout')
@@ -55,6 +66,30 @@ export class WalletController {
     @CurrentUser() user: JwtUser,
   ) {
     return this.walletService.processCashout(id, dto.status, user.id);
+  }
+
+  @Get('all-transactions')
+  @Roles(RoleName.ADMIN)
+  @ApiOperation({ summary: 'List all wallet transactions for all users (Admin only)' })
+  findAllTransactions(@Query() pagination: PaginationDto) {
+    return this.walletService.findAllTransactions(
+      pagination.page,
+      pagination.limit,
+    );
+  }
+
+  @Get('user/:userId/history')
+  @Roles(RoleName.ADMIN)
+  @ApiOperation({ summary: 'Get wallet history for a specific user (Admin only)' })
+  findUserHistory(
+    @Param('userId') userId: string,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.walletService.findMyWalletHistory(
+      userId,
+      pagination.page,
+      pagination.limit,
+    );
   }
 
   @Get('history')

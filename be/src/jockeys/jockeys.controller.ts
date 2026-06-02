@@ -44,6 +44,18 @@ export class JockeysController {
     return this.jockeysService.findAll(pagination.page, pagination.limit);
   }
 
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all jockeys with any status (Admin only)' })
+  findAllAdmin(
+    @Query() pagination: PaginationDto,
+    @Query('status') status?: JockeyStatus,
+  ) {
+    return this.jockeysService.findAllAdmin(pagination.page, pagination.limit, status);
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.JOCKEY)

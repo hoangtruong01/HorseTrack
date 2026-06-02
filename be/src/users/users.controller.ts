@@ -14,6 +14,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -24,7 +25,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { RoleName } from './schemas/user.schema';
+import { RoleName, UserStatus } from './schemas/user.schema';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -52,18 +53,32 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'List users with pagination (admin only)' })
-  @ApiResponse({ status: 200, type: [UserResponseDto] })
-  async findAll(@Query() pagination: PaginationDto) {
-    const users = await this.usersService.findAll(
+  @ApiOperation({ summary: 'List users with pagination, search and filter (admin only)' })
+  @ApiQuery({ name: 'search', required: false, description: 'Search by name or email' })
+  @ApiQuery({ name: 'role', required: false, enum: RoleName, description: 'Filter by role' })
+  @ApiQuery({ name: 'status', required: false, enum: UserStatus, description: 'Filter by status' })
+  @ApiResponse({ status: 200 })
+  async findAll(
+    @Query() pagination: PaginationDto,
+    @Query('search') search?: string,
+    @Query('role') role?: RoleName,
+    @Query('status') status?: UserStatus,
+  ) {
+    const result = await this.usersService.findAll(
       pagination.page,
       pagination.limit,
+      search,
+      role,
+      status,
     );
-    return users.map((u) =>
-      plainToInstance(UserResponseDto, u.toObject(), {
-        excludeExtraneousValues: true,
-      }),
-    );
+    return {
+      data: result.data.map((u) =>
+        plainToInstance(UserResponseDto, u.toObject(), {
+          excludeExtraneousValues: true,
+        }),
+      ),
+      meta: result.meta,
+    };
   }
 
   @Get(':id')
@@ -105,6 +120,26 @@ export class UsersController {
   async remove(@Param('id') id: string) {
     await this.usersService.softDelete(id);
     return { message: 'User deleted' };
+  }
+
+  @Patch(':id/ban')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Ban user account (admin only)' })
+  async ban(@Param('id') id: string) {
+    await this.usersService.ban(id);
+    return { message: 'User banned' };
+  }
+
+  @Patch(':id/unban')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Unban user account (admin only)' })
+  async unban(@Param('id') id: string) {
+    await this.usersService.unban(id);
+    return { message: 'User unbanned' };
   }
 
   @Post(':id/roles')

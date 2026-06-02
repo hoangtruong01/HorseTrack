@@ -241,4 +241,21 @@ export class WalletService {
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
+
+  async findAllTransactions(page = 1, limit = 20) {
+    const [data, total] = await Promise.all([
+      this.transactionModel
+        .find()
+        .populate('userId', 'fullName email')
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.transactionModel.countDocuments(),
+    ]);
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
 }

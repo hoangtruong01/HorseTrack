@@ -94,6 +94,49 @@ export class JockeysService {
     };
   }
 
+  async findAllAdmin(page = 1, limit = 20, status?: JockeyStatus) {
+    const filter: Record<string, unknown> = {};
+    if (status) filter.status = status;
+
+    const [docs, total] = await Promise.all([
+      this.jockeyModel
+        .find(filter)
+        .populate('userId', 'fullName email phone avatar')
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.jockeyModel.countDocuments(filter),
+    ]);
+
+    const data = await Promise.all(
+      docs.map(async (d) => {
+        const json = d.toJSON() as unknown as JockeyJson;
+        const userId =
+          (d.userId as unknown as { _id?: Types.ObjectId })?._id ?? d.userId;
+        const [totalRaces, wins] = await Promise.all([
+          this.resultModel.countDocuments({
+            jockeyUserId: userId,
+            status: RaceResultStatus.PUBLISHED,
+          }),
+          this.resultModel.countDocuments({
+            jockeyUserId: userId,
+            status: RaceResultStatus.PUBLISHED,
+            rank: 1,
+          }),
+        ]);
+        json.totalRaces = totalRaces;
+        json.wins = wins;
+        return json;
+      }),
+    );
+
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
   private async findDocument(id: string): Promise<JockeyDocument> {
     const jockey = await this.jockeyModel
       .findById(id)

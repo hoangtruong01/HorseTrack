@@ -1,0 +1,314 @@
+/**
+ * Thin API client — reads cookie from Next.js API route /api/auth/token
+ * All calls go through the BE directly with Bearer token.
+ */
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000") + "/api/v1";
+
+async function getToken(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/auth/token", { cache: "no-store" });
+    if (res.ok) {
+      const { token } = await res.json();
+      return token as string;
+    }
+  } catch {}
+  return null;
+}
+
+export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = await getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const text = await res.text();
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    raw = text;
+  }
+  if (!res.ok) {
+    const errMsg =
+      (raw as { message?: string })?.message ??
+      (raw as { error?: string })?.error ??
+      res.statusText;
+    throw new Error(errMsg);
+  }
+
+  // ResponseInterceptor wraps payload as { success, message, data, meta? }
+  // Unwrap if the wrapper is present
+  if (
+    raw &&
+    typeof raw === "object" &&
+    "success" in (raw as object) &&
+    "data" in (raw as object)
+  ) {
+    const envelope = raw as { success: boolean; data: unknown; meta?: unknown };
+    // For paginated results the meta is hoisted to top level by the interceptor
+    // while data contains the array. Reconstruct { data, meta } so callers work uniformly.
+    if (envelope.meta !== undefined) {
+      return { data: envelope.data, meta: envelope.meta } as T;
+    }
+    return envelope.data as T;
+  }
+  return raw as T;
+}
+
+// ─── Users ──────────────────────────────────────────────────────────────────
+export interface UserItem {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  dob?: string;
+  avatar?: string;
+  status: string;
+  roles: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+export const usersApi = {
+  list: (params?: { page?: number; limit?: number; search?: string; role?: string; status?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.search) qs.set("search", params.search);
+    if (params?.role) qs.set("role", params.role);
+    if (params?.status) qs.set("status", params.status);
+    return apiFetch<PaginatedResult<UserItem>>(`/users?${qs}`);
+  },
+  ban: (id: string) => apiFetch(`/users/${id}/ban`, { method: "PATCH" }),
+  unban: (id: string) => apiFetch(`/users/${id}/unban`, { method: "PATCH" }),
+  delete: (id: string) => apiFetch(`/users/${id}`, { method: "DELETE" }),
+  assignRole: (id: string, role: string) =>
+    apiFetch(`/users/${id}/roles`, { method: "POST", body: JSON.stringify({ role }) }),
+  removeRole: (id: string, role: string) =>
+    apiFetch(`/users/${id}/roles/${role}`, { method: "DELETE" }),
+};
+
+// ─── Horses ─────────────────────────────────────────────────────────────────
+export interface HorseItem {
+  _id: string;
+  name: string;
+  breed?: string;
+  age?: number;
+  gender?: string;
+  color?: string;
+  healthStatus: string;
+  status: string;
+  ownerId?: { _id: string; fullName: string; email: string } | string;
+  imageUrl?: string;
+  createdAt?: string;
+}
+
+export const horsesApi = {
+  list: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<HorseItem>>(`/horses?${qs}`);
+  },
+  delete: (id: string) => apiFetch(`/horses/${id}`, { method: "DELETE" }),
+};
+
+// ─── Jockeys ────────────────────────────────────────────────────────────────
+export interface JockeyItem {
+  _id: string;
+  userId?: { _id: string; fullName: string; email: string } | string;
+  licenseNumber?: string;
+  experienceYears?: number;
+  weight?: number;
+  status: string;
+  totalRaces?: number;
+  wins?: number;
+  createdAt?: string;
+}
+
+export const jockeysApi = {
+  listAdmin: (params?: { page?: number; limit?: number; status?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.status) qs.set("status", params.status);
+    return apiFetch<PaginatedResult<JockeyItem>>(`/jockeys/admin/all?${qs}`);
+  },
+  changeStatus: (id: string, status: string) =>
+    apiFetch(`/jockeys/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+};
+
+// ─── Tournaments ─────────────────────────────────────────────────────────────
+export interface TournamentItem {
+  _id: string;
+  name: string;
+  description?: string;
+  status: string;
+  startDate?: string;
+  endDate?: string;
+  maxHorses?: number;
+  prize?: number;
+  createdAt?: string;
+}
+
+export const tournamentsApi = {
+  list: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<TournamentItem>>(`/tournaments?${qs}`);
+  },
+  updateStatus: (id: string, status: string) =>
+    apiFetch(`/tournaments/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  delete: (id: string) => apiFetch(`/tournaments/${id}`, { method: "DELETE" }),
+};
+
+// ─── Referee Assignments ─────────────────────────────────────────────────────
+export interface AssignmentItem {
+  _id: string;
+  raceId?: { _id: string; name: string } | string;
+  refereeUserId?: { _id: string; fullName: string; email: string } | string;
+  status: string;
+  note?: string;
+  createdAt?: string;
+}
+
+export const refereeAssignmentsApi = {
+  listByRace: (raceId: string, params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<AssignmentItem>>(`/referee-assignments/race/${raceId}?${qs}`);
+  },
+  create: (dto: { raceId: string; refereeUserId: string; note?: string }) =>
+    apiFetch("/referee-assignments", { method: "POST", body: JSON.stringify(dto) }),
+  remove: (id: string) => apiFetch(`/referee-assignments/${id}`, { method: "DELETE" }),
+};
+
+// ─── Rankings ────────────────────────────────────────────────────────────────
+export interface RankingEntry {
+  horseId: string;
+  horseName?: string;
+  totalPoints: number;
+  totalRaces: number;
+  wins: number;
+  rank?: number;
+}
+
+export interface JockeyRankingEntry {
+  jockeyUserId: string;
+  jockeyName?: string;
+  totalPoints: number;
+  totalRaces: number;
+  wins: number;
+  rank?: number;
+}
+
+export const rankingsApi = {
+  getHorseRankings: (tournamentId: string) =>
+    apiFetch<RankingEntry[]>(`/rankings/tournament/${tournamentId}/horses`),
+  getJockeyRankings: (tournamentId: string) =>
+    apiFetch<JockeyRankingEntry[]>(`/rankings/tournament/${tournamentId}/jockeys`),
+};
+
+// ─── Prizes ─────────────────────────────────────────────────────────────────
+export interface PrizeItem {
+  _id: string;
+  tournamentId?: { _id: string; name: string } | string;
+  raceId?: { _id: string; name: string } | string;
+  horseId?: { _id: string; name: string } | string;
+  ownerId?: { _id: string; fullName: string; email: string } | string;
+  rank: number;
+  amount: number;
+  status: string;
+  paidAt?: string;
+  createdAt?: string;
+}
+
+export const prizesApi = {
+  list: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<PrizeItem>>(`/prizes?${qs}`);
+  },
+  updateStatus: (id: string, status: string) =>
+    apiFetch(`/prizes/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+};
+
+// ─── Predictions (Bets) ───────────────────────────────────────────────────────
+export interface PredictionItem {
+  _id: string;
+  userId?: { _id: string; fullName: string; email: string } | string;
+  raceId?: { _id: string; name: string } | string;
+  horseId?: { _id: string; name: string } | string;
+  rewardPoints?: number;
+  status: string;
+  createdAt?: string;
+}
+
+export const predictionsApi = {
+  list: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<PredictionItem>>(`/predictions?${qs}`);
+  },
+};
+
+// ─── Wallet Transactions ─────────────────────────────────────────────────────
+export interface WalletTxItem {
+  _id: string;
+  userId?: { _id: string; fullName: string; email: string } | string;
+  type: string;
+  amount: number;
+  points: number;
+  description?: string;
+  status: string;
+  createdAt?: string;
+}
+
+export interface CashoutItem {
+  _id: string;
+  userId?: { _id: string; fullName: string; email: string; phone?: string } | string;
+  pointsRedeemed: number;
+  redemptionCode: string;
+  status: string;
+  approvedBy?: { _id: string; fullName: string } | string;
+  paidBy?: { _id: string; fullName: string } | string;
+  paidAt?: string;
+  createdAt?: string;
+}
+
+export const walletApi = {
+  allTransactions: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<WalletTxItem>>(`/wallet/all-transactions?${qs}`);
+  },
+  allCashouts: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<CashoutItem>>(`/wallet/cashout/all?${qs}`);
+  },
+  processCashout: (id: string, status: string) =>
+    apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  depositForUser: (userId: string, amount: number) =>
+    apiFetch(`/wallet/deposit/for-user/${userId}`, { method: "POST", body: JSON.stringify({ amount }) }),
+};
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+export const dashboardApi = {
+  getAdminStats: () => apiFetch<Record<string, unknown>>("/dashboard/admin"),
+};
