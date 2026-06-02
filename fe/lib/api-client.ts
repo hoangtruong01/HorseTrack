@@ -186,11 +186,15 @@ export interface TournamentItem {
   _id: string;
   name: string;
   description?: string;
+  location?: string;
   status: string;
   startDate?: string;
   endDate?: string;
+  registrationStartDate?: string;
+  registrationEndDate?: string;
   maxHorses?: number;
-  prize?: number;
+  prize?: number;       // backward-compat alias
+  prizePool?: number;   // actual backend field
   createdAt?: string;
 }
 
@@ -201,9 +205,63 @@ export const tournamentsApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<TournamentItem>>(`/tournaments?${qs}`);
   },
+  get: (id: string) => apiFetch<TournamentItem>(`/tournaments/${id}`),
   updateStatus: (id: string, status: string) =>
     apiFetch(`/tournaments/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   delete: (id: string) => apiFetch(`/tournaments/${id}`, { method: "DELETE" }),
+};
+
+// ─── Races ───────────────────────────────────────────────────────────────────
+export interface RaceItem {
+  _id: string;
+  tournamentId: { _id: string; name: string; startDate?: string; endDate?: string } | string;
+  name: string;
+  description?: string;
+  raceNumber?: number;
+  startTime: string;
+  endTime?: string;
+  location?: string;
+  distanceMeters: number;
+  lapCount?: number;
+  maxParticipants?: number;
+  participantsCount?: number;
+  prize?: number;
+  status: string;
+  trackCondition?: string;
+  weatherSnapshot?: string;
+  createdBy?: { _id: string; fullName: string } | string;
+  createdAt?: string;
+}
+
+export const racesApi = {
+  list: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<RaceItem>>(`/races?${qs}`);
+  },
+  listByTournament: (tournamentId: string, params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<RaceItem>>(`/races/tournament/${tournamentId}?${qs}`);
+  },
+  get: (id: string) => apiFetch<RaceItem>(`/races/${id}`),
+  create: (dto: {
+    tournamentId: string;
+    name: string;
+    description?: string;
+    startTime: string;
+    distanceMeters: number;
+    lapCount?: number;
+    maxParticipants?: number;
+    prize?: number;
+    trackCondition?: string;
+    weatherSnapshot?: string;
+  }) => apiFetch<RaceItem>("/races", { method: "POST", body: JSON.stringify(dto) }),
+  updateStatus: (id: string, status: string) =>
+    apiFetch(`/races/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  delete: (id: string) => apiFetch(`/races/${id}`, { method: "DELETE" }),
 };
 
 // ─── Referee Assignments ─────────────────────────────────────────────────────

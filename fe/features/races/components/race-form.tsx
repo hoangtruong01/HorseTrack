@@ -1,84 +1,301 @@
-import { CalendarClock, Flag, MapPin, ShieldCheck } from "lucide-react";
+"use client";
 
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  CalendarClock, Flag, MapPin, Milestone, Trophy, Loader2, Layers, CloudSun, Users
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { racesApi, tournamentsApi, type TournamentItem } from "@/lib/api-client";
+import { toast } from "sonner";
 
 export function RaceForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const presetTournamentId = searchParams.get("tournamentId") || "";
+
+  const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
+  const [loadingTournaments, setLoadingTournaments] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Form state
+  const [tournamentId, setTournamentId] = useState(presetTournamentId);
+  const [name, setName] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [distanceMeters, setDistanceMeters] = useState(1000);
+  const [lapCount, setLapCount] = useState(1);
+  const [maxParticipants, setMaxParticipants] = useState(8);
+  const [prize, setPrize] = useState(0);
+  const [trackCondition, setTrackCondition] = useState("Dry turf");
+  const [weatherSnapshot, setWeatherSnapshot] = useState("Sunny");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    async function loadTournaments() {
+      try {
+        const res = await tournamentsApi.list({ limit: 100 });
+        setTournaments(res.data || []);
+      } catch {
+        toast.error("Không thể tải danh sách giải đấu");
+      } finally {
+        setLoadingTournaments(false);
+      }
+    }
+    void loadTournaments();
+  }, []);
+
+  const selectedTournament = tournaments.find((t) => t._id === tournamentId);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!tournamentId) {
+      toast.error("Vui lòng chọn giải đấu chính.");
+      return;
+    }
+    if (!name.trim()) {
+      toast.error("Vui lòng nhập tên trận đua.");
+      return;
+    }
+    if (!startTime) {
+      toast.error("Vui lòng nhập thời gian xuất phát.");
+      return;
+    }
+
+    // Date validation
+    if (selectedTournament) {
+      const raceStart = new Date(startTime);
+      const tStart = selectedTournament.startDate ? new Date(selectedTournament.startDate) : null;
+      const tEnd = selectedTournament.endDate ? new Date(selectedTournament.endDate) : null;
+      if (tStart && raceStart < tStart) {
+        toast.error("Thời gian xuất phát vòng đua nằm trước ngày bắt đầu giải đấu!");
+        return;
+      }
+      if (tEnd && raceStart > tEnd) {
+        toast.error("Thời gian xuất phát vòng đua nằm sau ngày kết thúc giải đấu!");
+        return;
+      }
+    }
+
+    setSubmitting(true);
+    try {
+      await racesApi.create({
+        tournamentId,
+        name,
+        description: description || undefined,
+        startTime: new Date(startTime).toISOString(),
+        distanceMeters,
+        lapCount,
+        maxParticipants,
+        prize,
+        trackCondition,
+        weatherSnapshot,
+      });
+      toast.success(`Đã tạo trận đua "${name}" thành công!`);
+      router.push("/admin/races");
+    } catch (e: any) {
+      toast.error(e.message || "Tạo trận đua thất bại");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <form className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] sm:p-6">
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] sm:p-6 space-y-6"
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Race form
-          </p>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">Race Setup</p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
-            Create race mock
+            Tạo Trận Đua Mới
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            UI-only form. No validation service, no API submit.
+            Điền đầy đủ thông tin để khởi tạo lịch trình vòng đua thuộc một giải đấu chính.
           </p>
         </div>
-        <Button type="button" className="rounded-full">
-          Save mock race
+        <Button
+          type="submit"
+          disabled={submitting}
+          className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase tracking-wider text-xs h-10 px-5"
+        >
+          {submitting ? (
+            <><Loader2 className="size-4 animate-spin mr-1" /> Đang xử lý...</>
+          ) : (
+            "Lưu trận đua"
+          )}
         </Button>
       </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {[
-          { label: "Race name", icon: Flag, placeholder: "Aurora Sprint 1200" },
-          {
-            label: "Tournament",
-            icon: ShieldCheck,
-            placeholder: "Spring Velocity Cup",
-          },
-          {
-            label: "Date & time",
-            icon: CalendarClock,
-            placeholder: "24 May 2026 · 10:00",
-          },
-          {
-            label: "Location",
-            icon: MapPin,
-            placeholder: "Saigon Grand Track",
-          },
-        ].map((field) => {
-          const Icon = field.icon;
-          return (
-            <label
-              key={field.label}
-              className="grid gap-2 text-sm font-bold text-white"
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Tournament Selector */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          <span className="inline-flex items-center gap-2">
+            <Trophy className="size-4 text-primary" />
+            Giải đấu chính <span className="text-primary">*</span>
+          </span>
+          {loadingTournaments ? (
+            <div className="h-11 rounded-lg border border-white/10 bg-black/25 flex items-center px-3 text-xs text-white/40">
+              <Loader2 className="size-3.5 animate-spin mr-2" /> Đang tải...
+            </div>
+          ) : (
+            <select
+              required
+              value={tournamentId}
+              onChange={(e) => setTournamentId(e.target.value)}
+              className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 cursor-pointer"
             >
-              <span className="inline-flex items-center gap-2">
-                <Icon className="size-4 text-primary" />
-                {field.label}
-              </span>
-              <input
-                className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
-                placeholder={field.placeholder}
-              />
-            </label>
-          );
-        })}
+              <option value="" className="bg-[#15151E]">-- Chọn giải đấu --</option>
+              {tournaments.map((t) => (
+                <option key={t._id} value={t._id} className="bg-[#15151E]">
+                  {t.name} ({t.status})
+                </option>
+              ))}
+            </select>
+          )}
+          {selectedTournament && (
+            <span className="text-[10px] text-white/40 font-normal">
+              Thời gian: {selectedTournament.startDate ? new Date(selectedTournament.startDate).toLocaleDateString("vi-VN") : "?"} - {selectedTournament.endDate ? new Date(selectedTournament.endDate).toLocaleDateString("vi-VN") : "?"} · Quỹ thưởng: {selectedTournament.prize?.toLocaleString() || 0} pts
+            </span>
+          )}
+        </label>
+
+        {/* Race name */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          <span className="inline-flex items-center gap-2">
+            <Flag className="size-4 text-primary" />
+            Tên trận đua <span className="text-primary">*</span>
+          </span>
+          <input
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
+            placeholder="Ví dụ: Vòng loại 100m, Bán kết 1000m..."
+          />
+        </label>
+
+        {/* Start Time */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          <span className="inline-flex items-center gap-2">
+            <CalendarClock className="size-4 text-primary" />
+            Thời gian xuất phát <span className="text-primary">*</span>
+          </span>
+          <input
+            type="datetime-local"
+            required
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 cursor-pointer"
+          />
+        </label>
+
+        {/* Distance */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          <span className="inline-flex items-center gap-2">
+            <Milestone className="size-4 text-primary" />
+            Cự ly thi đấu (mét) <span className="text-primary">*</span>
+          </span>
+          <input
+            type="number"
+            min={100}
+            required
+            value={distanceMeters}
+            onChange={(e) => setDistanceMeters(parseInt(e.target.value) || 0)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white font-mono outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+          />
+        </label>
       </div>
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
-        {[
-          ["Distance", "1,200m"],
-          ["Surface", "Dry turf"],
-          ["Capacity", "8"],
-        ].map(([label, placeholder]) => (
-          <label
-            key={label}
-            className="grid gap-2 text-sm font-bold text-white"
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Surface */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          <span className="inline-flex items-center gap-2">
+            <Layers className="size-4 text-primary" />
+            Mặt sân
+          </span>
+          <select
+            value={trackCondition}
+            onChange={(e) => setTrackCondition(e.target.value)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 cursor-pointer"
           >
-            {label}
-            <input
-              className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
-              placeholder={placeholder}
-            />
-          </label>
-        ))}
+            <option value="Dry turf" className="bg-[#15151E]">Dry turf (Cỏ khô)</option>
+            <option value="Wet turf" className="bg-[#15151E]">Wet turf (Cỏ ướt)</option>
+            <option value="Muddy" className="bg-[#15151E]">Muddy (Bùn đất)</option>
+            <option value="Synthetic" className="bg-[#15151E]">Synthetic (Nhân tạo)</option>
+          </select>
+        </label>
+
+        {/* Weather */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          <span className="inline-flex items-center gap-2">
+            <CloudSun className="size-4 text-primary" />
+            Thời tiết
+          </span>
+          <select
+            value={weatherSnapshot}
+            onChange={(e) => setWeatherSnapshot(e.target.value)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 cursor-pointer"
+          >
+            <option value="Sunny" className="bg-[#15151E]">Sunny (Nắng)</option>
+            <option value="Cloudy" className="bg-[#15151E]">Cloudy (Mây)</option>
+            <option value="Rainy" className="bg-[#15151E]">Rainy (Mưa)</option>
+            <option value="Windy" className="bg-[#15151E]">Windy (Gió)</option>
+          </select>
+        </label>
+
+        {/* Max Participants */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          <span className="inline-flex items-center gap-2">
+            <Users className="size-4 text-primary" />
+            Số ngựa tối đa
+          </span>
+          <input
+            type="number"
+            min={2}
+            value={maxParticipants}
+            onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 8)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white font-mono outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+          />
+        </label>
       </div>
-      <div className="mt-6 rounded-xl border border-yellow-400/20 bg-yellow-400/10 p-4 text-sm leading-6 text-yellow-100">
-        Phase 4C scope: form layout only. Registration approval, result publish,
-        realtime, backend integration stay out.
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Prize */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          Giải thưởng (Points)
+          <input
+            type="number"
+            min={0}
+            value={prize}
+            onChange={(e) => setPrize(parseInt(e.target.value) || 0)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white font-mono outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+          />
+        </label>
+
+        {/* Laps */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          Số vòng (Laps)
+          <input
+            type="number"
+            min={1}
+            value={lapCount}
+            onChange={(e) => setLapCount(parseInt(e.target.value) || 1)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white font-mono outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+          />
+        </label>
+
+        {/* Description */}
+        <label className="grid gap-2 text-sm font-bold text-white">
+          Mô tả ngắn
+          <input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
+            placeholder="Mô tả thêm về trận đua..."
+          />
+        </label>
       </div>
     </form>
   );

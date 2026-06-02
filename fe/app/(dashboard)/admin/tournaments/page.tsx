@@ -118,6 +118,12 @@ export default function AdminTournamentsPage() {
               >
                 {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
+              <Link
+                href={`/admin/tournaments/${t._id}`}
+                className="rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-2.5 py-1.5 text-xs text-white transition flex items-center gap-1 font-semibold"
+              >
+                Vòng đua
+              </Link>
               <button
                 onClick={() => handleDelete(t)}
                 disabled={actionLoading === t._id}
