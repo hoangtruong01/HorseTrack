@@ -16,7 +16,6 @@ import {
   Siren,
   Star,
   Trophy,
-  UserCog,
   Users,
   Wallet,
 } from "lucide-react";
@@ -43,18 +42,11 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Tổng quan hệ thống: users, tournaments, races, bets.",
   },
   {
-    title: "User Management",
+    title: "Quản Lý & Phân Quyền",
     href: "/admin/users",
     role: "Admin",
     icon: Users,
-    description: "Quản lý user: xem, ban/unban, xóa tài khoản.",
-  },
-  {
-    title: "Role Management",
-    href: "/admin/roles",
-    role: "Admin",
-    icon: UserCog,
-    description: "Phân quyền: assign/remove roles cho từng user.",
+    description: "Quản lý tài khoản: xem, ban/unban, xóa và phân quyền hệ thống.",
   },
   {
     title: "Horse Management",

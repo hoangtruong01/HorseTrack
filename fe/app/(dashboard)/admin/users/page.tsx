@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Users, Shield, Ban, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Shield, Ban, Trash2, Search, ChevronLeft, ChevronRight, UserCog, X } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { usersApi, type UserItem } from "@/lib/api-client";
 
@@ -33,6 +33,8 @@ export default function AdminUsersPage() {
   const [filterStatus, setFilterStatus] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+  const [selectedUserForRoles, setSelectedUserForRoles] = useState<UserItem | null>(null);
+  const [rolesActionLoading, setRolesActionLoading] = useState<string | null>(null);
 
   const showToast = (msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -92,12 +94,54 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleAssignRole = async (userId: string, role: string) => {
+    setRolesActionLoading(`${role}-add`);
+    try {
+      await usersApi.assignRole(userId, role);
+      showToast(`Đã cấp quyền "${role}" thành công`);
+      if (selectedUserForRoles && selectedUserForRoles.id === userId) {
+        setSelectedUserForRoles({
+          ...selectedUserForRoles,
+          roles: [...selectedUserForRoles.roles, role]
+        });
+      }
+      await fetchUsers(meta.page);
+    } catch (e: any) {
+      showToast(e.message, "err");
+    } finally {
+      setRolesActionLoading(null);
+    }
+  };
+
+  const handleRemoveRole = async (userId: string, role: string) => {
+    if (selectedUserForRoles && selectedUserForRoles.roles.length <= 1) {
+      showToast("Không thể xóa vai trò cuối cùng của người dùng", "err");
+      return;
+    }
+    setRolesActionLoading(`${role}-rm`);
+    try {
+      await usersApi.removeRole(userId, role);
+      showToast(`Đã gỡ quyền "${role}" thành công`);
+      if (selectedUserForRoles && selectedUserForRoles.id === userId) {
+        setSelectedUserForRoles({
+          ...selectedUserForRoles,
+          roles: selectedUserForRoles.roles.filter(r => r !== role)
+        });
+      }
+      await fetchUsers(meta.page);
+    } catch (e: any) {
+      showToast(e.message, "err");
+    } finally {
+      setRolesActionLoading(null);
+    }
+  };
+
   return (
     <main className="space-y-6">
       <PageHeader
-        eyebrow="User Management"
-        title="Quản Lý Người Dùng"
-        description="Xem, ban/unban, và xóa tài khoản. Tìm kiếm theo tên hoặc email."
+        eyebrow="User & Role Management"
+        title="Quản Lý & Phân Quyền"
+        description="Xem thông tin, ban/unban, xóa tài khoản và phân quyền hệ thống cho từng người dùng."
       />
 
       {/* Toast */}
@@ -193,6 +237,14 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          onClick={() => setSelectedUserForRoles(u)}
+                          disabled={actionLoading === u.id || u.status === "deleted"}
+                          className="flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition hover:scale-105 hover:bg-primary/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <UserCog className="size-3" />
+                          Quyền
+                        </button>
+                        <button
                           onClick={() => handleBan(u)}
                           disabled={actionLoading === u.id || u.status === "deleted"}
                           className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed ${u.status === "banned" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20"}`}
@@ -236,6 +288,85 @@ export default function AdminUsersPage() {
           >
             Sau <ChevronRight className="size-4" />
           </button>
+        </div>
+      )}
+      {/* Modal Phân Quyền */}
+      {selectedUserForRoles && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <UserCog className="size-5 text-primary" />
+                  Phân Quyền Người Dùng
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Thay đổi vai trò cho người dùng <strong>{selectedUserForRoles.fullName}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedUserForRoles(null)}
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-white transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="py-6 space-y-4">
+              <p className="text-xs text-muted-foreground">Chọn vai trò dưới đây để cấp hoặc gỡ quyền:</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {ROLES.map((r) => {
+                  const hasRole = selectedUserForRoles.roles.includes(r);
+                  const isLoading = rolesActionLoading === `${r}-add` || rolesActionLoading === `${r}-rm`;
+
+                  return (
+                    <button
+                      key={r}
+                      disabled={rolesActionLoading !== null}
+                      onClick={() => {
+                        if (hasRole) {
+                          handleRemoveRole(selectedUserForRoles.id, r);
+                        } else {
+                          handleAssignRole(selectedUserForRoles.id, r);
+                        }
+                      }}
+                      className={`flex flex-col items-start gap-1 p-3 rounded-xl border text-left transition hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 ${
+                        hasRole
+                          ? "border-primary bg-primary/10 text-white"
+                          : "border-white/10 bg-white/[0.02] text-muted-foreground hover:border-white/20 hover:text-white"
+                      }`}
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider">{r}</span>
+                        {isLoading ? (
+                          <div className="size-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        ) : hasRole ? (
+                          <div className="size-2 rounded-full bg-primary" />
+                        ) : null}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground mt-1 block">
+                        {r === "admin" && "Quyền quản trị tối cao"}
+                        {r === "owner" && "Chủ sở hữu chiến mã"}
+                        {r === "jockey" && "Nài ngựa chuyên nghiệp"}
+                        {r === "referee" && "Trọng tài điều khiển trận"}
+                        {r === "spectator" && "Khán giả / Người dự đoán"}
+                        {r === "counter_staff" && "Nhân viên quầy giao dịch"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setSelectedUserForRoles(null)}
+                className="rounded-xl bg-white/5 border border-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/10 transition"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

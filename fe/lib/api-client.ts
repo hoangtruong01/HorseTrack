@@ -15,6 +15,24 @@ async function getToken(): Promise<string | null> {
   return null;
 }
 
+function injectUnderscoreId(val: any): any {
+  if (val === null || val === undefined) return val;
+  if (Array.isArray(val)) {
+    return val.map(injectUnderscoreId);
+  }
+  if (typeof val === "object") {
+    if (typeof val.id === "string" && !("_id" in val)) {
+      val._id = val.id;
+    }
+    for (const key in val) {
+      if (Object.prototype.hasOwnProperty.call(val, key)) {
+        val[key] = injectUnderscoreId(val[key]);
+      }
+    }
+  }
+  return val;
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = await getToken();
   const headers: Record<string, string> = {
@@ -41,6 +59,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   // ResponseInterceptor wraps payload as { success, message, data, meta? }
   // Unwrap if the wrapper is present
+  let result: any = raw;
   if (
     raw &&
     typeof raw === "object" &&
@@ -51,11 +70,12 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     // For paginated results the meta is hoisted to top level by the interceptor
     // while data contains the array. Reconstruct { data, meta } so callers work uniformly.
     if (envelope.meta !== undefined) {
-      return { data: envelope.data, meta: envelope.meta } as T;
+      result = { data: envelope.data, meta: envelope.meta };
+    } else {
+      result = envelope.data;
     }
-    return envelope.data as T;
   }
-  return raw as T;
+  return injectUnderscoreId(result) as T;
 }
 
 // ─── Users ──────────────────────────────────────────────────────────────────
