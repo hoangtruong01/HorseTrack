@@ -6,5 +6,5 @@ export class RespondInvitationDto {
   @ApiProperty({ enum: [InvitationStatus.ACCEPTED, InvitationStatus.REJECTED] })
   @IsNotEmpty()
   @IsEnum([InvitationStatus.ACCEPTED, InvitationStatus.REJECTED])
-  status: InvitationStatus;
+  status!: InvitationStatus;
 }

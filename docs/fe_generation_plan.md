@@ -189,10 +189,14 @@ Create the Next.js App Router shell and role route groups without implementing b
 - `fe/app/(dashboard)/layout.tsx`
 - `fe/app/(dashboard)/admin/layout.tsx`
 - `fe/app/(dashboard)/admin/page.tsx`
+- `fe/app/(dashboard)/admin/cashouts/page.tsx`
+- `fe/app/(dashboard)/admin/audit-logs/page.tsx`
 - `fe/app/(dashboard)/owner/layout.tsx`
 - `fe/app/(dashboard)/owner/page.tsx`
+- `fe/app/(dashboard)/owner/wallet/page.tsx`
 - `fe/app/(dashboard)/jockey/layout.tsx`
 - `fe/app/(dashboard)/jockey/page.tsx`
+- `fe/app/(dashboard)/jockey/wallet/page.tsx`
 - `fe/app/(dashboard)/referee/layout.tsx`
 - `fe/app/(dashboard)/referee/page.tsx`
 - `fe/app/(dashboard)/spectator/layout.tsx`
@@ -582,24 +586,29 @@ Build admin race list/detail/schedule/status and participant view using mock dat
 
 ---
 
-## Phase 4D: Registration approval + result publish
+## Phase 4D: Registration approval, result publish + admin cashout processing
 
 ### Goal
 
-Build admin review workflows for race registrations and race results using mock data.
+Build admin review workflows for race registrations, race results, and cashout requests using mock data.
 
 ### Scope
 
 - Registration review table.
 - Approve/reject dialogs.
 - Need-more-info UI if useful.
-- Race result review.
+- Race result review & 70/30 split display.
 - Result publish flow.
 - Race ranking display.
+- Cashout requests queue table.
+- Cashout process action buttons (Approve/Pay/Reject dialogs).
+- Audit logs viewer.
 
 ### Files/routes to create or update
 
 - `fe/app/(dashboard)/admin/registrations/page.tsx`
+- `fe/app/(dashboard)/admin/cashouts/page.tsx`
+- `fe/app/(dashboard)/admin/audit-logs/page.tsx`
 - `fe/app/(dashboard)/admin/races/[raceId]/results/page.tsx`
 - `fe/features/race-registrations/components/registration-table.tsx`
 - `fe/features/race-registrations/components/approval-dialog.tsx`
@@ -609,6 +618,9 @@ Build admin review workflows for race registrations and race results using mock 
 - `fe/features/race-results/components/race-ranking-table.tsx`
 - `fe/features/race-results/components/publish-result-dialog.tsx`
 - `fe/features/race-results/mock-results.ts`
+- `fe/features/wallet/components/cashout-approval-queue.tsx`
+- `fe/features/wallet/components/audit-logs-viewer.tsx`
+- `fe/features/wallet/mock-wallet.ts`
 
 ### Main reusable components
 
@@ -618,6 +630,8 @@ Build admin review workflows for race registrations and race results using mock 
 - `RaceResultManager`
 - `RaceRankingTable`
 - `PublishResultDialog`
+- `CashoutApprovalQueue`
+- `AuditLogsViewer`
 - `StatusBadge`
 
 ### Mock data needed
@@ -626,6 +640,8 @@ Build admin review workflows for race registrations and race results using mock 
 - Draft/referee_confirmed/published race results.
 - Race rankings per race only.
 - Reject reason examples.
+- Cashout requests: pending, approved, paid, rejected.
+- Audit logs entries (realtime simulation).
 
 ### Acceptance criteria
 
@@ -633,11 +649,13 @@ Build admin review workflows for race registrations and race results using mock 
 - Reject action requires reason in UI.
 - Result publish action is disabled unless result is referee-confirmed.
 - Race ranking belongs to a single race only.
+- Cashout queue lists all user cashout requests with conversion calculations shown clearly (e.g. 50 pts = 5,000 VND).
+- Approve/Pay/Reject buttons change cashout status mock-only.
+- Audit logs viewer loads mock entries correctly.
 - No backend integration.
-- No advanced leaderboard aggregation.
 - `npm run lint` passes.
 - `npm run build` passes.
-- Preview inspected for registration review and result publish pages.
+- Preview inspected for registration review, result publish, cashout queue, and audit logs pages.
 
 ### Suggested Roo mode
 
@@ -655,21 +673,21 @@ Build admin review workflows for race registrations and race results using mock 
 
 ### Suggested MCP usage
 
-- filesystem: inspect registration/result feature files.
+- filesystem: inspect registration/result/wallet feature files.
 - chrome-devtools: inspect dialogs, table UX, console.
-- playwright: approval and publish smoke path.
+- playwright: approval, publish, and cashout smoke path.
 
 ### Git commit checkpoint message
 
-`feat(fe): add registration approval and result publish UI`
+- `feat(fe): add registration approval, result publish and cashout queue UI`
 
 ---
 
-## Phase 5: Owner horse + race registration
+## Phase 5: Owner horse, race registration + wallet cashout
 
 ### Goal
 
-Build owner-facing horse portfolio and race registration flow using mock data.
+Build owner-facing horse portfolio, race registration flow, and reward points wallet with cashout capability using mock data.
 
 ### Scope
 
@@ -679,7 +697,9 @@ Build owner-facing horse portfolio and race registration flow using mock data.
 - Available races list/detail.
 - Register horse to race form.
 - Owner registration status tracking.
-- Owner jockey assignment overview placeholder if needed for next phase handoff.
+- Owner jockey assignment overview placeholder.
+- Owner Wallet panel displaying current reward points, VND equivalence, and ledger transaction history.
+- Owner cashout request form with point validation.
 
 ### Files/routes to create or update
 
@@ -691,6 +711,7 @@ Build owner-facing horse portfolio and race registration flow using mock data.
 - `fe/app/(dashboard)/owner/races/[raceId]/page.tsx`
 - `fe/app/(dashboard)/owner/races/[raceId]/register/page.tsx`
 - `fe/app/(dashboard)/owner/registrations/page.tsx`
+- `fe/app/(dashboard)/owner/wallet/page.tsx`
 - `fe/features/horses/components/horse-card.tsx`
 - `fe/features/horses/components/horse-form.tsx`
 - `fe/features/horses/components/horse-status-badge.tsx`
@@ -701,6 +722,10 @@ Build owner-facing horse portfolio and race registration flow using mock data.
 - `fe/features/race-registrations/mock-registrations.ts`
 - `fe/features/races/components/race-card.tsx` reuse/update if needed
 - `fe/features/races/components/race-detail-panel.tsx` reuse/update if needed
+- `fe/features/wallet/components/wallet-balance.tsx`
+- `fe/features/wallet/components/transaction-history.tsx`
+- `fe/features/wallet/components/cashout-request-form.tsx`
+- `fe/features/wallet/mock-wallet.ts`
 
 ### Main reusable components
 
@@ -712,6 +737,9 @@ Build owner-facing horse portfolio and race registration flow using mock data.
 - `RegistrationStatusBadge`
 - `RaceCard`
 - `RaceDetailPanel`
+- `WalletBalance`
+- `TransactionHistory`
+- `CashoutRequestForm`
 - `EmptyState`
 - `StatusBadge`
 
@@ -722,6 +750,7 @@ Build owner-facing horse portfolio and race registration flow using mock data.
 - Ineligible horse examples.
 - Registration states: pending, approved, rejected, need_more_info.
 - Race capacity/slots.
+- Owner reward points ledger and cashout requests history.
 
 ### Acceptance criteria
 
@@ -729,8 +758,9 @@ Build owner-facing horse portfolio and race registration flow using mock data.
 - Horse must show approval status before registration.
 - Register UI clearly shows eligible vs ineligible horses.
 - Registration status page has status badges and next-step copy.
+- Wallet page shows clear conversion (1 point = 100 VND) and ledger list.
+- Cashout form checks that points requested do not exceed available ledger balance.
 - No backend integration.
-- No payment/betting flow.
 - `npm run lint` passes.
 - `npm run build` passes.
 - Preview inspected for owner routes on mobile/tablet/desktop.
@@ -761,11 +791,11 @@ Build owner-facing horse portfolio and race registration flow using mock data.
 
 ---
 
-## Phase 6: Jockey assignment
+## Phase 6: Jockey assignment + jockey wallet
 
 ### Goal
 
-Build jockey assignment workflow for owner and jockey using mock data.
+Build jockey assignment workflow for owner and jockey, and jockey rewards wallet using mock data.
 
 ### Scope
 
@@ -775,11 +805,13 @@ Build jockey assignment workflow for owner and jockey using mock data.
 - Accept/reject mock actions.
 - Jockey race schedule.
 - Mobile-first jockey dashboard/action center.
+- Jockey Wallet panel (mobile optimized) showing reward points, cash equivalents, ledger history, and cashout form.
 
 ### Files/routes to create or update
 
 - `fe/app/(dashboard)/owner/jockey-assignments/page.tsx`
 - `fe/app/(dashboard)/jockey/page.tsx`
+- `fe/app/(dashboard)/jockey/wallet/page.tsx`
 - `fe/app/(dashboard)/jockey/assignments/page.tsx`
 - `fe/app/(dashboard)/jockey/assignments/[assignmentId]/page.tsx`
 - `fe/app/(dashboard)/jockey/schedule/page.tsx`
@@ -790,6 +822,7 @@ Build jockey assignment workflow for owner and jockey using mock data.
 - `fe/features/jockey-assignments/components/assignment-status-badge.tsx`
 - `fe/features/jockey-assignments/components/race-schedule-list.tsx`
 - `fe/features/jockey-assignments/mock-assignments.ts`
+- `fe/features/wallet/mock-wallet.ts` reuse/update if needed
 
 ### Main reusable components
 
@@ -799,6 +832,9 @@ Build jockey assignment workflow for owner and jockey using mock data.
 - `AssignmentCard`
 - `AssignmentStatusBadge`
 - `RaceScheduleList`
+- `WalletBalance` reuse if needed
+- `TransactionHistory` reuse if needed
+- `CashoutRequestForm` reuse if needed
 - `MobileBottomNav`
 - `StatusBadge`
 
@@ -809,12 +845,14 @@ Build jockey assignment workflow for owner and jockey using mock data.
 - Race schedule items.
 - Horse + race pairings.
 - Conflict example for overlapping race time as display-only warning.
+- Jockey reward points and cashout history.
 
 ### Acceptance criteria
 
 - Owner sees jockey assignment statuses.
-- Jockey sees mobile-first inbox and schedule.
+- Jockey sees mobile-first inbox, wallet, and schedule.
 - Accept/reject actions are mock-only with clear feedback.
+- Wallet is fully mobile responsive and has cashout forms.
 - Time conflict warning can display but no real validation backend.
 - Jockey route feels usable on mobile.
 - No backend integration.
@@ -848,20 +886,21 @@ Build jockey assignment workflow for owner and jockey using mock data.
 
 ---
 
-## Phase 7: Referee result entry
+## Phase 7: Referee pre-race check, violations & result simulation
 
 ### Goal
 
-Build referee workflow for assigned races, pre-race checks, violation logging, and result entry using mock data.
+Build referee workflow for assigned races, pre-race checks (Jockey roll-call, health, equipment), violation logging with severity penalties, automatic result simulation, and result confirmation using mock data.
 
 ### Scope
 
 - Referee dashboard/action center.
 - Assigned race list.
-- Race checklist/detail.
-- Violation log minimal UI.
-- Result entry form.
-- Referee report summary.
+- Race checklist/detail featuring Jockey roll-call, Horse health check, Equipment check status.
+- Violation logging UI with severity selections (Minor, Major, Critical) mapped to time penalties (+3s, +6s, +12s) or Disqualification.
+- Result entry form with "Simulate Results" quick-simulate button (recreates backend's base stats + jockey skill + weather bonus/malus + random daily form + accident delay logic).
+- Automatic frontend calculation showing time penalties added to base time, and instant rank recalculation based on updated times.
+- Referee report summary and Result confirmation.
 - Tablet-first sticky action layout.
 
 ### Files/routes to create or update
@@ -882,10 +921,10 @@ Build referee workflow for assigned races, pre-race checks, violation logging, a
 
 ### Main reusable components
 
-- `RaceChecklist`
-- `ViolationQuickAdd`
-- `ViolationList`
-- `ResultEntryForm`
+- `RaceChecklist` (Jockey roll-call, health status, equipment checked)
+- `ViolationQuickAdd` (Severity and penalty selectors)
+- `ViolationList` (Display of violations per participant)
+- `ResultEntryForm` (Simulate Results button, timing, and confirmation status)
 - `RefereeReportSummary`
 - `RaceRankingTable`
 - `RaceStatusTimeline`
@@ -894,17 +933,19 @@ Build referee workflow for assigned races, pre-race checks, violation logging, a
 ### Mock data needed
 
 - Referee assigned races.
-- Participants with horse/jockey lane/order.
-- Race statuses: scheduled/live/finished.
-- Violation examples.
+- Participants with horse/jockey lane/order, base speed, stamina, weight.
+- Race statuses: checking, live, finished.
+- Violation severity rules and penalty codes.
 - Result entry rows with rank/time/status.
 - Referee confirmation state.
 
 ### Acceptance criteria
 
 - Referee can navigate assigned race → checklist → violations/result entry.
-- Result entry UI is enabled only for mock finished race.
-- Confirm result state is clearly distinct from published state.
+- Result entry UI is enabled only when all participants have a PASSED pre-race check (Jockey roll-call, health, equipment).
+- "Simulate Results" button generates randomized running times using base stats, jockey experience, weather conditions (Sunny/Rainy/Stormy), track conditions (Dry/Muddy), and random daily form factor, and lists results in DRAFT status.
+- Adding violations to a participant immediately adds penalty times (+3s/+6s/+12s) or changes outcome to DISQUALIFIED on the frontend, automatically recalculating and resort ranks.
+- Confirm result action is mock-only and saves states.
 - Tablet-first layout uses large buttons and sticky action bar.
 - No backend integration.
 - Race ranking remains per race only.

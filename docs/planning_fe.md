@@ -165,6 +165,8 @@ fe/
 │       │   ├── races/[raceId]/assignments/page.tsx
 │       │   ├── races/[raceId]/results/page.tsx
 │       │   ├── registrations/page.tsx
+│       │   ├── cashouts/page.tsx
+│       │   ├── audit-logs/page.tsx
 │       │   └── notifications/page.tsx
 │       ├── owner/
 │       │   ├── layout.tsx
@@ -177,6 +179,7 @@ fe/
 │       │   ├── races/[raceId]/register/page.tsx
 │       │   ├── registrations/page.tsx
 │       │   ├── jockey-assignments/page.tsx
+│       │   ├── wallet/page.tsx
 │       │   └── notifications/page.tsx
 │       ├── jockey/
 │       │   ├── layout.tsx
@@ -184,6 +187,7 @@ fe/
 │       │   ├── assignments/page.tsx
 │       │   ├── assignments/[assignmentId]/page.tsx
 │       │   ├── schedule/page.tsx
+│       │   ├── wallet/page.tsx
 │       │   └── notifications/page.tsx
 │       ├── referee/
 │       │   ├── layout.tsx
@@ -220,6 +224,7 @@ fe/
 │   ├── race-results/
 │   ├── predictions/
 │   ├── notifications/
+│   ├── wallet/
 │   └── dashboard/
 ├── lib/
 ├── hooks/
@@ -230,7 +235,7 @@ fe/
 ├── providers/
 └── middleware.ts
 ```
-
+  
 Không có route cho round management, stage management, qualification flow.
 
 ---
@@ -309,6 +314,8 @@ requireRole(["SPECTATOR"]);
 | `/admin/races/[raceId]/assignments`  | Referee/jockey assignments    | P1       |
 | `/admin/races/[raceId]/results`      | Result review/publish         | P0       |
 | `/admin/registrations`               | RaceRegistration approval     | P0       |
+| `/admin/cashouts`                    | Cashout approvals queue       | P1       |
+| `/admin/audit-logs`                  | System audit logs             | P2       |
 | `/admin/notifications`               | Notifications                 | P2       |
 
 ### 8.4 Horse Owner routes
@@ -324,6 +331,7 @@ requireRole(["SPECTATOR"]);
 | `/owner/races/[raceId]/register` | Register horse to race       | P0       |
 | `/owner/registrations`           | Registration status          | P0       |
 | `/owner/jockey-assignments`      | Jockey assignment management | P1       |
+| `/owner/wallet`                  | Wallet & Cashout request     | P1       |
 | `/owner/notifications`           | Notifications                | P2       |
 
 ### 8.5 Jockey routes
@@ -334,6 +342,7 @@ requireRole(["SPECTATOR"]);
 | `/jockey/assignments`                | Assignment inbox     | P0       |
 | `/jockey/assignments/[assignmentId]` | Assignment detail    | P0       |
 | `/jockey/schedule`                   | Race schedule        | P0       |
+| `/jockey/wallet`                     | Wallet & Cashout     | P1       |
 | `/jockey/notifications`              | Notifications        | P2       |
 
 ### 8.6 Referee routes
@@ -379,16 +388,17 @@ Nguyên tắc:
 
 | Module                | Mục đích                                                | Routes                                                                                                   | Components chính                                                                                                | API cần gọi                                                                                                                                                      | Realtime event                                                             | Roles                    |
 | --------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------ |
-| Authentication        | Login/register/session/role redirect                    | `/login`, `/register`                                                                                    | `LoginForm`, `RegisterForm`, `AuthCard`, `SessionHydrator`                                                      | `POST /auth/login`, `POST /auth/register`, `POST /auth/logout`, `GET /auth/me`                                                                                   | `auth:session-expired` optional                                            | Guest, all               |
+| Authentication        | Login/register/session/role redirect (với hỗ trợ Google Login) | `/login`, `/register`                                                                                    | `LoginForm`, `RegisterForm`, `AuthCard`, `SessionHydrator`, `GoogleLoginButton`                                 | `POST /auth/login`, `POST /auth/google`, `POST /auth/register`, `POST /auth/logout`, `GET /auth/me`                              | `auth:session-expired` optional                                            | Guest, all               |
 | Tournament Management | Admin tạo/sửa tournament; public/owner xem tournament   | `/admin/tournaments`, `/admin/tournaments/[tournamentId]`, `/tournaments`, `/tournaments/[tournamentId]` | `TournamentForm`, `TournamentCard`, `TournamentTable`, `TournamentDetail`, `RaceListInTournament`               | `GET /tournaments`, `GET /tournaments/:id`, `POST /tournaments`, `PATCH /tournaments/:id`                                                                        | `tournament:updated` optional                                              | Admin, Owner, Public     |
 | Race Management       | Tạo race, race schedule, detail, participants, status   | `/admin/races`, `/admin/races/new`, `/admin/races/[raceId]`, `/races/[raceId]`                           | `RaceForm`, `RaceTable`, `RaceDetailPanel`, `RaceScheduleCard`, `ParticipantTable`                              | `GET /races`, `GET /races/:id`, `POST /races`, `PATCH /races/:id`, `GET /races/:id/participants`, `POST /races/:id/status`                                       | `race:started`, `race:finished`                                            | Admin, Public, all roles |
 | Horse Management      | Owner quản lý horse, admin duyệt horse                  | `/owner/horses`, `/owner/horses/new`, `/owner/horses/[horseId]`                                          | `HorseForm`, `HorseCard`, `HorseStatusBadge`, `HorseApprovalPanel`                                              | `GET /horses/my`, `GET /horses/:id`, `POST /horses`, `PATCH /horses/:id`, `POST /admin/horses/:id/approve`                                                       | `horse:approved`, `horse:rejected`                                         | Owner, Admin             |
 | Race Registration     | Owner đăng ký horse vào race; admin duyệt               | `/owner/races/[raceId]/register`, `/owner/registrations`, `/admin/registrations`                         | `RaceRegistrationForm`, `EligibleHorseSelect`, `RegistrationStatusBadge`, `RegistrationTable`, `ApprovalDialog` | `POST /races/:id/register`, `GET /registrations/my`, `GET /admin/registrations`, `POST /admin/registrations/:id/approve`, `POST /admin/registrations/:id/reject` | `registration:submitted`, `registration:approved`, `registration:rejected` | Owner, Admin             |
 | Jockey Assignment     | Gán jockey cho horse trong race; jockey accept/reject   | `/owner/jockey-assignments`, `/jockey/assignments`, `/jockey/schedule`                                   | `JockeySearch`, `JockeyAssignmentForm`, `AssignmentInbox`, `RaceScheduleList`                                   | `GET /jockeys`, `POST /jockey-assignments`, `GET /jockey-assignments/received`, `POST /jockey-assignments/:id/accept`, `POST /jockey-assignments/:id/reject`     | `assignment:received`, `assignment:accepted`, `assignment:rejected`        | Owner, Jockey            |
-| Referee Workflow      | Referee check race, log violation, submit result/report | `/referee/assignments`, `/referee/races/[raceId]`, `/referee/races/[raceId]/result-entry`                | `RaceChecklist`, `ViolationQuickAdd`, `ResultEntryForm`, `RefereeReportSummary`                                 | `GET /referee/assignments`, `GET /races/:id`, `POST /races/:id/violations`, `POST /races/:id/results`, `POST /races/:id/reports`                                 | `violation:created`, `result:submitted`                                    | Referee, Admin           |
-| Race Result           | Review, confirm, publish race result                    | `/admin/races/[raceId]/results`, `/races/[raceId]`                                                       | `RaceResultManager`, `RaceRankingTable`, `PublishResultDialog`                                                  | `GET /races/:id/results`, `POST /races/:id/results/confirm`, `POST /races/:id/results/publish`                                                                   | `result:published`, `race:result-published`                                | Admin, Referee, Public   |
+| Referee Workflow      | Điểm danh Jockey, sức khỏe, thiết bị; vi phạm & kết quả | `/referee/assignments`, `/referee/races/[raceId]`, `/referee/races/[raceId]/violations`, `/referee/races/[raceId]/result-entry` | `RaceChecklist` (Jockey roll-call), `ViolationQuickAdd`, `ResultEntryForm` (với tự động giả lập), `RefereeReportSummary` | `GET /referee/assignments`, `GET /races/:id`, `POST /races/:id/checks`, `POST /races/:id/violations`, `POST /races/:id/results/simulate`, `POST /races/:id/results/confirm` | `violation:created`, `result:draft-simulated`, `result:confirmed`           | Referee, Admin           |
+| Race Result           | Review, confirm, công bố kết quả & chia giải thưởng     | `/admin/races/[raceId]/results`, `/races/[raceId]`                                                       | `RaceResultManager`, `RaceRankingTable`, `PublishResultDialog`                                                  | `GET /races/:id/results`, `POST /races/:id/results/publish` (kích hoạt chia giải 70/30 & trả prediction)                                                        | `result:published`, `race:result-published`                                | Admin, Referee, Public   |
 | Live Race Tracking    | Public/live race view + status timeline                 | `/races/[raceId]`, `/spectator/races/[raceId]`, `/owner/races/[raceId]`                                  | `LiveRaceTracker`, `RaceStatusTimeline`, `ParticipantLiveTable`, `RaceEventFeed`                                | `GET /races/:id`, `GET /races/:id/events`                                                                                                                        | `race:started`, `race:finished`                                            | Public, all roles        |
 | Prediction            | Spectator dự đoán winner của race                       | `/spectator/races/[raceId]`, `/spectator/predictions`                                                    | `PredictionPanel`, `PredictionCountdown`, `PredictionOptionCard`, `PredictionHistoryTable`                      | `GET /races/:id/prediction-options`, `POST /predictions`, `GET /predictions/my`                                                                                  | `prediction:locked`, `result:published`                                    | Spectator                |
+| Wallet & Cashout      | Ví tiền, đổi điểm thưởng nài/chủ ngựa, admin duyệt rút  | `/owner/wallet`, `/jockey/wallet`, `/admin/cashouts`, `/admin/audit-logs`                                | `WalletBalance`, `TransactionHistory`, `CashoutRequestForm`, `CashoutApprovalQueue`, `AuditLogsViewer`          | `GET /wallet/history`, `POST /wallet/cashout`, `GET /admin/cashouts`, `POST /admin/cashouts/:id/approve`, `POST /admin/cashouts/:id/pay`, `POST /admin/cashouts/:id/reject` | `wallet:balance-updated`, `cashout:updated`                                | Admin, Owner, Jockey     |
 | Notification          | Inbox theo role, unread badge, realtime toast           | role notification routes                                                                                 | `NotificationDropdown`, `NotificationList`, `UnreadBadge`                                                       | `GET /notifications`, `POST /notifications/:id/read`, `POST /notifications/read-all`                                                                             | `notification:new`, `notification:read`                                    | Auth roles               |
 | Dashboard             | Role summary đơn giản                                   | role dashboards                                                                                          | `DashboardCard`, `MetricGrid`, `ActivityFeed`                                                                   | `GET /dashboard/*`                                                                                                                                               | optional                                                                   | Auth roles               |
 
@@ -424,24 +434,33 @@ Nguyên tắc:
 ## 12. Race result flow
 
 ```txt
-Race finished
-→ Referee mở result-entry
-→ Referee nhập thứ hạng/timing/violation note
-→ Referee confirm RaceResult
-→ Admin review nếu cần
-→ Admin publish result
-→ Public/Spectator/Owner/Jockey xem race result + ranking
-→ Prediction resolved
-→ Notification sent
+Race status: CHECKING
+→ Referee thực hiện Pre-race check (Jockey roll-call, sức khỏe ngựa, thiết bị) cho toàn bộ APPROVED horses
+→ Khi all checks PASSED, Race status chuyển sang LIVE
+→ Trọng tài ghi nhận các lỗi vi phạm (RaceViolation) trong lúc đua (Minor/Major/Critical)
+→ Race finished
+→ Referee mở result-entry (hoặc bấm giả lập tự động simulateRaceResults)
+→ Hệ thống tự động quy đổi vi phạm thành giây phạt (+3s/+6s/+12s hoặc DISQUALIFIED), áp dụng vào kết quả chạy nháp (DRAFT)
+→ Hệ thống tự động sắp xếp lại thứ hạng (Rank) & điểm số của tất cả ngựa
+→ Referee kiểm tra và CONFIRM kết quả RaceResult
+→ Admin review & PUBLISH kết quả
+→ Tổng tiền thưởng tự động chia 70/30 (Horse Owner / Jockey) cộng vào Ví điểm thưởng
+→ Người chơi Spectator tự động nhận tiền thắng cược (Prediction payout)
+→ Lịch sử giao dịch (WalletTransaction) được tạo, thông báo (Notification) được gửi
+→ Jockey / Owner có thể vào trang Wallet để yêu cầu rút điểm thưởng (Cashout Request) quy đổi VND
 ```
 
 Rules FE cần reflect:
 
-- Result form chỉ mở khi race finished.
+- Pre-race checks phải hoàn thành (trạng thái PASSED cho tất cả) trước khi ghi nhận kết quả.
+- Ghi nhận lỗi vi phạm (RaceViolation) trực quan với các mức độ phạt khác nhau.
+- Hỗ trợ nút "Simulate Results" cho Referee để giả lập cuộc đua tự động với đầy đủ các yếu tố thời tiết, kỹ năng nài ngựa, chấn thương ngẫu nhiên.
+- Ranks của tất cả các ngựa sẽ tự động sắp xếp lại khi thời gian chạy thay đổi do vi phạm cộng phạt.
 - Publish button disabled nếu referee chưa confirm.
 - Race ranking hiển thị theo RaceResult của race đó.
 - Không tính điểm nhiều vòng.
-- Tournament leaderboard nếu có chỉ là summary optional.
+- Ví tiền của Jockey và Owner hiển thị rõ số điểm thưởng hiện có, lịch sử Sổ cái (Ledger) và lịch sử rút tiền (Cashout requests).
+- Form rút tiền kiểm tra hợp lệ số điểm khả dụng trước khi cho phép rút.
 
 ---
 

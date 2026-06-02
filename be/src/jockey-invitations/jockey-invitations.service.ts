@@ -5,22 +5,38 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   Registration,
   RegistrationDocument,
 } from '../registrations/schemas/registration.schema';
 import { UsersService } from '../users/users.service';
 import { RoleName } from '../users/schemas/user.schema';
+import {
+  Jockey,
+  JockeyDocument,
+  JockeyStatus,
+} from '../jockeys/schemas/jockey.schema';
+import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import {
   InvitationStatus,
   JockeyInvitation,
   JockeyInvitationDocument,
 } from './schemas/jockey-invitation.schema';
-
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
+
+const INVITATION_EXPIRY_DAYS = 3;
+const CONFLICT_WINDOW_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+/** Race statuses where jockey assignment is locked */
+const LOCKED_RACE_STATUSES = [
+  RaceStatus.READY,
+  RaceStatus.LIVE,
+  RaceStatus.FINISHED,
+  RaceStatus.RESULT_PUBLISHED,
+];
 
 @Injectable()
 export class JockeyInvitationsService {
@@ -29,6 +45,10 @@ export class JockeyInvitationsService {
     private invitationModel: Model<JockeyInvitationDocument>,
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
+    @InjectModel(Jockey.name)
+    private jockeyModel: Model<JockeyDocument>,
+    @InjectModel(Race.name)
+    private raceModel: Model<RaceDocument>,
     private usersService: UsersService,
     private notificationsService: NotificationsService,
   ) {}
@@ -38,28 +58,48 @@ export class JockeyInvitationsService {
     ownerId: string,
   ): Promise<JockeyInvitationDocument> {
     // 1. Verify registration exists and belongs to the owner
-    const registration = await this.registrationModel.findById(
-      dto.registrationId,
-    );
-    if (!registration) {
-      throw new NotFoundException('Registration not found');
-    }
+    const registration = await this.registrationModel
+      .findById(dto.registrationId)
+      .exec();
+    if (!registration) throw new NotFoundException('Registration not found');
     if (String(registration.ownerId) !== ownerId) {
       throw new ForbiddenException(
         'You can only invite a jockey for your own registered horse',
       );
     }
 
-    // 2. Verify target jockey exists and has JOCKEY role
+    // 2. Verify race is not locked for jockey changes
+    const race = await this.raceModel.findById(registration.raceId);
+    if (!race) throw new NotFoundException('Race not found');
+    if (LOCKED_RACE_STATUSES.includes(race.status)) {
+      throw new BadRequestException(
+        `Cannot invite a jockey when race is in ${race.status} status`,
+      );
+    }
+
+    // 3. Verify target user has JOCKEY role
     const jockeyUser = await this.usersService.findById(dto.jockeyId);
     if (!jockeyUser.roles.includes(RoleName.JOCKEY)) {
       throw new BadRequestException('Target user does not have JOCKEY role');
     }
 
-    // 3. Prevent duplicate active invitation
+    // 4. Verify jockey profile exists and is AVAILABLE
+    const jockeyProfile = await this.jockeyModel.findOne({
+      userId: dto.jockeyId,
+    });
+    if (!jockeyProfile) {
+      throw new BadRequestException('Jockey profile not found');
+    }
+    if (jockeyProfile.status !== JockeyStatus.AVAILABLE) {
+      throw new BadRequestException(
+        `Jockey is ${jockeyProfile.status} and cannot accept race invitations`,
+      );
+    }
+
+    // 5. Prevent duplicate active invitation
     const existing = await this.invitationModel.findOne({
       registrationId: dto.registrationId,
-      jockeyId: dto.jockeyId,
+      jockeyUserId: dto.jockeyId,
       status: InvitationStatus.PENDING,
     });
     if (existing) {
@@ -68,17 +108,24 @@ export class JockeyInvitationsService {
       );
     }
 
+    const expiredAt = new Date();
+    expiredAt.setDate(expiredAt.getDate() + INVITATION_EXPIRY_DAYS);
+
     const invitation = await this.invitationModel.create({
-      ...dto,
-      ownerId,
+      registrationId: new Types.ObjectId(dto.registrationId),
+      raceId: registration.raceId,
+      horseId: registration.horseId,
+      ownerId: new Types.ObjectId(ownerId),
+      jockeyUserId: new Types.ObjectId(dto.jockeyId),
+      message: dto.message,
+      expiredAt,
     });
 
-    // Notify the jockey!
     await this.notificationsService.send(
       dto.jockeyId,
       'New Race Invitation',
-      `You have been invited by an owner to ride in a race registration. Message: ${dto.message ?? ''}`,
-      NotificationType.INVITATION,
+      `You have been invited to ride in a race. Message: ${dto.message ?? ''}`,
+      NotificationType.RACE,
     );
 
     return invitation;
@@ -90,12 +137,9 @@ export class JockeyInvitationsService {
     jockeyUserId: string,
   ): Promise<JockeyInvitationDocument> {
     const invitation = await this.invitationModel.findById(id);
-    if (!invitation) {
-      throw new NotFoundException('Invitation not found');
-    }
+    if (!invitation) throw new NotFoundException('Invitation not found');
 
-    // Verify jockey owns the invitation
-    if (String(invitation.jockeyId) !== jockeyUserId) {
+    if (String(invitation.jockeyUserId) !== jockeyUserId) {
       throw new ForbiddenException(
         'You can only respond to invitations sent to you',
       );
@@ -105,37 +149,102 @@ export class JockeyInvitationsService {
       throw new BadRequestException('Invitation has already been responded to');
     }
 
+    // Check if expired
+    if (invitation.expiredAt && new Date() > invitation.expiredAt) {
+      invitation.status = InvitationStatus.EXPIRED;
+      await invitation.save();
+      throw new BadRequestException('Invitation has expired');
+    }
+
+    // When accepting, run additional checks
+    if (status === InvitationStatus.ACCEPTED) {
+      // Check race is not locked (READY or beyond)
+      const race = await this.raceModel.findById(invitation.raceId);
+      if (race && LOCKED_RACE_STATUSES.includes(race.status)) {
+        throw new BadRequestException(
+          `Cannot accept invitation — race is already in ${race.status} status`,
+        );
+      }
+
+      // Check schedule conflict: jockey already accepted another race within 4-hour window
+      if (race) {
+        const acceptedInvitations = await this.invitationModel.find({
+          jockeyUserId,
+          status: InvitationStatus.ACCEPTED,
+          _id: { $ne: id },
+        });
+
+        if (acceptedInvitations.length > 0) {
+          const conflictRaceIds = acceptedInvitations.map((inv) => inv.raceId);
+          const windowStart = new Date(
+            race.startTime.getTime() - CONFLICT_WINDOW_MS,
+          );
+          const windowEnd = new Date(
+            race.startTime.getTime() + CONFLICT_WINDOW_MS,
+          );
+          const conflicting = await this.raceModel.findOne({
+            _id: { $in: conflictRaceIds },
+            startTime: { $gte: windowStart, $lte: windowEnd },
+            status: {
+              $nin: [RaceStatus.CANCELLED, RaceStatus.RESULT_PUBLISHED],
+            },
+          });
+
+          if (conflicting) {
+            throw new BadRequestException(
+              'You already have an accepted race within the same time window (4-hour conflict)',
+            );
+          }
+        }
+      }
+
+      // Bind jockey to registration
+      await this.registrationModel.findByIdAndUpdate(
+        invitation.registrationId,
+        {
+          jockeyUserId: invitation.jockeyUserId,
+        },
+      );
+    }
+
     invitation.status = status;
+    invitation.respondedAt = new Date();
     await invitation.save();
 
-    // Notify the owner of the response!
     const jockeyUser = await this.usersService.findById(jockeyUserId);
     await this.notificationsService.send(
       String(invitation.ownerId),
       `Invitation ${status.toLowerCase()}`,
       `Jockey ${jockeyUser.fullName} has ${status.toLowerCase()} your race invitation.`,
-      NotificationType.INVITATION,
+      NotificationType.RACE,
     );
-
-    // If accepted, bind jockey to registration officially!
-    if (status === InvitationStatus.ACCEPTED) {
-      await this.registrationModel.findByIdAndUpdate(
-        invitation.registrationId,
-        {
-          jockeyId: invitation.jockeyId,
-        },
-      );
-    }
 
     return invitation;
   }
 
+  async cancel(id: string, ownerId: string): Promise<JockeyInvitationDocument> {
+    const invitation = await this.invitationModel.findById(id);
+    if (!invitation) throw new NotFoundException('Invitation not found');
+    if (String(invitation.ownerId) !== ownerId) {
+      throw new ForbiddenException('You can only cancel your own invitations');
+    }
+    if (invitation.status !== InvitationStatus.PENDING) {
+      throw new BadRequestException(
+        'Only pending invitations can be cancelled',
+      );
+    }
+    invitation.status = InvitationStatus.CANCELLED;
+    return invitation.save();
+  }
+
   async findMyReceived(jockeyUserId: string, page = 1, limit = 20) {
-    const filter = { jockeyId: jockeyUserId };
+    const filter = { jockeyUserId };
     const [data, total] = await Promise.all([
       this.invitationModel
         .find(filter)
         .populate('registrationId')
+        .populate('raceId', 'name startTime status')
+        .populate('horseId', 'name breed')
         .populate('ownerId', 'fullName email phone')
         .skip((page - 1) * limit)
         .limit(limit)
@@ -155,7 +264,9 @@ export class JockeyInvitationsService {
       this.invitationModel
         .find(filter)
         .populate('registrationId')
-        .populate('jockeyId', 'fullName email phone')
+        .populate('raceId', 'name startTime status')
+        .populate('horseId', 'name breed')
+        .populate('jockeyUserId', 'fullName email phone')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })

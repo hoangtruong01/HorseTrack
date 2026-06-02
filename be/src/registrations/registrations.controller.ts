@@ -8,7 +8,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -18,6 +23,7 @@ import { RoleName } from '../users/schemas/user.schema';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { RegistrationsService } from './registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
+import { RejectRegistrationDto } from './dto/reject-registration.dto';
 
 @ApiTags('Registrations')
 @ApiBearerAuth()
@@ -36,18 +42,23 @@ export class RegistrationsController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'List all registrations (Admin)' })
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
+  @ApiOperation({ summary: 'List all registrations (Admin / Spectators)' })
+  @ApiQuery({ name: 'tournamentId', required: false })
+  @ApiQuery({ name: 'raceId', required: false })
+  @ApiQuery({ name: 'status', required: false })
   findAll(
     @Query() pagination: PaginationDto,
     @Query('tournamentId') tournamentId?: string,
     @Query('raceId') raceId?: string,
+    @Query('status') status?: string,
   ) {
     return this.registrationsService.findAll(
       pagination.page,
       pagination.limit,
       tournamentId,
       raceId,
+      status,
     );
   }
 
@@ -81,15 +92,25 @@ export class RegistrationsController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Reject registration (Admin)' })
-  reject(@Param('id') id: string, @Body('reason') reason?: string) {
-    return this.registrationsService.reject(id, reason);
+  reject(@Param('id') id: string, @Body() dto: RejectRegistrationDto) {
+    return this.registrationsService.reject(id, dto.reason);
   }
 
   @Patch(':id/cancel')
   @UseGuards(RolesGuard)
   @Roles(RoleName.OWNER)
-  @ApiOperation({ summary: 'Cancel own registration (Owner)' })
+  @ApiOperation({
+    summary: 'Cancel own registration (Owner) — only PENDING/REJECTED',
+  })
   cancel(@Param('id') id: string, @CurrentUser() user: JwtUser) {
     return this.registrationsService.cancel(id, user.id);
+  }
+
+  @Patch(':id/withdraw')
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.OWNER)
+  @ApiOperation({ summary: 'Withdraw approved registration (Owner)' })
+  withdraw(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+    return this.registrationsService.withdraw(id, user.id);
   }
 }

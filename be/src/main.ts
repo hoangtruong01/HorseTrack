@@ -1,11 +1,15 @@
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import mongoose from 'mongoose';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { mongooseTransformPlugin } from './common/plugins/mongoose-transform.plugin';
+
+mongoose.plugin(mongooseTransformPlugin);
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -38,10 +42,7 @@ async function bootstrap() {
   );
 
   // ── Interceptors ──
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector)),
-    new ResponseInterceptor(),
-  );
+  app.useGlobalInterceptors(new ResponseInterceptor());
 
   // ── Exception filter ──
   app.useGlobalFilters(new AllExceptionsFilter());

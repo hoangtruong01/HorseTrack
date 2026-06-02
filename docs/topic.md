@@ -61,20 +61,22 @@ Hệ thống được xây dựng nhằm:
 
 ## 4.1 Trong scope MVP
 
-- Auth + RBAC cơ bản
+- Auth + RBAC cơ bản & Google OAuth2 Login
 - Tournament management
 - Race management
 - Horse management
 - Race registration
-- Jockey assignment
+- Jockey assignment & Jockey Invitations
 - Referee assignment
 - Race schedule
-- Live race status cơ bản
-- Race result entry/confirm/publish
+- Live race status & Pre-race checks (Jockey roll-call, Health, Equipment checks)
+- Race result entry/confirm/publish (với giả lập thông số & quy đổi vi phạm)
+- Automatic time penalty & outcomes calculation
+- 70/30 Winner prize split & Wallet direct reward point credit
+- Wallet balance, Point Ledger & Point Redemption (Jockey/Owner Cashout)
 - Ranking theo từng race
-- Spectator prediction
-- Notification cơ bản
-- Violation và referee report
+- Spectator prediction & automatic prediction payout resolution
+- Notification cơ bản & Realtime audit logs
 
 ## 4.2 Ngoài scope MVP
 
@@ -90,7 +92,7 @@ Không làm trong MVP:
 - Ranking logic nhiều vòng
 - Season point system
 
-Tournament leaderboard nếu có chỉ là optional/simple, ví dụ thống kê số race thắng hoặc danh sách result đã publish.
+Tournament leaderboard nếu có chỉ là đơn giản, ví dụ thống kê số race thắng hoặc danh sách result đã publish.
 
 ---
 
@@ -269,6 +271,29 @@ Nguyên tắc chính:
 - Một jockey không được tham gia hai race bị trùng thời gian.
 - Horse phải được duyệt trước khi đăng ký race.
 - RaceRegistration phải được duyệt trước khi horse xuất hiện trong danh sách thi đấu.
+- **Quy trình Kiểm tra trước cuộc đua (Pre-race check / Jockey roll-call):**
+  - Trước khi bắt đầu, trọng tài thực hiện điểm danh Jockey, kiểm tra sức khỏe của ngựa và thiết bị.
+  - Một cuộc đua chỉ có thể bắt đầu (LIVE) hoặc thực hiện ghi nhận kết quả khi toàn bộ các ngựa đã đăng ký APPROVED đều có bản ghi kiểm tra với trạng thái PASSED.
+- **Giả lập thông số (Race simulation):**
+  - Thời gian hoàn thành được giả lập tự động dựa trên tốc độ và thể lực cơ bản của ngựa, kỹ năng của nài ngựa (từ beginner đến professional), kinh nghiệm, điều kiện thời tiết (Sunny/Rainy/Stormy), điều kiện đường đua (Dry/Muddy), biến cố ngẫu nhiên (chấn thương, xuống nhịp chạy, xuất phát tệ) và phong độ trong ngày.
+- **Quy đổi Vi phạm sang phạt thời gian (Time Penalties):**
+  - Trọng tài ghi nhận vi phạm trước/trong cuộc đua với mức độ nghiêm trọng khác nhau:
+    - Minor: Phạt cộng thêm 3 giây (+3000ms) vào thời gian chạy.
+    - Major: Phạt cộng thêm 6 giây (+6000ms) vào thời gian chạy.
+    - Critical: Phạt cộng thêm 12 giây (+12000ms) vào thời gian chạy.
+  - Các vi phạm có thể dẫn tới bị loại (`DISQUALIFIED`) ngay lập tức hoặc bị phạt thời gian (`TIME_PENALTY`).
+  - Hệ thống tự động quy đổi vi phạm thành giây phạt, cộng vào kết quả chạy nháp (DRAFT) của ngựa, sau đó tự động sắp xếp lại thứ hạng (Rank) và tính điểm.
+- **Điểm số xếp hạng:** 1st = 10đ, 2nd = 7đ, 3rd = 5đ, 4th = 3đ, các thứ hạng khác = 1đ. Bị loại (DISQUALIFIED) = 0đ.
+- **Cơ chế Chia giải thưởng 70/30 (Winner Prize Split):**
+  - Khi kết quả cuộc đua được công bố (`PUBLISHED`), tổng tiền thưởng của cuộc đua (`prize`) được chia theo tỷ lệ:
+    - 70% dành cho Chủ ngựa (Horse Owner).
+    - 30% dành cho Nài ngựa (Jockey).
+  - Tiền thưởng này sẽ được cộng trực tiếp vào số dư điểm thưởng (Reward Points Ledger) của người thắng cuộc.
+- **Ví tiền và Quy đổi Điểm (Wallet & Cashout):**
+  - Tỷ lệ quy đổi điểm thưởng: `1 điểm = 100 VND`.
+  - Chủ ngựa và Jockey có thể yêu cầu rút tiền (Cashout Request) để đổi điểm thưởng thành tiền thật.
+  - Số điểm yêu cầu rút sẽ bị trừ ngay khỏi ví điểm thưởng khi gửi yêu cầu.
+  - Admin duyệt yêu cầu rút tiền (APPROVED/PAID/REJECTED). Nếu yêu cầu bị từ chối (REJECTED), điểm thưởng sẽ được hoàn lại ví của người dùng.
 - Spectator prediction bị lock trước giờ race theo server time.
 - Referee chỉ thao tác trên race được phân công.
 - RaceResult chỉ được publish sau khi referee confirm.
@@ -281,22 +306,23 @@ Nguyên tắc chính:
 
 ## Core entities
 
-- User
-- Tournament
-- Race
-- Horse
-- RaceRegistration
-- JockeyAssignment
-- RaceResult
-- Prediction
-- Notification
-- Violation
-- RefereeReport
-
-## Optional/simple entities
-
-- TournamentLeaderboard: optional, chỉ thống kê đơn giản từ published race result.
-- Reward: optional nếu demo cần phần thưởng.
+- **User**: Tài khoản người dùng, lưu trữ số dư ví (balance) và danh sách vai trò (roles).
+- **Tournament**: Giải đấu, chứa danh sách các cuộc đua độc lập.
+- **Race**: Cuộc đua chính, lưu thời gian, khoảng cách, điều kiện thời tiết, trạng thái, trọng tài phụ trách và tiền thưởng.
+- **Horse**: Chú ngựa thi đấu, lưu trữ thông số kỹ thuật (base speed, stamina, weight, breed) phục vụ giả lập.
+- **RaceRegistration**: Bản đăng ký tham gia cuộc đua của chủ ngựa.
+- **JockeyAssignment**: Giao nhiệm vụ nài ngựa thi đấu.
+- **JockeyInvitation**: Lời mời nài ngựa thi đấu từ chủ ngựa gửi tới jockey.
+- **RaceCheck**: Bản kiểm tra trước cuộc đua (Jockey roll-call, sức khỏe ngựa, thiết bị).
+- **RaceViolation**: Lỗi vi phạm của ngựa/nài ngựa trong cuộc đua.
+- **RaceResult**: Kết quả cuộc đua (thứ hạng, thời gian chạy, điểm số, trạng thái DRAFT/CONFIRMED/PUBLISHED).
+- **Prize**: Giải thưởng ghi nhận lịch sử trúng thưởng sau khi cuộc đua kết thúc.
+- **RewardPointLedger**: Sổ cái ghi nhận lịch sử biến động điểm thưởng (cộng điểm đua, trừ điểm rút tiền, hoàn điểm).
+- **WalletTransaction**: Lịch sử giao dịch ví tiền (Nạp tiền, Rút tiền thưởng).
+- **CashoutRequest**: Yêu cầu rút tiền đổi từ điểm thưởng của Jockey/Owner.
+- **Prediction**: Dự đoán của Spectator cho cuộc đua.
+- **Notification**: Thông báo hệ thống gửi theo vai trò.
+- **AuditLog**: Nhật ký thao tác hệ thống phục vụ hậu kiểm.
 
 ## Removed khỏi MVP
 
@@ -315,7 +341,7 @@ Nguyên tắc chính:
 
 ## User
 
-Đại diện tài khoản hệ thống. Có role: Admin, Horse Owner, Jockey, Referee, Spectator.
+Đại diện tài khoản hệ thống. Có role: Admin, Horse Owner, Jockey, Referee, Spectator. Lưu trữ số dư thực tế và liên kết với Ví/Sổ cái điểm thưởng.
 
 ## Tournament
 
@@ -323,11 +349,11 @@ Container gom nhiều race. Không xử lý round/stage/progression.
 
 ## Race
 
-Đơn vị thi đấu chính. Có schedule, participant list, referee, status, result, ranking.
+Đơn vị thi đấu chính. Có schedule, participant list, referee, status, result, ranking, prize pool và thông số thời tiết.
 
 ## Horse
 
-Thông tin ngựa thuộc owner. Horse cần được duyệt trước khi đăng ký race.
+Thông tin ngựa thuộc owner. Có thông số tốc độ, thể lực để phục vụ race simulation. Horse cần được duyệt trước khi đăng ký race.
 
 ## RaceRegistration
 
@@ -337,25 +363,37 @@ Bản ghi owner đăng ký horse vào một race cụ thể.
 
 Bản ghi jockey được gán cho horse trong một race.
 
+## RaceCheck
+
+Biên bản kiểm tra kỹ thuật và điểm danh (Jockey roll-call) trước giờ chạy của Referee.
+
+## RaceViolation
+
+Ghi nhận các vi phạm của ngựa/jockey và mức phạt thời gian tương ứng.
+
 ## RaceResult
 
-Kết quả của một race, gồm thứ hạng, thời gian hoàn thành, trạng thái confirm/publish.
+Kết quả của một race, gồm thứ hạng, thời gian hoàn thành (đã cộng phạt), điểm số tích lũy, trạng thái confirm/publish.
 
 ## Prediction
 
 Dự đoán của spectator cho một race. Lock trước giờ race.
 
+## Prize
+
+Lịch sử trúng giải và phân chia tiền thưởng 70/30.
+
+## RewardPointLedger
+
+Sổ cái kiểm soát điểm thưởng, đảm bảo tính toàn vẹn tài chính điểm.
+
+## WalletTransaction / CashoutRequest
+
+Quản lý nạp tiền mặt và rút điểm thưởng quy đổi tiền mặt của chủ ngựa/jockey.
+
 ## Notification
 
-Thông báo trạng thái registration, assignment, race started, race finished, result published.
-
-## Violation
-
-Vi phạm được referee ghi nhận trong race.
-
-## RefereeReport
-
-Biên bản referee cho race, gồm ghi chú, violation, xác nhận result.
+Thông báo trạng thái registration, assignment, race started, race finished, result published, prize paid, cashout approved.
 
 ---
 
@@ -372,50 +410,57 @@ Biên bản referee cho race, gồm ghi chú, violation, xác nhận result.
 
 ## Authentication Module
 
-- Login
+- Login (Email + Password)
+- Google OAuth2 Login
 - Register
 - Logout
 - Role-based access
 
 ## Admin Module
 
-- User management
+- User management & Banning status
 - Tournament management
-- Race management
+- Race management & Weather conditions
 - RaceRegistration approval
 - Referee assignment
-- Result publish
+- Result publish (trigger 70/30 split and payout prediction)
+- Cashout Request Approval queue (Approve/Pay/Reject)
+- Audit Logs viewer
 - Notification management
 
 ## Horse Owner Module
 
 - Horse portfolio
 - Race registration
-- Jockey assignment
-- Race tracking
-- Race result view
+- Jockey assignment & invitations
+- Wallet history & Point Ledger balance
+- Cashout Request (Redeem points to VND)
+- Race tracking & Published result view
 
 ## Jockey Module
 
-- Assignment inbox
+- Assignment inbox & Invitations
 - Race schedule
 - Race detail
+- Wallet history & Point Ledger balance
+- Cashout Request (Redeem points to VND)
 - Notification
 
 ## Referee Module
 
 - Assigned race list
-- Pre-race check
-- Violation logging
-- Result entry
-- Referee report
+- Pre-race check (Jockey roll-call, horse health, equipment)
+- Violation logging (Minor/Major/Critical severities mapped to time penalties/disqualifications)
+- Result entry & automatic simulation
+- Confirm results
 
 ## Spectator Module
 
 - Race browsing
 - Live race tracking
-- Prediction flow
+- Prediction flow (with lock status & countdown)
 - Published result view
+- Wallet deposit simulation
 - Notification
 
 ---
@@ -429,6 +474,10 @@ Dùng thống nhất:
 - “Race schedule” thay cho “tournament stage”.
 - “Race ranking” cho thứ hạng trong từng race.
 - “Tournament leaderboard” chỉ dùng nếu optional/simple.
+- “Pre-race check” thay cho “medical check” hoặc “equipment check”.
+- “Jockey roll-call” cho việc điểm danh nài ngựa.
+- “Reward points” cho số dư điểm thưởng.
+- “Cashout” cho việc rút tiền đổi điểm thưởng.
 
 Không dùng cho MVP:
 

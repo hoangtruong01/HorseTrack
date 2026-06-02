@@ -64,8 +64,12 @@ export class TournamentsController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change tournament status (Admin)' })
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
-    return this.tournamentsService.updateStatus(id, dto.status);
+  updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateStatusDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.tournamentsService.updateStatus(id, dto.status, user.id);
   }
 
   @Delete(':id')

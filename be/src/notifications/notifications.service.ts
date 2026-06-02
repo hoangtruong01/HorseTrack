@@ -26,15 +26,17 @@ export class NotificationsService {
   async send(
     userId: string,
     title: string,
-    message: string,
-    type: NotificationType = NotificationType.INFO,
+    body: string,
+    type: NotificationType = NotificationType.SYSTEM,
+    data?: Record<string, unknown>,
   ): Promise<NotificationDocument> {
     const notif = await this.notificationModel.create({
       userId,
       title,
-      message,
+      body,
       type,
       isRead: false,
+      data,
     });
 
     // Send realtime event!
@@ -66,6 +68,7 @@ export class NotificationsService {
       throw new NotFoundException('Notification not found');
     }
     notif.isRead = true;
+    notif.readAt = new Date();
     return notif.save();
   }
 

@@ -49,6 +49,10 @@ CLAUDE.md
 .temp
 .tmp
 
+# Uploaded files (runtime data, not source code)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # Runtime data
 pids
 *.pid

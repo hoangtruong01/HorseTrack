@@ -1,10 +1,18 @@
+/* eslint-disable react-hooks/immutability */
 "use client";
 
-import { X } from "lucide-react";
+import { Award, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { RaceResultReview } from "@/features/results/mock-results";
+import {
+  mockWalletBalances,
+  mockTransactions,
+  addAuditLog,
+} from "@/features/wallet/mock-wallet";
 
 export type PublishResultDialogProps = {
   result: RaceResultReview | null;
@@ -17,77 +25,202 @@ export function PublishResultDialog({
   open,
   onClose,
 }: PublishResultDialogProps) {
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishedSuccess, setPublishedSuccess] = useState(false);
+
   if (!open || !result) return null;
 
   const canPublish = result.status === "referee_confirmed";
 
+  const handlePublish = async () => {
+    setIsPublishing(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsPublishing(false);
+
+    // 1. Update result status to published
+    result.status = "published";
+    
+    // 2. Perform the 70/30 split logic
+    const totalPrizePoints = 10000;
+    const ownerPoints = totalPrizePoints * 0.7; // 7,000 pts
+    const jockeyPoints = totalPrizePoints * 0.3; // 3,000 pts
+
+    // Credit Owner (user-owner-1)
+    if (mockWalletBalances["user-owner-1"] !== undefined) {
+      mockWalletBalances["user-owner-1"] += ownerPoints;
+    }
+    // Credit Jockey (user-jockey-1)
+    if (mockWalletBalances["user-jockey-1"] !== undefined) {
+      mockWalletBalances["user-jockey-1"] += jockeyPoints;
+    }
+
+    // 3. Insert transaction ledger items
+    const newOwnerTx = {
+      id: `tx-${mockTransactions.length + 1}`,
+      type: "prize_owner" as const,
+      amount: ownerPoints,
+      amountVnd: ownerPoints * 100,
+      description: `Winner prize split (70%) - Crimson Bolt in ${result.race}`,
+      createdAt: new Date().toISOString(),
+      status: "completed" as const,
+    };
+    
+    const newJockeyTx = {
+      id: `tx-${mockTransactions.length + 2}`,
+      type: "prize_jockey" as const,
+      amount: jockeyPoints,
+      amountVnd: jockeyPoints * 100,
+      description: `Winner prize split (30%) - Jockey assignment for Crimson Bolt in ${result.race}`,
+      createdAt: new Date().toISOString(),
+      status: "completed" as const,
+    };
+
+    // Push at the beginning
+    mockTransactions.unshift(newOwnerTx, newJockeyTx);
+
+    // 4. Log to secure System Audit Trail
+    addAuditLog(
+      "RACE_PUBLISHED",
+      "admin@horsetrack.com",
+      `Published results for ${result.race}. Crimson Bolt placed 1st.`
+    );
+    addAuditLog(
+      "PRIZE_SPLIT",
+      "SYSTEM",
+      `Allocated 70% prize (${ownerPoints} pts) to Owner Linh Tran Stable and 30% (${jockeyPoints} pts) to Jockey Minh Khoa`
+    );
+
+    // Trigger spectator payout simulation
+    addAuditLog(
+      "PREDICTION_PAYOUT",
+      "SYSTEM",
+      `Processed spectator prediction win payout multiplier for users who predicted Crimson Bolt.`
+    );
+
+    setPublishedSuccess(true);
+    toast.success("Race results published successfully! Winnings distributed.");
+  };
+
+  const handleClose = () => {
+    setPublishedSuccess(false);
+    onClose();
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="publish-dialog-title"
     >
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] shadow-[0_24px_90px_rgba(0,0,0,0.6)]">
-        <div className="flex items-start justify-between border-b border-white/10 p-5">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-              Publish race result
-            </p>
-            <h2
-              id="publish-dialog-title"
-              className="mt-2 text-2xl font-black uppercase text-white"
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] shadow-[0_24px_90px_rgba(0,0,0,0.8)]">
+        {!publishedSuccess ? (
+          <>
+            <div className="flex items-start justify-between border-b border-white/10 p-5">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
+                  Publish race result
+                </p>
+                <h2
+                  id="publish-dialog-title"
+                  className="mt-2 text-2xl font-black uppercase text-white"
+                >
+                  {result.race}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="grid size-10 place-items-center rounded-full border border-white/10 text-white/70 transition hover:bg-white/10 hover:text-white cursor-pointer"
+                aria-label="Close publish dialog"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="space-y-4 p-5">
+              <StatusBadge
+                label={result.status.replace("_", " ")}
+                tone={
+                  canPublish
+                    ? "green"
+                    : result.status === "published"
+                      ? "teal"
+                      : "yellow"
+                }
+              />
+              <p className="text-sm leading-6 text-muted-foreground">
+                Publishing makes this race ranking visible as the final official result. This action will automatically trigger the reward splits:
+              </p>
+              
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <div className="flex items-center gap-2">
+                    <Award className="size-5 text-primary" />
+                    <span className="text-xs font-black uppercase text-white tracking-wider">Owner Split (70%)</span>
+                  </div>
+                  <p className="mt-2 font-mono text-2xl font-black text-white">7,000 pts</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Credits stable: Linh Tran Stable</p>
+                </div>
+
+                <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+                  <div className="flex items-center gap-2">
+                    <Award className="size-5 text-blue-400" />
+                    <span className="text-xs font-black uppercase text-white tracking-wider">Jockey Split (30%)</span>
+                  </div>
+                  <p className="mt-2 font-mono text-2xl font-black text-white">3,000 pts</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Credits jockey: Minh Khoa</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-black/25 p-4 text-xs text-white/80 leading-relaxed">
+                <strong className="text-primary font-black uppercase tracking-wide mr-1.5">Referee summary:</strong>
+                {result.refereeSummary}
+              </div>
+            </div>
+            <div className="flex flex-col-reverse gap-3 border-t border-white/10 p-5 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-11 rounded-full border-white/10 text-white"
+                onClick={handleClose}
+                disabled={isPublishing}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="min-h-11 rounded-full font-black uppercase tracking-wide bg-primary hover:bg-[#B80500] px-5"
+                disabled={!canPublish || isPublishing}
+                onClick={handlePublish}
+              >
+                {isPublishing ? "Distributing Prize..." : "Confirm & Publish"}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="p-8 text-center space-y-5">
+            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <Sparkles className="size-8" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-black uppercase text-white tracking-tight">Race Results Published!</h3>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                Prize splits have been credited to user balances. Ledger transactions and system audit logs successfully updated.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 text-left font-mono text-xs max-w-sm mx-auto space-y-1 text-white/80">
+              <p className="text-emerald-400 font-bold">+7,000 pts credited to Owner wallet</p>
+              <p className="text-blue-400 font-bold">+3,000 pts credited to Jockey wallet</p>
+              <p className="text-white/40 mt-2">Audit action: RACE_PUBLISHED, PRIZE_SPLIT</p>
+            </div>
+            <Button
+              onClick={handleClose}
+              className="h-12 w-full rounded-full font-black uppercase tracking-wider text-white bg-primary hover:bg-[#B80500]"
             >
-              {result.race}
-            </h2>
+              Done
+            </Button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="grid size-10 place-items-center rounded-full border border-white/10 text-white/70 transition hover:bg-white/10 hover:text-white"
-            aria-label="Close publish dialog"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
-        <div className="space-y-4 p-5">
-          <StatusBadge
-            label={result.status.replace("_", " ")}
-            tone={
-              canPublish
-                ? "green"
-                : result.status === "published"
-                  ? "teal"
-                  : "yellow"
-            }
-          />
-          <p className="text-sm leading-6 text-muted-foreground">
-            Publishing makes the mock race ranking visible as the final
-            published result state. No API call, socket, notification, or
-            leaderboard aggregation is performed.
-          </p>
-          <div className="rounded-xl border border-white/10 bg-black/25 p-4 text-sm text-white/80">
-            {result.refereeSummary}
-          </div>
-        </div>
-        <div className="flex flex-col-reverse gap-3 border-t border-white/10 p-5 sm:flex-row sm:justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            className="min-h-11 rounded-full"
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            className="min-h-11 rounded-full"
-            disabled={!canPublish}
-            onClick={onClose}
-          >
-            Confirm publish
-          </Button>
-        </div>
+        )}
       </div>
     </div>
   );

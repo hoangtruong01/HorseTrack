@@ -4,8 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
+import { PredictionsService } from '../predictions/predictions.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
 import {
@@ -14,35 +15,77 @@ import {
   RaceStatus,
   RACE_STATUS_FLOW,
 } from './schemas/race.schema';
+import {
+  Registration,
+  RegistrationDocument,
+  RegistrationStatus,
+} from '../registrations/schemas/registration.schema';
+import {
+  RaceCheck,
+  RaceCheckDocument,
+  RaceCheckStatus,
+} from '../race-checks/schemas/race-check.schema';
+import {
+  RefereeAssignment,
+  RefereeAssignmentDocument,
+  RefereeAssignmentStatus,
+} from '../referee-assignments/schemas/referee-assignment.schema';
+
+const LOCKED_STATUSES = [
+  RaceStatus.LIVE,
+  RaceStatus.FINISHED,
+  RaceStatus.RESULT_PUBLISHED,
+];
 
 @Injectable()
 export class RacesService {
   constructor(
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
+    @InjectModel(Registration.name)
+    private registrationModel: Model<RegistrationDocument>,
+    @InjectModel(RaceCheck.name)
+    private raceCheckModel: Model<RaceCheckDocument>,
+    @InjectModel(RefereeAssignment.name)
+    private refereeAssignmentModel: Model<RefereeAssignmentDocument>,
     private tournamentsService: TournamentsService,
+    private predictionsService: PredictionsService,
   ) {}
 
-  async create(dto: CreateRaceDto): Promise<RaceDocument> {
-    // Validate tournament exists
-    await this.tournamentsService.findOne(dto.tournamentId);
+  async create(dto: CreateRaceDto, createdBy: string): Promise<RaceDocument> {
+    const tournament = await this.tournamentsService.findOne(dto.tournamentId);
 
-    // Check duplicate horse ids
-    const horseIds = dto.horses.map((h) => h.horseId);
-    if (new Set(horseIds).size !== horseIds.length) {
-      throw new BadRequestException('Duplicate horse in race');
-    }
-
-    // Check duplicate jockey ids (only among those assigned)
-    const jockeyIds = dto.horses
-      .filter((h) => h.jockeyId)
-      .map((h) => h.jockeyId!);
-    if (new Set(jockeyIds).size !== jockeyIds.length) {
+    // Validate startTime within tournament dates
+    const startTime = new Date(dto.startTime);
+    if (startTime < tournament.startDate || startTime > tournament.endDate) {
       throw new BadRequestException(
-        'A jockey cannot ride two horses in the same race',
+        'Race startTime must be within tournament startDate and endDate',
       );
     }
 
-    return this.raceModel.create(dto as unknown as Partial<RaceDocument>);
+    // Validate prize does not exceed tournament budget
+    if (dto.prize !== undefined) {
+      const [agg] = await this.raceModel.aggregate<{ total: number }>([
+        {
+          $match: {
+            tournamentId: new Types.ObjectId(dto.tournamentId),
+            deletedAt: { $exists: false },
+          },
+        },
+        { $group: { _id: null, total: { $sum: '$prize' } } },
+      ]);
+      const usedPrize = agg?.total ?? 0;
+      if (usedPrize + dto.prize > (tournament.prizePool ?? 0)) {
+        throw new BadRequestException(
+          `Prize exceeds tournament budget. Used: ${usedPrize}, Available: ${(tournament.prizePool ?? 0) - usedPrize}`,
+        );
+      }
+    }
+
+    return this.raceModel.create({
+      ...dto,
+      tournamentId: new Types.ObjectId(dto.tournamentId),
+      createdBy: new Types.ObjectId(createdBy),
+    } as unknown as Partial<RaceDocument>);
   }
 
   async findAll(page = 1, limit = 20) {
@@ -51,12 +94,10 @@ export class RacesService {
       this.raceModel
         .find(filter)
         .populate('tournamentId', 'name')
-        .populate('horses.horseId', 'name breed')
-        .populate('horses.jockeyId', 'fullName')
-        .populate('refereeIds', 'fullName')
+        .populate('createdBy', 'fullName')
         .skip((page - 1) * limit)
         .limit(limit)
-        .sort({ scheduledAt: -1 })
+        .sort({ startTime: -1 })
         .exec(),
       this.raceModel.countDocuments(filter),
     ]);
@@ -71,12 +112,10 @@ export class RacesService {
     const [data, total] = await Promise.all([
       this.raceModel
         .find(filter)
-        .populate('horses.horseId', 'name breed')
-        .populate('horses.jockeyId', 'fullName')
-        .populate('refereeIds', 'fullName')
+        .populate('createdBy', 'fullName')
         .skip((page - 1) * limit)
         .limit(limit)
-        .sort({ scheduledAt: 1 })
+        .sort({ startTime: 1 })
         .exec(),
       this.raceModel.countDocuments(filter),
     ]);
@@ -89,10 +128,8 @@ export class RacesService {
   async findOne(id: string): Promise<RaceDocument> {
     const race = await this.raceModel
       .findById(id)
-      .populate('tournamentId', 'name')
-      .populate('horses.horseId', 'name breed')
-      .populate('horses.jockeyId', 'fullName')
-      .populate('refereeIds', 'fullName')
+      .populate('tournamentId', 'name startDate endDate')
+      .populate('createdBy', 'fullName')
       .exec();
     if (!race || race.deletedAt) {
       throw new NotFoundException('Race not found');
@@ -100,37 +137,37 @@ export class RacesService {
     return race;
   }
 
-  /** Races assigned to a specific referee */
-  async findMyAssigned(refereeId: string, page = 1, limit = 20) {
-    const filter = { refereeIds: refereeId, deletedAt: { $exists: false } };
-    const [data, total] = await Promise.all([
-      this.raceModel
-        .find(filter)
-        .populate('tournamentId', 'name')
-        .populate('horses.horseId', 'name breed')
-        .populate('horses.jockeyId', 'fullName')
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .sort({ scheduledAt: 1 })
-        .exec(),
-      this.raceModel.countDocuments(filter),
-    ]);
-    return {
-      data,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
-    };
-  }
-
   async update(id: string, dto: UpdateRaceDto): Promise<RaceDocument> {
     const race = await this.findOne(id);
-    if (
-      race.status === RaceStatus.FINISHED ||
-      race.status === RaceStatus.RESULT_PUBLISHED
-    ) {
+    if (LOCKED_STATUSES.includes(race.status)) {
       throw new BadRequestException(
-        'Cannot update a finished or result published race',
+        'Cannot update a race that is live, finished, or has published results',
       );
     }
+
+    // Validate prize does not exceed tournament budget
+    if (dto.prize !== undefined) {
+      const tournament = await this.tournamentsService.findOne(
+        race.tournamentId.toString(),
+      );
+      const [agg] = await this.raceModel.aggregate<{ total: number }>([
+        {
+          $match: {
+            tournamentId: race.tournamentId,
+            deletedAt: { $exists: false },
+            _id: { $ne: race._id },
+          },
+        },
+        { $group: { _id: null, total: { $sum: '$prize' } } },
+      ]);
+      const usedPrize = agg?.total ?? 0;
+      if (usedPrize + dto.prize > (tournament.prizePool ?? 0)) {
+        throw new BadRequestException(
+          `Prize exceeds tournament budget. Used by other races: ${usedPrize}, Available: ${(tournament.prizePool ?? 0) - usedPrize}`,
+        );
+      }
+    }
+
     Object.assign(race, dto);
     return race.save();
   }
@@ -138,7 +175,6 @@ export class RacesService {
   async updateStatus(id: string, status: RaceStatus): Promise<RaceDocument> {
     const race = await this.findOne(id);
 
-    // Validate status transition
     const allowedTransitions = RACE_STATUS_FLOW[race.status] || [];
     if (!allowedTransitions.includes(status)) {
       throw new BadRequestException(
@@ -146,8 +182,71 @@ export class RacesService {
       );
     }
 
+    // Guard: CHECKING → READY requires all checks passed + at least 1 referee accepted
+    if (status === RaceStatus.READY) {
+      await this.validateReadyConditions(id);
+    }
+
+    if (status === RaceStatus.CANCELLED) {
+      await this.predictionsService.cancelPredictionsForRace(id);
+    }
+
     race.status = status;
     return race.save();
+  }
+
+  /** Enforce pre-race conditions before READY transition */
+  private async validateReadyConditions(raceId: string): Promise<void> {
+    // 1. At least 1 referee_assignment must be ACCEPTED
+    const acceptedReferee = await this.refereeAssignmentModel.findOne({
+      raceId,
+      status: RefereeAssignmentStatus.ACCEPTED,
+    });
+    if (!acceptedReferee) {
+      throw new BadRequestException(
+        'Race cannot be marked READY: no referee has accepted the assignment',
+      );
+    }
+
+    // 2. All APPROVED registrations must have a PASSED race_check and Jockey roll-called (if assigned)
+    const approvedRegs = await this.registrationModel.find({
+      raceId,
+      status: RegistrationStatus.APPROVED,
+    });
+    if (approvedRegs.length === 0) {
+      throw new BadRequestException(
+        'Race cannot be marked READY: no approved horse registrations',
+      );
+    }
+
+    const checks = await this.raceCheckModel.find({
+      raceId,
+    });
+
+    for (const reg of approvedRegs) {
+      const check = checks.find(
+        (c) => String(c.raceRegistrationId) === String(reg._id),
+      );
+
+      if (!check) {
+        throw new BadRequestException(
+          `Race cannot be marked READY: Pre-race check for horse registration ${String(reg._id)} not found`,
+        );
+      }
+
+      if (check.status !== RaceCheckStatus.PASSED) {
+        throw new BadRequestException(
+          `Race cannot be marked READY: Horse check status is ${check.status} (not PASSED) for registration ${String(reg._id)}`,
+        );
+      }
+
+      // If there's an assigned Jockey, verify that they are checked in / roll-called
+      if (reg.jockeyUserId && !check.jockeyCheckedIn) {
+        throw new BadRequestException(
+          `Race cannot be marked READY: Jockey for registration ${String(reg._id)} has not been checked in / roll-called`,
+        );
+      }
+    }
   }
 
   async softDelete(id: string): Promise<void> {

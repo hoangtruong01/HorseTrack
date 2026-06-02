@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsEnum,
@@ -7,6 +8,7 @@ import {
   IsOptional,
   IsString,
   Min,
+  Max,
 } from 'class-validator';
 import { HorseGender, HorseHealthStatus } from '../schemas/horse.schema';
 
@@ -14,7 +16,7 @@ export class CreateHorseDto {
   @ApiProperty({ example: 'Thunder Bolt' })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({ example: 'Thoroughbred' })
   @IsOptional()
@@ -23,6 +25,7 @@ export class CreateHorseDto {
 
   @ApiPropertyOptional({ example: 5 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   age?: number;
@@ -39,15 +42,17 @@ export class CreateHorseDto {
 
   @ApiPropertyOptional({ example: 500 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
-  weight?: number;
+  weightKg?: number;
 
   @ApiPropertyOptional({ example: 160 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
-  height?: number;
+  heightCm?: number;
 
   @ApiPropertyOptional({ example: '2020-03-15' })
   @IsOptional()
@@ -62,13 +67,24 @@ export class CreateHorseDto {
   @IsEnum(HorseHealthStatus)
   healthStatus?: HorseHealthStatus;
 
-  @ApiPropertyOptional({ example: 'https://example.com/horse.jpg' })
-  @IsOptional()
-  @IsString()
-  image?: string;
-
   @ApiPropertyOptional({ example: 'Fast and strong horse' })
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ example: 60, minimum: 30, maximum: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(30)
+  @Max(100)
+  baseSpeed?: number;
+
+  @ApiPropertyOptional({ example: 70, minimum: 30, maximum: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(30)
+  @Max(100)
+  staminaScore?: number;
 }

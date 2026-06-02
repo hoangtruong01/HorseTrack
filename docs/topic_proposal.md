@@ -85,4 +85,3 @@ Hệ thống hướng tới các kết quả sau:
 * Cung cấp Dashboard quản trị trực quan, Kanban Board để quản lý trại ngựa cá nhân hóa.
 * Hỗ trợ trọng tài lập biên bản vi phạm nhanh chóng bằng Tags và thu thập chữ ký điện tử trực tiếp.
 * Đồng bộ đa ngôn ngữ (i18n): Tự động đổi URL và hiển thị giao diện Anh - Việt theo ngôn ngữ người dùng.
-

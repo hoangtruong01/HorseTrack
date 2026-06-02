@@ -45,20 +45,22 @@ export function AppHeader({
           </span>
         </Link>
 
-        <nav
-          className="hidden items-center gap-1 font-semibold text-sm tracking-wide lg:flex"
-          aria-label="Primary navigation"
-        >
-          {publicNavigation.map((item) => (
-            <Link
-              key={item.href + item.title}
-              href={item.href}
-              className="relative rounded-full px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-white/60 transition-all duration-150 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E10600] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070A]"
-            >
-              {item.title}
-            </Link>
-          ))}
-        </nav>
+        {!user && (
+          <nav
+            className="hidden items-center gap-1 font-semibold text-sm tracking-wide lg:flex"
+            aria-label="Primary navigation"
+          >
+            {publicNavigation.map((item) => (
+              <Link
+                key={item.href + item.title}
+                href={item.href}
+                className="relative rounded-full px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-white/60 transition-all duration-150 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E10600] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070A]"
+              >
+                {item.title}
+              </Link>
+            ))}
+          </nav>
+        )}
 
         <div className="hidden items-center gap-4 lg:flex">
           {user ? (
@@ -104,21 +106,23 @@ export function AppHeader({
 
       {mobileMenuOpen && (
         <div className="border-t border-white/5 bg-[#07070A] px-4 py-5 lg:hidden">
-          <nav
-            className="flex flex-col gap-2"
-            aria-label="Mobile primary navigation"
-          >
-            {publicNavigation.map((item) => (
-              <Link
-                key={item.href + item.title}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-white/60 hover:bg-white/[0.02] hover:text-white"
-              >
-                {item.title}
-              </Link>
-            ))}
-          </nav>
+          {!user && (
+            <nav
+              className="flex flex-col gap-2"
+              aria-label="Mobile primary navigation"
+            >
+              {publicNavigation.map((item) => (
+                <Link
+                  key={item.href + item.title}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-white/60 hover:bg-white/[0.02] hover:text-white"
+                >
+                  {item.title}
+                </Link>
+              ))}
+            </nav>
+          )}
           <div className="mt-4 flex flex-col gap-2 border-t border-white/5 pt-4">
             {user ? (
               <div className="flex flex-col gap-3">

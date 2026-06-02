@@ -46,5 +46,5 @@ export class Prize {
 
 export const PrizeSchema = SchemaFactory.createForClass(Prize);
 
-// One prize entry per horse per race
-PrizeSchema.index({ raceId: 1, horseId: 1 }, { unique: true });
+// One prize entry per owner/jockey per horse per race
+PrizeSchema.index({ raceId: 1, horseId: 1, ownerId: 1 }, { unique: true });

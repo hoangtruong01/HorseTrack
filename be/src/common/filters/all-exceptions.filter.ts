@@ -32,6 +32,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
               String(raw);
       }
     } else if (exception instanceof Error) {
+      console.error('AllExceptionsFilter caught exception:', exception);
       message = exception.message;
     }
 

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
 import {
@@ -13,12 +13,40 @@ import {
   TournamentStatus,
   TOURNAMENT_STATUS_FLOW,
 } from './schemas/tournament.schema';
+import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
+import {
+  Registration,
+  RegistrationDocument,
+  RegistrationStatus,
+} from '../registrations/schemas/registration.schema';
+import {
+  Prediction,
+  PredictionDocument,
+  PredictionStatus,
+} from '../predictions/schemas/prediction.schema';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/schemas/notification.schema';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+
+const TERMINAL_RACE_STATUSES = [
+  RaceStatus.LIVE,
+  RaceStatus.FINISHED,
+  RaceStatus.RESULT_PUBLISHED,
+  RaceStatus.CANCELLED,
+];
 
 @Injectable()
 export class TournamentsService {
   constructor(
     @InjectModel(Tournament.name)
     private tournamentModel: Model<TournamentDocument>,
+    @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
+    @InjectModel(Registration.name)
+    private registrationModel: Model<RegistrationDocument>,
+    @InjectModel(Prediction.name)
+    private predictionModel: Model<PredictionDocument>,
+    private notificationsService: NotificationsService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async create(
@@ -37,7 +65,10 @@ export class TournamentsService {
         'registrationStartDate must be before registrationEndDate',
       );
     }
-    return this.tournamentModel.create({ ...dto, createdBy });
+    return this.tournamentModel.create({
+      ...dto,
+      createdBy: new Types.ObjectId(createdBy),
+    });
   }
 
   async findAll(page = 1, limit = 20) {
@@ -81,7 +112,6 @@ export class TournamentsService {
       }
     }
 
-    // Don't allow editing COMPLETED / CANCELLED tournaments
     if (
       tournament.status === TournamentStatus.COMPLETED ||
       tournament.status === TournamentStatus.CANCELLED
@@ -98,6 +128,7 @@ export class TournamentsService {
   async updateStatus(
     id: string,
     newStatus: TournamentStatus,
+    actorId?: string,
   ): Promise<TournamentDocument> {
     const tournament = await this.findOne(id);
     const allowed = TOURNAMENT_STATUS_FLOW[tournament.status];
@@ -108,8 +139,74 @@ export class TournamentsService {
       );
     }
 
+    if (newStatus === TournamentStatus.CANCELLED) {
+      await this.cascadeCancel(id, tournament.name);
+    }
+
     tournament.status = newStatus;
-    return tournament.save();
+    const saved = await tournament.save();
+
+    if (newStatus === TournamentStatus.CANCELLED) {
+      await this.auditLogsService.log({
+        actorId,
+        action: 'tournament.cancel',
+        entityType: 'Tournament',
+        entityId: id,
+        before: { status: tournament.status },
+        after: { status: newStatus },
+      });
+    }
+
+    return saved;
+  }
+
+  private async cascadeCancel(
+    tournamentId: string,
+    tournamentName: string,
+  ): Promise<void> {
+    // Get all race IDs before cancelling
+    const races = await this.raceModel.find({
+      tournamentId,
+      status: { $nin: TERMINAL_RACE_STATUSES },
+    });
+    const raceIds = races.map((r) => r._id);
+
+    await Promise.all([
+      // Cancel non-terminal races
+      this.raceModel.updateMany(
+        { tournamentId, status: { $nin: TERMINAL_RACE_STATUSES } },
+        { $set: { status: RaceStatus.CANCELLED } },
+      ),
+      // Cancel all non-cancelled registrations
+      this.registrationModel.updateMany(
+        { tournamentId, status: { $ne: RegistrationStatus.CANCELLED } },
+        { $set: { status: RegistrationStatus.CANCELLED } },
+      ),
+      // Cancel pending predictions for all races in tournament
+      raceIds.length > 0
+        ? this.predictionModel.updateMany(
+            { raceId: { $in: raceIds }, status: PredictionStatus.PENDING },
+            { $set: { status: PredictionStatus.CANCELLED } },
+          )
+        : Promise.resolve(),
+    ]);
+
+    // Notify all affected owners
+    const ownerIds = await this.registrationModel.distinct('ownerId', {
+      tournamentId,
+    });
+    if (ownerIds.length > 0) {
+      await Promise.all(
+        ownerIds.map((ownerId) =>
+          this.notificationsService.send(
+            String(ownerId),
+            'Tournament Cancelled',
+            `Tournament "${tournamentName}" has been cancelled. Your registrations have been cancelled.`,
+            NotificationType.RACE,
+          ),
+        ),
+      );
+    }
   }
 
   async softDelete(id: string): Promise<void> {

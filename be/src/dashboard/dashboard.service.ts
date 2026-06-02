@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import {
   Horse,
@@ -17,7 +17,11 @@ import {
   RegistrationDocument,
 } from '../registrations/schemas/registration.schema';
 import { Prize, PrizeDocument } from '../prizes/schemas/prize.schema';
-import { Bet, BetDocument } from '../bets/schemas/bet.schema';
+import {
+  Prediction,
+  PredictionDocument,
+  PredictionStatus,
+} from '../predictions/schemas/prediction.schema';
 import {
   RaceResult,
   RaceResultDocument,
@@ -29,9 +33,18 @@ import {
   InvitationStatus,
 } from '../jockey-invitations/schemas/jockey-invitation.schema';
 import {
-  RefereeReport,
-  RefereeReportDocument,
-} from '../referee-reports/schemas/referee-report.schema';
+  RefereeAssignment,
+  RefereeAssignmentDocument,
+  RefereeAssignmentStatus,
+} from '../referee-assignments/schemas/referee-assignment.schema';
+import {
+  RaceCheck,
+  RaceCheckDocument,
+} from '../race-checks/schemas/race-check.schema';
+import {
+  RaceViolation,
+  RaceViolationDocument,
+} from '../race-violations/schemas/race-violation.schema';
 
 interface PrizeAggregateResult {
   _id: string;
@@ -39,10 +52,9 @@ interface PrizeAggregateResult {
   count: number;
 }
 
-interface BetAggregateResult {
+interface PredictionAggregateResult {
   _id: string;
-  totalAmount: number;
-  totalPayout: number;
+  totalRewardPoints: number;
   count: number;
 }
 
@@ -51,10 +63,9 @@ interface OwnerPrizeAggregateResult {
   total: number;
 }
 
-interface SpectatorBetAggregateResult {
+interface SpectatorPredictionAggregateResult {
   _id: string;
-  totalAmount: number;
-  totalPayout: number;
+  totalRewardPoints: number;
   count: number;
 }
 
@@ -69,13 +80,18 @@ export class DashboardService {
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
     @InjectModel(Prize.name) private prizeModel: Model<PrizeDocument>,
-    @InjectModel(Bet.name) private betModel: Model<BetDocument>,
+    @InjectModel(Prediction.name)
+    private predictionModel: Model<PredictionDocument>,
     @InjectModel(RaceResult.name)
     private resultModel: Model<RaceResultDocument>,
     @InjectModel(JockeyInvitation.name)
     private invitationModel: Model<JockeyInvitationDocument>,
-    @InjectModel(RefereeReport.name)
-    private reportModel: Model<RefereeReportDocument>,
+    @InjectModel(RefereeAssignment.name)
+    private assignmentModel: Model<RefereeAssignmentDocument>,
+    @InjectModel(RaceCheck.name)
+    private checkModel: Model<RaceCheckDocument>,
+    @InjectModel(RaceViolation.name)
+    private violationModel: Model<RaceViolationDocument>,
   ) {}
 
   async getAdminStats() {
@@ -85,7 +101,7 @@ export class DashboardService {
       totalTournaments,
       totalRaces,
       totalPrizes,
-      totalBets,
+      totalPredictions,
     ] = await Promise.all([
       this.userModel.countDocuments(),
       this.horseModel.countDocuments({ status: { $ne: HorseStatus.DELETED } }),
@@ -100,20 +116,19 @@ export class DashboardService {
           },
         },
       ]),
-      this.betModel.aggregate([
+      this.predictionModel.aggregate([
         {
           $group: {
             _id: '$status',
-            totalAmount: { $sum: '$amount' },
-            totalPayout: { $sum: '$payout' },
             count: { $sum: 1 },
+            totalRewardPoints: { $sum: '$rewardPoints' },
           },
         },
       ]),
     ]);
 
     const typedPrizes = totalPrizes as PrizeAggregateResult[];
-    const typedBets = totalBets as BetAggregateResult[];
+    const typedPredictions = totalPredictions as PredictionAggregateResult[];
 
     return {
       users: { total: totalUsers },
@@ -132,29 +147,29 @@ export class DashboardService {
           number
         >,
       ),
-      bets: typedBets.reduce(
+      predictions: typedPredictions.reduce(
         (acc, item) => {
           acc[item._id.toLowerCase()] = {
             count: item.count,
-            amount: item.totalAmount,
-            payout: item.totalPayout,
+            rewardPoints: item.totalRewardPoints,
           };
           return acc;
         },
-        {} as Record<string, { count: number; amount: number; payout: number }>,
+        {} as Record<string, { count: number; rewardPoints: number }>,
       ),
     };
   }
 
   async getOwnerStats(ownerId: string) {
+    const ownerObjectId = new Types.ObjectId(ownerId);
     const [myHorsesCount, prizesResult, registrationsCount] = await Promise.all(
       [
         this.horseModel.countDocuments({
-          ownerId,
+          ownerId: ownerObjectId,
           status: { $ne: HorseStatus.DELETED },
         }),
         this.prizeModel.aggregate([
-          { $match: { ownerId } },
+          { $match: { ownerId: ownerObjectId } },
           {
             $group: {
               _id: '$status',
@@ -162,12 +177,11 @@ export class DashboardService {
             },
           },
         ]),
-        this.registrationModel.countDocuments({ ownerId }),
+        this.registrationModel.countDocuments({ ownerId: ownerObjectId }),
       ],
     );
 
     const typedPrizes = prizesResult as OwnerPrizeAggregateResult[];
-
     const prizes = typedPrizes.reduce(
       (acc, item) => {
         const key = item._id.toLowerCase();
@@ -186,9 +200,10 @@ export class DashboardService {
   }
 
   async getJockeyStats(jockeyUserId: string) {
-    // 1. Find jockey results
+    const jockeyObjectId = new Types.ObjectId(jockeyUserId);
+
     const results = await this.resultModel.find({
-      jockeyId: jockeyUserId,
+      jockeyUserId: jockeyObjectId,
       status: RaceResultStatus.PUBLISHED,
     });
 
@@ -196,9 +211,8 @@ export class DashboardService {
     const wins = results.filter((r) => r.rank === 1).length;
     const totalPoints = results.reduce((sum, r) => sum + (r.points ?? 0), 0);
 
-    // 2. Count active invitations
     const pendingInvites = await this.invitationModel.countDocuments({
-      jockeyId: jockeyUserId,
+      jockeyUserId: jockeyObjectId,
       status: InvitationStatus.PENDING,
     });
 
@@ -212,64 +226,63 @@ export class DashboardService {
             : 0,
       },
       totalPoints,
-      invitations: {
-        pendingCount: pendingInvites,
-      },
+      invitations: { pendingCount: pendingInvites },
     };
   }
 
   async getRefereeStats(refereeId: string) {
-    const [assignedRacesCount, reportsSubmittedCount] = await Promise.all([
-      this.raceModel.countDocuments({
-        refereeIds: refereeId,
-        deletedAt: { $exists: false },
-      }),
-      this.reportModel.countDocuments({ refereeId }),
-    ]);
+    const refereeObjectId = new Types.ObjectId(refereeId);
+    const [assignedCount, acceptedCount, checksCount, violationsCount] =
+      await Promise.all([
+        this.assignmentModel.countDocuments({
+          refereeUserId: refereeObjectId,
+        }),
+        this.assignmentModel.countDocuments({
+          refereeUserId: refereeObjectId,
+          status: RefereeAssignmentStatus.ACCEPTED,
+        }),
+        this.checkModel.countDocuments({ checkedBy: refereeObjectId }),
+        this.violationModel.countDocuments({ reportedBy: refereeObjectId }),
+      ]);
 
     return {
-      races: { assignedCount: assignedRacesCount },
-      reports: { submittedCount: reportsSubmittedCount },
+      races: { assignedCount, acceptedCount },
+      checks: { total: checksCount },
+      violations: { total: violationsCount },
     };
   }
 
   async getSpectatorStats(userId: string) {
-    const [betsResult, activeBetsCount] = await Promise.all([
-      this.betModel.aggregate([
-        { $match: { userId } },
+    const userObjectId = new Types.ObjectId(userId);
+    const [predictionsResult, activePredictionsCount] = await Promise.all([
+      this.predictionModel.aggregate([
+        { $match: { userId: userObjectId } },
         {
           $group: {
             _id: '$status',
-            totalAmount: { $sum: '$amount' },
-            totalPayout: { $sum: '$payout' },
+            totalRewardPoints: { $sum: '$rewardPoints' },
             count: { $sum: 1 },
           },
         },
       ]),
-      this.betModel.countDocuments({
-        userId,
-        status: 'PENDING',
-      } as unknown as Record<string, unknown>),
+      this.predictionModel.countDocuments({
+        userId: userObjectId,
+        status: PredictionStatus.PENDING,
+      }),
     ]);
 
-    const typedBets = betsResult as SpectatorBetAggregateResult[];
+    const typedPredictions =
+      predictionsResult as SpectatorPredictionAggregateResult[];
 
-    const stats = typedBets.reduce(
+    const stats = typedPredictions.reduce(
       (acc, item) => {
-        acc.totalAmount += item.totalAmount;
-        acc.totalPayout += item.totalPayout;
-        acc.totalBets += item.count;
+        acc.totalRewardPoints += item.totalRewardPoints;
+        acc.totalPredictions += item.count;
         if (item._id === 'WON') acc.wonCount += item.count;
         if (item._id === 'LOST') acc.lostCount += item.count;
         return acc;
       },
-      {
-        totalAmount: 0,
-        totalPayout: 0,
-        totalBets: 0,
-        wonCount: 0,
-        lostCount: 0,
-      },
+      { totalRewardPoints: 0, totalPredictions: 0, wonCount: 0, lostCount: 0 },
     );
 
     const winRate =
@@ -283,11 +296,10 @@ export class DashboardService {
         : 0;
 
     return {
-      bets: {
-        total: stats.totalBets,
-        active: activeBetsCount,
-        totalAmountBet: stats.totalAmount,
-        totalPayoutReceived: stats.totalPayout,
+      predictions: {
+        total: stats.totalPredictions,
+        active: activePredictionsCount,
+        totalRewardPoints: stats.totalRewardPoints,
         winRate,
       },
     };
