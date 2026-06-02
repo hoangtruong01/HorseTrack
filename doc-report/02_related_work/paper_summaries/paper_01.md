@@ -3,19 +3,19 @@
 ## Citation
 
 Tên bài:
-Enhancing Textual Textbook Question Answering with Large Language Models and Retrieval-Augmented Generation
+Smart Tournament Scheduling Using a POX-HeuristicGenetic Algorithm
 
 Tác giả:
-H. A. Alawwad và cộng sự
+Mu-Chun Su, Jieh-Haur Chen, Achmad Muhyidin Arifai, Che-Hsuan Chang, Hsi-Hsien Wei
 
 Năm:
-2024
+2025
 
 Nguồn:
-arXiv
+International Journal of Information Technology & Decision Making (Vol. 24, No. 6)
 
 DOI/Link:
-https://arxiv.org/abs/2402.05128
+https://doi.org/10.1142/S0219622025500221
 
 ---
 
@@ -23,22 +23,22 @@ https://arxiv.org/abs/2402.05128
 
 Bài báo giải quyết vấn đề gì?
 
-Các hệ thống Question Answering trên textbook thường gặp khó khăn khi phải xử lý:
+Các hệ thống sắp xếp lịch thi đấu giải đấu (Tournament Scheduling) thường gặp khó khăn khi phải xử lý:
 
-* Nội dung dài.
-* Nhiều chương học khác nhau.
-* Kiến thức phân tán trong nhiều bài học.
-* Các câu hỏi yêu cầu suy luận vượt ra ngoài một đoạn văn duy nhất.
+* Đảm bảo tính công bằng cho tất cả các đối thủ tham gia.
+* Tránh việc xếp các trận đấu liên tiếp khiến người tham gia không có đủ thời gian nghỉ ngơi.
+* Khối lượng trận đấu lớn, nhiều ràng buộc phức tạp làm việc xếp lịch thủ công tốn quá nhiều thời gian và nhân lực.
+* Các toán tử di truyền truyền thống không thể áp dụng trực tiếp do cấu trúc mã hóa đặc thù của nhiễm sắc thể trong bài toán lịch trình.
 
-Trong các bài toán Textbook QA, thông tin cần thiết để trả lời thường nằm ở nhiều phần khác nhau của giáo trình, khiến các mô hình truyền thống khó retrieve đầy đủ ngữ cảnh liên quan.
+Trong bài toán lập lịch thi đấu, việc giải quyết các nhiễm sắc thể chứa "gene chất lượng kém" (poorly performing genes) thường làm giảm hiệu suất và tốc độ hội tụ của thuật toán tối ưu.
 
-Ngoài ra, các LLM tổng quát thường gặp vấn đề:
+Ngoài ra, các app lập lịch online thông thường thường gặp vấn đề:
 
-* Hallucination.
-* Thiếu grounding vào nội dung sách giáo khoa.
-* Giảm độ chính xác khi gặp kiến thức ngoài dữ liệu huấn luyện.
+* Chỉ hỗ trợ các hệ thống giải đấu vòng tròn (league-type) đơn giản.
+* Không tự động tối ưu hóa thời gian nghỉ của người chơi, dễ gây ra hiện tượng xếp lịch thi đấu liên tục
+* Khi số lượng đăng ký vượt giới hạn hệ thống hoặc trải rộng trên nhiều địa điểm, độ chính xác và hiệu suất xử lý có thể giảm.
 
-Bài báo hướng tới việc cải thiện khả năng trả lời câu hỏi học thuật bằng cách kết hợp Retrieval-Augmented Generation (RAG) với các kỹ thuật transfer learning và long-context reasoning.
+Bài báo đề xuất nâng cao hiệu quả tự động lập lịch giải đấu ở nhiều quy mô khác nhau thông qua việc kết hợp thuật toán di truyền (GA), toán tử lai POX và kỹ thuật đột biến Heuristic.
 
 ---
 
@@ -48,33 +48,33 @@ Bài báo dùng phương pháp/model/hệ thống nào?
 
 Tác giả đề xuất framework:
 
-# PLRTQA
+# POX-heuristic GA
 
-(Prompt-based Long-context Retrieval Textbook Question Answering)
+(POX-Heuristic Genetic Algorithm)
 
 Framework kết hợp:
 
 ```text
-Textbook
+Tournament Restrictions
 ↓
-Retrieval
+Chromosome Encoding (Sequence & Venue)
 ↓
-Relevant Context
+POX Crossover & Heuristic Mutation
 ↓
-LLM
+Objective Function Optimization (Minimize Delays)
 ↓
-Question Answering
+Optimal Tournament Schedule
 ```
 
 ---
 
-### Thành phần Retrieval
+### Thành phần Mã hóa & Tối ưu hóa
 
-Hệ thống sử dụng Retrieval-Augmented Generation để:
+Hệ thống sử dụng bộ đôi nhiễm sắc thể đặc thù để:
 
-* Retrieve các đoạn văn liên quan từ textbook.
-* Giảm context noise.
-* Ground câu trả lời vào tài liệu học tập.
+* Mã hóa chính xác thứ tự trận đấu (Schedule Sequence Chromosome) và mã hóa phân bổ địa điểm (Schedule Venue Chromosome).
+* Thiết lập hàm mục tiêu tập trung vào việc giảm thiểu chỉ số trì hoãn tổng thể (DelayNum = One Round Delay + Two Round Delay).
+* Ngăn chặn triệt để tình trạng chồng chéo khung giờ hoặc phân bổ thiếu thời gian hồi sức giữa các chặng đấu liên tiếp.
 
 ---
 
