@@ -28,12 +28,11 @@ import { RejectRegistrationDto } from './dto/reject-registration.dto';
 @ApiTags('Registrations')
 @ApiBearerAuth()
 @Controller('registrations')
-@UseGuards(JwtAuthGuard)
 export class RegistrationsController {
   constructor(private readonly registrationsService: RegistrationsService) {}
 
   @Post()
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.OWNER)
   @ApiOperation({ summary: 'Register horse for tournament (Owner)' })
   create(@Body() dto: CreateRegistrationDto, @CurrentUser() user: JwtUser) {
@@ -41,9 +40,7 @@ export class RegistrationsController {
   }
 
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
-  @ApiOperation({ summary: 'List all registrations (Admin / Spectators)' })
+  @ApiOperation({ summary: 'List all registrations (Public / Admin / Spectators)' })
   @ApiQuery({ name: 'tournamentId', required: false })
   @ApiQuery({ name: 'raceId', required: false })
   @ApiQuery({ name: 'status', required: false })
@@ -63,7 +60,7 @@ export class RegistrationsController {
   }
 
   @Get('my-registrations')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.OWNER)
   @ApiOperation({ summary: 'List my registrations (Owner)' })
   findMine(@Query() pagination: PaginationDto, @CurrentUser() user: JwtUser) {
@@ -75,13 +72,13 @@ export class RegistrationsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get registration detail' })
+  @ApiOperation({ summary: 'Get registration detail (Public)' })
   findOne(@Param('id') id: string) {
     return this.registrationsService.findOne(id);
   }
 
   @Patch(':id/approve')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Approve registration (Admin)' })
   approve(@Param('id') id: string, @CurrentUser() user: JwtUser) {
@@ -89,7 +86,7 @@ export class RegistrationsController {
   }
 
   @Patch(':id/reject')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Reject registration (Admin)' })
   reject(@Param('id') id: string, @Body() dto: RejectRegistrationDto) {
@@ -97,7 +94,7 @@ export class RegistrationsController {
   }
 
   @Patch(':id/cancel')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.OWNER)
   @ApiOperation({
     summary: 'Cancel own registration (Owner) — only PENDING/REJECTED',
@@ -107,7 +104,7 @@ export class RegistrationsController {
   }
 
   @Patch(':id/withdraw')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.OWNER)
   @ApiOperation({ summary: 'Withdraw approved registration (Owner)' })
   withdraw(@Param('id') id: string, @CurrentUser() user: JwtUser) {

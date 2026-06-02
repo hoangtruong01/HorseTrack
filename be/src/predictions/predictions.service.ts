@@ -50,10 +50,11 @@ export class PredictionsService {
     if (!race) throw new NotFoundException('Race not found');
     if (
       race.status !== RaceStatus.SCHEDULED &&
-      race.status !== RaceStatus.CHECKING
+      race.status !== RaceStatus.CHECKING &&
+      race.status !== RaceStatus.READY
     ) {
       throw new BadRequestException(
-        'Predictions are closed for this race (race is no longer in SCHEDULED or CHECKING status)',
+        'Predictions are closed for this race (race is no longer in SCHEDULED, CHECKING or READY status)',
       );
     }
 
@@ -132,11 +133,12 @@ export class PredictionsService {
   }
 
   async payoutBetsForRace(raceId: string): Promise<void> {
-    const winner = await this.resultModel.findOne({
+    const winners = await this.resultModel.find({
       raceId,
       status: RaceResultStatus.PUBLISHED,
       rank: 1,
     });
+    const winnerHorseIds = winners.map((w) => String(w.horseId));
 
     const predictions = await this.predictionModel.find({
       raceId,
@@ -150,8 +152,8 @@ export class PredictionsService {
 
     const bulkOps = predictions.map((prediction) => {
       const won =
-        winner != null &&
-        String(prediction.predictedHorseId) === String(winner.horseId);
+        winners.length > 0 &&
+        winnerHorseIds.includes(String(prediction.predictedHorseId));
 
       if (won) {
         winnersList.push({
