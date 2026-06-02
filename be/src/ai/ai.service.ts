@@ -1,62 +1,54 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { User, UserDocument, RoleName } from '../users/schemas/user.schema';
-import {
-  WalletTransaction,
-  WalletTransactionDocument,
-  TransactionType,
-  TransactionStatus,
-} from '../wallet/schemas/wallet-transaction.schema';
+import { RoleName } from '../users/schemas/user.schema';
 import {
   AIPredictionPackage,
-  AIPredictionPackageDocument,
+  type AIPredictionPackageDocument,
   PackageStatus,
 } from './schemas/ai-prediction-package.schema';
 import {
-  Payment,
-  PaymentDocument,
-  PaymentStatus,
-} from './schemas/payment.schema';
-import {
   UserSubscription,
-  UserSubscriptionDocument,
+  type UserSubscriptionDocument,
   SubscriptionStatus,
 } from './schemas/user-subscription.schema';
+import { Payment, type PaymentDocument } from './schemas/payment.schema';
 import {
   AIPredictionSuggestion,
-  AIPredictionSuggestionDocument,
+  type AIPredictionSuggestionDocument,
 } from './schemas/ai-prediction-suggestion.schema';
 import {
   AIRaceArrangementSuggestion,
-  AIRaceArrangementSuggestionDocument,
+  type AIRaceArrangementSuggestionDocument,
   ArrangementStatus,
 } from './schemas/ai-race-arrangement-suggestion.schema';
 import { CreateAiPackageDto } from './dto/create-package.dto';
-import { CreateAiPredictionSuggestionDto } from './dto/create-prediction-suggestion.dto';
-import { CreateAiArrangementSuggestionDto } from './dto/create-arrangement-suggestion.dto';
+import { PredictionEngineService } from './services/prediction-engine.service';
+import { ArrangementEngineService } from './services/arrangement-engine.service';
+import { PayosService } from './services/payos.service';
 
 @Injectable()
 export class AiService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(WalletTransaction.name)
-    private transactionModel: Model<WalletTransactionDocument>,
     @InjectModel(AIPredictionPackage.name)
     private packageModel: Model<AIPredictionPackageDocument>,
-    @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
     @InjectModel(UserSubscription.name)
     private subscriptionModel: Model<UserSubscriptionDocument>,
+    @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
     @InjectModel(AIPredictionSuggestion.name)
     private predictionModel: Model<AIPredictionSuggestionDocument>,
     @InjectModel(AIRaceArrangementSuggestion.name)
     private arrangementModel: Model<AIRaceArrangementSuggestionDocument>,
+    private readonly predictionEngine: PredictionEngineService,
+    private readonly arrangementEngine: ArrangementEngineService,
+    private readonly payosService: PayosService,
   ) {}
+
+  // ─── Packages ────────────────────────────────────────────────────────────────
 
   async createPackage(
     dto: CreateAiPackageDto,
@@ -68,94 +60,56 @@ export class AiService {
     return this.packageModel.find({ status: PackageStatus.ACTIVE }).exec();
   }
 
-  async subscribe(
+  // ─── Subscription via PayOS ───────────────────────────────────────────────
+
+  async initiateSubscription(
     packageId: string,
     userId: string,
-  ): Promise<UserSubscriptionDocument> {
-    const pkg = await this.packageModel.findById(packageId);
-    if (!pkg || pkg.status !== PackageStatus.ACTIVE) {
-      throw new NotFoundException('Prediction package not found or inactive');
-    }
+  ): Promise<{ checkoutUrl: string; orderCode: number }> {
+    return this.payosService.createPaymentLink(packageId, userId);
+  }
 
-    const user = await this.userModel.findById(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    if ((user.balance ?? 0) < pkg.price) {
-      throw new BadRequestException('Insufficient wallet balance to subscribe');
-    }
-
-    // 1. Deduct money
-    await this.userModel.findByIdAndUpdate(userId, {
-      $inc: { balance: -pkg.price },
-    });
-
-    // 2. Record Wallet Transaction
-    await this.transactionModel.create({
-      userId,
-      type: TransactionType.PURCHASE,
-      amount: pkg.price,
-      points: 0,
-      description: `Purchased AI package: ${pkg.name}`,
-      status: TransactionStatus.SUCCESS,
-    });
-
-    // 3. Record Payment
-    await this.paymentModel.create({
-      userId,
-      packageId,
-      amount: pkg.price,
-      paymentMethod: 'WALLET',
-      status: PaymentStatus.SUCCESS,
-      transactionId: `TX_${userId}_${new Types.ObjectId().toHexString()}`,
-    });
-
-    // 4. Create or extend Subscription
-    const now = new Date();
-    const existingSub = await this.subscriptionModel.findOne({
-      userId,
-      packageId,
-      status: SubscriptionStatus.ACTIVE,
-      endDate: { $gt: now },
-    });
-
-    const durationMs = pkg.durationDays * 24 * 60 * 60 * 1000;
-
-    if (existingSub) {
-      existingSub.endDate = new Date(
-        existingSub.endDate.getTime() + durationMs,
-      );
-      return existingSub.save();
-    }
-
-    return this.subscriptionModel.create({
-      userId,
-      packageId,
-      startDate: now,
-      endDate: new Date(now.getTime() + durationMs),
-      status: SubscriptionStatus.ACTIVE,
-    });
+  async handlePayosWebhook(body: unknown): Promise<void> {
+    return this.payosService.handleWebhook(body);
   }
 
   async checkSubscriptionActive(userId: string): Promise<boolean> {
     const now = new Date();
     const sub = await this.subscriptionModel.findOne({
-      userId,
+      userId: new Types.ObjectId(userId),
       status: SubscriptionStatus.ACTIVE,
       endDate: { $gt: now },
     });
     return !!sub;
   }
 
-  async createPredictionSuggestion(
-    dto: CreateAiPredictionSuggestionDto,
+  // ─── Payments (admin revenue) ─────────────────────────────────────────────
+
+  async findAllPayments(): Promise<PaymentDocument[]> {
+    return this.paymentModel
+      .find()
+      .populate('userId', 'fullName email')
+      .populate('packageId', 'name price')
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  // ─── Predictions ─────────────────────────────────────────────────────────
+
+  async generatePrediction(
+    raceId: string,
+    userId: string,
+    userRoles: string[],
   ): Promise<AIPredictionSuggestionDocument> {
-    // Upsert so there is only one suggestion per race
-    return this.predictionModel.findOneAndUpdate({ raceId: dto.raceId }, dto, {
-      upsert: true,
-      new: true,
-    });
+    if (!userRoles.includes(RoleName.ADMIN)) {
+      const isSubscribed = await this.checkSubscriptionActive(userId);
+      if (!isSubscribed) {
+        throw new ForbiddenException(
+          'Cần có subscription đang hoạt động để sử dụng tính năng AI. Vui lòng mua gói subscription.',
+        );
+      }
+    }
+    return this.predictionEngine.generateForRace(raceId);
   }
 
   async getPredictionSuggestionForRace(
@@ -163,76 +117,62 @@ export class AiService {
     userId: string,
     userRoles: string[],
   ): Promise<AIPredictionSuggestionDocument> {
-    // Admin bypasses subscription check
-    if (userRoles.includes(RoleName.ADMIN)) {
-      const suggestion = await this.predictionModel
-        .findOne({ raceId })
-        .populate('suggestedWinnerId', 'name breed')
-        .populate('suggestedPlaceIds', 'name breed')
-        .exec();
-      if (!suggestion) {
-        throw new NotFoundException(
-          'No AI suggestions generated for this race',
+    if (!userRoles.includes(RoleName.ADMIN)) {
+      const isSubscribed = await this.checkSubscriptionActive(userId);
+      if (!isSubscribed) {
+        throw new ForbiddenException(
+          'Cần có subscription đang hoạt động để xem gợi ý AI. Vui lòng mua gói subscription.',
         );
       }
-      return suggestion;
-    }
-
-    // Check if spectator has active subscription
-    const isSubscribed = await this.checkSubscriptionActive(userId);
-    if (!isSubscribed) {
-      throw new ForbiddenException(
-        'Subscription required to access premium AI suggestions. Please purchase an AI prediction package.',
-      );
     }
 
     const suggestion = await this.predictionModel
-      .findOne({ raceId })
-      .populate('suggestedWinnerId', 'name breed')
-      .populate('suggestedPlaceIds', 'name breed')
+      .findOne({ raceId: new Types.ObjectId(raceId) })
+      .populate('rankings.horseId', 'name breed')
       .exec();
+
     if (!suggestion) {
-      throw new NotFoundException('No AI suggestions generated for this race');
+      throw new NotFoundException('Chưa có gợi ý AI cho race này');
     }
     return suggestion;
   }
 
-  async createArrangementSuggestion(
-    dto: CreateAiArrangementSuggestionDto,
-  ): Promise<AIRaceArrangementSuggestionDocument> {
-    const proposedRaces = dto.proposedRaces.map((r) => ({
-      name: r.name,
-      trackCondition: r.trackCondition,
-      horseIds: r.horseIds.map((id) => new Types.ObjectId(id)),
-      refereeIds: r.refereeIds.map((id) => new Types.ObjectId(id)),
-    }));
+  // ─── Arrangements ─────────────────────────────────────────────────────────
 
-    return this.arrangementModel.create({
-      tournamentId: new Types.ObjectId(dto.tournamentId),
-      proposedRaces,
-      reasoning: dto.reasoning,
-    });
+  async generateArrangement(
+    tournamentId: string,
+  ): Promise<AIRaceArrangementSuggestionDocument> {
+    return this.arrangementEngine.generateForTournament(tournamentId);
   }
 
   async getArrangementSuggestions(
     tournamentId: string,
   ): Promise<AIRaceArrangementSuggestionDocument[]> {
     return this.arrangementModel
-      .find({ tournamentId })
-      .populate('proposedRaces.horseIds', 'name breed')
-      .populate('proposedRaces.refereeIds', 'fullName')
+      .find({ tournamentId: new Types.ObjectId(tournamentId) })
+      .sort({ createdAt: -1 })
       .exec();
   }
 
-  async updateArrangementSuggestionStatus(
+  async updateArrangementStatus(
     id: string,
     status: ArrangementStatus.APPLIED | ArrangementStatus.REJECTED,
+    adminId: string,
   ): Promise<AIRaceArrangementSuggestionDocument> {
+    if (status === ArrangementStatus.APPLIED) {
+      return this.arrangementEngine.applyArrangement(id, adminId);
+    }
+
     const suggestion = await this.arrangementModel.findById(id);
     if (!suggestion) {
-      throw new NotFoundException('Arrangement suggestion not found');
+      throw new NotFoundException('Arrangement suggestion không tồn tại');
     }
-    suggestion.status = status;
+    if (suggestion.status !== ArrangementStatus.PENDING) {
+      throw new Error(
+        `Chỉ có thể từ chối đề xuất đang ở trạng thái PENDING (hiện tại: ${suggestion.status})`,
+      );
+    }
+    suggestion.status = ArrangementStatus.REJECTED;
     return suggestion.save();
   }
 }

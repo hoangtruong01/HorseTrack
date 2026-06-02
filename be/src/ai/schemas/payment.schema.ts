@@ -20,15 +20,17 @@ export class Payment {
   @Prop({ required: true })
   amount!: number;
 
-  @Prop({ required: true, default: 'WALLET' })
-  paymentMethod!: 'WALLET' | 'BANK_TRANSFER' | 'CARD';
+  @Prop({ required: true, default: 'PAYOS' })
+  paymentMethod!: 'PAYOS' | 'WALLET' | 'BANK_TRANSFER';
 
-  @Prop({
-    required: true,
-    enum: PaymentStatus,
-    default: PaymentStatus.SUCCESS,
-  })
+  @Prop({ required: true, enum: PaymentStatus, default: PaymentStatus.PENDING })
   status!: PaymentStatus;
+
+  @Prop({ index: true })
+  payosOrderCode?: number;
+
+  @Prop()
+  payosPaymentLinkId?: string;
 
   @Prop()
   transactionId?: string;

@@ -174,7 +174,7 @@ export class RaceResultsService {
 
       // 3. Điểm thưởng thích ứng môi trường (RaceConditionBonus)
       let conditionBonusMs = 0;
-      const track = race.trackCondition || 'Dry';
+      const track = (race.trackCondition as string) || 'Dry';
       const weather = race.weatherSnapshot || 'Sunny';
 
       if (weather === 'Sunny' && track === 'Dry') {
@@ -652,10 +652,14 @@ export class RaceResultsService {
       const rank = dto.rank !== undefined ? dto.rank : result.rank;
 
       if (outcome === RaceResultOutcome.FINISHED && !rank) {
-        throw new BadRequestException('rank is required when outcome is FINISHED');
+        throw new BadRequestException(
+          'rank is required when outcome is FINISHED',
+        );
       }
       if (outcome !== RaceResultOutcome.FINISHED && rank) {
-        throw new BadRequestException('rank must not be set for non-FINISHED outcomes');
+        throw new BadRequestException(
+          'rank must not be set for non-FINISHED outcomes',
+        );
       }
     }
 
@@ -697,7 +701,7 @@ export class RaceResultsService {
     // Save/update each result
     for (const item of dto.results) {
       // Find existing result
-      let result = await this.resultModel.findOne({
+      const result = await this.resultModel.findOne({
         raceId,
         horseId: item.horseId,
       });
