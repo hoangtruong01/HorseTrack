@@ -26,6 +26,8 @@ export interface CashoutRequest {
   status: "PENDING" | "APPROVED" | "PAID" | "REJECTED";
   rejectReason?: string;
   createdAt: string;
+  paidBy?: string;
+  paidAt?: string;
 }
 
 export interface AuditLog {
@@ -110,6 +112,8 @@ export let mockCashoutRequests: CashoutRequest[] = [
     redemptionCode: "RWD-A8D1X2",
     status: "PAID",
     createdAt: "2026-05-28T14:30:00Z",
+    paidBy: "admin@horsetrack.com",
+    paidAt: "2026-05-28T16:00:00Z",
   },
   {
     id: "co-3",
@@ -121,6 +125,8 @@ export let mockCashoutRequests: CashoutRequest[] = [
     status: "REJECTED",
     rejectReason: "Mã đã quá hạn quy đổi tại quầy hoặc không đủ điều kiện.",
     createdAt: "2026-05-27T08:00:00Z",
+    paidBy: "admin@horsetrack.com",
+    paidAt: "2026-05-27T09:15:00Z",
   },
 ];
 
@@ -237,6 +243,11 @@ export function updateCashoutStatus(
   const previousStatus = req.status;
   req.status = status;
   if (rejectReason) req.rejectReason = rejectReason;
+
+  if (status === "PAID" || status === "APPROVED") {
+    req.paidBy = adminEmail;
+    req.paidAt = new Date().toISOString();
+  }
 
   // Deduct points only when transitioning to APPROVED or PAID (if not already deducted)
   if (previousStatus === "PENDING" && (status === "APPROVED" || status === "PAID")) {

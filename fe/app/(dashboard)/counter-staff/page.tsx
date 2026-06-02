@@ -55,7 +55,7 @@ export default function CounterStaffDashboard() {
       <PageHeader
         eyebrow="Counter Operations"
         title="Quầy Giao Dịch Đổi Thưởng"
-        description="Chào mừng bạn đến với bàn làm việc của Nhân viên quầy. Tại đây bạn có thể phê duyệt mã quà tặng vật lý và hỗ trợ khách hàng nạp tiền."
+        description="Chào mừng bạn đến với bàn làm việc của Nhân viên quầy. Tại đây bạn có thể phê duyệt mã quà tặng vật lý và hỗ trợ trao thưởng trực tiếp tại quầy."
       />
 
       {/* Stats Cards */}
@@ -116,11 +116,11 @@ export default function CounterStaffDashboard() {
       </div>
 
       {/* Grid Quick Action Buttons */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="flex justify-center">
         {/* Action Redemptions */}
         <Link
           href="/counter-staff/redemptions"
-          className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#15151E]/60 p-6 transition duration-300 hover:border-[#E10600]/30 hover:bg-[#15151E]/95 hover:shadow-[0_8px_32px_rgba(225,6,0,0.08)]"
+          className="group max-w-xl w-full relative overflow-hidden rounded-2xl border border-white/5 bg-[#15151E]/60 p-6 transition duration-300 hover:border-[#E10600]/30 hover:bg-[#15151E]/95 hover:shadow-[0_8px_32px_rgba(225,6,0,0.08)]"
         >
           <div className="flex size-12 items-center justify-center rounded-xl bg-[#E10600]/10 border border-[#E10600]/20 text-[#E10600] group-hover:scale-110 transition duration-300">
             <Gift className="size-6" />
@@ -133,25 +133,6 @@ export default function CounterStaffDashboard() {
           </p>
           <div className="mt-6 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#E10600]">
             Mở hàng đợi đổi thưởng <ArrowRight className="size-4 group-hover:translate-x-1.5 transition-transform" />
-          </div>
-        </Link>
-
-        {/* Action Deposit */}
-        <Link
-          href="/counter-staff/deposit"
-          className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#15151E]/60 p-6 transition duration-300 hover:border-[#E10600]/30 hover:bg-[#15151E]/95 hover:shadow-[0_8px_32px_rgba(225,6,0,0.08)]"
-        >
-          <div className="flex size-12 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:scale-110 transition duration-300">
-            <Wallet className="size-6" />
-          </div>
-          <h3 className="mt-5 text-lg font-black uppercase tracking-wider text-white group-hover:text-blue-400 transition">
-            Nạp Tiền Cho Khách
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            Hỗ trợ nạp tiền mặt đổi lấy điểm thưởng/số dư tài khoản ví tại quầy. Nhập email/ID tài khoản của khách hàng để thực hiện nạp trực tiếp nhanh chóng.
-          </p>
-          <div className="mt-6 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-400">
-            Mở giao diện nạp ví <ArrowRight className="size-4 group-hover:translate-x-1.5 transition-transform" />
           </div>
         </Link>
       </div>

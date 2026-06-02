@@ -29,14 +29,14 @@ export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
   @Post('deposit')
-  @Roles(RoleName.ADMIN, RoleName.COUNTER_STAFF)
-  @ApiOperation({ summary: 'Deposit money to user wallet (Admin / Counter Staff only)' })
+  @Roles(RoleName.ADMIN)
+  @ApiOperation({ summary: 'Deposit money to user wallet (Admin only)' })
   deposit(@Body() dto: DepositDto, @CurrentUser() user: JwtUser) {
     return this.walletService.deposit(user.id, dto.amount);
   }
 
   @Post('deposit/for-user/:userId')
-  @Roles(RoleName.ADMIN, RoleName.COUNTER_STAFF)
+  @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Admin deposits money to a specific user wallet' })
   depositForUser(
     @Param('userId') userId: string,

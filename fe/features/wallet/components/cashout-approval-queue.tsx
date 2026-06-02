@@ -236,13 +236,15 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
               Không tìm thấy nhật ký quy đổi lịch sử nào.
             </div>
           ) : (
-            <table className="min-w-[800px] w-full text-left text-sm">
+            <table className="min-w-[900px] w-full text-left text-sm">
               <thead className="bg-white/[0.02] text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">Người dùng</th>
                   <th className="px-4 py-3">Mã quà tặng</th>
                   <th className="px-4 py-3 text-right">Điểm đổi</th>
-                  <th className="px-4 py-3">Thời gian nhận</th>
+                  <th className="px-4 py-3">Nhân viên duyệt</th>
+                  <th className="px-4 py-3">Thời gian tạo</th>
+                  <th className="px-4 py-3">Thời gian rút</th>
                   <th className="px-4 py-3">Trạng thái</th>
                 </tr>
               </thead>
@@ -263,8 +265,14 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
                     <td className="px-4 py-3.5 text-right font-mono font-black text-white/90">
                       {req.points.toLocaleString('vi-VN')}
                     </td>
+                    <td className="px-4 py-3.5 text-xs text-white/70 font-mono">
+                      {req.paidBy || "—"}
+                    </td>
                     <td className="px-4 py-3.5 text-xs text-white/60 font-mono">
-                      {new Date(req.createdAt).toLocaleDateString('vi-VN')}
+                      {new Date(req.createdAt).toLocaleString('vi-VN')}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-white/60 font-mono">
+                      {req.paidAt ? new Date(req.paidAt).toLocaleString('vi-VN') : "—"}
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="space-y-1">
