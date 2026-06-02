@@ -7,6 +7,7 @@ import {
   FileText,
   Flag,
   Gauge,
+  Gift,
   Home,
   ListChecks,
   Medal,
@@ -320,5 +321,27 @@ export const dashboardNavigation: NavigationItem[] = [
     role: "Spectator",
     icon: Bell,
     description: "Tham gia dự đoán ngựa vô địch nhận điểm thưởng miễn phí.",
+  },
+  // ─── COUNTER STAFF ──────────────────────────────────────────────────
+  {
+    title: "Bàn Làm Việc",
+    href: "/counter-staff",
+    role: "CounterStaff",
+    icon: Gauge,
+    description: "Tổng quan quầy giao dịch, tra cứu nhanh thông tin và thống kê.",
+  },
+  {
+    title: "Đổi Thưởng Vật Lý",
+    href: "/counter-staff/redemptions",
+    role: "CounterStaff",
+    icon: Gift,
+    description: "Xử lý hàng đợi đổi quà, phê duyệt và xác nhận trao quà vật lý.",
+  },
+  {
+    title: "Nạp Tiền Vào Ví",
+    href: "/counter-staff/deposit",
+    role: "CounterStaff",
+    icon: Wallet,
+    description: "Nạp tiền/điểm trực tiếp vào tài khoản ví của người dùng.",
   },
 ];

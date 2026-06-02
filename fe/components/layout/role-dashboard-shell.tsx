@@ -23,6 +23,8 @@ const roleCopy: Record<NavigationRole, string> = {
   Referee:
     "Tablet-first assigned races, checks, violations, result confirmation.",
   Spectator: "Race browsing, prediction status, public result follow-up.",
+  CounterStaff:
+    "Bàn làm việc của Nhân viên quầy: Xác nhận mã đổi quà vật lý, tra cứu tài khoản, nạp tiền vào ví.",
 };
 
 export function RoleDashboardShell({

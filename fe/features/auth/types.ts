@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-export type AuthRole = "admin" | "owner" | "jockey" | "referee" | "spectator";
+export type AuthRole = "admin" | "owner" | "jockey" | "referee" | "spectator" | "counter_staff";
 
 export type RolePreview = {
   role: AuthRole;

@@ -15,10 +15,12 @@ import {
   User,
   ShieldCheck,
   Tv,
+  Wallet,
 } from "lucide-react";
 
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const fieldClass =
   "h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-10 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 disabled:cursor-not-allowed disabled:opacity-60";
@@ -35,16 +37,21 @@ export function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Google OAuth credential callback
   const handleGoogleCredentialResponse = async (response: any) => {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
       const user = await loginWithGoogle(response.credential);
-      const firstRole = user.roles[0] || "spectator";
+      let firstRole = user.roles[0] || "spectator";
+      if (firstRole === "counter_staff") {
+        firstRole = "counter-staff";
+      }
+      toast.success(`Đăng nhập thành công! Chào mừng ${user.fullName} trở lại.`);
       window.location.href = `/${firstRole}`;
     } catch (err: any) {
-      setErrorMsg(err.message || "Xác thực tài khoản Google thất bại.");
+      const errMsg = err.message || "Xác thực tài khoản Google thất bại.";
+      setErrorMsg(errMsg);
+      toast.error(errMsg);
       setIsSubmitting(false);
     }
   };
@@ -91,13 +98,20 @@ export function LoginForm() {
     try {
       const user = await login(email, password);
       // Điều hướng vào cockpit phù hợp đầu tiên
-      const targetRole = user.roles.includes(selectedDemoRole)
+      let targetRole = user.roles.includes(selectedDemoRole)
         ? selectedDemoRole
         : (user.roles[0] || "spectator");
 
+      if (targetRole === "counter_staff") {
+        targetRole = "counter-staff";
+      }
+
+      toast.success(`Đăng nhập thành công! Chào mừng ${user.fullName} trở lại.`);
       window.location.href = `/${targetRole}`;
     } catch (err: any) {
-      setErrorMsg(err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+      const errMsg = err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+      setErrorMsg(errMsg);
+      toast.error(errMsg);
       setIsSubmitting(false);
     }
   }
@@ -243,20 +257,20 @@ export function LoginForm() {
             </span>
           </div>
 
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-6 gap-1.5">
             {/* Admin Demo Button */}
             <button
               type="button"
               onClick={() => handleSelectDemo("admin", "admin@horsetrack.local")}
               className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2.5 transition-all duration-200",
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "admin"
                   ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
                   : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
               )}
             >
-              <CalendarDays className="size-4.5 shrink-0" />
-              <span className="text-[9px] font-black uppercase tracking-wider leading-none">Admin</span>
+              <CalendarDays className="size-4 shrink-0" />
+              <span className="text-[8px] font-black uppercase tracking-wider leading-none">Admin</span>
             </button>
 
             {/* Owner Demo Button */}
@@ -264,14 +278,14 @@ export function LoginForm() {
               type="button"
               onClick={() => handleSelectDemo("owner", "owner@horsetrack.local")}
               className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2.5 transition-all duration-200",
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "owner"
                   ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
                   : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
               )}
             >
-              <Compass className="size-4.5 shrink-0" />
-              <span className="text-[9px] font-black uppercase tracking-wide leading-none text-center">Owner</span>
+              <Compass className="size-4 shrink-0" />
+              <span className="text-[8px] font-black uppercase tracking-wide leading-none text-center">Owner</span>
             </button>
 
             {/* Jockey Demo Button */}
@@ -279,14 +293,14 @@ export function LoginForm() {
               type="button"
               onClick={() => handleSelectDemo("jockey", "jockey@horsetrack.local")}
               className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2.5 transition-all duration-200",
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "jockey"
                   ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
                   : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
               )}
             >
-              <User className="size-4.5 shrink-0" />
-              <span className="text-[9px] font-black uppercase tracking-wide leading-none">Jockey</span>
+              <User className="size-4 shrink-0" />
+              <span className="text-[8px] font-black uppercase tracking-wide leading-none">Jockey</span>
             </button>
 
             {/* Referee Demo Button */}
@@ -294,14 +308,14 @@ export function LoginForm() {
               type="button"
               onClick={() => handleSelectDemo("referee", "referee@horsetrack.local")}
               className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2.5 transition-all duration-200",
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "referee"
                   ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
                   : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
               )}
             >
-              <ShieldCheck className="size-4.5 shrink-0" />
-              <span className="text-[9px] font-black uppercase tracking-wide leading-none">Referee</span>
+              <ShieldCheck className="size-4 shrink-0" />
+              <span className="text-[8px] font-black uppercase tracking-wide leading-none">Referee</span>
             </button>
 
             {/* Spectator Demo Button */}
@@ -309,14 +323,29 @@ export function LoginForm() {
               type="button"
               onClick={() => handleSelectDemo("spectator", "spectator@horsetrack.local")}
               className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2.5 transition-all duration-200",
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "spectator"
                   ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
                   : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
               )}
             >
-              <Tv className="size-4.5 shrink-0" />
-              <span className="text-[9px] font-black uppercase tracking-wide leading-none">Spectator</span>
+              <Tv className="size-4 shrink-0" />
+              <span className="text-[8px] font-black uppercase tracking-wide leading-none">Spec</span>
+            </button>
+
+            {/* Counter Staff Demo Button */}
+            <button
+              type="button"
+              onClick={() => handleSelectDemo("counter_staff", "counter@horsetrack.local")}
+              className={cn(
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
+                selectedDemoRole === "counter_staff"
+                  ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
+                  : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
+              )}
+            >
+              <Wallet className="size-4 shrink-0" />
+              <span className="text-[8px] font-black uppercase tracking-wide leading-none">Desk</span>
             </button>
           </div>
         </div>

@@ -5,6 +5,7 @@ import {
   Sparkles,
   Telescope,
   Trophy,
+  Wallet,
 } from "lucide-react";
 
 import type { AuthRole, RolePreview } from "./types";
@@ -62,6 +63,16 @@ export const rolePreviews: RolePreview[] = [
     icon: Telescope,
     highlights: ["Race discovery", "Prediction", "Ranking view"],
   },
+  {
+    role: "counter_staff",
+    label: "Counter Staff",
+    eyebrow: "Redemption desk",
+    description:
+      "Manage physical point redemptions, verify exchange codes, view audit logs, and deposit funds to customer wallets.",
+    entryPath: "/counter-staff",
+    icon: Wallet,
+    highlights: ["Point redemption", "Verify codes", "Wallet deposits"],
+  },
 ];
 
 export const authAssurances = [
@@ -71,7 +82,7 @@ export const authAssurances = [
 ];
 
 export const authStats = [
-  { label: "Roles", value: "05" },
+  { label: "Roles", value: "06" },
   { label: "Mock session", value: "UI" },
   { label: "API calls", value: "0" },
 ];

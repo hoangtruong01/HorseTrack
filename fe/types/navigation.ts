@@ -5,7 +5,8 @@ export type NavigationRole =
   | "Owner"
   | "Jockey"
   | "Referee"
-  | "Spectator";
+  | "Spectator"
+  | "CounterStaff";
 
 export type NavigationItem = {
   title: string;
