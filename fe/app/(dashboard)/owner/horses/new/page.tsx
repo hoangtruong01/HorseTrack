@@ -41,7 +41,7 @@ export default function NewHorsePage() {
       <div>
         <Link
           href="/owner/horses"
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-white/50 hover:text-white transition mb-3"
+          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition mb-3"
         >
           <ChevronLeft className="size-4" /> Quay lại chuồng ngựa
         </Link>

@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 
 export function ViolationQuickAdd() {
   return (
-    <section className="rounded-2xl border border-primary/25 bg-[linear-gradient(135deg,rgba(225,6,0,0.18),rgba(21,21,30,0.92))] p-4 shadow-[0_18px_56px_rgba(225,6,0,0.12)] sm:p-6">
+    <section className="rounded-2xl border border-primary/25 dark:bg-[linear-gradient(135deg,rgba(225,6,0,0.18),rgba(21,21,30,0.92))] bg-card p-4 shadow-[0_18px_56px_rgba(225,6,0,0.12)] sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
             <RadioTower className="size-4" /> Quick add
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase dark:text-white text-foreground">
             Log violation
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">

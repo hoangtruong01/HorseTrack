@@ -60,15 +60,15 @@ export default function OwnerRacesBrowserPage() {
       />
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-white/55">
+        <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tìm kiếm các trận đấu khả dụng...</p>
         </div>
       ) : races.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
-          <Award className="size-16 text-white/15 mx-auto mb-4 stroke-[1]" />
-          <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">Chưa có trận đấu nào</h3>
-          <p className="text-sm text-white/50 max-w-md mx-auto">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
+          <Award className="size-16 dark:text-white/15 text-muted-foreground mx-auto mb-4 stroke-[1]" />
+          <h3 className="text-xl font-black dark:text-white text-foreground uppercase tracking-tight mb-2">Chưa có trận đấu nào</h3>
+          <p className="text-sm dark:text-white/50 text-muted-foreground max-w-md mx-auto">
             Hệ thống hiện không có trận đua nào đang mở đăng ký hoặc được khởi tạo. Vui lòng quay lại sau!
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function OwnerRacesBrowserPage() {
             return (
               <article
                 key={race.id}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 hover:bg-[#1C1C25] flex flex-col justify-between min-h-[290px]"
+                className="group relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 dark:hover:bg-[#1C1C25] hover:bg-muted/80 flex flex-col justify-between min-h-[290px]"
               >
                 <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-white/20 to-transparent" />
                 <div className="absolute -right-12 -top-12 size-36 rounded-full bg-primary/5 blur-3xl transition group-hover:bg-primary/15" />
@@ -101,12 +101,12 @@ export default function OwnerRacesBrowserPage() {
                     </span>
                   </div>
                   
-                  <h2 className="mt-4 text-xl font-black uppercase tracking-tight text-white line-clamp-1 group-hover:text-primary transition">
+                  <h2 className="mt-4 text-xl font-black uppercase tracking-tight dark:text-white text-foreground line-clamp-1 group-hover:text-primary transition">
                     {race.name}
                   </h2>
                   
                   {/* Specs */}
-                  <div className="mt-4 grid gap-2.5 text-xs text-white/60">
+                  <div className="mt-4 grid gap-2.5 text-xs dark:text-white/60 text-muted-foreground">
                     <span className="inline-flex items-center gap-2">
                       <Timer className="size-4 text-primary shrink-0" />
                       Khởi tranh: {new Date(race.startTime).toLocaleString("vi-VN", {
@@ -128,10 +128,10 @@ export default function OwnerRacesBrowserPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-white/5 flex gap-2">
+                <div className="mt-6 pt-4 border-t dark:border-white/5 border-border flex gap-2">
                   {isOpen ? (
                     isFull ? (
-                      <Button disabled className="rounded-xl flex-1 text-xs py-2 h-9 bg-white/5 text-white/40 border border-white/5">
+                      <Button disabled className="rounded-xl flex-1 text-xs py-2 h-9 dark:bg-white/5 bg-muted/50 dark:text-white/40 text-muted-foreground border dark:border-white/5 border-border">
                         Trận đấu đã đầy
                       </Button>
                     ) : (
@@ -142,7 +142,7 @@ export default function OwnerRacesBrowserPage() {
                       </Button>
                     )
                   ) : (
-                    <Button disabled className="rounded-xl flex-1 text-xs py-2 h-9 bg-white/5 text-white/40 border border-white/5">
+                    <Button disabled className="rounded-xl flex-1 text-xs py-2 h-9 dark:bg-white/5 bg-muted/50 dark:text-white/40 text-muted-foreground border dark:border-white/5 border-border">
                       Ngừng tiếp nhận hồ sơ
                     </Button>
                   )}

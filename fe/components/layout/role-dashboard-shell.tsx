@@ -38,7 +38,7 @@ export function RoleDashboardShell({
     <div className="flex min-h-[calc(100vh-76px)]">
       <AppSidebar role={role} />
       <section className="min-w-0 flex-1 pb-24 lg:pb-0">
-        <div className="border-b border-white/10 bg-white/[0.02]">
+        <div className="border-b border-border bg-card/60">
           <div className="px-4 py-5 sm:px-6 lg:px-8">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
               {role} shell

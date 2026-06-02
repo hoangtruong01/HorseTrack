@@ -72,7 +72,7 @@ export default function SpectatorResultsPage() {
               placeholder="Tìm kết quả cuộc đua, giải đấu..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-xl border border-white/10 bg-black/20 pl-10 pr-4 text-sm text-white placeholder:text-muted-foreground outline-none focus:border-primary transition"
+              className="h-10 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/20 bg-muted/20 pl-10 pr-4 text-sm dark:text-white text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
             />
           </div>
 
@@ -81,7 +81,7 @@ export default function SpectatorResultsPage() {
             {filteredRaces.map((race) => (
               <div
                 key={race.id}
-                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#16161E]/90 hover:border-white/15 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 p-5 flex flex-col justify-between space-y-4"
+                className="group relative overflow-hidden rounded-2xl border dark:border-white/5 border-border dark:bg-[#16161E]/90 bg-card hover:dark:border-white/15 border-border hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 p-5 flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
@@ -91,7 +91,7 @@ export default function SpectatorResultsPage() {
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-black uppercase tracking-tight text-white group-hover:text-primary transition duration-300">
+                  <h3 className="text-lg font-black uppercase tracking-tight dark:text-white text-foreground group-hover:text-primary transition duration-300">
                     {race.name}
                   </h3>
                   
@@ -99,25 +99,24 @@ export default function SpectatorResultsPage() {
                 </div>
 
                 {/* Podium Overview */}
-                <div className="grid grid-cols-3 gap-2 bg-white/[0.01] rounded-xl p-3 border border-white/5 text-center text-xs">
+                <div className="grid grid-cols-3 gap-2 dark:bg-white/[0.01] bg-muted/50 rounded-xl p-3 border dark:border-white/5 border-border text-center text-xs">
                   <div className="space-y-1">
                     <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Hạng 2</span>
-                    <span className="font-bold text-white text-[11px] block truncate">{race.results[1]?.horse}</span>
+                    <span className="font-bold dark:text-white text-foreground text-[11px] block truncate">{race.results[1]?.horse}</span>
                   </div>
-                  <div className="space-y-1 border-x border-white/5">
+                  <div className="space-y-1 border-x dark:border-white/5 border-border">
                     <span className="block text-[8px] uppercase tracking-wider text-primary font-black">🏆 Vô Địch</span>
                     <span className="font-black text-primary text-[11px] block truncate">{race.results[0]?.horse}</span>
                   </div>
                   <div className="space-y-1">
                     <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Hạng 3</span>
-                    <span className="font-bold text-white text-[11px] block truncate">{race.results[2]?.horse}</span>
+                    <span className="font-bold dark:text-white text-foreground text-[11px] block truncate">{race.results[2]?.horse}</span>
                   </div>
                 </div>
 
                 <Button
                   onClick={() => setSelectedRaceId(race.id)}
-                  className="w-full rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"
-                >
+className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border dark:text-white text-foreground hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"                >
                   Xem Bảng Điểm Chi Tiết
                 </Button>
               </div>
@@ -130,32 +129,32 @@ export default function SpectatorResultsPage() {
           <Button
             onClick={() => setSelectedRaceId(null)}
             variant="ghost"
-            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white -ml-2"
+            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:dark:text-white text-foreground -ml-2"
           >
             <ArrowLeft className="size-4 mr-2" /> Quay lại danh sách kết quả
           </Button>
 
           <div className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-[#16161E] p-6 space-y-4 relative overflow-hidden">
+            <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#16161E] bg-card p-6 space-y-4 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px]" />
               
               <div className="space-y-2">
                 <span className="text-[10px] text-primary font-black uppercase tracking-wider">{selectedRace?.tournament}</span>
-                <h2 className="text-2xl font-black uppercase tracking-tight text-white">{selectedRace?.name}</h2>
+                <h2 className="text-2xl font-black uppercase tracking-tight dark:text-white text-foreground">{selectedRace?.name}</h2>
                 <div className="flex gap-4 text-xs text-muted-foreground">
-                  <span>Khoảng cách: <strong className="text-white">{selectedRace?.distance}</strong></span>
-                  <span>Đường chạy: <strong className="text-white">{selectedRace?.track}</strong></span>
-                  <span>Mặt cỏ: <strong className="text-white">{selectedRace?.surface}</strong></span>
-                  <span>Ngày đấu: <strong className="text-white">{selectedRace?.date}</strong></span>
+                  <span>Khoảng cách: <strong className="dark:text-white text-foreground">{selectedRace?.distance}</strong></span>
+                  <span>Đường chạy: <strong className="dark:text-white text-foreground">{selectedRace?.track}</strong></span>
+                  <span>Mặt cỏ: <strong className="dark:text-white text-foreground">{selectedRace?.surface}</strong></span>
+                  <span>Ngày đấu: <strong className="dark:text-white text-foreground">{selectedRace?.date}</strong></span>
                 </div>
               </div>
             </div>
 
             {/* Results Table */}
-            <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden">
+            <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-card overflow-hidden">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                  <tr className="border-b dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
                     <th className="p-4 w-16 text-center">Hạng</th>
                     <th className="p-4 w-16">Lane</th>
                     <th className="p-4">Chiến Mã</th>
@@ -167,7 +166,7 @@ export default function SpectatorResultsPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {selectedRace?.results.map((res) => (
-                    <tr key={res.rank} className="hover:bg-white/[0.01] transition duration-200">
+                    <tr key={res.rank} className="hover:dark:bg-white/[0.01] bg-muted/50 transition duration-200">
                       <td className="p-4 text-center">
                         <span className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
                           res.rank === 1
@@ -176,15 +175,15 @@ export default function SpectatorResultsPage() {
                             ? "bg-slate-300 text-black"
                             : res.rank === 3
                             ? "bg-[#CD7F32] text-white"
-                            : "bg-white/5 border border-white/10 text-muted-foreground"
+                            : "dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border text-muted-foreground"
                         }`}>
                           {res.rank}
                         </span>
                       </td>
                       <td className="p-4 font-mono font-bold text-muted-foreground">{res.lane}</td>
-                      <td className="p-4 font-black text-white">{res.horse}</td>
-                      <td className="p-4 font-bold text-white">{res.jockey}</td>
-                      <td className="p-4 font-mono font-black text-white text-sm">{res.time}</td>
+                      <td className="p-4 font-black dark:text-white text-foreground">{res.horse}</td>
+                      <td className="p-4 font-bold dark:text-white text-foreground">{res.jockey}</td>
+                      <td className="p-4 font-mono font-black dark:text-white text-foreground text-sm">{res.time}</td>
                       <td className={`p-4 ${res.penalty > 0 ? "text-primary font-bold" : "text-muted-foreground"}`}>
                         {res.violations}
                       </td>

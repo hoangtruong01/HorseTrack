@@ -61,52 +61,52 @@ export default function CounterStaffDashboard() {
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Pending Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-yellow-500/10 bg-gradient-to-br from-[#1A1813]/90 to-[#12110D]/90 p-5 shadow-2xl transition duration-300 hover:border-yellow-500/20">
+        <div className="relative overflow-hidden rounded-2xl border border-yellow-500/20 dark:bg-gradient-to-br dark:from-[#1A1813]/90 dark:to-[#12110D]/90 bg-yellow-50 p-5 shadow-2xl transition duration-300 hover:border-yellow-500/40">
           <div className="flex items-center justify-between">
             <p className="text-xs font-black uppercase tracking-widest text-yellow-500/80">Chờ Phê Duyệt</p>
             <Clock className="size-5 text-yellow-500" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{loading ? "—" : stats.pendingCount}</span>
+            <span className="text-3xl font-black dark:text-white text-foreground">{loading ? "—" : stats.pendingCount}</span>
             <span className="text-xs text-muted-foreground">mã đang đợi</span>
           </div>
           <div className="absolute -bottom-6 -right-6 size-24 bg-yellow-500/5 rounded-full blur-xl"></div>
         </div>
 
         {/* Approved Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-blue-500/10 bg-gradient-to-br from-[#121724]/90 to-[#0E121C]/90 p-5 shadow-2xl transition duration-300 hover:border-blue-500/20">
+        <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 dark:bg-gradient-to-br dark:from-[#121724]/90 dark:to-[#0E121C]/90 bg-blue-50 p-5 shadow-2xl transition duration-300 hover:border-blue-500/40">
           <div className="flex items-center justify-between">
             <p className="text-xs font-black uppercase tracking-widest text-blue-400/80">Đã Duyệt (Chờ Trao Quà)</p>
             <Sparkles className="size-5 text-blue-400" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{loading ? "—" : stats.approvedCount}</span>
+            <span className="text-3xl font-black dark:text-white text-foreground">{loading ? "—" : stats.approvedCount}</span>
             <span className="text-xs text-muted-foreground">mã đã xác thực</span>
           </div>
           <div className="absolute -bottom-6 -right-6 size-24 bg-blue-500/5 rounded-full blur-xl"></div>
         </div>
 
         {/* Paid Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/10 bg-gradient-to-br from-[#101C15]/90 to-[#0A120E]/90 p-5 shadow-2xl transition duration-300 hover:border-emerald-500/20">
+        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 dark:bg-gradient-to-br dark:from-[#101C15]/90 dark:to-[#0A120E]/90 bg-emerald-50 p-5 shadow-2xl transition duration-300 hover:border-emerald-500/40">
           <div className="flex items-center justify-between">
             <p className="text-xs font-black uppercase tracking-widest text-emerald-400/80">Đã Trao Quà</p>
             <CheckCircle2 className="size-5 text-emerald-400" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{loading ? "—" : stats.paidCount}</span>
+            <span className="text-3xl font-black dark:text-white text-foreground">{loading ? "—" : stats.paidCount}</span>
             <span className="text-xs text-muted-foreground">giao dịch hoàn tất</span>
           </div>
           <div className="absolute -bottom-6 -right-6 size-24 bg-emerald-500/5 rounded-full blur-xl"></div>
         </div>
 
         {/* Points Redeemed Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-[#E10600]/10 bg-gradient-to-br from-[#241010]/90 to-[#190C0C]/90 p-5 shadow-2xl transition duration-300 hover:border-[#E10600]/20">
+        <div className="relative overflow-hidden rounded-2xl border border-[#E10600]/20 dark:bg-gradient-to-br dark:from-[#241010]/90 dark:to-[#190C0C]/90 bg-red-50 p-5 shadow-2xl transition duration-300 hover:border-[#E10600]/40">
           <div className="flex items-center justify-between">
             <p className="text-xs font-black uppercase tracking-widest text-[#E10600]/80">Tổng Điểm Đổi Quà</p>
             <Gift className="size-5 text-[#E10600]" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-mono font-black text-[#E10600]">
+            <span className="text-3xl font-black dark:text-white text-foreground">
               {loading ? "—" : stats.totalPoints.toLocaleString()}
             </span>
             <span className="text-xs text-muted-foreground">điểm</span>
@@ -120,12 +120,12 @@ export default function CounterStaffDashboard() {
         {/* Action Redemptions */}
         <Link
           href="/counter-staff/redemptions"
-          className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#15151E]/60 p-6 transition duration-300 hover:border-[#E10600]/30 hover:bg-[#15151E]/95 hover:shadow-[0_8px_32px_rgba(225,6,0,0.08)]"
+          className="group relative overflow-hidden rounded-2xl border dark:border-white/5 border-border dark:bg-[#15151E]/60 bg-card p-6 transition duration-300 hover:border-[#E10600]/30 hover:dark:bg-[#15151E]/95 bg-card hover:shadow-[0_8px_32px_rgba(225,6,0,0.08)]"
         >
           <div className="flex size-12 items-center justify-center rounded-xl bg-[#E10600]/10 border border-[#E10600]/20 text-[#E10600] group-hover:scale-110 transition duration-300">
             <Gift className="size-6" />
           </div>
-          <h3 className="mt-5 text-lg font-black uppercase tracking-wider text-white group-hover:text-[#E10600] transition">
+          <h3 className="mt-5 text-lg font-black uppercase tracking-wider dark:text-white text-foreground group-hover:text-[#E10600] transition">
             Đổi Thưởng Vật Lý
           </h3>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
@@ -139,12 +139,12 @@ export default function CounterStaffDashboard() {
         {/* Action Deposit */}
         <Link
           href="/counter-staff/deposit"
-          className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#15151E]/60 p-6 transition duration-300 hover:border-[#E10600]/30 hover:bg-[#15151E]/95 hover:shadow-[0_8px_32px_rgba(225,6,0,0.08)]"
+          className="group relative overflow-hidden rounded-2xl border dark:border-white/5 border-border dark:bg-[#15151E]/60 bg-card p-6 transition duration-300 hover:border-[#E10600]/30 hover:dark:bg-[#15151E]/95 bg-card hover:shadow-[0_8px_32px_rgba(225,6,0,0.08)]"
         >
           <div className="flex size-12 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:scale-110 transition duration-300">
             <Wallet className="size-6" />
           </div>
-          <h3 className="mt-5 text-lg font-black uppercase tracking-wider text-white group-hover:text-blue-400 transition">
+          <h3 className="mt-5 text-lg font-black uppercase tracking-wider dark:text-white text-foreground group-hover:text-blue-400 transition">
             Nạp Tiền Cho Khách
           </h3>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
@@ -157,8 +157,8 @@ export default function CounterStaffDashboard() {
       </div>
 
       {/* Recent Redemptions Table */}
-      <div className="rounded-2xl border border-white/5 bg-[#15151E]/60 p-6 shadow-2xl">
-        <h3 className="text-sm font-black uppercase tracking-wider text-white mb-4">Các lượt quy đổi gần đây</h3>
+      <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#15151E]/60 bg-card p-6 shadow-2xl">
+        <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground mb-4">Các lượt quy đổi gần đây</h3>
         {loading ? (
           <div className="py-8 text-center text-xs text-muted-foreground">Đang tải lịch sử đổi...</div>
         ) : recentCashouts.length === 0 ? (
@@ -167,7 +167,7 @@ export default function CounterStaffDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-white/5 text-muted-foreground uppercase font-black tracking-wider text-[10px]">
+                <tr className="border-b dark:border-white/5 border-border text-muted-foreground uppercase font-black tracking-wider text-[10px]">
                   <th className="pb-3 pr-4">Mã Đổi Quà</th>
                   <th className="pb-3 pr-4">Khách hàng</th>
                   <th className="pb-3 text-center pr-4">Điểm đổi</th>
@@ -175,9 +175,9 @@ export default function CounterStaffDashboard() {
                   <th className="pb-3 text-right">Thời gian</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-white/80">
+              <tbody className="divide-y divide-white/5 dark:text-white/80 text-muted-foreground">
                 {recentCashouts.map((item) => (
-                  <tr key={item._id} className="hover:bg-white/[0.01]">
+                  <tr key={item._id} className="hover:dark:bg-white/[0.01] bg-muted/50">
                     <td className="py-3 font-mono font-bold text-primary pr-4">{item.redemptionCode}</td>
                     <td className="py-3 pr-4">
                       {typeof item.userId === "object" ? item.userId.fullName : "Khách hàng"}

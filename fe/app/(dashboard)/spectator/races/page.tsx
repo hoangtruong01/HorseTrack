@@ -114,7 +114,7 @@ export default function SpectatorRacesPage() {
           />
 
           {/* Search & Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center rounded-2xl border border-white/5 bg-[#13131A] p-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-muted/50 p-4">
             <div className="relative w-full sm:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <input
@@ -122,7 +122,7 @@ export default function SpectatorRacesPage() {
                 placeholder="Tìm trận đấu, tên giải..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-10 w-full rounded-xl border border-white/10 bg-black/20 pl-10 pr-4 text-sm text-white placeholder:text-muted-foreground outline-none focus:border-primary transition"
+                className="h-10 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/20 bg-muted/20 pl-10 pr-4 text-sm dark:text-white text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
               />
             </div>
 
@@ -134,7 +134,7 @@ export default function SpectatorRacesPage() {
                   className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
                     statusFilter === status
                       ? "bg-primary text-white border border-primary"
-                      : "bg-white/[0.02] border border-white/5 text-muted-foreground hover:text-white"
+                      : "dark:bg-white/[0.02] bg-muted/50 border dark:border-white/5 border-border text-muted-foreground hover:text-foreground dark:hover:text-white"
                   }`}
                 >
                   {status === "ALL" ? "Tất cả" : status === "LIVE" ? "Trực tiếp" : status === "SCHEDULED" ? "Sắp diễn" : "Đã xong"}
@@ -148,7 +148,7 @@ export default function SpectatorRacesPage() {
             {filteredRaces.map((race) => (
               <div
                 key={race.id}
-                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#16161E]/90 hover:border-white/15 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
+                className="group relative overflow-hidden rounded-2xl border dark:border-white/5 border-border dark:bg-[#16161E]/90 bg-card hover:dark:border-white/15 border-border hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
               >
                 {race.status === "LIVE" && (
                   <div className="absolute top-0 left-0 w-full h-[3px] bg-teal-400" />
@@ -163,38 +163,37 @@ export default function SpectatorRacesPage() {
                           ? "bg-teal-500/10 border border-teal-500/20 text-teal-400"
                           : race.status === "SCHEDULED"
                           ? "bg-primary/10 border border-primary/20 text-primary"
-                          : "bg-white/5 border border-white/10 text-muted-foreground"
+                          : "dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border text-muted-foreground"
                       }`}>
                         {race.status === "LIVE" ? "LIVE NOW" : race.statusLabel}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-black uppercase tracking-tight text-white leading-tight group-hover:text-primary transition duration-300">
+                    <h3 className="text-lg font-black uppercase tracking-tight dark:text-white text-foreground leading-tight group-hover:text-primary transition duration-300">
                       {race.name}
                     </h3>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground bg-white/[0.01] rounded-xl p-3 border border-white/5">
+                  <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground dark:bg-white/[0.01] bg-muted/50 rounded-xl p-3 border dark:border-white/5 border-border">
                     <div>
                       <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Cự ly</span>
-                      <span className="font-bold text-white text-xs">{race.distance}</span>
+                      <span className="font-bold dark:text-white text-foreground text-xs">{race.distance}</span>
                     </div>
                     <div>
                       <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Địa điểm</span>
-                      <span className="font-bold text-white text-[11px] truncate block">{race.location}</span>
+                      <span className="font-bold dark:text-white text-foreground text-[11px] truncate block">{race.location}</span>
                     </div>
                   </div>
 
                   <div className="space-y-1 text-[11px] text-muted-foreground pt-1">
-                    <p className="flex items-center gap-1.5"><Calendar className="size-3.5 text-primary" /> Xuất phát: <span className="font-bold text-white">{race.date} · {race.startTime}</span></p>
+                    <p className="flex items-center gap-1.5"><Calendar className="size-3.5 text-primary" /> Xuất phát: <span className="font-bold dark:text-white text-foreground">{race.date} · {race.startTime}</span></p>
                   </div>
                 </div>
 
                 <div className="px-5 pb-5">
                   <Button
                     onClick={() => setSelectedRaceId(race.id)}
-                    className="w-full rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"
-                  >
+className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border dark:text-white text-foreground hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"                  >
                     Xem Chi Tiết Trận
                   </Button>
                 </div>
@@ -208,7 +207,7 @@ export default function SpectatorRacesPage() {
           <Button
             onClick={() => setSelectedRaceId(null)}
             variant="ghost"
-            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white -ml-2"
+            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:dark:text-white text-foreground -ml-2"
           >
             <ArrowLeft className="size-4 mr-2" /> Quay lại danh sách lịch đua
           </Button>
@@ -216,43 +215,43 @@ export default function SpectatorRacesPage() {
           <div className="grid gap-6 lg:grid-cols-12 items-start">
             {/* Left Side: General Info & Live Timeline */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-2xl border border-white/10 bg-[#16161E] p-6 space-y-6 relative overflow-hidden">
+              <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#16161E] bg-card p-6 space-y-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px]" />
                 
                 <div className="space-y-3">
                   <span className="text-[10px] text-primary font-black uppercase tracking-wider">{selectedRace?.tournament}</span>
-                  <h2 className="text-2xl font-black uppercase tracking-tight text-white">{selectedRace?.name}</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-tight dark:text-white text-foreground">{selectedRace?.name}</h2>
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-black text-primary uppercase tracking-wider">
                     {selectedRace?.statusLabel}
                   </div>
                 </div>
 
-                <div className="space-y-3 border-t border-white/5 pt-4 text-xs">
+                <div className="space-y-3 border-t dark:border-white/5 border-border pt-4 text-xs">
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><MapPin className="size-3.5 text-primary" /> Địa điểm:</span>
-                    <span className="font-bold text-white">{selectedRace?.location}</span>
+                    <span className="font-bold dark:text-white text-foreground">{selectedRace?.location}</span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Calendar className="size-3.5 text-primary" /> Thời gian bắt đầu:</span>
-                    <span className="font-bold text-white">{selectedRace?.date} · {selectedRace?.startTime}</span>
+                    <span className="font-bold dark:text-white text-foreground">{selectedRace?.date} · {selectedRace?.startTime}</span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Compass className="size-3.5 text-primary" /> Cự ly & Đường đua:</span>
-                    <span className="font-bold text-white">{selectedRace?.distance} ({selectedRace?.track})</span>
+                    <span className="font-bold dark:text-white text-foreground">{selectedRace?.distance} ({selectedRace?.track})</span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Layers className="size-3.5 text-primary" /> Bề mặt đường đua:</span>
-                    <span className="font-bold text-white">{selectedRace?.surface}</span>
+                    <span className="font-bold dark:text-white text-foreground">{selectedRace?.surface}</span>
                   </div>
-                  <div className="flex justify-between items-center text-muted-foreground border-t border-white/5 pt-3">
+                  <div className="flex justify-between items-center text-muted-foreground border-t dark:border-white/5 border-border pt-3">
                     <span className="flex items-center gap-2"><User className="size-3.5 text-teal-400" /> Trọng tài chính:</span>
-                    <span className="font-bold text-white">{selectedRace?.referee.name} ({selectedRace?.referee.license})</span>
+                    <span className="font-bold dark:text-white text-foreground">{selectedRace?.referee.name} ({selectedRace?.referee.license})</span>
                   </div>
                 </div>
               </div>
 
               {/* Status Timeline */}
-              <div className="rounded-2xl border border-white/5 bg-[#13131A] p-6 space-y-4">
+              <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-muted/50 p-6 space-y-4">
                 <h4 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                   <Activity className="size-3.5 text-primary" /> Tiến độ cuộc đua (Status Timeline)
                 </h4>
@@ -261,17 +260,17 @@ export default function SpectatorRacesPage() {
                   {selectedRace?.timeline.map((step, idx) => (
                     <div key={idx} className="flex gap-3 items-start relative">
                       {idx !== selectedRace.timeline.length - 1 && (
-                        <div className="absolute left-[7px] top-[18px] w-[2px] h-[calc(100%+8px)] bg-white/10" />
+                        <div className="absolute left-[7px] top-[18px] w-[2px] h-[calc(100%+8px)] dark:bg-white/10 bg-muted/50" />
                       )}
                       <div className={`size-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
                         step.status === "complete" 
                           ? "bg-primary border-primary text-white" 
                           : step.status === "current" 
                           ? "bg-teal-400 border-teal-400 text-black animate-pulse" 
-                          : "bg-transparent border-white/20 text-transparent"
+                          : "bg-transparent dark:border-white/20 border-border text-transparent"
                       }`} />
                       <div className="space-y-0.5">
-                        <p className={`text-xs font-black uppercase tracking-wider ${step.status === "current" ? "text-teal-400" : "text-white"}`}>{step.step}</p>
+                        <p className={`text-xs font-black uppercase tracking-wider ${step.status === "current" ? "text-teal-400" : "dark:text-white text-foreground"}`}>{step.step}</p>
                         <p className="text-[10px] text-muted-foreground">{step.desc}</p>
                       </div>
                     </div>
@@ -282,16 +281,16 @@ export default function SpectatorRacesPage() {
 
             {/* Right Side: Participant Horses list */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="border-b border-white/10 pb-3">
-                <h3 className="text-lg font-black uppercase tracking-tight text-white flex items-center gap-2">
+              <div className="border-b dark:border-white/10 border-border pb-3">
+                <h3 className="text-lg font-black uppercase tracking-tight dark:text-white text-foreground flex items-center gap-2">
                   <Users className="size-5 text-primary" /> Chiến mã xuất kích & Nài ngựa tham gia ({selectedRace?.participants.length})
                 </h3>
               </div>
 
-              <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden">
+              <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-muted/30 overflow-hidden">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                    <tr className="border-b dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
                       <th className="p-4 w-16">Lane</th>
                       <th className="p-4">Chiến Mã (Mã)</th>
                       <th className="p-4">Nài Ngựa</th>
@@ -301,13 +300,13 @@ export default function SpectatorRacesPage() {
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {selectedRace?.participants.map((p, idx) => (
-                      <tr key={idx} className="hover:bg-white/[0.01] transition duration-200">
+                      <tr key={idx} className="hover:dark:bg-white/[0.01] bg-muted/50 transition duration-200">
                         <td className="p-4 font-mono font-black text-primary text-sm">{p.lane}</td>
-                        <td className="p-4 font-bold text-white">
+                        <td className="p-4 font-bold dark:text-white text-foreground">
                           <span className="block">{p.horse}</span>
                           <span className="text-[9px] font-mono text-muted-foreground">{p.horseCode}</span>
                         </td>
-                        <td className="p-4 font-bold text-white">{p.jockey}</td>
+                        <td className="p-4 font-bold dark:text-white text-foreground">{p.jockey}</td>
                         <td className="p-4 text-muted-foreground">{p.owner}</td>
                         <td className="p-4 text-right">
                           <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[9px] font-black text-teal-400 uppercase tracking-wider">

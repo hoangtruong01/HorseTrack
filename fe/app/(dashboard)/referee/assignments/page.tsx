@@ -100,12 +100,12 @@ export default function RefereeAssignmentsPage() {
       />
 
       {assignments.length === 0 ? (
-        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E] max-w-lg mx-auto space-y-3">
-          <div className="size-12 rounded-full border border-white/10 flex items-center justify-center text-white/30">
+        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed dark:border-white/10 border-border dark:bg-[#15151E] bg-card max-w-lg mx-auto space-y-3">
+          <div className="size-12 rounded-full border dark:border-white/10 border-border flex items-center justify-center dark:text-white/30 text-muted-foreground">
             <Calendar className="size-6" />
           </div>
-          <h4 className="font-bold text-white uppercase text-sm">Danh sách trống</h4>
-          <p className="text-xs text-white/40 leading-relaxed">
+          <h4 className="font-bold dark:text-white text-foreground uppercase text-sm">Danh sách trống</h4>
+          <p className="text-xs dark:text-white/40 text-muted-foreground leading-relaxed">
             Bạn hiện tại chưa được Ban tổ chức phân công điều hành cuộc đua nào trong hệ thống.
           </p>
         </section>
@@ -116,7 +116,7 @@ export default function RefereeAssignmentsPage() {
             return (
               <article
                 key={assignment._id}
-                className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 flex flex-col justify-between space-y-4 hover:border-primary/25 transition shadow-lg"
+                className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 flex flex-col justify-between space-y-4 hover:border-primary/25 transition shadow-lg"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
@@ -133,12 +133,12 @@ export default function RefereeAssignmentsPage() {
                       }
                       pulse={assignment.status === "assigned"}
                     />
-                    <span className="text-[10px] text-white/45 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded uppercase font-black tracking-wider">
+                    <span className="text-[10px] dark:text-white/45 text-muted-foreground dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border px-2.5 py-0.5 rounded uppercase font-black tracking-wider">
                       {assignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}
                     </span>
                   </div>
                   {assignment.status === "accepted" && (
-                    <Button asChild variant="outline" className="h-10 rounded-full border-white/15 hover:bg-white/5 text-white hover:text-white">
+                    <Button asChild variant="outline" className="h-10 rounded-full dark:border-white/15 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground hover:dark:text-white text-foreground">
                       <Link href={`/referee/races/${assignment.raceId._id}`} className="flex items-center gap-1.5 text-xs">
                         Tác nghiệp <ArrowRight className="size-4" />
                       </Link>
@@ -147,30 +147,30 @@ export default function RefereeAssignmentsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-lg font-black uppercase text-white leading-tight">
+                  <h3 className="text-lg font-black uppercase dark:text-white text-foreground leading-tight">
                     {assignment.raceId.name}
                   </h3>
-                  <div className="p-3 rounded-xl bg-black/25 border border-white/5 space-y-2">
+                  <div className="p-3 rounded-xl dark:bg-black/25 bg-muted/20 border dark:border-white/5 border-border space-y-2">
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Giờ bắt đầu</p>
-                        <p className="text-white font-bold mt-0.5 flex items-center gap-1">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] dark:text-white/40 text-muted-foreground">Giờ bắt đầu</p>
+                        <p className="dark:text-white text-foreground font-bold mt-0.5 flex items-center gap-1">
                           <Clock className="size-3 text-teal-400 shrink-0" />
                           {formatDateTime(assignment.raceId.startTime)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Người phân công</p>
-                        <p className="text-white font-bold mt-0.5 flex items-center gap-1">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] dark:text-white/40 text-muted-foreground">Người phân công</p>
+                        <p className="dark:text-white text-foreground font-bold mt-0.5 flex items-center gap-1">
                           <User className="size-3 text-teal-400 shrink-0" />
                           {assignment.assignedBy?.fullName}
                         </p>
                       </div>
                     </div>
-                    <div className="h-px bg-white/5" />
+                    <div className="h-px dark:bg-white/5 bg-muted/50" />
                     <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Trạng thái cuộc đua</p>
-                      <p className="text-white font-bold text-xs mt-0.5">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] dark:text-white/40 text-muted-foreground">Trạng thái cuộc đua</p>
+                      <p className="dark:text-white text-foreground font-bold text-xs mt-0.5">
                         {assignment.raceId.status === "SCHEDULED" && "LÊN LỊCH CHỜ CHẠY"}
                         {assignment.raceId.status === "CHECKING" && "ĐANG KHỞI CHẠY KIỂM TRA SỨC KHỎE NGỰA"}
                         {assignment.raceId.status === "READY" && "SẴN SÀNG XUẤT PHÁT"}
@@ -189,7 +189,7 @@ export default function RefereeAssignmentsPage() {
                       onClick={() => handleRespond(assignment._id, "REJECTED")}
                       disabled={submittingActionId !== null}
                       variant="outline"
-                      className="rounded-full border-white/10 hover:bg-white/5 text-xs h-9 uppercase font-bold text-white hover:text-white"
+                      className="rounded-full dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 text-xs h-9 uppercase font-bold dark:text-white text-foreground hover:dark:text-white text-foreground"
                     >
                       Từ chối
                     </Button>

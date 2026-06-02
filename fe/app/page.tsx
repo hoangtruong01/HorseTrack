@@ -209,7 +209,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#07070A] text-white overflow-x-hidden">
+    <main className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Background radial glows */}
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_16%_8%,rgba(225,6,0,0.14),transparent_32rem),radial-gradient(circle_at_86%_28%,rgba(6,126,106,0.06),transparent_28rem)] opacity-40 z-0" />
 
@@ -217,24 +217,24 @@ export default function Home() {
       <AppHeader />
 
       {/* 2. Hero Section */}
-      <section className="relative min-h-[580px] lg:min-h-[660px] border-b border-white/5 flex items-center py-16">
+      <section className="relative min-h-[580px] lg:min-h-[660px] border-b border-border flex items-center py-16">
         {/* Generated Action Jockey image masked in background */}
         <div
           className="absolute inset-0 bg-cover bg-right lg:bg-center bg-no-repeat opacity-[0.16] pointer-events-none mix-blend-lighten"
           style={{ backgroundImage: "url('/hero_horse_racing.png')" }}
         />
         {/* Soft radial overlay grid to secure text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#07070A] via-[#07070A]/85 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent pointer-events-none" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full grid gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
           {/* Left Hero Text block */}
           <div className="space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#E10600]/30 bg-[#E10600]/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-white">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#E10600]/30 bg-[#E10600]/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-foreground">
               <span className="size-2 rounded-full bg-[#E10600] animate-ping" />
               Live Tournament Platform
             </span>
 
-            <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl uppercase">
+            <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-foreground sm:text-5xl lg:text-6xl uppercase">
               Manage Horse Racing <br />
               Tournaments{" "}
               <span className="text-[#E10600] drop-shadow-[0_0_15px_rgba(225,6,0,0.3)]">
@@ -242,7 +242,7 @@ export default function Home() {
               </span>
             </h1>
 
-            <p className="max-w-xl text-base sm:text-lg leading-7 text-white/55 font-medium">
+            <p className="max-w-xl text-base sm:text-lg leading-7 text-muted-foreground font-medium">
               Register horses, assign jockeys, schedule races, record results,
               track rankings and create predictions – all in one platform.
             </p>
@@ -257,7 +257,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/races"
-                className="flex h-12 items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] px-8 text-sm font-black uppercase tracking-widest text-white transition"
+                className="flex h-12 items-center justify-center gap-2.5 rounded-xl border border-border bg-card/70 hover:bg-muted px-8 text-sm font-black uppercase tracking-widest text-foreground transition"
               >
                 <CalendarClock className="size-4.5 text-[#E10600]" />
                 View Races
@@ -266,9 +266,9 @@ export default function Home() {
           </div>
 
           {/* Right Live Race Status Board */}
-          <div className="rounded-[2rem] border border-white/[0.06] bg-[#111118]/80 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-xl space-y-5">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
-              <h2 className="text-lg font-black uppercase tracking-wider text-white">
+          <div className="rounded-[2rem] border border-border bg-card/80 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.25)] backdrop-blur-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-border pb-4">
+              <h2 className="text-lg font-black uppercase tracking-wider text-foreground">
                 Live Race Status
               </h2>
               <Link
@@ -282,7 +282,7 @@ export default function Home() {
 
             <div className="space-y-3.5">
               {/* Card 1: LIVE */}
-              <div className="group relative rounded-2xl border border-white/[0.04] bg-[#07070A]/90 p-4 hover:border-[#E10600]/30 transition-all duration-300">
+              <div className="group relative rounded-2xl border border-border bg-background/80 p-4 hover:border-[#E10600]/30 transition-all duration-300">
                 <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-[#E10600]/10 border border-[#E10600]/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[#E10600]">
                   <span className="size-1.5 rounded-full bg-[#E10600] animate-pulse" />
                   Racing now
@@ -290,17 +290,17 @@ export default function Home() {
                 <span className="inline-block rounded-md bg-[#E10600] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white">
                   LIVE
                 </span>
-                <h3 className="mt-2.5 font-black uppercase text-base text-white group-hover:text-[#E10600] transition-colors">
+                <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-[#E10600] transition-colors">
                   Saigon Sprint Race 05
                 </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-white/40 font-semibold">
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground font-semibold">
                   <span>📍 Ho Chi Minh City Arena</span>
-                  <span className="font-mono text-white/60">14:30</span>
+                  <span className="font-mono text-foreground/70">14:30</span>
                 </div>
               </div>
 
               {/* Card 2: UPCOMING */}
-              <div className="group relative rounded-2xl border border-white/[0.04] bg-[#07070A]/90 p-4 hover:border-[#F8CD46]/30 transition-all duration-300">
+              <div className="group relative rounded-2xl border border-border bg-background/80 p-4 hover:border-[#F8CD46]/30 transition-all duration-300">
                 <div className="absolute right-4 top-4 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#F8CD46]">
                   <Clock className="size-3.5" />
                   Starts in {countdown}
@@ -308,27 +308,27 @@ export default function Home() {
                 <span className="inline-block rounded-md border border-[#F8CD46]/30 bg-[#F8CD46]/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#F8CD46]">
                   UPCOMING
                 </span>
-                <h3 className="mt-2.5 font-black uppercase text-base text-white group-hover:text-[#F8CD46] transition-colors">
+                <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-[#F8CD46] transition-colors">
                   Delta Derby Race 07
                 </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-white/40 font-semibold">
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground font-semibold">
                   <span>📍 Can Tho Racecourse</span>
-                  <span className="font-mono text-white/60">17:00</span>
+                  <span className="font-mono text-foreground/70">17:00</span>
                 </div>
               </div>
 
               {/* Card 3: FINISHED */}
-              <div className="group relative rounded-2xl border border-white/[0.04] bg-[#07070A]/90 p-4 hover:border-[#067E6A]/30 transition-all duration-300">
+              <div className="group relative rounded-2xl border border-border bg-background/80 p-4 hover:border-[#067E6A]/30 transition-all duration-300">
                 <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-[#067E6A]/10 border border-[#067E6A]/20 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-[#067E6A]">
                   Winner: Thunder Bolt
                 </div>
                 <span className="inline-block rounded-md border border-[#067E6A]/30 bg-[#067E6A]/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#067E6A]">
                   FINISHED
                 </span>
-                <h3 className="mt-2.5 font-black uppercase text-base text-white group-hover:text-[#067E6A] transition-colors">
+                <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-[#067E6A] transition-colors">
                   Capital Race 02
                 </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-white/40 font-semibold">
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground font-semibold">
                   <span>📍 Hanoi Racecourse</span>
                   <span className="text-[#067E6A] font-bold">Finished</span>
                 </div>
@@ -339,7 +339,7 @@ export default function Home() {
       </section>
 
       {/* 3. Quick Stats Section */}
-      <section className="py-12 border-b border-white/5 bg-[#111118]/20">
+      <section className="py-12 border-b border-border bg-card/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {quickStats.map((stat) => {
@@ -348,13 +348,13 @@ export default function Home() {
                 <div
                   key={stat.label}
                   className={cn(
-                    "group flex items-center gap-4 rounded-2xl border p-5 transition hover:bg-white/[0.02]",
+                    "group flex items-center gap-4 rounded-2xl border border-border p-5 transition hover:bg-muted",
                     stat.border,
                   )}
                 >
                   <div
                     className={cn(
-                      "flex size-12 shrink-0 items-center justify-center rounded-xl border border-white/5",
+                      "flex size-12 shrink-0 items-center justify-center rounded-xl border border-border",
                       stat.bg,
                       stat.color,
                     )}
@@ -362,13 +362,13 @@ export default function Home() {
                     <Icon className="size-6" />
                   </div>
                   <div>
-                    <span className="block text-3xl font-black text-white leading-none">
+                    <span className="block text-3xl font-black text-foreground leading-none">
                       {stat.value}
                     </span>
-                    <span className="block text-xs font-black uppercase tracking-wider text-white/80 mt-1.5 leading-none">
+                    <span className="block text-xs font-black uppercase tracking-wider text-foreground/80 mt-1.5 leading-none">
                       {stat.label}
                     </span>
-                    <span className="block text-[10px] font-semibold text-white/40 mt-1">
+                    <span className="block text-[10px] font-semibold text-muted-foreground mt-1">
                       {stat.desc}
                     </span>
                   </div>
@@ -381,14 +381,14 @@ export default function Home() {
 
 
       {/* 5. Choose Your Role Section */}
-      <section className="py-20 border-b border-white/5 bg-[#111118]/15">
+      <section className="py-20 border-b border-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex items-end justify-between">
             <div className="space-y-2">
               <span className="text-xs font-black uppercase tracking-[0.24em] text-[#E10600]">
                 Access Point Selectors
               </span>
-              <h2 className="text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+              <h2 className="text-3xl font-black uppercase tracking-tight text-foreground sm:text-4xl">
                 Choose Your Role
               </h2>
             </div>
@@ -407,7 +407,7 @@ export default function Home() {
               return (
                 <div
                   key={role.name}
-                  className="group flex flex-col justify-between rounded-2xl border border-white/[0.04] bg-[#111118]/70 p-5 hover:border-white/15 transition-all duration-300"
+                  className="group flex flex-col justify-between rounded-2xl border border-border bg-card/70 p-5 hover:border-border transition-all duration-300"
                 >
                   <div className="space-y-4">
                     <div
@@ -419,10 +419,10 @@ export default function Home() {
                       <Icon className="size-5.5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-sm uppercase text-white tracking-wider leading-none">
+                      <h3 className="font-black text-sm uppercase text-foreground tracking-wider leading-none">
                         {role.name}
                       </h3>
-                      <p className="mt-3 text-xs text-white/50 leading-relaxed font-medium">
+                      <p className="mt-3 text-xs text-muted-foreground leading-relaxed font-medium">
                         {role.desc}
                       </p>
                     </div>
@@ -445,13 +445,13 @@ export default function Home() {
       </section>
 
       {/* 6. Core Features Section */}
-      <section className="py-20 border-b border-white/5">
+      <section className="py-20 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="space-y-2 text-center">
             <span className="text-xs font-black uppercase tracking-[0.24em] text-[#E10600]">
               Operational Abstractions
             </span>
-            <h2 className="text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+            <h2 className="text-3xl font-black uppercase tracking-tight text-foreground sm:text-4xl">
               Core Features
             </h2>
           </div>
@@ -462,16 +462,16 @@ export default function Home() {
               return (
                 <div
                   key={feat.title}
-                  className="group flex items-start gap-4 rounded-2xl border border-white/[0.04] bg-white/[0.01] p-5 hover:border-white/10 hover:bg-white/[0.02] shadow-[0_4px_24px_rgba(0,0,0,0.1)] transition-all duration-200"
+                  className="group flex items-start gap-4 rounded-2xl border border-border bg-card/60 p-5 hover:border-border hover:bg-muted shadow-[0_4px_24px_rgba(0,0,0,0.1)] transition-all duration-200"
                 >
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#E10600]/8 text-[#E10600] border border-[#E10600]/15 group-hover:scale-105 transition-transform">
                     <Icon className="size-5" />
                   </div>
                   <div>
-                    <h3 className="font-black text-xs uppercase text-white tracking-wide leading-none">
+                    <h3 className="font-black text-xs uppercase text-foreground tracking-wide leading-none">
                       {feat.title}
                     </h3>
-                    <p className="mt-2 text-xs text-white/50 leading-relaxed font-medium">
+                    <p className="mt-2 text-xs text-muted-foreground leading-relaxed font-medium">
                       {feat.desc}
                     </p>
                   </div>
@@ -485,7 +485,7 @@ export default function Home() {
       {/* 7. Newsletter Subscription Section */}
       <section id="contact" className="scroll-mt-24 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/[0.05] bg-[#111118]/85 p-6 sm:p-10 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/85 p-6 sm:p-10 shadow-[0_24px_80px_rgba(0,0,0,0.25)] backdrop-blur-xl">
             {/* Glowing gold border lines */}
             <div className="absolute inset-y-12 left-0 w-[2px] bg-gradient-to-b from-transparent via-[#F8CD46] to-transparent shadow-[0_0_10px_rgba(248,205,70,0.8)] opacity-70" />
 
@@ -500,7 +500,7 @@ export default function Home() {
                   <span className="text-[10px] font-black uppercase tracking-[0.24em] text-[#F8CD46]">
                     Champion Gold Rewards
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wide text-white leading-tight">
+                  <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wide text-foreground leading-tight">
                     Stay Updated <br />
                     With Horse Racing
                   </h3>
@@ -510,12 +510,12 @@ export default function Home() {
               {/* Right side: Input and Subscribe CTA */}
               <div className="flex flex-col sm:flex-row gap-3 w-full lg:pl-8">
                 <div className="relative flex-1">
-                  <Mail className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+                  <Mail className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="email"
                     required
                     placeholder="Enter your email"
-                    className="h-12 w-full rounded-xl border border-white/10 bg-[#07070A] pl-10.5 pr-4 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15"
+                    className="h-12 w-full rounded-xl border border-border bg-background/70 pl-10.5 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15"
                   />
                 </div>
                 <button
@@ -531,8 +531,8 @@ export default function Home() {
       </section>
 
       {/* 8. Footer Section */}
-      <footer className="bg-[#07070A] border-t border-white/5 py-16 text-xs sm:text-sm text-white/40 font-semibold tracking-wide">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 pb-12 border-b border-white/5">
+      <footer className="bg-background border-t border-border py-16 text-xs sm:text-sm text-muted-foreground font-semibold tracking-wide">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 pb-12 border-b border-border">
           {/* Logo & Desc */}
           <div className="space-y-4">
             <Link
@@ -542,20 +542,20 @@ export default function Home() {
               <img
                 src="/logo.png"
                 alt="HorseTrack Logo"
-                className="size-11 rounded-2xl object-cover border border-white/10 shadow-[0_0_20px_rgba(225,6,0,0.25)] transition group-hover:scale-105"
+                className="size-11 rounded-2xl object-cover border border-border shadow-[0_0_20px_rgba(225,6,0,0.25)] transition group-hover:scale-105"
               />
-              <span className="text-xl font-black uppercase tracking-[0.16em]">
+              <span className="text-xl font-black uppercase tracking-[0.16em] text-foreground">
                 Horse<span className="text-[#E10600]">Track</span>
               </span>
             </Link>
-            <p className="text-xs text-white/40 leading-relaxed font-medium max-w-xs">
+            <p className="text-xs text-muted-foreground leading-relaxed font-medium max-w-xs">
               The complete management system for horse racing tournaments.
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
               Quick Links
             </h4>
             <div className="flex flex-col gap-2 text-xs">
@@ -564,7 +564,7 @@ export default function Home() {
                   <Link
                     key={link}
                     href={`/${link.toLowerCase()}`}
-                    className="text-white/40 hover:text-white transition"
+                    className="text-muted-foreground hover:text-foreground transition"
                   >
                     {link}
                   </Link>
@@ -575,7 +575,7 @@ export default function Home() {
 
           {/* Support */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
               Support
             </h4>
             <div className="flex flex-col gap-2 text-xs">
@@ -583,7 +583,7 @@ export default function Home() {
                 <Link
                   key={link}
                   href={`/support`}
-                  className="text-white/40 hover:text-white transition"
+                  className="text-muted-foreground hover:text-foreground transition"
                 >
                   {link}
                 </Link>
@@ -593,13 +593,13 @@ export default function Home() {
 
           {/* Follow Us */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
               Follow Us
             </h4>
             <div className="flex items-center gap-3">
               <Link
                 href="https://facebook.com"
-                className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition"
+                className="flex size-9 items-center justify-center rounded-xl bg-card/70 border border-border text-muted-foreground hover:text-[#E10600] hover:border-[#E10600]/30 transition"
               >
                 <svg
                   className="size-4.5"
@@ -611,7 +611,7 @@ export default function Home() {
               </Link>
               <Link
                 href="https://twitter.com"
-                className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition"
+                className="flex size-9 items-center justify-center rounded-xl bg-card/70 border border-border text-muted-foreground hover:text-[#E10600] hover:border-[#E10600]/30 transition"
               >
                 <svg
                   className="size-4.5"
@@ -623,7 +623,7 @@ export default function Home() {
               </Link>
               <Link
                 href="https://instagram.com"
-                className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition"
+                className="flex size-9 items-center justify-center rounded-xl bg-card/70 border border-border text-muted-foreground hover:text-[#E10600] hover:border-[#E10600]/30 transition"
               >
                 <svg
                   className="size-4.5"
@@ -641,7 +641,7 @@ export default function Home() {
               </Link>
               <Link
                 href="https://youtube.com"
-                className="flex size-9 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-white/40 hover:text-[#E10600] hover:border-[#E10600]/30 transition"
+                className="flex size-9 items-center justify-center rounded-xl bg-card/70 border border-border text-muted-foreground hover:text-[#E10600] hover:border-[#E10600]/30 transition"
               >
                 <svg
                   className="size-4.5"
@@ -662,10 +662,10 @@ export default function Home() {
             reserved.
           </span>
           <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-white transition">
+            <Link href="/privacy" className="hover:text-foreground transition">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-white transition">
+            <Link href="/terms" className="hover:text-foreground transition">
               Terms of Service
             </Link>
           </div>

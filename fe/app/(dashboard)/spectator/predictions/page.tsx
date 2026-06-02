@@ -138,7 +138,7 @@ export default function SpectatorPredictionsPage() {
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-white/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b dark:border-white/10 border-border pb-6">
         <PageHeader
           eyebrow="Prediction Station"
           title="Dự Đoán Kết Quả Race"
@@ -146,13 +146,13 @@ export default function SpectatorPredictionsPage() {
         />
 
         {/* Quick Points Display */}
-        <div className="shrink-0 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3 flex items-center gap-4">
+        <div className="shrink-0 rounded-2xl border dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 px-5 py-3 flex items-center gap-4">
           <div className="size-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <Coins className="size-5" />
           </div>
           <div>
             <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">Số dư điểm free</span>
-            <p className="text-xl font-black text-white">{balance.toLocaleString()} Pts</p>
+            <p className="text-xl font-black dark:dark:text-white text-foreground text-foreground">{balance.toLocaleString()} Pts</p>
           </div>
         </div>
       </div>
@@ -160,10 +160,10 @@ export default function SpectatorPredictionsPage() {
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* Left Side: Submit New Prediction */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#16161E] p-6 space-y-6 relative overflow-hidden">
+          <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#16161E] bg-card p-6 space-y-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px]" />
             
-            <h3 className="text-lg font-black uppercase tracking-tight text-white flex items-center gap-2">
+            <h3 className="text-lg font-black uppercase tracking-tight dark:dark:text-white text-foreground text-foreground flex items-center gap-2">
               <Bell className="size-5 text-primary" /> Đặt Dự Đoán Mới
             </h3>
 
@@ -176,7 +176,7 @@ export default function SpectatorPredictionsPage() {
                   setSelectedRaceId(e.target.value);
                   setSelectedHorseId("");
                 }}
-                className="w-full h-11 rounded-xl border border-white/10 bg-black/40 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
+                className="w-full h-11 rounded-xl border dark:border-white/10 border-border dark:bg-black/40 bg-muted/20 px-3 text-xs dark:text-white text-foreground outline-none focus:border-primary cursor-pointer"
               >
                 {mockScheduledRaces.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -197,7 +197,7 @@ export default function SpectatorPredictionsPage() {
                     className={`flex items-center justify-between p-3.5 rounded-xl border transition cursor-pointer ${
                       selectedHorseId === h.id
                         ? "border-primary bg-primary/5 shadow-[0_0_12px_rgba(225,6,0,0.15)]"
-                        : "border-white/5 bg-black/20 hover:border-white/10"
+                        : "dark:border-white/5 border-border dark:bg-black/20 bg-muted/20 hover:dark:border-white/10 border-border"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -209,8 +209,8 @@ export default function SpectatorPredictionsPage() {
                         className="accent-primary size-4"
                       />
                       <div>
-                        <span className="block text-xs font-black text-white uppercase">{h.name}</span>
-                        <span className="text-[10px] text-muted-foreground">Nài ngựa: <strong className="text-white">{h.jockey}</strong></span>
+                        <span className="block text-xs font-black dark:dark:text-white text-foreground text-foreground uppercase">{h.name}</span>
+                        <span className="text-[10px] text-muted-foreground">Nài ngựa: <strong className="dark:dark:text-white text-foreground text-foreground">{h.jockey}</strong></span>
                       </div>
                     </div>
                     <span className="text-[10px] text-muted-foreground uppercase font-mono">{h.breed}</span>
@@ -228,21 +228,21 @@ export default function SpectatorPredictionsPage() {
             </Button>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-[#13131A] p-5 space-y-2">
+          <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-muted/50 p-5 space-y-2">
             <div className="flex items-center gap-2 text-yellow-400">
               <AlertTriangle className="size-4" />
               <span className="text-xs font-black uppercase tracking-wider">Lưu Ý Cắt Cổng</span>
             </div>
             <p className="text-[10px] leading-relaxed text-muted-foreground">
-              Cổng dự đoán đóng hoàn toàn khi cuộc đua chuyển sang trạng thái <strong className="text-white">LIVE</strong> (Trận đấu bắt đầu chạy). Bạn chỉ có thể đặt dự đoán ở các trận ở trạng thái <strong className="text-white">SCHEDULED</strong>, <strong className="text-white">CHECKING</strong> hoặc <strong className="text-white">READY</strong>.
+              Cổng dự đoán đóng hoàn toàn khi cuộc đua chuyển sang trạng thái <strong className="dark:dark:text-white text-foreground text-foreground">LIVE</strong> (Trận đấu bắt đầu chạy). Bạn chỉ có thể đặt dự đoán ở các trận ở trạng thái <strong className="dark:dark:text-white text-foreground text-foreground">SCHEDULED</strong>, <strong className="dark:dark:text-white text-foreground text-foreground">CHECKING</strong> hoặc <strong className="dark:dark:text-white text-foreground text-foreground">READY</strong>.
             </p>
           </div>
         </div>
 
         {/* Right Side: List of Predictions & Simulating resolving */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="border-b border-white/10 pb-3">
-            <h3 className="text-lg font-black uppercase tracking-tight text-white flex items-center gap-2">
+          <div className="border-b dark:border-white/10 border-border pb-3">
+            <h3 className="text-lg font-black uppercase tracking-tight dark:dark:text-white text-foreground text-foreground flex items-center gap-2">
               <Activity className="size-5 text-primary" /> Lịch sử lượt dự đoán của tôi ({myPredictions.length})
             </h3>
           </div>
@@ -251,7 +251,7 @@ export default function SpectatorPredictionsPage() {
             {myPredictions.map((p) => (
               <div
                 key={p.id}
-                className="group rounded-2xl border border-white/5 bg-[#13131A] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-white/10 transition duration-300 relative overflow-hidden"
+                className="group rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-muted/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:dark:border-white/10 border-border transition duration-300 relative overflow-hidden"
               >
                 {p.status === "PENDING" && (
                   <div className="absolute top-0 left-0 w-full h-[2px] bg-yellow-400" />
@@ -271,13 +271,13 @@ export default function SpectatorPredictionsPage() {
                     </span>
                   </div>
 
-                  <h4 className="font-black text-white text-sm uppercase">{p.raceName}</h4>
+                  <h4 className="font-black dark:dark:text-white text-foreground text-foreground text-sm uppercase">{p.raceName}</h4>
                   <p className="text-[10px] text-muted-foreground">
-                    Đã chọn: <strong className="text-white">{p.predictedHorse}</strong> (Nài: {p.jockey})
+                    Đã chọn: <strong className="dark:dark:text-white text-foreground text-foreground">{p.predictedHorse}</strong> (Nài: {p.jockey})
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
+                <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 dark:border-white/5 border-border pt-2 sm:pt-0">
                   <span className={`text-xs font-black ${p.status === "WON" ? "text-teal-400" : p.status === "LOST" ? "text-primary" : "text-yellow-400"}`}>
                     {p.pointsChange}
                   </span>
@@ -287,7 +287,7 @@ export default function SpectatorPredictionsPage() {
                       <Button
                         size="sm"
                         onClick={() => handleSimulateResult(p.id, true)}
-                        className="h-7 rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-bold text-[10px] px-2 py-0"
+                        className="h-7 rounded-lg bg-teal-500 hover:bg-teal-600 dark:text-white text-foreground font-bold text-[10px] px-2 py-0"
                       >
                         Đoán Đúng
                       </Button>

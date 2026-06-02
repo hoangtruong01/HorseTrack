@@ -112,14 +112,14 @@ export default function AdminUsersPage() {
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
-            className="w-full rounded-xl border border-white/10 bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
+            className="w-full rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 pl-10 pr-4 py-2.5 text-sm dark:text-white text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
             placeholder="Tìm theo tên, email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <select
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
+          className="rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2.5 text-sm dark:text-white text-foreground focus:border-primary/50 focus:outline-none"
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value)}
         >
@@ -127,7 +127,7 @@ export default function AdminUsersPage() {
           {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
         <select
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
+          className="rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2.5 text-sm dark:text-white text-foreground focus:border-primary/50 focus:outline-none"
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
@@ -139,11 +139,11 @@ export default function AdminUsersPage() {
       {/* Stats */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Users className="size-4" />
-        <span>Tổng: <strong className="text-white">{meta.total}</strong> users — Trang {meta.page}/{meta.totalPages}</span>
+        <span>Tổng: <strong className="dark:text-white text-foreground">{meta.total}</strong> users — Trang {meta.page}/{meta.totalPages}</span>
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+      <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
         ) : users.length === 0 ? (
@@ -152,7 +152,7 @@ export default function AdminUsersPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10 text-left">
+                <tr className="border-b dark:border-white/10 border-border text-left">
                   <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Người dùng</th>
                   <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Roles</th>
                   <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
@@ -162,14 +162,14 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {users.map((u) => (
-                  <tr key={u.id} className="group hover:bg-white/[0.02] transition-colors">
+                  <tr key={u.id} className="group hover:dark:bg-white/[0.02] bg-muted/50 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-black">
                           {u.fullName.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-white">{u.fullName}</p>
+                          <p className="text-sm font-semibold dark:text-white text-foreground">{u.fullName}</p>
                           <p className="text-xs text-muted-foreground">{u.email}</p>
                           {u.phone && <p className="text-xs text-muted-foreground">{u.phone}</p>}
                         </div>
@@ -178,7 +178,7 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-1.5">
                         {u.roles.map(r => (
-                          <span key={r} className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${roleColors[r] ?? "bg-white/5 text-gray-400 border-white/10"}`}>{r}</span>
+                          <span key={r} className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${roleColors[r] ?? "dark:bg-white/5 bg-muted/50 text-gray-400 dark:border-white/10 border-border"}`}>{r}</span>
                         ))}
                       </div>
                     </td>
@@ -224,7 +224,7 @@ export default function AdminUsersPage() {
           <button
             onClick={() => fetchUsers(meta.page - 1)}
             disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition"
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition"
           >
             <ChevronLeft className="size-4" /> Trước
           </button>
@@ -232,7 +232,7 @@ export default function AdminUsersPage() {
           <button
             onClick={() => fetchUsers(meta.page + 1)}
             disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition"
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition"
           >
             Sau <ChevronRight className="size-4" />
           </button>

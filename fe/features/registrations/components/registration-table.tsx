@@ -45,13 +45,13 @@ export function RegistrationTable({
   };
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-4 sm:p-6">
+    <section className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-4 sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Registration queue
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight dark:text-white text-foreground">
             Admin moderation board
           </h2>
         </div>
@@ -59,9 +59,9 @@ export function RegistrationTable({
           UI-only · showing {visibleRegistrations.length}/{registrations.length}
         </p>
       </div>
-      <div className="mt-5 overflow-x-auto rounded-xl border border-white/10">
+      <div className="mt-5 overflow-x-auto rounded-xl border dark:border-white/10 border-border">
         <table className="min-w-[980px] w-full text-left text-sm">
-          <thead className="bg-white/[0.04] text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <thead className="dark:bg-white/[0.04] bg-muted/50 text-xs uppercase tracking-[0.18em] text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Horse</th>
               <th className="px-4 py-3">Owner</th>
@@ -72,14 +72,14 @@ export function RegistrationTable({
               <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10 bg-black/10">
+          <tbody className="divide-y divide-white/10 dark:bg-black/10 bg-muted/20">
             {visibleRegistrations.map((registration) => (
               <tr
                 key={registration.id}
-                className="transition hover:bg-white/[0.04]"
+                className="transition hover:dark:bg-white/[0.04] bg-muted/50"
               >
                 <td className="px-4 py-4">
-                  <p className="font-black uppercase text-white">
+                  <p className="font-black uppercase dark:text-white text-foreground">
                     {registration.horse}
                   </p>
                   <p className="font-mono text-xs text-muted-foreground">
@@ -87,7 +87,7 @@ export function RegistrationTable({
                   </p>
                 </td>
                 <td className="px-4 py-4">
-                  <p className="font-bold text-white/90">
+                  <p className="font-bold dark:text-white/90 text-muted-foreground">
                     {registration.owner}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -95,12 +95,12 @@ export function RegistrationTable({
                   </p>
                 </td>
                 <td className="px-4 py-4">
-                  <p className="font-bold text-white/90">{registration.race}</p>
+                  <p className="font-bold dark:text-white/90 text-muted-foreground">{registration.race}</p>
                   <p className="text-xs text-muted-foreground">
                     {registration.tournament}
                   </p>
                 </td>
-                <td className="px-4 py-4 font-mono text-white/80">
+                <td className="px-4 py-4 font-mono dark:text-white/80 text-muted-foreground">
                   {registration.submittedAt}
                 </td>
                 <td className="px-4 py-4">

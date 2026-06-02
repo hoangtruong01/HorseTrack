@@ -29,8 +29,8 @@ export function RegistrationReviewPanel({
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)] sm:p-6 lg:p-8">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.18),transparent_26rem)]" />
+      <section className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)] sm:p-6 lg:p-8">
+        <div className="absolute inset-0 dark:bg-[linear-gradient(120deg,rgba(225,6,0,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.18),transparent_26rem)] bg-card" />
         <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div>
             <StatusBadge
@@ -38,7 +38,7 @@ export function RegistrationReviewPanel({
               tone={meta[registration.status].tone}
               pulse={registration.status === "pending"}
             />
-            <h1 className="mt-5 text-3xl font-black uppercase leading-tight tracking-tight text-white sm:text-5xl">
+            <h1 className="mt-5 text-3xl font-black uppercase leading-tight tracking-tight dark:text-white text-foreground sm:text-5xl">
               {registration.horse}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -46,14 +46,14 @@ export function RegistrationReviewPanel({
               target, eligibility snapshot, notes placeholder, approval trail.
             </p>
           </div>
-          <div className="grid gap-3 rounded-2xl border border-white/10 bg-black/25 p-4">
+          <div className="grid gap-3 rounded-2xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4">
             <div className="flex items-center gap-3">
               <ClipboardCheck className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   Race
                 </p>
-                <p className="font-black text-white">{registration.race}</p>
+                <p className="font-black dark:text-white text-foreground">{registration.race}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -62,7 +62,7 @@ export function RegistrationReviewPanel({
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   Eligibility
                 </p>
-                <p className="font-black text-white">Review required</p>
+                <p className="font-black dark:text-white text-foreground">Review required</p>
               </div>
             </div>
           </div>
@@ -70,51 +70,51 @@ export function RegistrationReviewPanel({
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Registration detail
           </p>
           <dl className="mt-4 space-y-4 text-sm">
             <div>
               <dt className="text-muted-foreground">Horse</dt>
-              <dd className="font-black uppercase text-white">
+              <dd className="font-black uppercase dark:text-white text-foreground">
                 {registration.horse} · {registration.horseCode}
               </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Owner</dt>
-              <dd className="font-bold text-white">{registration.owner}</dd>
+              <dd className="font-bold dark:text-white text-foreground">{registration.owner}</dd>
               <dd className="text-muted-foreground">
                 {registration.ownerEmail}
               </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Submitted</dt>
-              <dd className="font-mono font-bold text-white">
+              <dd className="font-mono font-bold dark:text-white text-foreground">
                 {registration.submittedAt}
               </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Eligibility snapshot</dt>
-              <dd className="font-bold text-white">
+              <dd className="font-bold dark:text-white text-foreground">
                 {registration.eligibility}
               </dd>
             </div>
           </dl>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Review notes
           </p>
           <label
-            className="mt-4 block text-sm font-bold text-white"
+            className="mt-4 block text-sm font-bold dark:text-white text-foreground"
             htmlFor="review-note"
           >
             Admin note placeholder
           </label>
           <textarea
             id="review-note"
-            className="mt-2 min-h-32 w-full rounded-xl border border-white/10 bg-black/35 p-3 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-primary focus:ring-2 focus:ring-primary/30"
+            className="mt-2 min-h-32 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 p-3 text-sm dark:text-white text-foreground outline-none transition placeholder:dark:text-white/35 text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
             placeholder="Add internal moderation note. Mock-only; not saved."
             defaultValue={registration.reviewNote}
           />
@@ -140,7 +140,7 @@ export function RegistrationReviewPanel({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+      <section className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
         <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
           Moderation trail
         </p>
@@ -148,7 +148,7 @@ export function RegistrationReviewPanel({
           {registration.adminTrail.map((item) => (
             <li
               key={item}
-              className="rounded-xl border border-white/10 bg-black/25 p-4 text-sm font-bold text-white/85"
+              className="rounded-xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4 text-sm font-bold dark:text-white/85 text-muted-foreground"
             >
               {item}
             </li>

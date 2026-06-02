@@ -20,7 +20,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-5 border-b border-white/10 pb-6 sm:flex-row sm:items-end sm:justify-between",
+        "flex flex-col gap-5 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between",
         className,
       )}
     >
@@ -30,7 +30,7 @@ export function PageHeader({
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+        <h1 className="text-3xl font-black uppercase tracking-tight text-foreground sm:text-4xl">
           {title}
         </h1>
         {description ? (

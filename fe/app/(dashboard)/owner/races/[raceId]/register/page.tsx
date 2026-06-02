@@ -102,7 +102,7 @@ export default function RaceRegisterPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-white/55">
+      <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
         <Loader2 className="size-8 animate-spin text-[#E10600]" />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang khởi tạo thủ tục đăng ký...</p>
       </div>
@@ -111,9 +111,9 @@ export default function RaceRegisterPage() {
 
   if (!race) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-12 text-center max-w-xl mx-auto shadow-2xl">
-        <p className="text-sm text-white/50 mb-4">Trận đua không khả dụng hoặc đã kết thúc.</p>
-        <Button asChild className="rounded-full bg-white/5 text-white">
+      <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-12 text-center max-w-xl mx-auto shadow-2xl">
+        <p className="text-sm dark:text-white/50 text-muted-foreground mb-4">Trận đua không khả dụng hoặc đã kết thúc.</p>
+        <Button asChild className="rounded-full dark:bg-white/5 bg-muted/50 dark:text-white text-foreground">
           <Link href="/owner/races">Quay lại danh sách trận đua</Link>
         </Button>
       </div>
@@ -145,7 +145,7 @@ export default function RaceRegisterPage() {
       <div>
         <Link
           href="/owner/races"
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-white/50 hover:text-white transition mb-3"
+          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition mb-3"
         >
           <ChevronLeft className="size-4" /> Quay lại danh sách trận đua
         </Link>

@@ -21,9 +21,9 @@ import type { AuthRole } from "../types";
 import { toast } from "sonner";
 
 const fieldClass =
-  "h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-xl border border-border bg-background/70 pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 disabled:cursor-not-allowed disabled:opacity-60";
 const labelClass =
-  "text-xs font-black uppercase tracking-[0.16em] text-white/55";
+  "text-xs font-black uppercase tracking-[0.16em] text-muted-foreground";
 
 export function RegisterForm() {
   const { register } = useAuth();
@@ -78,7 +78,7 @@ export function RegisterForm() {
           <AlertTriangle className="size-5 shrink-0 text-[#E10600] mt-0.5" />
           <div>
             <p className="text-xs font-black uppercase text-[#E10600] tracking-[0.1em]">Lỗi đăng ký</p>
-            <p className="mt-1 text-sm text-[#E0DEDC] leading-5">{errorMsg}</p>
+            <p className="mt-1 text-sm text-foreground leading-5">{errorMsg}</p>
           </div>
         </div>
       )}
@@ -87,7 +87,7 @@ export function RegisterForm() {
         <label className="space-y-2 sm:col-span-2">
           <span className={labelClass}>Họ và tên</span>
           <div className="relative">
-            <User className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <User className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
               name="fullName"
               required
@@ -101,7 +101,7 @@ export function RegisterForm() {
         <label className="space-y-2">
           <span className={labelClass}>Email</span>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
               name="email"
               type="email"
@@ -116,7 +116,7 @@ export function RegisterForm() {
         <label className="space-y-2">
           <span className={labelClass}>Mật khẩu</span>
           <div className="relative">
-            <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
               name="password"
               type="password"
@@ -132,7 +132,7 @@ export function RegisterForm() {
         <label className="space-y-2">
           <span className={labelClass}>Số điện thoại</span>
           <div className="relative">
-            <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
               name="phone"
               type="tel"
@@ -145,11 +145,11 @@ export function RegisterForm() {
         <label className="space-y-2">
           <span className={labelClass}>Ngày sinh</span>
           <div className="relative">
-            <Calendar className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <Calendar className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
               name="dob"
               type="date"
-              className={cn(fieldClass, "[&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert")}
+              className={cn(fieldClass, "dark:[&::-webkit-calendar-picker-indicator]:invert")}
             />
           </div>
         </label>
@@ -157,7 +157,7 @@ export function RegisterForm() {
         <label className="space-y-2 sm:col-span-2">
           <span className={labelClass}>Địa chỉ</span>
           <div className="relative">
-            <MapPin className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <MapPin className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
               name="address"
               className={fieldClass}
@@ -182,7 +182,7 @@ export function RegisterForm() {
                   "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200 text-center cursor-pointer",
                   isSelected
                     ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
-                    : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
+                    : "border-border bg-card/60 text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground"
                 )}
               >
                 <Icon className="size-4 shrink-0" />
@@ -195,23 +195,23 @@ export function RegisterForm() {
         </div>
 
         {/* Small Elegant Role Description Card */}
-        <div className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-3 text-xs leading-relaxed text-white/60">
+        <div className="rounded-xl border border-border bg-card/70 p-3 text-xs leading-relaxed text-muted-foreground">
           <p className="font-black text-[#E10600] uppercase tracking-wider text-[10px]">
             {selectedPreview.eyebrow} • {selectedPreview.label}
           </p>
-          <p className="mt-1 text-white/45 leading-normal font-semibold">
+          <p className="mt-1 text-muted-foreground leading-normal font-semibold">
             {selectedPreview.description}
           </p>
         </div>
       </fieldset>
 
       <div className="pt-1">
-        <label className="flex items-start gap-2.5 text-xs text-white/50 cursor-pointer hover:text-white/70 transition-colors">
+        <label className="flex items-start gap-2.5 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
           <input
             name="acceptPolicy"
             type="checkbox"
             required
-            className="mt-0.5 size-4 shrink-0 rounded border-white/10 bg-white/[0.04] accent-[#E10600] focus:ring-offset-0 focus:ring-0"
+            className="mt-0.5 size-4 shrink-0 rounded border-border bg-background/70 accent-[#E10600] focus:ring-offset-0 focus:ring-0"
           />
           <span className="leading-normal font-semibold">
             I understand this is a mock registration with visual-only role assignment.
@@ -237,7 +237,7 @@ export function RegisterForm() {
         )}
       </button>
 
-      <div className="pt-2 text-center text-xs sm:text-sm text-white/55 font-semibold">
+      <div className="pt-2 text-center text-xs sm:text-sm text-muted-foreground font-semibold">
         Already staged?{" "}
         <Link
           href="/login"

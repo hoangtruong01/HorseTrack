@@ -213,7 +213,7 @@ export default function RefereeRaceDetailPage({
   if (!race) {
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
-        <h2 className="text-xl font-bold text-white">Không tìm thấy cuộc đua</h2>
+        <h2 className="text-xl font-bold dark:text-white text-foreground">Không tìm thấy cuộc đua</h2>
         <Button onClick={() => router.back()}>Quay lại</Button>
       </main>
     );
@@ -225,7 +225,7 @@ export default function RefereeRaceDetailPage({
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Back link */}
-      <Link href="/referee" className="inline-flex items-center text-xs text-white/50 hover:text-white transition">
+      <Link href="/referee" className="inline-flex items-center text-xs dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition">
         <ArrowLeft className="size-3.5 mr-1" /> Quay lại bàn làm việc
       </Link>
 
@@ -235,7 +235,7 @@ export default function RefereeRaceDetailPage({
         description={`Kiểm duyệt an toàn thiết bị bảo hộ, sức khỏe chiến mã và điểm danh nài ngựa trước khi xuất phát.`}
         actions={
           <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white">
+            <Button asChild variant="outline" className="h-11 rounded-full dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground hover:dark:text-white text-foreground">
               <Link href={`/referee/races/${race._id}/violations`}>
                 <Siren className="size-4 mr-1 text-primary" /> Lỗi vi phạm
               </Link>
@@ -250,7 +250,7 @@ export default function RefereeRaceDetailPage({
       />
 
       {/* Race Status Control Panel */}
-      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-lg">
+      <section className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-lg">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-500 to-transparent" />
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -271,9 +271,9 @@ export default function RefereeRaceDetailPage({
                 }
                 pulse={race.status === "LIVE" || race.status === "CHECKING"}
               />
-              <span className="text-sm font-black text-white uppercase">{race.name}</span>
+              <span className="text-sm font-black dark:text-white text-foreground uppercase">{race.name}</span>
             </div>
-            <p className="mt-1.5 text-xs text-white/50">
+            <p className="mt-1.5 text-xs dark:text-white/50 text-muted-foreground">
               Giờ xuất phát dự kiến: {formatDateTime(race.startTime)} · Cự ly: {race.distanceMeter}m
             </p>
           </div>
@@ -296,7 +296,7 @@ export default function RefereeRaceDetailPage({
                 className={`h-10 px-5 rounded-full text-xs font-black uppercase ${
                   allPassed
                     ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                    : "bg-white/5 border border-white/10 text-white/35 cursor-not-allowed"
+                    : "dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border dark:text-white/35 text-muted-foreground cursor-not-allowed"
                 }`}
               >
                 {!allPassed ? "Chờ duyệt tất cả ngựa qua" : "Thiết lập Sẵn sàng xuất phát"}
@@ -326,10 +326,10 @@ export default function RefereeRaceDetailPage({
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-black uppercase tracking-wider text-white">
+            <h3 className="text-base font-black uppercase tracking-wider dark:text-white text-foreground">
               Báo cáo kiểm duyệt ngựa trước Race
             </h3>
-            <p className="text-xs text-white/50 mt-0.5">
+            <p className="text-xs dark:text-white/50 text-muted-foreground mt-0.5">
               Đảm bảo tất cả ngựa đều đủ tiêu chuẩn sức khỏe (PASSED) và Jockey đã có mặt điểm danh.
             </p>
           </div>
@@ -346,7 +346,7 @@ export default function RefereeRaceDetailPage({
         </div>
 
         {checks.length === 0 ? (
-          <div className="text-center py-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E]/40 text-white/40 text-xs">
+          <div className="text-center py-12 rounded-2xl border border-dashed dark:border-white/10 border-border dark:bg-[#15151E]/40 bg-card dark:text-white/40 text-muted-foreground text-xs">
             {race.status === "SCHEDULED"
               ? "Cuộc đua chưa mở đợt kiểm duyệt. Vui lòng bấm 'Mở đợt kiểm duyệt ngựa' ở trên."
               : "Danh sách kiểm duyệt chưa được khởi tạo. Vui lòng bấm 'Khởi tạo danh sách kiểm duyệt'."}
@@ -362,19 +362,19 @@ export default function RefereeRaceDetailPage({
                     isEditing
                       ? "border-primary/50 bg-[#1C1C28]"
                       : check.status === "passed"
-                        ? "border-emerald-500/25 bg-[#15151E]/60"
+                        ? "border-emerald-500/25 dark:bg-[#15151E]/60 bg-card"
                         : check.status === "failed"
-                          ? "border-red-500/25 bg-[#15151E]/60"
-                          : "border-white/5 bg-[#15151E]/90"
+                          ? "border-red-500/25 dark:bg-[#15151E]/60 bg-card"
+                          : "dark:border-white/5 border-border dark:bg-[#15151E]/90 bg-card"
                   }`}
                 >
                   {isEditing ? (
                     <div className="space-y-4">
                       {/* Editing Header */}
-                      <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                      <div className="flex justify-between items-center pb-3 border-b dark:border-white/5 border-border">
                         <div>
                           <h4 className="text-xs font-black uppercase text-primary">Cập nhật kiểm tra sức khỏe</h4>
-                          <h3 className="text-sm font-bold text-white uppercase mt-0.5">{check.horseId?.name}</h3>
+                          <h3 className="text-sm font-bold dark:text-white text-foreground uppercase mt-0.5">{check.horseId?.name}</h3>
                         </div>
                         <StatusBadge
                           label={editStatus === "passed" ? "ĐẠT" : editStatus === "failed" ? "K. ĐẠT" : "Chờ duyệt"}
@@ -385,15 +385,15 @@ export default function RefereeRaceDetailPage({
                       {/* Edit Fields */}
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase text-white/50">Trạng thái duyệt</label>
+                          <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Trạng thái duyệt</label>
                           <select
                             value={editStatus}
                             onChange={(e) => setEditStatus(e.target.value as any)}
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                            className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                           >
-                            <option value="pending" className="bg-[#15151E]">Chờ duyệt (PENDING)</option>
-                            <option value="passed" className="bg-[#15151E]">Đạt chuẩn (PASSED)</option>
-                            <option value="failed" className="bg-[#15151E]">Không đạt (FAILED)</option>
+                            <option value="pending" className="dark:bg-[#15151E] bg-card">Chờ duyệt (PENDING)</option>
+                            <option value="passed" className="dark:bg-[#15151E] bg-card">Đạt chuẩn (PASSED)</option>
+                            <option value="failed" className="dark:bg-[#15151E] bg-card">Không đạt (FAILED)</option>
                           </select>
                         </div>
 
@@ -403,54 +403,54 @@ export default function RefereeRaceDetailPage({
                             id="jockeyCheckedIn"
                             checked={editJockeyCheckedIn}
                             onChange={(e) => setEditJockeyCheckedIn(e.target.checked)}
-                            className="size-4 rounded border-white/10 bg-white/5 text-primary focus:ring-0 focus:ring-offset-0"
+                            className="size-4 rounded dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 text-primary focus:ring-0 focus:ring-offset-0"
                           />
-                          <label htmlFor="jockeyCheckedIn" className="text-xs font-bold text-white uppercase cursor-pointer selection:bg-transparent">
+                          <label htmlFor="jockeyCheckedIn" className="text-xs font-bold dark:text-white text-foreground uppercase cursor-pointer selection:bg-transparent">
                             Jockey đã có mặt (Checked in)
                           </label>
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase text-white/50">Ghi chú sức khỏe ngựa</label>
+                          <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Ghi chú sức khỏe ngựa</label>
                           <input
                             type="text"
                             value={editHealthNote}
                             onChange={(e) => setEditHealthNote(e.target.value)}
                             placeholder="Nhịp tim bình thường, cơ đùi săn chắc..."
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/35 focus:border-primary focus:outline-none"
+                            className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/35 focus:border-primary focus:outline-none"
                           />
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase text-white/50">Ghi chú thiết bị/giáp ngựa</label>
+                          <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Ghi chú thiết bị/giáp ngựa</label>
                           <input
                             type="text"
                             value={editEquipmentNote}
                             onChange={(e) => setEditEquipmentNote(e.target.value)}
                             placeholder="Yên ngựa chắc chắn, móng sắt đầy đủ..."
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/35 focus:border-primary focus:outline-none"
+                            className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/35 focus:border-primary focus:outline-none"
                           />
                         </div>
 
                         <div className="space-y-1.5 sm:col-span-2">
-                          <label className="text-[10px] font-bold uppercase text-white/50">Ghi chú nài ngựa (Jockey Note)</label>
+                          <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Ghi chú nài ngựa (Jockey Note)</label>
                           <input
                             type="text"
                             value={editJockeyNote}
                             onChange={(e) => setEditJockeyNote(e.target.value)}
                             placeholder="Trang phục bảo hộ hợp lệ, cân nặng đạt chuẩn..."
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/35 focus:border-primary focus:outline-none"
+                            className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/35 focus:border-primary focus:outline-none"
                           />
                         </div>
                       </div>
 
                       {/* Edit Actions */}
-                      <div className="flex justify-end gap-3 pt-3 border-t border-white/5">
+                      <div className="flex justify-end gap-3 pt-3 border-t dark:border-white/5 border-border">
                         <Button
                           onClick={cancelEdit}
                           disabled={isSavingCheck}
                           variant="outline"
-                          className="rounded-full border-white/10 hover:bg-white/5 text-xs h-9 uppercase font-bold text-white hover:text-white"
+                          className="rounded-full dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 text-xs h-9 uppercase font-bold dark:text-white text-foreground hover:dark:text-white text-foreground"
                         >
                           Hủy
                         </Button>
@@ -473,16 +473,16 @@ export default function RefereeRaceDetailPage({
                             tone={check.status === "passed" ? "green" : check.status === "failed" ? "red" : "yellow"}
                             pulse={check.status === "pending"}
                           />
-                          <h4 className="text-sm font-black uppercase text-white">{check.horseId?.name}</h4>
-                          <span className="text-[10px] text-white/40">({check.horseId?.breed})</span>
+                          <h4 className="text-sm font-black uppercase dark:text-white text-foreground">{check.horseId?.name}</h4>
+                          <span className="text-[10px] dark:text-white/40 text-muted-foreground">({check.horseId?.breed})</span>
                         </div>
 
-                        <div className="grid gap-2 sm:grid-cols-2 text-xs text-white/60">
+                        <div className="grid gap-2 sm:grid-cols-2 text-xs dark:text-white/60 text-muted-foreground">
                           <p>
-                            Sức khỏe ngựa: <strong className="text-white">{check.healthNote || "Chưa ghi nhận"}</strong>
+                            Sức khỏe ngựa: <strong className="dark:text-white text-foreground">{check.healthNote || "Chưa ghi nhận"}</strong>
                           </p>
                           <p>
-                            Giáp sắt/Yên: <strong className="text-white">{check.equipmentNote || "Chưa ghi nhận"}</strong>
+                            Giáp sắt/Yên: <strong className="dark:text-white text-foreground">{check.equipmentNote || "Chưa ghi nhận"}</strong>
                           </p>
                           <p className="sm:col-span-2 flex items-center gap-1.5">
                             Nài ngựa (Jockey): 
@@ -493,7 +493,7 @@ export default function RefereeRaceDetailPage({
                             }`}>
                               {check.jockeyCheckedIn ? "Có mặt (Checked In)" : "Vắng mặt"}
                             </span>
-                            {check.jockeyNote && <span className="text-white/40">({check.jockeyNote})</span>}
+                            {check.jockeyNote && <span className="dark:text-white/40 text-muted-foreground">({check.jockeyNote})</span>}
                           </p>
                         </div>
                       </div>
@@ -503,7 +503,7 @@ export default function RefereeRaceDetailPage({
                         <Button
                           onClick={() => startEdit(check)}
                           variant="outline"
-                          className="h-9 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white text-xs font-bold uppercase shrink-0"
+                          className="h-9 rounded-full dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground hover:dark:text-white text-foreground text-xs font-bold uppercase shrink-0"
                         >
                           <Edit2 className="size-3.5 mr-1" /> Cập nhật
                         </Button>

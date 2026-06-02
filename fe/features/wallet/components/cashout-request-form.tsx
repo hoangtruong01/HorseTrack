@@ -42,12 +42,12 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#15151E]/95 p-4 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
+    <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/95 bg-card p-4 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
       <div>
         <p className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
           <Gift className="size-4 animate-pulse" /> Phiếu Quy Đổi Thưởng
         </p>
-        <h2 className="mt-1 text-2xl font-black uppercase text-white">
+        <h2 className="mt-1 text-2xl font-black uppercase dark:text-white text-foreground">
           Đổi Điểm Nhận Thưởng
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -57,7 +57,7 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         {/* Available Points Display */}
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex items-center justify-between">
+        <div className="rounded-xl border dark:border-white/5 border-border dark:bg-white/[0.02] bg-muted/50 p-4 flex items-center justify-between">
           <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">
             Số Dư Điểm Hiện Có
           </span>
@@ -83,7 +83,7 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
                 setPoints(isNaN(val) ? 0 : val);
               }}
               required
-              className="h-12 w-full rounded-xl border border-white/10 bg-black/35 px-4 font-mono font-black text-white placeholder:text-white/20 outline-none focus:border-primary"
+              className="h-12 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-4 font-mono font-black dark:text-white text-foreground placeholder:dark:text-white/20 text-muted-foreground outline-none focus:border-primary"
               placeholder="Tối thiểu 10 điểm"
             />
             <button
@@ -100,13 +100,13 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
         <div className="rounded-xl border border-primary/10 bg-primary/5 p-4 flex items-center gap-3">
           <Award className="size-8 text-primary shrink-0" />
           <div className="text-xs">
-            <p className="font-bold text-white uppercase tracking-wider">Hệ thống đổi thưởng vật lý</p>
+            <p className="font-bold dark:text-white text-foreground uppercase tracking-wider">Hệ thống đổi thưởng vật lý</p>
             <p className="text-muted-foreground mt-0.5">Một mã quy đổi độc duy nhất sẽ được tạo. Điểm chỉ bị trừ khỏi ví của bạn khi nhân viên tại quầy kiểm tra và xác nhận trao thưởng thành công.</p>
           </div>
         </div>
 
         {/* Disclaimers & Checks */}
-        <div className="rounded-xl border border-white/5 bg-white/[0.01] p-3 space-y-2">
+        <div className="rounded-xl border dark:border-white/5 border-border dark:bg-white/[0.01] bg-muted/50 p-3 space-y-2">
           <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
             <AlertTriangle className="size-3.5 text-amber-500 shrink-0 mt-0.5" />
             <span>Lưu ý: Không đổi điểm quá số điểm hiện có của bạn tại thời điểm nhận quà tại quầy.</span>
@@ -124,7 +124,7 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
             variant="outline"
             onClick={onCancel}
             disabled={isLoading}
-            className="h-12 flex-1 rounded-full font-black uppercase tracking-wider border-white/10 text-white bg-transparent hover:bg-white/5"
+            className="h-12 flex-1 rounded-full font-black uppercase tracking-wider dark:border-white/10 border-border dark:text-white text-foreground bg-transparent hover:dark:bg-white/5 bg-muted/50"
           >
             Hủy Bỏ
           </Button>

@@ -59,7 +59,7 @@ export default function OwnerRegistrationsPage() {
       />
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-white/55">
+        <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải lịch sử ghi danh...</p>
         </div>

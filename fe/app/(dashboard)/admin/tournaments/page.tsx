@@ -87,25 +87,25 @@ export default function AdminTournamentsPage() {
         </div>
       )}
 
-      <div className="text-sm text-muted-foreground">Tổng: <strong className="text-white">{meta.total}</strong> giải đấu</div>
+      <div className="text-sm text-muted-foreground">Tổng: <strong className="dark:text-white text-foreground">{meta.total}</strong> giải đấu</div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {loading ? (
           Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 h-40" />
+            <div key={i} className="animate-pulse rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 h-40" />
           ))
         ) : tournaments.map((t) => (
-          <div key={t._id} className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 space-y-3 hover:border-white/20 transition">
+          <div key={t._id} className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 space-y-3 hover:dark:border-white/20 border-border transition">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="text-base font-black uppercase text-white leading-tight">{t.name}</h3>
+              <h3 className="text-base font-black uppercase dark:text-white text-foreground leading-tight">{t.name}</h3>
               <span className={`shrink-0 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${statusColors[t.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                 {t.status}
               </span>
             </div>
             {t.description && <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>}
             <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-              <span>🏆 Prize: <strong className="text-white">{t.prize?.toLocaleString() ?? "?"} pts</strong></span>
-              <span>🐴 Max: <strong className="text-white">{t.maxHorses ?? "?"} ngựa</strong></span>
+              <span>🏆 Prize: <strong className="dark:text-white text-foreground">{t.prize?.toLocaleString() ?? "?"} pts</strong></span>
+              <span>🐴 Max: <strong className="dark:text-white text-foreground">{t.maxHorses ?? "?"} ngựa</strong></span>
               {t.startDate && <span>📅 {new Date(t.startDate).toLocaleDateString("vi-VN")}</span>}
               {t.endDate && <span>🏁 {new Date(t.endDate).toLocaleDateString("vi-VN")}</span>}
             </div>
@@ -114,7 +114,7 @@ export default function AdminTournamentsPage() {
                 value={t.status}
                 disabled={actionLoading === t._id}
                 onChange={(e) => handleStatusChange(t._id, e.target.value)}
-                className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-xs text-white focus:border-primary/50 focus:outline-none disabled:opacity-50"
+                className="flex-1 rounded-lg border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-2 py-1.5 text-xs dark:text-white text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50"
               >
                 {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -133,12 +133,12 @@ export default function AdminTournamentsPage() {
       {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchTournaments(meta.page - 1)} disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
             <ChevronLeft className="size-4" /> Trước
           </button>
           <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
           <button onClick={() => fetchTournaments(meta.page + 1)} disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
             Sau <ChevronRight className="size-4" />
           </button>
         </div>

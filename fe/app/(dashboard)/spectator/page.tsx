@@ -87,8 +87,8 @@ export default function SpectatorDashboardPage() {
   return (
     <main className="space-y-8 max-w-6xl mx-auto pb-12">
       {/* Premium Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1A1A24] to-[#111116] p-6 sm:p-8 shadow-[0_24px_48px_rgba(0,0,0,0.5)]">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(225,6,0,0.15),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(6,126,106,0.1),transparent_30rem)] animate-pulse duration-[8s]" />
+      <div className="relative overflow-hidden rounded-3xl border dark:border-white/10 border-border dark:bg-gradient-to-br dark:from-[#1A1A24] dark:to-[#111116] bg-card p-6 sm:p-8 shadow-[0_24px_48px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_48px_rgba(0,0,0,0.5)]">
+        <div className="absolute inset-0 -z-10 dark:bg-[linear-gradient(135deg,rgba(225,6,0,0.15),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(6,126,106,0.1),transparent_30rem)] bg-card animate-pulse duration-[8s]" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none" />
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -96,7 +96,7 @@ export default function SpectatorDashboardPage() {
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary">
               <Activity className="size-3.5 animate-pulse" /> Spectator Control Center
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight dark:text-white text-foreground">
               Đường Đua & <span className="text-primary">Dự Đoán</span>
             </h1>
             <p className="max-w-xl text-sm leading-6 text-muted-foreground">
@@ -105,16 +105,16 @@ export default function SpectatorDashboardPage() {
           </div>
 
           {/* Quick Balance Card */}
-          <div className="shrink-0 rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-md min-w-[240px] space-y-4">
+          <div className="shrink-0 rounded-2xl border dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 p-5 backdrop-blur-md min-w-[240px] space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Số dư Ví Điểm</span>
               <Wallet className="size-4 text-primary" />
             </div>
             <div className="space-y-1">
-              <p className="text-3xl font-black text-white tracking-tight">{balance.toLocaleString()} Pts</p>
+              <p className="text-3xl font-black dark:text-white text-foreground tracking-tight">{balance.toLocaleString()} Pts</p>
               <p className="text-[10px] text-teal-400 font-bold uppercase tracking-wider">● Tài khoản hoạt động</p>
             </div>
-            <Button asChild variant="outline" className="w-full rounded-xl border-white/10 bg-transparent text-white hover:bg-white/5 text-xs font-bold uppercase tracking-wider">
+            <Button asChild variant="outline" className="w-full rounded-xl dark:border-white/10 border-border bg-transparent dark:text-white text-foreground hover:dark:bg-white/5 bg-muted/50 text-xs font-bold uppercase tracking-wider">
               <Link href="/spectator/wallet">Xem ví & Đổi thưởng</Link>
             </Button>
           </div>
@@ -123,18 +123,18 @@ export default function SpectatorDashboardPage() {
 
       {/* Grid Quick Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-5 space-y-2 hover:border-white/10 transition duration-300">
+        <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-white/[0.01] bg-muted/50 p-5 space-y-2 hover:dark:border-white/10 border-border transition duration-300">
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
               <Trophy className="size-4.5" />
             </div>
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Giải Đang Diễn Ra</span>
           </div>
-          <p className="text-3xl font-black text-white">2 Giải Đấu</p>
+          <p className="text-3xl font-black dark:text-white text-foreground">2 Giải Đấu</p>
           <p className="text-xs text-muted-foreground">Quy tụ hơn 30+ chiến mã đăng ký</p>
         </div>
 
-        <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-5 space-y-2 hover:border-white/10 transition duration-300">
+        <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-white/[0.01] bg-muted/50 p-5 space-y-2 hover:dark:border-white/10 border-border transition duration-300">
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
               <Activity className="size-4.5" />
@@ -145,7 +145,7 @@ export default function SpectatorDashboardPage() {
           <p className="text-xs text-muted-foreground">Trực tiếp cập nhật kết quả tại trường đua</p>
         </div>
 
-        <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-5 space-y-2 hover:border-white/10 transition duration-300">
+        <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-white/[0.01] bg-muted/50 p-5 space-y-2 hover:dark:border-white/10 border-border transition duration-300">
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
               <Bell className="size-4.5" />
@@ -161,14 +161,14 @@ export default function SpectatorDashboardPage() {
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Left Column: Featured Tournaments */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="flex items-center justify-between border-b dark:border-white/10 border-border pb-4">
             <div className="space-y-1">
-              <h2 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
+              <h2 className="text-xl font-black uppercase tracking-tight dark:text-white text-foreground flex items-center gap-2">
                 <Trophy className="size-5 text-primary" /> Giải Đấu Nổi Bật (Featured)
               </h2>
               <p className="text-xs text-muted-foreground">Khám phá các giải đua ngựa kịch tính sắp diễn ra hoặc đang khởi tranh</p>
             </div>
-            <Button asChild variant="ghost" className="text-xs font-bold uppercase tracking-wider text-primary hover:text-white group">
+            <Button asChild variant="ghost" className="text-xs font-bold uppercase tracking-wider text-primary hover:dark:text-white text-foreground group">
               <Link href="/spectator/tournaments" className="flex items-center gap-1">
                 Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
               </Link>
@@ -179,10 +179,10 @@ export default function SpectatorDashboardPage() {
             {mockFeaturedTournaments.slice(0, 2).map((tour) => (
               <div
                 key={tour.id}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#16161E]/90 hover:border-white/20 transition duration-300 flex flex-col h-full"
+                className="group relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#16161E]/90 bg-card hover:dark:border-white/20 border-border transition duration-300 flex flex-col h-full"
               >
                 {/* Image Banner */}
-                <div className="h-44 w-full overflow-hidden relative border-b border-white/5">
+                <div className="h-44 w-full overflow-hidden relative border-b dark:border-white/5 border-border">
                   <img
                     src={tour.image}
                     alt={tour.name}
@@ -204,7 +204,7 @@ export default function SpectatorDashboardPage() {
                 {/* Content */}
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
-                    <h3 className="text-lg font-black uppercase tracking-tight text-white leading-tight group-hover:text-primary transition duration-300">
+                    <h3 className="text-lg font-black uppercase tracking-tight dark:text-white text-foreground leading-tight group-hover:text-primary transition duration-300">
                       {tour.name}
                     </h3>
                     <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
@@ -212,14 +212,14 @@ export default function SpectatorDashboardPage() {
                     </p>
                   </div>
 
-                  <div className="space-y-3 pt-3 border-t border-white/5 text-[11px] text-muted-foreground">
+                  <div className="space-y-3 pt-3 border-t dark:border-white/5 border-border text-[11px] text-muted-foreground">
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1.5"><MapPin className="size-3 text-primary" /> {tour.location}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1.5"><Calendar className="size-3 text-primary" /> {tour.startDate} ~ {tour.endDate}</span>
                     </div>
-                    <div className="flex items-center justify-between font-bold text-white border-t border-white/5 pt-2">
+                    <div className="flex items-center justify-between font-bold dark:text-white text-foreground border-t dark:border-white/5 border-border pt-2">
                       <span>Tổng Giải Thưởng:</span>
                       <span className="text-primary text-xs font-black uppercase tracking-wider">{tour.prizePool.toLocaleString()} Pts</span>
                     </div>
@@ -227,7 +227,7 @@ export default function SpectatorDashboardPage() {
                 </div>
 
                 <div className="px-5 pb-5 mt-auto">
-                  <Button asChild className="w-full rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider">
+                  <Button asChild className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border text-white hover:bg-primary hover:text-foreground dark:hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider">
                     <Link href={`/spectator/tournaments?id=${tour.id}`}>Chi tiết giải đấu</Link>
                   </Button>
                 </div>
@@ -238,8 +238,8 @@ export default function SpectatorDashboardPage() {
 
         {/* Right Column: Upcoming Races & Quick Bets */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="space-y-1 border-b border-white/10 pb-4">
-            <h2 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
+          <div className="space-y-1 border-b dark:border-white/10 border-border pb-4">
+            <h2 className="text-xl font-black uppercase tracking-tight dark:text-white text-foreground flex items-center gap-2">
               <Flag className="size-5 text-primary" /> Lịch Đua Hot
             </h2>
             <p className="text-xs text-muted-foreground">Theo dõi và đặt dự đoán sớm trước giờ xuất phát</p>
@@ -249,7 +249,7 @@ export default function SpectatorDashboardPage() {
             {mockUpcomingRaces.map((race) => (
               <div
                 key={race.id}
-                className="rounded-2xl border border-white/5 bg-[#13131A] p-5 space-y-4 hover:border-white/15 transition duration-300 relative overflow-hidden"
+                className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-card p-5 space-y-4 hover:dark:border-white/15 border-border transition duration-300 relative overflow-hidden"
               >
                 {race.status === "LIVE" && (
                   <div className="absolute top-0 right-0 w-2 h-full bg-teal-500" />
@@ -258,27 +258,27 @@ export default function SpectatorDashboardPage() {
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
                     <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{race.tournament}</span>
-                    <h4 className="font-black text-white text-base leading-tight uppercase">{race.name}</h4>
+                    <h4 className="font-black dark:text-white text-foreground text-base leading-tight uppercase">{race.name}</h4>
                   </div>
                   {race.status === "LIVE" ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[9px] font-black text-teal-400 uppercase tracking-wider">
                       ● LIVE NOW
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-[9px] font-black text-muted-foreground uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1 rounded-full dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border px-2 py-0.5 text-[9px] font-black text-muted-foreground uppercase tracking-wider">
                       {race.startTime}
                     </span>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground bg-white/[0.01] rounded-xl p-2.5 border border-white/5">
+                <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground dark:bg-white/[0.01] bg-muted/50 rounded-xl p-2.5 border dark:border-white/5 border-border">
                   <div>
                     <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Cự ly</span>
-                    <span className="font-bold text-white text-xs">{race.distance}</span>
+                    <span className="font-bold dark:text-white text-foreground text-xs">{race.distance}</span>
                   </div>
                   <div>
                     <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Mặt sân</span>
-                    <span className="font-bold text-white text-xs truncate block">{race.surface}</span>
+                    <span className="font-bold dark:text-white text-foreground text-xs truncate block">{race.surface}</span>
                   </div>
                 </div>
 
@@ -301,7 +301,7 @@ export default function SpectatorDashboardPage() {
                 <span className="text-xs font-black uppercase tracking-wider">Cơ cấu dự đoán (Reward Rule)</span>
               </div>
               <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Mỗi trận đấu bạn có quyền chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="text-white">+1 điểm</strong>, dự đoán sai khấu trừ <strong className="text-white">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
+                Mỗi trận đấu bạn có quyền chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="dark:text-white text-foreground">+1 điểm</strong>, dự đoán sai khấu trừ <strong className="dark:text-white text-foreground">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
               </p>
             </div>
           </div>

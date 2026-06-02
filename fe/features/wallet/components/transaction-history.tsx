@@ -44,22 +44,22 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
+    <div className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
       {/* Decorative gradient header */}
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#E10600]/30 to-transparent" />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b dark:border-white/5 border-border pb-5">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
             <Coins className="size-3.5 animate-pulse" /> Sổ cái điểm thưởng
           </p>
-          <h2 className="mt-1.5 text-xl font-black uppercase tracking-tight text-white sm:text-2xl">
+          <h2 className="mt-1.5 text-xl font-black uppercase tracking-tight dark:text-white text-foreground sm:text-2xl">
             Lịch sử giao dịch điểm
           </h2>
         </div>
 
         {/* Filter Badges with sleek modern pill styling */}
-        <div className="flex flex-wrap gap-1.5 bg-black/30 p-1.5 rounded-xl border border-white/5">
+        <div className="flex flex-wrap gap-1.5 dark:bg-black/30 bg-muted/20 p-1.5 rounded-xl border dark:border-white/5 border-border">
           {[
             { id: "all", label: "Tất cả" },
             { id: "prizes", label: "Chủ/Nài ngựa" },
@@ -73,7 +73,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                 "rounded-lg px-3 py-1.5 text-[10px] sm:text-xs font-black uppercase tracking-wider transition cursor-pointer outline-none",
                 filterType === t.id
                   ? "bg-primary text-white shadow-[0_2px_8px_rgba(225,6,0,0.25)]"
-                  : "text-white/60 hover:text-white hover:bg-white/5",
+                  : "dark:text-white/60 text-muted-foreground hover:dark:text-white hover:text-foreground hover:dark:bg-white/5 bg-muted/50 hover:bg-muted/80",
               )}
             >
               {t.label}
@@ -84,22 +84,22 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
 
       {/* Search input with motorsport dark aesthetic */}
       <div className="relative mt-5">
-        <Search className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-white/30" />
+        <Search className="absolute top-1/2 left-4 size-4 -translate-y-1/2 dark:text-white/30 text-muted-foreground" />
         <input
           type="text"
           placeholder="Tìm kiếm theo mô tả giao dịch..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="h-12 w-full rounded-xl border border-white/10 bg-black/40 pl-11 pr-6 text-sm text-white outline-none placeholder:text-white/20 focus:border-primary transition"
+          className="h-12 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/40 bg-muted/20 pl-11 pr-6 text-sm dark:text-white text-foreground outline-none placeholder:dark:text-white/20 text-muted-foreground focus:border-primary transition"
         />
       </div>
 
       {/* Transactions List */}
-      <div className="mt-5 overflow-hidden rounded-xl border border-white/5 bg-black/10">
+      <div className="mt-5 overflow-hidden rounded-xl border dark:border-white/5 border-border dark:bg-black/10 bg-muted/20">
         {filteredTransactions.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center">
-            <Coins className="size-10 text-white/10 animate-pulse" />
-            <p className="mt-4 text-xs font-black uppercase tracking-wider text-white/40">
+            <Coins className="size-10 dark:text-white/10 text-muted-foreground animate-pulse" />
+            <p className="mt-4 text-xs font-black uppercase tracking-wider dark:text-white/40 text-muted-foreground">
               Không tìm thấy giao dịch nào
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -109,7 +109,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
         ) : (
           <div className="w-full overflow-x-auto select-none">
             <table className="w-full text-left text-xs sm:text-sm border-collapse">
-              <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b border-white/5">
+              <thead className="dark:bg-white/[0.03] bg-muted/50 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b dark:border-white/5 border-border">
                 <tr>
                   <th className="px-4 py-3">Loại giao dịch</th>
                   <th className="px-4 py-3">Chi tiết hoạt động</th>
@@ -119,12 +119,12 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredTransactions.map((tx) => {
-                  const meta = typeMeta[tx.type] || { icon: Coins, color: "text-white/60 bg-white/5 border-white/10", label: "Giao dịch" };
+                  const meta = typeMeta[tx.type] || { icon: Coins, color: "dark:text-white/60 text-muted-foreground dark:bg-white/5 bg-muted/50 dark:border-white/10 border-border", label: "Giao dịch" };
                   const Icon = meta.icon;
                   const isPositive = tx.type === "deposit" || tx.type === "prize_owner" || tx.type === "prize_jockey" || tx.type === "prediction_win" || tx.type === "prediction_refund";
 
                   return (
-                    <tr key={tx.id} className="transition hover:bg-white/[0.015]">
+                    <tr key={tx.id} className="transition hover:dark:bg-white/[0.015] bg-muted/50">
                       {/* Icon and Type */}
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
@@ -132,7 +132,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                             <Icon className="size-4" />
                           </div>
                           <div>
-                            <p className="font-black uppercase tracking-wider text-white text-[11px] sm:text-xs">
+                            <p className="font-black uppercase tracking-wider dark:text-white text-foreground text-[11px] sm:text-xs">
                               {meta.label}
                             </p>
                             <p className="text-[9px] text-muted-foreground font-mono mt-0.5">
@@ -144,7 +144,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
 
                       {/* Details */}
                       <td className="px-4 py-3.5">
-                        <p className="font-semibold text-white/90 text-xs sm:text-sm">
+                        <p className="font-semibold dark:text-white/90 text-muted-foreground text-xs sm:text-sm">
                           {tx.description}
                         </p>
                         <div className="mt-1 flex items-center gap-2">
@@ -162,13 +162,13 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                       </td>
 
                       {/* Stacked Date & Time */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-white/60 font-mono text-[11px] leading-relaxed">
+                      <td className="px-4 py-3.5 whitespace-nowrap dark:text-white/60 text-muted-foreground font-mono text-[11px] leading-relaxed">
                         <div className="flex flex-col">
-                          <span className="flex items-center gap-1 font-bold text-white/80">
+                          <span className="flex items-center gap-1 font-bold dark:text-white/80 text-muted-foreground">
                             <Calendar className="size-3 text-primary shrink-0" />
                             {new Date(tx.createdAt).toLocaleDateString()}
                           </span>
-                          <span className="flex items-center gap-1 text-[10px] text-white/40 mt-0.5">
+                          <span className="flex items-center gap-1 text-[10px] dark:text-white/40 text-muted-foreground mt-0.5">
                             <Clock className="size-3 shrink-0" />
                             {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>

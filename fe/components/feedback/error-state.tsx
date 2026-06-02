@@ -30,8 +30,8 @@ export function ErrorState({
         className="mx-auto size-8 text-primary"
         aria-hidden="true"
       />
-      <h2 className="mt-4 text-xl font-black uppercase text-white">{title}</h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#E0DEDC]">
+      <h2 className="mt-4 text-xl font-black uppercase text-foreground">{title}</h2>
+      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
         {description}
       </p>
       {reset ? (

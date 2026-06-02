@@ -194,7 +194,7 @@ export default function RefereeViolationsPage({
   if (!race) {
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
-        <h2 className="text-xl font-bold text-white">Không tìm thấy cuộc đua</h2>
+        <h2 className="text-xl font-bold dark:text-white text-foreground">Không tìm thấy cuộc đua</h2>
         <Button onClick={() => router.back()}>Quay lại</Button>
       </main>
     );
@@ -203,7 +203,7 @@ export default function RefereeViolationsPage({
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Back link */}
-      <Link href={`/referee/races/${raceId}`} className="inline-flex items-center text-xs text-white/50 hover:text-white transition">
+      <Link href={`/referee/races/${raceId}`} className="inline-flex items-center text-xs dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition">
         <ArrowLeft className="size-3.5 mr-1" /> Quay lại kiểm duyệt ngựa
       </Link>
 
@@ -223,10 +223,10 @@ export default function RefereeViolationsPage({
       />
 
       {/* Violation Penalty Info Card */}
-      <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4 flex gap-3 text-xs text-white/70">
+      <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4 flex gap-3 text-xs dark:text-white/70 text-muted-foreground">
         <AlertTriangle className="size-5 text-yellow-500 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <h4 className="font-bold text-white uppercase text-[11px]">Hệ thống phạt tự động (Automatic Penalties)</h4>
+          <h4 className="font-bold dark:text-white text-foreground uppercase text-[11px]">Hệ thống phạt tự động (Automatic Penalties)</h4>
           <p className="leading-relaxed">
             Các vi phạm có hình phạt **Cộng giây phạt (time_penalty)** sẽ được hệ thống tự động cộng trực tiếp vào thời gian hoàn thành của ngựa khi thực hiện khóa kết quả:
             <br />
@@ -239,8 +239,8 @@ export default function RefereeViolationsPage({
 
       <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr] items-start">
         {/* Quick Add Form */}
-        <section className="rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-lg space-y-4">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-1.5">
+        <section className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-lg space-y-4">
+          <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground flex items-center gap-1.5">
             <PlusCircle className="size-4 text-primary" />
             Ghi nhận vi phạm nhanh
           </h3>
@@ -248,16 +248,16 @@ export default function RefereeViolationsPage({
           <form onSubmit={handleSubmitViolation} className="space-y-4 text-xs">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Chọn ngựa vi phạm</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Chọn ngựa vi phạm</label>
                 <select
                   value={selectedHorseId}
                   onChange={(e) => setSelectedHorseId(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                   required
                 >
-                  <option value="" className="bg-[#15151E]">-- Chọn chiến mã --</option>
+                  <option value="" className="dark:bg-[#15151E] bg-card">-- Chọn chiến mã --</option>
                   {horses.map((h) => (
-                    <option key={h.horseId?._id} value={h.horseId?._id} className="bg-[#15151E]">
+                    <option key={h.horseId?._id} value={h.horseId?._id} className="dark:bg-[#15151E] bg-card">
                       {h.horseId?.name} ({h.horseId?.breed})
                     </option>
                   ))}
@@ -265,56 +265,56 @@ export default function RefereeViolationsPage({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Loại vi phạm</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Loại vi phạm</label>
                 <select
                   value={violationType}
                   onChange={(e) => setViolationType(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                 >
-                  <option value="track_violation" className="bg-[#15151E]">Vi phạm đường đua (TRACK)</option>
-                  <option value="false_start" className="bg-[#15151E]">Xuất phát sai quy định (FALSE START)</option>
-                  <option value="dangerous_riding" className="bg-[#15151E]">Đua xe/kỵ sĩ nguy hiểm (DANGEROUS)</option>
-                  <option value="equipment_violation" className="bg-[#15151E]">Lỗi trang thiết bị bảo hộ (EQUIPMENT)</option>
-                  <option value="other" className="bg-[#15151E]">Lỗi vi phạm khác (OTHER)</option>
+                  <option value="track_violation" className="dark:bg-[#15151E] bg-card">Vi phạm đường đua (TRACK)</option>
+                  <option value="false_start" className="dark:bg-[#15151E] bg-card">Xuất phát sai quy định (FALSE START)</option>
+                  <option value="dangerous_riding" className="dark:bg-[#15151E] bg-card">Đua xe/kỵ sĩ nguy hiểm (DANGEROUS)</option>
+                  <option value="equipment_violation" className="dark:bg-[#15151E] bg-card">Lỗi trang thiết bị bảo hộ (EQUIPMENT)</option>
+                  <option value="other" className="dark:bg-[#15151E] bg-card">Lỗi vi phạm khác (OTHER)</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Mức độ vi phạm</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Mức độ vi phạm</label>
                 <select
                   value={violationSeverity}
                   onChange={(e) => setViolationSeverity(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                 >
-                  <option value="minor" className="bg-[#15151E]">Nhẹ (MINOR - Phạt +3s)</option>
-                  <option value="major" className="bg-[#15151E]">Trung bình (MAJOR - Phạt +6s)</option>
-                  <option value="critical" className="bg-[#15151E]">Nghiêm trọng (CRITICAL - Phạt +12s)</option>
+                  <option value="minor" className="dark:bg-[#15151E] bg-card">Nhẹ (MINOR - Phạt +3s)</option>
+                  <option value="major" className="dark:bg-[#15151E] bg-card">Trung bình (MAJOR - Phạt +6s)</option>
+                  <option value="critical" className="dark:bg-[#15151E] bg-card">Nghiêm trọng (CRITICAL - Phạt +12s)</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Hình phạt áp dụng</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Hình phạt áp dụng</label>
                 <select
                   value={violationPenalty}
                   onChange={(e) => setViolationPenalty(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                 >
-                  <option value="time_penalty" className="bg-[#15151E]">Cộng giây phạt (TIME PENALTY)</option>
-                  <option value="warning" className="bg-[#15151E]">Cảnh cáo nhắc nhở (WARNING)</option>
-                  <option value="disqualified" className="bg-[#15151E]">Truất quyền thi đấu (DISQUALIFIED)</option>
-                  <option value="none" className="bg-[#15151E]">Không phạt (NONE)</option>
+                  <option value="time_penalty" className="dark:bg-[#15151E] bg-card">Cộng giây phạt (TIME PENALTY)</option>
+                  <option value="warning" className="dark:bg-[#15151E] bg-card">Cảnh cáo nhắc nhở (WARNING)</option>
+                  <option value="disqualified" className="dark:bg-[#15151E] bg-card">Truất quyền thi đấu (DISQUALIFIED)</option>
+                  <option value="none" className="dark:bg-[#15151E] bg-card">Không phạt (NONE)</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase text-white/50">Mô tả sự cố vi phạm chi tiết</label>
+              <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Mô tả sự cố vi phạm chi tiết</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ví dụ: Kỵ sĩ cố ý ép làn tại khúc cua thứ hai, chèn ép số hiệu 04 chệch khoảng 1.5m..."
                 rows={3}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/20 focus:border-primary focus:outline-none resize-none"
+                className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/20 focus:border-primary focus:outline-none resize-none"
                 required
               />
             </div>
@@ -333,12 +333,12 @@ export default function RefereeViolationsPage({
 
         {/* Violations Log List */}
         <section className="space-y-4">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
+          <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground">
             Nhật ký vi phạm đã ghi nhận ({violations.length})
           </h3>
 
           {violations.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E]/40 text-white/40 text-xs">
+            <div className="text-center py-12 rounded-2xl border border-dashed dark:border-white/10 border-border dark:bg-[#15151E]/40 bg-card dark:text-white/40 text-muted-foreground text-xs">
               Chưa có vi phạm nào được ghi nhận cho cuộc đua này.
             </div>
           ) : (
@@ -346,7 +346,7 @@ export default function RefereeViolationsPage({
               {violations.map((v) => (
                 <article
                   key={v._id}
-                  className="rounded-xl border border-white/5 bg-[#15151E]/90 p-4 space-y-3 shadow"
+                  className="rounded-xl border dark:border-white/5 border-border dark:bg-[#15151E]/90 bg-card p-4 space-y-3 shadow"
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -357,13 +357,13 @@ export default function RefereeViolationsPage({
                       }`}>
                         {v.severity === "critical" ? "CRITICAL" : v.severity === "major" ? "MAJOR" : "MINOR"}
                       </span>
-                      <span className="text-[10px] text-white/60 uppercase font-black tracking-wider">
+                      <span className="text-[10px] dark:text-white/60 text-muted-foreground uppercase font-black tracking-wider">
                         · {v.type === "track_violation" ? "LỖI ĐƯỜNG ĐUA" :
                            v.type === "false_start" ? "XUẤT PHÁT SAI" :
                            v.type === "dangerous_riding" ? "KỴ SĨ ÉP LÀN" : "VI PHẠM KHÁC"}
                       </span>
                     </div>
-                    <span className="text-[10px] text-white/40 font-bold uppercase bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+                    <span className="text-[10px] dark:text-white/40 text-muted-foreground font-bold uppercase dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border px-2 py-0.5 rounded">
                       {v.penalty === "time_penalty" ? "Phạt cộng giây" :
                        v.penalty === "warning" ? "Cảnh cáo" :
                        v.penalty === "disqualified" ? "TRUẤT QUYỀN" : "Không phạt"}
@@ -371,16 +371,16 @@ export default function RefereeViolationsPage({
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-white uppercase">Chiến mã: {v.horseId?.name}</p>
+                    <p className="text-xs font-bold dark:text-white text-foreground uppercase">Chiến mã: {v.horseId?.name}</p>
                     {v.jockeyUserId && (
-                      <p className="text-[10px] text-white/50">Kỵ sĩ: <strong>{v.jockeyUserId?.fullName}</strong></p>
+                      <p className="text-[10px] dark:text-white/50 text-muted-foreground">Kỵ sĩ: <strong>{v.jockeyUserId?.fullName}</strong></p>
                     )}
-                    <p className="text-xs text-white/70 leading-relaxed mt-1">{v.description}</p>
+                    <p className="text-xs dark:text-white/70 text-muted-foreground leading-relaxed mt-1">{v.description}</p>
                   </div>
 
-                  <div className="h-px bg-white/5" />
+                  <div className="h-px dark:bg-white/5 bg-muted/50" />
 
-                  <div className="flex justify-between items-center text-[9px] text-white/40 font-bold uppercase">
+                  <div className="flex justify-between items-center text-[9px] dark:text-white/40 text-muted-foreground font-bold uppercase">
                     <span>Ghi nhận bởi: {v.reportedBy?.fullName}</span>
                     <span>{new Date(v.createdAt).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>

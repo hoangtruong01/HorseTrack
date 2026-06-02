@@ -67,9 +67,9 @@ export default function AdminPrizesPage() {
         </div>
       )}
 
-      <div className="text-sm text-muted-foreground">Tổng: <strong className="text-white">{meta.total}</strong> prizes</div>
+      <div className="text-sm text-muted-foreground">Tổng: <strong className="dark:text-white text-foreground">{meta.total}</strong> prizes</div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+      <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
         ) : prizes.length === 0 ? (
@@ -78,7 +78,7 @@ export default function AdminPrizesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b dark:border-white/10 border-border">
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Người nhận</th>
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Race</th>
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa</th>
@@ -89,8 +89,8 @@ export default function AdminPrizesPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {prizes.map((p) => (
-                  <tr key={p._id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-4 text-sm text-white">{getName(p.ownerId)}</td>
+                  <tr key={p._id} className="hover:dark:bg-white/[0.02] bg-muted/50 transition-colors">
+                    <td className="px-5 py-4 text-sm dark:text-white text-foreground">{getName(p.ownerId)}</td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{getName(p.raceId)}</td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{getName(p.horseId)}</td>
                     <td className="px-5 py-4 text-center font-mono font-black text-primary">{p.amount.toLocaleString()}</td>
@@ -124,12 +124,12 @@ export default function AdminPrizesPage() {
       {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchPrizes(meta.page - 1)} disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
             <ChevronLeft className="size-4" /> Trước
           </button>
           <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
           <button onClick={() => fetchPrizes(meta.page + 1)} disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
             Sau <ChevronRight className="size-4" />
           </button>
         </div>

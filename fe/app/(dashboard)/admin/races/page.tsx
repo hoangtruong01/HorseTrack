@@ -27,11 +27,11 @@ export default function AdminRacesPage() {
       />
       <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <RaceCard race={liveRace} />
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Status stack
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase dark:text-white text-foreground">
             Scheduled · Live · Finished · Published
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">

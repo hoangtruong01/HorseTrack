@@ -36,15 +36,15 @@ export function AdminOverview() {
         }
       />
 
-      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)] sm:p-6 lg:p-8">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.22),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.2),transparent_28rem)]" />
+      <section className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)] sm:p-6 lg:p-8">
+        <div className="absolute inset-0 dark:bg-[linear-gradient(120deg,rgba(225,6,0,0.22),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.2),transparent_28rem)] bg-card" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
         <div className="relative grid gap-6 lg:grid-cols-[1.35fr_0.65fr] lg:items-end">
           <div>
             <p className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
               Mock command deck · Phase 4A
             </p>
-            <h2 className="mt-5 max-w-4xl text-3xl font-black uppercase leading-tight tracking-tight text-white sm:text-5xl">
+            <h2 className="mt-5 max-w-4xl text-3xl font-black uppercase leading-tight tracking-tight dark:text-white text-foreground sm:text-5xl">
               Keep live races visible. Push admin work into clear lanes.
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
@@ -52,7 +52,7 @@ export function AdminOverview() {
               then route entry points for future modules.
             </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+          <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-primary">
                 <ShieldCheck className="size-6" />
@@ -61,7 +61,7 @@ export function AdminOverview() {
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
                   Scope guard
                 </p>
-                <p className="mt-1 text-sm font-semibold text-white">
+                <p className="mt-1 text-sm font-semibold dark:text-white text-foreground">
                   No CRUD · No API · No realtime sockets
                 </p>
               </div>
@@ -80,13 +80,13 @@ export function AdminOverview() {
 
       <RaceStatusOverview races={raceSummaries} counts={raceStatusCounts} />
 
-      <section className="rounded-2xl border border-white/10 bg-[#15151E]/80 p-4 shadow-[0_18px_56px_rgba(0,0,0,0.24)] sm:p-6">
+      <section className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/80 bg-card p-4 shadow-[0_18px_56px_rgba(0,0,0,0.24)] sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
               Recent activity
             </p>
-            <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+            <h2 className="mt-2 text-2xl font-black uppercase tracking-tight dark:text-white text-foreground">
               Admin feed
             </h2>
           </div>
@@ -95,7 +95,7 @@ export function AdminOverview() {
             aria-hidden="true"
           />
         </div>
-        <div className="mt-5 divide-y divide-white/10 rounded-xl border border-white/10 bg-white/[0.03]">
+        <div className="mt-5 divide-y divide-white/10 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50">
           {adminActivities.map((item) => (
             <article
               key={item.id}
@@ -105,7 +105,7 @@ export function AdminOverview() {
                 {item.time}
               </time>
               <div>
-                <h3 className="font-bold text-white">{item.title}</h3>
+                <h3 className="font-bold dark:text-white text-foreground">{item.title}</h3>
                 <p className="mt-1 text-sm leading-5 text-muted-foreground">
                   {item.description}
                 </p>

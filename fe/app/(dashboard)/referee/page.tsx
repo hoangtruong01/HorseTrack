@@ -194,52 +194,52 @@ export default function RefereeDashboardPage() {
 
       {/* Profile Check / Greeting */}
       {!profile ? (
-        <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-[#15151E] p-6 shadow-2xl">
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.1),transparent_35%)]" />
+        <section className="relative overflow-hidden rounded-3xl border border-primary/30 dark:bg-[#15151E] bg-card p-6 shadow-2xl">
+          <div className="absolute inset-0 dark:bg-[linear-gradient(120deg,rgba(225,6,0,0.1),transparent_35%)] bg-card" />
           <div className="relative space-y-4 max-w-2xl">
             <div className="flex items-center gap-2">
               <span className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
                 CẦN HOÀN THIỆN HỒ SƠ
               </span>
             </div>
-            <h2 className="text-xl font-black uppercase text-white sm:text-2xl">
+            <h2 className="text-xl font-black uppercase dark:text-white text-foreground sm:text-2xl">
               Khởi tạo hồ sơ Trọng tài của bạn
             </h2>
-            <p className="text-xs text-white/60 leading-relaxed">
+            <p className="text-xs dark:text-white/60 text-muted-foreground leading-relaxed">
               Xin chào **{user?.fullName}**, bạn có vai trò Trọng tài nhưng chưa tạo hồ sơ thông số chuyên môn. Hãy điền số giấy phép hành nghề bên dưới để có thể nhận phân công giám sát các cuộc đua từ Ban tổ chức.
             </p>
-            <form onSubmit={handleCreateProfile} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end bg-black/25 p-4 rounded-xl border border-white/5">
+            <form onSubmit={handleCreateProfile} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end dark:bg-black/25 bg-muted/20 p-4 rounded-xl border dark:border-white/5 border-border">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Số giấy phép (License)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Số giấy phép (License)</label>
                 <input
                   type="text"
                   value={licenseNumber}
                   onChange={(e) => setLicenseNumber(e.target.value)}
                   placeholder="Ví dụ: RF-7799"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/35 focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/35 focus:border-primary focus:outline-none"
                   required
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Kinh nghiệm (Năm)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Kinh nghiệm (Năm)</label>
                 <input
                   type="number"
                   min={1}
                   max={50}
                   value={experienceYears}
                   onChange={(e) => setExperienceYears(Number(e.target.value))}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                   required
                 />
               </div>
               <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-                <label className="text-[10px] font-bold uppercase text-white/50">Tiểu sử ngắn / Bio (Tùy chọn)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Tiểu sử ngắn / Bio (Tùy chọn)</label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Ghi chú về kinh nghiệm làm việc hoặc các trận chung kết quốc gia đã điều hành..."
                   rows={2}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/35 focus:border-primary focus:outline-none resize-none"
+                  className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/35 focus:border-primary focus:outline-none resize-none"
                 />
               </div>
               <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
@@ -255,27 +255,27 @@ export default function RefereeDashboardPage() {
           </div>
         </section>
       ) : (
-        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#15151E] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.36)] sm:p-7">
-          <div className="absolute inset-0 bg-[linear-gradient(125deg,rgba(225,6,0,0.22),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(6,126,106,0.15),transparent_25rem)]" />
+        <section className="relative overflow-hidden rounded-3xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-[0_24px_80px_rgba(0,0,0,0.36)] sm:p-7">
+          <div className="absolute inset-0 dark:bg-[linear-gradient(125deg,rgba(225,6,0,0.22),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(6,126,106,0.15),transparent_25rem)] bg-card" />
           <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <span className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
                 GIÁM SÁT TRỰC TUYẾN
               </span>
-              <h2 className="mt-3 text-3xl font-black uppercase tracking-tight text-white leading-none">
+              <h2 className="mt-3 text-3xl font-black uppercase tracking-tight dark:text-white text-foreground leading-none">
                 BÀN LÀM VIỆC CỦA TRỌNG TÀI
               </h2>
-              <p className="mt-2 text-xs text-white/50 leading-relaxed max-w-xl">
+              <p className="mt-2 text-xs dark:text-white/50 text-muted-foreground leading-relaxed max-w-xl">
                 Quản lý các cuộc đua được ủy quyền. Thực hiện kiểm duyệt đầy đủ tình trạng thiết bị bảo hộ, sức khỏe ngựa, jockey điểm danh và xác lập thứ hạng chuẩn hóa sau khi trận đấu hoàn thành.
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4 shrink-0 min-w-[240px]">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-white/45">Trọng tài được cấp phép</p>
-              <p className="mt-1 text-lg font-black uppercase text-white flex items-center gap-1.5">
+            <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4 shrink-0 min-w-[240px]">
+              <p className="text-[10px] uppercase tracking-[0.18em] dark:text-white/45 text-muted-foreground">Trọng tài được cấp phép</p>
+              <p className="mt-1 text-lg font-black uppercase dark:text-white text-foreground flex items-center gap-1.5">
                 <User className="size-4 text-primary" />
                 {user?.fullName}
               </p>
-              <p className="mt-1 text-xs text-white/60">
+              <p className="mt-1 text-xs dark:text-white/60 text-muted-foreground">
                 License: <strong className="text-teal-400">{profile.licenseNumber}</strong> · {profile.experienceYears} năm kinh nghiệm
               </p>
             </div>
@@ -289,8 +289,8 @@ export default function RefereeDashboardPage() {
           <div className="flex items-center gap-3">
             <ShieldAlert className="size-5 text-yellow-500 shrink-0" />
             <div>
-              <h4 className="text-xs font-black uppercase text-white">Yêu cầu phân công mới!</h4>
-              <p className="text-[10px] text-white/60 mt-0.5">Bạn đang có {pendingAssignments.length} cuộc đua mới được Ban tổ chức chỉ định cần phê duyệt.</p>
+              <h4 className="text-xs font-black uppercase dark:text-white text-foreground">Yêu cầu phân công mới!</h4>
+              <p className="text-[10px] dark:text-white/60 text-muted-foreground mt-0.5">Bạn đang có {pendingAssignments.length} cuộc đua mới được Ban tổ chức chỉ định cần phê duyệt.</p>
             </div>
           </div>
           <Link href="/referee/assignments">
@@ -304,22 +304,22 @@ export default function RefereeDashboardPage() {
       {/* Next required action center */}
       {profile && activeAssignment && (
         <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-          <article className="rounded-2xl border border-primary/25 bg-[linear-gradient(135deg,rgba(225,6,0,0.12),rgba(21,21,30,0.95))] p-5 flex flex-col justify-between space-y-4">
+          <article className="rounded-2xl border border-primary/25 dark:bg-[linear-gradient(135deg,rgba(225,6,0,0.12),rgba(21,21,30,0.95))] bg-card p-5 flex flex-col justify-between space-y-4">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
                 NHIỆM VỤ TIẾP THEO
               </p>
-              <h3 className="mt-2 text-2xl font-black uppercase text-white leading-tight">
+              <h3 className="mt-2 text-2xl font-black uppercase dark:text-white text-foreground leading-tight">
                 {activeAssignment.raceId?.name}
               </h3>
-              <p className="mt-1 text-xs text-white/50 flex items-center gap-1.5">
+              <p className="mt-1 text-xs dark:text-white/50 text-muted-foreground flex items-center gap-1.5">
                 <Clock className="size-3.5" />
                 {formatDateTime(activeAssignment.raceId?.startTime)}
               </p>
               <div className="mt-2 flex items-center gap-2">
-                <span className="text-xs text-white/70">Vai trò: <strong>{activeAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}</strong></span>
-                <span className="text-white/20">•</span>
-                <span className="text-xs text-white/70">Trạng thái: 
+                <span className="text-xs dark:text-white/70 text-muted-foreground">Vai trò: <strong>{activeAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}</strong></span>
+                <span className="dark:text-white/20 text-muted-foreground">•</span>
+                <span className="text-xs dark:text-white/70 text-muted-foreground">Trạng thái: 
                   <span className="ml-1 text-teal-400 font-bold uppercase">{activeAssignment.status}</span>
                 </span>
               </div>
@@ -331,7 +331,7 @@ export default function RefereeDashboardPage() {
                   onClick={() => handleRespond(activeAssignment._id, "REJECTED")}
                   disabled={submittingActionId !== null}
                   variant="outline"
-                  className="rounded-full border-white/10 hover:bg-white/5 text-xs h-10 px-6 uppercase font-bold text-white hover:text-white"
+                  className="rounded-full dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 text-xs h-10 px-6 uppercase font-bold dark:text-white text-foreground hover:dark:text-white text-foreground"
                 >
                   Từ chối
                 </Button>
@@ -345,13 +345,13 @@ export default function RefereeDashboardPage() {
               </div>
             ) : (
               <div className="grid gap-2.5 sm:grid-cols-3 pt-2">
-                <Button asChild className="h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white">
+                <Button asChild className="h-11 rounded-full dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border hover:dark:bg-white/10 bg-muted/50 hover:dark:border-white/20 border-border dark:text-white text-foreground">
                   <Link href={`/referee/races/${activeAssignment.raceId?._id}`}>
                     <ClipboardList className="size-4 text-primary shrink-0" />
                     <span className="ml-1.5 text-xs font-bold uppercase">Kiểm tra ngựa</span>
                   </Link>
                 </Button>
-                <Button asChild className="h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white">
+                <Button asChild className="h-11 rounded-full dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border hover:dark:bg-white/10 bg-muted/50 hover:dark:border-white/20 border-border dark:text-white text-foreground">
                   <Link href={`/referee/races/${activeAssignment.raceId?._id}/violations`}>
                     <Siren className="size-4 text-primary shrink-0" />
                     <span className="ml-1.5 text-xs font-bold uppercase">Lỗi vi phạm</span>
@@ -367,19 +367,19 @@ export default function RefereeDashboardPage() {
             )}
           </article>
 
-          <article className="rounded-2xl border border-white/10 bg-[#15151E]/90 p-5 flex flex-col justify-between">
+          <article className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/90 bg-card p-5 flex flex-col justify-between">
             <div className="space-y-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
                 BIÊN BẢN TRẬN ĐẤU
               </p>
-              <h3 className="text-lg font-black uppercase text-white">
+              <h3 className="text-lg font-black uppercase dark:text-white text-foreground">
                 Khóa sổ & Đồng bộ
               </h3>
-              <p className="text-xs leading-relaxed text-white/50">
+              <p className="text-xs leading-relaxed dark:text-white/50 text-muted-foreground">
                 Khi trọng tài chính thực hiện bấm **Xác nhận kết quả**, BE sẽ tự động áp các hình phạt cộng giây từ bảng vi phạm, thực hiện tính toán lại thứ hạng thực tế của ngựa và khóa sửa đổi.
               </p>
             </div>
-            <Button asChild variant="outline" className="mt-4 h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white w-full">
+            <Button asChild variant="outline" className="mt-4 h-11 rounded-full dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground hover:dark:text-white text-foreground w-full">
               <Link href="/referee/reports" className="flex items-center justify-center gap-1">
                 <FileText className="size-4 shrink-0" />
                 <span className="text-xs font-bold uppercase">Xem toàn bộ biên bản</span>
@@ -393,7 +393,7 @@ export default function RefereeDashboardPage() {
       {/* Grid of all assignments */}
       {profile && assignments.length > 0 && (
         <section className="space-y-4">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
+          <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground">
             Danh sách cuộc đua được phân công ({assignments.length})
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -402,7 +402,7 @@ export default function RefereeDashboardPage() {
               return (
                 <article
                   key={assignment._id}
-                  className="rounded-2xl border border-white/5 bg-[#15151E]/80 p-4 flex flex-col justify-between space-y-4 shadow hover:border-primary/20 transition"
+                  className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#15151E]/80 bg-card p-4 flex flex-col justify-between space-y-4 shadow hover:border-primary/20 transition"
                 >
                   <div className="flex items-center justify-between">
                     <StatusBadge
@@ -418,19 +418,19 @@ export default function RefereeDashboardPage() {
                       }
                       pulse={assignment.status === "assigned"}
                     />
-                    <span className="text-[10px] text-white/40 uppercase font-black">
+                    <span className="text-[10px] dark:text-white/40 text-muted-foreground uppercase font-black">
                       {assignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}
                     </span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-black uppercase text-white leading-tight">
+                    <h4 className="text-sm font-black uppercase dark:text-white text-foreground leading-tight">
                       {assignment.raceId.name}
                     </h4>
-                    <p className="text-[10px] text-white/50 mt-1 flex items-center gap-1">
+                    <p className="text-[10px] dark:text-white/50 text-muted-foreground mt-1 flex items-center gap-1">
                       <Clock className="size-3 shrink-0" />
                       {formatDateTime(assignment.raceId.startTime)}
                     </p>
-                    <p className="text-[10px] text-white/40 mt-1 uppercase font-bold">
+                    <p className="text-[10px] dark:text-white/40 text-muted-foreground mt-1 uppercase font-bold">
                       Trận đua: {
                         assignment.raceId.status === "SCHEDULED" ? "Đã lên lịch" :
                         assignment.raceId.status === "CHECKING" ? "Đang kiểm tra" :
@@ -440,11 +440,11 @@ export default function RefereeDashboardPage() {
                       }
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-white/5 flex justify-end">
+                  <div className="pt-2 border-t dark:border-white/5 border-border flex justify-end">
                     <Button
                       asChild
                       variant="outline"
-                      className="h-9 px-4 rounded-full text-xs font-bold uppercase border-white/10 hover:bg-white/5 text-white hover:text-white"
+                      className="h-9 px-4 rounded-full text-xs font-bold uppercase dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground hover:dark:text-white text-foreground"
                     >
                       <Link href={`/referee/races/${assignment.raceId._id}`}>
                         Chi tiết <ArrowRight className="size-3.5 ml-1" />
@@ -459,12 +459,12 @@ export default function RefereeDashboardPage() {
       )}
 
       {profile && assignments.length === 0 && (
-        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E]/50 max-w-lg mx-auto space-y-3">
-          <div className="size-12 rounded-full border border-white/10 flex items-center justify-center text-white/30">
+        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed dark:border-white/10 border-border dark:bg-[#15151E]/50 bg-card max-w-lg mx-auto space-y-3">
+          <div className="size-12 rounded-full border dark:border-white/10 border-border flex items-center justify-center dark:text-white/30 text-muted-foreground">
             <Flag className="size-6" />
           </div>
-          <h4 className="font-bold text-white uppercase text-sm">Chưa có phân công nào</h4>
-          <p className="text-xs text-white/40 leading-relaxed">
+          <h4 className="font-bold dark:text-white text-foreground uppercase text-sm">Chưa có phân công nào</h4>
+          <p className="text-xs dark:text-white/40 text-muted-foreground leading-relaxed">
             Danh sách trống. Khi Ban tổ chức chỉ định bạn vào tổ trọng tài giám sát một cuộc đua, thông tin cuộc đua và các API tác nghiệp sẽ hiển thị đầy đủ tại đây.
           </p>
         </section>

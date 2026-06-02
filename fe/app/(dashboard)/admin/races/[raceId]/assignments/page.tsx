@@ -27,12 +27,12 @@ export default async function AdminRaceAssignmentsPage({
         }
       />
       <section className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 sm:p-6">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 sm:p-6">
           <ShieldCheck className="size-6 text-primary" />
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Referee assignment
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase dark:text-white text-foreground">
             {race.referee.name}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -40,7 +40,7 @@ export default async function AdminRaceAssignmentsPage({
           </p>
           <StatusBadge className="mt-4" label="Display only" tone="slate" />
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 sm:p-6">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Jockey lanes
           </p>
@@ -48,12 +48,12 @@ export default async function AdminRaceAssignmentsPage({
             {race.participants.map((item) => (
               <article
                 key={item.id}
-                className="rounded-xl border border-white/10 bg-black/20 p-4"
+                className="rounded-xl border dark:border-white/10 border-border dark:bg-black/20 bg-muted/20 p-4"
               >
                 <div className="flex items-center gap-3">
                   <UserRound className="size-5 text-primary" />
                   <div>
-                    <h3 className="font-black uppercase text-white">
+                    <h3 className="font-black uppercase dark:text-white text-foreground">
                       {item.jockey}
                     </h3>
                     <p className="text-sm text-muted-foreground">

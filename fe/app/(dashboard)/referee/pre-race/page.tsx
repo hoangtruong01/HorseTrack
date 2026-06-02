@@ -68,12 +68,12 @@ export default function RefereePreRaceWorkspacePage() {
       />
 
       {assignments.length === 0 ? (
-        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E] max-w-lg mx-auto space-y-3">
-          <div className="size-12 rounded-full border border-white/10 flex items-center justify-center text-white/30">
+        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed dark:border-white/10 border-border dark:bg-[#15151E] bg-card max-w-lg mx-auto space-y-3">
+          <div className="size-12 rounded-full border dark:border-white/10 border-border flex items-center justify-center dark:text-white/30 text-muted-foreground">
             <ShieldCheck className="size-6" />
           </div>
-          <h4 className="font-bold text-white uppercase text-sm">Chưa có cuộc đua nào</h4>
-          <p className="text-xs text-white/40 leading-relaxed">
+          <h4 className="font-bold dark:text-white text-foreground uppercase text-sm">Chưa có cuộc đua nào</h4>
+          <p className="text-xs dark:text-white/40 text-muted-foreground leading-relaxed">
             Bạn cần được Ban tổ chức phân công và chấp nhận cuộc đua trước khi thực hiện kiểm duyệt.
           </p>
         </section>
@@ -86,8 +86,8 @@ export default function RefereePreRaceWorkspacePage() {
                 key={a._id}
                 className={`rounded-2xl border p-5 flex flex-col justify-between space-y-4 shadow transition ${
                   isChecking
-                    ? "border-primary/20 bg-[linear-gradient(135deg,rgba(225,6,0,0.06),rgba(21,21,30,0.95))]"
-                    : "border-white/5 bg-[#15151E]/90 hover:border-white/15"
+                    ? "border-primary/20 dark:bg-[linear-gradient(135deg,rgba(225,6,0,0.06),rgba(21,21,30,0.95))] bg-card"
+                    : "dark:border-white/5 border-border dark:bg-[#15151E]/90 bg-card hover:dark:border-white/15 border-border"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -103,28 +103,28 @@ export default function RefereePreRaceWorkspacePage() {
                     }
                     pulse={isChecking}
                   />
-                  <span className="text-[10px] text-white/40 font-bold uppercase">
+                  <span className="text-[10px] dark:text-white/40 text-muted-foreground font-bold uppercase">
                     Cự ly: {a.raceId.status === "LIVE" ? "Đang chạy" : "Chưa xuất phát"}
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-sm font-black uppercase text-white leading-tight">
+                  <h3 className="text-sm font-black uppercase dark:text-white text-foreground leading-tight">
                     {a.raceId.name}
                   </h3>
-                  <p className="text-[10px] text-white/50 flex items-center gap-1">
+                  <p className="text-[10px] dark:text-white/50 text-muted-foreground flex items-center gap-1">
                     <Clock className="size-3 text-primary shrink-0" />
                     Giờ khởi chạy: {formatDateTime(a.raceId.startTime)}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-white/5 flex justify-end">
+                <div className="pt-2 border-t dark:border-white/5 border-border flex justify-end">
                   <Button
                     asChild
                     className={`h-9 px-4 rounded-full text-xs font-black uppercase ${
                       isChecking
                         ? "bg-primary hover:bg-primary-dark text-white"
-                        : "bg-white/5 border border-white/10 hover:bg-white/10 text-white"
+                        : "dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border hover:dark:bg-white/10 bg-muted/50 text-white"
                     }`}
                   >
                     <Link href={`/referee/races/${a.raceId._id}`}>

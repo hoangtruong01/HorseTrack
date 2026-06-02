@@ -29,8 +29,8 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)] sm:p-6 lg:p-8">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.2),transparent_26rem)]" />
+      <section className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)] sm:p-6 lg:p-8">
+        <div className="absolute inset-0 dark:bg-[linear-gradient(120deg,rgba(225,6,0,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.2),transparent_26rem)] bg-card" />
         <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div>
             <StatusBadge
@@ -38,7 +38,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
               tone={meta[result.status].tone}
               pulse={canPublish}
             />
-            <h1 className="mt-5 text-3xl font-black uppercase leading-tight tracking-tight text-white sm:text-5xl">
+            <h1 className="mt-5 text-3xl font-black uppercase leading-tight tracking-tight dark:text-white text-foreground sm:text-5xl">
               {result.race}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -46,14 +46,14 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
               then publish only when referee-confirmed. Mock data only.
             </p>
           </div>
-          <div className="grid gap-3 rounded-2xl border border-white/10 bg-black/25 p-4">
+          <div className="grid gap-3 rounded-2xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4">
             <div className="flex items-center gap-3">
               <Flag className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   Track
                 </p>
-                <p className="font-black text-white">{result.track}</p>
+                <p className="font-black dark:text-white text-foreground">{result.track}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -62,7 +62,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   Ranking rows
                 </p>
-                <p className="font-mono font-black text-white">
+                <p className="font-mono font-black dark:text-white text-foreground">
                   {result.rankings.length}
                 </p>
               </div>
@@ -73,7 +73,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   Referee
                 </p>
-                <p className="font-black text-white">{result.referee}</p>
+                <p className="font-black dark:text-white text-foreground">{result.referee}</p>
               </div>
             </div>
           </div>
@@ -81,18 +81,18 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Race summary
           </p>
-          <h2 className="mt-2 text-xl font-black uppercase text-white">
+          <h2 className="mt-2 text-xl font-black uppercase dark:text-white text-foreground">
             {result.tournament}
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
             {result.distance} · {result.track} · finished {result.finishedAt}
           </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Referee summary
           </p>
@@ -100,7 +100,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
             {result.refereeSummary}
           </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Publish state
           </p>
@@ -130,12 +130,12 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
 
       <RaceRankingTable rankings={result.rankings} raceName={result.race} />
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <section className="flex flex-col gap-4 rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Publish confirmation
           </p>
-          <h2 className="mt-2 text-xl font-black uppercase text-white">
+          <h2 className="mt-2 text-xl font-black uppercase dark:text-white text-foreground">
             {result.status === "published"
               ? "Published state locked"
               : "Final admin gate"}

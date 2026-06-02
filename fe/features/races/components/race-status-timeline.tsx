@@ -9,11 +9,11 @@ export type RaceStatusTimelineProps = {
 
 export function RaceStatusTimeline({ steps }: RaceStatusTimelineProps) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-4 sm:p-6">
+    <section className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-4 sm:p-6">
       <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
         Status timeline
       </p>
-      <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+      <h2 className="mt-2 text-2xl font-black uppercase tracking-tight dark:text-white text-foreground">
         Race pulse
       </h2>
       <div className="mt-6 space-y-4">
@@ -30,19 +30,19 @@ export function RaceStatusTimeline({ steps }: RaceStatusTimelineProps) {
                     active
                       ? "border-primary bg-primary text-white shadow-[0_0_24px_rgba(225,6,0,0.5)]"
                       : complete
-                        ? "border-emerald-400/40 bg-emerald-400/15 text-emerald-200"
-                        : "border-white/15 bg-white/5 text-white/40",
+                        ? "border-emerald-500/50 dark:bg-emerald-400/15 bg-emerald-100 dark:text-emerald-200 text-emerald-700"
+                        : "dark:border-white/15 border-border dark:bg-white/5 bg-muted/50 dark:text-white/40 text-muted-foreground",
                   )}
                 >
                   <Icon className="size-4" />
                 </span>
                 {index < steps.length - 1 ? (
-                  <span className="mt-2 h-10 w-px bg-white/10" />
+                  <span className="mt-2 h-10 w-px dark:bg-white/10 bg-border" />
                 ) : null}
               </div>
               <div className="pb-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-bold uppercase text-white">
+                  <h3 className="font-bold uppercase dark:text-white text-foreground">
                     {step.label}
                   </h3>
                   <time className="text-xs font-bold uppercase tracking-[0.16em] text-primary">

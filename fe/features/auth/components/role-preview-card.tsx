@@ -21,10 +21,10 @@ export function RolePreviewCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden rounded-2xl border bg-[#15151E]/85 p-4 text-left shadow-[0_18px_60px_rgba(0,0,0,0.34)] transition duration-200",
+        "group relative overflow-hidden rounded-2xl border dark:bg-[#15151E]/85 bg-card p-4 text-left shadow-[0_18px_60px_rgba(0,0,0,0.34)] transition duration-200",
         selected
           ? "border-primary/80 ring-2 ring-primary/25"
-          : "border-white/10 hover:border-primary/50",
+          : "dark:border-white/10 border-border hover:border-primary/50",
         compact && "p-3",
       )}
     >
@@ -37,7 +37,7 @@ export function RolePreviewCard({
             "flex size-11 shrink-0 items-center justify-center rounded-xl border",
             selected
               ? "border-primary bg-primary text-white"
-              : "border-white/10 bg-white/[0.06] text-primary",
+              : "dark:border-white/10 border-border dark:bg-white/[0.06] bg-muted/50 text-primary",
           )}
         >
           <Icon className="size-5" aria-hidden="true" />
@@ -54,10 +54,10 @@ export function RolePreviewCard({
               />
             ) : null}
           </div>
-          <h3 className="mt-1 text-base font-black uppercase text-white">
+          <h3 className="mt-1 text-base font-black uppercase dark:text-white text-foreground">
             {role.label}
           </h3>
-          <p className="mt-2 text-sm leading-6 text-white/68">
+          <p className="mt-2 text-sm leading-6 dark:text-white/68 text-muted-foreground">
             {role.description}
           </p>
         </div>
@@ -71,7 +71,7 @@ export function RolePreviewCard({
           {role.highlights.map((item) => (
             <li
               key={item}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold text-white/78"
+              className="rounded-full border dark:border-white/10 border-border dark:bg-white/[0.04] bg-muted/50 px-3 py-1 text-xs font-bold dark:text-white/78 text-muted-foreground"
             >
               {item}
             </li>

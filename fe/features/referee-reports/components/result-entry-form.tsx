@@ -268,13 +268,13 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
     <section className="space-y-6">
       {/* Simulation Controls */}
       {enabled && (
-        <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(225,6,0,0.12),rgba(21,21,30,0.95))] p-4 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[linear-gradient(135deg,rgba(225,6,0,0.12),rgba(21,21,30,0.95))] bg-card p-4 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-primary flex items-center gap-1.5">
                 <Sparkles className="size-4" /> Quick-simulation Center
               </p>
-              <h3 className="mt-1 text-xl font-black uppercase text-white">
+              <h3 className="mt-1 text-xl font-black uppercase dark:text-white text-foreground">
                 Race Simulation Engine
               </h3>
               <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
@@ -289,7 +289,7 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                 <select
                   value={weather}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setWeather(e.target.value as any)}
-                  className="h-10 rounded-lg border border-white/10 bg-[#1C1C25] px-3 text-xs text-white outline-none cursor-pointer"
+                  className="h-10 rounded-lg border dark:border-white/10 border-border bg-[#1C1C25] px-3 text-xs text-white outline-none cursor-pointer"
                 >
                   <option value="sunny">Sunny (Dry +0%)</option>
                   <option value="rainy">Rainy (Slick -4%)</option>
@@ -303,7 +303,7 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                 <select
                   value={track}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTrack(e.target.value as any)}
-                  className="h-10 rounded-lg border border-white/10 bg-[#1C1C25] px-3 text-xs text-white outline-none cursor-pointer"
+                  className="h-10 rounded-lg border dark:border-white/10 border-border bg-[#1C1C25] px-3 text-xs text-white outline-none cursor-pointer"
                 >
                   <option value="dry">Dry Turf</option>
                   <option value="muddy">Muddy / Slow (-5%)</option>
@@ -321,10 +321,10 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.02] p-3 flex items-center gap-3">
+          <div className="mt-4 rounded-xl border dark:border-white/5 border-border dark:bg-white/[0.02] bg-muted/50 p-3 flex items-center gap-3">
             <Info className="size-5 text-primary shrink-0" />
             <div className="text-xs text-muted-foreground leading-relaxed">
-              <strong className="text-white uppercase font-black mr-1">Pre-race Check status:</strong>
+              <strong className="dark:text-white text-foreground uppercase font-black mr-1">Pre-race Check status:</strong>
               {preRaceCheckPassed ? (
                 <span className="text-emerald-400 font-bold">PASSED (Jockey checked-in, horse health approved, equipment verified)</span>
               ) : (
@@ -336,13 +336,13 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
       )}
 
       {/* Main Results Form */}
-      <div className="relative rounded-2xl border border-white/10 bg-[#15151E]/90 p-4 pb-28 sm:p-6 sm:pb-28">
+      <div className="relative rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/90 bg-card p-4 pb-28 sm:p-6 sm:pb-28">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
               Race result entry
             </p>
-            <h2 className="mt-2 text-2xl font-black uppercase text-white">
+            <h2 className="mt-2 text-2xl font-black uppercase dark:text-white text-foreground">
               {race.name}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -356,15 +356,15 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
         </div>
 
         {!enabled ? (
-          <div className="mt-5 rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-muted-foreground">
+          <div className="mt-5 rounded-xl border dark:border-white/10 border-border dark:bg-black/30 bg-muted/20 p-4 text-sm text-muted-foreground">
             <Lock className="mr-2 inline size-4 text-primary" /> Result entry
             disabled because this race is not in finished status.
           </div>
         ) : null}
 
-        <div className="mt-5 overflow-x-auto rounded-xl border border-white/10">
+        <div className="mt-5 overflow-x-auto rounded-xl border dark:border-white/10 border-border">
           <table className="min-w-[980px] w-full text-left text-sm">
-            <thead className="bg-white/[0.04] text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            <thead className="dark:bg-white/[0.04] bg-muted/50 text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">Rank</th>
                 <th className="px-4 py-3">Horse</th>
@@ -374,25 +374,25 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                 <th className="px-4 py-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10 bg-black/10">
+            <tbody className="divide-y divide-white/10 dark:bg-black/10 bg-muted/20">
               {rows.map((row) => (
                 <tr
                   key={row.id}
                   className={cn(
-                    "transition hover:bg-white/[0.04]",
+                    "transition hover:dark:bg-white/[0.04] bg-muted/50",
                     (!enabled || row.finishTime === "DISQ") && "opacity-60",
                   )}
                 >
-                  <td className="px-4 py-4 font-mono text-2xl font-black text-white">
+                  <td className="px-4 py-4 font-mono text-2xl font-black dark:text-white text-foreground">
                     {row.finishTime === "DISQ" ? "#--" : `#${row.rank}`}
                   </td>
                   <td className="px-4 py-4">
-                    <p className="font-black uppercase text-white">{row.horse}</p>
+                    <p className="font-black uppercase dark:text-white text-foreground">{row.horse}</p>
                     <p className="font-mono text-xs text-muted-foreground">
                       {row.horseCode}
                     </p>
                   </td>
-                  <td className="px-4 py-4 text-white/80">{row.jockey}</td>
+                  <td className="px-4 py-4 dark:text-white/80 text-muted-foreground">{row.jockey}</td>
                   <td className="px-4 py-4">
                     <input
                       aria-label={`Finish time for ${row.horse}`}
@@ -404,7 +404,7 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                         );
                         setRows(recalculateResults(updatedRows, violations));
                       }}
-                      className="h-11 w-32 rounded-lg border border-white/10 bg-black/35 px-3 font-mono font-black text-white outline-none focus:border-primary disabled:cursor-not-allowed disabled:text-white/40"
+                      className="h-11 w-32 rounded-lg border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-3 font-mono font-black dark:text-white text-foreground outline-none focus:border-primary disabled:cursor-not-allowed disabled:dark:text-white/40 text-muted-foreground"
                     />
                   </td>
                   <td className="px-4 py-4 font-semibold text-xs">
@@ -427,10 +427,10 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
         </div>
 
         {/* Sticky Action Bar */}
-        <div className="sticky bottom-3 z-10 mt-6 rounded-2xl border border-white/10 bg-[#1C1C25]/95 p-3 shadow-[0_18px_56px_rgba(0,0,0,0.45)] backdrop-blur">
+        <div className="sticky bottom-3 z-10 mt-6 rounded-2xl border dark:border-white/10 border-border bg-[#1C1C25]/95 p-3 shadow-[0_18px_56px_rgba(0,0,0,0.45)] backdrop-blur">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="font-black uppercase text-white">Tablet action bar</p>
+              <p className="font-black uppercase dark:text-white text-foreground">Tablet action bar</p>
               <p className="text-xs text-muted-foreground">
                 Confirm finish order and transmit to administrative result review desk.
               </p>
@@ -463,12 +463,12 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
       {enabled && (
         <div className="grid gap-6 md:grid-cols-2">
           {/* Quick Add Form */}
-          <form onSubmit={handleAddViolation} className="rounded-2xl border border-white/10 bg-[#15151E]/95 p-4 sm:p-6 space-y-4">
+          <form onSubmit={handleAddViolation} className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/95 bg-card p-4 sm:p-6 space-y-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
                 <Siren className="size-4" /> Live Infractions desk
               </p>
-              <h3 className="mt-1 text-xl font-black uppercase text-white">
+              <h3 className="mt-1 text-xl font-black uppercase dark:text-white text-foreground">
                 Log New Violation
               </h3>
               <p className="text-xs text-muted-foreground">
@@ -483,7 +483,7 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                 id="horse-select"
                 value={selectedHorseIndex}
                 onChange={(e) => setSelectedHorseIndex(parseInt(e.target.value))}
-                className="h-11 w-full rounded-xl border border-white/10 bg-black/35 px-3 text-sm text-white outline-none focus:border-primary cursor-pointer"
+                className="h-11 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-3 text-sm dark:text-white text-foreground outline-none focus:border-primary cursor-pointer"
               >
                 {race.participants.map((p, idx) => (
                   <option key={p.id} value={idx} className="bg-[#1C1C25] text-white">
@@ -500,7 +500,7 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                 id="severity-select"
                 value={severity}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSeverity(e.target.value as any)}
-                className="h-11 w-full rounded-xl border border-white/10 bg-black/35 px-3 text-sm text-white outline-none focus:border-primary cursor-pointer"
+                className="h-11 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-3 text-sm dark:text-white text-foreground outline-none focus:border-primary cursor-pointer"
               >
                 <option value="minor">Minor timing penalty (+3 seconds)</option>
                 <option value="major">Major timing penalty (+6 seconds)</option>
@@ -518,7 +518,7 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                 placeholder="e.g. Lane drift during final bend..."
                 value={violationNote}
                 onChange={(e) => setViolationNote(e.target.value)}
-                className="h-11 w-full rounded-xl border border-white/10 bg-black/35 px-3 text-sm text-white outline-none focus:border-primary"
+                className="h-11 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-3 text-sm dark:text-white text-foreground outline-none focus:border-primary"
               />
             </div>
 
@@ -531,9 +531,9 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
           </form>
 
           {/* Active Violations List */}
-          <div className="rounded-2xl border border-white/10 bg-[#15151E]/95 p-4 sm:p-6 space-y-4">
+          <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/95 bg-card p-4 sm:p-6 space-y-4">
             <div>
-              <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
+              <h3 className="text-xl font-black uppercase dark:text-white text-foreground flex items-center gap-2">
                 Active Steward Notes ({violations.length})
               </h3>
               <p className="text-xs text-muted-foreground">
@@ -562,13 +562,13 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                   }
 
                   return (
-                    <div key={v.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-black/30 p-3">
+                    <div key={v.id} className="flex items-center justify-between gap-3 rounded-xl border dark:border-white/5 border-border dark:bg-black/30 bg-muted/20 p-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className={cn("rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider font-mono", tone)}>
                             {penaltyLabel}
                           </span>
-                          <strong className="text-xs font-black uppercase text-white">{v.horse}</strong>
+                          <strong className="text-xs font-black uppercase dark:text-white text-foreground">{v.horse}</strong>
                           <span className="text-[10px] text-muted-foreground">· {v.jockey}</span>
                         </div>
                         <p className="mt-1 text-[11px] text-muted-foreground leading-normal">{v.note}</p>
@@ -576,7 +576,7 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                       <button
                         type="button"
                         onClick={() => handleDeleteViolation(v.id)}
-                        className="grid size-8 place-items-center rounded-lg hover:bg-white/5 text-muted-foreground hover:text-primary transition shrink-0 cursor-pointer"
+                        className="grid size-8 place-items-center rounded-lg hover:dark:bg-white/5 bg-muted/50 text-muted-foreground hover:text-primary transition shrink-0 cursor-pointer"
                         aria-label="Remove infraction"
                       >
                         <Trash2 className="size-4" />

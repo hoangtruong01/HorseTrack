@@ -20,7 +20,7 @@ export function EmptyState({
   return (
     <section
       className={cn(
-        "rounded-lg border border-dashed border-white/15 bg-white/[0.03] p-6 text-center sm:p-8",
+        "rounded-lg border border-dashed dark:border-white/15 border-border dark:bg-white/[0.03] bg-muted/50 p-6 text-center sm:p-8",
         className,
       )}
     >
@@ -29,7 +29,7 @@ export function EmptyState({
           {icon}
         </div>
       ) : null}
-      <h2 className="text-xl font-black uppercase text-white">{title}</h2>
+      <h2 className="text-xl font-black uppercase text-foreground">{title}</h2>
       {description ? (
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
           {description}

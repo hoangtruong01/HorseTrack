@@ -77,15 +77,15 @@ export default function HorsesStablePage() {
       />
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-white/55">
+        <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải dữ liệu chuồng ngựa...</p>
         </div>
       ) : horses.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
-          <Award className="size-16 text-white/15 mx-auto mb-4 stroke-[1]" />
-          <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">Chuồng ngựa trống</h3>
-          <p className="text-sm text-white/50 max-w-md mx-auto mb-6">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
+          <Award className="size-16 dark:text-white/15 text-muted-foreground mx-auto mb-4 stroke-[1]" />
+          <h3 className="text-xl font-black dark:text-white text-foreground uppercase tracking-tight mb-2">Chuồng ngựa trống</h3>
+          <p className="text-sm dark:text-white/50 text-muted-foreground max-w-md mx-auto mb-6">
             Bạn chưa đăng ký bất kỳ chiến mã nào. Hãy thêm chiến mã đầu tiên để bắt đầu ghi danh tham gia các giải đấu hấp dẫn.
           </p>
           <Button asChild className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">

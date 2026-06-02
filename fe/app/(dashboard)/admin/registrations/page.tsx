@@ -22,12 +22,12 @@ export default function AdminRegistrationsPage() {
         description="Review horse, owner, race target, submission time, and mock eligibility notes before approving or rejecting. FE-first; no backend calls."
       />
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <ClipboardCheck className="size-5 text-primary" />
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Pending
           </p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="mt-2 font-mono text-4xl font-black dark:text-white text-foreground">
             {counts.pending}
           </p>
           <StatusBadge
@@ -37,20 +37,20 @@ export default function AdminRegistrationsPage() {
             pulse
           />
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Approved
           </p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="mt-2 font-mono text-4xl font-black dark:text-white text-foreground">
             {counts.approved}
           </p>
           <StatusBadge className="mt-3" label="Ready queue" tone="green" />
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Rejected
           </p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="mt-2 font-mono text-4xl font-black dark:text-white text-foreground">
             {counts.rejected}
           </p>
           <StatusBadge className="mt-3" label="Reason required" tone="red" />

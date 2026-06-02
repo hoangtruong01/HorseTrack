@@ -17,7 +17,7 @@ export function MobileBottomNav({
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#15151E]/95 px-3 py-2 backdrop-blur lg:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t dark:border-white/10 border-border dark:bg-[#15151E]/95 bg-card px-3 py-2 backdrop-blur lg:hidden",
         className,
       )}
       aria-label="Mobile dashboard navigation"

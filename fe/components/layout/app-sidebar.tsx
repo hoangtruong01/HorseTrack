@@ -55,18 +55,7 @@ export function AppSidebar({
       aria-label="Dashboard navigation"
     >
       <div className="space-y-6">
-        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary">
-            Race ops
-          </p>
-          <h2 className="mt-2 text-xl font-black uppercase text-white">
-            Independent race flow
-          </h2>
-          <p className="mt-2 text-sm leading-5 text-muted-foreground">
-            Tournament contains races. Each race owns participants, referee,
-            result, ranking.
-          </p>
-        </div>
+        
 
         <nav className="space-y-2">
           {visibleItems.map((item) => {
@@ -82,8 +71,8 @@ export function AppSidebar({
                 key={item.href + item.title}
                 href={item.href}
                 className={cn(
-                  "group flex gap-3 rounded-lg border border-transparent p-3 text-sm transition hover:border-white/15 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                  isActive && "border-primary/60 bg-primary/10 text-white",
+                  "group flex gap-3 rounded-lg border border-transparent p-3 text-sm transition hover:border-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  isActive && "border-primary/60 bg-primary/10 text-foreground",
                 )}
               >
                 {Icon ? (
@@ -109,16 +98,16 @@ export function AppSidebar({
       </div>
 
       {user ? (
-        <div className="mt-auto pt-6 border-t border-white/10 space-y-4">
+        <div className="mt-auto pt-6 border-t border-border space-y-4">
           <Link
             href="/profile"
-            className="flex items-center gap-3 group rounded-xl p-2 border border-transparent hover:border-white/5 hover:bg-white/[0.02] transition"
+            className="flex items-center gap-3 group rounded-xl p-2 border border-transparent hover:border-border hover:bg-sidebar-accent transition"
           >
             <div className="flex size-9 items-center justify-center rounded-xl bg-[#E10600]/10 border border-[#E10600]/20 text-[#E10600] group-hover:scale-105 transition-transform">
               <User className="size-4.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-black uppercase tracking-wider text-white truncate">
+              <p className="text-xs font-black uppercase tracking-wider text-foreground truncate">
                 {user.fullName}
               </p>
               <p className="text-[9px] font-black uppercase tracking-wider text-primary mt-0.5">

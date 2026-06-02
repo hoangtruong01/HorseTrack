@@ -90,7 +90,7 @@ export default function SpectatorTournamentsPage() {
           />
 
           {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center rounded-2xl border border-white/5 bg-[#13131A] p-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-muted/50 p-4">
             <div className="relative w-full sm:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <input
@@ -98,7 +98,7 @@ export default function SpectatorTournamentsPage() {
                 placeholder="Tìm giải đấu, địa điểm..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-10 w-full rounded-xl border border-white/10 bg-black/20 pl-10 pr-4 text-sm text-white placeholder:text-muted-foreground outline-none focus:border-primary transition"
+                className="h-10 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/20 bg-muted/20 pl-10 pr-4 text-sm dark:text-white text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
               />
             </div>
 
@@ -110,7 +110,7 @@ export default function SpectatorTournamentsPage() {
                   className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
                     statusFilter === status
                       ? "bg-primary text-white border border-primary"
-                      : "bg-white/[0.02] border border-white/5 text-muted-foreground hover:text-white"
+                      : "dark:bg-white/[0.02] bg-muted/50 border dark:border-white/5 border-border text-muted-foreground hover:text-foreground dark:hover:dark:text-white text-foreground"
                   }`}
                 >
                   {status === "ALL" ? "Tất cả" : status === "ONGOING" ? "Đang diễn" : status === "OPEN_REGISTRATION" ? "Mở đăng ký" : "Kết thúc"}
@@ -124,7 +124,7 @@ export default function SpectatorTournamentsPage() {
             {filteredTournaments.map((tour) => (
               <div
                 key={tour.id}
-                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#16161E]/90 hover:border-white/15 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
+                className="group relative overflow-hidden rounded-2xl border dark:border-white/5 border-border dark:bg-[#16161E]/90 bg-card hover:dark:border-white/15 border-border hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
               >
                 <div className="h-40 w-full overflow-hidden relative">
                   <img
@@ -135,12 +135,12 @@ export default function SpectatorTournamentsPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#16161E] via-transparent to-transparent" />
                   
                   {/* Status Badge */}
-                  <span className={`absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white border backdrop-blur-md ${
+                  <span className={`absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider dark:text-white text-foreground border backdrop-blur-md ${
                     tour.status === "ONGOING"
                       ? "bg-[#E10600]/80 border-[#E10600]"
                       : tour.status === "OPEN_REGISTRATION"
                       ? "bg-teal-500/80 border-teal-500"
-                      : "bg-white/10 border-white/20"
+                      : "dark:bg-white/10 bg-muted/50 dark:border-white/20 border-border"
                   }`}>
                     {tour.statusLabel}
                   </span>
@@ -148,7 +148,7 @@ export default function SpectatorTournamentsPage() {
 
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-1">
-                    <h3 className="text-base font-black uppercase tracking-tight text-white leading-tight truncate group-hover:text-primary transition duration-300">
+                    <h3 className="text-base font-black uppercase tracking-tight dark:dark:text-white text-foreground text-foreground leading-tight truncate group-hover:text-primary transition duration-300">
                       {tour.name}
                     </h3>
                     <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
@@ -156,14 +156,14 @@ export default function SpectatorTournamentsPage() {
                     </p>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t border-white/5 text-[10px] text-muted-foreground">
+                  <div className="space-y-2 pt-2 border-t dark:border-white/5 border-border text-[10px] text-muted-foreground">
                     <div className="flex justify-between">
                       <span className="flex items-center gap-1"><MapPin className="size-3 text-primary" /> {tour.location}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="flex items-center gap-1"><Calendar className="size-3 text-primary" /> {tour.startDate} ~ {tour.endDate}</span>
                     </div>
-                    <div className="flex justify-between font-bold text-white border-t border-white/5 pt-2">
+                    <div className="flex justify-between font-bold dark:dark:text-white text-foreground text-foreground border-t dark:border-white/5 border-border pt-2">
                       <span>Giải Thưởng:</span>
                       <span className="text-primary text-xs font-black">{tour.prizePool.toLocaleString()} Pts</span>
                     </div>
@@ -173,8 +173,7 @@ export default function SpectatorTournamentsPage() {
                 <div className="px-5 pb-5">
                   <Button
                     onClick={() => setSelectedTourId(tour.id)}
-                    className="w-full rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"
-                  >
+className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border dark:text-white text-foreground hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"                  >
                     Xem Chi Tiết Giải
                   </Button>
                 </div>
@@ -188,7 +187,7 @@ export default function SpectatorTournamentsPage() {
           <Button
             onClick={() => setSelectedTourId(null)}
             variant="ghost"
-            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white -ml-2"
+            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:dark:dark:text-white text-foreground text-foreground -ml-2"
           >
             <ArrowLeft className="size-4 mr-2" /> Quay lại danh sách
           </Button>
@@ -196,35 +195,35 @@ export default function SpectatorTournamentsPage() {
           <div className="grid gap-6 lg:grid-cols-12 items-start">
             {/* Left Side: General Info */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-2xl border border-white/10 bg-[#16161E] p-6 space-y-6 relative overflow-hidden">
+              <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#16161E] bg-card p-6 space-y-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px]" />
                 
                 <div className="space-y-3">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white border ${
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider dark:text-white text-foreground border ${
                     selectedTour?.status === "ONGOING"
                       ? "bg-[#E10600]/80 border-[#E10600]"
                       : selectedTour?.status === "OPEN_REGISTRATION"
                       ? "bg-teal-500/80 border-teal-500"
-                      : "bg-white/10 border-white/20"
+                      : "dark:bg-white/10 bg-muted/50 dark:border-white/20 border-border"
                   }`}>
                     {selectedTour?.statusLabel}
                   </span>
-                  <h2 className="text-2xl font-black uppercase tracking-tight text-white">{selectedTour?.name}</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-tight dark:dark:text-white text-foreground text-foreground">{selectedTour?.name}</h2>
                   <p className="text-xs text-muted-foreground leading-relaxed">{selectedTour?.description}</p>
                 </div>
 
-                <div className="space-y-3 border-t border-white/5 pt-4 text-xs">
+                <div className="space-y-3 border-t dark:border-white/5 border-border pt-4 text-xs">
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><MapPin className="size-3.5 text-primary" /> Địa điểm:</span>
-                    <span className="font-bold text-white">{selectedTour?.location}</span>
+                    <span className="font-bold dark:dark:text-white text-foreground text-foreground">{selectedTour?.location}</span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Calendar className="size-3.5 text-primary" /> Thời gian giải:</span>
-                    <span className="font-bold text-white">{selectedTour?.startDate} ~ {selectedTour?.endDate}</span>
+                    <span className="font-bold dark:dark:text-white text-foreground text-foreground">{selectedTour?.startDate} ~ {selectedTour?.endDate}</span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Users className="size-3.5 text-primary" /> Số ngựa tham gia:</span>
-                    <span className="font-bold text-white">{selectedTour?.enrolledHorses} / {selectedTour?.maxHorses} Chiến mã</span>
+                    <span className="font-bold dark:dark:text-white text-foreground text-foreground">{selectedTour?.enrolledHorses} / {selectedTour?.maxHorses} Chiến mã</span>
                   </div>
                 </div>
 
@@ -240,8 +239,8 @@ export default function SpectatorTournamentsPage() {
 
             {/* Right Side: Races list inside this tournament */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="border-b border-white/10 pb-3">
-                <h3 className="text-lg font-black uppercase tracking-tight text-white flex items-center gap-2">
+              <div className="border-b dark:border-white/10 border-border pb-3">
+                <h3 className="text-lg font-black uppercase tracking-tight dark:dark:text-white text-foreground text-foreground flex items-center gap-2">
                   <Flag className="size-5 text-primary" /> Danh sách lịch trình đua ({selectedTour?.races.length})
                 </h3>
               </div>
@@ -250,27 +249,27 @@ export default function SpectatorTournamentsPage() {
                 {selectedTour?.races.map((race) => (
                   <div
                     key={race.id}
-                    className="group rounded-2xl border border-white/5 bg-[#13131A] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-white/15 hover:bg-white/[0.01] transition duration-300"
+                    className="group rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-muted/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:dark:border-white/15 border-border hover:dark:bg-white/[0.01] bg-muted/50 transition duration-300"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-black text-white text-base leading-tight uppercase group-hover:text-primary transition duration-300">{race.name}</h4>
+                        <h4 className="font-black dark:dark:text-white text-foreground text-foreground text-base leading-tight uppercase group-hover:text-primary transition duration-300">{race.name}</h4>
                         {race.status === "LIVE" && (
                           <span className="size-2 rounded-full bg-teal-400 animate-pulse" />
                         )}
                       </div>
                       <div className="flex gap-4 text-[10px] text-muted-foreground">
-                        <span>Cự ly: <strong className="text-white">{race.distance}</strong></span>
-                        <span>Mặt sân: <strong className="text-white">{race.surface}</strong></span>
+                        <span>Cự ly: <strong className="dark:dark:text-white text-foreground text-foreground">{race.distance}</strong></span>
+                        <span>Mặt sân: <strong className="dark:dark:text-white text-foreground text-foreground">{race.surface}</strong></span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 dark:border-white/5 border-border pt-2 sm:pt-0">
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
                         race.status === "LIVE"
                           ? "bg-teal-500/10 border border-teal-500/20 text-teal-400"
                           : race.status === "FINISHED" || race.status === "RESULT_PUBLISHED"
-                          ? "bg-white/5 border border-white/10 text-muted-foreground"
+                          ? "dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border text-muted-foreground"
                           : "bg-primary/10 border border-primary/20 text-primary"
                       }`}>
                         {race.status === "LIVE" ? "LIVE NOW" : race.status === "FINISHED" || race.status === "RESULT_PUBLISHED" ? "KẾT THÚC" : race.time}

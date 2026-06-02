@@ -73,9 +73,9 @@ export default function AdminHorsesPage() {
         </div>
       )}
 
-      <div className="text-sm text-muted-foreground">Tổng: <strong className="text-white">{meta.total}</strong> ngựa</div>
+      <div className="text-sm text-muted-foreground">Tổng: <strong className="dark:text-white text-foreground">{meta.total}</strong> ngựa</div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+      <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
         ) : horses.length === 0 ? (
@@ -84,7 +84,7 @@ export default function AdminHorsesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b dark:border-white/10 border-border">
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa</th>
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Chủ ngựa</th>
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Sức khoẻ</th>
@@ -94,21 +94,21 @@ export default function AdminHorsesPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {horses.map((h) => (
-                  <tr key={h._id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={h._id} className="hover:dark:bg-white/[0.02] bg-muted/50 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         {h.imageUrl ? (
-                          <img src={h.imageUrl} alt={h.name} className="size-10 rounded-xl object-cover border border-white/10" />
+                          <img src={h.imageUrl} alt={h.name} className="size-10 rounded-xl object-cover border dark:border-white/10 border-border" />
                         ) : (
                           <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary font-black text-sm">🐎</div>
                         )}
                         <div>
-                          <p className="text-sm font-semibold text-white">{h.name}</p>
+                          <p className="text-sm font-semibold dark:text-white text-foreground">{h.name}</p>
                           <p className="text-xs text-muted-foreground">{h.breed ?? "—"} · {h.gender ?? "—"} · {h.age ?? "?"}t</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-sm text-white">{getOwnerName(h.ownerId)}</td>
+                    <td className="px-5 py-4 text-sm dark:text-white text-foreground">{getOwnerName(h.ownerId)}</td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${healthColors[h.healthStatus] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                         {h.healthStatus}
@@ -139,12 +139,12 @@ export default function AdminHorsesPage() {
       {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchHorses(meta.page - 1)} disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
             <ChevronLeft className="size-4" /> Trước
           </button>
           <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
           <button onClick={() => fetchHorses(meta.page + 1)} disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
             Sau <ChevronRight className="size-4" />
           </button>
         </div>

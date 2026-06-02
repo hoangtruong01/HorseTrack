@@ -21,13 +21,13 @@ export function AuditLogsViewer({ logs }: AuditLogsViewerProps) {
   });
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#15151E]/95 p-4 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+    <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/95 bg-card p-4 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
             <Shield className="size-4" /> System Audit Trail
           </p>
-          <h2 className="mt-1 text-2xl font-black uppercase text-white">
+          <h2 className="mt-1 text-2xl font-black uppercase dark:text-white text-foreground">
             System Operations Logs
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -38,25 +38,25 @@ export function AuditLogsViewer({ logs }: AuditLogsViewerProps) {
 
       {/* Search Input */}
       <div className="relative mt-6">
-        <Terminal className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-white/40" />
+        <Terminal className="absolute top-1/2 left-4 size-4 -translate-y-1/2 dark:text-white/40 text-muted-foreground" />
         <input
           type="text"
           placeholder="Filter audit entries by action, user or details..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="h-12 w-full rounded-full border border-white/10 bg-black/25 pl-11 pr-6 text-sm text-white outline-none placeholder:text-white/40 focus:border-primary"
+          className="h-12 w-full rounded-full border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 pl-11 pr-6 text-sm dark:text-white text-foreground outline-none placeholder:dark:text-white/40 text-muted-foreground focus:border-primary"
         />
       </div>
 
       {/* Audit List */}
-      <div className="mt-6 overflow-x-auto rounded-xl border border-white/10">
+      <div className="mt-6 overflow-x-auto rounded-xl border dark:border-white/10 border-border">
         {filteredLogs.length === 0 ? (
           <div className="p-8 text-center text-xs text-muted-foreground">
             No system operations entries found matching the query.
           </div>
         ) : (
           <table className="min-w-[800px] w-full text-left text-sm">
-            <thead className="bg-white/[0.04] text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
+            <thead className="dark:bg-white/[0.04] bg-muted/50 text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-3.5">Action Event</th>
                 <th className="px-4 py-3.5">User</th>
@@ -65,9 +65,9 @@ export function AuditLogsViewer({ logs }: AuditLogsViewerProps) {
                 <th className="px-4 py-3.5">Timestamp</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10 bg-black/5 font-mono text-xs">
+            <tbody className="divide-y divide-white/10 dark:bg-black/5 bg-muted/20 font-mono text-xs">
               {filteredLogs.map((log) => {
-                let badgeColor = "text-white/70 bg-white/5 border-white/10";
+                let badgeColor = "dark:text-white/70 text-muted-foreground dark:bg-white/5 bg-muted/50 dark:border-white/10 border-border";
                 if (log.action.includes("APPROVED") || log.action.includes("PAID") || log.action.includes("PUBLISHED") || log.action.includes("PRIZE")) {
                   badgeColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
                 } else if (log.action.includes("REJECTED") || log.action.includes("BAN")) {
@@ -77,7 +77,7 @@ export function AuditLogsViewer({ logs }: AuditLogsViewerProps) {
                 }
 
                 return (
-                  <tr key={log.id} className="transition hover:bg-white/[0.02]">
+                  <tr key={log.id} className="transition hover:dark:bg-white/[0.02] bg-muted/50">
                     {/* Action */}
                     <td className="px-4 py-4">
                       <span className={`inline-flex rounded-full border px-3 py-1 font-black uppercase tracking-wider text-[10px] ${badgeColor}`}>
@@ -86,22 +86,22 @@ export function AuditLogsViewer({ logs }: AuditLogsViewerProps) {
                     </td>
 
                     {/* Performed By */}
-                    <td className="px-4 py-4 text-white/95 font-semibold">
+                    <td className="px-4 py-4 dark:text-white/95 text-muted-foreground font-semibold">
                       {log.performedBy}
                     </td>
 
                     {/* Details */}
-                    <td className="px-4 py-4 text-white/70 font-semibold leading-relaxed max-w-sm whitespace-pre-wrap">
+                    <td className="px-4 py-4 dark:text-white/70 text-muted-foreground font-semibold leading-relaxed max-w-sm whitespace-pre-wrap">
                       {log.details}
                     </td>
 
                     {/* IP Address */}
-                    <td className="px-4 py-4 text-white/40">
+                    <td className="px-4 py-4 dark:text-white/40 text-muted-foreground">
                       {log.ipAddress}
                     </td>
 
                     {/* Date */}
-                    <td className="px-4 py-4 text-white/60">
+                    <td className="px-4 py-4 dark:text-white/60 text-muted-foreground">
                       {new Date(log.createdAt).toLocaleString('vi-VN')}
                     </td>
                   </tr>

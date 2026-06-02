@@ -233,30 +233,30 @@ export default function JockeyInvitationsPage() {
       />
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-white/55">
+        <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải lịch sử mời Jockey...</p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
-          <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
-            <h2 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
+          <div className="flex items-center justify-between border-b dark:border-white/5 border-border pb-4 mb-5">
+            <h2 className="text-xl font-black uppercase tracking-tight dark:text-white text-foreground flex items-center gap-2">
               <Send className="size-5 text-[#E10600]" /> Lời mời đã gửi
             </h2>
           </div>
 
           {invitations.length === 0 ? (
-            <div className="text-center py-16 text-white/50">
+            <div className="text-center py-16 dark:text-white/50 text-muted-foreground">
               <Users className="size-16 mx-auto mb-4 opacity-20" />
-              <p className="font-bold text-white uppercase tracking-wider text-sm">Hòm thư trống</p>
-              <p className="text-xs text-white/40 mt-1 max-w-md mx-auto">
+              <p className="font-bold dark:text-white text-foreground uppercase tracking-wider text-sm">Hòm thư trống</p>
+              <p className="text-xs dark:text-white/40 text-muted-foreground mt-1 max-w-md mx-auto">
                 Bạn chưa gửi bất kỳ lời mời cộng tác Jockey nào. Gửi lời mời mới ngay để chuẩn bị tốt nhất cho trận đua sắp tới!
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm border-collapse">
-                <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b border-white/5">
+                <thead className="dark:bg-white/[0.03] bg-muted/50 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b dark:border-white/5 border-border">
                   <tr>
                     <th className="px-4 py-3">Jockey</th>
                     <th className="px-4 py-3">Chiến mã & Trận đấu</th>
@@ -269,15 +269,15 @@ export default function JockeyInvitationsPage() {
                   {invitations.map((inv) => {
                     const st = getStatusToneAndLabel(inv.status);
                     return (
-                      <tr key={inv.id} className="transition hover:bg-white/[0.015]">
+                      <tr key={inv.id} className="transition hover:dark:bg-white/[0.015] bg-muted/50">
                         <td className="px-4 py-4">
-                          <p className="font-black text-white">{inv.jockeyName}</p>
-                          <p className="text-[10px] text-white/40 font-mono mt-0.5">{inv.jockeyEmail || "N/A"}</p>
+                          <p className="font-black dark:text-white text-foreground">{inv.jockeyName}</p>
+                          <p className="text-[10px] dark:text-white/40 text-muted-foreground font-mono mt-0.5">{inv.jockeyEmail || "N/A"}</p>
                         </td>
                         <td className="px-4 py-4">
-                          <p className="font-bold text-white/95">{inv.horseName}</p>
+                          <p className="font-bold dark:text-white/95 text-muted-foreground">{inv.horseName}</p>
                           <p className="text-xs text-[#E10600] font-bold mt-0.5">{inv.raceName}</p>
-                          <div className="flex items-center gap-3 text-[10px] text-white/40 font-mono mt-1">
+                          <div className="flex items-center gap-3 text-[10px] dark:text-white/40 text-muted-foreground font-mono mt-1">
                             <span className="flex items-center gap-1">
                               <Calendar className="size-3 text-primary" />
                               {new Date(inv.raceStartTime).toLocaleDateString()}
@@ -289,8 +289,8 @@ export default function JockeyInvitationsPage() {
                           </div>
                         </td>
                         <td className="px-4 py-4 max-w-[200px] truncate">
-                          <p className="text-xs text-white/70 italic flex items-center gap-1.5">
-                            <MessageSquare className="size-3 text-white/30 shrink-0" />
+                          <p className="text-xs dark:text-white/70 text-muted-foreground italic flex items-center gap-1.5">
+                            <MessageSquare className="size-3 dark:text-white/30 text-muted-foreground shrink-0" />
                             {inv.message || "Không có lời nhắn."}
                           </p>
                         </td>
@@ -320,14 +320,14 @@ export default function JockeyInvitationsPage() {
 
       {/* Modal Dialog for sending invitations */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl space-y-5 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black/60 bg-muted/20 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-6 shadow-2xl space-y-5 animate-in slide-in-from-bottom-4 duration-300">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#E10600] flex items-center gap-1.5">
                 <Sparkles className="size-4" /> Chiêu mộ nài ngựa
               </p>
-              <h3 className="text-2xl font-black uppercase text-white mt-1">Gửi Lời Mời Jockey</h3>
-              <p className="text-xs text-white/50 mt-1">
+              <h3 className="text-2xl font-black uppercase dark:text-white text-foreground mt-1">Gửi Lời Mời Jockey</h3>
+              <p className="text-xs dark:text-white/50 text-muted-foreground mt-1">
                 Lưu ý: Chỉ những hồ sơ ghi danh chiến mã đã được Ban Tổ Chức duyệt (APPROVED) và chưa được gán Jockey mới hiển thị bên dưới.
               </p>
             </div>
@@ -335,18 +335,18 @@ export default function JockeyInvitationsPage() {
             <form onSubmit={handleSendInvitation} className="space-y-4">
               {/* Select Registration */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-black uppercase tracking-wider text-white/60">
+                <label className="block text-xs font-black uppercase tracking-wider dark:text-white/60 text-muted-foreground">
                   Chọn Lượt Ghi Danh Khả Dụng
                 </label>
                 <select
                   value={selectedReg}
                   onChange={(e) => setSelectedReg(e.target.value)}
                   required
-                  className="h-11 w-full rounded-xl border border-white/10 bg-black/40 px-3 text-xs text-white outline-none focus:border-primary transition"
+                  className="h-11 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/40 bg-muted/20 px-3 text-xs dark:text-white text-foreground outline-none focus:border-primary transition"
                 >
-                  <option value="" disabled className="bg-[#15151E]">-- Chọn lượt đăng ký trận đấu --</option>
+                  <option value="" disabled className="dark:bg-[#15151E] bg-card">-- Chọn lượt đăng ký trận đấu --</option>
                   {registrations.map((r) => (
-                    <option key={r.id} value={r.id} className="bg-[#15151E]">
+                    <option key={r.id} value={r.id} className="dark:bg-[#15151E] bg-card">
                       {r.horseName} - {r.raceName}
                     </option>
                   ))}
@@ -355,18 +355,18 @@ export default function JockeyInvitationsPage() {
 
               {/* Select Jockey */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-black uppercase tracking-wider text-white/60">
+                <label className="block text-xs font-black uppercase tracking-wider dark:text-white/60 text-muted-foreground">
                   Chọn Jockey Đang Rảnh (AVAILABLE)
                 </label>
                 <select
                   value={selectedJockey}
                   onChange={(e) => setSelectedJockey(e.target.value)}
                   required
-                  className="h-11 w-full rounded-xl border border-white/10 bg-black/40 px-3 text-xs text-white outline-none focus:border-primary transition"
+                  className="h-11 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/40 bg-muted/20 px-3 text-xs dark:text-white text-foreground outline-none focus:border-primary transition"
                 >
-                  <option value="" disabled className="bg-[#15151E]">-- Chọn Jockey tự do --</option>
+                  <option value="" disabled className="dark:bg-[#15151E] bg-card">-- Chọn Jockey tự do --</option>
                   {jockeys.map((j) => (
-                    <option key={j.id} value={j.userId} className="bg-[#15151E]">
+                    <option key={j.id} value={j.userId} className="dark:bg-[#15151E] bg-card">
                       {j.fullName} {j.experienceYears ? `(${j.experienceYears} năm kinh nghiệm)` : ""}
                     </option>
                   ))}
@@ -375,14 +375,14 @@ export default function JockeyInvitationsPage() {
 
               {/* Message */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-black uppercase tracking-wider text-white/60">
+                <label className="block text-xs font-black uppercase tracking-wider dark:text-white/60 text-muted-foreground">
                   Lời nhắn gửi Jockey (Tùy chọn)
                 </label>
                 <textarea
                   value={invitationMessage}
                   onChange={(e) => setInvitationMessage(e.target.value)}
                   rows={3}
-                  className="w-full rounded-xl border border-white/10 bg-black/40 p-3 text-xs text-white outline-none focus:border-primary transition placeholder:text-white/20"
+                  className="w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/40 bg-muted/20 p-3 text-xs dark:text-white text-foreground outline-none focus:border-primary transition placeholder:dark:text-white/20 text-muted-foreground"
                   placeholder="Ví dụ: Rất mong bạn sẽ đồng hành cùng chiến mã của mình trong giải đua lần này!"
                 />
               </div>
@@ -394,7 +394,7 @@ export default function JockeyInvitationsPage() {
                   variant="outline"
                   onClick={() => setShowModal(false)}
                   disabled={isSubmitting}
-                  className="h-10 rounded-xl text-xs font-black uppercase tracking-wider border-white/10 text-white bg-transparent hover:bg-white/5"
+                  className="h-10 rounded-xl text-xs font-black uppercase tracking-wider dark:border-white/10 border-border dark:text-white text-foreground bg-transparent hover:dark:bg-white/5 bg-muted/50"
                 >
                   Đóng
                 </Button>

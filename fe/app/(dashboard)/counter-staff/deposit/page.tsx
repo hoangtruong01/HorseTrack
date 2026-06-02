@@ -95,8 +95,8 @@ export default function CounterDepositPage() {
       <div className="grid gap-6 md:grid-cols-5">
         {/* Main Form Area */}
         <div className="md:col-span-3 space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#15151E]/95 p-6 shadow-2xl">
-            <h2 className="text-base font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
+          <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/95 bg-card p-6 shadow-2xl">
+            <h2 className="text-base font-black uppercase tracking-wider dark:text-white text-foreground mb-6 flex items-center gap-2">
               <Wallet className="size-5 text-primary" /> Chi tiết giao dịch nạp điểm
             </h2>
 
@@ -107,22 +107,22 @@ export default function CounterDepositPage() {
                   1. Tìm kiếm tài khoản khách hàng
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+                  <Search className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 dark:text-white/30 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Nhập tên, email hoặc số điện thoại..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#E10600]"
+                    className="h-11 w-full rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.04] bg-muted/50 pl-10 pr-4 text-sm dark:text-white text-foreground outline-none transition placeholder:dark:text-white/30 text-muted-foreground focus:border-[#E10600]"
                   />
                   {searching && (
-                    <RefreshCw className="absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-white/30 animate-spin" />
+                    <RefreshCw className="absolute right-3.5 top-1/2 size-4 -translate-y-1/2 dark:text-white/30 text-muted-foreground animate-spin" />
                   )}
                 </div>
 
                 {/* Search Results Dropdown */}
                 {users.length > 0 && (
-                  <div className="mt-2 max-h-60 overflow-y-auto rounded-xl border border-white/10 bg-[#1A1A24] divide-y divide-white/5 shadow-2xl">
+                  <div className="mt-2 max-h-60 overflow-y-auto rounded-xl border dark:border-white/10 border-border bg-[#1A1A24] divide-y divide-white/5 shadow-2xl">
                     {users.map((u) => (
                       <button
                         key={u.id}
@@ -132,10 +132,10 @@ export default function CounterDepositPage() {
                           setUsers([]);
                           setSearchQuery("");
                         }}
-                        className="w-full text-left px-4 py-3 hover:bg-white/[0.03] transition flex items-center justify-between"
+                        className="w-full text-left px-4 py-3 hover:dark:bg-white/[0.03] bg-muted/50 transition flex items-center justify-between"
                       >
                         <div>
-                          <p className="text-sm font-bold text-white">{u.fullName}</p>
+                          <p className="text-sm font-bold dark:text-white text-foreground">{u.fullName}</p>
                           <p className="text-xs text-muted-foreground">{u.email}</p>
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#E10600]/80 bg-[#E10600]/10 border border-[#E10600]/20 px-2 py-0.5 rounded">
@@ -152,13 +152,13 @@ export default function CounterDepositPage() {
                 <div className="rounded-xl border border-[#E10600]/20 bg-[#E10600]/5 p-4 flex items-center justify-between animate-[fadeIn_0.3s_ease-out]">
                   <div>
                     <span className="text-[9px] font-black uppercase tracking-wider text-primary">Tài khoản được chọn</span>
-                    <h4 className="text-sm font-black text-white">{selectedUser.fullName}</h4>
+                    <h4 className="text-sm font-black dark:text-white text-foreground">{selectedUser.fullName}</h4>
                     <p className="text-xs text-muted-foreground">{selectedUser.email}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedUser(null)}
-                    className="text-xs font-bold text-white/40 hover:text-white hover:underline cursor-pointer"
+                    className="text-xs font-bold dark:text-white/40 text-muted-foreground hover:dark:text-white text-foreground hover:underline cursor-pointer"
                   >
                     Thay đổi
                   </button>
@@ -171,7 +171,7 @@ export default function CounterDepositPage() {
                   2. Số tiền nạp ví (VND)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-white/30 text-sm">₫</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black dark:text-white/30 text-muted-foreground text-sm">₫</span>
                   <input
                     type="number"
                     min="1000"
@@ -181,7 +181,7 @@ export default function CounterDepositPage() {
                     onChange={(e) => setAmount(e.target.value)}
                     required
                     disabled={!selectedUser}
-                    className="h-12 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-8 pr-4 text-base font-black font-mono text-white placeholder:text-white/20 outline-none transition focus:border-[#E10600] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="h-12 w-full rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.04] bg-muted/50 pl-8 pr-4 text-base font-black font-mono dark:text-white text-foreground placeholder:dark:text-white/20 text-muted-foreground outline-none transition focus:border-[#E10600] disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                 </div>
                 {amount && !isNaN(parseFloat(amount)) && (
@@ -211,19 +211,19 @@ export default function CounterDepositPage() {
                 <CheckCircle2 className="size-8" />
               </div>
               <div>
-                <h3 className="text-lg font-black uppercase text-white">Nạp tiền thành công</h3>
+                <h3 className="text-lg font-black uppercase dark:text-white text-foreground">Nạp tiền thành công</h3>
                 <p className="text-xs text-muted-foreground">Giao dịch đã được ghi nhận vào ví người dùng</p>
               </div>
 
               {/* Transaction Receipt Card */}
-              <div className="rounded-xl border border-white/5 bg-black/40 p-4 text-left space-y-3 font-mono text-xs text-white/80">
+              <div className="rounded-xl border dark:border-white/5 border-border dark:bg-black/40 bg-muted/20 p-4 text-left space-y-3 font-mono text-xs dark:text-white/80 text-muted-foreground">
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase font-black block">Mã giao dịch</span>
                   <span className="font-bold text-[#E10600]">{successReceipt.txId}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase font-black block">Khách hàng</span>
-                  <span className="font-bold text-white">{successReceipt.userName}</span>
+                  <span className="font-bold dark:text-white text-foreground">{successReceipt.userName}</span>
                   <span className="block text-[10px] text-muted-foreground">{successReceipt.email}</span>
                 </div>
                 <div>
@@ -232,24 +232,24 @@ export default function CounterDepositPage() {
                 </div>
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase font-black block">Thời gian</span>
-                  <span className="text-white/60">{successReceipt.timestamp}</span>
+                  <span className="dark:text-white/60 text-muted-foreground">{successReceipt.timestamp}</span>
                 </div>
               </div>
 
               <Button
                 variant="outline"
                 onClick={() => setSuccessReceipt(null)}
-                className="w-full h-10 rounded-full border-white/10 text-white hover:bg-white/5 font-bold text-xs"
+                className="w-full h-10 rounded-full dark:border-white/10 border-border dark:text-white text-foreground hover:dark:bg-white/5 bg-muted/50 font-bold text-xs"
               >
                 Thực hiện nạp tiếp
               </Button>
             </div>
           ) : (
-            <div className="rounded-2xl border border-white/5 bg-[#15151E]/60 p-6 text-center space-y-4">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-white/[0.03] text-muted-foreground">
+            <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#15151E]/60 bg-card p-6 text-center space-y-4">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-xl dark:bg-white/[0.03] bg-muted/50 text-muted-foreground">
                 <ShieldCheck className="size-6" />
               </div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-white">Chế độ quầy an toàn</h3>
+              <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground">Chế độ quầy an toàn</h3>
               <p className="text-xs text-muted-foreground leading-relaxed font-semibold">
                 Tất cả các giao dịch nạp điểm tại quầy đều được kiểm toán nghiêm ngặt và lưu lại dưới dạng Audit Log. Hãy chắc chắn rằng bạn đã nhận đủ tiền mặt trước khi nhấn xác nhận nạp ví.
               </p>

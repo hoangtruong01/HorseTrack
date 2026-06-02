@@ -34,13 +34,13 @@ export default function SpectatorRankingsPage() {
       />
 
       {/* Tab Triggers */}
-      <div className="flex border-b border-white/10 max-w-sm">
+      <div className="flex border-b dark:border-white/10 border-border max-w-sm">
         <button
           onClick={() => setActiveTab("horses")}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "horses"
               ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground hover:text-white"
+              : "text-muted-foreground hover:text-foreground dark:hover:text-white"
           }`}
         >
           🐎 Chiến Mã Vô Địch
@@ -50,7 +50,7 @@ export default function SpectatorRankingsPage() {
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "jockeys"
               ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground hover:text-white"
+              : "text-muted-foreground hover:text-foreground dark:hover:text-white"
           }`}
         >
           🏇 Nài Ngựa Hàng Đầu
@@ -60,10 +60,10 @@ export default function SpectatorRankingsPage() {
       {activeTab === "horses" ? (
         /* Horses Ranking Table */
         <div className="space-y-4">
-          <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden">
+          <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-card overflow-hidden">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-b dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Tên Chiến Mã</th>
                   <th className="p-4">Giống Ngựa</th>
@@ -75,7 +75,7 @@ export default function SpectatorRankingsPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {mockHorseRankings.map((horse) => (
-                  <tr key={horse.rank} className="hover:bg-white/[0.01] transition duration-200">
+                  <tr key={horse.rank} className="hover:dark:bg-white/[0.01] bg-muted/50 transition duration-200">
                     <td className="p-4 text-center">
                       <span className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
                         horse.rank === 1
@@ -84,19 +84,19 @@ export default function SpectatorRankingsPage() {
                           ? "bg-slate-300 text-black"
                           : horse.rank === 3
                           ? "bg-[#CD7F32] text-white"
-                          : "bg-white/5 border border-white/10 text-muted-foreground"
+                          : "dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border text-muted-foreground"
                       }`}>
                         {horse.rank}
                       </span>
                     </td>
-                    <td className="p-4 font-black text-white flex items-center gap-2">
+                    <td className="p-4 font-black dark:text-white text-foreground flex items-center gap-2">
                       {horse.name}
                       {horse.rank === 1 && (
                         <Flame className="size-3.5 text-primary animate-pulse" />
                       )}
                     </td>
                     <td className="p-4 text-muted-foreground">{horse.breed}</td>
-                    <td className="p-4 text-center font-bold text-white">{horse.races}</td>
+                    <td className="p-4 text-center font-bold dark:text-white text-foreground">{horse.races}</td>
                     <td className="p-4 text-center text-primary font-black">{horse.wins}</td>
                     <td className="p-4 text-center font-mono text-muted-foreground">{horse.avgTime}</td>
                     <td className="p-4 text-right font-black text-teal-400 text-sm">
@@ -111,10 +111,10 @@ export default function SpectatorRankingsPage() {
       ) : (
         /* Jockeys Ranking Table */
         <div className="space-y-4">
-          <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden">
+          <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-card overflow-hidden">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-b dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Họ Tên Nài Ngựa</th>
                   <th className="p-4">Số Giấy Phép</th>
@@ -126,7 +126,7 @@ export default function SpectatorRankingsPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {mockJockeyRankings.map((jockey) => (
-                  <tr key={jockey.rank} className="hover:bg-white/[0.01] transition duration-200">
+                  <tr key={jockey.rank} className="hover:dark:bg-white/[0.01] bg-muted/50 transition duration-200">
                     <td className="p-4 text-center">
                       <span className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
                         jockey.rank === 1
@@ -135,19 +135,19 @@ export default function SpectatorRankingsPage() {
                           ? "bg-slate-300 text-black"
                           : jockey.rank === 3
                           ? "bg-[#CD7F32] text-white"
-                          : "bg-white/5 border border-white/10 text-muted-foreground"
+                          : "dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border text-muted-foreground"
                       }`}>
                         {jockey.rank}
                       </span>
                     </td>
-                    <td className="p-4 font-black text-white flex items-center gap-2">
+                    <td className="p-4 font-black dark:text-white text-foreground flex items-center gap-2">
                       {jockey.name}
                       {jockey.rank === 1 && (
                         <Trophy className="size-3.5 text-primary animate-bounce" />
                       )}
                     </td>
                     <td className="p-4 font-mono text-muted-foreground">{jockey.license}</td>
-                    <td className="p-4 text-center font-bold text-white">{jockey.matches}</td>
+                    <td className="p-4 text-center font-bold dark:text-white text-foreground">{jockey.matches}</td>
                     <td className="p-4 text-center text-primary font-black">{jockey.wins}</td>
                     <td className="p-4 text-center font-bold text-teal-400">{jockey.winRate}</td>
                     <td className="p-4 text-right font-black text-teal-400 text-sm">

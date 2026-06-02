@@ -82,7 +82,7 @@ export default function AdminRefereeAssignmentsPage() {
 
       <div className="flex gap-3">
         <select
-          className="flex-1 max-w-md rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
+          className="flex-1 max-w-md rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2.5 text-sm dark:text-white text-foreground focus:border-primary/50 focus:outline-none"
           value={selectedRace}
           onChange={(e) => setSelectedRace(e.target.value)}
         >
@@ -94,7 +94,7 @@ export default function AdminRefereeAssignmentsPage() {
       </div>
 
       {selectedRace && (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+        <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
           ) : assignments.length === 0 ? (
@@ -106,7 +106,7 @@ export default function AdminRefereeAssignmentsPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b dark:border-white/10 border-border">
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Trọng tài</th>
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ghi chú</th>
@@ -115,8 +115,8 @@ export default function AdminRefereeAssignmentsPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {assignments.map((a) => (
-                    <tr key={a._id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="px-5 py-4 text-sm text-white">{getRefereeName(a.refereeUserId)}</td>
+                    <tr key={a._id} className="hover:dark:bg-white/[0.02] bg-muted/50 transition-colors">
+                      <td className="px-5 py-4 text-sm dark:text-white text-foreground">{getRefereeName(a.refereeUserId)}</td>
                       <td className="px-5 py-4">
                         <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${statusColors[a.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                           {a.status}

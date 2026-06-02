@@ -66,17 +66,17 @@ export default function AdminBetsPage() {
       {/* Stats cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {["PENDING", "WON", "LOST", "CANCELLED"].map(s => (
-          <div key={s} className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-4">
+          <div key={s} className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-4">
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{s}</p>
-            <p className="mt-2 font-mono text-3xl font-black text-white">{stats[s] ?? 0}</p>
+            <p className="mt-2 font-mono text-3xl font-black dark:text-white text-foreground">{stats[s] ?? 0}</p>
             <span className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusColors[s]}`}>{s}</span>
           </div>
         ))}
       </div>
 
-      <div className="text-sm text-muted-foreground">Tổng: <strong className="text-white">{meta.total}</strong> predictions</div>
+      <div className="text-sm text-muted-foreground">Tổng: <strong className="dark:text-white text-foreground">{meta.total}</strong> predictions</div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+      <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
         ) : bets.length === 0 ? (
@@ -85,7 +85,7 @@ export default function AdminBetsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b dark:border-white/10 border-border">
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">User</th>
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Race</th>
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa đặt</th>
@@ -96,8 +96,8 @@ export default function AdminBetsPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {bets.map((b) => (
-                  <tr key={b._id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-4 text-sm text-white">{getName(b.userId)}</td>
+                  <tr key={b._id} className="hover:dark:bg-white/[0.02] bg-muted/50 transition-colors">
+                    <td className="px-5 py-4 text-sm dark:text-white text-foreground">{getName(b.userId)}</td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{getName(b.raceId)}</td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{getName(b.horseId)}</td>
                     <td className="px-5 py-4 text-center font-mono font-black text-primary">{b.rewardPoints ?? 0}</td>
@@ -120,12 +120,12 @@ export default function AdminBetsPage() {
       {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchBets(meta.page - 1)} disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
             <ChevronLeft className="size-4" /> Trước
           </button>
           <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
           <button onClick={() => fetchBets(meta.page + 1)} disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
             Sau <ChevronRight className="size-4" />
           </button>
         </div>
