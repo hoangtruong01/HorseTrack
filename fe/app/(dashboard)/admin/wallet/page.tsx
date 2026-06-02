@@ -74,6 +74,18 @@ export default function AdminWalletPage() {
     return String(u);
   };
 
+  const getHandlerName = (c: CashoutItem) => {
+    if (c.paidBy && typeof c.paidBy === "object" && "fullName" in c.paidBy) {
+      return c.paidBy.fullName;
+    }
+    if (c.approvedBy && typeof c.approvedBy === "object" && "fullName" in c.approvedBy) {
+      return c.approvedBy.fullName;
+    }
+    if (typeof c.paidBy === "string") return c.paidBy;
+    if (typeof c.approvedBy === "string") return c.approvedBy;
+    return "—";
+  };
+
   return (
     <main className="space-y-6">
       <PageHeader
@@ -112,14 +124,16 @@ export default function AdminWalletPage() {
             <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Không có cashout requests.</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[1000px]">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">User</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Mã QĐ</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngày tạo</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Người rút</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Mã rút</th>
+                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Số điểm rút</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Nhân viên duyệt rút</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Thời gian tạo lệnh</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Thời gian rút</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Trạng thái</th>
                     <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">Hành động</th>
                   </tr>
                 </thead>
@@ -134,13 +148,19 @@ export default function AdminWalletPage() {
                         <code className="rounded bg-white/5 px-2 py-1 text-xs font-mono text-primary border border-primary/20">{c.redemptionCode}</code>
                       </td>
                       <td className="px-5 py-4 text-center font-mono font-black text-primary">{c.pointsRedeemed.toLocaleString()}</td>
+                      <td className="px-5 py-4 text-sm text-white/80">
+                        {getHandlerName(c)}
+                      </td>
+                      <td className="px-5 py-4 text-xs text-muted-foreground">
+                        {c.createdAt ? new Date(c.createdAt).toLocaleString("vi-VN") : "—"}
+                      </td>
+                      <td className="px-5 py-4 text-xs text-muted-foreground">
+                        {c.paidAt ? new Date(c.paidAt).toLocaleString("vi-VN") : "—"}
+                      </td>
                       <td className="px-5 py-4">
                         <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${cashoutStatusColors[c.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                           {c.status}
                         </span>
-                      </td>
-                      <td className="px-5 py-4 text-xs text-muted-foreground">
-                        {c.createdAt ? new Date(c.createdAt).toLocaleDateString("vi-VN") : "—"}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-2">

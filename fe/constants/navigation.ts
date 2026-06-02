@@ -329,11 +329,4 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Gift,
     description: "Xử lý hàng đợi đổi quà, phê duyệt và xác nhận trao quà vật lý.",
   },
-  {
-    title: "Nạp Tiền Vào Ví",
-    href: "/counter-staff/deposit",
-    role: "CounterStaff",
-    icon: Wallet,
-    description: "Nạp tiền/điểm trực tiếp vào tài khoản ví của người dùng.",
-  },
 ];
