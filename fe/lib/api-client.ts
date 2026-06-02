@@ -125,20 +125,34 @@ export interface HorseItem {
   age?: number;
   gender?: string;
   color?: string;
+  weightKg?: number;
+  heightCm?: number;
+  baseSpeed?: number;
+  staminaScore?: number;
+  description?: string;
   healthStatus: string;
   status: string;
+  approvalStatus?: string;
+  rejectionReason?: string;
+  rejectedAt?: string;
+  approvedAt?: string;
   ownerId?: { _id: string; fullName: string; email: string } | string;
   imageUrl?: string;
+  image?: string;
   createdAt?: string;
 }
 
 export const horsesApi = {
-  list: (params?: { page?: number; limit?: number }) => {
+  list: (params?: { page?: number; limit?: number; search?: string }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.search) qs.set("search", params.search);
     return apiFetch<PaginatedResult<HorseItem>>(`/horses?${qs}`);
   },
+  approve: (id: string) => apiFetch(`/horses/${id}/approve`, { method: "PATCH" }),
+  reject: (id: string, reason: string) =>
+    apiFetch(`/horses/${id}/reject`, { method: "PATCH", body: JSON.stringify({ reason }) }),
   delete: (id: string) => apiFetch(`/horses/${id}`, { method: "DELETE" }),
 };
 

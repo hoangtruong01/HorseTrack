@@ -23,9 +23,16 @@ export enum HorseStatus {
   DELETED = 'DELETED',
 }
 
+export enum HorseApprovalStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
 @Schema({
   timestamps: true,
   toObject: { virtuals: true },
+  toJSON: { virtuals: true },
 })
 export class Horse {
   @Prop({ required: true })
@@ -66,6 +73,22 @@ export class Horse {
   })
   status!: HorseStatus;
 
+  @Prop({
+    required: true,
+    enum: HorseApprovalStatus,
+    default: HorseApprovalStatus.PENDING,
+  })
+  approvalStatus!: HorseApprovalStatus;
+
+  @Prop()
+  rejectionReason?: string;
+
+  @Prop()
+  rejectedAt?: Date;
+
+  @Prop()
+  approvedAt?: Date;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   ownerId!: Types.ObjectId;
 
@@ -89,3 +112,4 @@ export const HorseSchema = SchemaFactory.createForClass(Horse);
 
 // Compound index for quick owner queries
 HorseSchema.index({ ownerId: 1, status: 1 });
+

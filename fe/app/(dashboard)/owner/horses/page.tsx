@@ -19,8 +19,13 @@ export default function HorsesStablePage() {
       if (response.ok) {
         const resData = await response.json();
         if (resData.success) {
-          // Response will contain { success: true, data: [...] } or direct list
-          setHorses(resData.data?.data || resData.data || []);
+          const rawList = resData.data?.data || resData.data || [];
+          // Normalize: đảm bảo mỗi horse object luôn có trường `id`
+          const normalized = rawList.map((h: any) => ({
+            ...h,
+            id: h.id || h._id,
+          }));
+          setHorses(normalized);
         }
       } else {
         toast.error("Không thể lấy danh sách chiến mã từ server.");
@@ -60,12 +65,20 @@ export default function HorsesStablePage() {
     }
   };
 
+  // Lọc danh sách chiến mã theo trạng thái duyệt
+  const approvedHorses = horses.filter(
+    (h) => h.approvalStatus === "APPROVED" || !h.approvalStatus
+  );
+  const pendingOrRejectedHorses = horses.filter(
+    (h) => h.approvalStatus === "PENDING" || h.approvalStatus === "REJECTED"
+  );
+
   return (
-    <main className="space-y-6 max-w-6xl mx-auto">
+    <main className="space-y-10 max-w-6xl mx-auto">
       <PageHeader
         eyebrow="Quản lý chuồng đua"
         title="Danh Sách Chiến Mã"
-        description="Quản lý hồ sơ kỹ thuật, trạng thái sức khỏe của từng chiến mã. Ngựa phải khỏe mạnh mới đủ điều kiện đăng ký tham dự giải đấu."
+        description="Quản lý hồ sơ kỹ thuật, trạng thái sức khỏe của từng chiến mã. Chiến mã phải được phê duyệt và khỏe mạnh mới đủ điều kiện đăng ký tham dự giải đấu."
         actions={
           <Button asChild className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
             <Link href="/owner/horses/new">
@@ -81,26 +94,58 @@ export default function HorsesStablePage() {
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải dữ liệu chuồng ngựa...</p>
         </div>
-      ) : horses.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
-          <Award className="size-16 text-white/15 mx-auto mb-4 stroke-[1]" />
-          <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">Chuồng ngựa trống</h3>
-          <p className="text-sm text-white/50 max-w-md mx-auto mb-6">
-            Bạn chưa đăng ký bất kỳ chiến mã nào. Hãy thêm chiến mã đầu tiên để bắt đầu ghi danh tham gia các giải đấu hấp dẫn.
-          </p>
-          <Button asChild className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
-            <Link href="/owner/horses/new">
-              Thêm chiến mã ngay
-              <PlusCircle className="size-4 ml-1.5" />
-            </Link>
-          </Button>
-        </div>
       ) : (
-        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {horses.map((horse) => (
-            <HorseCard key={horse.id} horse={horse} onDelete={handleDelete} />
-          ))}
-        </section>
+        <div className="space-y-12">
+          {/* PHẦN 1: DANH SÁCH CHIẾN MÃ ĐÃ DUYỆT (CHUỒNG CHÍNH) */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <h2 className="text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+                <span className="size-2 rounded-full bg-green-500 animate-pulse" />
+                Chuồng đua chính thức ({approvedHorses.length})
+              </h2>
+            </div>
+
+            {approvedHorses.length === 0 ? (
+              <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
+                <Award className="size-16 text-white/15 mx-auto mb-4 stroke-[1]" />
+                <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">Chuồng chính trống</h3>
+                <p className="text-sm text-white/50 max-w-md mx-auto mb-6">
+                  Bạn chưa có chiến mã nào được phê duyệt hoạt động. Vui lòng thêm chiến mã mới hoặc đợi Admin duyệt hồ sơ.
+                </p>
+                <Button asChild className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
+                  <Link href="/owner/horses/new">
+                    Thêm chiến mã ngay
+                    <PlusCircle className="size-4 ml-1.5" />
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {approvedHorses.map((horse) => (
+                  <HorseCard key={horse.id} horse={horse} onDelete={handleDelete} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* PHẦN 2: DANH SÁCH CHỜ DUYỆT & BỊ TỪ CHỐI */}
+          {pendingOrRejectedHorses.length > 0 && (
+            <section className="space-y-4 pt-4 border-t border-white/5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                <h2 className="text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+                  <span className="size-2 rounded-full bg-yellow-500" />
+                  Hồ sơ chờ phê duyệt & Bị từ chối ({pendingOrRejectedHorses.length})
+                </h2>
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {pendingOrRejectedHorses.map((horse) => (
+                  <HorseCard key={horse.id} horse={horse} onDelete={handleDelete} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       )}
     </main>
   );

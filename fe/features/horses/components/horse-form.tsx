@@ -38,6 +38,8 @@ export function HorseForm({
   const [imagePreview, setImagePreview] = useState<string>(initialData?.image || "");
   const [errorMsg, setErrorMsg] = useState("");
 
+  const isApproved = initialData?.approvalStatus === "APPROVED";
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -118,6 +120,7 @@ export function HorseForm({
                 onChange={(e) => setBreed(e.target.value)}
                 className={fieldClass}
                 placeholder="Thoroughbred"
+                disabled={isApproved}
               />
             </div>
             <div className="space-y-2">
@@ -128,6 +131,7 @@ export function HorseForm({
                 onChange={(e) => setColor(e.target.value)}
                 className={fieldClass}
                 placeholder="Vàng cát, Đen tuyền"
+                disabled={isApproved}
               />
             </div>
           </div>
@@ -178,6 +182,7 @@ export function HorseForm({
                 value={gender}
                 onChange={(e) => setGender(e.target.value as HorseGender)}
                 className={fieldClass}
+                disabled={isApproved}
               >
                 <option value="MALE">Đực (Male)</option>
                 <option value="FEMALE">Cái (Female)</option>
@@ -204,7 +209,7 @@ export function HorseForm({
         <div className="space-y-4 flex flex-col">
           <div className="space-y-2 flex-1 flex flex-col">
             <label className={labelClass}>Hình ảnh chiến mã</label>
-            <div className="relative border border-dashed border-white/10 hover:border-primary/50 bg-white/[0.02] rounded-xl flex-1 min-h-[200px] flex flex-col items-center justify-center p-4 transition group cursor-pointer">
+            <div className={`relative border border-dashed border-white/10 hover:border-primary/50 bg-white/[0.02] rounded-xl flex-1 min-h-[200px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${isApproved ? 'pointer-events-none opacity-60' : ''}`}>
               {imagePreview ? (
                 <div className="relative w-full h-full min-h-[180px] rounded-lg overflow-hidden">
                   <img
@@ -212,9 +217,11 @@ export function HorseForm({
                     alt="Preview"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">
-                    <span className="text-white text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">Thay đổi ảnh</span>
-                  </div>
+                  {!isApproved && (
+                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">
+                      <span className="text-white text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">Thay đổi ảnh</span>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center space-y-2">
@@ -223,12 +230,14 @@ export function HorseForm({
                   <p className="text-xs text-white/45">Cho phép định dạng PNG, JPG, WEBP tối đa 5MB</p>
                 </div>
               )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
+              {!isApproved && (
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              )}
             </div>
           </div>
 

@@ -20,6 +20,10 @@ export type Horse = {
   staminaScore: number;
   image?: string;
   description?: string;
+  approvalStatus?: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason?: string;
+  rejectedAt?: string;
+  approvedAt?: string;
 };
 
 type HorseCardProps = {
@@ -43,6 +47,17 @@ const healthMeta: Record<
 export function HorseCard({ horse, onDelete }: HorseCardProps) {
   const meta = healthMeta[horse.healthStatus] || { label: horse.healthStatus, tone: "slate" };
 
+  const getRemainingTimeText = (rejectedAtStr?: string) => {
+    if (!rejectedAtStr) return "Sắp bị xóa";
+    const rejectedAt = new Date(rejectedAtStr).getTime();
+    const now = new Date().getTime();
+    const diffMs = rejectedAt + 24 * 60 * 60 * 1000 - now;
+    if (diffMs <= 0) return "Sắp bị xóa";
+    const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
+    const diffMins = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
+    return `Hệ thống tự động xóa sau ${diffHours}h ${diffMins}p`;
+  };
+
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 hover:bg-[#1C1C25] flex flex-col justify-between min-h-[380px]">
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#E10600] via-white/20 to-transparent" />
@@ -61,8 +76,14 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
             <span className="text-xs uppercase tracking-widest mt-2">No Image Available</span>
           </div>
         )}
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
           <StatusBadge label={meta.label} tone={meta.tone} />
+          {horse.approvalStatus && horse.approvalStatus !== "APPROVED" && (
+            <StatusBadge 
+              label={horse.approvalStatus === "PENDING" ? "Chờ duyệt" : "Bị từ chối"} 
+              tone={horse.approvalStatus === "PENDING" ? "yellow" : "red"} 
+            />
+          )}
         </div>
       </div>
 
@@ -101,6 +122,19 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
               </p>
             </div>
           </div>
+
+          {horse.approvalStatus === "REJECTED" && (
+            <div className="mt-3 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400 space-y-1">
+              <p className="font-bold flex items-center gap-1">
+                <ShieldAlert className="size-3.5 shrink-0" />
+                Lý do không duyệt:
+              </p>
+              <p className="text-white/80 italic">{horse.rejectionReason || "Không rõ lý do"}</p>
+              <p className="text-[10px] font-mono text-red-300 font-bold uppercase tracking-wider">
+                {getRemainingTimeText(horse.rejectedAt)}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Action buttons */}
