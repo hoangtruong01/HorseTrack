@@ -57,7 +57,10 @@ export class RacesService {
 
     // Validate startTime within tournament dates
     const startTime = new Date(dto.startTime);
-    if (startTime < tournament.startDate || startTime > tournament.endDate) {
+    // Allow 12 hours buffer before start date and 36 hours buffer after end date to handle timezone offsets
+    const startLimit = new Date(tournament.startDate.getTime() - 12 * 60 * 60 * 1000);
+    const endLimit = new Date(tournament.endDate.getTime() + 36 * 60 * 60 * 1000);
+    if (startTime < startLimit || startTime > endLimit) {
       throw new BadRequestException(
         'Race startTime must be within tournament startDate and endDate',
       );

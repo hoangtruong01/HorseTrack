@@ -65,13 +65,17 @@ export function RaceForm() {
     // Date validation
     if (selectedTournament) {
       const raceStart = new Date(startTime);
-      const tStart = selectedTournament.startDate ? new Date(selectedTournament.startDate) : null;
-      const tEnd = selectedTournament.endDate ? new Date(selectedTournament.endDate) : null;
-      if (tStart && raceStart < tStart) {
+      const tStartPart = typeof selectedTournament.startDate === "string" ? selectedTournament.startDate.split("T")[0] : "";
+      const tEndPart = typeof selectedTournament.endDate === "string" ? selectedTournament.endDate.split("T")[0] : "";
+
+      const localStartLimit = tStartPart ? new Date(`${tStartPart}T00:00:00`) : null;
+      const localEndLimit = tEndPart ? new Date(`${tEndPart}T23:59:59.999`) : null;
+
+      if (localStartLimit && raceStart < localStartLimit) {
         toast.error("Thời gian xuất phát vòng đua nằm trước ngày bắt đầu giải đấu!");
         return;
       }
-      if (tEnd && raceStart > tEnd) {
+      if (localEndLimit && raceStart > localEndLimit) {
         toast.error("Thời gian xuất phát vòng đua nằm sau ngày kết thúc giải đấu!");
         return;
       }

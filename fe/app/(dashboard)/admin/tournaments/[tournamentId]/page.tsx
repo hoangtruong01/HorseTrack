@@ -109,16 +109,19 @@ export default function AdminTournamentDetailPage() {
 
     // Validation: Start time within tournament limits
     const raceStart = new Date(startTime);
-    const tournamentStart = tournament.startDate ? new Date(tournament.startDate) : null;
-    const tournamentEnd = tournament.endDate ? new Date(tournament.endDate) : null;
+    const tStartPart = typeof tournament.startDate === "string" ? tournament.startDate.split("T")[0] : "";
+    const tEndPart = typeof tournament.endDate === "string" ? tournament.endDate.split("T")[0] : "";
 
-    if (tournamentStart && raceStart < tournamentStart) {
-      toast.error(`Thời gian bắt đầu vòng đua không thể trước ngày bắt đầu giải đấu (${tournamentStart.toLocaleDateString("vi-VN")})`);
+    const localStartLimit = tStartPart ? new Date(`${tStartPart}T00:00:00`) : null;
+    const localEndLimit = tEndPart ? new Date(`${tEndPart}T23:59:59.999`) : null;
+
+    if (localStartLimit && raceStart < localStartLimit) {
+      toast.error(`Thời gian bắt đầu vòng đua không thể trước ngày bắt đầu giải đấu (${localStartLimit.toLocaleDateString("vi-VN")})`);
       return;
     }
 
-    if (tournamentEnd && raceStart > tournamentEnd) {
-      toast.error(`Thời gian bắt đầu vòng đua không thể sau ngày kết thúc giải đấu (${tournamentEnd.toLocaleDateString("vi-VN")})`);
+    if (localEndLimit && raceStart > localEndLimit) {
+      toast.error(`Thời gian bắt đầu vòng đua không thể sau ngày kết thúc giải đấu (${localEndLimit.toLocaleDateString("vi-VN")})`);
       return;
     }
 
@@ -221,6 +224,32 @@ export default function AdminTournamentDetailPage() {
   const totalBudget = tournament.prizePool || tournament.prize || 0;
   const remainingBudget = totalBudget - totalPrizeAllocated;
   const budgetPercent = totalBudget > 0 ? Math.min(100, Math.max(0, (totalPrizeAllocated / totalBudget) * 100)) : 0;
+
+  // Real-time validations for race creation
+  const raceStart = startTime ? new Date(startTime) : null;
+  const tStartPart = typeof tournament?.startDate === "string" ? tournament.startDate.split("T")[0] : "";
+  const tEndPart = typeof tournament?.endDate === "string" ? tournament.endDate.split("T")[0] : "";
+  const localStartLimit = tStartPart ? new Date(`${tStartPart}T00:00:00`) : null;
+  const localEndLimit = tEndPart ? new Date(`${tEndPart}T23:59:59.999`) : null;
+
+  const isStartTimeTooEarly = !!(raceStart && localStartLimit && raceStart < localStartLimit);
+  const isStartTimeTooLate = !!(raceStart && localEndLimit && raceStart > localEndLimit);
+  const isStartTimeInvalid = isStartTimeTooEarly || isStartTimeTooLate;
+
+  const isNameInvalid = raceName.length > 0 && !raceName.trim();
+  const isDistanceInvalid = distanceMeters < 100;
+  const isPrizeInvalid = prize < 0 || prize > remainingBudget;
+  const isLapCountInvalid = lapCount < 1;
+  const isMaxParticipantsInvalid = maxParticipants < 2;
+
+  const isFormInvalid =
+    !raceName.trim() ||
+    !startTime ||
+    isStartTimeInvalid ||
+    isDistanceInvalid ||
+    isPrizeInvalid ||
+    isLapCountInvalid ||
+    isMaxParticipantsInvalid;
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
@@ -485,9 +514,18 @@ export default function AdminTournamentDetailPage() {
                   required
                   value={raceName}
                   onChange={(e) => setRaceName(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white placeholder:text-white/20 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+                  className={`h-10 w-full rounded-xl border px-3 text-xs text-white placeholder:text-white/20 outline-none focus:ring-1 ${
+                    isNameInvalid
+                      ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5"
+                      : "border-white/10 bg-black/45 focus:border-primary focus:ring-primary/20"
+                  }`}
                   placeholder="Ví dụ: Vòng loại 100m, Bán kết 1000m..."
                 />
+                {isNameInvalid && (
+                  <span className="text-[10px] text-red-400 font-semibold mt-1">
+                    Tên vòng đua không thể chỉ chứa khoảng trắng.
+                  </span>
+                )}
               </label>
 
               {/* Start Time */}
@@ -498,11 +536,27 @@ export default function AdminTournamentDetailPage() {
                   required
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 cursor-pointer"
+                  className={`h-10 w-full rounded-xl border px-3 text-xs text-white outline-none focus:ring-1 cursor-pointer ${
+                    isStartTimeInvalid
+                      ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5"
+                      : "border-white/10 bg-black/45 focus:border-primary focus:ring-primary/20"
+                  }`}
                 />
-                <span className="text-[10px] text-white/40 font-normal">
-                  Giới hạn giải đấu: {tournament.startDate ? new Date(tournament.startDate).toLocaleDateString("vi-VN") : ""} - {tournament.endDate ? new Date(tournament.endDate).toLocaleDateString("vi-VN") : ""}
-                </span>
+                {isStartTimeTooEarly && localStartLimit && (
+                  <span className="text-[10px] text-red-400 font-semibold mt-1">
+                    Thời gian phải từ ngày bắt đầu giải đấu: {localStartLimit.toLocaleDateString("vi-VN")}.
+                  </span>
+                )}
+                {isStartTimeTooLate && localEndLimit && (
+                  <span className="text-[10px] text-red-400 font-semibold mt-1">
+                    Thời gian không được sau ngày kết thúc giải đấu: {localEndLimit.toLocaleDateString("vi-VN")}.
+                  </span>
+                )}
+                {!isStartTimeInvalid && (
+                  <span className="text-[10px] text-white/40 font-normal">
+                    Giới hạn giải đấu: {tournament.startDate ? new Date(tournament.startDate).toLocaleDateString("vi-VN") : ""} - {tournament.endDate ? new Date(tournament.endDate).toLocaleDateString("vi-VN") : ""}
+                  </span>
+                )}
               </label>
 
               <div className="grid grid-cols-2 gap-4">
@@ -515,8 +569,17 @@ export default function AdminTournamentDetailPage() {
                     required
                     value={distanceMeters}
                     onChange={(e) => setDistanceMeters(parseInt(e.target.value) || 0)}
-                    className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white font-mono focus:border-primary"
+                    className={`h-10 w-full rounded-xl border px-3 text-xs text-white font-mono focus:outline-none focus:ring-1 ${
+                      isDistanceInvalid
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5"
+                        : "border-white/10 bg-black/45 focus:border-primary focus:ring-primary/20"
+                    }`}
                   />
+                  {isDistanceInvalid && (
+                    <span className="text-[10px] text-red-400 font-semibold mt-1">
+                      Cự ly tối thiểu là 100m.
+                    </span>
+                  )}
                 </label>
 
                 {/* Prize */}
@@ -528,14 +591,18 @@ export default function AdminTournamentDetailPage() {
                     value={prize}
                     onChange={(e) => setPrize(parseInt(e.target.value) || 0)}
                     className={`h-10 w-full rounded-xl border px-3 text-xs text-white font-mono focus:outline-none focus:ring-1 ${
-                      prize > remainingBudget
+                      isPrizeInvalid
                         ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5"
-                        : "border-white/10 focus:border-primary focus:ring-primary/20 bg-black/45"
+                        : "border-white/10 bg-black/45 focus:border-primary focus:ring-primary/20"
                     }`}
                   />
                   {prize > remainingBudget ? (
-                    <span className="text-[10px] text-red-400 font-semibold animate-pulse">
+                    <span className="text-[10px] text-red-400 font-semibold mt-1 animate-pulse">
                       Vượt quá ngân quỹ còn lại: {(prize - remainingBudget).toLocaleString()} pts!
+                    </span>
+                  ) : prize < 0 ? (
+                    <span className="text-[10px] text-red-400 font-semibold mt-1">
+                      Giải thưởng không được là số âm.
                     </span>
                   ) : (
                     <span className="text-[10px] text-white/40 font-normal">
@@ -553,9 +620,18 @@ export default function AdminTournamentDetailPage() {
                     type="number"
                     min={1}
                     value={lapCount}
-                    onChange={(e) => setLapCount(parseInt(e.target.value) || 1)}
-                    className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white font-mono focus:border-primary"
+                    onChange={(e) => setLapCount(parseInt(e.target.value) || 0)}
+                    className={`h-10 w-full rounded-xl border px-3 text-xs text-white font-mono focus:outline-none focus:ring-1 ${
+                      isLapCountInvalid
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5"
+                        : "border-white/10 bg-black/45 focus:border-primary focus:ring-primary/20"
+                    }`}
                   />
+                  {isLapCountInvalid && (
+                    <span className="text-[10px] text-red-400 font-semibold mt-1">
+                      Số vòng tối thiểu là 1.
+                    </span>
+                  )}
                 </label>
 
                 {/* Max Participants */}
@@ -565,9 +641,18 @@ export default function AdminTournamentDetailPage() {
                     type="number"
                     min={2}
                     value={maxParticipants}
-                    onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 8)}
-                    className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white font-mono focus:border-primary"
+                    onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 0)}
+                    className={`h-10 w-full rounded-xl border px-3 text-xs text-white font-mono focus:outline-none focus:ring-1 ${
+                      isMaxParticipantsInvalid
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5"
+                        : "border-white/10 bg-black/45 focus:border-primary focus:ring-primary/20"
+                    }`}
                   />
+                  {isMaxParticipantsInvalid && (
+                    <span className="text-[10px] text-red-400 font-semibold mt-1">
+                      Số ngựa tối thiểu là 2.
+                    </span>
+                  )}
                 </label>
               </div>
 
@@ -578,12 +663,12 @@ export default function AdminTournamentDetailPage() {
                   <select
                     value={trackCondition}
                     onChange={(e) => setTrackCondition(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
+                    className="h-10 w-full rounded-xl border border-white/10 bg-[#15151E] px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
                   >
-                    <option value="Dry turf" className="bg-[#15151E] text-white">Dry turf (Cỏ khô)</option>
-                    <option value="Wet turf" className="bg-[#15151E] text-white">Wet turf (Cỏ ướt)</option>
-                    <option value="Muddy" className="bg-[#15151E] text-white">Muddy (Bùn đất)</option>
-                    <option value="Synthetic" className="bg-[#15151E] text-white">Synthetic (Nhân tạo)</option>
+                    <option value="Dry turf">Dry turf (Cỏ khô)</option>
+                    <option value="Wet turf">Wet turf (Cỏ ướt)</option>
+                    <option value="Muddy">Muddy (Bùn đất)</option>
+                    <option value="Synthetic">Synthetic (Nhân tạo)</option>
                   </select>
                 </label>
 
@@ -593,12 +678,12 @@ export default function AdminTournamentDetailPage() {
                   <select
                     value={weatherSnapshot}
                     onChange={(e) => setWeatherSnapshot(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
+                    className="h-10 w-full rounded-xl border border-white/10 bg-[#15151E] px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
                   >
-                    <option value="Sunny" className="bg-[#15151E] text-white">Sunny (Nắng rực rỡ)</option>
-                    <option value="Cloudy" className="bg-[#15151E] text-white">Cloudy (Nhiều mây)</option>
-                    <option value="Rainy" className="bg-[#15151E] text-white">Rainy (Mưa rào)</option>
-                    <option value="Windy" className="bg-[#15151E] text-white">Windy (Nhiều gió)</option>
+                    <option value="Sunny">Sunny (Nắng rực rỡ)</option>
+                    <option value="Cloudy">Cloudy (Nhiều mây)</option>
+                    <option value="Rainy">Rainy (Mưa rào)</option>
+                    <option value="Windy">Windy (Nhiều gió)</option>
                   </select>
                 </label>
               </div>
@@ -615,6 +700,17 @@ export default function AdminTournamentDetailPage() {
                 />
               </label>
 
+              {/* Validation Alert Box */}
+              {isFormInvalid && (
+                <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 flex gap-2.5 items-start animate-fade-in">
+                  <AlertCircle className="size-4 text-red-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-bold text-red-400">Thông tin chưa hợp lệ</p>
+                    <p className="text-[10px] text-red-400/80 mt-0.5">Vui lòng kiểm tra lại các trường được đánh dấu đỏ.</p>
+                  </div>
+                </div>
+              )}
+
               {/* Buttons */}
               <div className="flex justify-end gap-3 pt-3 border-t border-white/5">
                 <Button
@@ -628,8 +724,8 @@ export default function AdminTournamentDetailPage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={submitting || prize > remainingBudget}
-                  className="rounded-xl px-5 h-10 bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 disabled:opacity-40"
+                  disabled={submitting || isFormInvalid}
+                  className="rounded-xl px-5 h-10 bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
                     <>
@@ -637,7 +733,7 @@ export default function AdminTournamentDetailPage() {
                       Đang xử lý...
                     </>
                   ) : (
-                    "Lưu vòng đua"
+                    "Lưu vòng đấu"
                   )}
                 </Button>
               </div>
