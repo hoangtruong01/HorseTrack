@@ -108,7 +108,10 @@ export class RacesService {
   }
 
   async findByTournament(tournamentId: string, page = 1, limit = 20) {
-    const filter = { tournamentId, deletedAt: { $exists: false } };
+    const filter = {
+      tournamentId: new Types.ObjectId(tournamentId),
+      deletedAt: { $exists: false },
+    };
     const [data, total] = await Promise.all([
       this.raceModel
         .find(filter)

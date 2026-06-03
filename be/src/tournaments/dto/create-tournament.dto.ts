@@ -55,4 +55,9 @@ export class CreateTournamentDto {
   @IsNumber()
   @Min(0)
   prizePool?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

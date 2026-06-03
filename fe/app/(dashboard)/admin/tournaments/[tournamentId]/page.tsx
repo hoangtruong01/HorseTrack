@@ -6,11 +6,11 @@ import Link from "next/link";
 import { 
   Trophy, Calendar, MapPin, Users, ChevronLeft, Plus, 
   Trash2, Loader2, AlertCircle, RefreshCw, Play, CheckCircle2,
-  CloudSun, Navigation, Milestone
+  CloudSun, Navigation, Milestone, X
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { tournamentsApi, racesApi, type TournamentItem, type RaceItem } from "@/lib/api-client";
+import { tournamentsApi, racesApi, apiFetch, type TournamentItem, type RaceItem } from "@/lib/api-client";
 import { toast } from "sonner";
 
 const raceStatusColors: Record<string, string> = {
@@ -49,6 +49,26 @@ export default function AdminTournamentDetailPage() {
   const [prize, setPrize] = useState(0);
   const [trackCondition, setTrackCondition] = useState("Dry turf");
   const [weatherSnapshot, setWeatherSnapshot] = useState("Sunny");
+
+  // Race Details Modal State
+  const [selectedRace, setSelectedRace] = useState<RaceItem | null>(null);
+  const [raceRegistrations, setRaceRegistrations] = useState<any[]>([]);
+  const [loadingRegistrations, setLoadingRegistrations] = useState(false);
+
+  const handleOpenRaceDetails = async (race: RaceItem) => {
+    setSelectedRace(race);
+    setLoadingRegistrations(true);
+    try {
+      const res = await apiFetch<any>(`/registrations?raceId=${race._id}&limit=100`);
+      setRaceRegistrations(res.data || []);
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Không thể tải danh sách đăng ký tham gia vòng đua.");
+      setRaceRegistrations([]);
+    } finally {
+      setLoadingRegistrations(false);
+    }
+  };
 
   const loadDetails = useCallback(async () => {
     setLoading(true);
@@ -227,23 +247,70 @@ export default function AdminTournamentDetailPage() {
       </div>
 
       {/* Tournament Info Deck */}
-      <section className="grid gap-6 md:grid-cols-3">
-        <div className="md:col-span-2 rounded-2xl border border-white/10 bg-[#15151E]/85 p-6 space-y-4 shadow-[0_18px_56px_rgba(0,0,0,0.28)] relative overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary to-transparent" />
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#E10600] flex items-center gap-1.5">
-            <Trophy className="size-4" /> Hồ Sơ Giải Đấu Chính
-          </h3>
-          {tournament.description && (
-            <p className="text-sm text-white/70 leading-relaxed pt-1">{tournament.description}</p>
-          )}
-          <div className="grid grid-cols-2 gap-4 text-xs pt-4 border-t border-white/5 text-white/50">
-            <div>
-              <span className="block text-[9px] uppercase tracking-widest text-white/30 mb-0.5">Địa điểm</span>
-              <span className="font-bold text-white flex items-center gap-1.5"><MapPin className="size-3.5 text-primary" /> {tournament.location || "Chưa thiết lập"}</span>
+      <section className="grid gap-6 lg:grid-cols-3">
+        {/* Main Details Card */}
+        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-[#15151E]/85 shadow-[0_18px_56px_rgba(0,0,0,0.28)] relative overflow-hidden flex flex-col md:flex-row">
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary to-transparent z-10" />
+          
+          {/* Tournament Image on Left */}
+          {tournament.imageUrl ? (
+            <div className="w-full md:w-64 h-48 md:h-auto relative shrink-0 border-b md:border-b-0 md:border-r border-white/10 bg-black/40">
+              <img
+                src={tournament.imageUrl}
+                alt={tournament.name}
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div>
-              <span className="block text-[9px] uppercase tracking-widest text-white/30 mb-0.5">Thời gian</span>
-              <span className="font-bold text-white flex items-center gap-1.5"><Calendar className="size-3.5 text-primary" /> {tournament.startDate ? new Date(tournament.startDate).toLocaleDateString("vi-VN") : "?"} - {tournament.endDate ? new Date(tournament.endDate).toLocaleDateString("vi-VN") : "?"}</span>
+          ) : (
+            <div className="w-full md:w-64 h-48 md:h-auto relative shrink-0 flex items-center justify-center border-b md:border-b-0 md:border-r border-white/10 bg-black/20">
+              <Trophy className="size-16 text-white/5" />
+            </div>
+          )}
+
+          {/* Details on Right */}
+          <div className="p-6 flex-1 space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#E10600] flex items-center gap-1.5">
+                <Trophy className="size-4 animate-pulse" /> Hồ Sơ Giải Đấu Chính
+              </h3>
+              <span className={`inline-flex rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase ${
+                tournament.status === "OPEN_REGISTRATION" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10" : "text-white/60 border-white/10 bg-white/5"
+              }`}>
+                {tournament.status}
+              </span>
+            </div>
+
+            {tournament.description && (
+              <p className="text-sm text-white/70 leading-relaxed">{tournament.description}</p>
+            )}
+
+            <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-xs pt-4 border-t border-white/5 text-white/50">
+              <div>
+                <span className="block text-[9px] uppercase tracking-widest text-white/30 mb-0.5">Địa điểm tổ chức</span>
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <MapPin className="size-3.5 text-primary" /> {tournament.location || "Chưa thiết lập"}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[9px] uppercase tracking-widest text-white/30 mb-0.5">Thời gian giải đấu</span>
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <Calendar className="size-3.5 text-primary" /> 
+                  {tournament.startDate ? new Date(tournament.startDate).toLocaleDateString("vi-VN") : "?"} - {tournament.endDate ? new Date(tournament.endDate).toLocaleDateString("vi-VN") : "?"}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[9px] uppercase tracking-widest text-white/30 mb-0.5">Thời gian nhận đăng ký</span>
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <Calendar className="size-3.5 text-teal-400" />
+                  {tournament.registrationStartDate ? new Date(tournament.registrationStartDate).toLocaleDateString("vi-VN") : "Chưa mở"} - {tournament.registrationEndDate ? new Date(tournament.registrationEndDate).toLocaleDateString("vi-VN") : "Chưa mở"}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[9px] uppercase tracking-widest text-white/30 mb-0.5">Sức chứa tối đa</span>
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <Users className="size-3.5 text-primary" /> {tournament.maxHorses ?? "?"} chiến mã
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -314,7 +381,16 @@ export default function AdminTournamentDetailPage() {
                   {races.map((race, index) => {
                     const isLocked = ["LIVE", "FINISHED", "RESULT_PUBLISHED"].includes(race.status);
                     return (
-                      <tr key={race._id} className="hover:bg-white/[0.01] transition duration-200">
+                      <tr 
+                        key={race._id} 
+                        onClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          if (target.closest('select') || target.closest('button')) return;
+                          void handleOpenRaceDetails(race);
+                        }}
+                        className="hover:bg-white/[0.03] cursor-pointer transition duration-200"
+                        title="Click to view detailed race information"
+                      >
                         <td className="p-4 font-mono font-bold text-white/40">{index + 1}</td>
                         <td className="p-4 font-bold text-white">
                           <span className="block">{race.name}</span>
@@ -546,6 +622,136 @@ export default function AdminTournamentDetailPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Race Detail Modal */}
+      {selectedRace && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary to-teal-500" />
+            
+            <div className="flex justify-between items-start border-b border-white/10 pb-4">
+              <div>
+                <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${raceStatusColors[selectedRace.status] || "text-white/60 border-white/10 bg-white/5"}`}>
+                  {selectedRace.status}
+                </span>
+                <h3 className="text-xl font-black uppercase text-white mt-1.5">{selectedRace.name}</h3>
+              </div>
+              <button 
+                onClick={() => { setSelectedRace(null); setRaceRegistrations([]); }}
+                className="text-white/40 hover:text-white text-lg font-bold bg-white/5 hover:bg-white/10 rounded-lg size-8 flex items-center justify-center transition"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* General Info Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+              <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                <span className="block text-[10px] uppercase text-white/40 font-bold mb-1">Cự ly thi đấu</span>
+                <span className="text-sm font-black text-white">{selectedRace.distanceMeters} mét</span>
+              </div>
+              <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                <span className="block text-[10px] uppercase text-white/40 font-bold mb-1">Số vòng chạy</span>
+                <span className="text-sm font-black text-white">{selectedRace.lapCount || 1} vòng</span>
+              </div>
+              <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                <span className="block text-[10px] uppercase text-white/40 font-bold mb-1">Mặt sân đua</span>
+                <span className="text-sm font-black text-white">{selectedRace.trackCondition || "Dry turf"}</span>
+              </div>
+              <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                <span className="block text-[10px] uppercase text-white/40 font-bold mb-1">Dự báo thời tiết</span>
+                <span className="text-sm font-black text-white">{selectedRace.weatherSnapshot || "Sunny"}</span>
+              </div>
+              <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                <span className="block text-[10px] uppercase text-white/40 font-bold mb-1">Quỹ giải thưởng</span>
+                <span className="text-sm font-black text-teal-400">{(selectedRace.prize || 0).toLocaleString()} pts</span>
+              </div>
+              <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                <span className="block text-[10px] uppercase text-white/40 font-bold mb-1">Giới hạn số ngựa</span>
+                <span className="text-sm font-black text-white">{(selectedRace.participantsCount || 0)} / {selectedRace.maxParticipants || 8} chiến mã</span>
+              </div>
+            </div>
+
+            {selectedRace.description && (
+              <div className="bg-white/[0.01] border border-white/5 rounded-xl p-4 text-xs text-white/70 space-y-1">
+                <span className="block text-[10px] font-bold text-white/30 uppercase tracking-wider">Thông tin mô tả</span>
+                <p className="leading-relaxed">{selectedRace.description}</p>
+              </div>
+            )}
+
+            {/* Registrations/Participants list */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-1.5">
+                <Users className="size-4 text-primary" /> Chiến mã đã đăng ký thi đấu ({raceRegistrations.length})
+              </h4>
+              
+              {loadingRegistrations ? (
+                <div className="flex flex-col items-center justify-center py-8 text-white/55">
+                  <Loader2 className="size-6 animate-spin text-primary" />
+                  <p className="mt-2 text-[10px] uppercase tracking-wider font-mono">Đang tải danh sách chiến mã...</p>
+                </div>
+              ) : raceRegistrations.length === 0 ? (
+                <div className="text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/[0.01] text-xs text-white/40">
+                  Chưa có chiến mã nào được ghi danh tham gia vòng đua này.
+                </div>
+              ) : (
+                <div className="rounded-xl border border-white/5 overflow-hidden bg-black/20 max-h-48 overflow-y-auto">
+                  <table className="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr className="bg-white/[0.03] border-b border-white/5 text-white/50 font-bold uppercase tracking-wider">
+                        <th className="p-2.5 w-10">Cổng</th>
+                        <th className="p-2.5">Chiến mã</th>
+                        <th className="p-2.5">Chủ ngựa (Owner)</th>
+                        <th className="p-2.5">Nài ngựa (Jockey)</th>
+                        <th className="p-2.5 text-right">Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-white/80">
+                      {raceRegistrations.map((reg, idx) => (
+                        <tr key={reg._id} className="hover:bg-white/[0.01]">
+                          <td className="p-2.5 font-mono font-bold text-white/40">#{reg.gateNumber ?? idx + 1}</td>
+                          <td className="p-2.5 font-bold text-white">
+                            {reg.horseId?.name || "Chiến mã ẩn"}
+                            {reg.horseId?.breed && <span className="block text-[9px] text-white/30 font-normal">{reg.horseId.breed}</span>}
+                          </td>
+                          <td className="p-2.5">
+                            {reg.ownerId?.fullName || "N/A"}
+                            {reg.ownerId?.email && <span className="block text-[9px] text-white/30">{reg.ownerId.email}</span>}
+                          </td>
+                          <td className="p-2.5">
+                            {reg.jockeyUserId?.fullName || "Chưa gán"}
+                            {reg.jockeyUserId?.email && <span className="block text-[9px] text-white/30">{reg.jockeyUserId.email}</span>}
+                          </td>
+                          <td className="p-2.5 text-right">
+                            <span className={`inline-flex rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider border ${
+                              reg.status === "APPROVED"
+                                ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
+                                : reg.status === "PENDING"
+                                ? "text-amber-400 border-amber-500/20 bg-amber-500/10"
+                                : "text-red-400 border-red-500/20 bg-red-500/10"
+                            }`}>
+                              {reg.status === "APPROVED" ? "Đã duyệt" : reg.status === "PENDING" ? "Chờ duyệt" : reg.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-white/5">
+              <Button 
+                onClick={() => { setSelectedRace(null); setRaceRegistrations([]); }}
+                className="rounded-xl px-5 h-10 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-wider text-xs border border-white/10"
+              >
+                Đóng
+              </Button>
+            </div>
           </div>
         </div>
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Plus, Link as LinkIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Link as LinkIcon, Trophy } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { tournamentsApi, type TournamentItem } from "@/lib/api-client";
@@ -95,28 +95,43 @@ export default function AdminTournamentsPage() {
             <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 h-40" />
           ))
         ) : tournaments.map((t) => (
-          <div key={t._id} className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 space-y-3 hover:border-white/20 transition">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="text-base font-black uppercase text-white leading-tight">{t.name}</h3>
-              <span className={`shrink-0 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${statusColors[t.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
-                {t.status}
-              </span>
-            </div>
-            {t.description && <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>}
-            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-              <span>🏆 Prize: <strong className="text-white">{t.prize?.toLocaleString() ?? "?"} pts</strong></span>
-              <span>🐴 Max: <strong className="text-white">{t.maxHorses ?? "?"} ngựa</strong></span>
-              {t.startDate && <span>📅 {new Date(t.startDate).toLocaleDateString("vi-VN")}</span>}
-              {t.endDate && <span>🏁 {new Date(t.endDate).toLocaleDateString("vi-VN")}</span>}
-            </div>
-            <div className="flex items-center gap-2 pt-1">
+          <div key={t._id} className="relative rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 flex flex-col justify-between space-y-3 hover:border-primary/30 hover:bg-[#1C1C25] transition duration-200 shadow-lg group">
+            <Link href={`/admin/tournaments/${t._id}`} className="block space-y-3 cursor-pointer group/card flex-1">
+              {t.imageUrl ? (
+                <div className="relative h-36 w-full overflow-hidden rounded-xl border border-white/5 bg-black/40">
+                  <img
+                    src={t.imageUrl}
+                    alt={t.name}
+                    className="h-full w-full object-cover group-hover:scale-105 transition duration-300"
+                  />
+                </div>
+              ) : (
+                <div className="relative h-36 w-full flex items-center justify-center rounded-xl border border-dashed border-white/10 bg-black/20">
+                  <Trophy className="size-8 text-white/10" />
+                </div>
+              )}
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="text-base font-black uppercase text-white leading-tight group-hover:text-primary transition">{t.name}</h3>
+                <span className={`shrink-0 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${statusColors[t.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
+                  {t.status}
+                </span>
+              </div>
+              {t.description && <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>}
+              <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground border-t border-white/5 pt-2">
+                <span>🏆 Prize: <strong className="text-white">{(t.prizePool || t.prize || 0).toLocaleString()} pts</strong></span>
+                <span>🐴 Max: <strong className="text-white">{t.maxHorses ?? "?"} ngựa</strong></span>
+                {t.startDate && <span>📅 {new Date(t.startDate).toLocaleDateString("vi-VN")}</span>}
+                {t.endDate && <span>🏁 {new Date(t.endDate).toLocaleDateString("vi-VN")}</span>}
+              </div>
+            </Link>
+            <div className="flex items-center gap-2 pt-2 border-t border-white/5 relative z-10" onClick={(e) => e.stopPropagation()}>
               <select
                 value={t.status}
                 disabled={actionLoading === t._id}
                 onChange={(e) => handleStatusChange(t._id, e.target.value)}
                 className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-xs text-white focus:border-primary/50 focus:outline-none disabled:opacity-50"
               >
-                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                {STATUS_OPTIONS.map(s => <option key={s} value={s} className="bg-[#15151E] text-white">{s}</option>)}
               </select>
               <Link
                 href={`/admin/tournaments/${t._id}`}

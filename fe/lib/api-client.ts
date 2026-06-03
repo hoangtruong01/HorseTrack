@@ -195,6 +195,7 @@ export interface TournamentItem {
   maxHorses?: number;
   prize?: number;       // backward-compat alias
   prizePool?: number;   // actual backend field
+  imageUrl?: string;
   createdAt?: string;
 }
 

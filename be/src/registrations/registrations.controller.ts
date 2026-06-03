@@ -24,6 +24,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { RegistrationsService } from './registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { RejectRegistrationDto } from './dto/reject-registration.dto';
+import { ListRegistrationsDto } from './dto/list-registrations.dto';
 
 @ApiTags('Registrations')
 @ApiBearerAuth()
@@ -41,21 +42,13 @@ export class RegistrationsController {
 
   @Get()
   @ApiOperation({ summary: 'List all registrations (Public / Admin / Spectators)' })
-  @ApiQuery({ name: 'tournamentId', required: false })
-  @ApiQuery({ name: 'raceId', required: false })
-  @ApiQuery({ name: 'status', required: false })
-  findAll(
-    @Query() pagination: PaginationDto,
-    @Query('tournamentId') tournamentId?: string,
-    @Query('raceId') raceId?: string,
-    @Query('status') status?: string,
-  ) {
+  findAll(@Query() query: ListRegistrationsDto) {
     return this.registrationsService.findAll(
-      pagination.page,
-      pagination.limit,
-      tournamentId,
-      raceId,
-      status,
+      query.page,
+      query.limit,
+      query.tournamentId,
+      query.raceId,
+      query.status,
     );
   }
 
