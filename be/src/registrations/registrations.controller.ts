@@ -8,7 +8,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { PaginationDto } from '../common/dto/pagination.dto';
@@ -48,11 +53,11 @@ export class RegistrationsController {
     @Query('status') status?: string,
   ) {
     return this.registrationsService.findAll(
-      query.page,
-      query.limit,
-      query.tournamentId,
-      query.raceId,
-      query.status,
+      pagination.page,
+      pagination.limit,
+      tournamentId,
+      raceId,
+      status,
     );
   }
 
