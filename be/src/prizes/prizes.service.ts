@@ -9,6 +9,10 @@ import {
 import { Race, RaceDocument } from '../races/schemas/race.schema';
 import { Horse, HorseDocument } from '../horses/schemas/horse.schema';
 import {
+  Registration,
+  RegistrationDocument,
+} from '../registrations/schemas/registration.schema';
+import {
   Prize,
   PrizeDocument,
   PrizePaymentStatus,
@@ -24,6 +28,8 @@ export class PrizesService {
     private resultModel: Model<RaceResultDocument>,
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
     @InjectModel(Horse.name) private horseModel: Model<HorseDocument>,
+    @InjectModel(Registration.name)
+    private registrationModel: Model<RegistrationDocument>,
     private ledgerService: RewardPointLedgerService,
   ) {}
 
@@ -47,11 +53,23 @@ export class PrizesService {
 
     const createdPrizes: PrizeDocument[] = [];
 
-    // Calculate 70/30 split
-    const ownerAmount = Math.round(totalPrize * 0.7);
+    // Read jockeySharePercent from registration (fallback to 30% if not set)
+    let jockeySharePct = 30;
+    if (winnerResult.horseId) {
+      const registration = await this.registrationModel.findOne({
+        raceId,
+        horseId: winnerResult.horseId,
+      });
+      if (registration?.jockeySharePercent) {
+        jockeySharePct = registration.jockeySharePercent;
+      }
+    }
+
+    const ownerSharePct = 100 - jockeySharePct;
+    const ownerAmount = Math.round(totalPrize * (ownerSharePct / 100));
     const jockeyAmount = totalPrize - ownerAmount;
 
-    // 1. Process Horse Owner Prize (70%)
+    // 1. Process Horse Owner Prize
     if (ownerAmount > 0 && horse.ownerId) {
       const existingOwnerPrize = await this.prizeModel.findOne({
         raceId,
@@ -66,7 +84,7 @@ export class PrizesService {
           points: ownerAmount,
           sourceType: LedgerSourceType.RACE_WIN_REWARD,
           sourceId: raceId,
-          note: `Received 70% winner reward for race "${race.name}" (Horse: ${horse.name})`,
+          note: `Received ${ownerSharePct}% winner reward for race "${race.name}" (Horse: ${horse.name})`,
         });
 
         const ownerPrize = await this.prizeModel.create({
@@ -83,7 +101,7 @@ export class PrizesService {
       }
     }
 
-    // 2. Process Jockey Prize (30%)
+    // 2. Process Jockey Prize
     if (jockeyAmount > 0 && winnerResult.jockeyUserId) {
       const existingJockeyPrize = await this.prizeModel.findOne({
         raceId,
@@ -98,7 +116,7 @@ export class PrizesService {
           points: jockeyAmount,
           sourceType: LedgerSourceType.RACE_WIN_REWARD,
           sourceId: raceId,
-          note: `Received 30% winner reward for race "${race.name}" (Jockey share)`,
+          note: `Received ${jockeySharePct}% winner reward for race "${race.name}" (Jockey share)`,
         });
 
         const jockeyPrize = await this.prizeModel.create({

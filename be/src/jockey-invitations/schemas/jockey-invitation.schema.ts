@@ -16,6 +16,9 @@ export class JockeyInvitation {
   @Prop({ type: Types.ObjectId, ref: 'Registration', required: true })
   registrationId!: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'Tournament', required: true })
+  tournamentId!: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'Race', required: true })
   raceId!: Types.ObjectId;
 
@@ -38,6 +41,9 @@ export class JockeyInvitation {
   @Prop()
   message?: string;
 
+  @Prop({ required: true, default: 30, min: 5, max: 50 })
+  jockeySharePercent!: number;
+
   @Prop()
   respondedAt?: Date;
 
@@ -53,3 +59,4 @@ JockeyInvitationSchema.index({ raceId: 1 });
 JockeyInvitationSchema.index({ ownerId: 1 });
 JockeyInvitationSchema.index({ jockeyUserId: 1, status: 1 });
 JockeyInvitationSchema.index({ raceId: 1, jockeyUserId: 1 });
+JockeyInvitationSchema.index({ tournamentId: 1 });

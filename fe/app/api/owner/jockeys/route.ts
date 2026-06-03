@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("access_token")?.value;
@@ -13,7 +13,11 @@ export async function GET() {
       );
     }
 
-    const response = await fetch("http://localhost:3000/api/v1/jockeys", {
+    const { searchParams } = new URL(request.url);
+    const page = searchParams.get("page") || "1";
+    const limit = searchParams.get("limit") || "100";
+
+    const response = await fetch(`http://localhost:3000/api/v1/jockeys?page=${page}&limit=${limit}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
