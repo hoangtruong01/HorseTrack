@@ -12,6 +12,8 @@ import {
   ClipboardCheck,
   ChevronRight,
   TrendingUp,
+  Activity,
+  Medal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/data-display/stat-card";
@@ -157,7 +159,7 @@ export default function OwnerDashboardPage() {
       {/* Quick Action Hub */}
       <section className="space-y-4">
         <h3 className="text-lg font-black uppercase tracking-wider text-white">Chức năng chính</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           
           {/* Action 1: Danh sách ngựa */}
           <Link
@@ -210,7 +212,58 @@ export default function OwnerDashboardPage() {
             </p>
           </Link>
 
-          {/* Action 4: Ví thưởng */}
+          {/* Action 4: Mời Jockey */}
+          <Link
+            href="/owner/jockey-invitations"
+            className="group block rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-[#E10600]/30 hover:bg-[#1C1C25] transition shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          >
+            <div className="size-10 rounded-xl bg-white/5 group-hover:bg-[#E10600]/10 flex items-center justify-center border border-white/10 group-hover:border-[#E10600]/25 transition mb-4">
+              <Users className="size-5 text-white/60 group-hover:text-primary transition" />
+            </div>
+            <h4 className="font-black uppercase tracking-tight text-white group-hover:text-primary transition flex items-center justify-between">
+              Mời nài ngựa
+              <ChevronRight className="size-4 opacity-0 group-hover:opacity-100 transition -translate-x-2 group-hover:translate-x-0" />
+            </h4>
+            <p className="text-xs text-white/50 mt-2 leading-relaxed">
+              Quản lý và gửi lời mời đến nài ngựa chuyên nghiệp điều khiển ngựa chiến của bạn.
+            </p>
+          </Link>
+
+          {/* Action 5: Theo dõi kết quả */}
+          <Link
+            href="/owner/results"
+            className="group block rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-[#E10600]/30 hover:bg-[#1C1C25] transition shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          >
+            <div className="size-10 rounded-xl bg-white/5 group-hover:bg-[#E10600]/10 flex items-center justify-center border border-white/10 group-hover:border-[#E10600]/25 transition mb-4">
+              <Activity className="size-5 text-white/60 group-hover:text-primary transition" />
+            </div>
+            <h4 className="font-black uppercase tracking-tight text-white group-hover:text-primary transition flex items-center justify-between">
+              Kết quả thi đấu
+              <ChevronRight className="size-4 opacity-0 group-hover:opacity-100 transition -translate-x-2 group-hover:translate-x-0" />
+            </h4>
+            <p className="text-xs text-white/50 mt-2 leading-relaxed">
+              Theo dõi chi tiết kết quả xếp hạng và biên bản thời gian chạy của các trận đấu.
+            </p>
+          </Link>
+
+          {/* Action 6: Bảng xếp hạng */}
+          <Link
+            href="/owner/rankings"
+            className="group block rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-[#E10600]/30 hover:bg-[#1C1C25] transition shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          >
+            <div className="size-10 rounded-xl bg-white/5 group-hover:bg-[#E10600]/10 flex items-center justify-center border border-white/10 group-hover:border-[#E10600]/25 transition mb-4">
+              <Medal className="size-5 text-white/60 group-hover:text-primary transition" />
+            </div>
+            <h4 className="font-black uppercase tracking-tight text-white group-hover:text-primary transition flex items-center justify-between">
+              Bảng xếp hạng
+              <ChevronRight className="size-4 opacity-0 group-hover:opacity-100 transition -translate-x-2 group-hover:translate-x-0" />
+            </h4>
+            <p className="text-xs text-white/50 mt-2 leading-relaxed">
+              Xem đại sảnh vinh danh xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số trận thắng.
+            </p>
+          </Link>
+
+          {/* Action 7: Ví thưởng */}
           <Link
             href="/owner/wallet"
             className="group block rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-[#E10600]/30 hover:bg-[#1C1C25] transition shadow-[0_4px_20px_rgba(0,0,0,0.15)]"

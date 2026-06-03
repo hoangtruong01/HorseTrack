@@ -161,6 +161,20 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Invite professional jockeys for your approved horses.",
   },
   {
+    title: "Kết Quả Thi Đấu",
+    href: "/owner/results",
+    role: "Owner",
+    icon: Activity,
+    description: "Theo dõi kết quả các trận đua và xếp hạng cán đích chính thức.",
+  },
+  {
+    title: "Bảng Xếp Hạng",
+    href: "/owner/rankings",
+    role: "Owner",
+    icon: Medal,
+    description: "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch.",
+  },
+  {
     title: "Ví Của Tôi",
     href: "/owner/wallet",
     role: "Owner",
@@ -203,6 +217,13 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Xem chi tiết chỉ số kỹ năng nghề nghiệp và kết quả sự nghiệp.",
   },
   {
+    title: "Bảng Xếp Hạng",
+    href: "/jockey/rankings",
+    role: "Jockey",
+    icon: Medal,
+    description: "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch.",
+  },
+  {
     title: "Ví Của Tôi",
     href: "/jockey/wallet",
     role: "Jockey",
@@ -222,6 +243,13 @@ export const dashboardNavigation: NavigationItem[] = [
     role: "Referee",
     icon: Flag,
     description: "Danh sách các cuộc đua được phân công giám sát và điều hành.",
+  },
+  {
+    title: "Bảng Xếp Hạng",
+    href: "/referee/rankings",
+    role: "Referee",
+    icon: Medal,
+    description: "Theo dõi bảng tổng hợp hiệu suất thi đấu của toàn bộ nài ngựa và chiến mã.",
   },
   {
     title: "Pre-race Check",
