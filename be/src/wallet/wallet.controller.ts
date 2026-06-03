@@ -38,10 +38,7 @@ export class WalletController {
   @Post('deposit/for-user/:userId')
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Admin deposits money to a specific user wallet' })
-  depositForUser(
-    @Param('userId') userId: string,
-    @Body() dto: DepositDto,
-  ) {
+  depositForUser(@Param('userId') userId: string, @Body() dto: DepositDto) {
     return this.walletService.deposit(userId, dto.amount);
   }
 
@@ -70,7 +67,9 @@ export class WalletController {
 
   @Get('all-transactions')
   @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'List all wallet transactions for all users (Admin only)' })
+  @ApiOperation({
+    summary: 'List all wallet transactions for all users (Admin only)',
+  })
   findAllTransactions(@Query() pagination: PaginationDto) {
     return this.walletService.findAllTransactions(
       pagination.page,
@@ -80,7 +79,9 @@ export class WalletController {
 
   @Get('user/:userId/history')
   @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'Get wallet history for a specific user (Admin only)' })
+  @ApiOperation({
+    summary: 'Get wallet history for a specific user (Admin only)',
+  })
   findUserHistory(
     @Param('userId') userId: string,
     @Query() pagination: PaginationDto,

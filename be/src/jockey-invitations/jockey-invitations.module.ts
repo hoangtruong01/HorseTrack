@@ -36,4 +36,3 @@ import { JockeyInvitationsService } from './jockey-invitations.service';
   exports: [JockeyInvitationsService],
 })
 export class JockeyInvitationsModule {}
-

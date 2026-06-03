@@ -21,8 +21,6 @@ import { CreateCashoutDto } from './dto/create-cashout.dto';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
-
-
 @Injectable()
 export class WalletService {
   constructor(

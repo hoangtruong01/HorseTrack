@@ -11,6 +11,7 @@ import {
 } from '../race-results/schemas/race-result.schema';
 import { Race } from '../races/schemas/race.schema';
 import { Horse } from '../horses/schemas/horse.schema';
+import { Registration } from '../registrations/schemas/registration.schema';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 import { Types } from 'mongoose';
@@ -36,6 +37,10 @@ describe('PrizesService', () => {
     findById: jest.fn(),
   };
 
+  const mockRegistrationModel = {
+    findOne: jest.fn(),
+  };
+
   const mockLedgerService = {
     credit: jest.fn(),
   };
@@ -59,6 +64,10 @@ describe('PrizesService', () => {
         {
           provide: getModelToken(Horse.name),
           useValue: mockHorseModel,
+        },
+        {
+          provide: getModelToken(Registration.name),
+          useValue: mockRegistrationModel,
         },
         {
           provide: RewardPointLedgerService,

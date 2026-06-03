@@ -112,4 +112,3 @@ export const HorseSchema = SchemaFactory.createForClass(Horse);
 
 // Compound index for quick owner queries
 HorseSchema.index({ ownerId: 1, status: 1 });
-

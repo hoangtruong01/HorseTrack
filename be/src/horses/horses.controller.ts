@@ -126,7 +126,11 @@ export class HorsesController {
     @Query() pagination: PaginationDto,
     @Query('search') search?: string,
   ) {
-    return this.horsesService.findAll(pagination.page, pagination.limit, search);
+    return this.horsesService.findAll(
+      pagination.page,
+      pagination.limit,
+      search,
+    );
   }
 
   @Patch(':id/approve')
@@ -141,10 +145,7 @@ export class HorsesController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Admin: Reject a horse' })
-  async reject(
-    @Param('id') id: string,
-    @Body('reason') reason: string,
-  ) {
+  async reject(@Param('id') id: string, @Body('reason') reason: string) {
     return this.horsesService.rejectHorse(id, reason);
   }
 

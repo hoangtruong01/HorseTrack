@@ -89,7 +89,9 @@ export class RaceResultsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.REFEREE, RoleName.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Bulk record/update results for a race (Referee/Admin)' })
+  @ApiOperation({
+    summary: 'Bulk record/update results for a race (Referee/Admin)',
+  })
   bulkCreate(
     @Param('raceId') raceId: string,
     @Body() dto: BulkRaceResultsDto,

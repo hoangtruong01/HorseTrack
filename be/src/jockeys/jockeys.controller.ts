@@ -53,7 +53,11 @@ export class JockeysController {
     @Query() pagination: PaginationDto,
     @Query('status') status?: JockeyStatus,
   ) {
-    return this.jockeysService.findAllAdmin(pagination.page, pagination.limit, status);
+    return this.jockeysService.findAllAdmin(
+      pagination.page,
+      pagination.limit,
+      status,
+    );
   }
 
   @Get('me')

@@ -8,12 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -41,7 +36,9 @@ export class RegistrationsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all registrations (Public / Admin / Spectators)' })
+  @ApiOperation({
+    summary: 'List all registrations (Public / Admin / Spectators)',
+  })
   findAll(@Query() query: ListRegistrationsDto) {
     return this.registrationsService.findAll(
       query.page,

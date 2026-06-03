@@ -201,17 +201,34 @@ export class RacesService {
     // Automate Tournament Status Transitions:
     try {
       if (status === RaceStatus.LIVE) {
-        const tournament = await this.tournamentsService.findOne(race.tournamentId.toString());
+        const tournament = await this.tournamentsService.findOne(
+          race.tournamentId.toString(),
+        );
         if (tournament.status === TournamentStatus.OPEN_REGISTRATION) {
-          await this.tournamentsService.updateStatus(tournament._id.toString(), TournamentStatus.CLOSED_REGISTRATION);
-          await this.tournamentsService.updateStatus(tournament._id.toString(), TournamentStatus.ONGOING);
+          await this.tournamentsService.updateStatus(
+            tournament._id.toString(),
+            TournamentStatus.CLOSED_REGISTRATION,
+          );
+          await this.tournamentsService.updateStatus(
+            tournament._id.toString(),
+            TournamentStatus.ONGOING,
+          );
         } else if (tournament.status === TournamentStatus.CLOSED_REGISTRATION) {
-          await this.tournamentsService.updateStatus(tournament._id.toString(), TournamentStatus.ONGOING);
+          await this.tournamentsService.updateStatus(
+            tournament._id.toString(),
+            TournamentStatus.ONGOING,
+          );
         }
       } else if (
-        [RaceStatus.FINISHED, RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED].includes(status)
+        [
+          RaceStatus.FINISHED,
+          RaceStatus.RESULT_PUBLISHED,
+          RaceStatus.CANCELLED,
+        ].includes(status)
       ) {
-        const tournament = await this.tournamentsService.findOne(race.tournamentId.toString());
+        const tournament = await this.tournamentsService.findOne(
+          race.tournamentId.toString(),
+        );
         if (tournament.status === TournamentStatus.ONGOING) {
           const activeRacesCount = await this.raceModel.countDocuments({
             tournamentId: race.tournamentId,
@@ -225,7 +242,10 @@ export class RacesService {
             },
           });
           if (activeRacesCount === 0) {
-            await this.tournamentsService.updateStatus(tournament._id.toString(), TournamentStatus.COMPLETED);
+            await this.tournamentsService.updateStatus(
+              tournament._id.toString(),
+              TournamentStatus.COMPLETED,
+            );
           }
         }
       }

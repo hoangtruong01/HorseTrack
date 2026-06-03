@@ -284,8 +284,14 @@ export class JockeyInvitationsService {
         .find(filter)
         .populate('registrationId')
         .populate('tournamentId', 'name startDate endDate location status')
-        .populate('raceId', 'name startTime status distanceMeters lapCount location prize')
-        .populate('horseId', 'name breed age gender color weightKg heightCm baseSpeed staminaScore image healthStatus')
+        .populate(
+          'raceId',
+          'name startTime status distanceMeters lapCount location prize',
+        )
+        .populate(
+          'horseId',
+          'name breed age gender color weightKg heightCm baseSpeed staminaScore image healthStatus',
+        )
         .populate('ownerId', 'fullName email phone avatar')
         .skip((page - 1) * limit)
         .limit(limit)
