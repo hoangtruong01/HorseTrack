@@ -53,10 +53,26 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'List users with pagination, search and filter (admin only)' })
-  @ApiQuery({ name: 'search', required: false, description: 'Search by name or email' })
-  @ApiQuery({ name: 'role', required: false, enum: RoleName, description: 'Filter by role' })
-  @ApiQuery({ name: 'status', required: false, enum: UserStatus, description: 'Filter by status' })
+  @ApiOperation({
+    summary: 'List users with pagination, search and filter (admin only)',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Search by name or email',
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: RoleName,
+    description: 'Filter by role',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: UserStatus,
+    description: 'Filter by status',
+  })
   @ApiResponse({ status: 200 })
   async findAll(
     @Query() pagination: PaginationDto,

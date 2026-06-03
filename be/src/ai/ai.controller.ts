@@ -95,7 +95,8 @@ export class AiController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Sinh gợi ý dự đoán cho một race (Admin hoặc Spectator có subscription)',
+    summary:
+      'Sinh gợi ý dự đoán cho một race (Admin hoặc Spectator có subscription)',
     description:
       'Spectator cần subscription đang hoạt động. Admin không cần subscription.',
   })

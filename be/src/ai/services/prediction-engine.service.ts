@@ -37,7 +37,10 @@ interface EntryData {
   horseId: Types.ObjectId;
   score: number;
   hasHistory: boolean;
-  meta: Omit<HorsePredictionMeta, 'predictedRank' | 'winProbability' | 'strengthScore'>;
+  meta: Omit<
+    HorsePredictionMeta,
+    'predictedRank' | 'winProbability' | 'strengthScore'
+  >;
 }
 
 @Injectable()
@@ -116,7 +119,9 @@ export class PredictionEngineService {
         weather: race.weather,
       },
     );
-    const source = llmReasoning ? PredictionSource.LLM : PredictionSource.RULE_BASED;
+    const source = llmReasoning
+      ? PredictionSource.LLM
+      : PredictionSource.RULE_BASED;
     const reasoning =
       llmReasoning ??
       'Dự đoán được tổng hợp từ lịch sử thi đấu và các chỉ số sức mạnh của từng ngựa.';

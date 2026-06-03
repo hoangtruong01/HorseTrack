@@ -54,11 +54,11 @@ export class RaceChecksController {
   @Post('race/:raceId/initialize')
   @UseGuards(RolesGuard)
   @Roles(RoleName.REFEREE)
-  @ApiOperation({ summary: 'Auto-initialize race checks for all approved registrations (Referee)' })
-  initialize(
-    @Param('raceId') raceId: string,
-    @CurrentUser() user: JwtUser,
-  ) {
+  @ApiOperation({
+    summary:
+      'Auto-initialize race checks for all approved registrations (Referee)',
+  })
+  initialize(@Param('raceId') raceId: string, @CurrentUser() user: JwtUser) {
     return this.service.initializeChecksForRace(raceId, user.id);
   }
 }

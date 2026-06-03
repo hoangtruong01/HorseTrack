@@ -60,7 +60,9 @@ export class LlmService {
   ): Promise<string | null> {
     if (!this.ai) return null;
 
-    const sorted = [...horses].sort((a, b) => a.predictedRank - b.predictedRank);
+    const sorted = [...horses].sort(
+      (a, b) => a.predictedRank - b.predictedRank,
+    );
 
     const horseLines = sorted
       .map((h) => {
@@ -73,7 +75,9 @@ export class LlmService {
             ? `3 race gần nhất: hạng ${h.recentRanks.join(', ')}`
             : 'chưa có lịch sử';
         const speed =
-          h.avgSpeedKmh > 0 ? `tốc độ trung bình ${h.avgSpeedKmh.toFixed(1)} km/h` : '';
+          h.avgSpeedKmh > 0
+            ? `tốc độ trung bình ${h.avgSpeedKmh.toFixed(1)} km/h`
+            : '';
         const jockey = h.jockeySkill ? `jockey ${h.jockeySkill}` : '';
         const extras = [recentForm, speed, jockey].filter(Boolean).join(', ');
         return `  ${h.predictedRank}. ${h.name} (${h.breed ?? 'chưa rõ giống'}, ${h.age ?? '?'} tuổi, sức khoẻ: ${h.healthStatus}) — điểm sức mạnh ${h.strengthScore.toFixed(1)}, tỷ lệ thắng ${winRate}%, ${extras}`;
@@ -127,7 +131,10 @@ ${raceLines}`;
   private async callModel(prompt: string, tag: string): Promise<string | null> {
     try {
       const result = await Promise.race([
-        this.ai!.models.generateContent({ model: this.model, contents: prompt }),
+        this.ai!.models.generateContent({
+          model: this.model,
+          contents: prompt,
+        }),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('LLM timeout')), this.timeoutMs),
         ),
@@ -136,7 +143,9 @@ ${raceLines}`;
       const text = result.text ?? '';
       const parsed = this.parseJson(text) as { reasoning?: string } | null;
       if (!parsed?.reasoning) {
-        this.logger.warn(`LLM ${tag}: no reasoning in response — raw: ${text.slice(0, 200)}`);
+        this.logger.warn(
+          `LLM ${tag}: no reasoning in response — raw: ${text.slice(0, 200)}`,
+        );
         return null;
       }
       return parsed.reasoning;

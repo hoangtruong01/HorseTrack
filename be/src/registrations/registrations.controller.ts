@@ -40,7 +40,9 @@ export class RegistrationsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all registrations (Public / Admin / Spectators)' })
+  @ApiOperation({
+    summary: 'List all registrations (Public / Admin / Spectators)',
+  })
   @ApiQuery({ name: 'tournamentId', required: false })
   @ApiQuery({ name: 'raceId', required: false })
   @ApiQuery({ name: 'status', required: false })

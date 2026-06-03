@@ -110,12 +110,18 @@ export class UsersService {
   }
 
   async ban(id: string): Promise<void> {
-    const result = await this.usersRepository.updateStatus(id, UserStatus.BANNED);
+    const result = await this.usersRepository.updateStatus(
+      id,
+      UserStatus.BANNED,
+    );
     if (!result) throw new NotFoundException('User not found');
   }
 
   async unban(id: string): Promise<void> {
-    const result = await this.usersRepository.updateStatus(id, UserStatus.ACTIVE);
+    const result = await this.usersRepository.updateStatus(
+      id,
+      UserStatus.ACTIVE,
+    );
     if (!result) throw new NotFoundException('User not found');
   }
 
