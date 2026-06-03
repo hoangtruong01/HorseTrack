@@ -405,3 +405,38 @@ export const walletApi = {
 export const dashboardApi = {
   getAdminStats: () => apiFetch<Record<string, unknown>>("/dashboard/admin"),
 };
+
+// ─── Registrations ───────────────────────────────────────────────────────────
+export interface RegistrationItem {
+  _id: string;
+  tournamentId?: { _id: string; name: string; status: string } | string;
+  raceId?: { _id: string; name: string; startTime: string; status: string } | string;
+  horseId?: { _id: string; name: string; breed: string } | string;
+  ownerId?: { _id: string; fullName: string; email: string } | string;
+  jockeyUserId?: { _id: string; fullName: string; email: string } | string;
+  status: string;
+  note?: string;
+  rejectedReason?: string;
+  approvedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const registrationsApi = {
+  list: (params?: { page?: number; limit?: number; tournamentId?: string; raceId?: string; status?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.tournamentId) qs.set("tournamentId", params.tournamentId);
+    if (params?.raceId) qs.set("raceId", params.raceId);
+    if (params?.status) qs.set("status", params.status);
+    return apiFetch<PaginatedResult<RegistrationItem>>(`/registrations?${qs}`);
+  },
+  get: (id: string) => apiFetch<RegistrationItem>(`/registrations/${id}`),
+  approve: (id: string) => apiFetch<RegistrationItem>(`/registrations/${id}/approve`, { method: "PATCH" }),
+  reject: (id: string, reason?: string) =>
+    apiFetch<RegistrationItem>(`/registrations/${id}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify({ reason }),
+    }),
+};

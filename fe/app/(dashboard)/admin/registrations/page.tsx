@@ -1,62 +1,135 @@
-import { ClipboardCheck } from "lucide-react";
+"use client";
 
+import { useEffect, useState, useCallback } from "react";
+import { ClipboardCheck, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { RegistrationTable } from "@/features/registrations/components/registration-table";
-import { mockRegistrations } from "@/features/registrations/mock-registrations";
+import { registrationsApi } from "@/lib/api-client";
+import type { RaceRegistration } from "@/features/registrations/mock-registrations";
+import { toast } from "sonner";
 
 export default function AdminRegistrationsPage() {
-  const counts = mockRegistrations.reduce(
-    (acc, registration) => {
-      acc[registration.status] += 1;
+  const [registrations, setRegistrations] = useState<RaceRegistration[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchRegistrations = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await registrationsApi.list({ limit: 100 });
+      const rawList = res.data || [];
+      
+      const mapped = rawList.map((item: any): RaceRegistration => {
+        const statusVal = item.status || "PENDING";
+        const statusLower = statusVal.toLowerCase();
+        
+        let statusMapped: "pending" | "approved" | "rejected" = "pending";
+        if (statusLower === "approved") statusMapped = "approved";
+        if (statusLower === "rejected") statusMapped = "rejected";
+        if (statusLower === "cancelled" || statusLower === "withdrawn") statusMapped = "rejected";
+
+        const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
+        const formattedDate = createdDate.toLocaleDateString("vi-VN") + " · " + createdDate.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
+
+        return {
+          id: item._id || item.id,
+          horse: item.horseId?.name || "Không rõ chiến mã",
+          horseCode: item.horseId?.breed || "HB-00",
+          owner: item.ownerId?.fullName || "Không rõ chủ ngựa",
+          ownerEmail: item.ownerId?.email || "",
+          raceId: item.raceId?._id || item.raceId || "",
+          race: item.raceId?.name || "Không rõ vòng đua",
+          tournament: item.tournamentId?.name || "Không rõ giải đấu",
+          submittedAt: formattedDate,
+          status: statusMapped,
+          eligibility: `Trạng thái thực tế: ${statusVal}. ${item.note || ""}`,
+          reviewNote: item.rejectedReason || "Không có ghi chú từ chối.",
+          adminTrail: [
+            "Đã nộp hồ sơ",
+            item.approvedAt ? `Được duyệt vào ${new Date(item.approvedAt).toLocaleString("vi-VN")}` : "Chờ duyệt",
+          ],
+        };
+      });
+
+      setRegistrations(mapped);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Lỗi khi tải danh sách đăng ký.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchRegistrations();
+  }, [fetchRegistrations]);
+
+  const counts = registrations.reduce(
+    (acc, reg) => {
+      if (reg.status === "approved") acc.approved += 1;
+      else if (reg.status === "rejected") acc.rejected += 1;
+      else acc.pending += 1;
       return acc;
     },
-    { approved: 0, pending: 0, rejected: 0 },
+    { approved: 0, pending: 0, rejected: 0 }
   );
 
   return (
     <main className="space-y-6">
       <PageHeader
-        eyebrow="Registration approval"
-        title="Race registration moderation"
-        description="Review horse, owner, race target, submission time, and mock eligibility notes before approving or rejecting. FE-first; no backend calls."
+        eyebrow="Phê duyệt ghi danh"
+        title="Quản lý yêu cầu đăng ký trận đua"
+        description="Duyệt hồ sơ đăng ký tham gia vòng đua từ các chủ ngựa. Phê duyệt hoặc từ chối dựa trên điều lệ giải đấu."
       />
+      
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
           <ClipboardCheck className="size-5 text-primary" />
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Pending
+            Chờ duyệt (PENDING)
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-white">
-            {counts.pending}
+            {isLoading ? "..." : counts.pending}
           </p>
           <StatusBadge
             className="mt-3"
-            label="Needs review"
+            label="Cần xem xét"
             tone="yellow"
-            pulse
+            pulse={counts.pending > 0}
           />
         </div>
         <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Approved
+            Đã duyệt (APPROVED)
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-white">
-            {counts.approved}
+            {isLoading ? "..." : counts.approved}
           </p>
-          <StatusBadge className="mt-3" label="Ready queue" tone="green" />
+          <StatusBadge className="mt-3" label="Sẵn sàng thi đấu" tone="green" />
         </div>
         <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Rejected
+            Từ chối (REJECTED)
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-white">
-            {counts.rejected}
+            {isLoading ? "..." : counts.rejected}
           </p>
-          <StatusBadge className="mt-3" label="Reason required" tone="red" />
+          <StatusBadge className="mt-3" label="Đã từ chối" tone="red" />
         </div>
       </section>
-      <RegistrationTable registrations={mockRegistrations} />
+
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 text-white/55">
+          <Loader2 className="size-8 animate-spin text-[#E10600]" />
+          <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách đăng ký...</p>
+        </div>
+      ) : (
+        <RegistrationTable 
+          registrations={registrations} 
+          limit={100} 
+          onRefresh={fetchRegistrations} 
+        />
+      )}
     </main>
   );
 }

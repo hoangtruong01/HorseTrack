@@ -1,7 +1,9 @@
 "use client";
 
 import { X } from "lucide-react";
-
+import { useState } from "react";
+import { toast } from "sonner";
+import { registrationsApi } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import type { RaceRegistration } from "@/features/registrations/mock-registrations";
 
@@ -10,6 +12,7 @@ export type ApprovalDialogProps = {
   action: "approve" | "reject" | null;
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 };
 
 export function ApprovalDialog({
@@ -17,10 +20,33 @@ export function ApprovalDialog({
   action,
   open,
   onClose,
+  onSuccess,
 }: ApprovalDialogProps) {
+  const [reason, setReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!open || !registration || !action) return null;
 
   const isReject = action === "reject";
+
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      if (isReject) {
+        await registrationsApi.reject(registration.id, reason);
+        toast.success(`Đã từ chối đơn đăng ký của ngựa ${registration.horse} thành công!`);
+      } else {
+        await registrationsApi.approve(registration.id);
+        toast.success(`Đã phê duyệt đơn đăng ký của ngựa ${registration.horse} thành công!`);
+      }
+      onSuccess?.();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Lỗi xử lý duyệt đơn đăng ký.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -45,7 +71,8 @@ export function ApprovalDialog({
           <button
             type="button"
             onClick={onClose}
-            className="grid size-10 place-items-center rounded-full border border-white/10 text-white/70 transition hover:bg-white/10 hover:text-white"
+            disabled={isSubmitting}
+            className="grid size-10 place-items-center rounded-full border border-white/10 text-white/70 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
             aria-label="Close approval dialog"
           >
             <X className="size-4" />
@@ -71,17 +98,19 @@ export function ApprovalDialog({
               className="block text-sm font-bold text-white"
               htmlFor="reject-reason"
             >
-              Reject reason placeholder
+              Lý do từ chối
               <textarea
                 id="reject-reason"
                 className="mt-2 min-h-28 w-full rounded-xl border border-white/10 bg-black/35 p-3 text-sm font-normal text-white outline-none transition placeholder:text-white/35 focus:border-primary focus:ring-2 focus:ring-primary/30"
-                placeholder="Example: missing health clearance, duplicate entry, owner needs resubmission..."
+                placeholder="Nhập lý do từ chối đăng ký..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                disabled={isSubmitting}
               />
             </label>
           ) : (
             <div className="rounded-xl border border-emerald-400/25 bg-emerald-400/10 p-4 text-sm text-emerald-100">
-              Approve action is mock-only. This confirms the registration
-              visually for the admin moderation workflow.
+              Bạn có chắc chắn muốn phê duyệt đơn đăng ký của chiến mã này vào trận đấu không? Hành động này sẽ được ghi nhận và nài ngựa (nếu có) sẽ có thể được mời tham gia.
             </div>
           )}
         </div>
@@ -91,16 +120,22 @@ export function ApprovalDialog({
             variant="outline"
             className="min-h-11 rounded-full"
             onClick={onClose}
+            disabled={isSubmitting}
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="button"
             variant={isReject ? "destructive" : "default"}
             className="min-h-11 rounded-full"
-            onClick={onClose}
+            onClick={handleConfirm}
+            disabled={isSubmitting}
           >
-            {isReject ? "Confirm reject" : "Confirm approve"}
+            {isSubmitting
+              ? "Đang xử lý..."
+              : isReject
+              ? "Xác nhận từ chối"
+              : "Xác nhận phê duyệt"}
           </Button>
         </div>
       </div>

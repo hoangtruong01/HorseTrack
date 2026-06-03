@@ -142,8 +142,12 @@ export class RegistrationsService {
     status?: string,
   ) {
     const filter: Record<string, unknown> = {};
-    if (tournamentId) filter.tournamentId = tournamentId;
-    if (raceId) filter.raceId = raceId;
+    if (tournamentId && Types.ObjectId.isValid(tournamentId)) {
+      filter.tournamentId = new Types.ObjectId(tournamentId);
+    }
+    if (raceId && Types.ObjectId.isValid(raceId)) {
+      filter.raceId = new Types.ObjectId(raceId);
+    }
     if (status) filter.status = status;
 
     const [data, total] = await Promise.all([
@@ -167,7 +171,7 @@ export class RegistrationsService {
   }
 
   async findMyRegistrations(ownerId: string, page = 1, limit = 20) {
-    const filter = { ownerId };
+    const filter = { ownerId: new Types.ObjectId(ownerId) };
     const [data, total] = await Promise.all([
       this.registrationModel
         .find(filter)

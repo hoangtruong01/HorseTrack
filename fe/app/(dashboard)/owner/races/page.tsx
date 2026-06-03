@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { OwnerRegistrationTable, type Registration } from "@/features/registrations/components/owner-registration-table";
 
 type Tournament = {
   _id: string;
@@ -53,6 +54,42 @@ export default function OwnerRacesBrowserPage() {
   const [loadingTournaments, setLoadingTournaments] = useState(true);
   const [loadingRaces, setLoadingRaces] = useState(false);
   const [search, setSearch] = useState("");
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [loadingRegistrations, setLoadingRegistrations] = useState(false);
+  const [activeTab, setActiveTab] = useState<"browse" | "requests">("browse");
+
+  // Fetch my registrations
+  const fetchRegistrations = useCallback(async () => {
+    setLoadingRegistrations(true);
+    try {
+      const response = await fetch("/api/owner/registrations");
+      if (response.ok) {
+        const resData = await response.json();
+        if (resData.success) {
+          const rawList = resData.data?.data || resData.data || [];
+          const mapped: Registration[] = rawList.map((item: any) => ({
+            id: item.id || item._id,
+            tournamentId: item.tournamentId?._id || item.tournamentId?.id || "",
+            tournamentName: item.tournamentId?.name || "Giải đấu tự do",
+            raceId: item.raceId?._id || item.raceId?.id || "",
+            raceName: item.raceId?.name || "Không rõ trận đua",
+            horseId: item.horseId?._id || item.horseId?.id || "",
+            horseName: item.horseId?.name || "Không rõ chiến mã",
+            ownerId: item.ownerId?._id || item.ownerId || "",
+            status: item.status,
+            note: item.note,
+            rejectedReason: item.rejectedReason,
+            createdAt: item.createdAt || new Date().toISOString(),
+          }));
+          setRegistrations(mapped);
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi lấy lịch sử đăng ký:", err);
+    } finally {
+      setLoadingRegistrations(false);
+    }
+  }, []);
 
   // Fetch all tournaments
   const fetchTournaments = useCallback(async () => {
@@ -112,6 +149,12 @@ export default function OwnerRacesBrowserPage() {
     }
   }, [selectedTournamentId, fetchRaces]);
 
+  useEffect(() => {
+    if (activeTab === "requests") {
+      void fetchRegistrations();
+    }
+  }, [activeTab, fetchRegistrations]);
+
   const selectedTournament = tournaments.find(
     (t) => t._id === selectedTournamentId || t.id === selectedTournamentId
   );
@@ -130,8 +173,33 @@ export default function OwnerRacesBrowserPage() {
         description="Chọn một giải đấu chính để xem các vòng đua nhỏ đang tuyển chiến mã. Đăng ký ngựa của bạn vào vòng đua phù hợp."
       />
 
-      {/* Two-column Layout */}
-      <div className="grid gap-6 lg:grid-cols-[380px_1fr] items-start">
+      {/* Navigation tabs */}
+      <div className="flex border-b border-white/10 gap-6 mt-4">
+        <button
+          onClick={() => setActiveTab("browse")}
+          className={`pb-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
+            activeTab === "browse"
+              ? "border-[#E10600] text-primary"
+              : "border-transparent text-white/50 hover:text-white/80"
+          }`}
+        >
+          Duyệt Giải Đấu & Đăng Ký
+        </button>
+        <button
+          onClick={() => setActiveTab("requests")}
+          className={`pb-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
+            activeTab === "requests"
+              ? "border-[#E10600] text-primary"
+              : "border-transparent text-white/50 hover:text-white/80"
+          }`}
+        >
+          Danh Sách Gửi Yêu Cầu
+        </button>
+      </div>
+
+      {activeTab === "browse" ? (
+        /* Two-column Layout */
+        <div className="grid gap-6 lg:grid-cols-[380px_1fr] items-start">
         {/* LEFT: Tournament List */}
         <aside className="space-y-4">
           <div className="flex items-center justify-between">
@@ -361,6 +429,42 @@ export default function OwnerRacesBrowserPage() {
           )}
         </section>
       </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-[0.15em] text-white/85">Yêu cầu đã gửi</h3>
+              <p className="text-xs text-white/40 mt-1">Danh sách chi tiết các hồ sơ đăng ký tham gia vòng đua đã được gửi.</p>
+            </div>
+            <Button
+              onClick={fetchRegistrations}
+              variant="outline"
+              size="sm"
+              className="rounded-xl bg-white/5 hover:bg-white/10 border-white/10 h-8"
+              disabled={loadingRegistrations}
+            >
+              {loadingRegistrations ? (
+                <Loader2 className="size-3.5 animate-spin mr-2" />
+              ) : (
+                <RefreshCw className="size-3.5 mr-2" />
+              )}
+              Làm mới
+            </Button>
+          </div>
+
+          {loadingRegistrations ? (
+            <div className="flex flex-col items-center justify-center py-20 text-white/55">
+              <Loader2 className="size-8 animate-spin text-[#E10600]" />
+              <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách gửi yêu cầu...</p>
+            </div>
+          ) : (
+            <OwnerRegistrationTable
+              registrations={registrations}
+              onRefresh={fetchRegistrations}
+            />
+          )}
+        </div>
+      )}
     </main>
   );
 }
