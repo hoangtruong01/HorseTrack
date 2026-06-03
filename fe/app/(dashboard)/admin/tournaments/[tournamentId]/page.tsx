@@ -220,6 +220,7 @@ export default function AdminTournamentDetailPage() {
   const totalPrizeAllocated = races.reduce((sum, r) => sum + (r.prize || 0), 0);
   const totalBudget = tournament.prizePool || tournament.prize || 0;
   const remainingBudget = totalBudget - totalPrizeAllocated;
+  const budgetPercent = totalBudget > 0 ? Math.min(100, Math.max(0, (totalPrizeAllocated / totalBudget) * 100)) : 0;
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
@@ -329,6 +330,15 @@ export default function AdminTournamentDetailPage() {
                 <span>Đã phân bổ:</span>
                 <span className="font-bold text-white">{totalPrizeAllocated.toLocaleString()} pts</span>
               </div>
+              
+              {/* Progress Bar */}
+              <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden my-2 border border-white/5">
+                <div 
+                  className={`h-full rounded-full transition-all duration-500 ${remainingBudget < 0 ? "bg-red-500" : "bg-teal-500"}`}
+                  style={{ width: `${budgetPercent}%` }}
+                />
+              </div>
+
               <div className="flex justify-between text-xs border-t border-white/5 pt-1.5 text-white/60">
                 <span>Ngân quỹ còn lại:</span>
                 <span className={`font-bold ${remainingBudget < 0 ? "text-red-400" : "text-teal-400"}`}>{remainingBudget.toLocaleString()} pts</span>
@@ -517,11 +527,21 @@ export default function AdminTournamentDetailPage() {
                     min={0}
                     value={prize}
                     onChange={(e) => setPrize(parseInt(e.target.value) || 0)}
-                    className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white font-mono focus:border-primary"
+                    className={`h-10 w-full rounded-xl border px-3 text-xs text-white font-mono focus:outline-none focus:ring-1 ${
+                      prize > remainingBudget
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5"
+                        : "border-white/10 focus:border-primary focus:ring-primary/20 bg-black/45"
+                    }`}
                   />
-                  <span className="text-[10px] text-white/40 font-normal">
-                    Còn khả dụng: {remainingBudget.toLocaleString()} pts
-                  </span>
+                  {prize > remainingBudget ? (
+                    <span className="text-[10px] text-red-400 font-semibold animate-pulse">
+                      Vượt quá ngân quỹ còn lại: {(prize - remainingBudget).toLocaleString()} pts!
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-white/40 font-normal">
+                      Còn khả dụng: {(remainingBudget - prize).toLocaleString()} pts
+                    </span>
+                  )}
                 </label>
               </div>
 
@@ -608,7 +628,7 @@ export default function AdminTournamentDetailPage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || prize > remainingBudget}
                   className="rounded-xl px-5 h-10 bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 disabled:opacity-40"
                 >
                   {submitting ? (
