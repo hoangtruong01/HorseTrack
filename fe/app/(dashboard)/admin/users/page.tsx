@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Users, Shield, Ban, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
-import { usersApi, type UserItem } from "@/lib/api-client";
+import { Users, Ban, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { TransHtml } from "@/components/i18n/trans-html";
+import { normalizePaginationMeta, usersApi, type UserItem } from "@/lib/api-client";
 
 const ROLES = ["admin", "owner", "jockey", "referee", "spectator", "counter_staff"];
 const STATUSES = ["active", "inactive", "banned", "deleted"];
@@ -25,6 +26,7 @@ const roleColors: Record<string, string> = {
 };
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -49,14 +51,15 @@ export default function AdminUsersPage() {
         role: filterRole || undefined,
         status: filterStatus || undefined,
       });
-      setUsers(res.data);
-      setMeta(res.meta);
-    } catch (e: any) {
-      showToast(e.message ?? "Không tải được danh sách users", "err");
+      setUsers(Array.isArray(res.data) ? res.data : []);
+      setMeta(normalizePaginationMeta(res.meta, 15));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : t("pages.admin.users.loadError");
+      showToast(message, "err");
     } finally {
       setLoading(false);
     }
-  }, [search, filterRole, filterStatus]);
+  }, [search, filterRole, filterStatus, t]);
 
   useEffect(() => { void fetchUsers(1); }, [fetchUsers]);
 
@@ -65,28 +68,28 @@ export default function AdminUsersPage() {
     try {
       if (u.status === "banned") {
         await usersApi.unban(u.id);
-        showToast(`Đã unban ${u.fullName}`);
+        showToast(t("pages.admin.users.toastUnban", { name: u.fullName }));
       } else {
         await usersApi.ban(u.id);
-        showToast(`Đã ban ${u.fullName}`);
+        showToast(t("pages.admin.users.toastBan", { name: u.fullName }));
       }
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      showToast(e.message, "err");
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleDelete = async (u: UserItem) => {
-    if (!confirm(`Xóa user "${u.fullName}"? Hành động này không thể hoàn tác.`)) return;
+    if (!confirm(t("pages.admin.users.confirmDelete", { name: u.fullName }))) return;
     setActionLoading(u.id);
     try {
       await usersApi.delete(u.id);
-      showToast(`Đã xóa ${u.fullName}`);
+      showToast(t("pages.admin.users.toastDelete", { name: u.fullName }));
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      showToast(e.message, "err");
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
     } finally {
       setActionLoading(null);
     }
@@ -94,26 +97,19 @@ export default function AdminUsersPage() {
 
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="User Management"
-        title="Quản Lý Người Dùng"
-        description="Xem, ban/unban, và xóa tài khoản. Tìm kiếm theo tên hoặc email."
-      />
 
-      {/* Toast */}
       {toast && (
         <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl transition-all ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
           {toast.msg}
         </div>
       )}
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
             className="w-full rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 pl-10 pr-4 py-2.5 text-sm dark:text-white text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
-            placeholder="Tìm theo tên, email..."
+            placeholder={t("pages.admin.users.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -123,7 +119,7 @@ export default function AdminUsersPage() {
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value)}
         >
-          <option value="">Tất cả Role</option>
+          <option value="">{t("pages.admin.users.allRoles")}</option>
           {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
         <select
@@ -131,33 +127,38 @@ export default function AdminUsersPage() {
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
-          <option value="">Tất cả Status</option>
+          <option value="">{t("pages.admin.users.allStatus")}</option>
           {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
-      {/* Stats */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Users className="size-4" />
-        <span>Tổng: <strong className="dark:text-white text-foreground">{meta.total}</strong> users — Trang {meta.page}/{meta.totalPages}</span>
+        <TransHtml
+          i18nKey="pages.admin.users.stats"
+          values={{
+            total: meta.total,
+            page: meta.page,
+            totalPages: meta.totalPages,
+          }}
+        />
       </div>
 
-      {/* Table */}
       <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.users.loading")}</div>
         ) : users.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Không tìm thấy user nào.</div>
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.users.empty")}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b dark:border-white/10 border-border text-left">
-                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Người dùng</th>
-                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Roles</th>
-                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngày tạo</th>
-                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">Actions</th>
+                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.users.colUser")}</th>
+                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.users.colRoles")}</th>
+                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.users.colStatus")}</th>
+                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.users.colCreated")}</th>
+                  <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">{t("pages.admin.users.colActions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -198,7 +199,7 @@ export default function AdminUsersPage() {
                           className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed ${u.status === "banned" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20"}`}
                         >
                           <Ban className="size-3" />
-                          {u.status === "banned" ? "Unban" : "Ban"}
+                          {u.status === "banned" ? t("pages.admin.common.unban") : t("pages.admin.common.ban")}
                         </button>
                         <button
                           onClick={() => handleDelete(u)}
@@ -206,7 +207,7 @@ export default function AdminUsersPage() {
                           className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 transition hover:scale-105 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           <Trash2 className="size-3" />
-                          Xóa
+                          {t("pages.admin.common.delete")}
                         </button>
                       </div>
                     </td>
@@ -218,7 +219,6 @@ export default function AdminUsersPage() {
         )}
       </div>
 
-      {/* Pagination */}
       {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button
@@ -226,15 +226,17 @@ export default function AdminUsersPage() {
             disabled={meta.page <= 1}
             className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition"
           >
-            <ChevronLeft className="size-4" /> Trước
+            <ChevronLeft className="size-4" /> {t("pages.admin.common.prev")}
           </button>
-          <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
+          <span className="text-sm text-muted-foreground">
+            {t("pages.admin.common.pageOf", { page: meta.page, total: meta.totalPages })}
+          </span>
           <button
             onClick={() => fetchUsers(meta.page + 1)}
             disabled={meta.page >= meta.totalPages}
             className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition"
           >
-            Sau <ChevronRight className="size-4" />
+            {t("pages.admin.common.next")} <ChevronRight className="size-4" />
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,12 +13,9 @@ export type ErrorStateProps = {
   className?: string;
 };
 
-export function ErrorState({
-  title = "Race control interrupted",
-  description = "The current view could not be loaded. This mock-first shell keeps actions local and safe.",
-  reset,
-  className,
-}: ErrorStateProps) {
+export function ErrorState({ title, description, reset, className }: ErrorStateProps) {
+  const { t } = useTranslation();
+
   return (
     <section
       className={cn(
@@ -30,16 +28,18 @@ export function ErrorState({
         className="mx-auto size-8 text-primary"
         aria-hidden="true"
       />
-      <h2 className="mt-4 text-xl font-black uppercase text-foreground">{title}</h2>
+      <h2 className="mt-4 text-xl font-black uppercase text-foreground">
+        {title ?? t("common.errorState.title")}
+      </h2>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-        {description}
+        {description ?? t("common.errorState.description")}
       </p>
       {reset ? (
         <Button
           className="mt-5 rounded-full bg-primary font-bold hover:bg-[#B80500]"
           onClick={reset}
         >
-          Retry shell
+          {t("common.errorState.retry")}
         </Button>
       ) : null}
     </section>

@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
 import { Activity, ArrowRight, ShieldCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { StatCard } from "@/components/data-display/stat-card";
 import { PageHeader } from "@/components/layout/page-header";
@@ -14,23 +18,75 @@ import {
   raceSummaries,
 } from "@/features/dashboard/mock-admin-dashboard";
 
+const quickActionKeys = [
+  "createTournament",
+  "createRace",
+  "reviewRegistrations",
+  "reviewResults",
+] as const;
+
+const statKeys = [
+  "tournaments",
+  "races",
+  "liveRaces",
+  "pendingRegistrations",
+  "upcomingRaces",
+  "resultsWaiting",
+] as const;
+
+const activityKeys = ["act01", "act02", "act03"] as const;
+
 export function AdminOverview() {
+  const { t } = useTranslation();
+
+  const translatedStats = useMemo(
+    () =>
+      adminStats.map((stat, index) => ({
+        ...stat,
+        label: t(`admin.stats.${statKeys[index]}.label`),
+        helper: t(`admin.stats.${statKeys[index]}.helper`),
+        trend: t(`admin.stats.${statKeys[index]}.trend`),
+      })),
+    [t],
+  );
+
+  const translatedQuickActions = useMemo(
+    () =>
+      quickActions.map((action, index) => ({
+        ...action,
+        title: t(`admin.quickActionsItems.${quickActionKeys[index]}.title`),
+        description: t(`admin.quickActionsItems.${quickActionKeys[index]}.description`),
+        label: t(`admin.quickActionsItems.${quickActionKeys[index]}.label`),
+      })),
+    [t],
+  );
+
+  const translatedActivities = useMemo(
+    () =>
+      adminActivities.map((item, index) => ({
+        ...item,
+        title: t(`admin.activity.items.${activityKeys[index]}.title`),
+        description: t(`admin.activity.items.${activityKeys[index]}.description`),
+      })),
+    [t],
+  );
+
   return (
     <main className="space-y-6">
       <PageHeader
-        eyebrow="Admin race control"
-        title="Race control overview"
-        description="Premium command center for tournament containers, independent race status, registration queues, and result-publish readiness. Mock data only."
+        eyebrow={t("admin.overview.systemOverview")}
+        title={t("admin.overview.title")}
+        description={t("admin.overview.subtitle")}
         actions={
           <>
             <Button asChild className="rounded-full">
               <Link href="/admin/races/new">
-                Create race
+                {t("admin.actions.createRace")}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
             <Button asChild variant="outline" className="rounded-full">
-              <Link href="/admin/registrations">Review queue</Link>
+              <Link href="/admin/registrations">{t("admin.actions.reviewQueue")}</Link>
             </Button>
           </>
         }
@@ -42,14 +98,13 @@ export function AdminOverview() {
         <div className="relative grid gap-6 lg:grid-cols-[1.35fr_0.65fr] lg:items-end">
           <div>
             <p className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
-              Mock command deck · Phase 4A
+              {t("admin.hero.badge")}
             </p>
             <h2 className="mt-5 max-w-4xl text-3xl font-black uppercase leading-tight tracking-tight dark:text-white text-foreground sm:text-5xl">
-              Keep live races visible. Push admin work into clear lanes.
+              {t("admin.overview.title")}
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              This overview is the admin entry point: status first, then queues,
-              then route entry points for future modules.
+              {t("admin.overview.subtitle")}
             </p>
           </div>
           <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4">
@@ -59,10 +114,10 @@ export function AdminOverview() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                  Scope guard
+                  {t("admin.hero.scopeGuard")}
                 </p>
                 <p className="mt-1 text-sm font-semibold dark:text-white text-foreground">
-                  No CRUD · No API · No realtime sockets
+                  {t("admin.hero.scopeGuardDesc")}
                 </p>
               </div>
             </div>
@@ -71,12 +126,12 @@ export function AdminOverview() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {adminStats.map((stat) => (
+        {translatedStats.map((stat) => (
           <StatCard key={stat.label} {...stat} />
         ))}
       </section>
 
-      <QuickActionGrid actions={quickActions} />
+      <QuickActionGrid actions={translatedQuickActions} />
 
       <RaceStatusOverview races={raceSummaries} counts={raceStatusCounts} />
 
@@ -84,10 +139,10 @@ export function AdminOverview() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-              Recent activity
+              {t("admin.activity.eyebrow")}
             </p>
             <h2 className="mt-2 text-2xl font-black uppercase tracking-tight dark:text-white text-foreground">
-              Admin feed
+              {t("admin.activity.title")}
             </h2>
           </div>
           <Activity
@@ -96,7 +151,7 @@ export function AdminOverview() {
           />
         </div>
         <div className="mt-5 divide-y divide-white/10 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50">
-          {adminActivities.map((item) => (
+          {translatedActivities.map((item) => (
             <article
               key={item.id}
               className="grid gap-3 p-4 sm:grid-cols-[5rem_1fr]"

@@ -1,11 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Clock, ShieldCheck } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
+
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { normalizeLanguage } from "@/lib/i18n-language";
 import { toast } from "sonner";
 
 type RaceInfo = {
@@ -22,6 +24,8 @@ type Assignment = {
 };
 
 export default function RefereePreRaceWorkspacePage() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = normalizeLanguage(i18n.language) === "en" ? "en-US" : "vi-VN";
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +33,7 @@ export default function RefereePreRaceWorkspacePage() {
     const fetchAssignments = async () => {
       try {
         const res = await fetch("/api/referee/referee-assignments/my-assignments?limit=100");
-        if (!res.ok) throw new Error("Không thể tải danh sách cuộc đua");
+        if (!res.ok) throw new Error(t("pages.referee.reports.fetchFailed"));
         const resData = await res.json();
         // Only accepted assignments
         const list = (resData.data?.data || []).filter(
@@ -37,7 +41,7 @@ export default function RefereePreRaceWorkspacePage() {
         );
         setAssignments(list);
       } catch (err: any) {
-        toast.error(err.message || "Lỗi tải danh sách cuộc đua.");
+        toast.error(err.message || t("pages.referee.reports.fetchError"));
       } finally {
         setIsLoading(false);
       }
@@ -46,9 +50,11 @@ export default function RefereePreRaceWorkspacePage() {
   }, []);
 
   const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return "Chưa xác định";
+    if (!dateStr) return t("pages.referee.common.dateUnknown");
     const d = new Date(dateStr);
-    return `${d.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} ngày ${d.toLocaleDateString("vi-VN")}`;
+    const time = d.toLocaleTimeString(dateLocale, { hour: "2-digit", minute: "2-digit" });
+    const date = d.toLocaleDateString(dateLocale);
+    return `${time} ${t("pages.referee.common.dateAt")} ${date}`;
   };
 
   if (isLoading) {
@@ -61,20 +67,15 @@ export default function RefereePreRaceWorkspacePage() {
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
-      <PageHeader
-        eyebrow="Tác nghiệp trọng tài"
-        title="Pre-race Check (Kiểm tra trước Race)"
-        description="Chọn một cuộc đua đang kiểm duyệt dưới đây để cập nhật tình trạng sức khỏe của ngựa và điểm danh nài ngựa trước giờ xuất phát."
-      />
 
       {assignments.length === 0 ? (
         <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed dark:border-white/10 border-border dark:bg-[#15151E] bg-card max-w-lg mx-auto space-y-3">
           <div className="size-12 rounded-full border dark:border-white/10 border-border flex items-center justify-center dark:text-white/30 text-muted-foreground">
             <ShieldCheck className="size-6" />
           </div>
-          <h4 className="font-bold dark:text-white text-foreground uppercase text-sm">Chưa có cuộc đua nào</h4>
+          <h4 className="font-bold dark:text-white text-foreground uppercase text-sm">{t("pages.referee.common.noRacesTitle")}</h4>
           <p className="text-xs dark:text-white/40 text-muted-foreground leading-relaxed">
-            Bạn cần được Ban tổ chức phân công và chấp nhận cuộc đua trước khi thực hiện kiểm duyệt.
+            {t("pages.referee.preRace.emptyDescription")}
           </p>
         </section>
       ) : (
@@ -93,9 +94,9 @@ export default function RefereePreRaceWorkspacePage() {
                 <div className="flex items-center justify-between">
                   <StatusBadge
                     label={
-                      a.raceId.status === "SCHEDULED" ? "Chưa mở" :
-                      a.raceId.status === "CHECKING" ? "Đang mở duyệt" :
-                      a.raceId.status === "READY" ? "Sẵn sàng" : "Đã chạy / Xong"
+                      a.raceId.status === "SCHEDULED" ? t("pages.referee.preRace.statusNotOpen") :
+                      a.raceId.status === "CHECKING" ? t("pages.referee.preRace.statusInspecting") :
+                      a.raceId.status === "READY" ? t("pages.referee.preRace.statusReady") : t("pages.referee.preRace.statusDone")
                     }
                     tone={
                       isChecking ? "yellow" :
@@ -104,7 +105,7 @@ export default function RefereePreRaceWorkspacePage() {
                     pulse={isChecking}
                   />
                   <span className="text-[10px] dark:text-white/40 text-muted-foreground font-bold uppercase">
-                    Cự ly: {a.raceId.status === "LIVE" ? "Đang chạy" : "Chưa xuất phát"}
+                    {t("pages.referee.common.distance")} {a.raceId.status === "LIVE" ? t("pages.referee.common.running") : t("pages.referee.common.notStarted")}
                   </span>
                 </div>
 
@@ -114,7 +115,7 @@ export default function RefereePreRaceWorkspacePage() {
                   </h3>
                   <p className="text-[10px] dark:text-white/50 text-muted-foreground flex items-center gap-1">
                     <Clock className="size-3 text-primary shrink-0" />
-                    Giờ khởi chạy: {formatDateTime(a.raceId.startTime)}
+                    {t("pages.referee.common.startTimeLabel")} {formatDateTime(a.raceId.startTime)}
                   </p>
                 </div>
 
@@ -128,7 +129,7 @@ export default function RefereePreRaceWorkspacePage() {
                     }`}
                   >
                     <Link href={`/referee/races/${a.raceId._id}`}>
-                      {isChecking ? "Bắt đầu kiểm duyệt" : "Xem chi tiết"}
+                      {isChecking ? t("pages.referee.common.startInspection") : t("pages.referee.common.viewDetails")}
                       <ArrowRight className="size-3.5 ml-1" />
                     </Link>
                   </Button>

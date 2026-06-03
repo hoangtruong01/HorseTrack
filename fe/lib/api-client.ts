@@ -53,6 +53,16 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     if (envelope.meta !== undefined) {
       return { data: envelope.data, meta: envelope.meta } as T;
     }
+    if (Array.isArray(envelope.data)) {
+      const items = envelope.data;
+      return {
+        data: items,
+        meta: normalizePaginationMeta(
+          { total: items.length, page: 1, limit: items.length || 1, totalPages: 1 },
+          items.length || 1,
+        ),
+      } as T;
+    }
     return envelope.data as T;
   }
   return raw as T;
@@ -73,9 +83,35 @@ export interface UserItem {
   updatedAt: string;
 }
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface PaginatedResult<T> {
   data: T[];
-  meta: { total: number; page: number; limit: number; totalPages: number };
+  meta: PaginationMeta;
+}
+
+export const DEFAULT_PAGINATION_META: PaginationMeta = {
+  total: 0,
+  page: 1,
+  limit: 20,
+  totalPages: 1,
+};
+
+export function normalizePaginationMeta(
+  meta?: Partial<PaginationMeta>,
+  limit = DEFAULT_PAGINATION_META.limit,
+): PaginationMeta {
+  return {
+    total: meta?.total ?? DEFAULT_PAGINATION_META.total,
+    page: meta?.page ?? DEFAULT_PAGINATION_META.page,
+    limit: meta?.limit ?? limit,
+    totalPages: meta?.totalPages ?? DEFAULT_PAGINATION_META.totalPages,
+  };
 }
 
 export const usersApi = {

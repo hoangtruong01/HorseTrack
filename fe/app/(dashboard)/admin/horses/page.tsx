@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
+import { TransHtml } from "@/components/i18n/trans-html";
 import { horsesApi, type HorseItem } from "@/lib/api-client";
 
 const healthColors: Record<string, string> = {
@@ -18,6 +19,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminHorsesPage() {
+  const { t } = useTranslation();
   const [horses, setHorses] = useState<HorseItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -35,37 +37,34 @@ export default function AdminHorsesPage() {
       const res = await horsesApi.list({ page, limit: 15 });
       setHorses(res.data);
       setMeta(res.meta);
-    } catch (e: any) {
-      showToast(e.message ?? "Lỗi tải dữ liệu", "err");
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
     } finally { setLoading(false); }
-  }, []);
+  }, [t]);
 
   useEffect(() => { void fetchHorses(1); }, [fetchHorses]);
 
   const handleDelete = async (h: HorseItem) => {
-    if (!confirm(`Xóa ngựa "${h.name}"?`)) return;
+    if (!confirm(t("pages.admin.horses.confirmDelete", { name: h.name }))) return;
     setActionLoading(h._id);
     try {
       await horsesApi.delete(h._id);
-      showToast(`Đã xóa ngựa ${h.name}`);
+      showToast(t("pages.admin.horses.toastDeleted", { name: h.name }));
       await fetchHorses(meta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
+    }
     finally { setActionLoading(null); }
   };
 
   const getOwnerName = (ownerId: HorseItem["ownerId"]) => {
-    if (!ownerId) return "—";
+    if (!ownerId) return t("pages.admin.common.dash");
     if (typeof ownerId === "object") return ownerId.fullName;
     return ownerId;
   };
 
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="Horse Management"
-        title="Quản Lý Ngựa"
-        description="Xem toàn bộ danh sách ngựa trong hệ thống. Admin có thể xóa ngựa vi phạm."
-      />
 
       {toast && (
         <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
@@ -73,23 +72,27 @@ export default function AdminHorsesPage() {
         </div>
       )}
 
-      <div className="text-sm text-muted-foreground">Tổng: <strong className="dark:text-white text-foreground">{meta.total}</strong> ngựa</div>
+      <TransHtml
+        className="text-sm text-muted-foreground"
+        i18nKey="pages.admin.horses.total"
+        values={{ count: meta.total }}
+      />
 
       <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.common.loading")}</div>
         ) : horses.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có ngựa nào.</div>
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.horses.empty")}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b dark:border-white/10 border-border">
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Chủ ngựa</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Sức khoẻ</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-                  <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">Actions</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.horses.colHorse")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.horses.colOwner")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.horses.colHealth")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.horses.colStatus")}</th>
+                  <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.common.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -104,7 +107,7 @@ export default function AdminHorsesPage() {
                         )}
                         <div>
                           <p className="text-sm font-semibold dark:text-white text-foreground">{h.name}</p>
-                          <p className="text-xs text-muted-foreground">{h.breed ?? "—"} · {h.gender ?? "—"} · {h.age ?? "?"}t</p>
+                          <p className="text-xs text-muted-foreground">{h.breed ?? t("pages.admin.common.dash")} · {h.gender ?? t("pages.admin.common.dash")} · {h.age ?? "?"}t</p>
                         </div>
                       </div>
                     </td>
@@ -125,7 +128,7 @@ export default function AdminHorsesPage() {
                         disabled={actionLoading === h._id || h.status === "DELETED"}
                         className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 transition hover:bg-red-500/20 disabled:opacity-40 ml-auto"
                       >
-                        <Trash2 className="size-3" /> Xóa
+                        <Trash2 className="size-3" /> {t("pages.admin.common.delete")}
                       </button>
                     </td>
                   </tr>
@@ -140,12 +143,14 @@ export default function AdminHorsesPage() {
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchHorses(meta.page - 1)} disabled={meta.page <= 1}
             className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
-            <ChevronLeft className="size-4" /> Trước
+            <ChevronLeft className="size-4" /> {t("pages.admin.common.prev")}
           </button>
-          <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
+          <span className="text-sm text-muted-foreground">
+            {t("pages.admin.common.pageOf", { page: meta.page, total: meta.totalPages })}
+          </span>
           <button onClick={() => fetchHorses(meta.page + 1)} disabled={meta.page >= meta.totalPages}
             className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
-            Sau <ChevronRight className="size-4" />
+            {t("pages.admin.common.next")} <ChevronRight className="size-4" />
           </button>
         </div>
       )}

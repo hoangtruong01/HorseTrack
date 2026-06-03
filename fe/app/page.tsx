@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
@@ -25,8 +26,7 @@ import { AppHeader } from "@/components/layout/app-header";
 const quickStats = [
   {
     value: "12",
-    label: "Active Tournaments",
-    desc: "Running this season",
+    id: "tournaments",
     icon: Trophy,
     color: "text-[#E10600]",
     bg: "bg-[#E10600]/8",
@@ -34,8 +34,7 @@ const quickStats = [
   },
   {
     value: "256",
-    label: "Registered Horses",
-    desc: "Across all tournaments",
+    id: "horses",
     icon: Compass,
     color: "text-[#F8CD46]",
     bg: "bg-[#F8CD46]/8",
@@ -43,8 +42,7 @@ const quickStats = [
   },
   {
     value: "98",
-    label: "Assigned Jockeys",
-    desc: "Ready to compete",
+    id: "jockeys",
     icon: UserCheck,
     color: "text-[#067E6A]",
     bg: "bg-[#067E6A]/8",
@@ -52,8 +50,7 @@ const quickStats = [
   },
   {
     value: "48",
-    label: "Completed Races",
-    desc: "This season",
+    id: "races",
     icon: Flag,
     color: "text-[#3B82F6]",
     bg: "bg-[#3B82F6]/8",
@@ -102,36 +99,31 @@ const upcomingRaces = [
 
 const roles = [
   {
-    name: "Admin",
-    desc: "Manage users, tournaments, races, schedules, results and system settings.",
+    id: "admin",
     icon: Trophy,
     color: "text-[#E10600] border-[#E10600]/20 bg-[#E10600]/5",
     btnClass: "bg-[#E10600]/10 hover:bg-[#E10600]/20 text-[#E10600]",
   },
   {
-    name: "Horse Owner",
-    desc: "Register horses, choose jockeys, track races and view prizes.",
+    id: "owner",
     icon: Compass,
     color: "text-[#F8CD46] border-[#F8CD46]/20 bg-[#F8CD46]/5",
     btnClass: "bg-[#F8CD46]/10 hover:bg-[#F8CD46]/20 text-[#F8CD46]",
   },
   {
-    name: "Jockey",
-    desc: "Accept race invitations, view assigned races and track performance.",
+    id: "jockey",
     icon: UserCheck,
     color: "text-[#067E6A] border-[#067E6A]/20 bg-[#067E6A]/5",
     btnClass: "bg-[#067E6A]/10 hover:bg-[#067E6A]/20 text-[#067E6A]",
   },
   {
-    name: "Race Referee",
-    desc: "Inspect horses, record violations, confirm results and create reports.",
+    id: "referee",
     icon: Sparkles,
     color: "text-[#3B82F6] border-[#3B82F6]/20 bg-[#3B82F6]/5",
     btnClass: "bg-[#3B82F6]/10 hover:bg-[#3B82F6]/20 text-[#3B82F6]",
   },
   {
-    name: "Spectator",
-    desc: "View races, rankings and make predictions to win exciting rewards.",
+    id: "spectator",
     icon: Users,
     color: "text-[#A855F7] border-[#A855F7]/20 bg-[#A855F7]/5",
     btnClass: "bg-[#A855F7]/10 hover:bg-[#A855F7]/20 text-[#A855F7]",
@@ -140,48 +132,41 @@ const roles = [
 
 const coreFeatures = [
   {
-    title: "Tournament Management",
-    desc: "Create, manage and organize tournaments easily.",
+    id: "feat1",
     icon: Trophy,
   },
   {
-    title: "Horse Registration",
-    desc: "Register and manage horses for races.",
+    id: "feat2",
     icon: Compass,
   },
   {
-    title: "Jockey Assignment",
-    desc: "Assign jockeys to horses and manage agreements.",
+    id: "feat3",
     icon: UserCheck,
   },
   {
-    title: "Race Scheduling",
-    desc: "Create race schedules and manage race days.",
+    id: "feat4",
     icon: CalendarClock,
   },
   {
-    title: "Referee Report",
-    desc: "Record violations and generate referee reports.",
+    id: "feat5",
     icon: Sparkles,
   },
   {
-    title: "Race Results",
-    desc: "Record race results and announcements.",
+    id: "feat6",
     icon: Flag,
   },
   {
-    title: "Ranking & Leaderboard",
-    desc: "Track rankings for horses and jockeys.",
+    id: "feat7",
     icon: Target,
   },
   {
-    title: "Prediction Management",
-    desc: "Allow spectators to predict and win rewards.",
+    id: "feat8",
     icon: Tv,
   },
 ];
 
 export default function Home() {
+  const { t } = useTranslation();
   const [countdown, setCountdown] = useState("02:45:30");
 
   // Giả lập đồng hồ đếm ngược trực quan cho Upcoming Race
@@ -231,20 +216,19 @@ export default function Home() {
           <div className="space-y-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#E10600]/30 bg-[#E10600]/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-foreground">
               <span className="size-2 rounded-full bg-[#E10600] animate-ping" />
-              Live Tournament Platform
+              {t("homepage.badge")}
             </span>
 
             <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-foreground sm:text-5xl lg:text-6xl uppercase">
-              Manage Horse Racing <br />
-              Tournaments{" "}
+              {t("homepage.heroTitle1")} <br />
+              {t("homepage.heroTitle2")}{" "}
               <span className="text-[#E10600] drop-shadow-[0_0_15px_rgba(225,6,0,0.3)]">
-                Smarter
+                {t("homepage.heroTitleHighlight")}
               </span>
             </h1>
 
             <p className="max-w-xl text-base sm:text-lg leading-7 text-muted-foreground font-medium">
-              Register horses, assign jockeys, schedule races, record results,
-              track rankings and create predictions – all in one platform.
+              {t("homepage.heroSubtitle")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -252,7 +236,7 @@ export default function Home() {
                 href="/register"
                 className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#E10600] px-8 text-sm font-black uppercase tracking-widest text-white hover:bg-[#B80500] hover:scale-[1.02] active:scale-[0.98] transition shadow-[0_4px_25px_rgba(225,6,0,0.3)]"
               >
-                Get Started
+                {t("homepage.getStarted")}
                 <ArrowRight className="size-4.5" />
               </Link>
               <Link
@@ -260,7 +244,7 @@ export default function Home() {
                 className="flex h-12 items-center justify-center gap-2.5 rounded-xl border border-border bg-card/70 hover:bg-muted px-8 text-sm font-black uppercase tracking-widest text-foreground transition"
               >
                 <CalendarClock className="size-4.5 text-[#E10600]" />
-                View Races
+                {t("homepage.viewRaces")}
               </Link>
             </div>
           </div>
@@ -269,13 +253,13 @@ export default function Home() {
           <div className="rounded-[2rem] border border-border bg-card/80 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.25)] backdrop-blur-xl space-y-5">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <h2 className="text-lg font-black uppercase tracking-wider text-foreground">
-                Live Race Status
+                {t("homepage.liveRaceStatus")}
               </h2>
               <Link
                 href="/races"
                 className="flex items-center gap-1 text-xs font-black uppercase tracking-wider text-[#E10600] hover:underline"
               >
-                View All Races
+                {t("homepage.viewAllRaces")}
                 <ChevronRight className="size-3.5" />
               </Link>
             </div>
@@ -285,10 +269,10 @@ export default function Home() {
               <div className="group relative rounded-2xl border border-border bg-background/80 p-4 hover:border-[#E10600]/30 transition-all duration-300">
                 <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-[#E10600]/10 border border-[#E10600]/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[#E10600]">
                   <span className="size-1.5 rounded-full bg-[#E10600] animate-pulse" />
-                  Racing now
+                  {t("homepage.racingNow")}
                 </div>
                 <span className="inline-block rounded-md bg-[#E10600] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white">
-                  LIVE
+                  {t("homepage.live")}
                 </span>
                 <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-[#E10600] transition-colors">
                   Saigon Sprint Race 05
@@ -303,10 +287,10 @@ export default function Home() {
               <div className="group relative rounded-2xl border border-border bg-background/80 p-4 hover:border-[#F8CD46]/30 transition-all duration-300">
                 <div className="absolute right-4 top-4 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#F8CD46]">
                   <Clock className="size-3.5" />
-                  Starts in {countdown}
+                  {t("homepage.startsIn")} {countdown}
                 </div>
                 <span className="inline-block rounded-md border border-[#F8CD46]/30 bg-[#F8CD46]/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#F8CD46]">
-                  UPCOMING
+                  {t("homepage.upcoming")}
                 </span>
                 <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-[#F8CD46] transition-colors">
                   Delta Derby Race 07
@@ -320,10 +304,10 @@ export default function Home() {
               {/* Card 3: FINISHED */}
               <div className="group relative rounded-2xl border border-border bg-background/80 p-4 hover:border-[#067E6A]/30 transition-all duration-300">
                 <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-[#067E6A]/10 border border-[#067E6A]/20 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-[#067E6A]">
-                  Winner: Thunder Bolt
+                  {t("homepage.winner")}: Thunder Bolt
                 </div>
                 <span className="inline-block rounded-md border border-[#067E6A]/30 bg-[#067E6A]/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#067E6A]">
-                  FINISHED
+                  {t("homepage.finished")}
                 </span>
                 <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-[#067E6A] transition-colors">
                   Capital Race 02
@@ -346,7 +330,7 @@ export default function Home() {
               const Icon = stat.icon;
               return (
                 <div
-                  key={stat.label}
+                  key={stat.id}
                   className={cn(
                     "group flex items-center gap-4 rounded-2xl border border-border p-5 transition hover:bg-muted",
                     stat.border,
@@ -366,10 +350,10 @@ export default function Home() {
                       {stat.value}
                     </span>
                     <span className="block text-xs font-black uppercase tracking-wider text-foreground/80 mt-1.5 leading-none">
-                      {stat.label}
+                      {t(`homepage.quickStats.${stat.id}.label`)}
                     </span>
                     <span className="block text-[10px] font-semibold text-muted-foreground mt-1">
-                      {stat.desc}
+                      {t(`homepage.quickStats.${stat.id}.desc`)}
                     </span>
                   </div>
                 </div>
@@ -386,17 +370,17 @@ export default function Home() {
           <div className="flex items-end justify-between">
             <div className="space-y-2">
               <span className="text-xs font-black uppercase tracking-[0.24em] text-[#E10600]">
-                Access Point Selectors
+                {t("homepage.roles.eyebrow")}
               </span>
               <h2 className="text-3xl font-black uppercase tracking-tight text-foreground sm:text-4xl">
-                Choose Your Role
+                {t("homepage.roles.title")}
               </h2>
             </div>
             <Link
               href="/roles"
               className="flex items-center gap-1 text-xs font-black uppercase tracking-wider text-[#E10600] hover:underline"
             >
-              Learn more about roles
+              {t("homepage.roles.learnMore")}
               <ChevronRight className="size-3.5" />
             </Link>
           </div>
@@ -406,7 +390,7 @@ export default function Home() {
               const Icon = role.icon;
               return (
                 <div
-                  key={role.name}
+                  key={role.id}
                   className="group flex flex-col justify-between rounded-2xl border border-border bg-card/70 p-5 hover:border-border transition-all duration-300"
                 >
                   <div className="space-y-4">
@@ -420,22 +404,22 @@ export default function Home() {
                     </div>
                     <div>
                       <h3 className="font-black text-sm uppercase text-foreground tracking-wider leading-none">
-                        {role.name}
+                        {t(`homepage.roles.${role.id}.name`)}
                       </h3>
                       <p className="mt-3 text-xs text-muted-foreground leading-relaxed font-medium">
-                        {role.desc}
+                        {t(`homepage.roles.${role.id}.desc`)}
                       </p>
                     </div>
                   </div>
 
                   <Link
-                    href={`/login?role=${role.name.toLowerCase().replace(" ", "")}`}
+                    href={`/login?role=${role.id}`}
                     className={cn(
                       "mt-5 flex h-9 w-full items-center justify-center rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
                       role.btnClass,
                     )}
                   >
-                    Explore
+                    {t("homepage.roles.explore")}
                   </Link>
                 </div>
               );
@@ -449,10 +433,10 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="space-y-2 text-center">
             <span className="text-xs font-black uppercase tracking-[0.24em] text-[#E10600]">
-              Operational Abstractions
+              {t("homepage.features.eyebrow")}
             </span>
             <h2 className="text-3xl font-black uppercase tracking-tight text-foreground sm:text-4xl">
-              Core Features
+              {t("homepage.features.title")}
             </h2>
           </div>
 
@@ -461,7 +445,7 @@ export default function Home() {
               const Icon = feat.icon;
               return (
                 <div
-                  key={feat.title}
+                  key={feat.id}
                   className="group flex items-start gap-4 rounded-2xl border border-border bg-card/60 p-5 hover:border-border hover:bg-muted shadow-[0_4px_24px_rgba(0,0,0,0.1)] transition-all duration-200"
                 >
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#E10600]/8 text-[#E10600] border border-[#E10600]/15 group-hover:scale-105 transition-transform">
@@ -469,10 +453,10 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-black text-xs uppercase text-foreground tracking-wide leading-none">
-                      {feat.title}
+                      {t(`homepage.features.${feat.id}.title`)}
                     </h3>
                     <p className="mt-2 text-xs text-muted-foreground leading-relaxed font-medium">
-                      {feat.desc}
+                      {t(`homepage.features.${feat.id}.desc`)}
                     </p>
                   </div>
                 </div>
@@ -498,11 +482,11 @@ export default function Home() {
                 />
                 <div className="space-y-1.5">
                   <span className="text-[10px] font-black uppercase tracking-[0.24em] text-[#F8CD46]">
-                    Champion Gold Rewards
+                    {t("homepage.newsletter.eyebrow")}
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wide text-foreground leading-tight">
-                    Stay Updated <br />
-                    With Horse Racing
+                    {t("homepage.newsletter.title")} <br />
+                    {t("homepage.newsletter.titleBreak")}
                   </h3>
                 </div>
               </div>
@@ -514,7 +498,7 @@ export default function Home() {
                   <input
                     type="email"
                     required
-                    placeholder="Enter your email"
+                    placeholder={t("homepage.newsletter.placeholder")}
                     className="h-12 w-full rounded-xl border border-border bg-background/70 pl-10.5 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15"
                   />
                 </div>
@@ -522,7 +506,7 @@ export default function Home() {
                   type="button"
                   className="h-12 rounded-xl bg-[#E10600] hover:bg-[#B80500] px-8 text-sm font-black uppercase tracking-widest text-white transition hover:scale-[1.01] active:scale-[0.99]"
                 >
-                  Subscribe
+                  {t("homepage.newsletter.subscribe")}
                 </button>
               </div>
             </div>
@@ -549,14 +533,14 @@ export default function Home() {
               </span>
             </Link>
             <p className="text-xs text-muted-foreground leading-relaxed font-medium max-w-xs">
-              The complete management system for horse racing tournaments.
+              {t("homepage.footer.desc")}
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-3.5">
             <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
-              Quick Links
+              {t("homepage.footer.quickLinks")}
             </h4>
             <div className="flex flex-col gap-2 text-xs">
               {["Tournaments", "Races", "Rankings", "Predictions"].map(
@@ -576,7 +560,7 @@ export default function Home() {
           {/* Support */}
           <div className="space-y-3.5">
             <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
-              Support
+              {t("homepage.footer.support")}
             </h4>
             <div className="flex flex-col gap-2 text-xs">
               {["Help Center", "Guides", "FAQ", "Contact Us"].map((link) => (
@@ -594,7 +578,7 @@ export default function Home() {
           {/* Follow Us */}
           <div className="space-y-3.5">
             <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
-              Follow Us
+              {t("homepage.footer.followUs")}
             </h4>
             <div className="flex items-center gap-3">
               <Link
@@ -658,15 +642,14 @@ export default function Home() {
         {/* Bottom copyright row */}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <span>
-            © 2026 Horse Racing Tournament Management System. All rights
-            reserved.
+            {t("homepage.footer.copyright")}
           </span>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-foreground transition">
-              Privacy Policy
+              {t("homepage.footer.privacy")}
             </Link>
             <Link href="/terms" className="hover:text-foreground transition">
-              Terms of Service
+              {t("homepage.footer.terms")}
             </Link>
           </div>
         </div>

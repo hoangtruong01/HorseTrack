@@ -4,22 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Edit2, Loader2, Award, Zap, Heart, Trophy, Timer, Gauge, ShieldAlert } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { HorseForm } from "@/features/horses/components/horse-form";
 import type { Horse, HorseHealthStatus } from "@/features/horses/components/horse-card";
 import { toast } from "sonner";
-
-const healthMeta: Record<
-  HorseHealthStatus,
-  { label: string; tone: "red" | "yellow" | "green" | "slate" | "teal" }
-> = {
-  HEALTHY: { label: "Khỏe mạnh", tone: "green" },
-  INJURED: { label: "Chấn thương", tone: "red" },
-  RECOVERING: { label: "Đang hồi phục", tone: "yellow" },
-  RETIRED: { label: "Giải nghệ", tone: "slate" },
-};
 
 type RaceResultRecord = {
   id: string;
@@ -34,6 +24,7 @@ type RaceResultRecord = {
 };
 
 export default function HorseDetailPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -45,6 +36,19 @@ export default function HorseDetailPage() {
   const [results, setResults] = useState<RaceResultRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getHealthMeta = (status: HorseHealthStatus) => {
+    const toneMap: Record<HorseHealthStatus, "red" | "yellow" | "green" | "slate" | "teal"> = {
+      HEALTHY: "green",
+      INJURED: "red",
+      RECOVERING: "yellow",
+      RETIRED: "slate",
+    };
+    return {
+      label: t(`pages.owner.horseDetail.health.${status}`),
+      tone: toneMap[status] || ("slate" as const),
+    };
+  };
 
   const fetchHorseAndResults = async () => {
     setIsLoading(true);
@@ -60,7 +64,7 @@ export default function HorseDetailPage() {
           setHorse(resData.data);
         }
       } else {
-        toast.error("Không thể lấy thông tin chi tiết của ngựa.");
+        toast.error(t("pages.owner.horseDetail.toast.fetchFailed"));
         router.push("/owner/horses");
         return;
       }
@@ -71,7 +75,7 @@ export default function HorseDetailPage() {
           const raw = resData.data || [];
           const mapped: RaceResultRecord[] = raw.map((item: any) => ({
             id: item.id || item._id,
-            raceName: item.raceId?.name || "Giải đấu tự do",
+            raceName: item.raceId?.name || t("common.freeTournament"),
             raceStartTime: item.raceId?.startTime || new Date().toISOString(),
             position: item.position,
             finishTime: item.finishTime,
@@ -85,7 +89,7 @@ export default function HorseDetailPage() {
       }
     } catch (err) {
       console.error("Lỗi lấy chi tiết ngựa và lịch sử:", err);
-      toast.error("Lỗi kết nối tới Backend.");
+      toast.error(t("common.backendError"));
     } finally {
       setIsLoading(false);
     }
@@ -108,16 +112,14 @@ export default function HorseDetailPage() {
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.message || "Cập nhật chiến mã thất bại.");
+        throw new Error(resData.message || t("pages.owner.horseDetail.toast.updateFailed"));
       }
 
-      toast.success("Thông tin chiến mã đã được cập nhật thành công!");
-      
-      // Turn off edit mode
+      toast.success(t("pages.owner.horseDetail.toast.updateSuccess"));
       router.push(`/owner/horses/${horseId}`);
-      fetchHorseAndResults(); // Reload
+      fetchHorseAndResults();
     } catch (err: any) {
-      toast.error(err.message || "Đã xảy ra lỗi khi lưu chiến mã.");
+      toast.error(err.message || t("pages.owner.horseDetail.toast.saveError"));
       throw err;
     } finally {
       setIsSubmitting(false);
@@ -128,7 +130,7 @@ export default function HorseDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
         <Loader2 className="size-8 animate-spin text-[#E10600]" />
-        <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải dữ liệu hồ sơ...</p>
+        <p className="mt-4 text-xs font-mono uppercase tracking-widest">{t("pages.owner.horseDetail.loading")}</p>
       </div>
     );
   }
@@ -136,9 +138,9 @@ export default function HorseDetailPage() {
   if (!horse) {
     return (
       <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-12 text-center max-w-xl mx-auto shadow-2xl">
-        <p className="text-sm dark:text-white/50 text-muted-foreground mb-4">Chiến mã không tồn tại hoặc bạn không có quyền xem.</p>
+        <p className="text-sm dark:text-white/50 text-muted-foreground mb-4">{t("pages.owner.horseDetail.notFound")}</p>
         <Button asChild className="rounded-full dark:bg-white/5 bg-muted/50 dark:text-white text-foreground">
-          <Link href="/owner/horses">Quay lại chuồng ngựa</Link>
+          <Link href="/owner/horses">{t("common.backToStable")}</Link>
         </Button>
       </div>
     );
@@ -152,13 +154,9 @@ export default function HorseDetailPage() {
             href={`/owner/horses/${horseId}`}
             className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition mb-3"
           >
-            <ChevronLeft className="size-4" /> Hủy chỉnh sửa
+            <ChevronLeft className="size-4" /> {t("pages.owner.horseDetail.cancelEdit")}
           </Link>
-          <PageHeader
-            eyebrow="Chỉnh sửa hồ sơ"
-            title={`Cập Nhật ${horse.name}`}
-            description="Chỉnh sửa hoặc cập nhật các thông số sức khỏe và kỹ thuật mới nhất của chiến mã."
-          />
+          
         </div>
 
         <section className="mt-4">
@@ -173,7 +171,7 @@ export default function HorseDetailPage() {
     );
   }
 
-  const meta = healthMeta[horse.healthStatus] || { label: horse.healthStatus, tone: "slate" };
+  const meta = getHealthMeta(horse.healthStatus);
 
   return (
     <main className="space-y-8 max-w-4xl mx-auto">
@@ -182,29 +180,13 @@ export default function HorseDetailPage() {
           href="/owner/horses"
           className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition mb-3"
         >
-          <ChevronLeft className="size-4" /> Quay lại chuồng ngựa
+          <ChevronLeft className="size-4" /> {t("common.backToStable")}
         </Link>
         
-        <PageHeader
-          eyebrow="Hồ sơ chiến mã"
-          title={horse.name}
-          description="Thông số kỹ thuật chuẩn quốc tế và lịch sử tham gia thi đấu."
-          actions={
-            <Button
-              onClick={() => router.push(`/owner/horses/${horseId}?edit=true`)}
-              className="rounded-full dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border hover:dark:bg-white/10 bg-muted/50 dark:text-white text-foreground flex items-center gap-2"
-            >
-              <Edit2 className="size-4" />
-              Chỉnh sửa hồ sơ
-            </Button>
-          }
-        />
+        
       </div>
 
-      {/* Horse Deck Details */}
       <section className="grid gap-6 md:grid-cols-12 dark:bg-[#15151E] bg-card border dark:border-white/10 border-border rounded-2xl overflow-hidden p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
-        
-        {/* Left Column: Image (span 5) */}
         <div className="md:col-span-5 flex flex-col gap-4">
           <div className="relative aspect-square w-full rounded-xl overflow-hidden dark:bg-black/40 bg-muted/20 border dark:border-white/5 border-border flex items-center justify-center">
             {horse.image ? (
@@ -216,7 +198,7 @@ export default function HorseDetailPage() {
             ) : (
               <div className="flex flex-col items-center justify-center dark:text-white/20 text-muted-foreground">
                 <Award className="size-20 stroke-[1]" />
-                <span className="text-xs uppercase tracking-widest mt-3">No Image</span>
+                <span className="text-xs uppercase tracking-widest mt-3">{t("common.noImage")}</span>
               </div>
             )}
             <div className="absolute top-3 left-3">
@@ -224,12 +206,11 @@ export default function HorseDetailPage() {
             </div>
           </div>
 
-          {/* Core Speed & Stamina Indicators */}
           <div className="space-y-4 dark:bg-white/[0.02] bg-muted/50 border dark:border-white/5 border-border rounded-xl p-4">
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
                 <span className="dark:text-white/50 text-muted-foreground uppercase tracking-wider flex items-center gap-1 font-bold">
-                  <Zap className="size-3.5 text-yellow-400" /> Tốc độ nền
+                  <Zap className="size-3.5 text-yellow-400" /> {t("pages.owner.horseDetail.baseSpeed")}
                 </span>
                 <span className="dark:text-white text-foreground font-mono font-bold">{horse.baseSpeed} km/h</span>
               </div>
@@ -244,7 +225,7 @@ export default function HorseDetailPage() {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
                 <span className="dark:text-white/50 text-muted-foreground uppercase tracking-wider flex items-center gap-1 font-bold">
-                  <Heart className="size-3.5 text-red-500" /> Thể lực tích lũy
+                  <Heart className="size-3.5 text-red-500" /> {t("pages.owner.horseDetail.stamina")}
                 </span>
                 <span className="dark:text-white text-foreground font-mono font-bold">{horse.staminaScore}/100</span>
               </div>
@@ -258,86 +239,89 @@ export default function HorseDetailPage() {
           </div>
         </div>
 
-        {/* Right Column: Information Sheet (span 7) */}
         <div className="md:col-span-7 flex flex-col justify-between space-y-6">
           <div className="space-y-5">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E10600]">Thông số sinh học</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E10600]">{t("pages.owner.horseDetail.bioSpecs")}</p>
               <h3 className="text-2xl font-black uppercase dark:text-white text-foreground tracking-tight mt-1">{horse.name}</h3>
             </div>
 
             <div className="grid grid-cols-2 gap-4 border-y dark:border-white/5 border-border py-4 text-sm">
               <div className="space-y-1">
-                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">Giống ngựa</span>
-                <p className="dark:text-white text-foreground font-bold">{horse.breed || "Không rõ giống"}</p>
+                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">{t("pages.owner.horseDetail.breed")}</span>
+                <p className="dark:text-white text-foreground font-bold">{horse.breed || t("common.unknownBreed")}</p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">Màu sắc</span>
-                <p className="dark:text-white text-foreground font-bold">{horse.color || "Không rõ màu sắc"}</p>
+                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">{t("pages.owner.horseDetail.color")}</span>
+                <p className="dark:text-white text-foreground font-bold">{horse.color || t("common.unknownColor")}</p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">Giới tính</span>
+                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">{t("pages.owner.horseDetail.gender")}</span>
                 <p className="dark:text-white text-foreground font-bold">
-                  {horse.gender === "MALE" ? "Ngựa Đực (Male)" : horse.gender === "FEMALE" ? "Ngựa Cái (Female)" : "Ngựa Thiến (Gelding)"}
+                  {horse.gender === "MALE"
+                    ? t("pages.owner.horseDetail.genderMale")
+                    : horse.gender === "FEMALE"
+                      ? t("pages.owner.horseDetail.genderFemale")
+                      : t("pages.owner.horseDetail.genderGelding")}
                 </p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">Tuổi đời</span>
-                <p className="dark:text-white text-foreground font-bold">{horse.age ? `${horse.age} tuổi` : "N/A"}</p>
+                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">{t("pages.owner.horseDetail.age")}</span>
+                <p className="dark:text-white text-foreground font-bold">
+                  {horse.age ? t("common.yearsOld", { age: horse.age }) : t("common.na")}
+                </p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">Trọng lượng (kg)</span>
-                <p className="dark:text-white text-foreground font-mono font-bold">{horse.weightKg ? `${horse.weightKg} kg` : "N/A"}</p>
+                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">{t("pages.owner.horseDetail.weight")}</span>
+                <p className="dark:text-white text-foreground font-mono font-bold">{horse.weightKg ? `${horse.weightKg} kg` : t("common.na")}</p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">Chiều cao (cm)</span>
-                <p className="dark:text-white text-foreground font-mono font-bold">{horse.heightCm ? `${horse.heightCm} cm` : "N/A"}</p>
+                <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">{t("pages.owner.horseDetail.height")}</span>
+                <p className="dark:text-white text-foreground font-mono font-bold">{horse.heightCm ? `${horse.heightCm} cm` : t("common.na")}</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">Mô tả đặc điểm</span>
+              <span className="text-xs dark:text-white/40 text-muted-foreground uppercase tracking-widest">{t("pages.owner.horseDetail.descriptionLabel")}</span>
               <p className="text-sm dark:text-white/80 text-muted-foreground leading-relaxed dark:bg-white/[0.02] bg-muted/50 border dark:border-white/5 border-border rounded-xl p-4">
-                {horse.description || "Chiến mã chưa cập nhật thông tin mô tả cụ thể về tính cách hoặc thế mạnh địa hình."}
+                {horse.description || t("pages.owner.horseDetail.noDescription")}
               </p>
             </div>
           </div>
 
           <div className="pt-4 flex justify-end gap-3">
             <Button asChild variant="outline" className="rounded-xl border dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground">
-              <Link href="/owner/horses">Quay lại chuồng ngựa</Link>
+              <Link href="/owner/horses">{t("common.backToStable")}</Link>
             </Button>
             <Button
               onClick={() => router.push(`/owner/races`)}
               className="rounded-xl bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase text-xs tracking-wider"
             >
-              Ghi danh thi đấu
+              {t("pages.owner.horseDetail.registerRace")}
             </Button>
           </div>
         </div>
-
       </section>
 
-      {/* Horse Historical Race Results Section */}
       <section className="space-y-4">
         <h3 className="text-lg font-black uppercase tracking-wider dark:text-white text-foreground flex items-center gap-2">
-          <Trophy className="size-5 text-[#E10600]" /> Lịch sử thi đấu & Kết quả
+          <Trophy className="size-5 text-[#E10600]" /> {t("pages.owner.horseDetail.raceHistoryTitle")}
         </h3>
 
         {results.length === 0 ? (
           <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/50 bg-card p-8 text-center dark:text-white/40 text-muted-foreground">
             <Trophy className="size-12 mx-auto mb-3 opacity-20" />
-            <p className="font-bold text-xs uppercase tracking-widest">Chưa có dữ liệu thi đấu</p>
-            <p className="text-xs mt-1">Chiến mã này chưa từng tham gia trận đua chính thức nào hoặc kết quả chưa được ghi nhận.</p>
+            <p className="font-bold text-xs uppercase tracking-widest">{t("pages.owner.horseDetail.noRaceData")}</p>
+            <p className="text-xs mt-1">{t("pages.owner.horseDetail.noRaceDataDesc")}</p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {results.map((rec) => {
               const isPodium = rec.position <= 3;
               const podiumColors = [
-                "border-yellow-500/40 bg-yellow-500/5 text-yellow-400 shadow-[0_4px_20px_rgba(234,179,8,0.08)]", // 1st
-                "border-slate-300/40 bg-slate-300/5 text-slate-300 shadow-[0_4px_20px_rgba(203,213,225,0.08)]", // 2nd
-                "border-amber-600/40 bg-amber-600/5 text-amber-500 shadow-[0_4px_20px_rgba(217,119,6,0.08)]", // 3rd
+                "border-yellow-500/40 bg-yellow-500/5 text-yellow-400 shadow-[0_4px_20px_rgba(234,179,8,0.08)]",
+                "border-slate-300/40 bg-slate-300/5 text-slate-300 shadow-[0_4px_20px_rgba(203,213,225,0.08)]",
+                "border-amber-600/40 bg-amber-600/5 text-amber-500 shadow-[0_4px_20px_rgba(217,119,6,0.08)]",
               ];
               const cardBorder = isPodium ? podiumColors[rec.position - 1] : "dark:border-white/10 border-border dark:bg-[#15151E] bg-card dark:text-white/80 text-muted-foreground";
 
@@ -370,20 +354,22 @@ export default function HorseDetailPage() {
 
                   <div className="mt-4 grid grid-cols-3 gap-2 text-[10px] border-t dark:border-white/5 border-border pt-3">
                     <div>
-                      <span className="dark:text-white/40 text-muted-foreground uppercase block">Thời gian</span>
+                      <span className="dark:text-white/40 text-muted-foreground uppercase block">{t("pages.owner.horseDetail.finishTime")}</span>
                       <span className="font-mono font-bold dark:text-white text-foreground flex items-center gap-1 mt-0.5">
                         <Timer className="size-3 text-primary" /> {rec.finishTime}s
                       </span>
                     </div>
                     <div>
-                      <span className="dark:text-white/40 text-muted-foreground uppercase block">Tốc độ TB</span>
+                      <span className="dark:text-white/40 text-muted-foreground uppercase block">{t("pages.owner.horseDetail.avgSpeed")}</span>
                       <span className="font-mono font-bold dark:text-white text-foreground flex items-center gap-1 mt-0.5">
                         <Gauge className="size-3 text-primary" /> {rec.speed} km/h
                       </span>
                     </div>
                     <div>
-                      <span className="dark:text-white/40 text-muted-foreground uppercase block">Cổng xuất phát</span>
-                      <span className="font-mono font-bold dark:text-white text-foreground block mt-0.5">Cổng {rec.gateNumber}</span>
+                      <span className="dark:text-white/40 text-muted-foreground uppercase block">{t("pages.owner.horseDetail.startGate")}</span>
+                      <span className="font-mono font-bold dark:text-white text-foreground block mt-0.5">
+                        {t("common.gateNumber", { number: rec.gateNumber })}
+                      </span>
                     </div>
                   </div>
 

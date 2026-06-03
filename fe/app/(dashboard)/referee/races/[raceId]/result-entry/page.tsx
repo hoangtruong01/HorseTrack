@@ -18,9 +18,9 @@ import {
   Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 // Types
 type Race = {
@@ -67,6 +67,7 @@ export default function RefereeResultEntryPage({
 }) {
   const { raceId } = use(params);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [race, setRace] = useState<Race | null>(null);
   const [horses, setHorses] = useState<RaceCheck[]>([]);
@@ -257,7 +258,7 @@ export default function RefereeResultEntryPage({
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
         <h2 className="text-xl font-bold dark:text-white text-foreground">Không tìm thấy cuộc đua</h2>
-        <Button onClick={() => router.back()}>Quay lại</Button>
+        <Button onClick={() => router.back()}>{t("pages.referee.raceDetail.back")}</Button>
       </main>
     );
   }
@@ -269,23 +270,10 @@ export default function RefereeResultEntryPage({
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Back link */}
       <Link href={`/referee/races/${raceId}`} className="inline-flex items-center text-xs dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition">
-        <ArrowLeft className="size-3.5 mr-1" /> Quay lại kiểm duyệt ngựa
+        <ArrowLeft className="size-3.5 mr-1" /> {t("pages.referee.raceDetail.backToPreRace")}
       </Link>
 
-      <PageHeader
-        eyebrow="Ghi nhận thứ hạng"
-        title="Nhập Kết Quả Thi Đấu"
-        description="Nhập thời gian về đích thủ công hoặc kích hoạt thuật toán giả lập thời gian chạy dựa trên các chỉ số ngựa và biến cố trên sân."
-        actions={
-          <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-11 rounded-full dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground hover:dark:text-white text-foreground">
-              <Link href={`/referee/races/${race._id}/violations`}>
-                <Siren className="size-4 mr-1 text-primary" /> Vi phạm
-              </Link>
-            </Button>
-          </div>
-        }
-      />
+      
 
       {/* Control Actions / Banner */}
       <section className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-lg">

@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -8,19 +11,20 @@ import { RaceTable } from "@/features/races/components/race-table";
 import { mockRaces } from "@/features/races/mock-races";
 
 export default function AdminRacesPage() {
+  const { t } = useTranslation();
   const liveRace =
     mockRaces.find((race) => race.status === "live") ?? mockRaces[0];
 
   return (
     <main className="space-y-6">
       <PageHeader
-        eyebrow="Race management"
-        title="Race control board"
-        description="Core race-centric admin UI: status visibility, schedule board, participant routes, reusable race components. Mock data only."
+        eyebrow={t("pages.admin.races.eyebrow")}
+        title={t("pages.admin.races.title")}
+        description={t("pages.admin.races.description")}
         actions={
           <Button asChild className="rounded-full">
             <Link href="/admin/races/new">
-              Create race <ArrowRight className="size-4" />
+              {t("pages.admin.races.createRace")} <ArrowRight className="size-4" />
             </Link>
           </Button>
         }
@@ -29,14 +33,13 @@ export default function AdminRacesPage() {
         <RaceCard race={liveRace} />
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Status stack
+            {t("pages.admin.races.statusStack")}
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase dark:text-white text-foreground">
-            Scheduled · Live · Finished · Published
+            {t("pages.admin.races.statusTitle")}
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Phase 4C keeps every race independent. No rounds, stage progression,
-            brackets, qualification, betting, or backend calls.
+            {t("pages.admin.races.statusDesc")}
           </p>
         </div>
       </section>

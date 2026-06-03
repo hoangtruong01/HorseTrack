@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { Medal, Trophy } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
 import { rankingsApi, tournamentsApi, type RankingEntry, type JockeyRankingEntry, type TournamentItem } from "@/lib/api-client";
 
 export default function AdminRankingsPage() {
+  const { t } = useTranslation();
   const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
   const [selectedTournament, setSelectedTournament] = useState("");
   const [horseRankings, setHorseRankings] = useState<RankingEntry[]>([]);
@@ -25,7 +25,9 @@ export default function AdminRankingsPage() {
         const res = await tournamentsApi.list({ limit: 100 });
         setTournaments(res.data);
         if (res.data.length > 0) setSelectedTournament(res.data[0]._id);
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
     void loadTournaments();
   }, []);
@@ -39,9 +41,11 @@ export default function AdminRankingsPage() {
     ]).then(([h, j]) => {
       setHorseRankings(h);
       setJockeyRankings(j);
-    }).catch((e) => showToast(e.message, "err"))
+    }).catch((e: unknown) => {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
+    })
       .finally(() => setLoading(false));
-  }, [selectedTournament]);
+  }, [selectedTournament, t]);
 
   const rankBadge = (rank: number | undefined) => {
     if (rank === 1) return "🥇";
@@ -50,13 +54,20 @@ export default function AdminRankingsPage() {
     return `#${rank}`;
   };
 
+  const tableHead = (cols: string[]) => (
+    <thead>
+      <tr className="border-b dark:border-white/10 border-border">
+        {cols.map((col) => (
+          <th key={col} className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground first:text-left [&:not(:first-child)]:text-center">
+            {col}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
+
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="Ranking Management"
-        title="Xem/Cập Nhật Ranking"
-        description="Ranking được tính realtime từ race results đã PUBLISHED. Chọn giải đấu để xem bảng xếp hạng."
-      />
 
       {toast && (
         <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
@@ -70,8 +81,8 @@ export default function AdminRankingsPage() {
           value={selectedTournament}
           onChange={(e) => setSelectedTournament(e.target.value)}
         >
-          <option value="">— Chọn Giải Đấu —</option>
-          {tournaments.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+          <option value="">{t("pages.admin.rankings.selectTournament")}</option>
+          {tournaments.map(item => <option key={item._id} value={item._id}>{item.name}</option>)}
         </select>
 
         <div className="flex rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 p-1">
@@ -79,37 +90,35 @@ export default function AdminRankingsPage() {
             onClick={() => setActiveTab("horses")}
             className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${activeTab === "horses" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground dark:hover:text-white"}`}
           >
-            🐎 Ngựa
+            🐎 {t("pages.admin.rankings.tabHorses")}
           </button>
           <button
             onClick={() => setActiveTab("jockeys")}
             className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${activeTab === "jockeys" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground dark:hover:text-white"}`}
           >
-            🏇 Jockey
+            🏇 {t("pages.admin.rankings.tabJockeys")}
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">Đang tính toán ranking...</div>
+        <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">{t("pages.admin.rankings.loading")}</div>
       ) : !selectedTournament ? (
-        <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">Chọn giải đấu để xem ranking.</div>
+        <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">{t("pages.admin.rankings.selectPrompt")}</div>
       ) : (
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
           {activeTab === "horses" ? (
             horseRankings.length === 0 ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có kết quả race nào được công bố.</div>
+              <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.rankings.empty")}</div>
             ) : (
               <table className="w-full">
-                <thead>
-                  <tr className="border-b dark:border-white/10 border-border">
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Hạng</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Races</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Wins</th>
-                  </tr>
-                </thead>
+                {tableHead([
+                  t("pages.admin.rankings.colRank"),
+                  t("pages.admin.rankings.colHorse"),
+                  t("pages.admin.rankings.colPoints"),
+                  t("pages.admin.rankings.colRaces"),
+                  t("pages.admin.rankings.colWins"),
+                ])}
                 <tbody className="divide-y divide-white/5">
                   {horseRankings.map((r) => (
                     <tr key={r.horseId} className={`hover:dark:bg-white/[0.02] bg-muted/50 transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
@@ -125,18 +134,16 @@ export default function AdminRankingsPage() {
             )
           ) : (
             jockeyRankings.length === 0 ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có kết quả race nào được công bố.</div>
+              <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.rankings.empty")}</div>
             ) : (
               <table className="w-full">
-                <thead>
-                  <tr className="border-b dark:border-white/10 border-border">
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Hạng</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Jockey</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Races</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Wins</th>
-                  </tr>
-                </thead>
+                {tableHead([
+                  t("pages.admin.rankings.colRank"),
+                  t("pages.admin.rankings.colJockey"),
+                  t("pages.admin.rankings.colPoints"),
+                  t("pages.admin.rankings.colRaces"),
+                  t("pages.admin.rankings.colWins"),
+                ])}
                 <tbody className="divide-y divide-white/5">
                   {jockeyRankings.map((r) => (
                     <tr key={r.jockeyUserId} className={`hover:dark:bg-white/[0.02] bg-muted/50 transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>

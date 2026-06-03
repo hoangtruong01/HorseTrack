@@ -20,9 +20,9 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 // Types
 type Race = {
@@ -73,6 +73,7 @@ export default function RefereeViolationsPage({
 }) {
   const { raceId } = use(params);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [race, setRace] = useState<Race | null>(null);
   const [horses, setHorses] = useState<RaceCheck[]>([]);
@@ -195,7 +196,7 @@ export default function RefereeViolationsPage({
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
         <h2 className="text-xl font-bold dark:text-white text-foreground">Không tìm thấy cuộc đua</h2>
-        <Button onClick={() => router.back()}>Quay lại</Button>
+        <Button onClick={() => router.back()}>{t("pages.referee.raceDetail.back")}</Button>
       </main>
     );
   }
@@ -204,23 +205,10 @@ export default function RefereeViolationsPage({
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Back link */}
       <Link href={`/referee/races/${raceId}`} className="inline-flex items-center text-xs dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition">
-        <ArrowLeft className="size-3.5 mr-1" /> Quay lại kiểm duyệt ngựa
+        <ArrowLeft className="size-3.5 mr-1" /> {t("pages.referee.raceDetail.backToPreRace")}
       </Link>
 
-      <PageHeader
-        eyebrow="Ghi nhận biên bản"
-        title="Báo Cáo Vi Phạm (Violations)"
-        description="Ghi nhận các lỗi phát sinh trong quá trình thi đấu như xuất phát sai, chạy chệch làn đường, hoặc va chạm cản trở đối thủ."
-        actions={
-          <div className="flex items-center gap-3">
-            <Button asChild className="h-11 rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
-              <Link href={`/referee/races/${race._id}/result-entry`}>
-                <Flag className="size-4 mr-1" /> Nhập kết quả
-              </Link>
-            </Button>
-          </div>
-        }
-      />
+      
 
       {/* Violation Penalty Info Card */}
       <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4 flex gap-3 text-xs dark:text-white/70 text-muted-foreground">

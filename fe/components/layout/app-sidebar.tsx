@@ -6,7 +6,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { dashboardNavigation } from "@/constants/navigation";
+import { getNavDescription, getNavTitle } from "@/lib/navigation-i18n";
+import { formatRoleLabel } from "@/lib/role-i18n";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/providers/auth-provider";
 import type { NavigationItem, NavigationRole } from "@/types/navigation";
 
@@ -24,6 +27,7 @@ export function AppSidebar({
   role,
 }: AppSidebarProps) {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const pathname = usePathname();
   const [currentHref, setCurrentHref] = useState("");
 
@@ -83,11 +87,11 @@ export function AppSidebar({
                 ) : null}
                 <span>
                   <span className="block font-bold uppercase tracking-[0.08em]">
-                    {item.title}
+                    {getNavTitle(t, item)}
                   </span>
-                  {item.description ? (
+                  {getNavDescription(t, item) ? (
                     <span className="mt-1 block text-xs leading-4 text-muted-foreground">
-                      {item.description}
+                      {getNavDescription(t, item)}
                     </span>
                   ) : null}
                 </span>
@@ -111,7 +115,7 @@ export function AppSidebar({
                 {user.fullName}
               </p>
               <p className="text-[9px] font-black uppercase tracking-wider text-primary mt-0.5">
-                {user.roles[0] || "spectator"}
+                {formatRoleLabel(t, user.roles[0])}
               </p>
             </div>
           </Link>
@@ -120,7 +124,7 @@ export function AppSidebar({
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#E10600] px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(225,6,0,0.2)] transition hover:scale-[1.02] hover:bg-[#B80500] active:scale-[0.98] cursor-pointer"
           >
             <LogOut className="size-3.5" />
-            Đăng xuất
+            {t("nav.logout")}
           </button>
         </div>
       ) : null}

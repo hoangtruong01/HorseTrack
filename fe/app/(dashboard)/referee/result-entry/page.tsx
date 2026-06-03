@@ -1,11 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Award, ArrowRight, Clock } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
+
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { normalizeLanguage } from "@/lib/i18n-language";
 import { toast } from "sonner";
 
 type RaceInfo = {
@@ -22,6 +24,8 @@ type Assignment = {
 };
 
 export default function RefereeResultEntryWorkspacePage() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = normalizeLanguage(i18n.language) === "en" ? "en-US" : "vi-VN";
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +33,7 @@ export default function RefereeResultEntryWorkspacePage() {
     const fetchAssignments = async () => {
       try {
         const res = await fetch("/api/referee/referee-assignments/my-assignments?limit=100");
-        if (!res.ok) throw new Error("Không thể tải danh sách cuộc đua");
+        if (!res.ok) throw new Error(t("pages.referee.reports.fetchFailed"));
         const resData = await res.json();
         // Only accepted assignments
         const list = (resData.data?.data || []).filter(
@@ -37,7 +41,7 @@ export default function RefereeResultEntryWorkspacePage() {
         );
         setAssignments(list);
       } catch (err: any) {
-        toast.error(err.message || "Lỗi tải danh sách cuộc đua.");
+        toast.error(err.message || t("pages.referee.reports.fetchError"));
       } finally {
         setIsLoading(false);
       }
@@ -46,9 +50,9 @@ export default function RefereeResultEntryWorkspacePage() {
   }, []);
 
   const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return "Chưa xác định";
+    if (!dateStr) return t("pages.referee.common.dateUnknown");
     const d = new Date(dateStr);
-    return `${d.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} ngày ${d.toLocaleDateString("vi-VN")}`;
+    return `${d.toLocaleTimeString(dateLocale, { hour: "2-digit", minute: "2-digit" })} ${t("pages.referee.common.dateAt")} ${d.toLocaleDateString(dateLocale)}`;
   };
 
   if (isLoading) {
@@ -61,20 +65,15 @@ export default function RefereeResultEntryWorkspacePage() {
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
-      <PageHeader
-        eyebrow="Tác nghiệp trọng tài"
-        title="Xác Nhận Kết Quả (Input Result)"
-        description="Chọn cuộc đua đã kết thúc dưới đây để thực hiện nhập thời gian về đích, chạy thuật toán giả lập hoặc bấm khóa biên bản kết quả chính thức."
-      />
 
       {assignments.length === 0 ? (
         <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed dark:border-white/10 border-border dark:bg-[#15151E] bg-card max-w-lg mx-auto space-y-3">
           <div className="size-12 rounded-full border dark:border-white/10 border-border flex items-center justify-center dark:text-white/30 text-muted-foreground">
             <Award className="size-6" />
           </div>
-          <h4 className="font-bold dark:text-white text-foreground uppercase text-sm">Chưa có cuộc đua nào</h4>
+          <h4 className="font-bold dark:text-white text-foreground uppercase text-sm">{t("pages.referee.common.noRacesTitle")}</h4>
           <p className="text-xs dark:text-white/40 text-muted-foreground leading-relaxed">
-            Bạn cần được Ban tổ chức phân công và chấp nhận cuộc đua trước khi nhập kết quả.
+            {t("pages.referee.resultEntry.emptyDescription")}
           </p>
         </section>
       ) : (
@@ -99,11 +98,11 @@ export default function RefereeResultEntryWorkspacePage() {
                 <div className="flex items-center justify-between">
                   <StatusBadge
                     label={
-                      a.raceId.status === "SCHEDULED" ? "Chưa mở" :
-                      a.raceId.status === "CHECKING" ? "Kiểm duyệt" :
-                      a.raceId.status === "READY" ? "Sẵn sàng" :
-                      a.raceId.status === "LIVE" ? "Đang trực tiếp" :
-                      a.raceId.status === "FINISHED" ? "ĐÃ XONG - CHỜ DUYỆT" : "ĐÃ CÔNG BỐ"
+                      a.raceId.status === "SCHEDULED" ? t("pages.referee.preRace.statusNotOpen") :
+                      a.raceId.status === "CHECKING" ? t("pages.referee.preRace.statusInspecting") :
+                      a.raceId.status === "READY" ? t("pages.referee.preRace.statusReady") :
+                      a.raceId.status === "LIVE" ? t("pages.referee.common.running") :
+                      a.raceId.status === "FINISHED" ? t("pages.referee.resultEntry.enterResults") : t("pages.referee.resultEntry.viewLockedResults")
                     }
                     tone={
                       isFinished ? "teal" :
@@ -137,7 +136,7 @@ export default function RefereeResultEntryWorkspacePage() {
                     }`}
                   >
                     <Link href={`/referee/races/${a.raceId._id}/result-entry`}>
-                      {isFinished ? "Nhập kết quả ngay" : isPublished ? "Xem kết quả đã khóa" : "Nhập kết quả nháp"}
+                      {isFinished ? t("pages.referee.resultEntry.enterResults") : isPublished ? t("pages.referee.resultEntry.viewLockedResults") : t("pages.referee.resultEntry.draftResults")}
                       <ArrowRight className="size-3.5 ml-1" />
                     </Link>
                   </Button>

@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
-import { Award, Trophy, Star, ShieldCheck, Flame, Compass, ChevronDown } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { Trophy, Flame } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-// Mock Horse Rankings Data
+
 const mockHorseRankings = [
   { rank: 1, name: "Midnight Alloy", breed: "Thoroughbred", owner: "Saigon Equine", races: 12, wins: 8, points: 240, avgTime: "1:28.40" },
   { rank: 2, name: "Delta Comet", breed: "Arabian", owner: "Red River Farm", races: 10, wins: 6, points: 180, avgTime: "1:29.10" },
@@ -13,7 +13,6 @@ const mockHorseRankings = [
   { rank: 5, name: "Neon Stirrup", breed: "Mustang", owner: "Viet Derby House", races: 9, wins: 2, points: 75, avgTime: "1:35.00" }
 ];
 
-// Mock Jockey Rankings Data
 const mockJockeyRankings = [
   { rank: 1, name: "Gia Huy", license: "JK-091", matches: 15, wins: 9, winRate: "60.0%", points: 270 },
   { rank: 2, name: "An Nhi", license: "JK-042", matches: 12, wins: 7, winRate: "58.3%", points: 210 },
@@ -23,17 +22,12 @@ const mockJockeyRankings = [
 ];
 
 export default function SpectatorRankingsPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"horses" | "jockeys">("horses");
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
-      <PageHeader
-        eyebrow="Hall of Fame"
-        title="Bảng Xếp Hạng Giải Đấu"
-        description="Bảng tổng hợp điểm số, số trận thắng cán đích về nhất và tỷ lệ chiến thắng của các chiến mã và nài ngựa xuất sắc nhất."
-      />
 
-      {/* Tab Triggers */}
       <div className="flex border-b dark:border-white/10 border-border max-w-sm">
         <button
           onClick={() => setActiveTab("horses")}
@@ -43,7 +37,7 @@ export default function SpectatorRankingsPage() {
               : "text-muted-foreground hover:text-foreground dark:hover:text-white"
           }`}
         >
-          🐎 Chiến Mã Vô Địch
+          {t("pages.spectator.rankings.tabHorses")}
         </button>
         <button
           onClick={() => setActiveTab("jockeys")}
@@ -53,24 +47,23 @@ export default function SpectatorRankingsPage() {
               : "text-muted-foreground hover:text-foreground dark:hover:text-white"
           }`}
         >
-          🏇 Nài Ngựa Hàng Đầu
+          {t("pages.spectator.rankings.tabJockeys")}
         </button>
       </div>
 
       {activeTab === "horses" ? (
-        /* Horses Ranking Table */
         <div className="space-y-4">
           <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-card overflow-hidden">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
-                  <th className="p-4 w-16 text-center">Hạng</th>
-                  <th className="p-4">Tên Chiến Mã</th>
-                  <th className="p-4">Giống Ngựa</th>
-                  <th className="p-4 text-center">Số Trận Đã Chạy</th>
-                  <th className="p-4 text-center">Cán Đích Về Nhất</th>
-                  <th className="p-4 text-center">Thành tích TB</th>
-                  <th className="p-4 text-right">Tổng Điểm Tích Lũy</th>
+                  <th className="p-4 w-16 text-center">{t("pages.spectator.rankings.tableRank")}</th>
+                  <th className="p-4">{t("pages.spectator.rankings.tableHorseName")}</th>
+                  <th className="p-4">{t("pages.spectator.rankings.tableBreed")}</th>
+                  <th className="p-4 text-center">{t("pages.spectator.rankings.tableRacesRun")}</th>
+                  <th className="p-4 text-center">{t("pages.spectator.rankings.tableWins")}</th>
+                  <th className="p-4 text-center">{t("pages.spectator.rankings.tableAvgTime")}</th>
+                  <th className="p-4 text-right">{t("pages.spectator.rankings.tableTotalPoints")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -100,7 +93,7 @@ export default function SpectatorRankingsPage() {
                     <td className="p-4 text-center text-primary font-black">{horse.wins}</td>
                     <td className="p-4 text-center font-mono text-muted-foreground">{horse.avgTime}</td>
                     <td className="p-4 text-right font-black text-teal-400 text-sm">
-                      {horse.points} Pts
+                      {horse.points} {t("pages.spectator.common.pts")}
                     </td>
                   </tr>
                 ))}
@@ -109,19 +102,18 @@ export default function SpectatorRankingsPage() {
           </div>
         </div>
       ) : (
-        /* Jockeys Ranking Table */
         <div className="space-y-4">
           <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-card overflow-hidden">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
-                  <th className="p-4 w-16 text-center">Hạng</th>
-                  <th className="p-4">Họ Tên Nài Ngựa</th>
-                  <th className="p-4">Số Giấy Phép</th>
-                  <th className="p-4 text-center">Tổng Trận Cưỡi</th>
-                  <th className="p-4 text-center font-bold">Số Trận Thắng</th>
-                  <th className="p-4 text-center">Tỉ Lệ Thắng</th>
-                  <th className="p-4 text-right">Tổng Điểm NGHỀ NGHIỆP</th>
+                  <th className="p-4 w-16 text-center">{t("pages.spectator.rankings.tableRank")}</th>
+                  <th className="p-4">{t("pages.spectator.rankings.tableJockeyName")}</th>
+                  <th className="p-4">{t("pages.spectator.rankings.tableLicense")}</th>
+                  <th className="p-4 text-center">{t("pages.spectator.rankings.tableMatches")}</th>
+                  <th className="p-4 text-center font-bold">{t("pages.spectator.rankings.tableWins")}</th>
+                  <th className="p-4 text-center">{t("pages.spectator.rankings.tableWinRate")}</th>
+                  <th className="p-4 text-right">{t("pages.spectator.rankings.tableCareerPoints")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -151,7 +143,7 @@ export default function SpectatorRankingsPage() {
                     <td className="p-4 text-center text-primary font-black">{jockey.wins}</td>
                     <td className="p-4 text-center font-bold text-teal-400">{jockey.winRate}</td>
                     <td className="p-4 text-right font-black text-teal-400 text-sm">
-                      {jockey.points} Pts
+                      {jockey.points} {t("pages.spectator.common.pts")}
                     </td>
                   </tr>
                 ))}

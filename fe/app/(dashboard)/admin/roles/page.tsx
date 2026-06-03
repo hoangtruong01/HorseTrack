@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { UserCog, Plus, X, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { Plus, X, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { usersApi, type UserItem } from "@/lib/api-client";
 
 const ALL_ROLES = ["admin", "owner", "jockey", "referee", "spectator", "counter_staff"];
@@ -17,6 +17,7 @@ const roleColors: Record<string, string> = {
 };
 
 export default function AdminRolesPage() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -35,12 +36,12 @@ export default function AdminRolesPage() {
       const res = await usersApi.list({ page, limit: 15, search: search || undefined });
       setUsers(res.data);
       setMeta(res.meta);
-    } catch (e: any) {
-      showToast(e.message ?? "Lỗi tải dữ liệu", "err");
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, t]);
 
   useEffect(() => { void fetchUsers(1); }, [fetchUsers]);
 
@@ -48,9 +49,11 @@ export default function AdminRolesPage() {
     setActionLoading(`${userId}-${role}-add`);
     try {
       await usersApi.assignRole(userId, role);
-      showToast(`Đã thêm role "${role}"`);
+      showToast(t("pages.admin.roles.toastRoleAdded", { role }));
       await fetchUsers(meta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
+    }
     finally { setActionLoading(null); }
   };
 
@@ -58,19 +61,16 @@ export default function AdminRolesPage() {
     setActionLoading(`${userId}-${role}-rm`);
     try {
       await usersApi.removeRole(userId, role);
-      showToast(`Đã xóa role "${role}"`);
+      showToast(t("pages.admin.roles.toastRoleRemoved", { role }));
       await fetchUsers(meta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
+    }
     finally { setActionLoading(null); }
   };
 
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="Role Management"
-        title="Phân Quyền Hệ Thống"
-        description="Assign hoặc remove roles cho từng user. Thay đổi có hiệu lực ngay lập tức."
-      />
 
       {toast && (
         <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
@@ -78,29 +78,27 @@ export default function AdminRolesPage() {
         </div>
       )}
 
-      {/* Search */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <input
           className="w-full rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 pl-10 pr-4 py-2.5 text-sm dark:text-white text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
-          placeholder="Tìm theo tên, email..."
+          placeholder={t("pages.admin.roles.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      {/* Table */}
       <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.common.loading")}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b dark:border-white/10 border-border">
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Người dùng</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Roles hiện tại</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Thêm Role</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.roles.colUser")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.roles.colCurrentRoles")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.roles.colAddRole")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -124,7 +122,7 @@ export default function AdminRolesPage() {
                                 onClick={() => handleRemoveRole(u.id, r)}
                                 disabled={actionLoading === `${u.id}-${r}-rm` || (u.roles.length <= 1)}
                                 className="hover:text-red-400 disabled:opacity-40 cursor-pointer"
-                                title="Remove role"
+                                title={t("pages.admin.common.removeRole")}
                               >
                                 <X className="size-2.5" />
                               </button>
@@ -160,12 +158,14 @@ export default function AdminRolesPage() {
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchUsers(meta.page - 1)} disabled={meta.page <= 1}
             className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
-            <ChevronLeft className="size-4" /> Trước
+            <ChevronLeft className="size-4" /> {t("pages.admin.common.prev")}
           </button>
-          <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
+          <span className="text-sm text-muted-foreground">
+            {t("pages.admin.common.pageOf", { page: meta.page, total: meta.totalPages })}
+          </span>
           <button onClick={() => fetchUsers(meta.page + 1)} disabled={meta.page >= meta.totalPages}
             className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
-            Sau <ChevronRight className="size-4" />
+            {t("pages.admin.common.next")} <ChevronRight className="size-4" />
           </button>
         </div>
       )}

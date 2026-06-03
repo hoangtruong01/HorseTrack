@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Loader2 } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { RaceRegistrationForm } from "@/features/registrations/components/race-registration-form";
 import type { Horse } from "@/features/horses/components/horse-card";
@@ -26,6 +26,7 @@ type RaceDetail = {
 };
 
 export default function RaceRegisterPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const raceId = params.raceId as string;
@@ -55,12 +56,12 @@ export default function RaceRegisterPage() {
             setHorses(horsesData.data?.data || horsesData.data || []);
           }
         } else {
-          toast.error("Không thể tải thông tin trận đua hoặc chuồng ngựa.");
+          toast.error(t("pages.owner.raceRegister.toast.loadFailed"));
           router.push("/owner/races");
         }
       } catch (err) {
         console.error("Lỗi lấy dữ liệu:", err);
-        toast.error("Lỗi kết nối mạng.");
+        toast.error(t("common.networkError"));
       } finally {
         setIsLoading(false);
       }
@@ -69,7 +70,7 @@ export default function RaceRegisterPage() {
     if (raceId) {
       loadData();
     }
-  }, [raceId]);
+  }, [raceId, router, t]);
 
   const handleSubmit = async (horseId: string) => {
     setIsSubmitting(true);
@@ -87,13 +88,13 @@ export default function RaceRegisterPage() {
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.message || "Ghi tên chiến mã thất bại.");
+        throw new Error(resData.message || t("pages.owner.raceRegister.toast.registerFailed"));
       }
 
-      toast.success("Hồ sơ đăng ký trận đua của bạn đã được gửi thành công!");
+      toast.success(t("pages.owner.raceRegister.toast.registerSuccess"));
       router.push("/owner/registrations");
     } catch (err: any) {
-      toast.error(err.message || "Có lỗi xảy ra khi nộp hồ sơ.");
+      toast.error(err.message || t("pages.owner.raceRegister.toast.submitError"));
       throw err;
     } finally {
       setIsSubmitting(false);
@@ -104,7 +105,7 @@ export default function RaceRegisterPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
         <Loader2 className="size-8 animate-spin text-[#E10600]" />
-        <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang khởi tạo thủ tục đăng ký...</p>
+        <p className="mt-4 text-xs font-mono uppercase tracking-widest">{t("pages.owner.raceRegister.loading")}</p>
       </div>
     );
   }
@@ -112,15 +113,14 @@ export default function RaceRegisterPage() {
   if (!race) {
     return (
       <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-12 text-center max-w-xl mx-auto shadow-2xl">
-        <p className="text-sm dark:text-white/50 text-muted-foreground mb-4">Trận đua không khả dụng hoặc đã kết thúc.</p>
+        <p className="text-sm dark:text-white/50 text-muted-foreground mb-4">{t("pages.owner.raceRegister.notAvailable")}</p>
         <Button asChild className="rounded-full dark:bg-white/5 bg-muted/50 dark:text-white text-foreground">
-          <Link href="/owner/races">Quay lại danh sách trận đua</Link>
+          <Link href="/owner/races">{t("common.backToRaces")}</Link>
         </Button>
       </div>
     );
   }
 
-  // Format race fields for the form
   const formattedRace = {
     id: race.id,
     name: race.name,
@@ -147,14 +147,10 @@ export default function RaceRegisterPage() {
           href="/owner/races"
           className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition mb-3"
         >
-          <ChevronLeft className="size-4" /> Quay lại danh sách trận đua
+          <ChevronLeft className="size-4" /> {t("common.backToRaces")}
         </Link>
         
-        <PageHeader
-          eyebrow="Ghi danh thi đấu"
-          title={`Đăng Ký: ${race.name}`}
-          description="Nộp hồ sơ kỹ thuật chiến mã để ban quản trị giải đấu phê duyệt lượt tham gia xuất phát."
-        />
+        
       </div>
 
       <section className="mt-4">

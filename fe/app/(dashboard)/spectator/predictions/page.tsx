@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Flag, Bell, Wallet, Trophy, CheckCircle, HelpCircle, Activity, AlertTriangle, Coins, Play } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { Bell, Activity, AlertTriangle, Coins } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
 import { Button } from "@/components/ui/button";
 import { mockWalletBalances } from "@/features/wallet/mock-wallet";
 
@@ -65,6 +66,7 @@ const initialMyPredictions = [
 ];
 
 export default function SpectatorPredictionsPage() {
+  const { t } = useTranslation();
   const userId = "user-spectator-1";
   const [balance, setBalance] = useState(mockWalletBalances[userId] || 3200);
   const [myPredictions, setMyPredictions] = useState(initialMyPredictions);
@@ -77,7 +79,7 @@ export default function SpectatorPredictionsPage() {
 
   const handlePredictSubmit = () => {
     if (!selectedHorseId) {
-      toast.error("Vui lòng chọn 1 chiến mã trước khi gửi dự đoán!");
+      toast.error(t("pages.spectator.predictions.selectHorseFirst"));
       return;
     }
 
@@ -87,7 +89,7 @@ export default function SpectatorPredictionsPage() {
     // Check if already predicted this race in mock list
     const alreadyPredicted = myPredictions.some(p => p.raceName === currentRace.name && p.status === "PENDING");
     if (alreadyPredicted) {
-      toast.error("Bạn đã đặt dự đoán cho cuộc đua này rồi!");
+      toast.error(t("pages.spectator.predictions.alreadyPredicted"));
       return;
     }
 
@@ -98,13 +100,13 @@ export default function SpectatorPredictionsPage() {
       predictedHorse: horse.name,
       jockey: horse.jockey,
       status: "PENDING",
-      statusLabel: "Đang chờ chạy",
-      pointsChange: "Đang chờ kết quả",
+      statusLabel: t("pages.spectator.predictions.statusPending"),
+      pointsChange: t("pages.spectator.predictions.pointsPending"),
       date: "Today",
     };
 
     setMyPredictions([newPred, ...myPredictions]);
-    toast.success(`Đã ghi nhận dự đoán chiến mã "${horse.name}" về nhất trong cuộc đua "${currentRace.name}"!`);
+    toast.success(t("pages.spectator.predictions.predictionRecorded", { horse: horse.name, race: currentRace.name }));
     setSelectedHorseId("");
   };
 
@@ -115,10 +117,10 @@ export default function SpectatorPredictionsPage() {
       if (p.id === predId) {
         if (win) {
           pointsDiff = 1;
-          return { ...p, status: "WON", statusLabel: "Đoán Đúng", pointsChange: "+1 Điểm" };
+          return { ...p, status: "WON", statusLabel: t("pages.spectator.predictions.statusWon"), pointsChange: t("pages.spectator.predictions.pointsWon") };
         } else {
           pointsDiff = balance > 0 ? -1 : 0;
-          return { ...p, status: "LOST", statusLabel: "Đoán Sai", pointsChange: balance > 0 ? "-1 Điểm" : "0 Điểm" };
+          return { ...p, status: "LOST", statusLabel: t("pages.spectator.predictions.statusLost"), pointsChange: balance > 0 ? t("pages.spectator.predictions.pointsLost") : t("pages.spectator.predictions.pointsZero") };
         }
       }
       return p;
@@ -130,20 +132,15 @@ export default function SpectatorPredictionsPage() {
     setMyPredictions(updated);
 
     if (win) {
-      toast.success("Chúc mừng! Dự đoán của bạn chính xác, bạn nhận được +1 Điểm thưởng!");
+      toast.success(t("pages.spectator.predictions.winToast"));
     } else {
-      toast.error("Rất tiếc! Chiến mã dự đoán cán đích không đúng vị trí số 1. Tài khoản bị khấu trừ -1 Điểm.");
+      toast.error(t("pages.spectator.predictions.loseToast"));
     }
   };
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b dark:border-white/10 border-border pb-6">
-        <PageHeader
-          eyebrow="Prediction Station"
-          title="Dự Đoán Kết Quả Race"
-          description="Tham gia dự đoán ngựa về nhất trong các cuộc đua sắp diễn ra hoàn toàn miễn phí nhận điểm thưởng thực tế."
-        />
 
         {/* Quick Points Display */}
         <div className="shrink-0 rounded-2xl border dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 px-5 py-3 flex items-center gap-4">
@@ -151,8 +148,8 @@ export default function SpectatorPredictionsPage() {
             <Coins className="size-5" />
           </div>
           <div>
-            <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">Số dư điểm free</span>
-            <p className="text-xl font-black dark:dark:text-white text-foreground text-foreground">{balance.toLocaleString()} Pts</p>
+            <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">{t("pages.spectator.predictions.freeBalance")}</span>
+            <p className="text-xl font-black dark:dark:text-white text-foreground text-foreground">{balance.toLocaleString()} {t("pages.spectator.common.pts")}</p>
           </div>
         </div>
       </div>
@@ -164,12 +161,12 @@ export default function SpectatorPredictionsPage() {
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px]" />
             
             <h3 className="text-lg font-black uppercase tracking-tight dark:dark:text-white text-foreground text-foreground flex items-center gap-2">
-              <Bell className="size-5 text-primary" /> Đặt Dự Đoán Mới
+              <Bell className="size-5 text-primary" /> {t("pages.spectator.predictions.placeNewPrediction")}
             </h3>
 
             {/* Step 1: Select Race */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">1. Chọn trận đua sắp khởi tranh</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">{t("pages.spectator.predictions.step1Label")}</label>
               <select
                 value={selectedRaceId}
                 onChange={(e) => {
@@ -188,7 +185,7 @@ export default function SpectatorPredictionsPage() {
 
             {/* Step 2: Select Horse */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">2. Chọn chiến mã dự đoán về nhất (Hạng 1)</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">{t("pages.spectator.predictions.step2Label")}</label>
               
               <div className="space-y-2">
                 {currentRace?.horses.map((h) => (
@@ -210,7 +207,7 @@ export default function SpectatorPredictionsPage() {
                       />
                       <div>
                         <span className="block text-xs font-black dark:dark:text-white text-foreground text-foreground uppercase">{h.name}</span>
-                        <span className="text-[10px] text-muted-foreground">Nài ngựa: <strong className="dark:dark:text-white text-foreground text-foreground">{h.jockey}</strong></span>
+                        <span className="text-[10px] text-muted-foreground">{t("pages.spectator.predictions.jockeyLabel")} <strong className="dark:dark:text-white text-foreground text-foreground">{h.jockey}</strong></span>
                       </div>
                     </div>
                     <span className="text-[10px] text-muted-foreground uppercase font-mono">{h.breed}</span>
@@ -224,17 +221,17 @@ export default function SpectatorPredictionsPage() {
               disabled={!selectedHorseId}
               className="w-full rounded-xl bg-primary hover:bg-[#B80500] text-white font-black uppercase tracking-wider text-xs py-5 shadow-[0_4px_16px_rgba(225,6,0,0.35)]"
             >
-              Gửi Dự Đoán (+1 / -1 Pts)
+              {t("pages.spectator.predictions.submitPrediction")}
             </Button>
           </div>
 
           <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#13131A] bg-muted/50 p-5 space-y-2">
             <div className="flex items-center gap-2 text-yellow-400">
               <AlertTriangle className="size-4" />
-              <span className="text-xs font-black uppercase tracking-wider">Lưu Ý Cắt Cổng</span>
+              <span className="text-xs font-black uppercase tracking-wider">{t("pages.spectator.predictions.gateNoticeTitle")}</span>
             </div>
             <p className="text-[10px] leading-relaxed text-muted-foreground">
-              Cổng dự đoán đóng hoàn toàn khi cuộc đua chuyển sang trạng thái <strong className="dark:dark:text-white text-foreground text-foreground">LIVE</strong> (Trận đấu bắt đầu chạy). Bạn chỉ có thể đặt dự đoán ở các trận ở trạng thái <strong className="dark:dark:text-white text-foreground text-foreground">SCHEDULED</strong>, <strong className="dark:dark:text-white text-foreground text-foreground">CHECKING</strong> hoặc <strong className="dark:dark:text-white text-foreground text-foreground">READY</strong>.
+              {t("pages.spectator.predictions.gateNoticeBody")}
             </p>
           </div>
         </div>
@@ -243,7 +240,7 @@ export default function SpectatorPredictionsPage() {
         <div className="lg:col-span-7 space-y-4">
           <div className="border-b dark:border-white/10 border-border pb-3">
             <h3 className="text-lg font-black uppercase tracking-tight dark:dark:text-white text-foreground text-foreground flex items-center gap-2">
-              <Activity className="size-5 text-primary" /> Lịch sử lượt dự đoán của tôi ({myPredictions.length})
+              <Activity className="size-5 text-primary" /> {t("pages.spectator.predictions.myHistory", { count: myPredictions.length })}
             </h3>
           </div>
 
@@ -273,7 +270,7 @@ export default function SpectatorPredictionsPage() {
 
                   <h4 className="font-black dark:dark:text-white text-foreground text-foreground text-sm uppercase">{p.raceName}</h4>
                   <p className="text-[10px] text-muted-foreground">
-                    Đã chọn: <strong className="dark:dark:text-white text-foreground text-foreground">{p.predictedHorse}</strong> (Nài: {p.jockey})
+                    {t("pages.spectator.predictions.selected")} <strong className="dark:dark:text-white text-foreground text-foreground">{p.predictedHorse}</strong> ({t("pages.spectator.predictions.jockeyShort")} {p.jockey})
                   </p>
                 </div>
 
@@ -289,7 +286,7 @@ export default function SpectatorPredictionsPage() {
                         onClick={() => handleSimulateResult(p.id, true)}
                         className="h-7 rounded-lg bg-teal-500 hover:bg-teal-600 dark:text-white text-foreground font-bold text-[10px] px-2 py-0"
                       >
-                        Đoán Đúng
+                        {t("pages.spectator.predictions.simulateWin")}
                       </Button>
                       <Button
                         size="sm"
@@ -297,7 +294,7 @@ export default function SpectatorPredictionsPage() {
                         onClick={() => handleSimulateResult(p.id, false)}
                         className="h-7 rounded-lg bg-primary hover:bg-[#B80500] text-white font-bold text-[10px] px-2 py-0"
                       >
-                        Đoán Sai
+                        {t("pages.spectator.predictions.simulateLose")}
                       </Button>
                     </div>
                   )}

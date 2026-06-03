@@ -1,9 +1,14 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
-import { predictionsApi, type PredictionItem } from "@/lib/api-client";
+import { useTranslation } from "react-i18next";
+import { TransHtml } from "@/components/i18n/trans-html";
+import {
+  normalizePaginationMeta,
+  predictionsApi,
+  type PredictionItem,
+} from "@/lib/api-client";
 
 const statusColors: Record<string, string> = {
   PENDING: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
@@ -13,6 +18,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminBetsPage() {
+  const { t } = useTranslation();
   const [bets, setBets] = useState<PredictionItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -27,16 +33,18 @@ export default function AdminBetsPage() {
     setLoading(true);
     try {
       const res = await predictionsApi.list({ page, limit: 20 });
-      setBets(res.data);
-      setMeta(res.meta);
-    } catch (e: any) { showToast(e.message ?? "Lỗi tải dữ liệu", "err"); }
+      setBets(Array.isArray(res.data) ? res.data : []);
+      setMeta(normalizePaginationMeta(res.meta, 20));
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
+    }
     finally { setLoading(false); }
-  }, []);
+  }, [t]);
 
   useEffect(() => { void fetchBets(1); }, [fetchBets]);
 
   const getName = (field: PredictionItem["userId"] | PredictionItem["raceId"] | PredictionItem["horseId"]) => {
-    if (!field) return "—";
+    if (!field) return t("pages.admin.common.dash");
     if (typeof field === "object") {
       if ("fullName" in field) return field.fullName;
       if ("name" in field) return field.name;
@@ -51,11 +59,6 @@ export default function AdminBetsPage() {
 
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="Bet Management"
-        title="Quản Lý Dự Đoán"
-        description="Xem tất cả predictions/bets của user trong hệ thống. Kết quả được cập nhật tự động sau khi race publish."
-      />
 
       {toast && (
         <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
@@ -63,35 +66,42 @@ export default function AdminBetsPage() {
         </div>
       )}
 
-      {/* Stats cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {["PENDING", "WON", "LOST", "CANCELLED"].map(s => (
+        {(["PENDING", "WON", "LOST", "CANCELLED"] as const).map((s) => (
           <div key={s} className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{s}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              {t(`pages.admin.bets.status.${s}`)}
+            </p>
             <p className="mt-2 font-mono text-3xl font-black dark:text-white text-foreground">{stats[s] ?? 0}</p>
-            <span className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusColors[s]}`}>{s}</span>
+            <span className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusColors[s]}`}>
+              {t(`pages.admin.bets.status.${s}`)}
+            </span>
           </div>
         ))}
       </div>
 
-      <div className="text-sm text-muted-foreground">Tổng: <strong className="dark:text-white text-foreground">{meta.total}</strong> predictions</div>
+      <TransHtml
+        className="text-sm text-muted-foreground"
+        i18nKey="pages.admin.bets.total"
+        values={{ count: meta.total }}
+      />
 
       <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.common.loading")}</div>
         ) : bets.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có prediction nào.</div>
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.bets.empty")}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b dark:border-white/10 border-border">
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">User</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Race</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa đặt</th>
-                  <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Reward</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngày đặt</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.bets.colUser")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.bets.colRace")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.bets.colHorse")}</th>
+                  <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.bets.colReward")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.bets.colStatus")}</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.bets.colDate")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -103,11 +113,11 @@ export default function AdminBetsPage() {
                     <td className="px-5 py-4 text-center font-mono font-black text-primary">{b.rewardPoints ?? 0}</td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${statusColors[b.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
-                        {b.status}
+                        {t(`pages.admin.bets.status.${b.status}`, { defaultValue: b.status })}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-xs text-muted-foreground">
-                      {b.createdAt ? new Date(b.createdAt).toLocaleDateString("vi-VN") : "—"}
+                      {b.createdAt ? new Date(b.createdAt).toLocaleDateString("vi-VN") : t("pages.admin.common.dash")}
                     </td>
                   </tr>
                 ))}
@@ -121,12 +131,14 @@ export default function AdminBetsPage() {
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchBets(meta.page - 1)} disabled={meta.page <= 1}
             className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
-            <ChevronLeft className="size-4" /> Trước
+            <ChevronLeft className="size-4" /> {t("pages.admin.common.prev")}
           </button>
-          <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
+          <span className="text-sm text-muted-foreground">
+            {t("pages.admin.common.pageOf", { page: meta.page, total: meta.totalPages })}
+          </span>
           <button onClick={() => fetchBets(meta.page + 1)} disabled={meta.page >= meta.totalPages}
             className="flex items-center gap-1.5 rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.03] bg-muted/50 px-4 py-2 text-sm dark:text-white text-foreground hover:dark:bg-white/[0.06] bg-muted/50 disabled:opacity-40 transition">
-            Sau <ChevronRight className="size-4" />
+            {t("pages.admin.common.next")} <ChevronRight className="size-4" />
           </button>
         </div>
       )}

@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
-import { Flag, Search, Calendar, MapPin, Award, User, Users, ClipboardCheck, ArrowLeft, Siren, Timer } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { Search, MapPin, ArrowLeft, Siren, Timer } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
 import { Button } from "@/components/ui/button";
 
 // Mock Race Results Data
@@ -44,6 +45,7 @@ const mockRaceResults = [
 ];
 
 export default function SpectatorResultsPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRaceId, setSelectedRaceId] = useState<string | null>(null);
 
@@ -58,18 +60,13 @@ export default function SpectatorResultsPage() {
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
       {!selectedRaceId ? (
         <>
-          <PageHeader
-            eyebrow="Race Results"
-            title="Kết Quả Trực Tiếp & BXH Trận"
-            description="Tra cứu biên bản kết quả xếp hạng cán đích chính thức, thời gian chạy và giây phạt kỷ luật do trọng tài giám sát ghi nhận."
-          />
 
           {/* Search Box */}
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Tìm kết quả cuộc đua, giải đấu..."
+              placeholder={t("pages.spectator.results.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-10 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/20 bg-muted/20 pl-10 pr-4 text-sm dark:text-white text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
@@ -87,7 +84,7 @@ export default function SpectatorResultsPage() {
                   <div className="flex justify-between items-start">
                     <span className="text-[10px] text-primary font-black uppercase tracking-wider">{race.tournament}</span>
                     <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-teal-500/10 border border-teal-500/20 text-teal-400">
-                      ● ĐÃ CÔNG BỐ
+                      ● {t("pages.spectator.results.published")}
                     </span>
                   </div>
 
@@ -101,15 +98,15 @@ export default function SpectatorResultsPage() {
                 {/* Podium Overview */}
                 <div className="grid grid-cols-3 gap-2 dark:bg-white/[0.01] bg-muted/50 rounded-xl p-3 border dark:border-white/5 border-border text-center text-xs">
                   <div className="space-y-1">
-                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Hạng 2</span>
+                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">{t("pages.spectator.results.rank2")}</span>
                     <span className="font-bold dark:text-white text-foreground text-[11px] block truncate">{race.results[1]?.horse}</span>
                   </div>
                   <div className="space-y-1 border-x dark:border-white/5 border-border">
-                    <span className="block text-[8px] uppercase tracking-wider text-primary font-black">🏆 Vô Địch</span>
+                    <span className="block text-[8px] uppercase tracking-wider text-primary font-black">{t("pages.spectator.results.champion")}</span>
                     <span className="font-black text-primary text-[11px] block truncate">{race.results[0]?.horse}</span>
                   </div>
                   <div className="space-y-1">
-                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Hạng 3</span>
+                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">{t("pages.spectator.results.rank3")}</span>
                     <span className="font-bold dark:text-white text-foreground text-[11px] block truncate">{race.results[2]?.horse}</span>
                   </div>
                 </div>
@@ -117,7 +114,7 @@ export default function SpectatorResultsPage() {
                 <Button
                   onClick={() => setSelectedRaceId(race.id)}
 className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border dark:text-white text-foreground hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"                >
-                  Xem Bảng Điểm Chi Tiết
+                  {t("pages.spectator.results.viewFullScoreboard")}
                 </Button>
               </div>
             ))}
@@ -131,7 +128,7 @@ className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-whit
             variant="ghost"
             className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:dark:text-white text-foreground -ml-2"
           >
-            <ArrowLeft className="size-4 mr-2" /> Quay lại danh sách kết quả
+            <ArrowLeft className="size-4 mr-2" /> {t("pages.spectator.results.backToResults")}
           </Button>
 
           <div className="space-y-4">
@@ -142,10 +139,10 @@ className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-whit
                 <span className="text-[10px] text-primary font-black uppercase tracking-wider">{selectedRace?.tournament}</span>
                 <h2 className="text-2xl font-black uppercase tracking-tight dark:text-white text-foreground">{selectedRace?.name}</h2>
                 <div className="flex gap-4 text-xs text-muted-foreground">
-                  <span>Khoảng cách: <strong className="dark:text-white text-foreground">{selectedRace?.distance}</strong></span>
-                  <span>Đường chạy: <strong className="dark:text-white text-foreground">{selectedRace?.track}</strong></span>
-                  <span>Mặt cỏ: <strong className="dark:text-white text-foreground">{selectedRace?.surface}</strong></span>
-                  <span>Ngày đấu: <strong className="dark:text-white text-foreground">{selectedRace?.date}</strong></span>
+                  <span>{t("pages.spectator.results.distanceLabel")} <strong className="dark:text-white text-foreground">{selectedRace?.distance}</strong></span>
+                  <span>{t("pages.spectator.results.trackLabel")} <strong className="dark:text-white text-foreground">{selectedRace?.track}</strong></span>
+                  <span>{t("pages.spectator.results.surfaceLabel")} <strong className="dark:text-white text-foreground">{selectedRace?.surface}</strong></span>
+                  <span>{t("pages.spectator.results.raceDateLabel")} <strong className="dark:text-white text-foreground">{selectedRace?.date}</strong></span>
                 </div>
               </div>
             </div>
@@ -155,13 +152,13 @@ className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-whit
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
-                    <th className="p-4 w-16 text-center">Hạng</th>
-                    <th className="p-4 w-16">Lane</th>
-                    <th className="p-4">Chiến Mã</th>
-                    <th className="p-4">Nài Ngựa</th>
-                    <th className="p-4"><span className="flex items-center gap-1"><Timer className="size-3.5 text-primary" /> Thời gian chính thức</span></th>
-                    <th className="p-4"><span className="flex items-center gap-1"><Siren className="size-3.5 text-primary" /> Lỗi / Giây phạt</span></th>
-                    <th className="p-4 text-right">Giải Thưởng</th>
+                    <th className="p-4 w-16 text-center">{t("pages.spectator.results.tableRank")}</th>
+                    <th className="p-4 w-16">{t("pages.spectator.races.tableLane")}</th>
+                    <th className="p-4">{t("pages.spectator.results.tableHorse")}</th>
+                    <th className="p-4">{t("pages.spectator.races.tableJockey")}</th>
+                    <th className="p-4"><span className="flex items-center gap-1"><Timer className="size-3.5 text-primary" /> {t("pages.spectator.results.tableOfficialTime")}</span></th>
+                    <th className="p-4"><span className="flex items-center gap-1"><Siren className="size-3.5 text-primary" /> {t("pages.spectator.results.tableViolations")}</span></th>
+                    <th className="p-4 text-right">{t("pages.spectator.results.tablePrize")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">

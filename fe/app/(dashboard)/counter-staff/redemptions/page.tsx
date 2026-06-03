@@ -1,13 +1,15 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
+
 import { CashoutApprovalQueue } from "@/features/wallet/components/cashout-approval-queue";
 import { walletApi, type CashoutItem } from "@/lib/api-client";
 import type { CashoutRequest } from "@/features/wallet/mock-wallet";
 
 export default function RedemptionsQueuePage() {
+  const { t } = useTranslation();
   const [cashouts, setCashouts] = useState<CashoutItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,7 +21,7 @@ export default function RedemptionsQueuePage() {
         setCashouts(res.data);
       }
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi lấy danh sách đổi thưởng.");
+      toast.error(err.message || t("pages.counterStaff.redemptions.fetchError"));
     } finally {
       setLoading(false);
     }
@@ -27,25 +29,24 @@ export default function RedemptionsQueuePage() {
 
   useEffect(() => {
     fetchCashouts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => {
     try {
       await walletApi.processCashout(id, action);
-      toast.success(`Cập nhật giao dịch thành công sang trạng thái ${action}`);
+      toast.success(t("pages.counterStaff.redemptions.updateSuccess", { status: action }));
       await fetchCashouts();
     } catch (err: any) {
-      toast.error(err.message || `Lỗi khi cập nhật giao dịch sang ${action}`);
-      // Reload to ensure state is in sync
+      toast.error(err.message || t("pages.counterStaff.redemptions.updateError", { status: action }));
       await fetchCashouts();
     }
   };
 
-  // Map CashoutItem to CashoutRequest format required by the component
   const mappedRequests: CashoutRequest[] = cashouts.map((c) => {
     const userObj = typeof c.userId === "object" ? c.userId : null;
-    const userFullName = userObj?.fullName ?? "Khách hàng";
-    
+    const userFullName = userObj?.fullName ?? t("pages.counterStaff.redemptions.defaultCustomer");
+
     let userRole: "Owner" | "Jockey" | "Spectator" = "Spectator";
     if (userObj && Array.isArray((userObj as any).roles)) {
       const rolesList = (userObj as any).roles as string[];
@@ -71,15 +72,10 @@ export default function RedemptionsQueuePage() {
 
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="Redemption Queue"
-        title="Duyệt Hàng Đợi Đổi Thưởng"
-        description="Xử lý và hoàn tất các yêu cầu đổi điểm lấy quà tặng vật lý của người dùng khi họ đến quầy trực tiếp."
-      />
 
       {loading ? (
         <div className="flex items-center justify-center py-20 text-muted-foreground text-sm font-semibold">
-          Đang tải hàng đợi đổi thưởng từ hệ thống...
+          {t("pages.counterStaff.redemptions.loading")}
         </div>
       ) : (
         <CashoutApprovalQueue requests={mappedRequests} onAction={handleAction} />

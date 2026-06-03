@@ -1,16 +1,28 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, ClipboardList, Gauge, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ParticipantTable } from "@/features/races/components/participant-table";
 import { RaceScheduleCard } from "@/features/races/components/race-schedule-card";
 import { RaceStatusTimeline } from "@/features/races/components/race-status-timeline";
-import type { Race } from "@/features/races/mock-races";
+import type { Race, RaceStatus } from "@/features/races/mock-races";
+
+const statusTone: Record<RaceStatus, "red" | "yellow" | "slate" | "teal"> = {
+  scheduled: "yellow",
+  live: "red",
+  finished: "slate",
+  result_published: "teal",
+};
 
 export type RaceDetailPanelProps = { race: Race };
 
 export function RaceDetailPanel({ race }: RaceDetailPanelProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <section className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)] sm:p-6 lg:p-8">
@@ -18,25 +30,15 @@ export function RaceDetailPanel({ race }: RaceDetailPanelProps) {
         <div className="relative grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
           <div>
             <StatusBadge
-              label={race.status.replace("_", " ")}
-              tone={
-                race.status === "live"
-                  ? "red"
-                  : race.status === "scheduled"
-                    ? "yellow"
-                    : race.status === "result_published"
-                      ? "teal"
-                      : "slate"
-              }
+              label={t(`pages.admin.mockRaces.status.${race.status}`)}
+              tone={statusTone[race.status]}
               pulse={race.status === "live"}
             />
             <h1 className="mt-5 text-3xl font-black uppercase leading-tight tracking-tight dark:text-white text-foreground sm:text-5xl">
               {race.name}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Race is the core business object: schedule, participants, referee,
-              status timeline, and metadata are grouped in one admin control
-              view.
+              {t("pages.admin.mockRaces.detailDescription")}
             </p>
           </div>
           <div className="grid gap-3 rounded-2xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4">
@@ -44,7 +46,7 @@ export function RaceDetailPanel({ race }: RaceDetailPanelProps) {
               <Gauge className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Distance
+                  {t("pages.admin.mockRaces.distance")}
                 </p>
                 <p className="font-black dark:text-white text-foreground">{race.distance}</p>
               </div>
@@ -53,7 +55,7 @@ export function RaceDetailPanel({ race }: RaceDetailPanelProps) {
               <Users className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Participants
+                  {t("pages.admin.mockRaces.participantsLabel")}
                 </p>
                 <p className="font-black dark:text-white text-foreground">
                   {race.participants.length}/{race.capacity}
@@ -64,7 +66,7 @@ export function RaceDetailPanel({ race }: RaceDetailPanelProps) {
               <ClipboardList className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Tournament
+                  {t("pages.admin.mockRaces.tournament")}
                 </p>
                 <p className="font-black dark:text-white text-foreground">{race.tournament}</p>
               </div>
@@ -83,7 +85,7 @@ export function RaceDetailPanel({ race }: RaceDetailPanelProps) {
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Referee summary
+            {t("pages.admin.mockRaces.refereeSummary")}
           </p>
           <h2 className="mt-2 text-xl font-black uppercase dark:text-white text-foreground">
             {race.referee.name}
@@ -94,27 +96,27 @@ export function RaceDetailPanel({ race }: RaceDetailPanelProps) {
         </div>
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Quick actions
+            {t("pages.admin.mockRaces.quickActions")}
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button asChild variant="outline" className="rounded-full">
               <Link href={`/admin/races/${race.id}/participants`}>
-                View participants <ArrowRight className="size-4" />
+                {t("pages.admin.mockRaces.viewParticipants")} <ArrowRight className="size-4" />
               </Link>
             </Button>
             <Button asChild variant="outline" className="rounded-full">
               <Link href={`/admin/races/${race.id}/assignments`}>
-                Assignments
+                {t("pages.admin.mockRaces.assignments")}
               </Link>
             </Button>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Placeholders only. No approval/publish workflow.
+            {t("pages.admin.mockRaces.quickActionsHint")}
           </p>
         </div>
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Race metadata
+            {t("pages.admin.mockRaces.metadata")}
           </p>
           <dl className="mt-4 space-y-3 text-sm">
             <div>

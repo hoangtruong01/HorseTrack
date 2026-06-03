@@ -6,6 +6,17 @@ import { Bell, LogOut, Menu, User, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { publicNavigation } from "@/constants/navigation";
+
+const publicNavTitleKeys: Record<string, string> = {
+  Home: "nav.home",
+  Tournaments: "nav.tournaments",
+  Races: "nav.races",
+  Rankings: "nav.rankings",
+  Predictions: "nav.predictions",
+  News: "nav.news",
+  Contact: "nav.contact",
+};
+import { formatRoleLabel } from "@/lib/role-i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -86,7 +97,7 @@ export function AppHeader({
                 href={item.href}
                 className="relative rounded-full px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-muted-foreground transition-all duration-150 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E10600] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                {item.title}
+                {t(publicNavTitleKeys[item.title] ?? item.title)}
               </Link>
             ))}
           </nav>
@@ -117,7 +128,7 @@ export function AppHeader({
                     {user.fullName}
                   </span>
                   <span className="text-[9px] font-black uppercase tracking-wider text-[#E10600]/80">
-                    {user.roles[0] || "spectator"}
+                    {formatRoleLabel(t, user.roles[0])}
                   </span>
                 </div>
                 <div className="flex size-9 items-center justify-center rounded-xl bg-card/70 border border-border text-muted-foreground group-hover:border-[#E10600]/30 group-hover:text-foreground transition">
@@ -153,7 +164,7 @@ export function AppHeader({
               href="/login"
               className="rounded-xl border border-border bg-card/70 px-5 py-2 text-sm font-bold text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
-              Login
+              {t("nav.login")}
             </Link>
           )}
         </div>
@@ -189,7 +200,7 @@ export function AppHeader({
                   onClick={() => setMobileMenuOpen(false)}
                   className="rounded-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
-                  {item.title}
+                  {t(publicNavTitleKeys[item.title] ?? item.title)}
                 </Link>
               ))}
             </nav>
@@ -211,7 +222,7 @@ export function AppHeader({
                     </span>
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-[#E10600]">
-                    {user.roles[0] || "spectator"}
+                    {formatRoleLabel(t, user.roles[0])}
                   </span>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -238,7 +249,7 @@ export function AppHeader({
                   className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#E10600] text-sm font-bold text-white cursor-pointer"
                 >
                   <LogOut className="size-4" />
-                  Đăng xuất
+                  {t("nav.logout")}
                 </button>
               </div>
             ) : (
@@ -247,7 +258,7 @@ export function AppHeader({
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex h-11 w-full items-center justify-center rounded-xl border dark:border-white/5 border-border text-sm font-bold dark:text-white/70 text-muted-foreground"
               >
-                Login
+                {t("nav.login")}
               </Link>
             )}
           </div>

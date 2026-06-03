@@ -1,18 +1,27 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
+
 import { RoutePlaceholder } from "@/components/layout/route-placeholder";
 
 export default function PublicRacesPage() {
+  const { t } = useTranslation();
+  const p = "pages.public.races";
+
   return (
     <RoutePlaceholder
-      eyebrow="Public shell"
-      title="Races"
-      description="Race discovery shell with upcoming, live, and published-result placeholders. No live tracking yet."
+      eyebrow={t(`${p}.eyebrow`)}
+      title={t(`${p}.title`)}
+      description={t(`${p}.description`)}
       cards={[
-        { label: "Upcoming", value: "4 mock" },
-        { label: "Live", value: "1 mock" },
-        { label: "Result scope", value: "Per race" },
+        { label: t(`${p}.cardUpcoming`), value: t(`${p}.cardUpcomingValue`) },
+        { label: t(`${p}.cardLive`), value: t(`${p}.cardLiveValue`) },
+        { label: t(`${p}.cardScope`), value: t(`${p}.cardPerRace`) },
       ]}
       ctaHref="/races/race-01"
-      ctaLabel="Open mock race"
+      ctaLabel={t(`${p}.cta`)}
+      emptyTitle={t("pages.public.tournaments.emptyTitle")}
+      emptyDescription={t("pages.public.tournaments.emptyDesc")}
     />
   );
 }

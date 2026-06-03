@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Award, Upload } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import type { Horse, HorseGender, HorseHealthStatus } from "./horse-card";
 
@@ -23,6 +24,8 @@ export function HorseForm({
   onCancel,
   isSubmitting,
 }: HorseFormProps) {
+  const { t } = useTranslation();
+  const p = "pages.owner.horseForm";
   const [name, setName] = useState(initialData?.name || "");
   const [breed, setBreed] = useState(initialData?.breed || "");
   const [age, setAge] = useState(initialData?.age?.toString() || "");
@@ -42,7 +45,7 @@ export function HorseForm({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg("Kích thước ảnh không vượt quá 5MB.");
+        setErrorMsg(t(`${p}.errors.imageSize`));
         return;
       }
       setImageFile(file);
@@ -60,7 +63,7 @@ export function HorseForm({
     setErrorMsg("");
 
     if (!name.trim()) {
-      setErrorMsg("Tên chiến mã không được để trống.");
+      setErrorMsg(t(`${p}.errors.nameRequired`));
       return;
     }
 
@@ -81,7 +84,7 @@ export function HorseForm({
 
       await onSubmit(data);
     } catch (err: any) {
-      setErrorMsg(err.message || "Đã xảy ra lỗi khi lưu thông tin ngựa.");
+      setErrorMsg(err.message || t(`${p}.errors.saveFailed`));
     }
   };
 
@@ -89,7 +92,7 @@ export function HorseForm({
     <form onSubmit={handleSubmit} className="space-y-6 dark:bg-[#15151E] bg-card border dark:border-white/10 border-border rounded-2xl p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
       {errorMsg && (
         <div className="rounded-xl border border-[#E10600] bg-[#E10600]/10 p-4 text-sm text-[#E0DEDC]">
-          <span className="font-bold text-[#E10600] uppercase block mb-1">Lỗi nhập liệu</span>
+          <span className="font-bold text-[#E10600] uppercase block mb-1">{t(`${p}.errors.title`)}</span>
           {errorMsg}
         </div>
       )}
@@ -98,43 +101,43 @@ export function HorseForm({
         {/* Left Column: Form Inputs */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className={labelClass}>Tên Chiến Mã *</label>
+            <label className={labelClass}>{t(`${p}.fields.name`)}</label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={fieldClass}
-              placeholder="Nhập tên ngựa (ví dụ: Thunder Bolt)"
+              placeholder={t(`${p}.placeholders.name`)}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className={labelClass}>Giống Ngựa</label>
+              <label className={labelClass}>{t(`${p}.fields.breed`)}</label>
               <input
                 type="text"
                 value={breed}
                 onChange={(e) => setBreed(e.target.value)}
                 className={fieldClass}
-                placeholder="Thoroughbred"
+                placeholder={t(`${p}.placeholders.breed`)}
               />
             </div>
             <div className="space-y-2">
-              <label className={labelClass}>Màu Sắc</label>
+              <label className={labelClass}>{t(`${p}.fields.color`)}</label>
               <input
                 type="text"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
                 className={fieldClass}
-                placeholder="Vàng cát, Đen tuyền"
+                placeholder={t(`${p}.placeholders.color`)}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <label className={labelClass}>Tuổi</label>
+              <label className={labelClass}>{t(`${p}.fields.age`)}</label>
               <input
                 type="number"
                 min="1"
@@ -146,7 +149,7 @@ export function HorseForm({
               />
             </div>
             <div className="space-y-2">
-              <label className={labelClass}>Cân nặng (kg)</label>
+              <label className={labelClass}>{t(`${p}.fields.weight`)}</label>
               <input
                 type="number"
                 min="100"
@@ -158,7 +161,7 @@ export function HorseForm({
               />
             </div>
             <div className="space-y-2">
-              <label className={labelClass}>Chiều cao (cm)</label>
+              <label className={labelClass}>{t(`${p}.fields.height`)}</label>
               <input
                 type="number"
                 min="50"
@@ -173,28 +176,28 @@ export function HorseForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className={labelClass}>Giới Tính</label>
+              <label className={labelClass}>{t(`${p}.fields.gender`)}</label>
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value as HorseGender)}
                 className={fieldClass}
               >
-                <option value="MALE">Đực (Male)</option>
-                <option value="FEMALE">Cái (Female)</option>
-                <option value="GELDING">Thiến (Gelding)</option>
+                <option value="MALE">{t(`${p}.gender.MALE`)}</option>
+                <option value="FEMALE">{t(`${p}.gender.FEMALE`)}</option>
+                <option value="GELDING">{t(`${p}.gender.GELDING`)}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <label className={labelClass}>Trạng Thái Sức Khỏe</label>
+              <label className={labelClass}>{t(`${p}.fields.health`)}</label>
               <select
                 value={healthStatus}
                 onChange={(e) => setHealthStatus(e.target.value as HorseHealthStatus)}
                 className={fieldClass}
               >
-                <option value="HEALTHY">Khỏe mạnh</option>
-                <option value="INJURED">Chấn thương</option>
-                <option value="RECOVERING">Đang hồi phục</option>
-                <option value="RETIRED">Giải nghệ</option>
+                <option value="HEALTHY">{t(`${p}.health.HEALTHY`)}</option>
+                <option value="INJURED">{t(`${p}.health.INJURED`)}</option>
+                <option value="RECOVERING">{t(`${p}.health.RECOVERING`)}</option>
+                <option value="RETIRED">{t(`${p}.health.RETIRED`)}</option>
               </select>
             </div>
           </div>
@@ -203,7 +206,7 @@ export function HorseForm({
         {/* Right Column: Image and Description */}
         <div className="space-y-4 flex flex-col">
           <div className="space-y-2 flex-1 flex flex-col">
-            <label className={labelClass}>Hình ảnh chiến mã</label>
+            <label className={labelClass}>{t(`${p}.fields.image`)}</label>
             <div className="relative border border-dashed dark:border-white/10 border-border hover:border-primary/50 dark:bg-white/[0.02] bg-muted/50 rounded-xl flex-1 min-h-[200px] flex flex-col items-center justify-center p-4 transition group cursor-pointer">
               {imagePreview ? (
                 <div className="relative w-full h-full min-h-[180px] rounded-lg overflow-hidden">
@@ -213,14 +216,14 @@ export function HorseForm({
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 dark:bg-black/40 bg-muted/20 opacity-0 hover:opacity-100 flex items-center justify-center transition">
-                    <span className="text-white text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">Thay đổi ảnh</span>
+                    <span className="text-white text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">{t(`${p}.changeImage`)}</span>
                   </div>
                 </div>
               ) : (
                 <div className="text-center space-y-2">
                   <Upload className="size-10 dark:text-white/35 text-muted-foreground mx-auto group-hover:text-primary transition" />
-                  <p className="text-sm font-bold dark:text-white text-foreground">Tải lên hình ảnh</p>
-                  <p className="text-xs dark:text-white/45 text-muted-foreground">Cho phép định dạng PNG, JPG, WEBP tối đa 5MB</p>
+                  <p className="text-sm font-bold dark:text-white text-foreground">{t(`${p}.uploadTitle`)}</p>
+                  <p className="text-xs dark:text-white/45 text-muted-foreground">{t(`${p}.uploadHint`)}</p>
                 </div>
               )}
               <input
@@ -233,12 +236,12 @@ export function HorseForm({
           </div>
 
           <div className="space-y-2">
-            <label className={labelClass}>Mô tả / Ghi chú</label>
+            <label className={labelClass}>{t(`${p}.fields.description`)}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full rounded-xl border dark:border-white/10 border-border dark:bg-white/[0.04] bg-muted/50 p-4 text-sm dark:text-white text-foreground placeholder:dark:text-white/30 text-muted-foreground outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 min-h-[96px]"
-              placeholder="Nhập mô tả về thế mạnh hoặc đặc điểm nổi bật của ngựa..."
+              placeholder={t(`${p}.placeholders.description`)}
             />
           </div>
         </div>
@@ -252,7 +255,7 @@ export function HorseForm({
           variant="outline"
           className="rounded-xl px-5 h-11 border dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground"
         >
-          Hủy bỏ
+          {t(`${p}.cancel`)}
         </Button>
         <Button
           type="submit"
@@ -262,10 +265,10 @@ export function HorseForm({
           {isSubmitting ? (
             <>
               <Loader2 className="size-4 animate-spin" />
-              Đang lưu...
+              {t(`${p}.saving`)}
             </>
           ) : (
-            "Lưu chiến mã"
+            t(`${p}.save`)
           )}
         </Button>
       </div>

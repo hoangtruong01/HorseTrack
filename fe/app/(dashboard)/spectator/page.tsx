@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { Trophy, Calendar, MapPin, Award, ArrowRight, Flag, Bell, Wallet, Activity } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { mockWalletBalances } from "@/features/wallet/mock-wallet";
 
@@ -81,6 +81,7 @@ const mockUpcomingRaces = [
 ];
 
 export default function SpectatorDashboardPage() {
+  const { t } = useTranslation();
   const userId = "user-spectator-1";
   const [balance] = useState(mockWalletBalances[userId] || 3200);
 
@@ -94,28 +95,28 @@ export default function SpectatorDashboardPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary">
-              <Activity className="size-3.5 animate-pulse" /> Spectator Control Center
+              <Activity className="size-3.5 animate-pulse" /> {t("spectator.header.eyebrow")}
             </div>
             <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight dark:text-white text-foreground">
-              Đường Đua & <span className="text-primary">Dự Đoán</span>
+              {t("spectator.header.title").split(" & ")[0]} & <span className="text-primary">{t("spectator.header.title").split(" & ")[1] || "Dự Đoán"}</span>
             </h1>
             <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-              Duyệt qua các giải đua xe chiến mã đỉnh cao, tham gia thử tài dự đoán kết quả hoàn toàn miễn phí nhận điểm thưởng và đổi các phần quà vật lý hấp dẫn tại quầy.
+              {t("spectator.header.description")}
             </p>
           </div>
 
           {/* Quick Balance Card */}
           <div className="shrink-0 rounded-2xl border dark:border-white/10 border-border dark:bg-white/[0.02] bg-muted/50 p-5 backdrop-blur-md min-w-[240px] space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Số dư Ví Điểm</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("spectator.wallet.title")}</span>
               <Wallet className="size-4 text-primary" />
             </div>
             <div className="space-y-1">
               <p className="text-3xl font-black dark:text-white text-foreground tracking-tight">{balance.toLocaleString()} Pts</p>
-              <p className="text-[10px] text-teal-400 font-bold uppercase tracking-wider">● Tài khoản hoạt động</p>
+              <p className="text-[10px] text-teal-400 font-bold uppercase tracking-wider">● {t("spectator.wallet.active")}</p>
             </div>
             <Button asChild variant="outline" className="w-full rounded-xl dark:border-white/10 border-border bg-transparent dark:text-white text-foreground hover:dark:bg-white/5 bg-muted/50 text-xs font-bold uppercase tracking-wider">
-              <Link href="/spectator/wallet">Xem ví & Đổi thưởng</Link>
+              <Link href="/spectator/wallet">{t("spectator.wallet.link")}</Link>
             </Button>
           </div>
         </div>
@@ -128,10 +129,10 @@ export default function SpectatorDashboardPage() {
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
               <Trophy className="size-4.5" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Giải Đang Diễn Ra</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("spectator.stats.ongoing.label")}</span>
           </div>
-          <p className="text-3xl font-black dark:text-white text-foreground">2 Giải Đấu</p>
-          <p className="text-xs text-muted-foreground">Quy tụ hơn 30+ chiến mã đăng ký</p>
+          <p className="text-3xl font-black dark:text-white text-foreground">{t("spectator.stats.ongoing.value")}</p>
+          <p className="text-xs text-muted-foreground">{t("spectator.stats.ongoing.desc")}</p>
         </div>
 
         <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-white/[0.01] bg-muted/50 p-5 space-y-2 hover:dark:border-white/10 border-border transition duration-300">
@@ -139,10 +140,10 @@ export default function SpectatorDashboardPage() {
             <div className="flex size-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
               <Activity className="size-4.5" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Lịch Trình Hôm Nay</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("spectator.stats.today.label")}</span>
           </div>
-          <p className="text-3xl font-black text-teal-400">1 LIVE</p>
-          <p className="text-xs text-muted-foreground">Trực tiếp cập nhật kết quả tại trường đua</p>
+          <p className="text-3xl font-black text-teal-400">{t("spectator.stats.today.value")}</p>
+          <p className="text-xs text-muted-foreground">{t("spectator.stats.today.desc")}</p>
         </div>
 
         <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-white/[0.01] bg-muted/50 p-5 space-y-2 hover:dark:border-white/10 border-border transition duration-300">
@@ -150,10 +151,10 @@ export default function SpectatorDashboardPage() {
             <div className="flex size-9 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
               <Bell className="size-4.5" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tỷ Lệ Dự Đoán Đúng</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("spectator.stats.accuracy.label")}</span>
           </div>
-          <p className="text-3xl font-black text-yellow-400">68.4%</p>
-          <p className="text-xs text-muted-foreground">Dự đoán đúng nhận +1 điểm, sai -1 điểm</p>
+          <p className="text-3xl font-black text-yellow-400">{t("spectator.stats.accuracy.value")}</p>
+          <p className="text-xs text-muted-foreground">{t("spectator.stats.accuracy.desc")}</p>
         </div>
       </div>
 
@@ -164,13 +165,13 @@ export default function SpectatorDashboardPage() {
           <div className="flex items-center justify-between border-b dark:border-white/10 border-border pb-4">
             <div className="space-y-1">
               <h2 className="text-xl font-black uppercase tracking-tight dark:text-white text-foreground flex items-center gap-2">
-                <Trophy className="size-5 text-primary" /> Giải Đấu Nổi Bật (Featured)
+                <Trophy className="size-5 text-primary" /> {t("spectator.tournaments.title")}
               </h2>
-              <p className="text-xs text-muted-foreground">Khám phá các giải đua ngựa kịch tính sắp diễn ra hoặc đang khởi tranh</p>
+              <p className="text-xs text-muted-foreground">{t("spectator.tournaments.desc")}</p>
             </div>
             <Button asChild variant="ghost" className="text-xs font-bold uppercase tracking-wider text-primary hover:dark:text-white text-foreground group">
               <Link href="/spectator/tournaments" className="flex items-center gap-1">
-                Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
+                {t("spectator.tournaments.viewAll")} <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </Button>
           </div>
@@ -220,15 +221,15 @@ export default function SpectatorDashboardPage() {
                       <span className="flex items-center gap-1.5"><Calendar className="size-3 text-primary" /> {tour.startDate} ~ {tour.endDate}</span>
                     </div>
                     <div className="flex items-center justify-between font-bold dark:text-white text-foreground border-t dark:border-white/5 border-border pt-2">
-                      <span>Tổng Giải Thưởng:</span>
+                      <span>{t("spectator.tournaments.prizePool")}</span>
                       <span className="text-primary text-xs font-black uppercase tracking-wider">{tour.prizePool.toLocaleString()} Pts</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="px-5 pb-5 mt-auto">
-                  <Button asChild className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border text-white hover:bg-primary hover:text-foreground dark:hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider">
-                    <Link href={`/spectator/tournaments?id=${tour.id}`}>Chi tiết giải đấu</Link>
+                  <Button asChild className="w-full rounded-xl dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border text-blackblack hover:bg-primary hover:text-foreground dark:hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider">
+                    <Link href={`/spectator/tournaments?id=${tour.id}`}>{t("spectator.tournaments.detailLink")}</Link>
                   </Button>
                 </div>
               </div>
@@ -240,9 +241,9 @@ export default function SpectatorDashboardPage() {
         <div className="lg:col-span-4 space-y-6">
           <div className="space-y-1 border-b dark:border-white/10 border-border pb-4">
             <h2 className="text-xl font-black uppercase tracking-tight dark:text-white text-foreground flex items-center gap-2">
-              <Flag className="size-5 text-primary" /> Lịch Đua Hot
+              <Flag className="size-5 text-primary" /> {t("spectator.upcoming.title")}
             </h2>
-            <p className="text-xs text-muted-foreground">Theo dõi và đặt dự đoán sớm trước giờ xuất phát</p>
+            <p className="text-xs text-muted-foreground">{t("spectator.upcoming.desc")}</p>
           </div>
 
           <div className="space-y-4">
@@ -262,7 +263,7 @@ export default function SpectatorDashboardPage() {
                   </div>
                   {race.status === "LIVE" ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[9px] font-black text-teal-400 uppercase tracking-wider">
-                      ● LIVE NOW
+                      ● {t("spectator.upcoming.liveNow")}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-full dark:bg-white/5 bg-muted/50 border dark:border-white/10 border-border px-2 py-0.5 text-[9px] font-black text-muted-foreground uppercase tracking-wider">
@@ -273,11 +274,11 @@ export default function SpectatorDashboardPage() {
 
                 <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground dark:bg-white/[0.01] bg-muted/50 rounded-xl p-2.5 border dark:border-white/5 border-border">
                   <div>
-                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Cự ly</span>
+                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">{t("spectator.upcoming.distance")}</span>
                     <span className="font-bold dark:text-white text-foreground text-xs">{race.distance}</span>
                   </div>
                   <div>
-                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Mặt sân</span>
+                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">{t("spectator.upcoming.surface")}</span>
                     <span className="font-bold dark:text-white text-foreground text-xs truncate block">{race.surface}</span>
                   </div>
                 </div>
@@ -288,7 +289,7 @@ export default function SpectatorDashboardPage() {
                     : "bg-primary hover:bg-[#B80500] text-white"
                 }`}>
                   <Link href="/spectator/predictions">
-                    {race.status === "LIVE" ? "Xem Trực Tiếp Kết Quả" : "Đặt Dự Đoán Free"}
+                    {race.status === "LIVE" ? t("spectator.upcoming.watchLive") : t("spectator.upcoming.predictFree")}
                   </Link>
                 </Button>
               </div>
@@ -298,10 +299,10 @@ export default function SpectatorDashboardPage() {
               <div className="absolute top-0 right-0 size-24 bg-primary/10 rounded-full blur-xl pointer-events-none" />
               <div className="flex items-center gap-2 text-[#E10600]">
                 <Award className="size-4 animate-bounce" />
-                <span className="text-xs font-black uppercase tracking-wider">Cơ cấu dự đoán (Reward Rule)</span>
+                <span className="text-xs font-black uppercase tracking-wider">{t("spectator.rules.title")}</span>
               </div>
               <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Mỗi trận đấu bạn có quyền chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="dark:text-white text-foreground">+1 điểm</strong>, dự đoán sai khấu trừ <strong className="dark:text-white text-foreground">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
+                {t("spectator.rules.desc")}
               </p>
             </div>
           </div>

@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,19 +20,20 @@ const toneClassName: Record<QuickAction["tone"], string> = {
 };
 
 export function QuickActionGrid({ actions }: QuickActionGridProps) {
+  const { t } = useTranslation();
   return (
     <section className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/80 bg-card p-4 shadow-[0_18px_56px_rgba(0,0,0,0.28)] sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Admin command grid
+            {t("admin.quickActions.title")}
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-tight dark:text-white text-foreground">
-            Quick actions
+            {t("admin.quickActions.title")}
           </h2>
         </div>
         <p className="max-w-md text-sm leading-6 text-muted-foreground">
-          Entry points only. CRUD flows arrive in later phases.
+          {t("admin.quickActions.subtitle")}
         </p>
       </div>
 

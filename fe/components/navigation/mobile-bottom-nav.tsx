@@ -1,5 +1,9 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
+
+import { getNavTitle } from "@/lib/navigation-i18n";
 import { cn } from "@/lib/utils";
 import type { NavigationItem } from "@/types/navigation";
 
@@ -14,6 +18,8 @@ export function MobileBottomNav({
   activeHref,
   className,
 }: MobileBottomNavProps) {
+  const { t } = useTranslation();
+
   return (
     <nav
       className={cn(
@@ -39,7 +45,7 @@ export function MobileBottomNav({
               {Icon ? (
                 <Icon className="mb-1 size-4 text-primary" aria-hidden="true" />
               ) : null}
-              <span>{item.title}</span>
+              <span>{getNavTitle(t, item)}</span>
             </Link>
           );
         })}

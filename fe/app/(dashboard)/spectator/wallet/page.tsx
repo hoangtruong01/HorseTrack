@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
+
 import { WalletBalance } from "@/features/wallet/components/wallet-balance";
 import { TransactionHistory } from "@/features/wallet/components/transaction-history";
 import { CashoutRequestForm } from "@/features/wallet/components/cashout-request-form";
@@ -21,22 +22,16 @@ export default function SpectatorWalletPage() {
 
   const handleCashoutSubmit = (points: number) => {
     addCashoutRequest(userId, userFullName, "Spectator", points);
-    // Refresh states
     setBalance(mockWalletBalances[userId]);
     setTransactions([...mockTransactions]);
     setShowCashoutForm(false);
   };
 
   return (
-    <main className="space-y-6 max-w-5xl mx-auto">
-      <PageHeader
-        eyebrow="My Wallet"
-        title="Spectator Points"
-        description="Theo dõi điểm thưởng tích lũy từ các lượt dự đoán miễn phí (Đúng +1 điểm, Sai -1 điểm) và tiến hành tạo mã quy đổi nhận quà tại quầy vật lý."
-      />
+    <main className="space-y-6 max-w-6xl mx-auto">
 
       <div className="grid gap-6 lg:grid-cols-12 items-start">
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-4 space-y-6">
           <WalletBalance
             points={balance}
             role="Spectator"
@@ -55,7 +50,7 @@ export default function SpectatorWalletPage() {
           )}
         </div>
 
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-8">
           <TransactionHistory transactions={transactions} />
         </div>
       </div>

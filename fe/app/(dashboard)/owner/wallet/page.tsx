@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
 import { WalletBalance } from "@/features/wallet/components/wallet-balance";
 import { TransactionHistory } from "@/features/wallet/components/transaction-history";
 import { CashoutRequestForm } from "@/features/wallet/components/cashout-request-form";
@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function OwnerWalletPage() {
+  const { t } = useTranslation();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,6 @@ export default function OwnerWalletPage() {
           
           setBalance(points || 0);
 
-          // Map database WalletTransaction representation to mock-wallet transaction types
           const mappedTxs = (data || []).map((tx: any) => {
             let mappedType: string = "deposit";
             if (tx.type === "PRIZE_EARNING") {
@@ -44,7 +44,7 @@ export default function OwnerWalletPage() {
               id: tx.id || tx._id,
               type: mappedType,
               amount: tx.points || tx.amount || 0,
-              description: tx.description || "Giao dịch ví",
+              description: tx.description || t("common.walletTransaction"),
               status: tx.status === "SUCCESS" ? "completed" : tx.status === "PENDING" ? "pending" : "failed",
               createdAt: tx.createdAt || new Date().toISOString(),
             };
@@ -53,11 +53,11 @@ export default function OwnerWalletPage() {
           setTransactions(mappedTxs);
         }
       } else {
-        toast.error("Không thể tải thông tin ví từ Backend.");
+        toast.error(t("pages.owner.wallet.toast.fetchFailed"));
       }
     } catch (err) {
       console.error("Lỗi lấy thông tin ví:", err);
-      toast.error("Kết nối ví thất bại.");
+      toast.error(t("pages.owner.wallet.toast.connectionFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -78,33 +78,28 @@ export default function OwnerWalletPage() {
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.message || "Đổi thưởng thất bại.");
+        throw new Error(resData.message || t("pages.owner.wallet.toast.cashoutFailed"));
       }
 
-      toast.success(`Yêu cầu đổi ${points} điểm đã được gửi! Hãy ra quầy nhận quà.`);
+      toast.success(t("pages.owner.wallet.toast.cashoutSuccess", { points }));
       setShowCashoutForm(false);
-      fetchWalletData(); // Refresh balance and transaction log
+      fetchWalletData();
     } catch (err: any) {
-      toast.error(err.message || "Đã xảy ra lỗi khi tạo yêu cầu rút điểm.");
+      toast.error(err.message || t("pages.owner.wallet.toast.cashoutError"));
     }
   };
 
   return (
-    <main className="space-y-6 max-w-5xl mx-auto">
-      <PageHeader
-        eyebrow="Ví điểm thưởng"
-        title="Quản Lý Thu Nhập"
-        description="Theo dõi số dư điểm thưởng tích lũy từ kết quả giải đua (phân chia 70/30) và thực hiện các phiếu yêu cầu đổi quà tặng trực tiếp tại quầy."
-      />
+    <main className="space-y-6 max-w-6xl mx-auto">
 
       {isLoading && transactions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
-          <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải lịch sử tài chính...</p>
+          <p className="mt-4 text-xs font-mono uppercase tracking-widest">{t("pages.owner.wallet.loading")}</p>
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-12 items-start">
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-4 space-y-6">
             <WalletBalance
               points={balance}
               role="Owner"
@@ -123,7 +118,7 @@ export default function OwnerWalletPage() {
             )}
           </div>
 
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-8">
             <TransactionHistory transactions={transactions} />
           </div>
         </div>

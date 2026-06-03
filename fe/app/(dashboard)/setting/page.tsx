@@ -1,11 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 
-import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { normalizeLanguage, persistLanguage } from "@/lib/i18n-language";
+import i18n from "@/lib/i18n";
 
 const languageOptions = [
   { value: "vi", labelKey: "settings.languageVietnamese" },
@@ -17,7 +18,7 @@ export default function SettingPage() {
   const { t, i18n } = useTranslation();
 
   const currentTheme = theme === "light" ? "light" : "dark";
-  const currentLanguage = i18n.language || "vi";
+  const currentLanguage = normalizeLanguage(i18n.language);
 
   const themeActions = useMemo(
     () => [
@@ -35,11 +36,6 @@ export default function SettingPage() {
 
   return (
     <main className="space-y-8 max-w-4xl mx-auto">
-      <PageHeader
-        eyebrow={t("settings.title")}
-        title={t("settings.title")}
-        description={t("settings.subtitle")}
-      />
 
       <section className="rounded-[2rem] border border-border bg-card/70 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.2)]">
         <div className="flex flex-col gap-2">
@@ -80,7 +76,11 @@ export default function SettingPage() {
               key={option.value}
               type="button"
               variant={currentLanguage === option.value ? "default" : "outline"}
-              onClick={() => i18n.changeLanguage(option.value)}
+              onClick={() => {
+                const lng = option.value as "en" | "vi";
+                persistLanguage(lng);
+                void i18n.changeLanguage(lng);
+              }}
               className="rounded-xl"
             >
               {t(option.labelKey)}

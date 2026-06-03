@@ -1,14 +1,15 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { PageHeader } from "@/components/layout/page-header";
+import { useTranslation } from "react-i18next";
 import { HorseForm } from "@/features/horses/components/horse-form";
 import { toast } from "sonner";
 
 export default function NewHorsePage() {
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -23,13 +24,13 @@ export default function NewHorsePage() {
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.message || "Tạo chiến mã mới thất bại.");
+        throw new Error(resData.message || t("pages.owner.horsesNew.toast.createFailed"));
       }
 
-      toast.success("Chiến mã đã được thêm vào chuồng thành công!");
+      toast.success(t("pages.owner.horsesNew.toast.createSuccess"));
       router.push("/owner/horses");
     } catch (err: any) {
-      toast.error(err.message || "Đã xảy ra lỗi khi thêm chiến mã.");
+      toast.error(err.message || t("pages.owner.horsesNew.toast.error"));
       throw err;
     } finally {
       setIsSubmitting(false);
@@ -43,14 +44,8 @@ export default function NewHorsePage() {
           href="/owner/horses"
           className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition mb-3"
         >
-          <ChevronLeft className="size-4" /> Quay lại chuồng ngựa
+          <ChevronLeft className="size-4" /> {t("common.backToStable")}
         </Link>
-        
-        <PageHeader
-          eyebrow="Đăng ký hồ sơ"
-          title="Thêm Chiến Mã Mới"
-          description="Khai báo thông số kỹ thuật của ngựa đua để lưu trữ trong danh mục. Hồ sơ này được sử dụng để kiểm duyệt điều kiện thi đấu."
-        />
       </div>
 
       <section className="mt-4">

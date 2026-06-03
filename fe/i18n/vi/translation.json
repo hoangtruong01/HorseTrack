@@ -1,0 +1,2295 @@
+{
+  "nav": {
+    "notifications": "Thông báo",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "home": "Trang chủ",
+    "tournaments": "Giải đấu",
+    "races": "Lịch đua",
+    "rankings": "Xếp hạng",
+    "predictions": "Dự đoán",
+    "news": "Tin tức",
+    "contact": "Liên hệ"
+  },
+  "roles": {
+    "admin": "Quản trị",
+    "owner": "Chủ ngựa",
+    "jockey": "Nài ngựa",
+    "referee": "Trọng tài",
+    "spectator": "Khán giả",
+    "counter_staff": "Nhân viên quầy"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "description": "Đường dẫn này chưa được hỗ trợ trong phiên bản hiện tại.",
+    "backHome": "Về trang chủ"
+  },
+  "wallet": {
+    "balance": {
+      "title": "Ví điểm thưởng free",
+      "role": "Vai trò: {{role}}",
+      "refreshAria": "Làm mới số dư",
+      "refreshSuccess": "Đã làm mới số dư điểm thưởng!",
+      "availableLabel": "Điểm thưởng khả dụng hiện tại",
+      "pointsUnit": "Điểm",
+      "redeem": "Đổi thưởng",
+      "rules": "Thể lệ đổi",
+      "rulesToast": "Tích lũy điểm để nhận mã quà tặng. Đưa mã cho nhân viên quầy để nhận quà vật lý.",
+      "noteLabel": "Lưu ý:",
+      "note": {
+        "owner": "Chủ ngựa (70%) và nài ngựa (30%) nhận điểm tự động sau khi kết quả được công bố. Đổi thưởng qua mã xác nhận tại quầy.",
+        "jockey": "Chủ ngựa (70%) và nài ngựa (30%) nhận điểm tự động sau khi kết quả được công bố. Đổi thưởng qua mã xác nhận tại quầy.",
+        "spectator": "Dự đoán đúng +1 điểm, sai -1 điểm (nếu còn dư). Tích lũy điểm để đổi quà tại quầy."
+      }
+    },
+    "transactions": {
+      "eyebrow": "Sổ cái điểm thưởng",
+      "title": "Lịch sử giao dịch điểm",
+      "searchPlaceholder": "Tìm kiếm theo mô tả giao dịch...",
+      "filters": {
+        "all": "Tất cả",
+        "prizes": "Chủ/Nài ngựa",
+        "predictions": "Dự đoán",
+        "cashouts": "Yêu cầu đổi quà"
+      },
+      "colType": "Loại giao dịch",
+      "colDetails": "Chi tiết hoạt động",
+      "colTime": "Thời gian",
+      "colPoints": "Biến động điểm",
+      "emptyTitle": "Không tìm thấy giao dịch nào",
+      "emptyHint": "Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm.",
+      "statusCompleted": "Thành công",
+      "statusPending": "Đang chờ tại quầy",
+      "statusFailed": "Từ chối/Lỗi",
+      "types": {
+        "deposit": "Điểm ban đầu",
+        "withdrawalRequested": "Đổi quà (Chờ)",
+        "withdrawalApproved": "Đổi quà (Duyệt)",
+        "withdrawalPaid": "Đổi quà (Thành công)",
+        "withdrawalRejected": "Đổi quà (Từ chối)",
+        "prizeOwner": "Giải chủ ngựa",
+        "prizeJockey": "Giải nài ngựa",
+        "predictionWin": "Dự đoán thắng",
+        "predictionRefund": "Hoàn trả điểm",
+        "generic": "Giao dịch"
+      }
+    },
+    "txHistory": {
+      "title": "LỊCH SỬ GIAO DỊCH",
+      "tabAll": "TẤT CẢ",
+      "tabPoints": "ĐIỂM THƯỞNG",
+      "tabCashouts": "ĐỔI THƯỞNG",
+      "searchPlaceholder": "Tìm kiếm giao dịch...",
+      "colType": "LOẠI GIAO DỊCH",
+      "colDetails": "NỘI DUNG",
+      "colTime": "THỜI GIAN",
+      "colPoints": "ĐIỂM",
+      "colValue": "QUY ĐỔI",
+      "empty": "Không tìm thấy giao dịch nào.",
+      "showing": "Hiển thị {{start}} - {{end}} của {{total}} giao dịch",
+      "typeReceived": "Nhận điểm thưởng",
+      "typeCashout": "Đổi thưởng",
+      "typeEvent": "Thưởng sự kiện",
+      "subDeposit": "Nạp điểm",
+      "subOwnerReward": "Thưởng chủ ngựa",
+      "subJockeyReward": "Thưởng nài ngựa",
+      "subPredictWin": "Dự đoán đúng",
+      "subWithdrawReq": "Yêu cầu rút",
+      "subWithdrawApp": "Đã duyệt",
+      "subWithdrawPaid": "Rút về ngân hàng",
+      "subWithdrawRej": "Bị từ chối",
+      "subRefundEvent": "Hoàn trả/Sự kiện"
+    },
+    "cashoutForm": {
+      "eyebrow": "Phiếu Quy Đổi Thưởng",
+      "title": "Đổi Điểm Nhận Thưởng",
+      "desc": "Quy đổi điểm thưởng tích lũy của bạn thành mã rút thưởng. Mang mã này ra quầy giao dịch vật lý để được nhân viên xác nhận và trao thưởng.",
+      "balanceLabel": "Số Dư Điểm Hiện Có",
+      "pointsSuffix": "điểm",
+      "amountLabel": "Số Điểm Muốn Đổi",
+      "inputPlaceholder": "Tối thiểu 10 điểm",
+      "btnMax": "TỐI ĐA",
+      "infoTitle": "Hệ thống đổi thưởng vật lý",
+      "infoDesc": "Một mã quy đổi độc duy nhất sẽ được tạo. Điểm chỉ bị trừ khỏi ví của bạn khi nhân viên tại quầy kiểm tra và xác nhận trao thưởng thành công.",
+      "warningOver": "Lưu ý: Không đổi điểm quá số điểm hiện có của bạn tại thời điểm nhận quà tại quầy.",
+      "warningAudit": "Giao dịch đổi thưởng được kiểm toán bảo mật và ghi lại trong hệ thống Ledger.",
+      "btnCancel": "Hủy Bỏ",
+      "btnSubmit": "Tạo Mã Nhận Thưởng",
+      "btnProcessing": "Đang xử lý...",
+      "errInvalid": "Vui lòng nhập số điểm hợp lệ.",
+      "errExceed": "Số điểm đổi vượt quá số dư hiện có của bạn.",
+      "errMin": "Số điểm tối thiểu để đổi thưởng là 10 điểm.",
+      "successMsg": "Yêu cầu đổi thưởng {{points}} điểm thành công! Hãy lưu lại mã quy đổi."
+    }
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "subtitle": "Quản lý giao diện và ngôn ngữ cho HorseTrack.",
+    "themeTitle": "Giao diện",
+    "themeHint": "Chọn chế độ sáng hoặc tối.",
+    "themeLight": "Sáng",
+    "themeDark": "Tối",
+    "languageTitle": "Ngôn ngữ",
+    "languageHint": "Chọn ngôn ngữ hiển thị.",
+    "languageEnglish": "Tiếng Anh",
+    "languageVietnamese": "Tiếng Việt"
+  },
+  "homepage": {
+    "badge": "Nền Tảng Quản Lý Giải Đấu",
+    "heroTitle1": "Quản Lý Giải Đua Ngựa",
+    "heroTitle2": "Thông Minh Hơn",
+    "heroTitleHighlight": "Toàn Diện",
+    "heroSubtitle": "Đăng ký chiến mã, phân công nài ngựa, lên lịch thi đấu, cập nhật kết quả, theo dõi bảng xếp hạng và tham gia dự đoán – tất cả trên một nền tảng duy nhất.",
+    "getStarted": "Bắt Đầu Ngay",
+    "viewRaces": "Xem Lịch Đua",
+    "liveRaceStatus": "Trạng Thái Trận Đua Trực Tiếp",
+    "viewAllRaces": "Xem Tất Cả Trận Đua",
+    "racingNow": "Đang chạy",
+    "live": "TRỰC TIẾP",
+    "startsIn": "Bắt đầu sau",
+    "upcoming": "SẮP DIỄN RA",
+    "winner": "Về nhất",
+    "finished": "ĐÃ KẾT THÚC",
+    "quickStats": {
+      "tournaments": {
+        "label": "Giải Đấu Đang Diễn Ra",
+        "desc": "Trong mùa giải này"
+      },
+      "horses": {
+        "label": "Chiến Mã Đã Đăng Ký",
+        "desc": "Trên tất cả các giải"
+      },
+      "jockeys": {
+        "label": "Nài Ngựa Tham Gia",
+        "desc": "Sẵn sàng thi đấu"
+      },
+      "races": {
+        "label": "Trận Đua Hoàn Tất",
+        "desc": "Trong mùa giải này"
+      }
+    },
+    "roles": {
+      "eyebrow": "Lựa Chọn Điểm Truy Cập",
+      "title": "Chọn Vai Trò Của Bạn",
+      "learnMore": "Tìm hiểu thêm về các vai trò",
+      "admin": {
+        "name": "Quản Trị Viên",
+        "desc": "Quản lý người dùng, giải đấu, lịch đua, kết quả và thiết lập hệ thống."
+      },
+      "owner": {
+        "name": "Chủ Ngựa",
+        "desc": "Đăng ký chiến mã, chọn nài ngựa, theo dõi thi đấu và xem giải thưởng."
+      },
+      "jockey": {
+        "name": "Nài Ngựa",
+        "desc": "Chấp nhận lời mời thi đấu, xem lịch được phân công và thành tích."
+      },
+      "referee": {
+        "name": "Trọng Tài",
+        "desc": "Kiểm tra chiến mã, ghi nhận vi phạm, xác nhận kết quả và lập biên bản."
+      },
+      "spectator": {
+        "name": "Khán Giả",
+        "desc": "Xem đua, theo dõi bảng xếp hạng và dự đoán để nhận phần thưởng."
+      },
+      "explore": "Khám Phá"
+    },
+    "features": {
+      "eyebrow": "Tính Năng Nổi Bật",
+      "title": "Chức Năng Cốt Lõi",
+      "feat1": {
+        "title": "Quản Lý Giải Đấu",
+        "desc": "Tạo, quản lý và tổ chức các giải đấu một cách dễ dàng."
+      },
+      "feat2": {
+        "title": "Đăng Ký Chiến Mã",
+        "desc": "Đăng ký và quản lý danh sách ngựa tham gia cuộc đua."
+      },
+      "feat3": {
+        "title": "Phân Công Nài Ngựa",
+        "desc": "Phân công nài ngựa cho chiến mã và quản lý thỏa thuận."
+      },
+      "feat4": {
+        "title": "Lên Lịch Thi Đấu",
+        "desc": "Tạo lịch đua chi tiết và quản lý ngày thi đấu."
+      },
+      "feat5": {
+        "title": "Biên Bản Trọng Tài",
+        "desc": "Ghi nhận vi phạm và xuất biên bản trọng tài chính thức."
+      },
+      "feat6": {
+        "title": "Kết Quả Trận Đua",
+        "desc": "Ghi nhận và công bố kết quả trận đua."
+      },
+      "feat7": {
+        "title": "Bảng Xếp Hạng",
+        "desc": "Theo dõi xếp hạng của các chiến mã và nài ngựa."
+      },
+      "feat8": {
+        "title": "Quản Lý Dự Đoán",
+        "desc": "Cho phép khán giả dự đoán kết quả và nhận thưởng."
+      }
+    },
+    "newsletter": {
+      "eyebrow": "Phần Thưởng Vô Địch",
+      "title": "Luôn Cập Nhật Thông Tin",
+      "titleBreak": "Về Giải Đua Ngựa",
+      "placeholder": "Nhập email của bạn",
+      "subscribe": "Đăng Ký Nhận Tin"
+    },
+    "footer": {
+      "desc": "Hệ thống quản lý toàn diện dành cho các giải đua ngựa chuyên nghiệp.",
+      "quickLinks": "Liên Kết Nhanh",
+      "support": "Hỗ Trợ",
+      "followUs": "Theo Dõi",
+      "copyright": "© 2026 Hệ Thống Quản Lý Giải Đua Ngựa. Mọi quyền được bảo lưu.",
+      "privacy": "Chính Sách Bảo Mật",
+      "terms": "Điều Khoản Dịch Vụ"
+    }
+  },
+  "admin": {
+    "overview": {
+      "title": "Trung Tâm Quản Trị",
+      "systemOverview": "Tổng Quan Hệ Thống",
+      "subtitle": "Quản lý người dùng, giải đấu, cuộc đua và cấu hình hệ thống cốt lõi.",
+      "activeUsers": "Người dùng hoạt động",
+      "totalRaces": "Tổng số cuộc đua",
+      "upcomingRaces": "Cuộc đua sắp tới",
+      "horses": "Chiến mã",
+      "activeHorses": "Chiến mã hoạt động",
+      "totalHorses": "Tổng số chiến mã",
+      "jockeys": "Nài ngựa",
+      "totalJockeys": "Tổng số nài ngựa",
+      "activeJockeys": "Nài ngựa hoạt động",
+      "wallets": "Ví hệ thống",
+      "recentTransactions": "Giao dịch gần đây"
+    },
+    "quickActions": {
+      "title": "Lệnh Quản Trị Nhanh",
+      "subtitle": "Truy cập nhanh đến các công cụ quản lý thường dùng nhất.",
+      "manageUsers": "Quản lý người dùng",
+      "viewAllUsers": "Xem tất cả người dùng",
+      "tournaments": "Giải đấu",
+      "manageTournaments": "Quản lý giải đấu",
+      "horses": "Chiến mã",
+      "manageHorses": "Quản lý chiến mã",
+      "prizes": "Giải thưởng",
+      "managePrizes": "Quản lý giải thưởng"
+    },
+    "actions": {
+      "createRace": "Tạo cuộc đua",
+      "reviewQueue": "Hàng đợi duyệt"
+    },
+    "hero": {
+      "badge": "Bảng điều khiển mô phỏng · Giai đoạn 4A",
+      "scopeGuard": "Giới hạn phạm vi",
+      "scopeGuardDesc": "Không CRUD · Không API · Không socket realtime"
+    },
+    "stats": {
+      "tournaments": {
+        "label": "Tổng giải đấu",
+        "helper": "Khung chứa các cuộc đua độc lập",
+        "trend": "+2 tháng này"
+      },
+      "races": {
+        "label": "Tổng cuộc đua",
+        "helper": "Cuộc đua là đơn vị vận hành chính",
+        "trend": "12 đã lên lịch"
+      },
+      "liveRaces": {
+        "label": "Đang diễn ra",
+        "helper": "Cần giám sát trạng thái ngay",
+        "trend": "Theo dõi"
+      },
+      "pendingRegistrations": {
+        "label": "Đăng ký chờ duyệt",
+        "helper": "Hồ sơ ngựa chờ quản trị viên xem xét",
+        "trend": "Cần xử lý"
+      },
+      "upcomingRaces": {
+        "label": "Cuộc đua sắp tới",
+        "helper": "Đã lên lịch trong khung giờ đua tiếp theo",
+        "trend": "Tiếp theo: 14:30"
+      },
+      "resultsWaiting": {
+        "label": "Kết quả chờ công bố",
+        "helper": "Kết quả đã xác nhận, sẵn sàng duyệt publish",
+        "trend": "Theo từng cuộc đua"
+      }
+    },
+    "quickActionsItems": {
+      "createTournament": {
+        "title": "Tạo giải đấu",
+        "description": "Mở khung giải mới cho một nhóm cuộc đua theo chủ đề.",
+        "label": "Lên kế hoạch"
+      },
+      "createRace": {
+        "title": "Tạo cuộc đua",
+        "description": "Lên lịch cuộc đua với đường đua, giờ xuất phát và trọng tài.",
+        "label": "Thêm cuộc đua"
+      },
+      "reviewRegistrations": {
+        "title": "Duyệt đăng ký",
+        "description": "Phê duyệt hoặc từ chối hồ sơ ngựa tham gia từng cuộc đua.",
+        "label": "Hàng đợi duyệt"
+      },
+      "reviewResults": {
+        "title": "Duyệt kết quả",
+        "description": "Kiểm tra kết quả trọng tài xác nhận trước khi công bố.",
+        "label": "Hàng đợi publish"
+      }
+    },
+    "raceStatus": {
+      "radarEyebrow": "Radar trạng thái đua",
+      "controlTower": "Tháp điều hành",
+      "radarDesc": "Tổng quan trạng thái các cuộc đua độc lập trên một màn hình. Không vòng đấu, không tiến trình giai đoạn.",
+      "livePriority": "Ưu tiên trực tiếp",
+      "livePriorityDesc": "Cuộc đua đang diễn ra được làm nổi bật để admin chuyển nhanh sang giám sát, tác động đăng ký và sẵn sàng kết quả.",
+      "summaryEyebrow": "Sắp tới / trực tiếp / đã kết thúc",
+      "summaryTitle": "Tóm tắt cuộc đua",
+      "mockOnly": "Chỉ dữ liệu mô phỏng",
+      "horsesCount": "{{count}} chiến mã",
+      "status": {
+        "live": "Trực tiếp",
+        "upcoming": "Sắp diễn ra",
+        "finished": "Đã kết thúc"
+      },
+      "raceMock": {
+        "race-live-01": {
+          "name": "Đua Đêm Sài Gòn",
+          "tournament": "Cúp Tốc Độ Miền Nam",
+          "startLabel": "Đang mở tính vòng",
+          "track": "Đường đua Quận 2",
+          "adminNote": "Kênh trọng tài đang hoạt động"
+        },
+        "race-live-02": {
+          "name": "Derby Đường Đỏ",
+          "tournament": "Cúp Độc Lập",
+          "startLabel": "Về đích",
+          "track": "Đấu trường Long Thành",
+          "adminNote": "Đang chờ khóa kết quả"
+        },
+        "race-upcoming-01": {
+          "name": "Vòng Loại Buổi Sáng",
+          "tournament": "Cuối Tuần Đua Metro",
+          "startLabel": "Hôm nay 14:30",
+          "track": "Sân đua Phú Thọ",
+          "adminNote": "3 hồ sơ đăng ký chờ duyệt"
+        },
+        "race-upcoming-02": {
+          "name": "Dặm Di Sản",
+          "tournament": "Loạt Chuồng Mùa Thu",
+          "startLabel": "Ngày mai 09:00",
+          "track": "Đường đua cao nguyên Đà Lạt",
+          "adminNote": "Đã phân công trọng tài"
+        },
+        "race-finished-01": {
+          "name": "Tốc Độ Ven Biển",
+          "tournament": "Mở Bờ Trung Tâm",
+          "startLabel": "Kết thúc 11:10",
+          "track": "Đường cát Nha Trang",
+          "adminNote": "Kết quả chờ công bố"
+        }
+      }
+    },
+    "activity": {
+      "eyebrow": "Hoạt động gần đây",
+      "title": "Bảng tin quản trị",
+      "items": {
+        "act01": {
+          "title": "Hàng đợi đăng ký cập nhật",
+          "description": "4 chiến mã mới được thêm vào Morning Qualifier Run."
+        },
+        "act02": {
+          "title": "Trạng thái cuộc đua thay đổi",
+          "description": "Saigon Night Sprint chuyển sang giám sát trực tiếp."
+        },
+        "act03": {
+          "title": "Trọng tài xác nhận kết quả",
+          "description": "Kết quả Coastal Dash sẵn sàng để admin duyệt công bố."
+        }
+      }
+    }
+  },
+  "counterStaff": {
+    "header": {
+      "eyebrow": "Vận hành quầy",
+      "title": "Quầy Giao Dịch Đổi Thưởng",
+      "description": "Chào mừng bạn đến với bàn làm việc của Nhân viên quầy. Tại đây bạn có thể phê duyệt mã quà tặng vật lý và hỗ trợ khách hàng nạp tiền."
+    },
+    "stats": {
+      "pending": {
+        "title": "Chờ Phê Duyệt",
+        "desc": "mã đang đợi"
+      },
+      "approved": {
+        "title": "Đã Duyệt (Chờ Trao Quà)",
+        "desc": "mã đã xác thực"
+      },
+      "paid": {
+        "title": "Đã Trao Quà",
+        "desc": "giao dịch hoàn tất"
+      },
+      "totalPoints": {
+        "title": "Tổng Điểm Đổi Quà",
+        "desc": "điểm"
+      }
+    },
+    "actions": {
+      "redemption": {
+        "title": "Đổi Thưởng Vật Lý",
+        "desc": "Tra cứu mã đổi thưởng dạng RWD-XXXXXX do khán giả/người dùng cung cấp tại quầy, đối soát thông tin quà và cập nhật trạng thái đã trao quà thành công.",
+        "link": "Mở hàng đợi đổi thưởng"
+      },
+      "deposit": {
+        "title": "Nạp Tiền Cho Khách",
+        "desc": "Hỗ trợ nạp tiền mặt đổi lấy điểm thưởng/số dư tài khoản ví tại quầy. Nhập email/ID tài khoản của khách hàng để thực hiện nạp trực tiếp nhanh chóng.",
+        "link": "Mở giao diện nạp ví"
+      }
+    },
+    "recentRedemptions": {
+      "title": "Các lượt quy đổi gần đây",
+      "loading": "Đang tải lịch sử đổi...",
+      "empty": "Chưa có giao dịch quy đổi nào được thực hiện.",
+      "columns": {
+        "code": "Mã Đổi Quà",
+        "customer": "Khách hàng",
+        "points": "Điểm đổi",
+        "status": "Trạng thái",
+        "time": "Thời gian"
+      },
+      "statusPaid": "ĐÃ TRAO QUÀ",
+      "customerFallback": "Khách hàng",
+      "statusPending": "CHỜ DUYỆT",
+      "statusApproved": "ĐÃ DUYỆT"
+    }
+  },
+  "owner": {
+    "header": {
+      "eyebrow": "Bảng điều khiển chủ chuồng",
+      "title": "Quản Lý Chuồng Đua",
+      "description": "Trung tâm điều hành của chủ ngựa độc lập. Đăng ký chiến mã, ghi danh trận đấu, quản lý thu nhập phân chia 70/30 từ giải thưởng trận đua."
+    },
+    "actions": {
+      "addHorse": "Thêm chiến mã",
+      "registerRace": "Đăng ký trận đua"
+    },
+    "hero": {
+      "badge": "TRẠM ĐIỀU HÀNH CHỦ NGỰA",
+      "title": "Nâng cấp chiến mã. Chiến thắng trên mọi đường đua.",
+      "description": "Kiểm soát quy trình từ khâu tuyển chọn, đăng ký tham gia thi đấu tới tối ưu hóa phần chia lợi nhuận 70% từ quỹ thưởng. Hãy chắc chắn ngựa luôn khỏe mạnh và sẵn sàng trước giờ xuất phát.",
+      "rewardSplit": "Phân chia thưởng",
+      "rewardSplitDesc": "Chủ ngựa nhận 70% · Nài ngựa 30%",
+      "wallet": "Ví điểm thưởng",
+      "walletDesc": "Tỷ lệ quy đổi: 1 điểm = 100 VND"
+    },
+    "stats": {
+      "horses": {
+        "label": "Chiến mã trong chuồng",
+        "helper": "Tổng số lượng chiến mã đã được đăng ký trong danh mục của bạn.",
+        "trend": "Chuồng đua"
+      },
+      "registrations": {
+        "label": "Lượt đăng ký trận đua",
+        "helper": "Lượt đăng ký tham gia các vòng đua (chờ duyệt, đã duyệt, đã hủy).",
+        "trend": "Ghi danh"
+      },
+      "winnings": {
+        "label": "Tổng tiền thưởng tích lũy",
+        "helperPaid": "Đã thanh toán",
+        "helperPending": "Chờ xử lý",
+        "trend": "Thu nhập 70/30"
+      }
+    },
+    "quickActions": {
+      "title": "Chức năng chính",
+      "horses": {
+        "title": "Chuồng chiến mã",
+        "desc": "Xem chi tiết, cập nhật thông tin và quản lý danh sách ngựa đua của riêng bạn."
+      },
+      "races": {
+        "title": "Đăng ký trận đua",
+        "desc": "Tìm các giải đấu mở đăng ký và ghi danh chiến mã khỏe mạnh để tham gia thi đấu."
+      },
+      "registrations": {
+        "title": "Lịch sử ghi danh",
+        "desc": "Theo dõi tiến độ phê duyệt hồ sơ trận đua và thực hiện hủy hoặc rút tên đăng ký."
+      },
+      "wallet": {
+        "title": "Ví của tôi",
+        "desc": "Yêu cầu rút tiền mặt (cashout), kiểm tra số dư điểm thưởng và xem sao kê ví."
+      }
+    }
+  },
+  "jockey": {
+    "header": {
+      "eyebrow": "Giao diện nài ngựa chuyên nghiệp",
+      "title": "Trạm Của Jockey",
+      "titleLoading": "Nài Ngựa",
+      "description": "Chào mừng bạn đến với khu vực quản lý nài ngựa. Tiếp nhận lời mời thi đấu phân chia lợi nhuận 70/30 từ chủ chuồng, xem chi tiết chiến mã, quản lý lịch thi đấu và theo dõi bảng thành tích cá nhân của bạn."
+    },
+    "hero": {
+      "badge": "CÔNG CỤ NÀI NGỰA",
+      "online": "Đang trực tuyến",
+      "title": "Cam kết 30% quỹ thưởng trận đấu",
+      "description": "Hợp đồng mặc định giữa chủ ngựa và Jockey: 70% thuộc về chủ chuồng, 30% thuộc về Jockey chiến thắng. Mọi lời mời chấp nhận sẽ được hệ thống kiểm tra xung đột thời gian 4 tiếng để bảo đảm an toàn.",
+      "newInvites": "Lời mời mới chờ duyệt!",
+      "newInvitesDesc": "Bạn đang có {count} lời mời tham gia từ các chủ ngựa chưa phản hồi."
+    },
+    "stats": {
+      "races": {
+        "label": "Số trận đã tham gia",
+        "helper": "Tổng số cuộc đua chính thức bạn đã điều khiển ngựa hoàn thành.",
+        "trend": "Sự nghiệp"
+      },
+      "wins": {
+        "label": "Chiến thắng (Hạng 1)",
+        "helper": "Tỷ lệ giành chức vô địch",
+        "trend": "Vô địch"
+      },
+      "points": {
+        "label": "Tổng điểm thi đấu",
+        "helper": "Quy đổi thứ hạng: Hạng 1 nhận 10đ, Hạng 2 nhận 7đ, Hạng 3 nhận 5đ...",
+        "trend": "Điểm tích lũy"
+      }
+    },
+    "tabs": {
+      "dashboard": "Bảng điều khiển",
+      "invitations": "Lời mời",
+      "assigned": "Lịch thi đấu",
+      "horses": "Chiến mã",
+      "performance": "Thành tích"
+    },
+    "ui": {
+      "loadError": "Không thể kết nối đến server. Vui lòng thử lại.",
+      "accept": "Chấp nhận",
+      "reject": "Từ chối",
+      "processing": "Đang xử lý...",
+      "horseFetchError": "Không thể lấy thông tin chi tiết của ngựa.",
+      "connectionError": "Lỗi kết nối.",
+      "dateUnknown": "Chưa xác định",
+      "dateAt": "ngày",
+      "scheduleTitle": "Lịch thi đấu gần nhất",
+      "viewAll": "Tất cả",
+      "noAcceptedRaces": "Không có cuộc đua nào được chấp nhận sắp tới.",
+      "raceNameFallback": "Tên trận đấu",
+      "horseLabel": "Chiến mã: {{name}}",
+      "inboxTitle": "Hòm thư lời mời ({{count}})",
+      "viewAllInvites": "Xem hết",
+      "inboxEmpty": "Hòm thư trống. Hiện tại không có lời mời mới nào.",
+      "inviteBadge": "Lời mời",
+      "raceLabel": "Cuộc đua: {{name}}",
+      "invitationsTitle": "Danh sách lời mời từ Chủ chuồng",
+      "newInvitesCount": "{{count}} Lời mời mới",
+      "inboxEmptyTitle": "Hòm thư trống",
+      "inboxEmptyDesc": "Hiện tại không có lời mời thi đấu nào từ chủ chuồng gửi cho bạn. Khi các chủ ngựa cần nài ngựa chuyên nghiệp, thông tin lời mời sẽ hiển thị tại đây.",
+      "pendingApproval": "Chờ duyệt",
+      "sentByOwner": "Chủ chuồng gửi",
+      "noPhone": "Không có SĐT",
+      "raceNameLabel": "Tên trận đấu",
+      "startTimeLabel": "Giờ xuất phát",
+      "horseNameLabel": "Tên chiến mã",
+      "ownerMessageLabel": "Lời nhắn từ chủ chuồng",
+      "assignedTitle": "Lịch thi đấu đã nhận",
+      "noAssigned": "Chưa có cuộc đua nào trong lịch đã chấp nhận.",
+      "horsesTitle": "Chiến mã bạn cưỡi",
+      "noHorses": "Chưa có chiến mã nào được phân công.",
+      "viewHorseSpecs": "Xem chi tiết thông số",
+      "profileTitle": "Hồ sơ nài ngựa",
+      "proJockey": "Jockey chuyên nghiệp",
+      "phone": "Số điện thoại",
+      "notUpdated": "Chưa cập nhật",
+      "performanceTitle": "Bảng điểm & Thành tích thi đấu chính thức",
+      "winsLabel": "Vô địch (Hạng 1)",
+      "totalRacesLabel": "Tổng trận chạy",
+      "winRateLabel": "Tỷ lệ thắng",
+      "pointsLabel": "Điểm thi đấu",
+      "historyNote": "Lịch sử chi tiết vị trí và điểm tích lũy của từng trận đấu được lấy trực tiếp từ kết quả chính thức do Ban giám sát cuộc đua công bố.",
+      "modalTitle": "CHI TIẾT CHIẾN MÃ",
+      "loadingData": "Đang tải dữ liệu...",
+      "noImage": "Chưa tải lên hình ảnh của chiến mã",
+      "breed": "Giống ngựa",
+      "age": "Tuổi đời",
+      "yearsOld": "{{age}} tuổi",
+      "gender": "Giới tính",
+      "male": "Đực",
+      "female": "Cái",
+      "conditionTitle": "Thể trạng & Kỹ thuật thi đấu",
+      "speedPower": "Sức mạnh tốc độ",
+      "stamina": "Sức bền dẻo dai",
+      "health": "Sức khỏe",
+      "healthy": "Khỏe mạnh",
+      "injured": "Chấn thương",
+      "sick": "Bị ốm",
+      "physicalStats": "Thông số vật lý",
+      "weightHeight": "Nặng: {{weight}} kg · Cao: {{height}} cm",
+      "descriptionLabel": "Mô tả đặc điểm chiến mã",
+      "horseNotFound": "Không tìm thấy thông tin chiến mã.",
+      "close": "Đóng",
+      "loadingStation": "Đang tải trạm điều hành...",
+      "statusPending": "Chờ chạy",
+      "statusReady": "Sẵn sàng",
+      "statusLive": "ĐANG CHẠY",
+      "statusFinished": "Đã xong",
+      "statusPublished": "Đã có kết quả",
+      "respondSuccess": "Đã {{action}} lời mời thành công",
+      "respondError": "Không thể {{action}} lời mời",
+      "assignedHorseLabel": "Ngựa được chỉ định",
+      "attachedMessageLabel": "Tin nhắn đính kèm",
+      "assignedScheduleTitle": "Lịch thi đấu đã nhận lời cưỡi",
+      "upcomingRacesCount": "{{count}} Cuộc đua sắp diễn ra",
+      "noScheduleTitle": "Chưa có lịch thi đấu",
+      "noScheduleDesc": "Lịch thi đấu trống. Khi bạn đồng ý chấp nhận các lời mời thi đấu từ chủ ngựa, lịch xuất phát chi tiết của bạn sẽ được hiển thị tại đây để theo dõi.",
+      "assignedBadge": "ĐÃ GÁN PHÂN CÔNG",
+      "departureTimeLabel": "Giờ xuất phát",
+      "ownerLabel": "Chủ sở hữu chiến mã",
+      "ridingHorseLabel": "Ngựa điều khiển",
+      "viewHorseDetail": "Xem chi tiết ngựa",
+      "ridingHorsesTitle": "Chiến mã đang điều khiển",
+      "ridingCount": "{{count}} Ngựa đang cưỡi",
+      "noHorseAssignedTitle": "Chưa được gán ngựa",
+      "noHorseAssignedDesc": "Danh sách trống. Khi bạn đồng ý chấp nhận các lời mời từ chủ ngựa, thông tin chi tiết và thể trạng của chú ngựa bạn được phân công điều khiển sẽ hiển thị tại đây.",
+      "raceRoleLabel": "Vai trò thi đấu",
+      "raceRoleDesc": "Chiến mã của bạn trong các trận đấu đã chấp nhận cưỡi. Thể lực và tốc độ ngựa ảnh hưởng rất lớn đến kết quả đua cuối cùng.",
+      "pointsSuffix": "đ"
+    }
+  },
+  "spectator": {
+    "header": {
+      "eyebrow": "Trung tâm khán giả",
+      "title": "Đường Đua & Dự Đoán",
+      "description": "Duyệt qua các giải đua xe chiến mã đỉnh cao, tham gia thử tài dự đoán kết quả hoàn toàn miễn phí nhận điểm thưởng và đổi các phần quà vật lý hấp dẫn tại quầy."
+    },
+    "wallet": {
+      "title": "Số dư Ví Điểm",
+      "active": "Tài khoản hoạt động",
+      "link": "Xem ví & Đổi thưởng"
+    },
+    "stats": {
+      "ongoing": {
+        "label": "Giải Đang Diễn Ra",
+        "value": "2 Giải Đấu",
+        "desc": "Quy tụ hơn 30+ chiến mã đăng ký"
+      },
+      "today": {
+        "label": "Lịch Trình Hôm Nay",
+        "value": "1 LIVE",
+        "desc": "Trực tiếp cập nhật kết quả tại trường đua"
+      },
+      "accuracy": {
+        "label": "Tỷ Lệ Dự Đoán Đúng",
+        "value": "68.4%",
+        "desc": "Dự đoán đúng nhận +1 điểm, sai -1 điểm"
+      }
+    },
+    "tournaments": {
+      "title": "Giải Đấu Nổi Bật (Featured)",
+      "desc": "Khám phá các giải đua ngựa kịch tính sắp diễn ra hoặc đang khởi tranh",
+      "viewAll": "Xem tất cả",
+      "prizePool": "Tổng Giải Thưởng:",
+      "detailLink": "Chi tiết giải đấu"
+    },
+    "upcoming": {
+      "title": "Lịch Đua Hot",
+      "desc": "Theo dõi và đặt dự đoán sớm trước giờ xuất phát",
+      "distance": "Cự ly",
+      "surface": "Mặt sân",
+      "liveNow": "LIVE NOW",
+      "watchLive": "Xem Trực Tiếp Kết Quả",
+      "predictFree": "Đặt Dự Đoán Free"
+    },
+    "rules": {
+      "title": "Cơ cấu dự đoán (Reward Rule)",
+      "desc": "Mỗi trận đấu bạn có quyền chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng +1 điểm, dự đoán sai khấu trừ -1 điểm. Số dư ví không thể bị âm dưới 0 điểm."
+    }
+  },
+  "referee": {
+    "header": {
+      "eyebrow": "Trạm điều hành trọng tài",
+      "title": "Hội Đồng Giám Sát",
+      "description": "Quản lý lịch phân công điều hành cuộc đua, kiểm tra ngựa trước trận, ghi nhận vi phạm và xác nhận biên bản kết quả thi đấu chính thức."
+    },
+    "profileCheck": {
+      "badge": "CẦN HOÀN THIỆN HỒ SƠ",
+      "title": "Khởi tạo hồ sơ Trọng tài của bạn",
+      "desc": "Xin chào **{name}**, bạn có vai trò Trọng tài nhưng chưa tạo hồ sơ thông số chuyên môn. Hãy điền số giấy phép hành nghề bên dưới để có thể nhận phân công giám sát các cuộc đua từ Ban tổ chức.",
+      "license": "Số giấy phép (License)",
+      "experience": "Kinh nghiệm (Năm)",
+      "bio": "Tiểu sử ngắn / Bio (Tùy chọn)",
+      "submit": "Khởi tạo hồ sơ ngay",
+      "submitting": "Đang xử lý..."
+    },
+    "dashboard": {
+      "badge": "GIÁM SÁT TRỰC TUYẾN",
+      "title": "BÀN LÀM VIỆC CỦA TRỌNG TÀI",
+      "desc": "Quản lý các cuộc đua được ủy quyền. Thực hiện kiểm duyệt đầy đủ tình trạng thiết bị bảo hộ, sức khỏe ngựa, jockey điểm danh và xác lập thứ hạng chuẩn hóa sau khi trận đấu hoàn thành.",
+      "licenseInfo": "Trọng tài được cấp phép"
+    },
+    "alerts": {
+      "newAssignments": "Yêu cầu phân công mới!",
+      "newAssignmentsDesc": "Bạn đang có {count} cuộc đua mới được Ban tổ chức chỉ định cần phê duyệt.",
+      "approveNow": "Phê duyệt ngay"
+    },
+    "actions": {
+      "nextTask": "NHIỆM VỤ TIẾP THEO",
+      "role": "Vai trò:",
+      "status": "Trạng thái:",
+      "reject": "Từ chối",
+      "accept": "Chấp nhận phân công",
+      "checkHorse": "Kiểm tra ngựa",
+      "violations": "Lỗi vi phạm",
+      "enterResult": "Nhập kết quả"
+    },
+    "report": {
+      "badge": "BIÊN BẢN TRẬN ĐẤU",
+      "title": "Khóa sổ & Đồng bộ",
+      "desc": "Khi trọng tài chính thực hiện bấm **Xác nhận kết quả**, BE sẽ tự động áp các hình phạt cộng giây từ bảng vi phạm, thực hiện tính toán lại thứ hạng thực tế của ngựa và khóa sửa đổi.",
+      "viewAll": "Xem toàn bộ biên bản"
+    },
+    "assignments": {
+      "title": "Danh sách cuộc đua được phân công",
+      "detail": "Chi tiết"
+    },
+    "empty": {
+      "title": "Chưa có phân công nào",
+      "desc": "Danh sách trống. Khi Ban tổ chức chỉ định bạn vào tổ trọng tài giám sát một cuộc đua, thông tin cuộc đua và các API tác nghiệp sẽ hiển thị đầy đủ tại đây."
+    }
+  },
+  "navigation": {
+    "admin": {
+      "dashboard": {
+        "title": "Trung tâm quản trị",
+        "description": "Tổng quan hệ thống: người dùng, giải đấu, cuộc đua, dự đoán."
+      },
+      "users": {
+        "title": "Quản lý người dùng",
+        "description": "Quản lý user: xem, khóa/mở khóa, xóa tài khoản."
+      },
+      "roles": {
+        "title": "Quản lý vai trò",
+        "description": "Phân quyền: gán hoặc gỡ vai trò cho từng user."
+      },
+      "horses": {
+        "title": "Quản lý chiến mã",
+        "description": "Quản lý ngựa: xem toàn bộ, cập nhật trạng thái."
+      },
+      "jockeys": {
+        "title": "Quản lý nài ngựa",
+        "description": "Quản lý jockey: duyệt hồ sơ, đổi trạng thái."
+      },
+      "tournaments": {
+        "title": "Quản lý giải đấu",
+        "description": "Quản lý giải: tạo, cập nhật, thay đổi trạng thái."
+      },
+      "registrations": {
+        "title": "Duyệt đăng ký",
+        "description": "Phê duyệt hoặc từ chối hồ sơ ngựa tham gia."
+      },
+      "races": {
+        "title": "Lên lịch đua",
+        "description": "Tạo cuộc đua, lên lịch và quản lý trạng thái."
+      },
+      "refereeAssignments": {
+        "title": "Phân công trọng tài",
+        "description": "Chỉ định trọng tài cho từng cuộc đua."
+      },
+      "rankings": {
+        "title": "Quản lý xếp hạng",
+        "description": "Xem/cập nhật xếp hạng ngựa và nài ngựa theo giải."
+      },
+      "prizes": {
+        "title": "Quản lý giải thưởng",
+        "description": "Quản lý giải thưởng và trạng thái thanh toán."
+      },
+      "bets": {
+        "title": "Quản lý dự đoán",
+        "description": "Xem tất cả lượt dự đoán trong hệ thống."
+      },
+      "wallet": {
+        "title": "Giao dịch ví",
+        "description": "Quản lý nạp điểm và hàng đợi rút tiền."
+      },
+      "results": {
+        "title": "Kết quả",
+        "description": "Duyệt và công bố kết quả theo từng cuộc đua."
+      },
+      "auditLogs": {
+        "title": "Nhật ký hệ thống",
+        "description": "Xem thao tác hệ thống và lịch sử giao dịch."
+      }
+    },
+    "owner": {
+      "dashboard": {
+        "title": "Trạm điều hành",
+        "description": "Trung tâm chuồng đua: ngựa, ghi danh và phân công nài ngựa."
+      },
+      "horses": {
+        "title": "Chuồng chiến mã",
+        "description": "Quản lý danh sách ngựa, sức khỏe và thông tin chi tiết."
+      },
+      "races": {
+        "title": "Đăng ký trận đua",
+        "description": "Tìm giải mở đăng ký và ghi danh chiến mã khỏe mạnh."
+      },
+      "registrations": {
+        "title": "Lịch sử ghi danh",
+        "description": "Theo dõi tiến độ phê duyệt hồ sơ thi đấu."
+      },
+      "jockeyInvitations": {
+        "title": "Mời nài ngựa",
+        "description": "Mời nài ngựa chuyên nghiệp cho ngựa đã duyệt."
+      },
+      "wallet": {
+        "title": "Ví của tôi",
+        "description": "Xem thưởng, chia lợi nhuận và yêu cầu rút tiền."
+      }
+    },
+    "jockey": {
+      "dashboard": {
+        "title": "Trạm điều hành",
+        "description": "Bảng điều khiển, lịch đua, lời mời và kết quả gần đây."
+      },
+      "invitations": {
+        "title": "Lời mời cưỡi ngựa",
+        "description": "Tiếp nhận và phản hồi lời mời từ chủ ngựa."
+      },
+      "assigned": {
+        "title": "Lịch thi đấu đã nhận",
+        "description": "Xem lịch đua đã chấp nhận và thông tin chiến mã."
+      },
+      "horses": {
+        "title": "Thông tin chiến mã",
+        "description": "Xem chỉ số sức mạnh, sức bền và thể trạng ngựa."
+      },
+      "performance": {
+        "title": "Thành tích cá nhân",
+        "description": "Chỉ số nghề nghiệp và lịch sử thi đấu."
+      },
+      "wallet": {
+        "title": "Ví của tôi",
+        "description": "Xem phần thưởng 30% và lịch sử rút tiền."
+      }
+    },
+    "referee": {
+      "dashboard": {
+        "title": "Trạm điều hành",
+        "description": "Bảng giám sát tổng hợp của trọng tài."
+      },
+      "assignments": {
+        "title": "Cuộc đua được phân công",
+        "description": "Danh sách cuộc đua được giao giám sát."
+      },
+      "preRace": {
+        "title": "Kiểm tra trước giờ đua",
+        "description": "Kiểm tra sức khỏe ngựa và điểm danh nài ngựa."
+      },
+      "monitoring": {
+        "title": "Theo dõi cuộc đua",
+        "description": "Theo dõi xuất phát và diễn biến trực tiếp."
+      },
+      "resultEntry": {
+        "title": "Xác nhận kết quả",
+        "description": "Nhập thời gian về đích và xếp hạng chính thức."
+      },
+      "violations": {
+        "title": "Ghi nhận vi phạm",
+        "description": "Báo cáo vi phạm và áp dụng hình phạt thời gian."
+      },
+      "reports": {
+        "title": "Biên bản thi đấu",
+        "description": "Quản lý và lập biên bản chính thức."
+      }
+    },
+    "spectator": {
+      "dashboard": {
+        "title": "Giải đấu nổi bật",
+        "description": "Giải đang diễn ra và sắp khởi tranh."
+      },
+      "tournaments": {
+        "title": "Thông tin giải đấu",
+        "description": "Điều lệ, chi tiết và cơ cấu giải thưởng."
+      },
+      "races": {
+        "title": "Lịch thi đấu",
+        "description": "Lịch đua, sơ đồ đường chạy và giờ xuất phát."
+      },
+      "results": {
+        "title": "Kết quả trực tiếp",
+        "description": "Cập nhật về đích và trạng thái trận đấu."
+      },
+      "rankings": {
+        "title": "Bảng xếp hạng",
+        "description": "Xếp hạng chiến mã và nài ngựa xuất sắc."
+      },
+      "wallet": {
+        "title": "Ví điểm thưởng",
+        "description": "Điểm dự đoán, lịch sử đổi quà và mã nhận thưởng."
+      },
+      "predictions": {
+        "title": "Dự đoán kết quả",
+        "description": "Dự đoán ngựa vô địch để nhận điểm thưởng."
+      }
+    },
+    "counterStaff": {
+      "dashboard": {
+        "title": "Bàn làm việc",
+        "description": "Tổng quan quầy, tra cứu nhanh và thống kê."
+      },
+      "redemptions": {
+        "title": "Đổi thưởng vật lý",
+        "description": "Xử lý hàng đợi đổi quà và xác nhận trao quà."
+      },
+      "deposit": {
+        "title": "Nạp tiền vào ví",
+        "description": "Nạp tiền/điểm trực tiếp vào ví người dùng tại quầy."
+      }
+    }
+  },
+  "shell": {
+    "Admin": {
+      "badge": "Không gian quản trị",
+      "description": "Điều phối đua, giải đấu, duyệt đăng ký và công bố kết quả."
+    },
+    "Owner": {
+      "badge": "Không gian chủ ngựa",
+      "description": "Vận hành chuồng, danh mục ngựa, ghi danh thi đấu và mời nài ngựa."
+    },
+    "Jockey": {
+      "badge": "Không gian nài ngựa",
+      "description": "Lời mời thi đấu và lịch trình cá nhân."
+    },
+    "Referee": {
+      "badge": "Không gian trọng tài",
+      "description": "Cuộc đua được phân công, kiểm tra, vi phạm và xác nhận kết quả."
+    },
+    "Spectator": {
+      "badge": "Không gian khán giả",
+      "description": "Xem đua, dự đoán và theo dõi kết quả công khai."
+    },
+    "CounterStaff": {
+      "badge": "Không gian quầy",
+      "description": "Duyệt mã đổi quà, tra cứu tài khoản và nạp ví tại quầy."
+    }
+  },
+  "pages": {
+    "admin": {
+      "common": {
+        "loading": "Đang tải...",
+        "prev": "Trước",
+        "next": "Sau",
+        "pageOf": "Trang {{page}} / {{total}}",
+        "delete": "Xóa",
+        "actions": "Actions",
+        "status": "Status",
+        "total": "Tổng: {{count}}",
+        "searchPlaceholder": "Tìm theo tên, email...",
+        "allRoles": "Tất cả Role",
+        "allStatus": "Tất cả Status",
+        "noResults": "Không tìm thấy kết quả.",
+        "confirmDelete": "Xóa \"{{name}}\"? Hành động này không thể hoàn tác.",
+        "loadError": "Lỗi tải dữ liệu",
+        "removeRole": "Xóa role",
+        "ban": "Ban",
+        "unban": "Unban",
+        "selectTournament": "— Chọn Giải Đấu —",
+        "selectRace": "— Chọn Race —",
+        "dash": "—",
+        "backToDashboard": "Quay lại Dashboard",
+        "years": "năm",
+        "completed": "Hoàn tất"
+      },
+      "users": {
+        "eyebrow": "Quản lý người dùng",
+        "title": "Quản Lý Người Dùng",
+        "description": "Xem, ban/unban, và xóa tài khoản. Tìm kiếm theo tên hoặc email.",
+        "searchPlaceholder": "Tìm theo tên, email...",
+        "allRoles": "Tất cả Role",
+        "allStatus": "Tất cả Status",
+        "stats": "Tổng: <strong>{{total}}</strong> người dùng — Trang {{page}}/{{totalPages}}",
+        "colUser": "Người dùng",
+        "colRoles": "Roles",
+        "colStatus": "Status",
+        "colCreated": "Ngày tạo",
+        "colActions": "Actions",
+        "loading": "Đang tải...",
+        "empty": "Không tìm thấy user nào.",
+        "loadError": "Không tải được danh sách users",
+        "toastUnban": "Đã unban {{name}}",
+        "toastBan": "Đã ban {{name}}",
+        "toastDelete": "Đã xóa {{name}}",
+        "confirmDelete": "Xóa user \"{{name}}\"? Hành động này không thể hoàn tác."
+      },
+      "roles": {
+        "eyebrow": "Quản lý vai trò",
+        "title": "Phân Quyền Hệ Thống",
+        "description": "Assign hoặc remove roles cho từng user. Thay đổi có hiệu lực ngay lập tức.",
+        "searchPlaceholder": "Tìm theo tên, email...",
+        "colUser": "Người dùng",
+        "colCurrentRoles": "Roles hiện tại",
+        "colAddRole": "Thêm Role",
+        "toastRoleAdded": "Đã thêm role \"{{role}}\"",
+        "toastRoleRemoved": "Đã xóa role \"{{role}}\""
+      },
+      "horses": {
+        "eyebrow": "Quản lý chiến mã",
+        "title": "Quản Lý Ngựa",
+        "description": "Xem toàn bộ danh sách ngựa trong hệ thống. Admin có thể xóa ngựa vi phạm.",
+        "total": "Tổng: <strong>{{count}}</strong> ngựa",
+        "colHorse": "Ngựa",
+        "colOwner": "Chủ ngựa",
+        "colHealth": "Sức khoẻ",
+        "colStatus": "Status",
+        "empty": "Chưa có ngựa nào.",
+        "confirmDelete": "Xóa ngựa \"{{name}}\"?",
+        "toastDeleted": "Đã xóa ngựa {{name}}"
+      },
+      "jockeys": {
+        "eyebrow": "Quản lý nài ngựa",
+        "title": "Quản Lý Jockey",
+        "description": "Xem toàn bộ jockey profiles bao gồm cả inactive/suspended. Thay đổi trạng thái ngay tại đây.",
+        "allStatus": "Tất cả Status",
+        "total": "Tổng: <strong>{{count}}</strong> nài ngựa",
+        "colJockey": "Jockey",
+        "colLicense": "License",
+        "colExperience": "Kinh nghiệm",
+        "colRacesWins": "Races / Wins",
+        "colChange": "Thay đổi",
+        "experience": "{{years}} năm · {{weight}}kg",
+        "empty": "Không có jockey nào.",
+        "toastStatus": "Đã cập nhật trạng thái → {{status}}",
+        "status": {
+          "ACTIVE": "Hoạt động",
+          "UNAVAILABLE": "Không khả dụng",
+          "SUSPENDED": "Đình chỉ"
+        }
+      },
+      "tournaments": {
+        "eyebrow": "Quản lý giải đấu",
+        "title": "Quản Lý Giải Đấu",
+        "description": "Tạo, cập nhật trạng thái và xóa giải đấu. Mỗi giải chứa nhiều races độc lập.",
+        "createNew": "Tạo giải mới",
+        "total": "Tổng: <strong>{{count}}</strong> giải đấu",
+        "prize": "Prize",
+        "maxHorses": "Max",
+        "horsesUnit": "ngựa",
+        "pts": "pts",
+        "confirmDelete": "Xóa giải \"{{name}}\"?",
+        "toastDeleted": "Đã xóa giải đấu",
+        "toastStatus": "Đã cập nhật status → {{status}}"
+      },
+      "tournamentsNew": {
+        "eyebrow": "Tạo giải đấu",
+        "title": "Thiết lập giải đấu mới",
+        "description": "Điền thông tin bên dưới để tạo một giải đấu mới. Giải đấu sẽ khởi tạo ở trạng thái nháp (DRAFT).",
+        "backToDashboard": "Quay lại Dashboard"
+      },
+      "tournamentForm": {
+        "deckEyebrow": "Bảng quản lý giải đấu",
+        "title": "Tạo giải đấu mới",
+        "subtitle": "Thiết lập bình chứa giải đấu để tổ chức các trận đua ngựa kịch tính sắp tới.",
+        "cancel": "Hủy bỏ",
+        "save": "Lưu giải đấu",
+        "saving": "Đang xử lý...",
+        "nameLabel": "Tên giải đấu",
+        "locationLabel": "Địa điểm tổ chức",
+        "startDateLabel": "Ngày bắt đầu giải đấu",
+        "endDateLabel": "Ngày kết thúc giải đấu",
+        "sectionRegistration": "Thiết lập giai đoạn đăng ký & thông số phụ",
+        "regStartLabel": "Ngày bắt đầu nhận đăng ký",
+        "regEndLabel": "Ngày đóng cổng đăng ký",
+        "maxHorsesLabel": "Số ngựa tối đa tham gia giải",
+        "prizePoolLabel": "Tổng giải thưởng (điểm)",
+        "descriptionLabel": "Mô tả giải đấu",
+        "namePlaceholder": "Ví dụ: Spring Velocity Cup 2026",
+        "locationPlaceholder": "Ví dụ: Trường đua Phú Thọ, TPHCM",
+        "maxHorsesPlaceholder": "Mặc định: 20",
+        "prizePoolPlaceholder": "Mặc định: 0",
+        "descriptionPlaceholder": "Mô tả tóm tắt về thể lệ giải đấu, giải thưởng hoặc thông tin ban tổ chức...",
+        "scopeTitle": "Ràng buộc hệ thống (scope guard)",
+        "scopeBody": "Mặc định khi giải đấu được tạo thành công, trạng thái ban đầu sẽ là <1>DRAFT</1>. Bạn có thể cập nhật trạng thái sang <2>OPEN REGISTRATION</2> trong trang chi tiết để các chủ ngựa có thể đăng ký tham gia.",
+        "validation": {
+          "nameRequired": "Vui lòng nhập tên giải đấu.",
+          "datesRequired": "Vui lòng nhập ngày bắt đầu và ngày kết thúc giải đấu.",
+          "startBeforeEnd": "Ngày bắt đầu phải trước ngày kết thúc giải đấu.",
+          "regStartBeforeEnd": "Ngày bắt đầu đăng ký phải trước ngày đóng đăng ký.",
+          "regBeforeTournament": "Thời hạn đăng ký phải kết thúc trước khi giải đấu bắt đầu.",
+          "minHorses": "Số lượng ngựa tối đa tham gia phải ít nhất là 2.",
+          "prizeNonNegative": "Tổng giải thưởng không được âm."
+        },
+        "createError": "Đã xảy ra lỗi khi tạo giải đấu.",
+        "createSuccess": "Giải đấu \"{{name}}\" đã được tạo thành công!",
+        "createFailed": "Tạo giải đấu thất bại. Vui lòng thử lại."
+      },
+      "mockRegistrations": {
+        "tableEyebrow": "Hàng đợi đăng ký",
+        "tableTitle": "Bảng kiểm duyệt quản trị",
+        "tableFooter": "Chỉ giao diện · hiển thị {{shown}}/{{total}}",
+        "colHorse": "Chiến mã",
+        "colOwner": "Chủ ngựa",
+        "colRace": "Cuộc đua",
+        "colSubmitted": "Gửi lúc",
+        "colStatus": "Trạng thái",
+        "colReviewNote": "Ghi chú duyệt",
+        "colActions": "Thao tác",
+        "viewDetail": "Xem chi tiết",
+        "review": "Duyệt",
+        "status": {
+          "pending": "Chờ duyệt",
+          "approved": "Đã duyệt",
+          "rejected": "Từ chối"
+        }
+      },
+      "mockRaces": {
+        "tableEyebrow": "Danh sách cuộc đua",
+        "tableTitle": "Bảng lịch quản trị",
+        "tableFooter": "Dữ liệu mô phỏng · hiển thị {{shown}}/{{total}}",
+        "openRace": "Mở cuộc đua",
+        "participants": "Người tham gia",
+        "participantsCount": "{{current}}/{{capacity}} người tham gia",
+        "colRace": "Cuộc đua",
+        "colStatus": "Trạng thái",
+        "colSchedule": "Lịch",
+        "colTrack": "Đường đua",
+        "colParticipants": "Người tham gia",
+        "colAction": "Thao tác",
+        "manage": "Quản lý",
+        "detailDescription": "Cuộc đua là đối tượng nghiệp vụ cốt lõi: lịch, người tham gia, trọng tài, timeline trạng thái và metadata được gom trong một màn quản trị.",
+        "distance": "Cự ly",
+        "participantsLabel": "Người tham gia",
+        "tournament": "Giải đấu",
+        "scheduleEyebrow": "Lịch cuộc đua",
+        "dateWindow": "Ngày / khung giờ",
+        "location": "Địa điểm",
+        "course": "Cung đường",
+        "referee": "Trọng tài",
+        "refereeSummary": "Tóm tắt trọng tài",
+        "quickActions": "Thao tác nhanh",
+        "viewParticipants": "Xem người tham gia",
+        "assignments": "Phân công",
+        "quickActionsHint": "Chỉ placeholder. Không có quy trình duyệt/công bố.",
+        "metadata": "Metadata cuộc đua",
+        "participantsEyebrow": "Người tham gia",
+        "horseGrid": "Lưới chiến mã",
+        "lanesCount": "{{count}} làn đã xác nhận",
+        "colLane": "Làn/thứ tự",
+        "colHorse": "Chiến mã",
+        "colOwner": "Chủ ngựa",
+        "colJockey": "Nài ngựa",
+        "status": {
+          "scheduled": "Đã lên lịch",
+          "live": "Trực tiếp",
+          "finished": "Đã kết thúc",
+          "result_published": "Đã công bố kết quả"
+        },
+        "participantStatus": {
+          "confirmed": "Đã xác nhận",
+          "checked_in": "Đã check-in",
+          "pending_assignment": "Chờ xử lý",
+          "scratched": "Rút lui"
+        }
+      },
+      "bets": {
+        "eyebrow": "Quản lý dự đoán",
+        "title": "Quản lý dự đoán",
+        "description": "Xem tất cả lượt dự đoán/đặt cược của người dùng trong hệ thống. Kết quả được cập nhật tự động sau khi cuộc đua được công bố.",
+        "total": "Tổng: <strong>{{count}}</strong> dự đoán",
+        "colUser": "Người dùng",
+        "colRace": "Cuộc đua",
+        "colHorse": "Ngựa đặt",
+        "colReward": "Điểm thưởng",
+        "colStatus": "Trạng thái",
+        "colDate": "Ngày đặt",
+        "empty": "Chưa có dự đoán nào.",
+        "status": {
+          "PENDING": "Đang chờ",
+          "WON": "Thắng",
+          "LOST": "Thua",
+          "CANCELLED": "Đã hủy"
+        }
+      },
+      "cashouts": {
+        "eyebrow": "Đổi Thưởng Vật Lý",
+        "title": "Quản Lý Quầy Đổi Thưởng",
+        "description": "Xác nhận mã quy đổi thưởng của Khán giả, Chủ ngựa, Nài ngựa tại quầy giao dịch vật lý và đối soát điểm Ledger hệ thống."
+      },
+      "prizes": {
+        "eyebrow": "Quản lý giải thưởng",
+        "title": "Quản Lý Giải Thưởng",
+        "description": "Xem tất cả prizes được tạo tự động (70% owner / 30% jockey) sau khi race kết thúc. Admin có thể cập nhật trạng thái thanh toán.",
+        "total": "Tổng: <strong>{{count}}</strong> giải thưởng",
+        "colRecipient": "Người nhận",
+        "colRace": "Race",
+        "colHorse": "Ngựa",
+        "colPoints": "Số điểm",
+        "colAction": "Hành động",
+        "markPaid": "Đánh dấu PAID",
+        "paidOn": "Đã thanh toán {{date}}",
+        "empty": "Chưa có prize nào.",
+        "toastStatus": "Cập nhật status → {{status}}"
+      },
+      "wallet": {
+        "eyebrow": "Giao dịch ví",
+        "title": "Quản Lý Giao Dịch Điểm",
+        "description": "Xem tất cả giao dịch wallet và duyệt yêu cầu cashout/quy đổi điểm của users.",
+        "tabCashouts": "Hàng đợi rút tiền ({{count}})",
+        "tabTransactions": "Tất cả Giao Dịch ({{count}})",
+        "colUser": "User",
+        "colCode": "Mã QĐ",
+        "colPoints": "Điểm",
+        "colType": "Loại",
+        "colDescription": "Mô tả",
+        "colDate": "Ngày",
+        "colAction": "Hành động",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "markPaid": "✓ Đã chi tiền",
+        "done": "Hoàn tất",
+        "emptyCashouts": "Không có cashout requests.",
+        "emptyTransactions": "Chưa có giao dịch nào.",
+        "toastStatus": "Đã cập nhật → {{status}}"
+      },
+      "rankings": {
+        "eyebrow": "Quản lý xếp hạng",
+        "title": "Xem/Cập Nhật Ranking",
+        "description": "Ranking được tính realtime từ race results đã PUBLISHED. Chọn giải đấu để xem bảng xếp hạng.",
+        "selectTournament": "— Chọn Giải Đấu —",
+        "tabHorses": "Ngựa",
+        "tabJockeys": "Jockey",
+        "loading": "Đang tính toán ranking...",
+        "selectPrompt": "Chọn giải đấu để xem ranking.",
+        "empty": "Chưa có kết quả race nào được công bố.",
+        "colRank": "Hạng",
+        "colHorse": "Ngựa",
+        "colJockey": "Jockey",
+        "colPoints": "Điểm",
+        "colRaces": "Races",
+        "colWins": "Wins"
+      },
+      "refereeAssignments": {
+        "eyebrow": "Phân công trọng tài",
+        "title": "Phân Công Trọng Tài",
+        "description": "Chọn race để xem và quản lý danh sách trọng tài được phân công.",
+        "selectRace": "— Chọn Race —",
+        "colReferee": "Trọng tài",
+        "colNote": "Ghi chú",
+        "empty": "Chưa có trọng tài nào được phân công cho race này.",
+        "emptyHint": "Sử dụng API POST /referee-assignments để phân công.",
+        "toastRemoved": "Đã xóa phân công"
+      },
+      "auditLogs": {
+        "eyebrow": "Bảo mật & Kiểm toán",
+        "title": "Nhật ký vận hành hệ thống",
+        "description": "Đối soát nhật ký hệ thống, theo dõi nhập kết quả trọng tài, phân chia giải thưởng tự động và quy đổi ví điểm."
+      },
+      "races": {
+        "eyebrow": "Quản lý đua",
+        "title": "Bảng điều khiển cuộc đua",
+        "description": "Giao diện admin theo cuộc đua: trạng thái, lịch, người tham gia, component tái sử dụng. Chỉ dữ liệu mock.",
+        "createRace": "Tạo cuộc đua",
+        "statusStack": "Trạng thái",
+        "statusTitle": "Đã lên lịch · Đang đua · Kết thúc · Đã công bố",
+        "statusDesc": "Phase 4C giữ mỗi cuộc đua độc lập. Không vòng đấu, bracket, đủ điều kiện, cược hay gọi backend."
+      },
+      "racesNew": {
+        "eyebrow": "Tạo cuộc đua",
+        "title": "Thiết lập cuộc đua mới",
+        "description": "Giao diện tạo cuộc đua mock: lịch, sân đấu, sức chứa, trọng tài. Không gửi backend.",
+        "backToRaces": "Về danh sách đua"
+      },
+      "raceDetail": {
+        "eyebrow": "Chi tiết cuộc đua",
+        "description": "Thông tin cuộc đua, lịch/địa điểm, người tham gia, trọng tài, timeline trạng thái và metadata.",
+        "allRaces": "Tất cả cuộc đua",
+        "participants": "Người tham gia"
+      },
+      "raceAssignments": {
+        "eyebrow": "Tổng quan phân công",
+        "title": "Phân công {{name}}",
+        "description": "Placeholder phân công trọng tài và jockey. Không workflow chấp nhận/từ chối, không backend, không realtime.",
+        "backToDetail": "Về chi tiết",
+        "refereeAssignment": "Phân công trọng tài",
+        "displayOnly": "Chỉ hiển thị",
+        "jockeyLanes": "Làn jockey",
+        "lane": "Làn {{lane}}"
+      },
+      "raceParticipants": {
+        "eyebrow": "Người tham gia",
+        "title": "Lưới {{name}}",
+        "description": "Tổ chức theo ngựa, chủ, jockey, làn/thứ tự và trạng thái. Dữ liệu mock chỉ đọc.",
+        "backToDetail": "Về chi tiết"
+      },
+      "registrations": {
+        "eyebrow": "Duyệt đăng ký",
+        "title": "Kiểm duyệt đăng ký đua",
+        "description": "Xem ngựa, chủ, cuộc đua đích, thời gian gửi và ghi chú đủ điều kiện mock trước khi duyệt/từ chối. FE-only.",
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối",
+        "needsReview": "Cần xem xét",
+        "readyQueue": "Sẵn sàng",
+        "reasonRequired": "Cần lý do"
+      },
+      "registrationDetail": {
+        "eyebrow": "Xem xét đăng ký",
+        "description": "Panel duyệt đơn lẻ: đủ điều kiện, ghi chú, hộp thoại duyệt/từ chối và trail mock.",
+        "allRegistrations": "Tất cả đăng ký"
+      },
+      "results": {
+        "eyebrow": "Công bố kết quả",
+        "title": "Xem xét kết quả đua",
+        "description": "Xem bảng xếp hạng, tóm tắt trọng tài, trạng thái nháp/xác nhận/công bố rồi publish. Chỉ mock.",
+        "ready": "Sẵn sàng",
+        "published": "Đã công bố",
+        "refereeConfirmed": "Trọng tài xác nhận",
+        "publicState": "Trạng thái công khai",
+        "reviewResult": "Xem kết quả"
+      },
+      "resultDetail": {
+        "eyebrow": "Xem xét kết quả",
+        "description": "Xem trước bảng xếp hạng, tóm tắt trọng tài, trạng thái công bố và xác nhận. Kết quả thuộc cuộc đua này.",
+        "allResults": "Tất cả kết quả"
+      },
+      "resultReview": {
+        "heroDescription": "Cổng duyệt kết quả admin: xem tóm tắt trọng tài, kiểm tra bảng xếp hạng, chỉ công bố khi trọng tài đã xác nhận. Chỉ dữ liệu mock.",
+        "track": "Đường đua",
+        "rankingRows": "Số hàng xếp hạng",
+        "referee": "Trọng tài",
+        "raceSummary": "Tóm tắt cuộc đua",
+        "raceSummaryLine": "{{distance}} · {{track}} · đã kết thúc · {{finishedAt}}",
+        "refereeSummary": "Tóm tắt trọng tài",
+        "publishState": "Trạng thái công bố",
+        "publishConfirmation": "Xác nhận công bố",
+        "publishedLocked": "Đã khóa trạng thái công bố",
+        "finalGate": "Cổng duyệt cuối của admin",
+        "alreadyPublished": "Kết quả đã được công bố",
+        "publishButton": "Công bố kết quả",
+        "status": {
+          "draft": "Bản nháp",
+          "referee_confirmed": "Trọng tài đã xác nhận",
+          "published": "Đã công bố"
+        },
+        "publishBadge": {
+          "published": "Kết quả đã công bố",
+          "ready": "Sẵn sàng công bố",
+          "awaiting": "Chờ trọng tài"
+        },
+        "mock": {
+          "race-aurora-1200": {
+            "refereeSummary": "Trọng tài đã xác nhận thứ hạng về đích. Một cảnh báo, một ghi chú phạt mock. Sẵn sàng cho admin duyệt công bố.",
+            "publishState": "Cho phép công bố sau khi trọng tài xác nhận. Xác nhận admin vẫn chỉ là mock."
+          },
+          "race-delta-1600": {
+            "refereeSummary": "Kết quả nháp cần trọng tài xác nhận trước khi nút công bố được bật.",
+            "publishState": "Tắt công bố cho đến khi trọng tài xác nhận kết quả cuộc đua."
+          },
+          "race-heritage-1400": {
+            "refereeSummary": "Kết quả đã được công bố. Trạng thái công khai đã khóa để hiển thị.",
+            "publishState": "Trạng thái đã công bố. Nút xác nhận được thay bằng giao diện trạng thái."
+          }
+        }
+      },
+      "raceRanking": {
+        "eyebrow": "Bảng xếp hạng cuộc đua",
+        "showing": "Hiển thị {{visible}}/{{total}}",
+        "colRank": "Hạng",
+        "colHorse": "Ngựa",
+        "colJockey": "Nài ngựa",
+        "colFinishTime": "Thời gian về đích",
+        "colPenalty": "Hình phạt",
+        "colFinalStatus": "Trạng thái cuối",
+        "penalty": {
+          "clean": "Sạch",
+          "warning": "Cảnh báo",
+          "penalty": "Phạt"
+        },
+        "resultStatus": {
+          "draft": "Bản nháp",
+          "referee_confirmed": "Trọng tài xác nhận",
+          "published": "Đã công bố"
+        }
+      },
+      "publishDialog": {
+        "eyebrow": "Công bố kết quả cuộc đua",
+        "close": "Đóng hộp thoại",
+        "description": "Công bố sẽ hiển thị bảng xếp hạng này là kết quả chính thức cuối cùng. Hành động này tự động kích hoạt chia phần thưởng:",
+        "ownerSplit": "Phần chủ ngựa (70%)",
+        "ownerPoints": "7.000 điểm",
+        "ownerCredits": "Ghi có chuồng: Linh Tran Stable",
+        "jockeySplit": "Phần nài ngựa (30%)",
+        "jockeyPoints": "3.000 điểm",
+        "jockeyCredits": "Ghi có nài ngựa: Minh Khoa",
+        "refereeSummaryLabel": "Tóm tắt trọng tài:",
+        "cancel": "Hủy",
+        "confirm": "Xác nhận & công bố",
+        "publishing": "Đang phân bổ giải...",
+        "toastSuccess": "Đã công bố kết quả cuộc đua! Phần thưởng đã được phân phối.",
+        "successTitle": "Đã công bố kết quả!",
+        "successDescription": "Phần thưởng đã được ghi vào số dư ví. Sổ cái giao dịch và nhật ký kiểm toán đã được cập nhật.",
+        "successOwnerCredit": "+7.000 điểm ghi có ví chủ ngựa",
+        "successJockeyCredit": "+3.000 điểm ghi có ví nài ngựa",
+        "successAudit": "Hành động kiểm toán: RACE_PUBLISHED, PRIZE_SPLIT",
+        "done": "Hoàn tất",
+        "status": {
+          "draft": "Bản nháp",
+          "referee_confirmed": "Trọng tài đã xác nhận",
+          "published": "Đã công bố"
+        }
+      },
+      "auditViewer": {
+        "eyebrow": "Nhật ký kiểm toán hệ thống",
+        "title": "Nhật ký vận hành hệ thống",
+        "description": "Theo dõi bất biến các hoạt động bảo mật, chi trả giải thưởng, công bố kết quả và duyệt hàng đợi quản trị.",
+        "searchPlaceholder": "Lọc theo hành động, người dùng hoặc chi tiết...",
+        "empty": "Không tìm thấy mục nhật ký phù hợp.",
+        "colAction": "Sự kiện",
+        "colUser": "Người thực hiện",
+        "colDetails": "Chi tiết hoạt động",
+        "colIp": "Địa chỉ IP",
+        "colTime": "Thời gian",
+        "systemUser": "Hệ thống",
+        "actions": {
+          "USER_LOGIN": "Đăng nhập",
+          "RACE_PUBLISHED": "Công bố đua",
+          "PRIZE_SPLIT": "Chia giải",
+          "CASHOUT_APPROVED": "Duyệt đổi thưởng",
+          "PREDICTION_PAYOUT": "Trả dự đoán"
+        }
+      },
+      "raceForm": {
+        "eyebrow": "Biểu mẫu cuộc đua",
+        "title": "Tạo cuộc đua mock",
+        "subtitle": "Biểu mẫu chỉ giao diện. Không validation, không gửi API.",
+        "save": "Lưu cuộc đua mock",
+        "scopeNote": "Phạm vi Phase 4C: chỉ bố cục form. Duyệt đăng ký, công bố kết quả, realtime và tích hợp backend nằm ngoài phạm vi.",
+        "fields": {
+          "raceName": "Tên cuộc đua",
+          "tournament": "Giải đấu",
+          "dateTime": "Ngày & giờ",
+          "location": "Địa điểm",
+          "distance": "Cự ly",
+          "surface": "Mặt đường",
+          "capacity": "Sức chứa"
+        },
+        "placeholders": {
+          "raceName": "Aurora Sprint 1200",
+          "tournament": "Spring Velocity Cup",
+          "dateTime": "24 tháng 5, 2026 · 10:00",
+          "location": "Saigon Grand Track",
+          "distance": "1.200m",
+          "surface": "Cỏ khô",
+          "capacity": "8"
+        }
+      }
+    },
+    "owner": {
+      "horses": {
+        "eyebrow": "Quản lý chuồng đua",
+        "title": "Danh Sách Chiến Mã",
+        "description": "Quản lý hồ sơ kỹ thuật, trạng thái sức khỏe của từng chiến mã. Ngựa phải khỏe mạnh mới đủ điều kiện đăng ký tham dự giải đấu.",
+        "addHorse": "Thêm chiến mã",
+        "addHorseNow": "Thêm chiến mã ngay",
+        "loading": "Đang tải dữ liệu chuồng ngựa...",
+        "emptyTitle": "Chuồng ngựa trống",
+        "emptyDescription": "Bạn chưa đăng ký bất kỳ chiến mã nào. Hãy thêm chiến mã đầu tiên để bắt đầu ghi danh tham gia các giải đấu hấp dẫn.",
+        "toast": {
+          "fetchFailed": "Không thể lấy danh sách chiến mã từ server.",
+          "deleteConfirm": "Bạn có chắc chắn muốn xóa chiến mã này khỏi chuồng không?",
+          "deleteSuccess": "Đã xóa chiến mã thành công.",
+          "deleteFailed": "Xóa chiến mã thất bại."
+        }
+      },
+      "horseForm": {
+        "fields": {
+          "name": "Tên chiến mã *",
+          "breed": "Giống ngựa",
+          "color": "Màu sắc",
+          "age": "Tuổi",
+          "weight": "Cân nặng (kg)",
+          "height": "Chiều cao (cm)",
+          "gender": "Giới tính",
+          "health": "Trạng thái sức khỏe",
+          "image": "Hình ảnh chiến mã",
+          "description": "Mô tả / Ghi chú"
+        },
+        "placeholders": {
+          "name": "Nhập tên ngựa (ví dụ: Thunder Bolt)",
+          "breed": "Thoroughbred",
+          "color": "Vàng cát, Đen tuyền",
+          "description": "Nhập mô tả về thế mạnh hoặc đặc điểm nổi bật của ngựa..."
+        },
+        "gender": {
+          "MALE": "Đực",
+          "FEMALE": "Cái",
+          "GELDING": "Thiến"
+        },
+        "health": {
+          "HEALTHY": "Khỏe mạnh",
+          "INJURED": "Chấn thương",
+          "RECOVERING": "Đang hồi phục",
+          "RETIRED": "Giải nghệ"
+        },
+        "errors": {
+          "title": "Lỗi nhập liệu",
+          "nameRequired": "Tên chiến mã không được để trống.",
+          "imageSize": "Kích thước ảnh không vượt quá 5MB.",
+          "saveFailed": "Đã xảy ra lỗi khi lưu thông tin ngựa."
+        },
+        "changeImage": "Thay đổi ảnh",
+        "uploadTitle": "Tải lên hình ảnh",
+        "uploadHint": "PNG, JPG, WEBP tối đa 5MB",
+        "cancel": "Hủy bỏ",
+        "save": "Lưu chiến mã",
+        "saving": "Đang lưu..."
+      },
+      "horsesNew": {
+        "eyebrow": "Đăng ký hồ sơ",
+        "title": "Thêm Chiến Mã Mới",
+        "description": "Khai báo thông số kỹ thuật của ngựa đua để lưu trữ trong danh mục. Hồ sơ này được sử dụng để kiểm duyệt điều kiện thi đấu.",
+        "toast": {
+          "createFailed": "Tạo chiến mã mới thất bại.",
+          "createSuccess": "Chiến mã đã được thêm vào chuồng thành công!",
+          "error": "Đã xảy ra lỗi khi thêm chiến mã."
+        }
+      },
+      "horseDetail": {
+        "eyebrow": "Hồ sơ chiến mã",
+        "description": "Thông số kỹ thuật chuẩn quốc tế và lịch sử tham gia thi đấu.",
+        "editEyebrow": "Chỉnh sửa hồ sơ",
+        "editTitle": "Cập Nhật {{name}}",
+        "editDescription": "Chỉnh sửa hoặc cập nhật các thông số sức khỏe và kỹ thuật mới nhất của chiến mã.",
+        "cancelEdit": "Hủy chỉnh sửa",
+        "editProfile": "Chỉnh sửa hồ sơ",
+        "registerRace": "Ghi danh thi đấu",
+        "loading": "Đang tải dữ liệu hồ sơ...",
+        "notFound": "Chiến mã không tồn tại hoặc bạn không có quyền xem.",
+        "bioSpecs": "Thông số sinh học",
+        "baseSpeed": "Tốc độ nền",
+        "stamina": "Thể lực tích lũy",
+        "breed": "Giống ngựa",
+        "color": "Màu sắc",
+        "gender": "Giới tính",
+        "genderMale": "Ngựa Đực (Male)",
+        "genderFemale": "Ngựa Cái (Female)",
+        "genderGelding": "Ngựa Thiến (Gelding)",
+        "age": "Tuổi đời",
+        "weight": "Trọng lượng (kg)",
+        "height": "Chiều cao (cm)",
+        "descriptionLabel": "Mô tả đặc điểm",
+        "noDescription": "Chiến mã chưa cập nhật thông tin mô tả cụ thể về tính cách hoặc thế mạnh địa hình.",
+        "raceHistoryTitle": "Lịch sử thi đấu & Kết quả",
+        "noRaceData": "Chưa có dữ liệu thi đấu",
+        "noRaceDataDesc": "Chiến mã này chưa từng tham gia trận đua chính thức nào hoặc kết quả chưa được ghi nhận.",
+        "finishTime": "Thời gian",
+        "avgSpeed": "Tốc độ TB",
+        "startGate": "Cổng xuất phát",
+        "health": {
+          "HEALTHY": "Khỏe mạnh",
+          "INJURED": "Chấn thương",
+          "RECOVERING": "Đang hồi phục",
+          "RETIRED": "Giải nghệ"
+        },
+        "toast": {
+          "fetchFailed": "Không thể lấy thông tin chi tiết của ngựa.",
+          "updateFailed": "Cập nhật chiến mã thất bại.",
+          "updateSuccess": "Thông tin chiến mã đã được cập nhật thành công!",
+          "saveError": "Đã xảy ra lỗi khi lưu chiến mã."
+        }
+      },
+      "races": {
+        "eyebrow": "Đại hội đua ngựa",
+        "title": "Danh Sách Trận Đua",
+        "description": "Tìm kiếm các trận đua đang mở hồ sơ ghi danh chiến mã. Đảm bảo chiến mã của bạn đáp ứng các tiêu chuẩn sức khỏe trước khi nộp hồ sơ.",
+        "loading": "Đang tìm kiếm các trận đấu khả dụng...",
+        "emptyTitle": "Chưa có trận đấu nào",
+        "emptyDescription": "Hệ thống hiện không có trận đua nào đang mở đăng ký hoặc được khởi tạo. Vui lòng quay lại sau!",
+        "openRegistration": "Mở ghi tên",
+        "closedRegistration": "Đóng đăng ký",
+        "startTime": "Khởi tranh: {{datetime}}",
+        "distanceSurface": "Khoảng cách: {{distance}} · Mặt sân: {{surface}}",
+        "participants": "Số lượng: {{current}}/{{max}} chiến mã",
+        "raceFull": "Trận đấu đã đầy",
+        "registerNow": "Ghi danh ngay",
+        "registrationClosed": "Ngừng tiếp nhận hồ sơ",
+        "toast": {
+          "fetchFailed": "Không thể lấy danh sách trận đua từ Backend."
+        }
+      },
+      "raceRegister": {
+        "eyebrow": "Ghi danh thi đấu",
+        "title": "Đăng Ký: {{raceName}}",
+        "description": "Nộp hồ sơ kỹ thuật chiến mã để ban quản trị giải đấu phê duyệt lượt tham gia xuất phát.",
+        "loading": "Đang khởi tạo thủ tục đăng ký...",
+        "notAvailable": "Trận đua không khả dụng hoặc đã kết thúc.",
+        "toast": {
+          "loadFailed": "Không thể tải thông tin trận đua hoặc chuồng ngựa.",
+          "registerFailed": "Ghi tên chiến mã thất bại.",
+          "registerSuccess": "Hồ sơ đăng ký trận đua của bạn đã được gửi thành công!",
+          "submitError": "Có lỗi xảy ra khi nộp hồ sơ."
+        }
+      },
+      "registrations": {
+        "eyebrow": "Theo dõi thủ tục",
+        "title": "Lịch Sử Ghi Danh",
+        "description": "Giám sát tiến độ phê duyệt hồ sơ tham dự giải đấu của chiến mã từ Ban Tổ Chức. Bạn có thể tự do hủy hoặc rút tên tùy theo trạng thái hồ sơ.",
+        "loading": "Đang tải lịch sử ghi danh...",
+        "toast": {
+          "fetchFailed": "Không thể tải danh sách đăng ký trận đua."
+        }
+      },
+      "jockeyInvitations": {
+        "eyebrow": "Chiêu mộ nài ngựa",
+        "title": "Quản Lý Lời Mời Jockey",
+        "description": "Gửi lời mời tới các nài ngựa (Jockey) chuyên nghiệp để lái chiến mã của bạn trong các giải đua đã được phê duyệt hồ sơ.",
+        "inviteJockey": "Mời Jockey",
+        "loading": "Đang tải lịch sử mời Jockey...",
+        "sentInvitations": "Lời mời đã gửi",
+        "emptyTitle": "Hòm thư trống",
+        "emptyDescription": "Bạn chưa gửi bất kỳ lời mời cộng tác Jockey nào. Gửi lời mời mới ngay để chuẩn bị tốt nhất cho trận đua sắp tới!",
+        "table": {
+          "jockey": "Jockey",
+          "horseAndRace": "Chiến mã & Trận đấu",
+          "message": "Lời nhắn",
+          "status": "Trạng thái",
+          "actions": "Thao tác"
+        },
+        "cancelInvitation": "Hủy lời mời",
+        "modal": {
+          "eyebrow": "Chiêu mộ nài ngựa",
+          "title": "Gửi Lời Mời Jockey",
+          "note": "Lưu ý: Chỉ những hồ sơ ghi danh chiến mã đã được Ban Tổ Chức duyệt (APPROVED) và chưa được gán Jockey mới hiển thị bên dưới.",
+          "selectRegistration": "Chọn Lượt Ghi Danh Khả Dụng",
+          "selectRegistrationPlaceholder": "-- Chọn lượt đăng ký trận đấu --",
+          "selectJockey": "Chọn Jockey Đang Rảnh (AVAILABLE)",
+          "selectJockeyPlaceholder": "-- Chọn Jockey tự do --",
+          "messageLabel": "Lời nhắn gửi Jockey (Tùy chọn)",
+          "messagePlaceholder": "Ví dụ: Rất mong bạn sẽ đồng hành cùng chiến mã của mình trong giải đua lần này!",
+          "sending": "Đang gửi...",
+          "send": "Gửi lời mời"
+        },
+        "status": {
+          "PENDING": "Chờ phản hồi",
+          "ACCEPTED": "Đã chấp nhận",
+          "REJECTED": "Từ chối",
+          "CANCELLED": "Đã hủy",
+          "EXPIRED": "Hết hạn"
+        },
+        "toast": {
+          "noApprovedRegistrations": "Không có lượt đăng ký được phê duyệt nào trống Jockey để gửi lời mời!",
+          "selectRequired": "Vui lòng chọn đầy đủ chiến mã trận đua và Jockey.",
+          "sendFailed": "Gửi lời mời Jockey thất bại.",
+          "sendSuccess": "Đã gửi lời mời tới Jockey thành công!",
+          "genericError": "Có lỗi xảy ra.",
+          "cancelConfirm": "Bạn có chắc chắn muốn hủy lời mời Jockey này không?",
+          "cancelSuccess": "Đã hủy lời mời thành công.",
+          "cancelFailed": "Hủy lời mời thất bại."
+        }
+      },
+      "wallet": {
+        "eyebrow": "Ví điểm thưởng",
+        "title": "Quản Lý Thu Nhập",
+        "description": "Theo dõi số dư điểm thưởng tích lũy từ kết quả giải đua (phân chia 70/30) và thực hiện các phiếu yêu cầu đổi quà tặng trực tiếp tại quầy.",
+        "loading": "Đang tải lịch sử tài chính...",
+        "toast": {
+          "fetchFailed": "Không thể tải thông tin ví từ Backend.",
+          "connectionFailed": "Kết nối ví thất bại.",
+          "cashoutFailed": "Đổi thưởng thất bại.",
+          "cashoutSuccess": "Yêu cầu đổi {{points}} điểm đã được gửi! Hãy ra quầy nhận quà.",
+          "cashoutError": "Đã xảy ra lỗi khi tạo yêu cầu rút điểm."
+        }
+      }
+    },
+    "jockey": {
+      "wallet": {
+        "eyebrow": "Ví điểm thưởng",
+        "title": "Quản Lý Thu Nhập Jockey",
+        "description": "Theo dõi điểm thưởng tích lũy từ các lượt cưỡi thắng cuộc (phân chia 30%) và thực hiện yêu cầu đổi quà tại quầy."
+      }
+    },
+    "spectator": {
+      "common": {
+        "filterAll": "Tất cả",
+        "backToList": "Quay lại danh sách",
+        "viewDetails": "Xem chi tiết",
+        "liveNow": "LIVE NOW",
+        "finished": "KẾT THÚC",
+        "prizePool": "Giải Thưởng:",
+        "location": "Địa điểm:",
+        "schedule": "Thời gian giải:",
+        "distance": "Cự ly",
+        "surface": "Mặt sân",
+        "pts": "Pts"
+      },
+      "tournaments": {
+        "eyebrow": "Khám phá giải đấu",
+        "title": "Thông Tin Giải Đấu",
+        "description": "Tìm kiếm, theo duyệt điều lệ giải và cự ly của toàn bộ các giải đấu đua ngựa đang hoạt động.",
+        "searchPlaceholder": "Tìm giải đấu, địa điểm...",
+        "filterOngoing": "Đang diễn",
+        "filterOpenRegistration": "Mở đăng ký",
+        "filterCompleted": "Kết thúc",
+        "viewTournamentDetails": "Xem Chi Tiết Giải",
+        "horsesEnrolled": "{{enrolled}} / {{max}} Chiến mã",
+        "raceSchedule": "Danh sách lịch trình đua ({{count}})",
+        "totalPrizePool": "Tổng quỹ thưởng giải",
+        "horsesEnrolledLabel": "Số ngựa tham gia:"
+      },
+      "races": {
+        "eyebrow": "Lịch trình đua",
+        "title": "Lịch Trình Thi Đấu",
+        "description": "Theo dõi toàn bộ lịch trình các trận đua ngựa kịch tính sắp khởi tranh hoặc xem trực tiếp các trận đấu đang phát trực tiếp.",
+        "searchPlaceholder": "Tìm trận đấu, tên giải...",
+        "filterLive": "Trực tiếp",
+        "filterScheduled": "Sắp diễn",
+        "filterFinished": "Đã xong",
+        "viewRaceDetails": "Xem Chi Tiết Trận",
+        "backToSchedule": "Quay lại danh sách lịch đua",
+        "departure": "Xuất phát:",
+        "startTime": "Thời gian bắt đầu:",
+        "distanceAndTrack": "Cự ly & Đường đua:",
+        "trackSurface": "Bề mặt đường đua:",
+        "mainReferee": "Trọng tài chính:",
+        "statusTimeline": "Tiến độ cuộc đua (Status Timeline)",
+        "participants": "Chiến mã xuất kích & Nài ngựa tham gia ({{count}})",
+        "tableLane": "Lane",
+        "tableHorse": "Chiến Mã (Mã)",
+        "tableJockey": "Nài Ngựa",
+        "tableOwner": "Chủ Ngựa",
+        "tableStatus": "Trạng thái",
+        "timeline": {
+          "scheduled": "Đã lên lịch",
+          "preCheck": "Kiểm tra trước giờ",
+          "liveRace": "Đang đua",
+          "finished": "Đã kết thúc"
+        }
+      },
+      "results": {
+        "eyebrow": "Kết quả đua",
+        "title": "Kết Quả Trực Tiếp & BXH Trận",
+        "description": "Tra cứu biên bản kết quả xếp hạng cán đích chính thức, thời gian chạy và giây phạt kỷ luật do trọng tài giám sát ghi nhận.",
+        "searchPlaceholder": "Tìm kết quả cuộc đua, giải đấu...",
+        "published": "ĐÃ CÔNG BỐ",
+        "rank2": "Hạng 2",
+        "champion": "🏆 Vô Địch",
+        "rank3": "Hạng 3",
+        "viewFullScoreboard": "Xem Bảng Điểm Chi Tiết",
+        "backToResults": "Quay lại danh sách kết quả",
+        "distanceLabel": "Khoảng cách:",
+        "trackLabel": "Đường chạy:",
+        "surfaceLabel": "Mặt cỏ:",
+        "raceDateLabel": "Ngày đấu:",
+        "tableRank": "Hạng",
+        "tableHorse": "Chiến Mã",
+        "tableOfficialTime": "Thời gian chính thức",
+        "tableViolations": "Lỗi / Giây phạt",
+        "tablePrize": "Giải Thưởng"
+      },
+      "rankings": {
+        "eyebrow": "Đài danh vọng",
+        "title": "Bảng Xếp Hạng Giải Đấu",
+        "description": "Bảng tổng hợp điểm số, số trận thắng cán đích về nhất và tỷ lệ chiến thắng của các chiến mã và nài ngựa xuất sắc nhất.",
+        "tabHorses": "🐎 Chiến Mã Vô Địch",
+        "tabJockeys": "🏇 Nài Ngựa Hàng Đầu",
+        "tableRank": "Hạng",
+        "tableHorseName": "Tên Chiến Mã",
+        "tableBreed": "Giống Ngựa",
+        "tableRacesRun": "Số Trận Đã Chạy",
+        "tableWins": "Cán Đích Về Nhất",
+        "tableAvgTime": "Thành tích TB",
+        "tableTotalPoints": "Tổng Điểm Tích Lũy",
+        "tableJockeyName": "Họ Tên Nài Ngựa",
+        "tableLicense": "Số Giấy Phép",
+        "tableMatches": "Tổng Trận Cưỡi",
+        "tableWinRate": "Tỉ Lệ Thắng",
+        "tableCareerPoints": "Tổng Điểm NGHỀ NGHIỆP"
+      },
+      "wallet": {
+        "eyebrow": "Ví của tôi",
+        "title": "Điểm Khán Giả",
+        "description": "Theo dõi điểm thưởng tích lũy từ các lượt dự đoán miễn phí (Đúng +1 điểm, Sai -1 điểm) và tiến hành tạo mã quy đổi nhận quà tại quầy vật lý."
+      },
+      "predictions": {
+        "eyebrow": "Trạm dự đoán",
+        "title": "Dự Đoán Kết Quả Race",
+        "description": "Tham gia dự đoán ngựa về nhất trong các cuộc đua sắp diễn ra hoàn toàn miễn phí nhận điểm thưởng thực tế.",
+        "freeBalance": "Số dư điểm free",
+        "placeNewPrediction": "Đặt Dự Đoán Mới",
+        "step1Label": "1. Chọn trận đua sắp khởi tranh",
+        "step2Label": "2. Chọn chiến mã dự đoán về nhất (Hạng 1)",
+        "jockeyLabel": "Nài ngựa:",
+        "submitPrediction": "Gửi Dự Đoán (+1 / -1 Pts)",
+        "gateNoticeTitle": "Lưu Ý Cắt Cổng",
+        "gateNoticeBody": "Cổng dự đoán đóng hoàn toàn khi cuộc đua chuyển sang trạng thái LIVE (Trận đấu bắt đầu chạy). Bạn chỉ có thể đặt dự đoán ở các trận ở trạng thái SCHEDULED, CHECKING hoặc READY.",
+        "myHistory": "Lịch sử lượt dự đoán của tôi ({{count}})",
+        "selected": "Đã chọn:",
+        "jockeyShort": "Nài:",
+        "simulateWin": "Đoán Đúng",
+        "simulateLose": "Đoán Sai",
+        "selectHorseFirst": "Vui lòng chọn 1 chiến mã trước khi gửi dự đoán!",
+        "alreadyPredicted": "Bạn đã đặt dự đoán cho cuộc đua này rồi!",
+        "predictionRecorded": "Đã ghi nhận dự đoán chiến mã \"{{horse}}\" về nhất trong cuộc đua \"{{race}}\"!",
+        "winToast": "Chúc mừng! Dự đoán của bạn chính xác, bạn nhận được +1 Điểm thưởng!",
+        "loseToast": "Rất tiếc! Chiến mã dự đoán cán đích không đúng vị trí số 1. Tài khoản bị khấu trừ -1 Điểm.",
+        "statusWon": "Đoán Đúng",
+        "statusLost": "Đoán Sai",
+        "statusPending": "Đang chờ chạy",
+        "pointsWon": "+1 Điểm",
+        "pointsLost": "-1 Điểm",
+        "pointsZero": "0 Điểm",
+        "pointsPending": "Đang chờ kết quả"
+      }
+    },
+    "referee": {
+      "common": {
+        "eyebrow": "Tác nghiệp trọng tài",
+        "dateUnknown": "Chưa xác định",
+        "dateAt": "ngày",
+        "noRacesTitle": "Chưa có cuộc đua nào",
+        "loading": "Đang tải...",
+        "startTime": "Giờ bắt đầu",
+        "assignedBy": "Người phân công",
+        "raceStatus": "Trạng thái cuộc đua",
+        "distance": "Cự ly:",
+        "viewDetails": "Xem chi tiết",
+        "startInspection": "Bắt đầu kiểm duyệt",
+        "notStarted": "Chưa xuất phát",
+        "running": "Đang chạy",
+        "startTimeLabel": "Giờ khởi chạy:"
+      },
+      "assignments": {
+        "eyebrow": "Race được phân công",
+        "title": "Danh sách phân công giám sát",
+        "description": "Quản lý toàn bộ các cuộc đua được Ban tổ chức chỉ định bạn vào tổ trọng tài giám sát chính thức.",
+        "emptyTitle": "Danh sách trống",
+        "emptyDescription": "Bạn hiện tại chưa được Ban tổ chức phân công điều hành cuộc đua nào trong hệ thống.",
+        "statusPending": "Chờ duyệt",
+        "statusAccepted": "Đã nhận",
+        "statusDeclined": "Đã từ chối",
+        "statusRemoved": "Đã hủy",
+        "roleMain": "Trọng tài chính",
+        "roleAssistant": "Trọng tài phụ",
+        "operate": "Tác nghiệp",
+        "reject": "Từ chối",
+        "accept": "Nhận nhiệm vụ",
+        "fetchFailed": "Không thể tải danh sách phân công",
+        "fetchError": "Lỗi tải dữ liệu phân công.",
+        "acceptAction": "Chấp nhận",
+        "rejectAction": "Từ chối",
+        "actionFailed": "Thao tác thất bại",
+        "actionError": "Lỗi khi xử lý thao tác.",
+        "acceptSuccess": "Chấp nhận phân công thành công!",
+        "rejectSuccess": "Từ chối phân công thành công!",
+        "raceStatusScheduled": "LÊN LỊCH CHỜ CHẠY",
+        "raceStatusChecking": "ĐANG KHỞI CHẠY KIỂM TRA SỨC KHỎE NGỰA",
+        "raceStatusReady": "SẴN SÀNG XUẤT PHÁT",
+        "raceStatusLive": "ĐANG DIỄN RA TRỰC TIẾP",
+        "raceStatusFinished": "ĐÃ KẾT THÚC CHỜ XÁC NHẬN KẾT QUẢ",
+        "raceStatusPublished": "ĐÃ CÔNG BỐ KẾT QUẢ VÀ TRẢ THƯỞNG",
+        "raceStatusCancelled": "ĐÃ HỦY TRẬN"
+      },
+      "preRace": {
+        "eyebrow": "Tác nghiệp trọng tài",
+        "title": "Pre-race Check (Kiểm tra trước Race)",
+        "description": "Chọn một cuộc đua đang kiểm duyệt dưới đây để cập nhật tình trạng sức khỏe của ngựa và điểm danh nài ngựa trước giờ xuất phát.",
+        "emptyDescription": "Bạn cần được Ban tổ chức phân công và chấp nhận cuộc đua trước khi thực hiện kiểm duyệt.",
+        "statusNotOpen": "Chưa mở",
+        "statusInspecting": "Đang mở duyệt",
+        "statusReady": "Sẵn sàng",
+        "statusDone": "Đã chạy / Xong"
+      },
+      "monitoring": {
+        "eyebrow": "Tác nghiệp trọng tài",
+        "title": "Theo Dõi Race (Race Monitoring)",
+        "description": "Theo dõi trực tiếp trạng thái xuất phát, điều phối race chạy trực tiếp (LIVE) và quản lý chuyển đổi trạng thái cuộc đua.",
+        "emptyDescription": "Bạn cần được Ban tổ chức phân công và chấp nhận cuộc đua trước khi thực hiện giám sát.",
+        "openMonitoring": "Mở giám sát",
+        "openMonitoringRoom": "Vào phòng giám sát",
+        "activateStart": "Kích hoạt xuất phát",
+        "statusFinished": "ĐÃ KẾT THÚC"
+      },
+      "resultEntry": {
+        "eyebrow": "Tác nghiệp trọng tài",
+        "title": "Xác Nhận Kết Quả (Input Result)",
+        "description": "Chọn cuộc đua đã kết thúc dưới đây để thực hiện nhập thời gian về đích, chạy thuật toán giả lập hoặc bấm khóa biên bản kết quả chính thức.",
+        "emptyDescription": "Bạn cần được Ban tổ chức phân công và chấp nhận cuộc đua trước khi nhập kết quả.",
+        "enterResults": "Nhập kết quả ngay",
+        "viewLockedResults": "Xem kết quả đã khóa",
+        "draftResults": "Nhập kết quả nháp"
+      },
+      "violations": {
+        "eyebrow": "Tác nghiệp trọng tài",
+        "title": "Ghi Nhận Vi Phạm (Violation Report)",
+        "description": "Chọn cuộc đua dưới đây để ghi chú các trường hợp phạm quy của nài ngựa và tự động áp dụng khung cộng giây phạt kỷ luật.",
+        "emptyDescription": "Bạn cần được Ban tổ chức phân công và chấp nhận cuộc đua trước khi báo cáo vi phạm.",
+        "recordViolation": "Ghi nhận vi phạm",
+        "viewViolationLog": "Xem nhật ký lỗi"
+      },
+      "reports": {
+        "eyebrow": "Tư liệu chính thức",
+        "title": "Biên bản thi đấu",
+        "description": "Lập biên bản trước hoặc sau trận để lưu vết lịch sử hệ thống.",
+        "form": {
+          "createTitle": "Lập biên bản thi đấu mới",
+          "selectRace": "Chọn cuộc đua phân công",
+          "selectRacePlaceholder": "— Chọn cuộc đua giám sát —",
+          "reportType": "Phân loại biên bản",
+          "typePostRace": "Biên bản sau trận",
+          "typePreRace": "Biên bản trước trận",
+          "horseOptional": "Chiến mã liên quan (tùy chọn)",
+          "horsePlaceholder": "— Tất cả / Không chọn —",
+          "violationOptional": "Sự cố vi phạm (tùy chọn)",
+          "violationPlaceholder": "Ví dụ: Lấn làn đối thủ",
+          "penaltyOptional": "Hình phạt đề xuất (tùy chọn)",
+          "penaltyPlaceholder": "Ví dụ: Cộng 3 giây",
+          "description": "Nội dung biên bản chi tiết",
+          "descriptionPlaceholder": "Ghi nhận diễn biến, quyết định điều khiển hoặc kiến nghị xử lý...",
+          "submitting": "Đang gửi...",
+          "submit": "Ký & gửi biên bản",
+          "archiveTitle": "Hồ sơ biên bản theo cuộc đua ({{count}})",
+          "archiveEmpty": "Bạn chưa có cuộc đua được phân công nên chưa có biên bản lưu trữ."
+        },
+        "selectRaceRequired": "Vui lòng chọn cuộc đua",
+        "descriptionRequired": "Vui lòng nhập mô tả biên bản",
+        "submitFailed": "Lập biên bản thất bại",
+        "submitSuccess": "Lập biên bản thi đấu chính thức thành công!",
+        "submitError": "Lỗi khi gửi biên bản.",
+        "fetchFailed": "Không thể tải danh sách cuộc đua",
+        "fetchError": "Lỗi tải danh sách cuộc đua."
+      },
+      "raceDetail": {
+        "backToAssignments": "Quay lại phân công",
+        "back": "Quay lại",
+        "backToWorkspace": "Quay lại bàn làm việc",
+        "backToPreRace": "Quay lại kiểm duyệt ngựa",
+        "notFound": "Không tìm thấy cuộc đua",
+        "description": "Kiểm duyệt an toàn thiết bị bảo hộ, sức khỏe chiến mã và điểm danh nài ngựa trước khi xuất phát.",
+        "loadingRace": "Đang tải dữ liệu cuộc đua..."
+      },
+      "raceResultEntry": {
+        "backToResultEntry": "Quay lại nhập kết quả",
+        "loading": "Đang tải dữ liệu kết quả..."
+      },
+      "raceViolations": {
+        "backToViolations": "Quay lại vi phạm",
+        "loading": "Đang tải dữ liệu vi phạm..."
+      }
+    },
+    "counterStaff": {
+      "redemptions": {
+        "eyebrow": "Hàng đợi đổi thưởng",
+        "title": "Duyệt hàng đợi đổi thưởng",
+        "description": "Xử lý và hoàn tất các yêu cầu đổi điểm lấy quà tặng vật lý của người dùng khi họ đến quầy trực tiếp.",
+        "loading": "Đang tải hàng đợi đổi thưởng...",
+        "fetchError": "Lỗi tải danh sách đổi thưởng",
+        "updateSuccess": "Cập nhật trạng thái thành {{status}}",
+        "updateError": "Lỗi cập nhật trạng thái thành {{status}}",
+        "defaultCustomer": "Khách hàng ẩn danh",
+        "searchLabel": "Tra cứu mã nhận thưởng tại quầy",
+        "searchPlaceholder": "Nhập mã quy đổi (ví dụ: RWD-YHS9X3)...",
+        "clearFilter": "Xóa lọc",
+        "pendingListEyebrow": "Danh sách chờ xác nhận",
+        "pendingListTitle": "Hàng Đợi Đổi Thưởng Vật Lý",
+        "pendingListDesc": "Tra cứu mã nhận quà do Khán giả/Chủ ngựa/Nài ngựa cung cấp tại quầy, đối soát số dư điểm và tiến hành trao quà vật lý tương ứng.",
+        "queueEmptyTitle": "Hàng đợi trống!",
+        "queueEmptyDesc": "Không tìm thấy yêu cầu quy đổi quà nào đang chờ xử lý.",
+        "colUser": "Người đổi quà",
+        "colCode": "Mã quy đổi",
+        "colPoints": "Số điểm quy đổi",
+        "colStatus": "Trạng thái",
+        "colActions": "Hành động quầy",
+        "roleOwner": "Chủ Ngựa",
+        "roleJockey": "Nài Ngựa",
+        "roleSpectator": "Khán Giả",
+        "copiedSuccess": "Đã sao chép mã quy đổi: {{code}}",
+        "createdAt": "Tạo lúc: {{time}}",
+        "statusApproved": "Đã Duyệt",
+        "statusPending": "Chờ tại quầy",
+        "btnApprove": "Phê duyệt mã",
+        "btnReject": "Từ chối",
+        "btnConfirmGift": "Xác nhận trao quà",
+        "btnCancelApprove": "Hủy bỏ duyệt",
+        "historyTitle": "Nhật Ký Đổi Thưởng Đã Xử Lý",
+        "historyDesc": "Lịch sử giao dịch các mã đổi quà đã được trao thành công hoặc bị từ chối từ trước tới nay.",
+        "historyEmpty": "Không tìm thấy nhật ký quy đổi lịch sử nào.",
+        "histColUser": "Người dùng",
+        "histColCode": "Mã quà tặng",
+        "histColPoints": "Điểm đổi",
+        "histColTime": "Thời gian nhận",
+        "histColStatus": "Trạng thái",
+        "histStatusPaid": "Đã Trao Quà",
+        "histStatusRejected": "Đã Từ Chối",
+        "histRejectReason": "Lý do: {{reason}}",
+        "dialogRejectTitle": "Từ chối yêu cầu đổi quà",
+        "dialogRejectDesc": "Bạn có chắc chắn muốn từ chối mã nhận quà <1>{{code}}</1> của <2>{{name}}</2> ({{points}} điểm)?",
+        "dialogRejectReasonLabel": "Lý do từ chối (Bắt buộc)",
+        "dialogRejectReasonPlaceholder": "Ví dụ: Mã đã quá hạn sử dụng, thông tin tài khoản không trùng khớp...",
+        "dialogBtnCancel": "Hủy bỏ",
+        "dialogBtnConfirm": "Từ Chối Giao Dịch"
+      },
+      "deposit": {
+        "eyebrow": "Wallet Topup",
+        "title": "Nạp Tiền Cho Khách Hàng",
+        "description": "Nạp số dư ví trực tiếp tại quầy giao dịch cho người dùng. Khách hàng trả tiền mặt, quầy quy đổi và nạp ví điện tử.",
+        "formTitle": "Chi tiết giao dịch nạp điểm",
+        "step1Label": "1. Tìm kiếm tài khoản khách hàng",
+        "searchPlaceholder": "Nhập tên, email hoặc số điện thoại...",
+        "selectedAccount": "Tài khoản được chọn",
+        "changeAccount": "Thay đổi",
+        "step2Label": "2. Số tiền nạp ví (VND)",
+        "amountPlaceholder": "Ví dụ: 100000",
+        "pointsConversion": "Quy đổi điểm tương ứng:",
+        "submitting": "Đang xử lý nạp điểm...",
+        "submit": "Xác nhận nạp ví",
+        "selectCustomer": "Vui lòng chọn một khách hàng.",
+        "invalidAmount": "Số tiền nạp phải lớn hơn 0.",
+        "depositSuccess": "Nạp tiền thành công cho {{name}}!",
+        "depositError": "Lỗi trong quá trình nạp điểm.",
+        "successTitle": "Nạp tiền thành công",
+        "successDescription": "Giao dịch đã được ghi nhận vào ví người dùng",
+        "receiptTxId": "Mã giao dịch",
+        "receiptCustomer": "Khách hàng",
+        "receiptAmount": "Số tiền nạp",
+        "receiptTime": "Thời gian",
+        "depositAgain": "Thực hiện nạp tiếp",
+        "safeModeTitle": "Chế độ quầy an toàn",
+        "safeModeDescription": "Tất cả các giao dịch nạp điểm tại quầy đều được kiểm toán nghiêm ngặt và lưu lại dưới dạng Audit Log. Hãy chắc chắn rằng bạn đã nhận đủ tiền mặt trước khi nhấn xác nhận nạp ví."
+      }
+    },
+    "public": {
+      "tournaments": {
+        "eyebrow": "Giao diện công khai",
+        "title": "Giải đấu",
+        "description": "Các giải đấu công bố sẽ hiển thị tại đây. Giai đoạn 2 chỉ xác nhận khung route công khai.",
+        "cardContainers": "Giải mô phỏng",
+        "cardLinks": "Liên kết cuộc đua",
+        "cardBackend": "Backend",
+        "cardReady": "Sẵn sàng",
+        "cardOff": "Tắt",
+        "cta": "Xem lịch đua",
+        "emptyTitle": "Chỉ khung giai đoạn 2",
+        "emptyDesc": "Route placeholder với nội dung mock cục bộ. Màn hình nghiệp vụ, API backend và auth guard chưa được triển khai."
+      },
+      "tournamentDetail": {
+        "eyebrow": "Chi tiết giải công khai",
+        "title": "Giải {{id}}",
+        "description": "Placeholder chi tiết giải. Các giai đoạn sau sẽ liệt kê cuộc đua trong giải.",
+        "cardRole": "Vai trò giải",
+        "cardRoleValue": "Khung chứa",
+        "cardRaceList": "Danh sách đua",
+        "cardDeferred": "Hoãn lại",
+        "cardMockId": "ID mock",
+        "cta": "Quay lại giải đấu"
+      },
+      "races": {
+        "eyebrow": "Giao diện công khai",
+        "title": "Lịch đua",
+        "description": "Khung khám phá cuộc đua với placeholder sắp diễn ra, trực tiếp và kết quả. Chưa có theo dõi live.",
+        "cardUpcoming": "Sắp diễn ra",
+        "cardUpcomingValue": "4 mock",
+        "cardLive": "Trực tiếp",
+        "cardLiveValue": "1 mock",
+        "cardScope": "Phạm vi kết quả",
+        "cardPerRace": "Theo cuộc đua",
+        "cta": "Mở cuộc đua mock"
+      },
+      "raceDetail": {
+        "eyebrow": "Chi tiết cuộc đua công khai",
+        "title": "Cuộc đua {{id}}",
+        "description": "Placeholder chi tiết cuộc đua công khai. UI tương lai hiển thị lịch, trạng thái, người tham gia và kết quả.",
+        "cardUnit": "Đơn vị đua",
+        "cardIndependent": "Độc lập",
+        "cardPrediction": "Dự đoán",
+        "cardLoginLater": "Đăng nhập sau",
+        "cardMockId": "ID mock",
+        "cta": "Quay lại lịch đua"
+      }
+    }
+  },
+  "common": {
+    "backToStable": "Quay lại chuồng ngựa",
+    "backToRaces": "Quay lại danh sách trận đua",
+    "backendConnectionFailed": "Kết nối tới Backend thất bại.",
+    "backendError": "Lỗi kết nối tới Backend.",
+    "networkError": "Lỗi kết nối mạng.",
+    "serverError": "Lỗi kết nối tới server.",
+    "close": "Đóng",
+    "na": "N/A",
+    "noImage": "No Image",
+    "unknownBreed": "Không rõ giống",
+    "unknownColor": "Không rõ màu sắc",
+    "unknownRace": "Không rõ trận đua",
+    "unknownHorse": "Không rõ chiến mã",
+    "unknownJockey": "Không rõ Jockey",
+    "anonymous": "Ẩn danh",
+    "freeTournament": "Giải đấu tự do",
+    "freeRace": "Giải tự do",
+    "yearsOld": "{{age}} tuổi",
+    "experienceYears": "({{years}} năm kinh nghiệm)",
+    "gateNumber": "Cổng {{number}}",
+    "noMessage": "Không có lời nhắn.",
+    "walletTransaction": "Giao dịch ví",
+    "errorState": {
+      "title": "Điều phối đua bị gián đoạn",
+      "description": "Không thể tải màn hình hiện tại. Shell mô phỏng này giữ mọi thao tác cục bộ và an toàn.",
+      "retry": "Thử tải lại"
+    }
+  },
+  "profile": {
+    "loginRequired": "Vui lòng đăng nhập để xem thông tin hồ sơ.",
+    "login": "Đăng nhập",
+    "eyebrow": "Tài khoản cá nhân",
+    "title": "Thông tin hồ sơ",
+    "description": "Quản lý và xem thông tin tài khoản của bạn trên hệ thống HorseTrack.",
+    "backToDashboard": "Quay lại Dashboard",
+    "statusLabel": "Trạng thái:",
+    "statusActive": "Hoạt động",
+    "email": "Địa chỉ Email",
+    "phone": "Số điện thoại",
+    "dob": "Ngày sinh",
+    "address": "Địa chỉ thường trú",
+    "notUpdated": "Chưa cập nhật",
+    "roles": {
+      "admin": "Quản Trị Viên",
+      "owner": "Chủ Ngựa",
+      "jockey": "Nài Ngựa",
+      "referee": "Trọng Tài",
+      "spectator": "Khán Giả",
+      "counterstaff": "Nhân Viên Quầy"
+    }
+  },
+  "auth": {
+    "marketing": {
+      "brandSubtitle": "Hệ thống điều hành đua",
+      "titleLine1": "Hệ thống",
+      "titleLine2": "quản lý giải đua",
+      "titleHighlight": "ngựa",
+      "description": "Quản lý giải đấu, đăng ký ngựa, phân công nài ngựa, lịch đua, biên bản trọng tài, kết quả, xếp hạng và thưởng dự đoán trên một nền tảng.",
+      "footerSecure": "Đăng nhập bảo mật",
+      "footerJwt": "Bảo vệ bằng JWT",
+      "footerSafe": "Dữ liệu của bạn được bảo vệ",
+      "features": {
+        "scheduling": {
+          "title": "Lên lịch giải đấu",
+          "description": "Tạo và quản lý giải, vòng đấu và lịch đua."
+        },
+        "registration": {
+          "title": "Đăng ký ngựa",
+          "description": "Đăng ký ngựa, quản lý hồ sơ, lịch sử và thành tích."
+        },
+        "jockey": {
+          "title": "Phân công nài ngựa",
+          "description": "Mời nài ngựa, phân công cưỡi và quản lý tham gia."
+        },
+        "results": {
+          "title": "Kết quả đua",
+          "description": "Ghi nhận kết quả, tính xếp hạng và quản lý giải thưởng."
+        },
+        "predictions": {
+          "title": "Quản lý dự đoán",
+          "description": "Cho khán giả dự đoán và thưởng người dự đoán chính xác."
+        }
+      }
+    },
+    "forgotPassword": {
+      "title": "Quên mật khẩu",
+      "description": "Tính năng khôi phục mật khẩu đang được phát triển. Vui lòng liên hệ quản trị hoặc dùng tài khoản demo.",
+      "backToLogin": "Quay lại đăng nhập"
+    },
+    "login": {
+      "title": "Đăng nhập Race Control",
+      "description": "Truy cập tài khoản và quản lý các cuộc đua như một chuyên gia."
+    },
+    "register": {
+      "title": "Đăng ký vị trí trên lưới xuất phát",
+      "description": "Tạo yêu cầu hồ sơ demo, chọn vai trò mong muốn và khám phá HorseTrack MVP."
+    },
+    "loginForm": {
+      "accessError": "Lỗi truy cập",
+      "emailLabel": "Địa chỉ email",
+      "emailPlaceholder": "Nhập email của bạn",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "signingIn": "Đang đăng nhập...",
+      "signIn": "Đăng nhập",
+      "or": "HOẶC",
+      "continueWithGoogle": "Tiếp tục với Google",
+      "tryDemoAccount": "Thử tài khoản demo",
+      "newToHorseTrack": "Mới dùng HorseTrack?",
+      "createAccount": "Tạo tài khoản",
+      "loginSuccess": "Đăng nhập thành công! Chào mừng {{name}} trở lại.",
+      "googleAuthFailed": "Xác thực tài khoản Google thất bại.",
+      "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.",
+      "roles": {
+        "admin": "Quản trị",
+        "owner": "Chủ ngựa",
+        "jockey": "Nài ngựa",
+        "referee": "Trọng tài",
+        "spectator": "Khán giả",
+        "counter_staff": "Quầy"
+      }
+    },
+    "registerForm": {
+      "registrationError": "Lỗi đăng ký",
+      "fullName": "Họ và tên",
+      "fullNamePlaceholder": "Ví dụ: Nguyễn Văn A",
+      "email": "Email",
+      "emailPlaceholder": "you@horsetrack.local",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Tối thiểu 6 ký tự",
+      "phone": "Số điện thoại",
+      "phonePlaceholder": "Ví dụ: 0912345678",
+      "dob": "Ngày sinh",
+      "address": "Địa chỉ",
+      "addressPlaceholder": "Ví dụ: Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội",
+      "requestRole": "Yêu cầu vai trò",
+      "spectatorRole": "Spectator",
+      "acceptPolicy": "Tôi hiểu đây là đăng ký demo với phân vai trò chỉ mang tính minh họa.",
+      "creatingProfile": "Đang tạo hồ sơ demo...",
+      "continueAs": "Tiếp tục với {{role}}",
+      "alreadyStaged": "Đã có tài khoản?",
+      "loginInstead": "Đăng nhập",
+      "registerSuccess": "Đăng ký tài khoản thành công! Đang chuyển hướng...",
+      "registerFailed": "Đăng ký tài khoản thất bại."
+    },
+    "roleDescriptions": {
+      "admin": {
+        "eyebrow": "Tháp điều khiển",
+        "label": "Admin",
+        "description": "Vận hành giải đấu, lịch đua, phê duyệt, công bố kết quả và quản trị vai trò người dùng."
+      },
+      "owner": {
+        "eyebrow": "Khu ổ ngựa",
+        "label": "Chủ ngựa",
+        "description": "Quản lý ngựa, theo dõi đăng ký, mời nài ngựa và theo dõi kết quả từng cuộc đua."
+      },
+      "jockey": {
+        "eyebrow": "Cổng xuất phát",
+        "label": "Nài ngựa",
+        "description": "Xem phân công, xác nhận cưỡi ngựa, kiểm tra lịch đua trước giờ xuất phát."
+      },
+      "referee": {
+        "eyebrow": "Điều khiển cuộc đua",
+        "label": "Trọng tài",
+        "description": "Giám sát cuộc đua được phân công, ghi nhận vi phạm, xác nhận kết quả và lập biên bản."
+      },
+      "spectator": {
+        "eyebrow": "Khán đài",
+        "label": "Khán giả",
+        "description": "Duyệt cuộc đua, theo dõi trạng thái trực tiếp, dự đoán demo và xem bảng xếp hạng."
+      },
+      "counter_staff": {
+        "eyebrow": "Quầy đổi thưởng",
+        "label": "Nhân viên quầy",
+        "description": "Quản lý đổi điểm vật lý, xác minh mã quy đổi, xem audit log và nạp tiền ví khách hàng."
+      }
+    }
+  },
+  "forbidden": {
+    "title": "Trang cấm truy cập (placeholder)",
+    "description": "RBAC thực tế được hoãn có chủ ý. Route này ghi nhận đích đến 403 trong tương lai.",
+    "action": "Đến trang đăng nhập demo"
+  }
+}

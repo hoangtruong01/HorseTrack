@@ -1,11 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
-import { refereeAssignmentsApi, tournamentsApi, apiFetch, type AssignmentItem, type TournamentItem } from "@/lib/api-client";
+import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { refereeAssignmentsApi, apiFetch, type AssignmentItem } from "@/lib/api-client";
 
-// Minimal race type for this page
 interface RaceItem { _id: string; name: string; startTime?: string; status: string; tournamentId?: string | { _id: string } }
 
 const statusColors: Record<string, string> = {
@@ -15,6 +14,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminRefereeAssignmentsPage() {
+  const { t } = useTranslation();
   const [races, setRaces] = useState<RaceItem[]>([]);
   const [selectedRace, setSelectedRace] = useState<string>("");
   const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
@@ -26,13 +26,14 @@ export default function AdminRefereeAssignmentsPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Fetch all races for dropdown
   useEffect(() => {
     async function fetchRaces() {
       try {
         const res = await apiFetch<{ data: RaceItem[] }>("/races?limit=100");
         setRaces(res.data ?? []);
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
     void fetchRaces();
   }, []);
@@ -43,9 +44,11 @@ export default function AdminRefereeAssignmentsPage() {
     try {
       const res = await refereeAssignmentsApi.listByRace(raceId);
       setAssignments(res.data);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
+    }
     finally { setLoading(false); }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (selectedRace) void fetchAssignments(selectedRace);
@@ -55,24 +58,21 @@ export default function AdminRefereeAssignmentsPage() {
   const handleRemove = async (id: string) => {
     try {
       await refereeAssignmentsApi.remove(id);
-      showToast("Đã xóa phân công");
+      showToast(t("pages.admin.refereeAssignments.toastRemoved"));
       if (selectedRace) await fetchAssignments(selectedRace);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : t("pages.admin.common.loadError"), "err");
+    }
   };
 
   const getRefereeName = (r: AssignmentItem["refereeUserId"]) => {
-    if (!r) return "—";
+    if (!r) return t("pages.admin.common.dash");
     if (typeof r === "object") return r.fullName;
     return r;
   };
 
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="Referee Assignment"
-        title="Phân Công Trọng Tài"
-        description="Chọn race để xem và quản lý danh sách trọng tài được phân công."
-      />
 
       {toast && (
         <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
@@ -86,7 +86,7 @@ export default function AdminRefereeAssignmentsPage() {
           value={selectedRace}
           onChange={(e) => setSelectedRace(e.target.value)}
         >
-          <option value="">— Chọn Race —</option>
+          <option value="">{t("pages.admin.refereeAssignments.selectRace")}</option>
           {races.map(r => (
             <option key={r._id} value={r._id}>{r.name} ({r.status})</option>
           ))}
@@ -96,21 +96,21 @@ export default function AdminRefereeAssignmentsPage() {
       {selectedRace && (
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card overflow-hidden">
           {loading ? (
-            <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
+            <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">{t("pages.admin.common.loading")}</div>
           ) : assignments.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
-              <p className="text-muted-foreground text-sm">Chưa có trọng tài nào được phân công cho race này.</p>
-              <p className="text-xs text-muted-foreground">Sử dụng API POST /referee-assignments để phân công.</p>
+              <p className="text-muted-foreground text-sm">{t("pages.admin.refereeAssignments.empty")}</p>
+              <p className="text-xs text-muted-foreground">{t("pages.admin.refereeAssignments.emptyHint")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b dark:border-white/10 border-border">
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Trọng tài</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ghi chú</th>
-                    <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">Actions</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.refereeAssignments.colReferee")}</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.common.status")}</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.refereeAssignments.colNote")}</th>
+                    <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("pages.admin.common.actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -122,13 +122,13 @@ export default function AdminRefereeAssignmentsPage() {
                           {a.status}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-xs text-muted-foreground">{a.note ?? "—"}</td>
+                      <td className="px-5 py-4 text-xs text-muted-foreground">{a.note ?? t("pages.admin.common.dash")}</td>
                       <td className="px-5 py-4 text-right">
                         <button
                           onClick={() => handleRemove(a._id)}
                           className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 transition hover:bg-red-500/20 ml-auto"
                         >
-                          <Trash2 className="size-3" /> Xóa
+                          <Trash2 className="size-3" /> {t("pages.admin.common.delete")}
                         </button>
                       </td>
                     </tr>

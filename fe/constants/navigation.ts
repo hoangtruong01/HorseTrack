@@ -37,6 +37,7 @@ export const dashboardNavigation: NavigationItem[] = [
   // ─── ADMIN ──────────────────────────────────────────────────────────
   {
     title: "Admin Dashboard",
+    i18nKey: "admin.dashboard",
     href: "/admin",
     role: "Admin",
     icon: Gauge,
@@ -44,6 +45,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "User Management",
+    i18nKey: "admin.users",
     href: "/admin/users",
     role: "Admin",
     icon: Users,
@@ -51,6 +53,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Role Management",
+    i18nKey: "admin.roles",
     href: "/admin/roles",
     role: "Admin",
     icon: UserCog,
@@ -58,6 +61,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Horse Management",
+    i18nKey: "admin.horses",
     href: "/admin/horses",
     role: "Admin",
     icon: ShieldCheck,
@@ -65,6 +69,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Jockey Management",
+    i18nKey: "admin.jockeys",
     href: "/admin/jockeys",
     role: "Admin",
     icon: Star,
@@ -72,6 +77,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Tournament Management",
+    i18nKey: "admin.tournaments",
     href: "/admin/tournaments",
     role: "Admin",
     icon: Trophy,
@@ -79,6 +85,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Registration Approval",
+    i18nKey: "admin.registrations",
     href: "/admin/registrations",
     role: "Admin",
     icon: ClipboardCheck,
@@ -86,6 +93,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Race Scheduling",
+    i18nKey: "admin.races",
     href: "/admin/races",
     role: "Admin",
     icon: Flag,
@@ -93,6 +101,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Referee Assignment",
+    i18nKey: "admin.refereeAssignments",
     href: "/admin/referee-assignments",
     role: "Admin",
     icon: Award,
@@ -100,6 +109,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Ranking Management",
+    i18nKey: "admin.rankings",
     href: "/admin/rankings",
     role: "Admin",
     icon: Medal,
@@ -107,6 +117,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Prize Management",
+    i18nKey: "admin.prizes",
     href: "/admin/prizes",
     role: "Admin",
     icon: Trophy,
@@ -114,6 +125,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Bet Management",
+    i18nKey: "admin.bets",
     href: "/admin/bets",
     role: "Admin",
     icon: Activity,
@@ -121,6 +133,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Wallet Transactions",
+    i18nKey: "admin.wallet",
     href: "/admin/wallet",
     role: "Admin",
     icon: Wallet,
@@ -128,6 +141,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Results",
+    i18nKey: "admin.results",
     href: "/admin/results",
     role: "Admin",
     icon: ListChecks,
@@ -135,6 +149,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Audit Logs",
+    i18nKey: "admin.auditLogs",
     href: "/admin/audit-logs",
     role: "Admin",
     icon: FileText,
@@ -142,6 +157,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Trạm Điều Hành",
+    i18nKey: "owner.dashboard",
     href: "/owner",
     role: "Owner",
     icon: Home,
@@ -149,6 +165,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Chuồng Chiến Mã",
+    i18nKey: "owner.horses",
     href: "/owner/horses",
     role: "Owner",
     icon: ShieldCheck,
@@ -156,6 +173,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Đăng Ký Trận Đua",
+    i18nKey: "owner.races",
     href: "/owner/races",
     role: "Owner",
     icon: Flag,
@@ -163,6 +181,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Lịch Sử Ghi Danh",
+    i18nKey: "owner.registrations",
     href: "/owner/registrations",
     role: "Owner",
     icon: ClipboardCheck,
@@ -170,6 +189,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Mời Jockey",
+    i18nKey: "owner.jockeyInvitations",
     href: "/owner/jockey-invitations",
     role: "Owner",
     icon: Users,
@@ -177,6 +197,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Ví Của Tôi",
+    i18nKey: "owner.wallet",
     href: "/owner/wallet",
     role: "Owner",
     icon: Wallet,
@@ -184,6 +205,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Trạm Điều Hành",
+    i18nKey: "jockey.dashboard",
     href: "/jockey",
     role: "Jockey",
     icon: Gauge,
@@ -191,6 +213,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Lời Mời Cưỡi Ngựa",
+    i18nKey: "jockey.invitations",
     href: "/jockey?tab=invitations",
     role: "Jockey",
     icon: Users,
@@ -198,6 +221,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Lịch Thi Đấu Đã Nhận",
+    i18nKey: "jockey.assigned",
     href: "/jockey?tab=assigned",
     role: "Jockey",
     icon: Flag,
@@ -205,6 +229,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Thông Tin Chiến Mã",
+    i18nKey: "jockey.horses",
     href: "/jockey?tab=horses",
     role: "Jockey",
     icon: ShieldCheck,
@@ -212,6 +237,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Thành Tích Cá Nhân",
+    i18nKey: "jockey.performance",
     href: "/jockey?tab=performance",
     role: "Jockey",
     icon: Award,
@@ -219,6 +245,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Ví Của Tôi",
+    i18nKey: "jockey.wallet",
     href: "/jockey/wallet",
     role: "Jockey",
     icon: Wallet,
@@ -226,6 +253,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Trạm Điều Hành",
+    i18nKey: "referee.dashboard",
     href: "/referee",
     role: "Referee",
     icon: Home,
@@ -233,6 +261,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Race Được Phân Công",
+    i18nKey: "referee.assignments",
     href: "/referee/assignments",
     role: "Referee",
     icon: Flag,
@@ -240,6 +269,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Pre-race Check",
+    i18nKey: "referee.preRace",
     href: "/referee/pre-race",
     role: "Referee",
     icon: ShieldCheck,
@@ -247,6 +277,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Theo Dõi Race",
+    i18nKey: "referee.monitoring",
     href: "/referee/monitoring",
     role: "Referee",
     icon: Activity,
@@ -254,6 +285,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Xác Nhận Kết Quả",
+    i18nKey: "referee.resultEntry",
     href: "/referee/result-entry",
     role: "Referee",
     icon: Award,
@@ -261,6 +293,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Ghi Nhận Vi Phạm",
+    i18nKey: "referee.violations",
     href: "/referee/violations",
     role: "Referee",
     icon: Siren,
@@ -268,6 +301,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Biên Bản Thi Đấu",
+    i18nKey: "referee.reports",
     href: "/referee/reports",
     role: "Referee",
     icon: FileText,
@@ -275,6 +309,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Giải Đấu Nổi Bật",
+    i18nKey: "spectator.dashboard",
     href: "/spectator",
     role: "Spectator",
     icon: Trophy,
@@ -282,6 +317,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Thông Tin Giải Đấu",
+    i18nKey: "spectator.tournaments",
     href: "/spectator/tournaments",
     role: "Spectator",
     icon: ListChecks,
@@ -289,6 +325,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Lịch Thi Đấu",
+    i18nKey: "spectator.races",
     href: "/spectator/races",
     role: "Spectator",
     icon: Flag,
@@ -296,6 +333,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Kết Quả Trực Tiếp",
+    i18nKey: "spectator.results",
     href: "/spectator/results",
     role: "Spectator",
     icon: Activity,
@@ -303,6 +341,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Bảng Xếp Hạng",
+    i18nKey: "spectator.rankings",
     href: "/spectator/rankings",
     role: "Spectator",
     icon: Medal,
@@ -310,6 +349,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Ví Điểm Thưởng",
+    i18nKey: "spectator.wallet",
     href: "/spectator/wallet",
     role: "Spectator",
     icon: Wallet,
@@ -317,6 +357,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Dự Đoán Kết Quả",
+    i18nKey: "spectator.predictions",
     href: "/spectator/predictions",
     role: "Spectator",
     icon: Bell,
@@ -325,6 +366,7 @@ export const dashboardNavigation: NavigationItem[] = [
   // ─── COUNTER STAFF ──────────────────────────────────────────────────
   {
     title: "Bàn Làm Việc",
+    i18nKey: "counterStaff.dashboard",
     href: "/counter-staff",
     role: "CounterStaff",
     icon: Gauge,
@@ -332,6 +374,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Đổi Thưởng Vật Lý",
+    i18nKey: "counterStaff.redemptions",
     href: "/counter-staff/redemptions",
     role: "CounterStaff",
     icon: Gift,
@@ -339,6 +382,7 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Nạp Tiền Vào Ví",
+    i18nKey: "counterStaff.deposit",
     href: "/counter-staff/deposit",
     role: "CounterStaff",
     icon: Wallet,

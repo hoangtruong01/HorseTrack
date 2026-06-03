@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Flag, RadioTower, Trophy } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -12,20 +13,29 @@ import type {
   ResultStatus,
 } from "@/features/results/mock-results";
 
-const meta: Record<
-  ResultStatus,
-  { label: string; tone: "slate" | "green" | "teal" }
-> = {
-  draft: { label: "Draft", tone: "slate" },
-  referee_confirmed: { label: "Referee confirmed", tone: "green" },
-  published: { label: "Published", tone: "teal" },
-};
-
 export type ResultReviewPanelProps = { result: RaceResultReview };
 
 export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const canPublish = result.status === "referee_confirmed";
+  const mockKey = `pages.admin.resultReview.mock.${result.raceId}`;
+  const refereeSummary = t(`${mockKey}.refereeSummary`, {
+    defaultValue: result.refereeSummary,
+  });
+  const publishStateText = t(`${mockKey}.publishState`, {
+    defaultValue: result.publishState,
+  });
+
+  const statusLabel = (status: ResultStatus) =>
+    t(`pages.admin.resultReview.status.${status}`);
+
+  const publishBadgeLabel =
+    result.status === "published"
+      ? t("pages.admin.resultReview.publishBadge.published")
+      : canPublish
+        ? t("pages.admin.resultReview.publishBadge.ready")
+        : t("pages.admin.resultReview.publishBadge.awaiting");
 
   return (
     <div className="space-y-6">
@@ -34,16 +44,21 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
         <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div>
             <StatusBadge
-              label={meta[result.status].label}
-              tone={meta[result.status].tone}
+              label={statusLabel(result.status)}
+              tone={
+                result.status === "published"
+                  ? "teal"
+                  : result.status === "referee_confirmed"
+                    ? "green"
+                    : "slate"
+              }
               pulse={canPublish}
             />
             <h1 className="mt-5 text-3xl font-black uppercase leading-tight tracking-tight dark:text-white text-foreground sm:text-5xl">
               {result.race}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Admin race-result gate: review referee summary, inspect ranking,
-              then publish only when referee-confirmed. Mock data only.
+              {t("pages.admin.resultReview.heroDescription")}
             </p>
           </div>
           <div className="grid gap-3 rounded-2xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4">
@@ -51,7 +66,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
               <Flag className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Track
+                  {t("pages.admin.resultReview.track")}
                 </p>
                 <p className="font-black dark:text-white text-foreground">{result.track}</p>
               </div>
@@ -60,7 +75,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
               <Trophy className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Ranking rows
+                  {t("pages.admin.resultReview.rankingRows")}
                 </p>
                 <p className="font-mono font-black dark:text-white text-foreground">
                   {result.rankings.length}
@@ -71,7 +86,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
               <RadioTower className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Referee
+                  {t("pages.admin.resultReview.referee")}
                 </p>
                 <p className="font-black dark:text-white text-foreground">{result.referee}</p>
               </div>
@@ -83,36 +98,34 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Race summary
+            {t("pages.admin.resultReview.raceSummary")}
           </p>
           <h2 className="mt-2 text-xl font-black uppercase dark:text-white text-foreground">
             {result.tournament}
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
-            {result.distance} · {result.track} · finished {result.finishedAt}
+            {t("pages.admin.resultReview.raceSummaryLine", {
+              distance: result.distance,
+              track: result.track,
+              finishedAt: result.finishedAt,
+            })}
           </p>
         </div>
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Referee summary
+            {t("pages.admin.resultReview.refereeSummary")}
           </p>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            {result.refereeSummary}
+            {refereeSummary}
           </p>
         </div>
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Publish state
+            {t("pages.admin.resultReview.publishState")}
           </p>
           <div className="mt-3">
             <StatusBadge
-              label={
-                result.status === "published"
-                  ? "Published result"
-                  : canPublish
-                    ? "Ready to publish"
-                    : "Awaiting referee"
-              }
+              label={publishBadgeLabel}
               tone={
                 result.status === "published"
                   ? "teal"
@@ -123,7 +136,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
             />
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
-            {result.publishState}
+            {publishStateText}
           </p>
         </div>
       </section>
@@ -133,17 +146,17 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
       <section className="flex flex-col gap-4 rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Publish confirmation
+            {t("pages.admin.resultReview.publishConfirmation")}
           </p>
           <h2 className="mt-2 text-xl font-black uppercase dark:text-white text-foreground">
             {result.status === "published"
-              ? "Published state locked"
-              : "Final admin gate"}
+              ? t("pages.admin.resultReview.publishedLocked")
+              : t("pages.admin.resultReview.finalGate")}
           </h2>
         </div>
         {result.status === "published" ? (
           <div className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#067E6A]/40 bg-[#067E6A]/20 px-4 text-sm font-bold text-teal-100">
-            <CheckCircle2 className="size-4" /> Result already published
+            <CheckCircle2 className="size-4" /> {t("pages.admin.resultReview.alreadyPublished")}
           </div>
         ) : (
           <Button
@@ -152,7 +165,7 @@ export function ResultReviewPanel({ result }: ResultReviewPanelProps) {
             disabled={!canPublish}
             onClick={() => setDialogOpen(true)}
           >
-            Publish result
+            {t("pages.admin.resultReview.publishButton")}
           </Button>
         )}
       </section>

@@ -2,16 +2,17 @@
 
 import { CalendarDays, Flag, MapPin, Sparkles, Trophy, Users, ShieldAlert, Award } from "lucide-react";
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
 export function TournamentForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Form Fields State
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -25,14 +26,13 @@ export function TournamentForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validations
     if (!name.trim()) {
-      toast.error("Vui lòng nhập tên giải đấu.");
+      toast.error(t("pages.admin.tournamentForm.validation.nameRequired"));
       return;
     }
 
     if (!startDate || !endDate) {
-      toast.error("Vui lòng nhập ngày bắt đầu và ngày kết thúc giải đấu.");
+      toast.error(t("pages.admin.tournamentForm.validation.datesRequired"));
       return;
     }
 
@@ -40,7 +40,7 @@ export function TournamentForm() {
     const end = new Date(endDate);
 
     if (start >= end) {
-      toast.error("Ngày bắt đầu phải trước ngày kết thúc giải đấu.");
+      toast.error(t("pages.admin.tournamentForm.validation.startBeforeEnd"));
       return;
     }
 
@@ -49,23 +49,23 @@ export function TournamentForm() {
       const regEnd = new Date(registrationEndDate);
 
       if (regStart >= regEnd) {
-        toast.error("Ngày bắt đầu đăng ký phải trước ngày đóng đăng ký.");
+        toast.error(t("pages.admin.tournamentForm.validation.regStartBeforeEnd"));
         return;
       }
 
       if (regEnd >= start) {
-        toast.error("Thời hạn đăng ký phải kết thúc trước khi giải đấu bắt đầu.");
+        toast.error(t("pages.admin.tournamentForm.validation.regBeforeTournament"));
         return;
       }
     }
 
     if (maxHorses < 2) {
-      toast.error("Số lượng ngựa tối đa tham gia phải ít nhất là 2.");
+      toast.error(t("pages.admin.tournamentForm.validation.minHorses"));
       return;
     }
 
     if (prizePool < 0) {
-      toast.error("Tổng giải thưởng (Prize Pool) không được âm.");
+      toast.error(t("pages.admin.tournamentForm.validation.prizeNonNegative"));
       return;
     }
 
@@ -95,17 +95,16 @@ export function TournamentForm() {
       const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.message || "Đã xảy ra lỗi khi tạo giải đấu.");
+        throw new Error(result.message || t("pages.admin.tournamentForm.createError"));
       }
 
-      toast.success(`Giải đấu "${name}" đã được tạo thành công!`);
-      
-      // Redirect back to Admin dashboard
+      toast.success(t("pages.admin.tournamentForm.createSuccess", { name }));
       router.push("/admin");
       router.refresh();
     } catch (err) {
       console.error(err);
-      const errorMessage = err instanceof Error ? err.message : "Tạo giải đấu thất bại. Vui lòng thử lại.";
+      const errorMessage =
+        err instanceof Error ? err.message : t("pages.admin.tournamentForm.createFailed");
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -117,21 +116,19 @@ export function TournamentForm() {
       onSubmit={handleSubmit}
       className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6 lg:p-8"
     >
-      {/* Decorative Gradients */}
       <div className="absolute inset-0 -z-10 dark:bg-[linear-gradient(135deg,rgba(225,6,0,0.12),transparent_35%),radial-gradient(circle_at_85%_15%,rgba(6,126,106,0.1),transparent_30rem)] bg-card" />
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
 
-      {/* Header Info */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b dark:border-white/10 border-border pb-6">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
-            <Trophy className="size-4 animate-pulse" /> Tournament Management Deck
+            <Trophy className="size-4 animate-pulse" /> {t("pages.admin.tournamentForm.deckEyebrow")}
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-tight dark:text-white text-foreground sm:text-3xl">
-            Tạo giải đấu mới
+            {t("pages.admin.tournamentForm.title")}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Thiết lập bình chứa giải đấu để tổ chức các trận đua ngựa kịch tính sắp tới.
+            {t("pages.admin.tournamentForm.subtitle")}
           </p>
         </div>
         <div className="flex gap-3">
@@ -142,25 +139,24 @@ export function TournamentForm() {
             disabled={isLoading}
             className="rounded-full dark:border-white/10 border-border dark:text-white text-foreground bg-transparent hover:dark:bg-white/5 bg-muted/50"
           >
-            Hủy bỏ
+            {t("pages.admin.tournamentForm.cancel")}
           </Button>
           <Button
             type="submit"
             disabled={isLoading}
             className="rounded-full font-black uppercase tracking-wider text-white bg-primary hover:bg-[#B80500] shadow-[0_4px_16px_rgba(225,6,0,0.35)]"
           >
-            {isLoading ? "Đang xử lý..." : "Lưu giải đấu"}
+            {isLoading ? t("pages.admin.tournamentForm.saving") : t("pages.admin.tournamentForm.save")}
           </Button>
         </div>
       </div>
 
       <div className="mt-8 space-y-6">
-        {/* Row 1: Tên & Địa điểm */}
         <div className="grid gap-6 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
             <span className="inline-flex items-center gap-2">
               <Flag className="size-4 text-primary" />
-              Tên giải đấu <span className="text-primary">*</span>
+              {t("pages.admin.tournamentForm.nameLabel")} <span className="text-primary">*</span>
             </span>
             <input
               type="text"
@@ -169,14 +165,14 @@ export function TournamentForm() {
               required
               disabled={isLoading}
               className="h-12 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-4 text-sm dark:text-white text-foreground outline-none transition placeholder:dark:text-white/20 text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Ví dụ: Spring Velocity Cup 2026"
+              placeholder={t("pages.admin.tournamentForm.namePlaceholder")}
             />
           </label>
 
           <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
             <span className="inline-flex items-center gap-2">
               <MapPin className="size-4 text-primary" />
-              Địa điểm tổ chức
+              {t("pages.admin.tournamentForm.locationLabel")}
             </span>
             <input
               type="text"
@@ -184,17 +180,16 @@ export function TournamentForm() {
               onChange={(e) => setLocation(e.target.value)}
               disabled={isLoading}
               className="h-12 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-4 text-sm dark:text-white text-foreground outline-none transition placeholder:dark:text-white/20 text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Ví dụ: Trường đua Phú Thọ, TPHCM"
+              placeholder={t("pages.admin.tournamentForm.locationPlaceholder")}
             />
           </label>
         </div>
 
-        {/* Row 2: Thời gian giải đấu */}
         <div className="grid gap-6 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-primary" />
-              Ngày bắt đầu giải đấu <span className="text-primary">*</span>
+              {t("pages.admin.tournamentForm.startDateLabel")} <span className="text-primary">*</span>
             </span>
             <input
               type="date"
@@ -209,7 +204,7 @@ export function TournamentForm() {
           <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-primary" />
-              Ngày kết thúc giải đấu <span className="text-primary">*</span>
+              {t("pages.admin.tournamentForm.endDateLabel")} <span className="text-primary">*</span>
             </span>
             <input
               type="date"
@@ -222,19 +217,17 @@ export function TournamentForm() {
           </label>
         </div>
 
-        {/* Section divider */}
         <div className="border-t dark:border-white/5 border-border pt-6">
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-            <Sparkles className="size-3.5 text-primary" /> Thiết lập giai đoạn đăng ký & Thông số phụ
+            <Sparkles className="size-3.5 text-primary" /> {t("pages.admin.tournamentForm.sectionRegistration")}
           </h3>
         </div>
 
-        {/* Row 3: Thời gian mở/đóng đăng ký */}
         <div className="grid gap-6 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-teal-400" />
-              Ngày bắt đầu nhận đăng ký
+              {t("pages.admin.tournamentForm.regStartLabel")}
             </span>
             <input
               type="date"
@@ -248,7 +241,7 @@ export function TournamentForm() {
           <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-teal-400" />
-              Ngày đóng cổng đăng ký
+              {t("pages.admin.tournamentForm.regEndLabel")}
             </span>
             <input
               type="date"
@@ -260,12 +253,11 @@ export function TournamentForm() {
           </label>
         </div>
 
-        {/* Row 4: Sức chứa & Giải thưởng */}
         <div className="grid gap-6 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
             <span className="inline-flex items-center gap-2">
               <Users className="size-4 text-primary" />
-              Số ngựa tối đa tham gia giải
+              {t("pages.admin.tournamentForm.maxHorsesLabel")}
             </span>
             <input
               type="number"
@@ -274,14 +266,14 @@ export function TournamentForm() {
               onChange={(e) => setMaxHorses(parseInt(e.target.value) || 0)}
               disabled={isLoading}
               className="h-12 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-4 font-mono text-sm dark:text-white text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Mặc định: 20"
+              placeholder={t("pages.admin.tournamentForm.maxHorsesPlaceholder")}
             />
           </label>
 
           <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
             <span className="inline-flex items-center gap-2">
               <Award className="size-4 text-primary" />
-              Tổng giải thưởng (Prize Pool - Points)
+              {t("pages.admin.tournamentForm.prizePoolLabel")}
             </span>
             <input
               type="number"
@@ -290,32 +282,37 @@ export function TournamentForm() {
               onChange={(e) => setPrizePool(parseInt(e.target.value) || 0)}
               disabled={isLoading}
               className="h-12 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 px-4 font-mono text-sm dark:text-white text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Mặc định: 0"
+              placeholder={t("pages.admin.tournamentForm.prizePoolPlaceholder")}
             />
           </label>
         </div>
 
-        {/* Row 5: Mô tả giải đấu */}
         <label className="grid gap-2 text-sm font-bold dark:text-white text-foreground">
-          <span>Mô tả giải đấu</span>
+          <span>{t("pages.admin.tournamentForm.descriptionLabel")}</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={isLoading}
             rows={4}
             className="w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/35 bg-muted/20 p-4 text-sm dark:text-white text-foreground outline-none transition placeholder:dark:text-white/20 text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 resize-y"
-            placeholder="Mô tả tóm tắt về thể lệ giải đấu, giải thưởng hoặc thông tin ban tổ chức..."
+            placeholder={t("pages.admin.tournamentForm.descriptionPlaceholder")}
           />
         </label>
 
-        {/* Information box */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-muted-foreground flex gap-3 items-start">
           <ShieldAlert className="size-5 text-primary shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold dark:text-white text-foreground uppercase tracking-wider text-xs">Ràng buộc hệ thống (Scope Guard)</p>
+            <p className="font-bold dark:text-white text-foreground uppercase tracking-wider text-xs">
+              {t("pages.admin.tournamentForm.scopeTitle")}
+            </p>
             <p className="mt-1 text-xs">
-              Mặc định khi giải đấu được tạo thành công, trạng thái ban đầu sẽ là <span className="font-bold dark:text-white text-foreground">DRAFT</span>. 
-              Bạn có thể cập nhật trạng thái sang <span className="font-bold text-teal-400">OPEN REGISTRATION</span> trong trang chi tiết để các chủ ngựa có thể đăng ký tham gia.
+              <Trans
+                i18nKey="pages.admin.tournamentForm.scopeBody"
+                components={{
+                  1: <span className="font-bold dark:text-white text-foreground" />,
+                  2: <span className="font-bold text-teal-400" />,
+                }}
+              />
             </p>
           </div>
         </div>

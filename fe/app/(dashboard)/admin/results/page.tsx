@@ -1,12 +1,15 @@
+﻿"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { mockRaceResults } from "@/features/results/mock-results";
 
 export default function AdminResultsPage() {
+  const { t } = useTranslation();
   const counts = mockRaceResults.reduce(
     (acc, result) => {
       acc[result.status] += 1;
@@ -17,35 +20,30 @@ export default function AdminResultsPage() {
 
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="Result publish"
-        title="Race result review"
-        description="Review per-race rankings, referee summary, draft/confirmed/published states, then publish confirmed results. Mock data only."
-      />
       <section className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <Trophy className="size-5 text-primary" />
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Ready
+            {t("pages.admin.results.ready")}
           </p>
           <p className="mt-2 font-mono text-4xl font-black dark:text-white text-foreground">
             {counts.referee_confirmed}
           </p>
           <StatusBadge
             className="mt-3"
-            label="Referee confirmed"
+            label={t("pages.admin.results.refereeConfirmed")}
             tone="green"
             pulse
           />
         </div>
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Published
+            {t("pages.admin.results.published")}
           </p>
           <p className="mt-2 font-mono text-4xl font-black dark:text-white text-foreground">
             {counts.published}
           </p>
-          <StatusBadge className="mt-3" label="Public state" tone="teal" />
+          <StatusBadge className="mt-3" label={t("pages.admin.results.publicState")} tone="teal" />
         </div>
       </section>
       <section className="grid gap-4">
@@ -80,7 +78,7 @@ export default function AdminResultsPage() {
                 className="min-h-11 rounded-full"
               >
                 <Link href={`/admin/results/${result.raceId}`}>
-                  Review result <ArrowUpRight className="size-4" />
+                  {t("pages.admin.results.reviewResult")} <ArrowUpRight className="size-4" />
                 </Link>
               </Button>
             </div>

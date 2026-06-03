@@ -3,6 +3,7 @@
 
 import { Award, Sparkles, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -25,36 +26,40 @@ export function PublishResultDialog({
   open,
   onClose,
 }: PublishResultDialogProps) {
+  const { t } = useTranslation();
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishedSuccess, setPublishedSuccess] = useState(false);
 
   if (!open || !result) return null;
 
   const canPublish = result.status === "referee_confirmed";
+  const refereeSummary = t(
+    `pages.admin.resultReview.mock.${result.raceId}.refereeSummary`,
+    { defaultValue: result.refereeSummary },
+  );
+
+  const statusLabel = t(`pages.admin.publishDialog.status.${result.status}`, {
+    defaultValue: result.status.replace("_", " "),
+  });
 
   const handlePublish = async () => {
     setIsPublishing(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsPublishing(false);
 
-    // 1. Update result status to published
     result.status = "published";
-    
-    // 2. Perform the 70/30 split logic
-    const totalPrizePoints = 10000;
-    const ownerPoints = totalPrizePoints * 0.7; // 7,000 pts
-    const jockeyPoints = totalPrizePoints * 0.3; // 3,000 pts
 
-    // Credit Owner (user-owner-1)
+    const totalPrizePoints = 10000;
+    const ownerPoints = totalPrizePoints * 0.7;
+    const jockeyPoints = totalPrizePoints * 0.3;
+
     if (mockWalletBalances["user-owner-1"] !== undefined) {
       mockWalletBalances["user-owner-1"] += ownerPoints;
     }
-    // Credit Jockey (user-jockey-1)
     if (mockWalletBalances["user-jockey-1"] !== undefined) {
       mockWalletBalances["user-jockey-1"] += jockeyPoints;
     }
 
-    // 3. Insert transaction ledger items
     const newOwnerTx = {
       id: `tx-${mockTransactions.length + 1}`,
       type: "prize_owner" as const,
@@ -64,7 +69,7 @@ export function PublishResultDialog({
       createdAt: new Date().toISOString(),
       status: "completed" as const,
     };
-    
+
     const newJockeyTx = {
       id: `tx-${mockTransactions.length + 2}`,
       type: "prize_jockey" as const,
@@ -75,30 +80,26 @@ export function PublishResultDialog({
       status: "completed" as const,
     };
 
-    // Push at the beginning
     mockTransactions.unshift(newOwnerTx, newJockeyTx);
 
-    // 4. Log to secure System Audit Trail
     addAuditLog(
       "RACE_PUBLISHED",
       "admin@horsetrack.com",
-      `Published results for ${result.race}. Crimson Bolt placed 1st.`
+      `Published results for ${result.race}. Crimson Bolt placed 1st.`,
     );
     addAuditLog(
       "PRIZE_SPLIT",
       "SYSTEM",
-      `Allocated 70% prize (${ownerPoints} pts) to Owner Linh Tran Stable and 30% (${jockeyPoints} pts) to Jockey Minh Khoa`
+      `Allocated 70% prize (${ownerPoints} pts) to Owner Linh Tran Stable and 30% (${jockeyPoints} pts) to Jockey Minh Khoa`,
     );
-
-    // Trigger spectator payout simulation
     addAuditLog(
       "PREDICTION_PAYOUT",
       "SYSTEM",
-      `Processed spectator prediction win payout multiplier for users who predicted Crimson Bolt.`
+      `Processed spectator prediction win payout multiplier for users who predicted Crimson Bolt.`,
     );
 
     setPublishedSuccess(true);
-    toast.success("Race results published successfully! Winnings distributed.");
+    toast.success(t("pages.admin.publishDialog.toastSuccess"));
   };
 
   const handleClose = () => {
@@ -119,7 +120,7 @@ export function PublishResultDialog({
             <div className="flex items-start justify-between border-b dark:border-white/10 border-border p-5">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-                  Publish race result
+                  {t("pages.admin.publishDialog.eyebrow")}
                 </p>
                 <h2
                   id="publish-dialog-title"
@@ -132,14 +133,14 @@ export function PublishResultDialog({
                 type="button"
                 onClick={handleClose}
                 className="grid size-10 place-items-center rounded-full border dark:border-white/10 border-border dark:text-white/70 text-muted-foreground transition hover:dark:bg-white/10 bg-muted/50 hover:dark:text-white text-foreground cursor-pointer"
-                aria-label="Close publish dialog"
+                aria-label={t("pages.admin.publishDialog.close")}
               >
                 <X className="size-4" />
               </button>
             </div>
             <div className="space-y-4 p-5">
               <StatusBadge
-                label={result.status.replace("_", " ")}
+                label={statusLabel}
                 tone={
                   canPublish
                     ? "green"
@@ -149,32 +150,46 @@ export function PublishResultDialog({
                 }
               />
               <p className="text-sm leading-6 text-muted-foreground">
-                Publishing makes this race ranking visible as the final official result. This action will automatically trigger the reward splits:
+                {t("pages.admin.publishDialog.description")}
               </p>
-              
+
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                   <div className="flex items-center gap-2">
                     <Award className="size-5 text-primary" />
-                    <span className="text-xs font-black uppercase dark:text-white text-foreground tracking-wider">Owner Split (70%)</span>
+                    <span className="text-xs font-black uppercase dark:text-white text-foreground tracking-wider">
+                      {t("pages.admin.publishDialog.ownerSplit")}
+                    </span>
                   </div>
-                  <p className="mt-2 font-mono text-2xl font-black dark:text-white text-foreground">7,000 pts</p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">Credits stable: Linh Tran Stable</p>
+                  <p className="mt-2 font-mono text-2xl font-black dark:text-white text-foreground">
+                    {t("pages.admin.publishDialog.ownerPoints")}
+                  </p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {t("pages.admin.publishDialog.ownerCredits")}
+                  </p>
                 </div>
 
                 <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
                   <div className="flex items-center gap-2">
                     <Award className="size-5 text-blue-400" />
-                    <span className="text-xs font-black uppercase dark:text-white text-foreground tracking-wider">Jockey Split (30%)</span>
+                    <span className="text-xs font-black uppercase dark:text-white text-foreground tracking-wider">
+                      {t("pages.admin.publishDialog.jockeySplit")}
+                    </span>
                   </div>
-                  <p className="mt-2 font-mono text-2xl font-black dark:text-white text-foreground">3,000 pts</p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">Credits jockey: Minh Khoa</p>
+                  <p className="mt-2 font-mono text-2xl font-black dark:text-white text-foreground">
+                    {t("pages.admin.publishDialog.jockeyPoints")}
+                  </p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {t("pages.admin.publishDialog.jockeyCredits")}
+                  </p>
                 </div>
               </div>
 
               <div className="rounded-xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4 text-xs dark:text-white/80 text-muted-foreground leading-relaxed">
-                <strong className="text-primary font-black uppercase tracking-wide mr-1.5">Referee summary:</strong>
-                {result.refereeSummary}
+                <strong className="text-primary font-black uppercase tracking-wide mr-1.5">
+                  {t("pages.admin.publishDialog.refereeSummaryLabel")}
+                </strong>
+                {refereeSummary}
               </div>
             </div>
             <div className="flex flex-col-reverse gap-3 border-t dark:border-white/10 border-border p-5 sm:flex-row sm:justify-end">
@@ -185,7 +200,7 @@ export function PublishResultDialog({
                 onClick={handleClose}
                 disabled={isPublishing}
               >
-                Cancel
+                {t("pages.admin.publishDialog.cancel")}
               </Button>
               <Button
                 type="button"
@@ -193,7 +208,9 @@ export function PublishResultDialog({
                 disabled={!canPublish || isPublishing}
                 onClick={handlePublish}
               >
-                {isPublishing ? "Distributing Prize..." : "Confirm & Publish"}
+                {isPublishing
+                  ? t("pages.admin.publishDialog.publishing")
+                  : t("pages.admin.publishDialog.confirm")}
               </Button>
             </div>
           </>
@@ -203,21 +220,29 @@ export function PublishResultDialog({
               <Sparkles className="size-8" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-2xl font-black uppercase dark:text-white text-foreground tracking-tight">Race Results Published!</h3>
+              <h3 className="text-2xl font-black uppercase dark:text-white text-foreground tracking-tight">
+                {t("pages.admin.publishDialog.successTitle")}
+              </h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                Prize splits have been credited to user balances. Ledger transactions and system audit logs successfully updated.
+                {t("pages.admin.publishDialog.successDescription")}
               </p>
             </div>
             <div className="rounded-xl border dark:border-white/5 border-border dark:bg-white/[0.02] bg-muted/50 p-4 text-left font-mono text-xs max-w-sm mx-auto space-y-1 dark:text-white/80 text-muted-foreground">
-              <p className="text-emerald-400 font-bold">+7,000 pts credited to Owner wallet</p>
-              <p className="text-blue-400 font-bold">+3,000 pts credited to Jockey wallet</p>
-              <p className="dark:text-white/40 text-muted-foreground mt-2">Audit action: RACE_PUBLISHED, PRIZE_SPLIT</p>
+              <p className="text-emerald-400 font-bold">
+                {t("pages.admin.publishDialog.successOwnerCredit")}
+              </p>
+              <p className="text-blue-400 font-bold">
+                {t("pages.admin.publishDialog.successJockeyCredit")}
+              </p>
+              <p className="dark:text-white/40 text-muted-foreground mt-2">
+                {t("pages.admin.publishDialog.successAudit")}
+              </p>
             </div>
             <Button
               onClick={handleClose}
               className="h-12 w-full rounded-full font-black uppercase tracking-wider text-white bg-primary hover:bg-[#B80500]"
             >
-              Done
+              {t("pages.admin.publishDialog.done")}
             </Button>
           </div>
         )}

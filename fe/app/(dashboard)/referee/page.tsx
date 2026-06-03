@@ -17,6 +17,7 @@ import {
   Clock,
   ShieldAlert,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -58,6 +59,7 @@ type Assignment = {
 };
 
 export default function RefereeDashboardPage() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<UserInfo | null>(null);
   const [profile, setProfile] = useState<RefereeProfileInfo | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -187,9 +189,9 @@ export default function RefereeDashboardPage() {
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       <PageHeader
-        eyebrow="Trạm điều hành trọng tài"
-        title="Hội Đồng Giám Sát"
-        description="Quản lý lịch phân công điều hành cuộc đua, kiểm tra ngựa trước trận, ghi nhận vi phạm và xác nhận biên bản kết quả thi đấu chính thức."
+        eyebrow={t("referee.header.eyebrow")}
+        title={t("referee.header.title")}
+        description={t("referee.header.description")}
       />
 
       {/* Profile Check / Greeting */}
@@ -199,18 +201,18 @@ export default function RefereeDashboardPage() {
           <div className="relative space-y-4 max-w-2xl">
             <div className="flex items-center gap-2">
               <span className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-                CẦN HOÀN THIỆN HỒ SƠ
+                {t("referee.profileCheck.badge")}
               </span>
             </div>
             <h2 className="text-xl font-black uppercase dark:text-white text-foreground sm:text-2xl">
-              Khởi tạo hồ sơ Trọng tài của bạn
+              {t("referee.profileCheck.title")}
             </h2>
             <p className="text-xs dark:text-white/60 text-muted-foreground leading-relaxed">
-              Xin chào **{user?.fullName}**, bạn có vai trò Trọng tài nhưng chưa tạo hồ sơ thông số chuyên môn. Hãy điền số giấy phép hành nghề bên dưới để có thể nhận phân công giám sát các cuộc đua từ Ban tổ chức.
+              {t("referee.profileCheck.desc").replace("{name}", user?.fullName || "")}
             </p>
             <form onSubmit={handleCreateProfile} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end dark:bg-black/25 bg-muted/20 p-4 rounded-xl border dark:border-white/5 border-border">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Số giấy phép (License)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t("referee.profileCheck.license")}</label>
                 <input
                   type="text"
                   value={licenseNumber}
@@ -221,7 +223,7 @@ export default function RefereeDashboardPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Kinh nghiệm (Năm)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t("referee.profileCheck.experience")}</label>
                 <input
                   type="number"
                   min={1}
@@ -233,7 +235,7 @@ export default function RefereeDashboardPage() {
                 />
               </div>
               <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Tiểu sử ngắn / Bio (Tùy chọn)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t("referee.profileCheck.bio")}</label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
@@ -248,7 +250,7 @@ export default function RefereeDashboardPage() {
                   disabled={isSubmittingProfile}
                   className="rounded-full bg-primary hover:bg-primary-dark font-black uppercase text-xs h-10 px-6 text-white"
                 >
-                  {isSubmittingProfile ? "Đang xử lý..." : "Khởi tạo hồ sơ ngay"}
+                  {isSubmittingProfile ? t("referee.profileCheck.submitting") : t("referee.profileCheck.submit")}
                 </Button>
               </div>
             </form>
@@ -260,17 +262,17 @@ export default function RefereeDashboardPage() {
           <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <span className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-                GIÁM SÁT TRỰC TUYẾN
+                {t("referee.dashboard.badge")}
               </span>
               <h2 className="mt-3 text-3xl font-black uppercase tracking-tight dark:text-white text-foreground leading-none">
-                BÀN LÀM VIỆC CỦA TRỌNG TÀI
+                {t("referee.dashboard.title")}
               </h2>
               <p className="mt-2 text-xs dark:text-white/50 text-muted-foreground leading-relaxed max-w-xl">
-                Quản lý các cuộc đua được ủy quyền. Thực hiện kiểm duyệt đầy đủ tình trạng thiết bị bảo hộ, sức khỏe ngựa, jockey điểm danh và xác lập thứ hạng chuẩn hóa sau khi trận đấu hoàn thành.
+                {t("referee.dashboard.desc")}
               </p>
             </div>
             <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-black/25 bg-muted/20 p-4 shrink-0 min-w-[240px]">
-              <p className="text-[10px] uppercase tracking-[0.18em] dark:text-white/45 text-muted-foreground">Trọng tài được cấp phép</p>
+              <p className="text-[10px] uppercase tracking-[0.18em] dark:text-white/45 text-muted-foreground">{t("referee.dashboard.licenseInfo")}</p>
               <p className="mt-1 text-lg font-black uppercase dark:text-white text-foreground flex items-center gap-1.5">
                 <User className="size-4 text-primary" />
                 {user?.fullName}
@@ -319,12 +321,12 @@ export default function RefereeDashboardPage() {
               <div className="mt-2 flex items-center gap-2">
                 <span className="text-xs dark:text-white/70 text-muted-foreground">Vai trò: <strong>{activeAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}</strong></span>
                 <span className="dark:text-white/20 text-muted-foreground">•</span>
-                <span className="text-xs dark:text-white/70 text-muted-foreground">Trạng thái: 
+                <span className="text-xs dark:text-white/70 text-muted-foreground">Trạng thái:
                   <span className="ml-1 text-teal-400 font-bold uppercase">{activeAssignment.status}</span>
                 </span>
               </div>
             </div>
-            
+
             {activeAssignment.status === "assigned" ? (
               <div className="flex items-center gap-3 pt-2">
                 <Button
@@ -408,13 +410,13 @@ export default function RefereeDashboardPage() {
                     <StatusBadge
                       label={
                         assignment.status === "assigned" ? "Chờ duyệt" :
-                        assignment.status === "accepted" ? "Đã nhận" :
-                        assignment.status === "declined" ? "Đã từ chối" : "Đã hủy"
+                          assignment.status === "accepted" ? "Đã nhận" :
+                            assignment.status === "declined" ? "Đã từ chối" : "Đã hủy"
                       }
                       tone={
                         assignment.status === "accepted" ? "green" :
-                        assignment.status === "assigned" ? "yellow" :
-                        assignment.status === "declined" ? "red" : "slate"
+                          assignment.status === "assigned" ? "yellow" :
+                            assignment.status === "declined" ? "red" : "slate"
                       }
                       pulse={assignment.status === "assigned"}
                     />
@@ -433,10 +435,10 @@ export default function RefereeDashboardPage() {
                     <p className="text-[10px] dark:text-white/40 text-muted-foreground mt-1 uppercase font-bold">
                       Trận đua: {
                         assignment.raceId.status === "SCHEDULED" ? "Đã lên lịch" :
-                        assignment.raceId.status === "CHECKING" ? "Đang kiểm tra" :
-                        assignment.raceId.status === "READY" ? "Sẵn sàng" :
-                        assignment.raceId.status === "LIVE" ? "Đang đua" :
-                        assignment.raceId.status === "FINISHED" ? "Hoàn thành" : "Đã công bố"
+                          assignment.raceId.status === "CHECKING" ? "Đang kiểm tra" :
+                            assignment.raceId.status === "READY" ? "Sẵn sàng" :
+                              assignment.raceId.status === "LIVE" ? "Đang đua" :
+                                assignment.raceId.status === "FINISHED" ? "Hoàn thành" : "Đã công bố"
                       }
                     </p>
                   </div>

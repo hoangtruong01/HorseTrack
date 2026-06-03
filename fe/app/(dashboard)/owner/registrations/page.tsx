@@ -1,12 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { ClipboardCheck, Loader2 } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { OwnerRegistrationTable, type Registration } from "@/features/registrations/components/owner-registration-table";
 import { toast } from "sonner";
 
 export default function OwnerRegistrationsPage() {
+  const { t } = useTranslation();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -17,16 +18,15 @@ export default function OwnerRegistrationsPage() {
       if (response.ok) {
         const resData = await response.json();
         if (resData.success) {
-          // Map backend objects to our Registration table structure
           const rawList = resData.data?.data || resData.data || [];
           const mapped: Registration[] = rawList.map((item: any) => ({
             id: item.id || item._id,
             tournamentId: item.tournamentId?._id || item.tournamentId?.id || "",
-            tournamentName: item.tournamentId?.name || "Giải đấu tự do",
+            tournamentName: item.tournamentId?.name || t("common.freeTournament"),
             raceId: item.raceId?._id || item.raceId?.id || "",
-            raceName: item.raceId?.name || "Không rõ trận đua",
+            raceName: item.raceId?.name || t("common.unknownRace"),
             horseId: item.horseId?._id || item.horseId?.id || "",
-            horseName: item.horseId?.name || "Không rõ chiến mã",
+            horseName: item.horseId?.name || t("common.unknownHorse"),
             ownerId: item.ownerId?._id || item.ownerId || "",
             status: item.status,
             note: item.note,
@@ -36,11 +36,11 @@ export default function OwnerRegistrationsPage() {
           setRegistrations(mapped);
         }
       } else {
-        toast.error("Không thể tải danh sách đăng ký trận đua.");
+        toast.error(t("pages.owner.registrations.toast.fetchFailed"));
       }
     } catch (err) {
       console.error("Lỗi lấy lịch sử đăng ký:", err);
-      toast.error("Lỗi kết nối tới Backend.");
+      toast.error(t("common.backendError"));
     } finally {
       setIsLoading(false);
     }
@@ -52,16 +52,11 @@ export default function OwnerRegistrationsPage() {
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto">
-      <PageHeader
-        eyebrow="Theo dõi thủ tục"
-        title="Lịch Sử Ghi Danh"
-        description="Giám sát tiến độ phê duyệt hồ sơ tham dự giải đấu của chiến mã từ Ban Tổ Chức. Bạn có thể tự do hủy hoặc rút tên tùy theo trạng thái hồ sơ."
-      />
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
-          <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải lịch sử ghi danh...</p>
+          <p className="mt-4 text-xs font-mono uppercase tracking-widest">{t("pages.owner.registrations.loading")}</p>
         </div>
       ) : (
         <OwnerRegistrationTable

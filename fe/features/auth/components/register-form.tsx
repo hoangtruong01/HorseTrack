@@ -13,6 +13,7 @@ import {
   Calendar,
   MapPin,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
@@ -27,6 +28,7 @@ const labelClass =
 
 export function RegisterForm() {
   const { register } = useAuth();
+  const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = useState<AuthRole>(defaultDemoRole);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -42,6 +44,9 @@ export function RegisterForm() {
       rolePreviews[0],
     [selectedRole],
   );
+
+  const roleLabel = (role: AuthRole) =>
+    t(`auth.roleDescriptions.${role}.label`);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,10 +66,10 @@ export function RegisterForm() {
 
     try {
       await register(payload);
-      toast.success("Đăng ký tài khoản thành công! Đang chuyển hướng...");
+      toast.success(t("auth.registerForm.registerSuccess"));
       window.location.href = selectedPreview.entryPath;
     } catch (err: any) {
-      const errMsg = err.message || "Đăng ký tài khoản thất bại.";
+      const errMsg = err.message || t("auth.registerForm.registerFailed");
       setErrorMsg(errMsg);
       toast.error(errMsg);
       setIsSubmitting(false);
@@ -77,7 +82,7 @@ export function RegisterForm() {
         <div className="flex items-start gap-3 rounded-xl border border-[#E10600] bg-[#E10600]/10 p-4 shadow-[0_0_15px_rgba(225,6,0,0.15)] animate-[shake_0.4s_ease-in-out]">
           <AlertTriangle className="size-5 shrink-0 text-[#E10600] mt-0.5" />
           <div>
-            <p className="text-xs font-black uppercase text-[#E10600] tracking-[0.1em]">Lỗi đăng ký</p>
+            <p className="text-xs font-black uppercase text-[#E10600] tracking-[0.1em]">{t("auth.registerForm.registrationError")}</p>
             <p className="mt-1 text-sm text-foreground leading-5">{errorMsg}</p>
           </div>
         </div>
@@ -85,7 +90,7 @@ export function RegisterForm() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-2 sm:col-span-2">
-          <span className={labelClass}>Họ và tên</span>
+          <span className={labelClass}>{t("auth.registerForm.fullName")}</span>
           <div className="relative">
             <User className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -93,13 +98,13 @@ export function RegisterForm() {
               required
               autoComplete="name"
               className={fieldClass}
-              placeholder="Ví dụ: Nguyễn Văn A"
+              placeholder={t("auth.registerForm.fullNamePlaceholder")}
             />
           </div>
         </label>
 
         <label className="space-y-2">
-          <span className={labelClass}>Email</span>
+          <span className={labelClass}>{t("auth.registerForm.email")}</span>
           <div className="relative">
             <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -108,13 +113,13 @@ export function RegisterForm() {
               required
               autoComplete="email"
               className={fieldClass}
-              placeholder="you@horsetrack.local"
+              placeholder={t("auth.registerForm.emailPlaceholder")}
             />
           </div>
         </label>
 
         <label className="space-y-2">
-          <span className={labelClass}>Mật khẩu</span>
+          <span className={labelClass}>{t("auth.registerForm.password")}</span>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -124,26 +129,26 @@ export function RegisterForm() {
               minLength={6}
               autoComplete="new-password"
               className={fieldClass}
-              placeholder="Tối thiểu 6 ký tự"
+              placeholder={t("auth.registerForm.passwordPlaceholder")}
             />
           </div>
         </label>
 
         <label className="space-y-2">
-          <span className={labelClass}>Số điện thoại</span>
+          <span className={labelClass}>{t("auth.registerForm.phone")}</span>
           <div className="relative">
             <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
               name="phone"
               type="tel"
               className={fieldClass}
-              placeholder="Ví dụ: 0912345678"
+              placeholder={t("auth.registerForm.phonePlaceholder")}
             />
           </div>
         </label>
 
         <label className="space-y-2">
-          <span className={labelClass}>Ngày sinh</span>
+          <span className={labelClass}>{t("auth.registerForm.dob")}</span>
           <div className="relative">
             <Calendar className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -155,20 +160,20 @@ export function RegisterForm() {
         </label>
 
         <label className="space-y-2 sm:col-span-2">
-          <span className={labelClass}>Địa chỉ</span>
+          <span className={labelClass}>{t("auth.registerForm.address")}</span>
           <div className="relative">
             <MapPin className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <input
               name="address"
               className={fieldClass}
-              placeholder="Ví dụ: Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội"
+              placeholder={t("auth.registerForm.addressPlaceholder")}
             />
           </div>
         </label>
       </div>
 
       <fieldset className="space-y-3">
-        <legend className={labelClass}>Request role</legend>
+        <legend className={labelClass}>{t("auth.registerForm.requestRole")}</legend>
         <div className="grid grid-cols-4 gap-2">
           {filteredRolePreviews.map((preview) => {
             const Icon = preview.icon;
@@ -187,20 +192,21 @@ export function RegisterForm() {
               >
                 <Icon className="size-4 shrink-0" />
                 <span className="text-[9px] font-black uppercase tracking-wide leading-none">
-                  {preview.role === "spectator" ? "Spectator" : preview.label.split(" ").pop()}
+                  {preview.role === "spectator"
+                    ? t("auth.registerForm.spectatorRole")
+                    : roleLabel(preview.role).split(" ").pop()}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* Small Elegant Role Description Card */}
         <div className="rounded-xl border border-border bg-card/70 p-3 text-xs leading-relaxed text-muted-foreground">
           <p className="font-black text-[#E10600] uppercase tracking-wider text-[10px]">
-            {selectedPreview.eyebrow} • {selectedPreview.label}
+            {t(`auth.roleDescriptions.${selectedRole}.eyebrow`)} • {roleLabel(selectedRole)}
           </p>
           <p className="mt-1 text-muted-foreground leading-normal font-semibold">
-            {selectedPreview.description}
+            {t(`auth.roleDescriptions.${selectedRole}.description`)}
           </p>
         </div>
       </fieldset>
@@ -214,7 +220,7 @@ export function RegisterForm() {
             className="mt-0.5 size-4 shrink-0 rounded border-border bg-background/70 accent-[#E10600] focus:ring-offset-0 focus:ring-0"
           />
           <span className="leading-normal font-semibold">
-            I understand this is a mock registration with visual-only role assignment.
+            {t("auth.registerForm.acceptPolicy")}
           </span>
         </label>
       </div>
@@ -227,23 +233,23 @@ export function RegisterForm() {
         {isSubmitting ? (
           <>
             <Loader2 className="size-4.5 animate-spin" aria-hidden="true" />
-            Creating mock profile...
+            {t("auth.registerForm.creatingProfile")}
           </>
         ) : (
           <>
-            Continue as {selectedPreview.label}
+            {t("auth.registerForm.continueAs", { role: roleLabel(selectedRole) })}
             <ArrowRight className="size-4.5" aria-hidden="true" />
           </>
         )}
       </button>
 
       <div className="pt-2 text-center text-xs sm:text-sm text-muted-foreground font-semibold">
-        Already staged?{" "}
+        {t("auth.registerForm.alreadyStaged")}{" "}
         <Link
           href="/login"
           className="font-black text-[#E10600] hover:underline"
         >
-          Login instead
+          {t("auth.registerForm.loginInstead")}
         </Link>
       </div>
     </form>

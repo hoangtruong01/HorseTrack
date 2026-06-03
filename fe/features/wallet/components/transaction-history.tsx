@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowDownLeft, ArrowUpRight, Award, Calendar, Clock, Coins, Search, Sparkles } from "lucide-react";
+import { Calendar, Search, Gift, Download, Award, ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
 import type { WalletTransaction } from "../mock-wallet";
 
@@ -12,187 +12,265 @@ export type TransactionHistoryProps = {
 };
 
 export function TransactionHistory({ transactions }: TransactionHistoryProps) {
+  const { t } = useTranslation();
   const [filterType, setFilterType] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
-      const matchesSearch = tx.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            tx.type.toLowerCase().includes(searchTerm.toLowerCase());
-      
+      const matchesSearch =
+        tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tx.type.toLowerCase().includes(searchTerm.toLowerCase());
+
       if (filterType === "all") return matchesSearch;
-      if (filterType === "prizes") return matchesSearch && (tx.type === "prize_owner" || tx.type === "prize_jockey");
-      if (filterType === "cashouts") return matchesSearch && (tx.type === "withdrawal_requested" || tx.type === "withdrawal_approved" || tx.type === "withdrawal_paid" || tx.type === "withdrawal_rejected");
-      if (filterType === "predictions") return matchesSearch && (tx.type === "prediction_win" || tx.type === "prediction_refund");
+      if (filterType === "points")
+        return matchesSearch && (tx.type.includes("prize") || tx.type.includes("prediction"));
+      if (filterType === "cashouts")
+        return matchesSearch && tx.type.includes("withdrawal");
       return matchesSearch;
     });
   }, [transactions, filterType, searchTerm]);
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const typeMeta: Record<
     WalletTransaction["type"],
-    { icon: React.ComponentType<{ className?: string }>; color: string; label: string }
+    { icon: React.ComponentType<{ className?: string }>; color: string; labelKey: string; subLabelKey: string; isPositive: boolean }
   > = {
-    deposit: { icon: ArrowDownLeft, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Điểm ban đầu" },
-    withdrawal_requested: { icon: ArrowUpRight, color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: "Đổi quà (Chờ)" },
-    withdrawal_approved: { icon: ArrowUpRight, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Đổi quà (Duyệt)" },
-    withdrawal_paid: { icon: ArrowUpRight, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Đổi quà (Thành công)" },
-    withdrawal_rejected: { icon: ArrowUpRight, color: "text-red-400 bg-red-500/10 border-red-500/20", label: "Đổi quà (Từ chối)" },
-    prize_owner: { icon: Award, color: "text-primary bg-primary/10 border-primary/20", label: "Giải Owner" },
-    prize_jockey: { icon: Award, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: "Giải Jockey" },
-    prediction_win: { icon: Sparkles, color: "text-purple-400 bg-purple-500/10 border-purple-500/20", label: "Dự đoán Thắng" },
-    prediction_refund: { icon: Coins, color: "text-sky-400 bg-sky-500/10 border-sky-500/20", label: "Hoàn trả điểm" },
+    deposit: { icon: Gift, color: "text-emerald-500 bg-emerald-500/10", labelKey: "typeReceived", subLabelKey: "subDeposit", isPositive: true },
+    withdrawal_requested: { icon: Download, color: "text-[#E10600] bg-[#E10600]/10", labelKey: "typeCashout", subLabelKey: "subWithdrawReq", isPositive: false },
+    withdrawal_approved: { icon: Download, color: "text-[#E10600] bg-[#E10600]/10", labelKey: "typeCashout", subLabelKey: "subWithdrawApp", isPositive: false },
+    withdrawal_paid: { icon: Download, color: "text-[#E10600] bg-[#E10600]/10", labelKey: "typeCashout", subLabelKey: "subWithdrawPaid", isPositive: false },
+    withdrawal_rejected: { icon: Download, color: "text-[#E10600] bg-[#E10600]/10", labelKey: "typeCashout", subLabelKey: "subWithdrawRej", isPositive: false },
+    prize_owner: { icon: Gift, color: "text-emerald-500 bg-emerald-500/10", labelKey: "typeReceived", subLabelKey: "subOwnerReward", isPositive: true },
+    prize_jockey: { icon: Gift, color: "text-emerald-500 bg-emerald-500/10", labelKey: "typeReceived", subLabelKey: "subJockeyReward", isPositive: true },
+    prediction_win: { icon: Gift, color: "text-emerald-500 bg-emerald-500/10", labelKey: "typeReceived", subLabelKey: "subPredictWin", isPositive: true },
+    prediction_refund: { icon: Award, color: "text-purple-400 bg-purple-500/10", labelKey: "typeEvent", subLabelKey: "subRefundEvent", isPositive: true },
   };
 
-  return (
-    <div className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
-      {/* Decorative gradient header */}
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#E10600]/30 to-transparent" />
+  const filters = [
+    { id: "all", labelKey: "tabAll" },
+    { id: "points", labelKey: "tabPoints" },
+    { id: "cashouts", labelKey: "tabCashouts" },
+  ] as const;
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b dark:border-white/5 border-border pb-5">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
-            <Coins className="size-3.5 animate-pulse" /> Sổ cái điểm thưởng
-          </p>
-          <h2 className="mt-1.5 text-xl font-black uppercase tracking-tight dark:text-white text-foreground sm:text-2xl">
-            Lịch sử giao dịch điểm
+  return (
+    <div className="overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-0 shadow-[0_24px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.48)]">
+      {/* Header section */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b dark:border-white/5 border-border p-5">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg dark:bg-white/5 bg-muted p-2 dark:text-white/70 text-muted-foreground border dark:border-white/10 border-border">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+            </svg>
+          </div>
+          <h2 className="text-base font-black uppercase tracking-wider dark:text-white text-foreground">
+            {t("wallet.txHistory.title")}
           </h2>
         </div>
 
-        {/* Filter Badges with sleek modern pill styling */}
-        <div className="flex flex-wrap gap-1.5 dark:bg-black/30 bg-muted/20 p-1.5 rounded-xl border dark:border-white/5 border-border">
-          {[
-            { id: "all", label: "Tất cả" },
-            { id: "prizes", label: "Chủ/Nài ngựa" },
-            { id: "predictions", label: "Dự đoán" },
-            { id: "cashouts", label: "Yêu cầu đổi quà" },
-          ].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setFilterType(t.id)}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-[10px] sm:text-xs font-black uppercase tracking-wider transition cursor-pointer outline-none",
-                filterType === t.id
-                  ? "bg-primary text-white shadow-[0_2px_8px_rgba(225,6,0,0.25)]"
-                  : "dark:text-white/60 text-muted-foreground hover:dark:text-white hover:text-foreground hover:dark:bg-white/5 bg-muted/50 hover:bg-muted/80",
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex dark:bg-[#1E1E26] bg-muted/50 rounded-lg p-1 border dark:border-white/5 border-border">
+            {filters.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => {
+                  setFilterType(f.id);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  "rounded-md px-4 py-2 text-xs font-bold uppercase transition",
+                  filterType === f.id
+                    ? "bg-[#E10600] text-white"
+                    : "dark:text-white/50 text-muted-foreground hover:dark:text-white/80 hover:text-foreground"
+                )}
+              >
+                {t(`wallet.txHistory.${f.labelKey}`)}
+              </button>
+            ))}
+          </div>
+          <button className="flex items-center justify-center p-2 rounded-lg dark:bg-[#1E1E26] bg-muted/50 border dark:border-white/5 border-border dark:text-white/50 text-muted-foreground hover:dark:text-white hover:text-foreground transition">
+            <Calendar className="size-5" />
+          </button>
         </div>
       </div>
 
-      {/* Search input with motorsport dark aesthetic */}
-      <div className="relative mt-5">
-        <Search className="absolute top-1/2 left-4 size-4 -translate-y-1/2 dark:text-white/30 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Tìm kiếm theo mô tả giao dịch..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="h-12 w-full rounded-xl border dark:border-white/10 border-border dark:bg-black/40 bg-muted/20 pl-11 pr-6 text-sm dark:text-white text-foreground outline-none placeholder:dark:text-white/20 text-muted-foreground focus:border-primary transition"
-        />
+      {/* Search section */}
+      <div className="border-b dark:border-white/5 border-border">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder={t("wallet.txHistory.searchPlaceholder")}
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="h-[52px] w-full bg-transparent pl-5 pr-12 text-sm dark:text-white text-foreground outline-none placeholder:dark:text-white/20 placeholder:text-muted-foreground/60 transition"
+          />
+          <Search className="absolute top-1/2 right-5 size-4 -translate-y-1/2 dark:text-white/30 text-muted-foreground" />
+        </div>
       </div>
 
-      {/* Transactions List */}
-      <div className="mt-5 overflow-hidden rounded-xl border dark:border-white/5 border-border dark:bg-black/10 bg-muted/20">
-        {filteredTransactions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-center">
-            <Coins className="size-10 dark:text-white/10 text-muted-foreground animate-pulse" />
-            <p className="mt-4 text-xs font-black uppercase tracking-wider dark:text-white/40 text-muted-foreground">
-              Không tìm thấy giao dịch nào
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Vui lòng thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm.
-            </p>
-          </div>
-        ) : (
-          <div className="w-full overflow-x-auto select-none">
-            <table className="w-full text-left text-xs sm:text-sm border-collapse">
-              <thead className="dark:bg-white/[0.03] bg-muted/50 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b dark:border-white/5 border-border">
-                <tr>
-                  <th className="px-4 py-3">Loại giao dịch</th>
-                  <th className="px-4 py-3">Chi tiết hoạt động</th>
-                  <th className="px-4 py-3">Thời gian</th>
-                  <th className="px-4 py-3 text-right">Biến động điểm</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {filteredTransactions.map((tx) => {
-                  const meta = typeMeta[tx.type] || { icon: Coins, color: "dark:text-white/60 text-muted-foreground dark:bg-white/5 bg-muted/50 dark:border-white/10 border-border", label: "Giao dịch" };
-                  const Icon = meta.icon;
-                  const isPositive = tx.type === "deposit" || tx.type === "prize_owner" || tx.type === "prize_jockey" || tx.type === "prediction_win" || tx.type === "prediction_refund";
+      {/* Table section */}
+      <div className="w-full overflow-x-auto select-none">
+        <table className="w-full text-left text-sm border-collapse min-w-[700px]">
+          <thead className="dark:bg-transparent bg-muted/20 text-[11px] font-black uppercase text-muted-foreground dark:text-white/40 border-b dark:border-white/5 border-border">
+            <tr>
+              <th className="px-5 py-4 w-1/4">{t("wallet.txHistory.colType")}</th>
+              <th className="px-5 py-4 w-1/3">{t("wallet.txHistory.colDetails")}</th>
+              <th className="px-5 py-4 w-1/6">{t("wallet.txHistory.colTime")}</th>
+              <th className="px-5 py-4 w-1/6">{t("wallet.txHistory.colPoints")}</th>
+              <th className="px-5 py-4 w-1/6 text-right">{t("wallet.txHistory.colValue")}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5 divide-border/50">
+            {paginatedTransactions.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-12 text-center text-sm dark:text-white/40 text-muted-foreground">
+                  {t("wallet.txHistory.empty")}
+                </td>
+              </tr>
+            ) : (
+              paginatedTransactions.map((tx) => {
+                const meta = typeMeta[tx.type] ?? {
+                  icon: Gift,
+                  color: "text-emerald-500 bg-emerald-500/10",
+                  labelKey: "typeReceived",
+                  subLabelKey: "subDeposit",
+                  isPositive: true,
+                };
+                const Icon = meta.icon;
+                
+                const d = new Date(tx.createdAt);
+                const dateStr = d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+                const timeStr = d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+                
+                const pointsStr = (meta.isPositive ? "+" : "-") + tx.amount.toLocaleString("vi-VN");
+                const vndStr = (meta.isPositive ? "+" : "-") + (tx.amount * 10).toLocaleString("vi-VN") + " VNĐ";
 
-                  return (
-                    <tr key={tx.id} className="transition hover:dark:bg-white/[0.015] bg-muted/50">
-                      {/* Icon and Type */}
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-3">
-                          <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl border", meta.color)}>
-                            <Icon className="size-4" />
-                          </div>
-                          <div>
-                            <p className="font-black uppercase tracking-wider dark:text-white text-foreground text-[11px] sm:text-xs">
-                              {meta.label}
-                            </p>
-                            <p className="text-[9px] text-muted-foreground font-mono mt-0.5">
-                              #{tx.id}
-                            </p>
-                          </div>
+                return (
+                  <tr key={tx.id} className="transition hover:dark:bg-white/[0.02] hover:bg-muted/50 group">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl", meta.color)}>
+                          <Icon className="size-5" />
                         </div>
-                      </td>
+                        <div>
+                          <p className="font-bold dark:text-white/90 text-foreground text-[13px]">
+                            {t(`wallet.txHistory.${meta.labelKey}`)}
+                          </p>
+                          <p className="text-xs dark:text-white/40 text-muted-foreground mt-0.5">
+                            {t(`wallet.txHistory.${meta.subLabelKey}`)}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <p className="dark:text-white/70 text-foreground text-[13px] leading-relaxed max-w-[280px]">
+                        {tx.description}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <p className="dark:text-white/70 text-foreground text-[13px]">
+                        {dateStr}
+                      </p>
+                      <p className="text-[13px] dark:text-white/40 text-muted-foreground mt-0.5">
+                        {timeStr}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <span className={cn("font-bold text-[14px]", meta.isPositive ? "text-emerald-600 dark:text-emerald-500" : "text-[#E10600]")}>
+                        {pointsStr}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-right whitespace-nowrap">
+                      <span className={cn("font-bold text-[14px]", meta.isPositive ? "text-emerald-600 dark:text-emerald-500" : "text-[#E10600]")}>
+                        {vndStr}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
 
-                      {/* Details */}
-                      <td className="px-4 py-3.5">
-                        <p className="font-semibold dark:text-white/90 text-muted-foreground text-xs sm:text-sm">
-                          {tx.description}
-                        </p>
-                        <div className="mt-1 flex items-center gap-2">
-                          <StatusBadge
-                            label={tx.status === "completed" ? "Thành công" : tx.status === "pending" ? "Đang chờ tại quầy" : "Từ chối/Lỗi"}
-                            tone={
-                              tx.status === "completed"
-                                ? "green"
-                                : tx.status === "pending"
-                                  ? "slate"
-                                  : "red"
-                            }
-                          />
-                        </div>
-                      </td>
+      {/* Pagination section */}
+      <div className="flex items-center justify-between border-t dark:border-white/5 border-border p-4 dark:bg-[#111116] bg-muted/20 rounded-b-2xl">
+        <div className="text-[13px] dark:text-white/40 text-muted-foreground">
+          {t("wallet.txHistory.showing", {
+            start: (currentPage - 1) * itemsPerPage + 1,
+            end: Math.min(currentPage * itemsPerPage, filteredTransactions.length),
+            total: filteredTransactions.length
+          })}
+        </div>
+        
+        <div className="flex items-center gap-1">
+          <button 
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            className="flex items-center justify-center size-8 rounded-lg hover:dark:bg-white/10 hover:bg-muted/50 transition disabled:opacity-30 disabled:cursor-not-allowed dark:text-white/60 text-muted-foreground"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          
+          {[...Array(Math.min(totalPages, 4))].map((_, idx) => {
+            const pageNum = idx + 1;
+            return (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={cn(
+                  "flex items-center justify-center size-8 rounded-lg text-[13px] font-bold transition",
+                  currentPage === pageNum
+                    ? "bg-[#E10600] text-white"
+                    : "dark:text-white/60 text-muted-foreground hover:dark:bg-white/10 hover:bg-muted/50"
+                )}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+          
+          {totalPages > 4 && (
+            <div className="flex items-center justify-center size-8 dark:text-white/40 text-muted-foreground">
+              <MoreHorizontal className="size-4" />
+            </div>
+          )}
 
-                      {/* Stacked Date & Time */}
-                      <td className="px-4 py-3.5 whitespace-nowrap dark:text-white/60 text-muted-foreground font-mono text-[11px] leading-relaxed">
-                        <div className="flex flex-col">
-                          <span className="flex items-center gap-1 font-bold dark:text-white/80 text-muted-foreground">
-                            <Calendar className="size-3 text-primary shrink-0" />
-                            {new Date(tx.createdAt).toLocaleDateString()}
-                          </span>
-                          <span className="flex items-center gap-1 text-[10px] dark:text-white/40 text-muted-foreground mt-0.5">
-                            <Clock className="size-3 shrink-0" />
-                            {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      </td>
+          {totalPages > 4 && (
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              className={cn(
+                "flex items-center justify-center size-8 rounded-lg text-[13px] font-bold transition",
+                currentPage === totalPages
+                  ? "bg-[#E10600] text-white"
+                  : "dark:text-white/60 text-muted-foreground hover:dark:bg-white/10 hover:bg-muted/50"
+              )}
+            >
+              {totalPages}
+            </button>
+          )}
 
-                      {/* Points Change */}
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                        <div className="flex flex-col items-end">
-                          <span className={cn(
-                            "font-mono text-xs sm:text-sm font-black",
-                            isPositive ? "text-emerald-400" : "text-primary"
-                          )}>
-                            {isPositive ? "+" : "-"}{tx.amount.toLocaleString('vi-VN')} Điểm
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+          <button 
+            disabled={currentPage === totalPages || totalPages === 0}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            className="flex items-center justify-center size-8 rounded-lg hover:dark:bg-white/10 hover:bg-muted/50 transition disabled:opacity-30 disabled:cursor-not-allowed dark:text-white/60 text-muted-foreground"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

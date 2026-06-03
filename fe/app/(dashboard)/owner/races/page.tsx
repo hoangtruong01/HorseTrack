@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Flag, Loader2, ArrowRight, Timer, MapPin, Users, Award } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 
@@ -24,6 +24,7 @@ type Race = {
 };
 
 export default function OwnerRacesBrowserPage() {
+  const { t } = useTranslation();
   const [races, setRaces] = useState<Race[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,51 +36,52 @@ export default function OwnerRacesBrowserPage() {
         if (response.ok) {
           const resData = await response.json();
           if (resData.success) {
-            // Backend returns a paginated list: { data: [...], meta: {...} }
             setRaces(resData.data?.data || resData.data || []);
           }
         } else {
-          toast.error("Không thể lấy danh sách trận đua từ Backend.");
+          toast.error(t("pages.owner.races.toast.fetchFailed"));
         }
       } catch (err) {
         console.error("Lỗi lấy trận đua:", err);
-        toast.error("Lỗi kết nối tới server.");
+        toast.error(t("common.serverError"));
       } finally {
         setIsLoading(false);
       }
     }
     fetchRaces();
-  }, []);
+  }, [t]);
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto">
-      <PageHeader
-        eyebrow="Đại hội đua ngựa"
-        title="Danh Sách Trận Đua"
-        description="Tìm kiếm các trận đua đang mở hồ sơ ghi danh chiến mã. Đảm bảo chiến mã của bạn đáp ứng các tiêu chuẩn sức khỏe trước khi nộp hồ sơ."
-      />
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 dark:text-white/55 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
-          <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tìm kiếm các trận đấu khả dụng...</p>
+          <p className="mt-4 text-xs font-mono uppercase tracking-widest">{t("pages.owner.races.loading")}</p>
         </div>
       ) : races.length === 0 ? (
         <div className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E]/85 bg-card p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
           <Award className="size-16 dark:text-white/15 text-muted-foreground mx-auto mb-4 stroke-[1]" />
-          <h3 className="text-xl font-black dark:text-white text-foreground uppercase tracking-tight mb-2">Chưa có trận đấu nào</h3>
+          <h3 className="text-xl font-black dark:text-white text-foreground uppercase tracking-tight mb-2">{t("pages.owner.races.emptyTitle")}</h3>
           <p className="text-sm dark:text-white/50 text-muted-foreground max-w-md mx-auto">
-            Hệ thống hiện không có trận đua nào đang mở đăng ký hoặc được khởi tạo. Vui lòng quay lại sau!
+            {t("pages.owner.races.emptyDescription")}
           </p>
         </div>
       ) : (
         <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {races.map((race) => {
             const tournament = race.tournamentId || {};
-            const tournamentName = tournament.name || "Giải tự do";
+            const tournamentName = tournament.name || t("common.freeRace");
             const tournamentStatus = tournament.status || "DRAFT";
             const isOpen = tournamentStatus === "OPEN_REGISTRATION";
             const isFull = (race.participantsCount || 0) >= (race.maxParticipants || 20);
+            const startDatetime = new Date(race.startTime).toLocaleString("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
 
             return (
               <article
@@ -92,9 +94,9 @@ export default function OwnerRacesBrowserPage() {
                 <div>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     {isOpen ? (
-                      <StatusBadge label="Mở ghi tên" tone="green" />
+                      <StatusBadge label={t("pages.owner.races.openRegistration")} tone="green" />
                     ) : (
-                      <StatusBadge label="Đóng đăng ký" tone="slate" />
+                      <StatusBadge label={t("pages.owner.races.closedRegistration")} tone="slate" />
                     )}
                     <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E10600] max-w-[150px] truncate">
                       {tournamentName}
@@ -105,25 +107,21 @@ export default function OwnerRacesBrowserPage() {
                     {race.name}
                   </h2>
                   
-                  {/* Specs */}
                   <div className="mt-4 grid gap-2.5 text-xs dark:text-white/60 text-muted-foreground">
                     <span className="inline-flex items-center gap-2">
                       <Timer className="size-4 text-primary shrink-0" />
-                      Khởi tranh: {new Date(race.startTime).toLocaleString("vi-VN", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {t("pages.owner.races.startTime", { datetime: startDatetime })}
                     </span>
                     <span className="inline-flex items-center gap-2">
                       <MapPin className="size-4 text-primary shrink-0" />
-                      Khoảng cách: {race.distance} · Mặt sân: {race.surface}
+                      {t("pages.owner.races.distanceSurface", { distance: race.distance, surface: race.surface })}
                     </span>
                     <span className="inline-flex items-center gap-2">
                       <Users className="size-4 text-primary shrink-0" />
-                      Số lượng: {race.participantsCount || 0}/{race.maxParticipants || 20} chiến mã
+                      {t("pages.owner.races.participants", {
+                        current: race.participantsCount || 0,
+                        max: race.maxParticipants || 20,
+                      })}
                     </span>
                   </div>
                 </div>
@@ -132,18 +130,18 @@ export default function OwnerRacesBrowserPage() {
                   {isOpen ? (
                     isFull ? (
                       <Button disabled className="rounded-xl flex-1 text-xs py-2 h-9 dark:bg-white/5 bg-muted/50 dark:text-white/40 text-muted-foreground border dark:border-white/5 border-border">
-                        Trận đấu đã đầy
+                        {t("pages.owner.races.raceFull")}
                       </Button>
                     ) : (
                       <Button asChild className="rounded-xl flex-1 text-xs py-2 h-9 bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase tracking-wider">
                         <Link href={`/owner/races/${race.id}/register`}>
-                          Ghi danh ngay <ArrowRight className="size-3.5 ml-1" />
+                          {t("pages.owner.races.registerNow")} <ArrowRight className="size-3.5 ml-1" />
                         </Link>
                       </Button>
                     )
                   ) : (
                     <Button disabled className="rounded-xl flex-1 text-xs py-2 h-9 dark:bg-white/5 bg-muted/50 dark:text-white/40 text-muted-foreground border dark:border-white/5 border-border">
-                      Ngừng tiếp nhận hồ sơ
+                      {t("pages.owner.races.registrationClosed")}
                     </Button>
                   )}
                 </div>

@@ -11,6 +11,8 @@ export type NavigationRole =
 export type NavigationItem = {
   title: string;
   href: string;
+  /** Key under `navigation.*` in translation files */
+  i18nKey?: string;
   description?: string;
   role?: NavigationRole;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;

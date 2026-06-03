@@ -1,19 +1,23 @@
-import Link from "next/link";
+"use client";
 
-import { PageHeader } from "@/components/layout/page-header";
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
+
 import { Button } from "@/components/ui/button";
 import { TournamentForm } from "@/features/tournaments/components/tournament-form";
 
 export default function NewAdminTournamentPage() {
+  const { t } = useTranslation();
+
   return (
     <main className="space-y-6">
       <PageHeader
-        eyebrow="Tạo giải đấu"
-        title="Thiết lập giải đấu mới"
-        description="Điền thông tin bên dưới để tạo một giải đấu mới. Giải đấu sẽ khởi tạo ở trạng thái nháp (DRAFT)."
+        eyebrow={t("pages.admin.tournamentsNew.eyebrow")}
+        title={t("pages.admin.tournamentsNew.title")}
+        description={t("pages.admin.tournamentsNew.description")}
         actions={
           <Button asChild variant="outline" className="rounded-full">
-            <Link href="/admin">Quay lại Dashboard</Link>
+            <Link href="/admin">{t("pages.admin.tournamentsNew.backToDashboard")}</Link>
           </Button>
         }
       />

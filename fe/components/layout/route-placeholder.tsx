@@ -12,6 +12,8 @@ export type RoutePlaceholderProps = {
   cards?: Array<{ label: string; value: string }>;
   ctaHref?: string;
   ctaLabel?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
 };
 
 export function RoutePlaceholder({
@@ -21,6 +23,8 @@ export function RoutePlaceholder({
   cards = [],
   ctaHref,
   ctaLabel,
+  emptyTitle = "Phase 2 shell only",
+  emptyDescription = "Placeholder route with local mock copy only. Business screens, backend calls, auth guards, and restricted MVP concepts are intentionally not implemented yet.",
 }: RoutePlaceholderProps) {
   return (
     <div className="space-y-8">
@@ -43,8 +47,8 @@ export function RoutePlaceholder({
 
       <EmptyState
         icon={<Flag className="size-8" aria-hidden="true" />}
-        title="Phase 2 shell only"
-        description="Placeholder route with local mock copy only. Business screens, backend calls, auth guards, and restricted MVP concepts are intentionally not implemented yet."
+        title={emptyTitle}
+        description={emptyDescription}
         action={
           ctaHref && ctaLabel ? (
             <Button

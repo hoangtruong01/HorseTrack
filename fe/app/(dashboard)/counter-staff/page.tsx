@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Gift, Wallet, ArrowRight, CheckCircle2, AlertCircle, Clock, ShieldAlert, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/layout/page-header";
 import { walletApi, type CashoutItem } from "@/lib/api-client";
 
 export default function CounterStaffDashboard() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     totalCount: 0,
     pendingCount: 0,
@@ -53,9 +55,9 @@ export default function CounterStaffDashboard() {
   return (
     <main className="space-y-8 animate-[fadeIn_0.5s_ease-out]">
       <PageHeader
-        eyebrow="Counter Operations"
-        title="Quầy Giao Dịch Đổi Thưởng"
-        description="Chào mừng bạn đến với bàn làm việc của Nhân viên quầy. Tại đây bạn có thể phê duyệt mã quà tặng vật lý và hỗ trợ khách hàng nạp tiền."
+        eyebrow={t("counterStaff.header.eyebrow")}
+        title={t("counterStaff.header.title")}
+        description={t("counterStaff.header.description")}
       />
 
       {/* Stats Cards */}
@@ -63,12 +65,12 @@ export default function CounterStaffDashboard() {
         {/* Pending Card */}
         <div className="relative overflow-hidden rounded-2xl border border-yellow-500/20 dark:bg-gradient-to-br dark:from-[#1A1813]/90 dark:to-[#12110D]/90 bg-yellow-50 p-5 shadow-2xl transition duration-300 hover:border-yellow-500/40">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-widest text-yellow-500/80">Chờ Phê Duyệt</p>
+            <p className="text-xs font-black uppercase tracking-widest text-yellow-500/80">{t("counterStaff.stats.pending.title")}</p>
             <Clock className="size-5 text-yellow-500" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-black dark:text-white text-foreground">{loading ? "—" : stats.pendingCount}</span>
-            <span className="text-xs text-muted-foreground">mã đang đợi</span>
+            <span className="text-xs text-muted-foreground">{t("counterStaff.stats.pending.desc")}</span>
           </div>
           <div className="absolute -bottom-6 -right-6 size-24 bg-yellow-500/5 rounded-full blur-xl"></div>
         </div>
@@ -76,12 +78,12 @@ export default function CounterStaffDashboard() {
         {/* Approved Card */}
         <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 dark:bg-gradient-to-br dark:from-[#121724]/90 dark:to-[#0E121C]/90 bg-blue-50 p-5 shadow-2xl transition duration-300 hover:border-blue-500/40">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-widest text-blue-400/80">Đã Duyệt (Chờ Trao Quà)</p>
+            <p className="text-xs font-black uppercase tracking-widest text-blue-400/80">{t("counterStaff.stats.approved.title")}</p>
             <Sparkles className="size-5 text-blue-400" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-black dark:text-white text-foreground">{loading ? "—" : stats.approvedCount}</span>
-            <span className="text-xs text-muted-foreground">mã đã xác thực</span>
+            <span className="text-xs text-muted-foreground">{t("counterStaff.stats.approved.desc")}</span>
           </div>
           <div className="absolute -bottom-6 -right-6 size-24 bg-blue-500/5 rounded-full blur-xl"></div>
         </div>
@@ -89,12 +91,12 @@ export default function CounterStaffDashboard() {
         {/* Paid Card */}
         <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 dark:bg-gradient-to-br dark:from-[#101C15]/90 dark:to-[#0A120E]/90 bg-emerald-50 p-5 shadow-2xl transition duration-300 hover:border-emerald-500/40">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-widest text-emerald-400/80">Đã Trao Quà</p>
+            <p className="text-xs font-black uppercase tracking-widest text-emerald-400/80">{t("counterStaff.stats.paid.title")}</p>
             <CheckCircle2 className="size-5 text-emerald-400" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-black dark:text-white text-foreground">{loading ? "—" : stats.paidCount}</span>
-            <span className="text-xs text-muted-foreground">giao dịch hoàn tất</span>
+            <span className="text-xs text-muted-foreground">{t("counterStaff.stats.paid.desc")}</span>
           </div>
           <div className="absolute -bottom-6 -right-6 size-24 bg-emerald-500/5 rounded-full blur-xl"></div>
         </div>
@@ -102,14 +104,14 @@ export default function CounterStaffDashboard() {
         {/* Points Redeemed Card */}
         <div className="relative overflow-hidden rounded-2xl border border-[#E10600]/20 dark:bg-gradient-to-br dark:from-[#241010]/90 dark:to-[#190C0C]/90 bg-red-50 p-5 shadow-2xl transition duration-300 hover:border-[#E10600]/40">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-widest text-[#E10600]/80">Tổng Điểm Đổi Quà</p>
+            <p className="text-xs font-black uppercase tracking-widest text-[#E10600]/80">{t("counterStaff.stats.totalPoints.title")}</p>
             <Gift className="size-5 text-[#E10600]" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-black dark:text-white text-foreground">
               {loading ? "—" : stats.totalPoints.toLocaleString()}
             </span>
-            <span className="text-xs text-muted-foreground">điểm</span>
+            <span className="text-xs text-muted-foreground">{t("counterStaff.stats.totalPoints.desc")}</span>
           </div>
           <div className="absolute -bottom-6 -right-6 size-24 bg-[#E10600]/5 rounded-full blur-xl"></div>
         </div>
@@ -126,13 +128,13 @@ export default function CounterStaffDashboard() {
             <Gift className="size-6" />
           </div>
           <h3 className="mt-5 text-lg font-black uppercase tracking-wider dark:text-white text-foreground group-hover:text-[#E10600] transition">
-            Đổi Thưởng Vật Lý
+            {t("counterStaff.actions.redemption.title")}
           </h3>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            Tra cứu mã đổi thưởng dạng <code className="text-[#E10600] font-mono">RWD-XXXXXX</code> do khán giả/người dùng cung cấp tại quầy, đối soát thông tin quà và cập nhật trạng thái đã trao quà thành công.
+            {t("counterStaff.actions.redemption.desc")}
           </p>
           <div className="mt-6 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#E10600]">
-            Mở hàng đợi đổi thưởng <ArrowRight className="size-4 group-hover:translate-x-1.5 transition-transform" />
+            {t("counterStaff.actions.redemption.link")} <ArrowRight className="size-4 group-hover:translate-x-1.5 transition-transform" />
           </div>
         </Link>
 
@@ -145,34 +147,34 @@ export default function CounterStaffDashboard() {
             <Wallet className="size-6" />
           </div>
           <h3 className="mt-5 text-lg font-black uppercase tracking-wider dark:text-white text-foreground group-hover:text-blue-400 transition">
-            Nạp Tiền Cho Khách
+            {t("counterStaff.actions.deposit.title")}
           </h3>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            Hỗ trợ nạp tiền mặt đổi lấy điểm thưởng/số dư tài khoản ví tại quầy. Nhập email/ID tài khoản của khách hàng để thực hiện nạp trực tiếp nhanh chóng.
+            {t("counterStaff.actions.deposit.desc")}
           </p>
           <div className="mt-6 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-400">
-            Mở giao diện nạp ví <ArrowRight className="size-4 group-hover:translate-x-1.5 transition-transform" />
+            {t("counterStaff.actions.deposit.link")} <ArrowRight className="size-4 group-hover:translate-x-1.5 transition-transform" />
           </div>
         </Link>
       </div>
 
       {/* Recent Redemptions Table */}
       <div className="rounded-2xl border dark:border-white/5 border-border dark:bg-[#15151E]/60 bg-card p-6 shadow-2xl">
-        <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground mb-4">Các lượt quy đổi gần đây</h3>
+        <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground mb-4">{t("counterStaff.recentRedemptions.title")}</h3>
         {loading ? (
-          <div className="py-8 text-center text-xs text-muted-foreground">Đang tải lịch sử đổi...</div>
+          <div className="py-8 text-center text-xs text-muted-foreground">{t("counterStaff.recentRedemptions.loading")}</div>
         ) : recentCashouts.length === 0 ? (
-          <div className="py-8 text-center text-xs text-muted-foreground">Chưa có giao dịch quy đổi nào được thực hiện.</div>
+          <div className="py-8 text-center text-xs text-muted-foreground">{t("counterStaff.recentRedemptions.empty")}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b dark:border-white/5 border-border text-muted-foreground uppercase font-black tracking-wider text-[10px]">
-                  <th className="pb-3 pr-4">Mã Đổi Quà</th>
-                  <th className="pb-3 pr-4">Khách hàng</th>
-                  <th className="pb-3 text-center pr-4">Điểm đổi</th>
-                  <th className="pb-3 pr-4">Trạng thái</th>
-                  <th className="pb-3 text-right">Thời gian</th>
+                  <th className="pb-3 pr-4">{t("counterStaff.recentRedemptions.columns.code")}</th>
+                  <th className="pb-3 pr-4">{t("counterStaff.recentRedemptions.columns.customer")}</th>
+                  <th className="pb-3 text-center pr-4">{t("counterStaff.recentRedemptions.columns.points")}</th>
+                  <th className="pb-3 pr-4">{t("counterStaff.recentRedemptions.columns.status")}</th>
+                  <th className="pb-3 text-right">{t("counterStaff.recentRedemptions.columns.time")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 dark:text-white/80 text-muted-foreground">
@@ -180,7 +182,7 @@ export default function CounterStaffDashboard() {
                   <tr key={item._id} className="hover:dark:bg-white/[0.01] bg-muted/50">
                     <td className="py-3 font-mono font-bold text-primary pr-4">{item.redemptionCode}</td>
                     <td className="py-3 pr-4">
-                      {typeof item.userId === "object" ? item.userId.fullName : "Khách hàng"}
+                      {typeof item.userId === "object" ? item.userId.fullName : t("counterStaff.recentRedemptions.customerFallback")}
                       <span className="block text-[10px] text-muted-foreground">
                         {typeof item.userId === "object" ? item.userId.email : "—"}
                       </span>
@@ -190,17 +192,22 @@ export default function CounterStaffDashboard() {
                     </td>
                     <td className="py-3 pr-4">
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
-                          item.status === "PENDING"
+                        className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${item.status === "PENDING"
                             ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
                             : item.status === "APPROVED"
-                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                            : item.status === "PAID"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-red-500/10 text-red-400 border border-red-500/20"
-                        }`}
+                              ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                              : item.status === "PAID"
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : "bg-red-500/10 text-red-400 border border-red-500/20"
+                          }`}
                       >
-                        {item.status === "PAID" ? "ĐÃ TRAO QUÀ" : item.status}
+                        {item.status === "PAID"
+                          ? t("counterStaff.recentRedemptions.statusPaid")
+                          : item.status === "PENDING"
+                            ? t("counterStaff.recentRedemptions.statusPending")
+                            : item.status === "APPROVED"
+                              ? t("counterStaff.recentRedemptions.statusApproved")
+                              : item.status}
                       </span>
                     </td>
                     <td className="py-3 text-right text-muted-foreground">

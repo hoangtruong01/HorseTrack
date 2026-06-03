@@ -22,9 +22,9 @@ import {
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 // Types
 type Race = {
@@ -68,6 +68,7 @@ export default function RefereeRaceDetailPage({
 }) {
   const { raceId } = use(params);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [race, setRace] = useState<Race | null>(null);
   const [checks, setChecks] = useState<RaceCheck[]>([]);
@@ -213,8 +214,8 @@ export default function RefereeRaceDetailPage({
   if (!race) {
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
-        <h2 className="text-xl font-bold dark:text-white text-foreground">Không tìm thấy cuộc đua</h2>
-        <Button onClick={() => router.back()}>Quay lại</Button>
+        <h2 className="text-xl font-bold dark:text-white text-foreground">{t("pages.referee.raceDetail.notFound")}</h2>
+        <Button onClick={() => router.back()}>{t("pages.referee.raceDetail.back")}</Button>
       </main>
     );
   }
@@ -226,28 +227,10 @@ export default function RefereeRaceDetailPage({
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Back link */}
       <Link href="/referee" className="inline-flex items-center text-xs dark:text-white/50 text-muted-foreground hover:dark:text-white text-foreground transition">
-        <ArrowLeft className="size-3.5 mr-1" /> Quay lại bàn làm việc
+        <ArrowLeft className="size-3.5 mr-1" /> {t("pages.referee.raceDetail.backToWorkspace")}
       </Link>
 
-      <PageHeader
-        eyebrow="Tác nghiệp trọng tài"
-        title={race.name}
-        description={`Kiểm duyệt an toàn thiết bị bảo hộ, sức khỏe chiến mã và điểm danh nài ngựa trước khi xuất phát.`}
-        actions={
-          <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-11 rounded-full dark:border-white/10 border-border hover:dark:bg-white/5 bg-muted/50 dark:text-white text-foreground hover:dark:text-white text-foreground">
-              <Link href={`/referee/races/${race._id}/violations`}>
-                <Siren className="size-4 mr-1 text-primary" /> Lỗi vi phạm
-              </Link>
-            </Button>
-            <Button asChild className="h-11 rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
-              <Link href={`/referee/races/${race._id}/result-entry`}>
-                <Flag className="size-4 mr-1" /> Nhập kết quả
-              </Link>
-            </Button>
-          </div>
-        }
-      />
+      
 
       {/* Race Status Control Panel */}
       <section className="relative overflow-hidden rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-lg">

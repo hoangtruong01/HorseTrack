@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -20,9 +20,10 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { normalizeLanguage } from "@/lib/i18n-language";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 // Types
 type RaceInfo = {
@@ -67,6 +68,9 @@ type RaceCheck = {
 };
 
 export default function RefereeReportsPage() {
+  const { t, i18n } = useTranslation();
+  const f = "pages.referee.reports.form";
+  const dateLocale = normalizeLanguage(i18n.language) === "en" ? "en-US" : "vi-VN";
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [reports, setReports] = useState<Record<string, RefereeReport[]>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +93,7 @@ export default function RefereeReportsPage() {
     try {
       // 1. Fetch all accepted assignments for this referee
       const res = await fetch("/api/referee/referee-assignments/my-assignments?limit=100");
-      if (!res.ok) throw new Error("Không thể tải danh sách cuộc đua");
+      if (!res.ok) throw new Error(t("pages.referee.reports.fetchFailed"));
       const resData = await res.json();
       const myAssignments = (resData.data?.data || []).filter(
         (a: any) => a.status === "accepted" && a.raceId
@@ -111,7 +115,7 @@ export default function RefereeReportsPage() {
       setReports(reportsMap);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Lỗi tải danh sách cuộc đua.");
+      toast.error(err.message || t("pages.referee.reports.fetchError"));
     } finally {
       setIsLoading(false);
     }
@@ -152,11 +156,11 @@ export default function RefereeReportsPage() {
   const handleSubmitReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRaceId) {
-      toast.error("Vui lòng chọn cuộc đua");
+      toast.error(t("pages.referee.reports.selectRaceRequired"));
       return;
     }
     if (!description.trim()) {
-      toast.error("Vui lòng nhập mô tả biên bản");
+      toast.error(t("pages.referee.reports.descriptionRequired"));
       return;
     }
 
@@ -179,10 +183,10 @@ export default function RefereeReportsPage() {
 
       const resData = await res.json();
       if (!res.ok) {
-        throw new Error(resData.message || "Lập biên bản thất bại");
+        throw new Error(resData.message || t("pages.referee.reports.submitFailed"));
       }
 
-      toast.success("Lập biên bản thi đấu chính thức thành công!");
+      toast.success(t("pages.referee.reports.submitSuccess"));
       // Reset form
       setSelectedRaceId("");
       setSelectedHorseId("");
@@ -194,16 +198,16 @@ export default function RefereeReportsPage() {
       // Reload
       await fetchData();
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi gửi biên bản.");
+      toast.error(err.message || t("pages.referee.reports.submitError"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return "Chưa xác định";
+    if (!dateStr) return t("pages.referee.common.dateUnknown");
     const d = new Date(dateStr);
-    return `${d.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} ngày ${d.toLocaleDateString("vi-VN")}`;
+    return `${d.toLocaleTimeString(dateLocale, { hour: "2-digit", minute: "2-digit" })} ${t("pages.referee.common.dateAt")} ${d.toLocaleDateString(dateLocale)}`;
   };
 
   if (isLoading) {
@@ -216,31 +220,26 @@ export default function RefereeReportsPage() {
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
-      <PageHeader
-        eyebrow="Tư liệu chính thức"
-        title="Biên Bản Thi Đấu (Referee Reports)"
-        description="Lập biên bản ghi nhận diễn biến trước trận (PRE_RACE) hoặc sự cố vi phạm thực tế sau trận (POST_RACE) để lưu vết lịch sử hệ thống."
-      />
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-start">
         {/* Reports Create Form */}
         <section className="rounded-2xl border dark:border-white/10 border-border dark:bg-[#15151E] bg-card p-5 shadow-lg space-y-4">
           <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground flex items-center gap-1.5">
             <PlusCircle className="size-4 text-primary" />
-            Lập biên bản thi đấu mới
+            {t(`${f}.createTitle`)}
           </h3>
 
           <form onSubmit={handleSubmitReport} className="space-y-4 text-xs">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Chọn cuộc đua phân công</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t(`${f}.selectRace`)}</label>
                 <select
                   value={selectedRaceId}
                   onChange={(e) => setSelectedRaceId(e.target.value)}
                   className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                   required
                 >
-                  <option value="" className="dark:bg-[#15151E] bg-card">-- Chọn cuộc đua giám sát --</option>
+                  <option value="" className="dark:bg-[#15151E] bg-card">{t(`${f}.selectRacePlaceholder`)}</option>
                   {assignments.map((a) => (
                     <option key={a.raceId?._id} value={a.raceId?._id} className="dark:bg-[#15151E] bg-card">
                       {a.raceId?.name} ({a.raceId?.status})
@@ -250,26 +249,26 @@ export default function RefereeReportsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Phân loại biên bản</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t(`${f}.reportType`)}</label>
                 <select
                   value={reportType}
                   onChange={(e) => setReportType(e.target.value as any)}
                   className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                 >
-                  <option value="POST_RACE" className="dark:bg-[#15151E] bg-card">Biên bản sau trận (POST_RACE)</option>
-                  <option value="PRE_RACE" className="dark:bg-[#15151E] bg-card">Biên bản trước trận (PRE_RACE)</option>
+                  <option value="POST_RACE" className="dark:bg-[#15151E] bg-card">{t(`${f}.typePostRace`)}</option>
+                  <option value="PRE_RACE" className="dark:bg-[#15151E] bg-card">{t(`${f}.typePreRace`)}</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Chiến mã liên quan (Tùy chọn)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t(`${f}.horseOptional`)}</label>
                 <select
                   value={selectedHorseId}
                   onChange={(e) => setSelectedHorseId(e.target.value)}
                   className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground focus:border-primary focus:outline-none"
                   disabled={!selectedRaceId}
                 >
-                  <option value="" className="dark:bg-[#15151E] bg-card">-- Tất cả / Không chọn --</option>
+                  <option value="" className="dark:bg-[#15151E] bg-card">{t(`${f}.horsePlaceholder`)}</option>
                   {horsesForSelectedRace.map((h) => (
                     <option key={h.horseId?._id} value={h.horseId?._id} className="dark:bg-[#15151E] bg-card">
                       {h.horseId?.name}
@@ -279,34 +278,34 @@ export default function RefereeReportsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Sự cố vi phạm (Tùy chọn)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t(`${f}.violationOptional`)}</label>
                 <input
                   type="text"
                   value={violation}
                   onChange={(e) => setViolation(e.target.value)}
-                  placeholder="Ví dụ: Lấn làn đối thủ"
+                  placeholder={t(`${f}.violationPlaceholder`)}
                   className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/20 focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Hình phạt đề xuất (Tùy chọn)</label>
+                <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t(`${f}.penaltyOptional`)}</label>
                 <input
                   type="text"
                   value={penalty}
                   onChange={(e) => setPenalty(e.target.value)}
-                  placeholder="Ví dụ: Cộng 3 giây"
+                  placeholder={t(`${f}.penaltyPlaceholder`)}
                   className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/20 focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">Nội dung biên bản chi tiết</label>
+              <label className="text-[10px] font-bold uppercase dark:text-white/50 text-muted-foreground">{t(`${f}.description`)}</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ghi nhận tổng quan về diễn biến cuộc đua, các quyết định điều khiển hoặc kiến nghị xử lý..."
+                placeholder={t(`${f}.descriptionPlaceholder`)}
                 rows={4}
                 className="w-full rounded-lg border dark:border-white/10 border-border dark:bg-white/5 bg-muted/50 px-3 py-2 text-xs dark:text-white text-foreground placeholder-white/20 focus:border-primary focus:outline-none resize-none"
                 required
@@ -319,7 +318,7 @@ export default function RefereeReportsPage() {
                 disabled={isSubmitting || !selectedRaceId}
                 className="rounded-full bg-primary hover:bg-primary-dark font-black uppercase text-xs h-10 px-6 text-white"
               >
-                {isSubmitting ? "Đang gửi..." : "Ký & Gửi biên bản"}
+                {isSubmitting ? t(`${f}.submitting`) : t(`${f}.submit`)}
               </Button>
             </div>
           </form>
@@ -328,12 +327,12 @@ export default function RefereeReportsPage() {
         {/* Reports Queue List */}
         <section className="space-y-4">
           <h3 className="text-sm font-black uppercase tracking-wider dark:text-white text-foreground">
-            Hồ sơ biên bản theo cuộc đua ({assignments.length})
+            {t(`${f}.archiveTitle`, { count: assignments.length })}
           </h3>
 
           {assignments.length === 0 ? (
             <div className="text-center py-12 rounded-2xl border border-dashed dark:border-white/10 border-border dark:bg-[#15151E]/40 bg-card dark:text-white/40 text-muted-foreground text-xs">
-              Bạn chưa chấp nhận giám sát cuộc đua nào nên chưa có biên bản lưu trữ.
+              {t(`${f}.archiveEmpty`)}
             </div>
           ) : (
             <div className="space-y-3">
