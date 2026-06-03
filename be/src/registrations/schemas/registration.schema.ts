@@ -46,6 +46,9 @@ export class Registration {
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   approvedBy?: Types.ObjectId;
+
+  @Prop({ default: 30, min: 5, max: 50 })
+  jockeySharePercent?: number;
 }
 
 export const RegistrationSchema = SchemaFactory.createForClass(Registration);

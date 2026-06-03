@@ -9,6 +9,10 @@ import {
 import { Jockey, JockeySchema } from '../jockeys/schemas/jockey.schema';
 import { Race, RaceSchema } from '../races/schemas/race.schema';
 import {
+  Tournament,
+  TournamentSchema,
+} from '../tournaments/schemas/tournament.schema';
+import {
   JockeyInvitation,
   JockeyInvitationSchema,
 } from './schemas/jockey-invitation.schema';
@@ -22,6 +26,7 @@ import { JockeyInvitationsService } from './jockey-invitations.service';
       { name: Registration.name, schema: RegistrationSchema },
       { name: Jockey.name, schema: JockeySchema },
       { name: Race.name, schema: RaceSchema },
+      { name: Tournament.name, schema: TournamentSchema },
     ]),
     UsersModule,
     NotificationsModule,

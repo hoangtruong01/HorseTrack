@@ -23,9 +23,16 @@ export enum HorseStatus {
   DELETED = 'DELETED',
 }
 
+export enum HorseApprovalStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
 @Schema({
   timestamps: true,
   toObject: { virtuals: true },
+  toJSON: { virtuals: true },
 })
 export class Horse {
   @Prop({ required: true })
@@ -65,6 +72,22 @@ export class Horse {
     default: HorseStatus.ACTIVE,
   })
   status!: HorseStatus;
+
+  @Prop({
+    required: true,
+    enum: HorseApprovalStatus,
+    default: HorseApprovalStatus.PENDING,
+  })
+  approvalStatus!: HorseApprovalStatus;
+
+  @Prop()
+  rejectionReason?: string;
+
+  @Prop()
+  rejectedAt?: Date;
+
+  @Prop()
+  approvedAt?: Date;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   ownerId!: Types.ObjectId;

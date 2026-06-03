@@ -68,7 +68,14 @@ export class JockeyInvitationsService {
       );
     }
 
-    // 2. Verify race is not locked for jockey changes
+    // 2. Check registration doesn't already have a jockey assigned
+    if (registration.jockeyUserId) {
+      throw new BadRequestException(
+        'This registration already has a jockey assigned. Cancel or remove the current jockey first.',
+      );
+    }
+
+    // 3. Verify race is not locked for jockey changes
     const race = await this.raceModel.findById(registration.raceId);
     if (!race) throw new NotFoundException('Race not found');
     if (LOCKED_RACE_STATUSES.includes(race.status)) {
@@ -77,15 +84,15 @@ export class JockeyInvitationsService {
       );
     }
 
-    // 3. Verify target user has JOCKEY role
+    // 4. Verify target user has JOCKEY role
     const jockeyUser = await this.usersService.findById(dto.jockeyId);
     if (!jockeyUser.roles.includes(RoleName.JOCKEY)) {
       throw new BadRequestException('Target user does not have JOCKEY role');
     }
 
-    // 4. Verify jockey profile exists and is AVAILABLE
+    // 5. Verify jockey profile exists and is AVAILABLE
     const jockeyProfile = await this.jockeyModel.findOne({
-      userId: dto.jockeyId,
+      userId: new Types.ObjectId(dto.jockeyId),
     });
     if (!jockeyProfile) {
       throw new BadRequestException('Jockey profile not found');
@@ -96,10 +103,10 @@ export class JockeyInvitationsService {
       );
     }
 
-    // 5. Prevent duplicate active invitation
+    // 6. Prevent duplicate active invitation
     const existing = await this.invitationModel.findOne({
-      registrationId: dto.registrationId,
-      jockeyUserId: dto.jockeyId,
+      registrationId: new Types.ObjectId(dto.registrationId),
+      jockeyUserId: new Types.ObjectId(dto.jockeyId),
       status: InvitationStatus.PENDING,
     });
     if (existing) {
@@ -108,23 +115,33 @@ export class JockeyInvitationsService {
       );
     }
 
+    // 7. Validate jockeySharePercent
+    const sharePercent = dto.jockeySharePercent ?? 30;
+    if (sharePercent < 5 || sharePercent > 50) {
+      throw new BadRequestException(
+        'Jockey share percent must be between 5% and 50%',
+      );
+    }
+
     const expiredAt = new Date();
     expiredAt.setDate(expiredAt.getDate() + INVITATION_EXPIRY_DAYS);
 
     const invitation = await this.invitationModel.create({
       registrationId: new Types.ObjectId(dto.registrationId),
+      tournamentId: registration.tournamentId,
       raceId: registration.raceId,
       horseId: registration.horseId,
       ownerId: new Types.ObjectId(ownerId),
       jockeyUserId: new Types.ObjectId(dto.jockeyId),
       message: dto.message,
+      jockeySharePercent: sharePercent,
       expiredAt,
     });
 
     await this.notificationsService.send(
       dto.jockeyId,
       'New Race Invitation',
-      `You have been invited to ride in a race. Message: ${dto.message ?? ''}`,
+      `You have been invited to ride in a race with ${sharePercent}% prize share. Message: ${dto.message ?? ''}`,
       NotificationType.RACE,
     );
 
@@ -158,6 +175,16 @@ export class JockeyInvitationsService {
 
     // When accepting, run additional checks
     if (status === InvitationStatus.ACCEPTED) {
+      // Check registration doesn't already have a jockey
+      const registration = await this.registrationModel.findById(
+        invitation.registrationId,
+      );
+      if (registration?.jockeyUserId) {
+        throw new BadRequestException(
+          'This registration already has a jockey assigned',
+        );
+      }
+
       // Check race is not locked (READY or beyond)
       const race = await this.raceModel.findById(invitation.raceId);
       if (race && LOCKED_RACE_STATUSES.includes(race.status)) {
@@ -169,7 +196,7 @@ export class JockeyInvitationsService {
       // Check schedule conflict: jockey already accepted another race within 4-hour window
       if (race) {
         const acceptedInvitations = await this.invitationModel.find({
-          jockeyUserId,
+          jockeyUserId: new Types.ObjectId(jockeyUserId),
           status: InvitationStatus.ACCEPTED,
           _id: { $ne: id },
         });
@@ -198,11 +225,24 @@ export class JockeyInvitationsService {
         }
       }
 
-      // Bind jockey to registration
+      // Bind jockey to registration + save jockeySharePercent
       await this.registrationModel.findByIdAndUpdate(
         invitation.registrationId,
         {
           jockeyUserId: invitation.jockeyUserId,
+          jockeySharePercent: invitation.jockeySharePercent,
+        },
+      );
+
+      // Auto-cancel all other PENDING invitations for the same registration
+      await this.invitationModel.updateMany(
+        {
+          registrationId: invitation.registrationId,
+          _id: { $ne: invitation._id },
+          status: InvitationStatus.PENDING,
+        },
+        {
+          status: InvitationStatus.CANCELLED,
         },
       );
     }
@@ -238,14 +278,21 @@ export class JockeyInvitationsService {
   }
 
   async findMyReceived(jockeyUserId: string, page = 1, limit = 20) {
-    const filter = { jockeyUserId };
+    const filter = { jockeyUserId: new Types.ObjectId(jockeyUserId) };
     const [data, total] = await Promise.all([
       this.invitationModel
         .find(filter)
         .populate('registrationId')
-        .populate('raceId', 'name startTime status')
-        .populate('horseId', 'name breed')
-        .populate('ownerId', 'fullName email phone')
+        .populate('tournamentId', 'name startDate endDate location status')
+        .populate(
+          'raceId',
+          'name startTime status distanceMeters lapCount location prize',
+        )
+        .populate(
+          'horseId',
+          'name breed age gender color weightKg heightCm baseSpeed staminaScore image healthStatus',
+        )
+        .populate('ownerId', 'fullName email phone avatar')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -259,14 +306,15 @@ export class JockeyInvitationsService {
   }
 
   async findMySent(ownerUserId: string, page = 1, limit = 20) {
-    const filter = { ownerId: ownerUserId };
+    const filter = { ownerId: new Types.ObjectId(ownerUserId) };
     const [data, total] = await Promise.all([
       this.invitationModel
         .find(filter)
         .populate('registrationId')
-        .populate('raceId', 'name startTime status')
+        .populate('tournamentId', 'name startDate endDate location status')
+        .populate('raceId', 'name startTime status distanceMeters')
         .populate('horseId', 'name breed')
-        .populate('jockeyUserId', 'fullName email phone')
+        .populate('jockeyUserId', 'fullName email phone avatar')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })

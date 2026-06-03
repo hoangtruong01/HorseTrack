@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { PredictionsService } from '../predictions/predictions.service';
+import { TournamentStatus } from '../tournaments/schemas/tournament.schema';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
 import {
@@ -108,7 +109,10 @@ export class RacesService {
   }
 
   async findByTournament(tournamentId: string, page = 1, limit = 20) {
-    const filter = { tournamentId, deletedAt: { $exists: false } };
+    const filter = {
+      tournamentId: new Types.ObjectId(tournamentId),
+      deletedAt: { $exists: false },
+    };
     const [data, total] = await Promise.all([
       this.raceModel
         .find(filter)
@@ -192,7 +196,65 @@ export class RacesService {
     }
 
     race.status = status;
-    return race.save();
+    const savedRace = await race.save();
+
+    // Automate Tournament Status Transitions:
+    try {
+      if (status === RaceStatus.LIVE) {
+        const tournament = await this.tournamentsService.findOne(
+          race.tournamentId.toString(),
+        );
+        if (tournament.status === TournamentStatus.OPEN_REGISTRATION) {
+          await this.tournamentsService.updateStatus(
+            tournament._id.toString(),
+            TournamentStatus.CLOSED_REGISTRATION,
+          );
+          await this.tournamentsService.updateStatus(
+            tournament._id.toString(),
+            TournamentStatus.ONGOING,
+          );
+        } else if (tournament.status === TournamentStatus.CLOSED_REGISTRATION) {
+          await this.tournamentsService.updateStatus(
+            tournament._id.toString(),
+            TournamentStatus.ONGOING,
+          );
+        }
+      } else if (
+        [
+          RaceStatus.FINISHED,
+          RaceStatus.RESULT_PUBLISHED,
+          RaceStatus.CANCELLED,
+        ].includes(status)
+      ) {
+        const tournament = await this.tournamentsService.findOne(
+          race.tournamentId.toString(),
+        );
+        if (tournament.status === TournamentStatus.ONGOING) {
+          const activeRacesCount = await this.raceModel.countDocuments({
+            tournamentId: race.tournamentId,
+            deletedAt: { $exists: false },
+            status: {
+              $nin: [
+                RaceStatus.FINISHED,
+                RaceStatus.RESULT_PUBLISHED,
+                RaceStatus.CANCELLED,
+              ],
+            },
+          });
+          if (activeRacesCount === 0) {
+            await this.tournamentsService.updateStatus(
+              tournament._id.toString(),
+              TournamentStatus.COMPLETED,
+            );
+          }
+        }
+      }
+    } catch (err) {
+      // Log errors but don't block the main race status update
+      console.error('Failed to automate tournament status transition:', err);
+    }
+
+    return savedRace;
   }
 
   /** Enforce pre-race conditions before READY transition */

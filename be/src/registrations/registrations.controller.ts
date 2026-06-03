@@ -8,22 +8,17 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
-import { PaginationDto } from '../common/dto/pagination.dto';
-import { RegistrationsService } from './registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { RejectRegistrationDto } from './dto/reject-registration.dto';
+import { RegistrationsService } from './registrations.service';
 
 @ApiTags('Registrations')
 @ApiBearerAuth()
@@ -53,11 +48,11 @@ export class RegistrationsController {
     @Query('status') status?: string,
   ) {
     return this.registrationsService.findAll(
-      pagination.page,
-      pagination.limit,
-      tournamentId,
-      raceId,
-      status,
+      query.page,
+      query.limit,
+      query.tournamentId,
+      query.raceId,
+      query.status,
     );
   }
 

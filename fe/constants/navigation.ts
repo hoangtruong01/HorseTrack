@@ -77,13 +77,6 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Duyệt đăng ký: approve/reject horse registrations.",
   },
   {
-    title: "Race Scheduling",
-    href: "/admin/races",
-    role: "Admin",
-    icon: Flag,
-    description: "Lập lịch Race: tạo, lên lịch, quản lý status.",
-  },
-  {
     title: "Referee Assignment",
     href: "/admin/referee-assignments",
     role: "Admin",

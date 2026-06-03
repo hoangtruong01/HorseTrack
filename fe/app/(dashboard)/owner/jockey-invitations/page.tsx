@@ -5,60 +5,65 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
-  Users,
-  Loader2,
-  Send,
-  Calendar,
-  Clock,
-  XCircle,
-  PlusCircle,
-  MessageSquare,
-  Sparkles,
+  Users, Loader2, Send, Calendar, Clock, XCircle, PlusCircle,
+  MessageSquare, Sparkles, Eye, Trophy, Flag, Percent, Search,
+  Star, Award, TrendingUp, ChevronRight, X, User,
 } from "lucide-react";
 import { toast } from "sonner";
 
-type Invitation = {
-  id: string;
-  registrationId: string;
-  raceName: string;
-  raceStartTime: string;
-  horseName: string;
-  horseBreed: string;
-  jockeyName: string;
-  jockeyEmail: string;
-  jockeyPhone: string;
-  status: string;
-  message?: string;
-  createdAt: string;
-};
-
-type Jockey = {
-  id: string;
-  userId: string;
-  fullName: string;
-  status: string;
-  experienceYears?: number;
+/* ───────── Types ───────── */
+type JockeyProfile = {
+  id: string; userId: string; fullName: string; email: string; phone?: string;
+  avatar?: string; heightCm: number; weightKg: number; experienceYears: number;
+  status: string; skillLevel?: string; bio?: string; specialty?: string;
+  personality?: string; totalRaces: number; wins: number;
 };
 
 type Registration = {
-  id: string;
-  raceName: string;
-  horseName: string;
+  id: string; raceName: string; horseName: string; raceStartTime: string;
+  tournamentName: string; tournamentId: string; raceId: string;
+};
+
+type Invitation = {
+  id: string; jockeyName: string; jockeyEmail: string; horseName: string;
+  horseBreed: string; raceName: string; raceStartTime: string;
+  tournamentName: string; status: string; message?: string;
+  jockeySharePercent: number; createdAt: string;
+};
+
+/* ───────── Helpers ───────── */
+const skillLabel: Record<string, string> = {
+  beginner: "Tập sự", intermediate: "Trung cấp",
+  advanced: "Nâng cao", professional: "Chuyên nghiệp",
+};
+
+const statusTone = (s: string) => {
+  switch (s) {
+    case "PENDING": return { label: "Chờ phản hồi", tone: "yellow" as const };
+    case "ACCEPTED": return { label: "Đã chấp nhận", tone: "green" as const };
+    case "REJECTED": return { label: "Từ chối", tone: "red" as const };
+    case "CANCELLED": return { label: "Đã hủy", tone: "slate" as const };
+    case "EXPIRED": return { label: "Hết hạn", tone: "yellow" as const };
+    default: return { label: s, tone: "slate" as const };
+  }
 };
 
 export default function JockeyInvitationsPage() {
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const [jockeys, setJockeys] = useState<Jockey[]>([]);
+  const [tab, setTab] = useState<"marketplace" | "history">("marketplace");
+  const [jockeys, setJockeys] = useState<JockeyProfile[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
-  
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState("");
 
-  // Form states
+  // Modal states
+  const [selectedJockey, setSelectedJockey] = useState<JockeyProfile | null>(null);
+  const [selectedJockeyForDetail, setSelectedJockeyForDetail] = useState<JockeyProfile | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedReg, setSelectedReg] = useState("");
-  const [selectedJockey, setSelectedJockey] = useState("");
-  const [invitationMessage, setInvitationMessage] = useState("");
+  const [sharePercent, setSharePercent] = useState(30);
+  const [invMessage, setInvMessage] = useState("");
 
   const loadData = async () => {
     setIsLoading(true);
@@ -66,347 +71,455 @@ export default function JockeyInvitationsPage() {
       const [invsRes, jockeysRes, regsRes] = await Promise.all([
         fetch("/api/owner/jockey-invitations"),
         fetch("/api/owner/jockeys"),
-        fetch("/api/owner/registrations"),
+        fetch("/api/owner/registrations?limit=100"),
       ]);
 
-      if (invsRes.ok) {
-        const resData = await invsRes.json();
-        if (resData.success) {
-          const raw = resData.data?.data || resData.data || [];
-          const mapped: Invitation[] = raw.map((item: any) => ({
-            id: item.id || item._id,
-            registrationId: item.registrationId?._id || item.registrationId?.id || "",
-            raceName: item.raceId?.name || "Không rõ trận đua",
-            raceStartTime: item.raceId?.startTime || new Date().toISOString(),
-            horseName: item.horseId?.name || "Không rõ chiến mã",
-            horseBreed: item.horseId?.breed || "",
-            jockeyName: item.jockeyUserId?.fullName || "Không rõ Jockey",
-            jockeyEmail: item.jockeyUserId?.email || "",
-            jockeyPhone: item.jockeyUserId?.phone || "",
-            status: item.status,
-            message: item.message,
-            createdAt: item.createdAt || new Date().toISOString(),
-          }));
-          setInvitations(mapped);
-        }
-      }
-
       if (jockeysRes.ok) {
-        const resData = await jockeysRes.json();
-        if (resData.success) {
-          const raw = resData.data?.data || resData.data || [];
-          const jList = raw.map((item: any) => ({
-            id: item.id || item._id,
-            userId: item.userId?._id || item.userId?.id || item.userId || "",
-            fullName: item.userId?.fullName || "Ẩn danh",
-            status: item.status,
-            experienceYears: item.experienceYears,
-          }));
-          setJockeys(jList.filter((j: any) => j.status === "AVAILABLE"));
+        const d = await jockeysRes.json();
+        if (d.success) {
+          const raw = d.data?.data || d.data || [];
+          setJockeys(raw.map((j: any) => ({
+            id: j.id || j._id,
+            userId: j.userId?._id || j.userId?.id || j.userId || "",
+            fullName: j.userId?.fullName || "Ẩn danh",
+            email: j.userId?.email || "",
+            phone: j.userId?.phone,
+            avatar: j.userId?.avatar,
+            heightCm: j.heightCm || 0,
+            weightKg: j.weightKg || 0,
+            experienceYears: j.experienceYears || 0,
+            status: j.status,
+            skillLevel: j.skillLevel,
+            bio: j.bio,
+            specialty: j.specialty,
+            personality: j.personality,
+            totalRaces: j.totalRaces || 0,
+            wins: j.wins || 0,
+          })));
         }
       }
 
       if (regsRes.ok) {
-        const resData = await regsRes.json();
-        if (resData.success) {
-          const raw = resData.data?.data || resData.data || [];
-          const rList = raw
-            .filter((item: any) => item.status === "APPROVED" && !item.jockeyUserId)
-            .map((item: any) => ({
-              id: item.id || item._id,
-              raceName: item.raceId?.name || "Không rõ trận đua",
-              horseName: item.horseId?.name || "Không rõ chiến mã",
-            }));
-          setRegistrations(rList);
+        const d = await regsRes.json();
+        if (d.success) {
+          const raw = d.data?.data || d.data || [];
+          setRegistrations(raw
+            .filter((r: any) => r.status === "APPROVED" && !r.jockeyUserId)
+            .map((r: any) => ({
+              id: r.id || r._id,
+              raceName: r.raceId?.name || "Không rõ",
+              horseName: r.horseId?.name || "Không rõ",
+              raceStartTime: r.raceId?.startTime || "",
+              tournamentName: r.tournamentId?.name || "Không rõ giải",
+              tournamentId: r.tournamentId?._id || r.tournamentId?.id || "",
+              raceId: r.raceId?._id || r.raceId?.id || "",
+            })));
         }
       }
-    } catch (err) {
-      console.error("Lỗi tải dữ liệu mời Jockey:", err);
-      toast.error("Lỗi kết nối tới Backend.");
-    } finally {
-      setIsLoading(false);
-    }
+
+      if (invsRes.ok) {
+        const d = await invsRes.json();
+        if (d.success) {
+          const raw = d.data?.data || d.data || [];
+          setInvitations(raw.map((i: any) => ({
+            id: i.id || i._id,
+            jockeyName: i.jockeyUserId?.fullName || "Không rõ",
+            jockeyEmail: i.jockeyUserId?.email || "",
+            horseName: i.horseId?.name || "Không rõ",
+            horseBreed: i.horseId?.breed || "",
+            raceName: i.raceId?.name || "Không rõ",
+            raceStartTime: i.raceId?.startTime || "",
+            tournamentName: i.tournamentId?.name || "",
+            status: i.status,
+            message: i.message,
+            jockeySharePercent: i.jockeySharePercent ?? 30,
+            createdAt: i.createdAt || "",
+          })));
+        }
+      }
+    } catch { toast.error("Lỗi kết nối tới Backend."); }
+    finally { setIsLoading(false); }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
-  const handleSendInvitation = async (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedReg || !selectedJockey) {
-      toast.error("Vui lòng chọn đầy đủ chiến mã trận đua và Jockey.");
-      return;
-    }
-
+    if (!selectedReg || !selectedJockey) { toast.error("Vui lòng chọn đầy đủ."); return; }
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/owner/jockey-invitations", {
+      const res = await fetch("/api/owner/jockey-invitations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           registrationId: selectedReg,
-          jockeyId: selectedJockey,
-          message: invitationMessage,
+          jockeyId: selectedJockey.userId,
+          message: invMessage,
+          jockeySharePercent: sharePercent,
         }),
       });
-
-      const resData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(resData.message || "Gửi lời mời Jockey thất bại.");
-      }
-
-      toast.success("Đã gửi lời mời tới Jockey thành công!");
-      setShowModal(false);
-      setSelectedReg("");
-      setSelectedJockey("");
-      setInvitationMessage("");
-      loadData(); // Reload
-    } catch (err: any) {
-      toast.error(err.message || "Có lỗi xảy ra.");
-    } finally {
-      setIsSubmitting(false);
-    }
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.message || "Gửi lời mời thất bại.");
+      toast.success("Đã gửi lời mời thành công!");
+      setShowModal(false); setSelectedReg(""); setInvMessage(""); setSharePercent(30);
+      setSelectedJockey(null); loadData();
+    } catch (err: any) { toast.error(err.message); }
+    finally { setIsSubmitting(false); }
   };
 
-  const handleCancelInvitation = async (id: string) => {
-    const isConfirm = window.confirm("Bạn có chắc chắn muốn hủy lời mời Jockey này không?");
-    if (!isConfirm) return;
-
+  const handleCancel = async (id: string) => {
+    if (!confirm("Bạn có chắc muốn hủy lời mời này?")) return;
     try {
-      const response = await fetch(`/api/owner/jockey-invitations/${id}/cancel`, {
-        method: "PATCH",
-      });
-
-      const resData = await response.json();
-
-      if (response.ok && resData.success) {
-        toast.success("Đã hủy lời mời thành công.");
-        loadData(); // Reload
-      } else {
-        toast.error(resData.message || "Hủy lời mời thất bại.");
-      }
-    } catch (err) {
-      console.error("Lỗi hủy lời mời:", err);
-      toast.error("Lỗi kết nối mạng.");
-    }
+      const res = await fetch(`/api/owner/jockey-invitations/${id}/cancel`, { method: "PATCH" });
+      const d = await res.json();
+      if (res.ok && d.success) { toast.success("Đã hủy lời mời."); loadData(); }
+      else toast.error(d.message || "Hủy thất bại.");
+    } catch { toast.error("Lỗi kết nối."); }
   };
 
-  const getStatusToneAndLabel = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return { label: "Chờ phản hồi", tone: "slate" as const };
-      case "ACCEPTED":
-        return { label: "Đã chấp nhận", tone: "green" as const };
-      case "REJECTED":
-        return { label: "Từ chối", tone: "red" as const };
-      case "CANCELLED":
-        return { label: "Đã hủy", tone: "slate" as const };
-      case "EXPIRED":
-        return { label: "Hết hạn", tone: "yellow" as const };
-      default:
-        return { label: status, tone: "slate" as const };
-    }
-  };
+  const filtered = jockeys.filter((j) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return j.fullName.toLowerCase().includes(q) || j.email.toLowerCase().includes(q)
+      || (j.specialty?.toLowerCase().includes(q)) || (j.personality?.toLowerCase().includes(q));
+  });
+
+  const availableJockeys = filtered.filter(j => j.status === "available");
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto">
       <PageHeader
         eyebrow="Chiêu mộ nài ngựa"
         title="Quản Lý Lời Mời Jockey"
-        description="Gửi lời mời tới các nài ngựa (Jockey) chuyên nghiệp để lái chiến mã của bạn trong các giải đua đã được phê duyệt hồ sơ."
-        actions={
-          <Button
-            onClick={() => {
-              if (registrations.length === 0) {
-                toast.info("Không có lượt đăng ký được phê duyệt nào trống Jockey để gửi lời mời!");
-              }
-              setShowModal(true);
-            }}
-            className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white"
-          >
-            Mời Jockey
-            <PlusCircle className="size-4 ml-1.5" />
-          </Button>
-        }
+        description="Nghiên cứu hồ sơ nài ngựa chuyên nghiệp, chọn người phù hợp và gửi lời mời cùng tỷ lệ chia thưởng tùy chỉnh."
       />
+
+      {/* Tab switcher */}
+      <div className="flex gap-2">
+        {[
+          { key: "marketplace" as const, label: "Thị Trường Jockey", icon: Users },
+          { key: "history" as const, label: "Lịch Sử Lời Mời", icon: Send },
+        ].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all ${tab === t.key ? "bg-[#E10600] text-white shadow-lg shadow-red-500/20" : "bg-white/5 text-white/50 hover:bg-white/10 border border-white/10"}`}>
+            <t.icon className="size-4" />{t.label}
+          </button>
+        ))}
+      </div>
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 text-white/55">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
-          <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải lịch sử mời Jockey...</p>
+          <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
-          <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
-            <h2 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
-              <Send className="size-5 text-[#E10600]" /> Lời mời đã gửi
-            </h2>
-          </div>
+        <>
+          {/* ── TAB 1: MARKETPLACE ── */}
+          {tab === "marketplace" && (
+            <div className="space-y-4">
+              {/* Search */}
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/30" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm kiếm tên, sở trường, tính tình..."
+                  className="w-full h-10 rounded-xl border border-white/10 bg-black/40 pl-10 pr-4 text-xs text-white outline-none focus:border-[#E10600] transition placeholder:text-white/25" />
+              </div>
+              <p className="text-[10px] text-white/40 uppercase tracking-wider font-bold">{availableJockeys.length} Jockey đang sẵn sàng</p>
 
-          {invitations.length === 0 ? (
-            <div className="text-center py-16 text-white/50">
-              <Users className="size-16 mx-auto mb-4 opacity-20" />
-              <p className="font-bold text-white uppercase tracking-wider text-sm">Hòm thư trống</p>
-              <p className="text-xs text-white/40 mt-1 max-w-md mx-auto">
-                Bạn chưa gửi bất kỳ lời mời cộng tác Jockey nào. Gửi lời mời mới ngay để chuẩn bị tốt nhất cho trận đua sắp tới!
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm border-collapse">
-                <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b border-white/5">
-                  <tr>
-                    <th className="px-4 py-3">Jockey</th>
-                    <th className="px-4 py-3">Chiến mã & Trận đấu</th>
-                    <th className="px-4 py-3">Lời nhắn</th>
-                    <th className="px-4 py-3">Trạng thái</th>
-                    <th className="px-4 py-3 text-right">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {invitations.map((inv) => {
-                    const st = getStatusToneAndLabel(inv.status);
-                    return (
-                      <tr key={inv.id} className="transition hover:bg-white/[0.015]">
-                        <td className="px-4 py-4">
-                          <p className="font-black text-white">{inv.jockeyName}</p>
-                          <p className="text-[10px] text-white/40 font-mono mt-0.5">{inv.jockeyEmail || "N/A"}</p>
-                        </td>
-                        <td className="px-4 py-4">
-                          <p className="font-bold text-white/95">{inv.horseName}</p>
-                          <p className="text-xs text-[#E10600] font-bold mt-0.5">{inv.raceName}</p>
-                          <div className="flex items-center gap-3 text-[10px] text-white/40 font-mono mt-1">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="size-3 text-primary" />
-                              {new Date(inv.raceStartTime).toLocaleDateString()}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="size-3" />
-                              {new Date(inv.raceStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+              {availableJockeys.length === 0 ? (
+                <div className="text-center py-16 text-white/50 rounded-2xl border border-dashed border-white/10 bg-[#15151E]">
+                  <Users className="size-12 mx-auto mb-3 opacity-20" />
+                  <p className="font-bold text-sm">Không tìm thấy Jockey</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {availableJockeys.map(j => (
+                    <div key={j.id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-[#E10600]/30 hover:bg-[#1C1C25] transition shadow-xl flex flex-col justify-between">
+                      {/* Header */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="size-12 rounded-full border-2 border-[#E10600]/40 bg-[#E10600]/10 flex items-center justify-center overflow-hidden shrink-0">
+                            {j.avatar ? <img src={j.avatar} className="size-full object-cover rounded-full" alt="" /> : <User className="size-5 text-[#E10600]" />}
                           </div>
-                        </td>
-                        <td className="px-4 py-4 max-w-[200px] truncate">
-                          <p className="text-xs text-white/70 italic flex items-center gap-1.5">
-                            <MessageSquare className="size-3 text-white/30 shrink-0" />
-                            {inv.message || "Không có lời nhắn."}
-                          </p>
-                        </td>
-                        <td className="px-4 py-4">
-                          <StatusBadge label={st.label} tone={st.tone} />
-                        </td>
-                        <td className="px-4 py-4 text-right">
-                          {inv.status === "PENDING" && (
-                            <Button
-                              onClick={() => handleCancelInvitation(inv.id)}
-                              variant="ghost"
-                              className="h-8 rounded-lg text-xs font-black uppercase text-primary hover:text-red-400 hover:bg-primary/10 px-3 cursor-pointer"
-                            >
-                              <XCircle className="size-3.5 mr-1" /> Hủy lời mời
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-black uppercase text-white truncate">{j.fullName}</h4>
+                            <p className="text-[10px] text-white/40 font-mono truncate">{j.email}</p>
+                          </div>
+                        </div>
+                        {/* Stats grid */}
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          {[
+                            { label: "Kinh nghiệm", value: `${j.experienceYears} năm`, icon: Star },
+                            { label: "Tổng trận", value: j.totalRaces.toString(), icon: Flag },
+                            { label: "Chiến thắng", value: j.wins.toString(), icon: Award },
+                          ].map((s, i) => (
+                            <div key={i} className="p-2 rounded-lg bg-black/30 border border-white/5">
+                              <s.icon className="size-3 text-[#E10600] mx-auto mb-1" />
+                              <p className="text-xs font-black text-white">{s.value}</p>
+                              <p className="text-[8px] text-white/35 uppercase tracking-wider">{s.label}</p>
+                            </div>
+                          ))}
+                        </div>
+                        {/* Info rows */}
+                        <div className="space-y-1.5 text-[10px]">
+                          <div className="flex justify-between"><span className="text-white/40">Trình độ</span><span className="text-white font-bold">{skillLabel[j.skillLevel || ""] || "Chưa xác định"}</span></div>
+                          <div className="flex justify-between"><span className="text-white/40">Chiều cao / Cân nặng</span><span className="text-white font-bold">{j.heightCm}cm / {j.weightKg}kg</span></div>
+                          {j.specialty && <div className="flex justify-between"><span className="text-white/40">Sở trường</span><span className="text-white font-bold truncate max-w-[140px]">{j.specialty}</span></div>}
+                          {j.personality && <div className="flex justify-between"><span className="text-white/40">Tính tình</span><span className="text-white font-bold truncate max-w-[140px]">{j.personality}</span></div>}
+                          {j.totalRaces > 0 && <div className="flex justify-between"><span className="text-white/40">Tỷ lệ thắng</span><span className="text-teal-400 font-bold">{((j.wins / j.totalRaces) * 100).toFixed(1)}%</span></div>}
+                        </div>
+                        {j.bio && <p className="text-[10px] text-white/50 italic bg-white/5 p-2 rounded-lg leading-relaxed line-clamp-2">&ldquo;{j.bio}&rdquo;</p>}
+                      </div>
+                      {/* CTA */}
+                      <div className="mt-4 pt-3 border-t border-white/5 grid grid-cols-2 gap-2">
+                        <Button onClick={() => setSelectedJockeyForDetail(j)} variant="outline"
+                          className="rounded-full border-white/10 hover:bg-white/5 text-[10px] h-9 uppercase font-bold text-white">
+                          <Eye className="size-3.5 mr-1" /> Chi tiết
+                        </Button>
+                        <Button onClick={() => { setSelectedJockey(j); setShowModal(true); setSelectedReg(""); setSharePercent(30); setInvMessage(""); }}
+                          disabled={registrations.length === 0}
+                          className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-[10px] h-9 uppercase font-bold text-white">
+                          <PlusCircle className="size-3.5 mr-1" /> Mời
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-        </div>
+
+          {/* ── TAB 2: HISTORY ── */}
+          {tab === "history" && (
+            <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
+                <h2 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
+                  <Send className="size-5 text-[#E10600]" /> Lời mời đã gửi
+                </h2>
+              </div>
+              {invitations.length === 0 ? (
+                <div className="text-center py-16 text-white/50">
+                  <Users className="size-16 mx-auto mb-4 opacity-20" />
+                  <p className="font-bold text-white uppercase tracking-wider text-sm">Hòm thư trống</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                    <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b border-white/5">
+                      <tr>
+                        <th className="px-4 py-3">Jockey</th>
+                        <th className="px-4 py-3">Chiến mã & Giải đấu</th>
+                        <th className="px-4 py-3">% Chia</th>
+                        <th className="px-4 py-3">Trạng thái</th>
+                        <th className="px-4 py-3 text-right">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {invitations.map(inv => {
+                        const st = statusTone(inv.status);
+                        return (
+                          <tr key={inv.id} className="transition hover:bg-white/[0.015]">
+                            <td className="px-4 py-4">
+                              <p className="font-black text-white">{inv.jockeyName}</p>
+                              <p className="text-[10px] text-white/40 font-mono mt-0.5">{inv.jockeyEmail}</p>
+                            </td>
+                            <td className="px-4 py-4">
+                              <p className="font-bold text-white/95">{inv.horseName}</p>
+                              {inv.tournamentName && <p className="text-[10px] text-teal-400 font-bold mt-0.5"><Trophy className="inline size-3 mr-0.5" />{inv.tournamentName}</p>}
+                              <p className="text-xs text-[#E10600] font-bold mt-0.5">{inv.raceName}</p>
+                              <div className="flex items-center gap-3 text-[10px] text-white/40 font-mono mt-1">
+                                <span className="flex items-center gap-1"><Calendar className="size-3" />{new Date(inv.raceStartTime).toLocaleDateString()}</span>
+                                <span className="flex items-center gap-1"><Clock className="size-3" />{new Date(inv.raceStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-teal-500/10 text-teal-400 font-black text-xs border border-teal-500/20">
+                                <Percent className="size-3" />{inv.jockeySharePercent}%
+                              </span>
+                            </td>
+                            <td className="px-4 py-4"><StatusBadge label={st.label} tone={st.tone} /></td>
+                            <td className="px-4 py-4 text-right">
+                              {inv.status === "PENDING" && (
+                                <Button onClick={() => handleCancel(inv.id)} variant="ghost"
+                                  className="h-8 rounded-lg text-xs font-black uppercase text-primary hover:text-red-400 hover:bg-primary/10 px-3 cursor-pointer">
+                                  <XCircle className="size-3.5 mr-1" /> Hủy
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
-      {/* Modal Dialog for sending invitations */}
-      {showModal && (
+      {/* ── MODAL: Send invitation ── */}
+      {showModal && selectedJockey && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl space-y-5 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl space-y-5 animate-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 size-8 rounded-full bg-black/40 hover:bg-black/80 flex items-center justify-center text-white/70 hover:text-white transition">
+              <X className="size-4" />
+            </button>
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#E10600] flex items-center gap-1.5">
-                <Sparkles className="size-4" /> Chiêu mộ nài ngựa
-              </p>
-              <h3 className="text-2xl font-black uppercase text-white mt-1">Gửi Lời Mời Jockey</h3>
-              <p className="text-xs text-white/50 mt-1">
-                Lưu ý: Chỉ những hồ sơ ghi danh chiến mã đã được Ban Tổ Chức duyệt (APPROVED) và chưa được gán Jockey mới hiển thị bên dưới.
-              </p>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#E10600] flex items-center gap-1.5"><Sparkles className="size-4" /> Gửi lời mời</p>
+              <h3 className="text-xl font-black uppercase text-white mt-1">Mời {selectedJockey.fullName}</h3>
+              <p className="text-xs text-white/50 mt-1">Chọn trận đấu đã duyệt chưa gán Jockey để gửi lời mời.</p>
             </div>
 
-            <form onSubmit={handleSendInvitation} className="space-y-4">
-              {/* Select Registration */}
+            {/* Jockey summary */}
+            <div className="p-3 rounded-xl bg-black/30 border border-white/5 flex items-center gap-3">
+              <div className="size-10 rounded-full border border-[#E10600]/40 bg-[#E10600]/10 flex items-center justify-center shrink-0">
+                {selectedJockey.avatar ? <img src={selectedJockey.avatar} className="size-full object-cover rounded-full" alt="" /> : <User className="size-4 text-[#E10600]" />}
+              </div>
+              <div className="text-xs">
+                <p className="font-black text-white">{selectedJockey.fullName}</p>
+                <p className="text-white/40">{selectedJockey.experienceYears} năm KN • {selectedJockey.totalRaces} trận • {selectedJockey.wins} thắng • {skillLabel[selectedJockey.skillLevel || ""] || "N/A"}</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSend} className="space-y-4">
+              {/* Registration select */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-black uppercase tracking-wider text-white/60">
-                  Chọn Lượt Ghi Danh Khả Dụng
-                </label>
-                <select
-                  value={selectedReg}
-                  onChange={(e) => setSelectedReg(e.target.value)}
-                  required
-                  className="h-11 w-full rounded-xl border border-white/10 bg-black/40 px-3 text-xs text-white outline-none focus:border-primary transition"
-                >
-                  <option value="" disabled className="bg-[#15151E]">-- Chọn lượt đăng ký trận đấu --</option>
-                  {registrations.map((r) => (
+                <label className="block text-xs font-black uppercase tracking-wider text-white/60">Chọn Ngựa & Trận đấu</label>
+                <select value={selectedReg} onChange={e => setSelectedReg(e.target.value)} required
+                  className="h-11 w-full rounded-xl border border-white/10 bg-black/40 px-3 text-xs text-white outline-none focus:border-primary transition">
+                  <option value="" disabled className="bg-[#15151E]">-- Chọn slot ghi danh --</option>
+                  {registrations.map(r => (
                     <option key={r.id} value={r.id} className="bg-[#15151E]">
-                      {r.horseName} - {r.raceName}
+                      🐴 {r.horseName} — 🏁 {r.raceName} — 🏆 {r.tournamentName}
                     </option>
                   ))}
                 </select>
+                {selectedReg && (() => {
+                  const r = registrations.find(x => x.id === selectedReg);
+                  return r?.raceStartTime ? (
+                    <p className="text-[10px] text-teal-400 flex items-center gap-1 mt-1"><Clock className="size-3" />Thời gian: {new Date(r.raceStartTime).toLocaleString("vi-VN")}</p>
+                  ) : null;
+                })()}
               </div>
 
-              {/* Select Jockey */}
+              {/* Share percent slider */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-black uppercase tracking-wider text-white/60">
-                  Chọn Jockey Đang Rảnh (AVAILABLE)
-                </label>
-                <select
-                  value={selectedJockey}
-                  onChange={(e) => setSelectedJockey(e.target.value)}
-                  required
-                  className="h-11 w-full rounded-xl border border-white/10 bg-black/40 px-3 text-xs text-white outline-none focus:border-primary transition"
-                >
-                  <option value="" disabled className="bg-[#15151E]">-- Chọn Jockey tự do --</option>
-                  {jockeys.map((j) => (
-                    <option key={j.id} value={j.userId} className="bg-[#15151E]">
-                      {j.fullName} {j.experienceYears ? `(${j.experienceYears} năm kinh nghiệm)` : ""}
-                    </option>
-                  ))}
-                </select>
+                <label className="block text-xs font-black uppercase tracking-wider text-white/60">% Chia thưởng cho Jockey</label>
+                <div className="flex items-center gap-4">
+                  <input type="range" min={5} max={50} step={1} value={sharePercent} onChange={e => setSharePercent(Number(e.target.value))}
+                    className="flex-1 accent-[#E10600] h-2 rounded-full" />
+                  <span className="text-lg font-black text-teal-400 min-w-[50px] text-center">{sharePercent}%</span>
+                </div>
+                <div className="flex justify-between text-[10px] text-white/40">
+                  <span>Owner nhận: {100 - sharePercent}%</span>
+                  <span>Jockey nhận: {sharePercent}%</span>
+                </div>
               </div>
 
               {/* Message */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-black uppercase tracking-wider text-white/60">
-                  Lời nhắn gửi Jockey (Tùy chọn)
-                </label>
-                <textarea
-                  value={invitationMessage}
-                  onChange={(e) => setInvitationMessage(e.target.value)}
-                  rows={3}
+                <label className="block text-xs font-black uppercase tracking-wider text-white/60">Lời nhắn (Tùy chọn)</label>
+                <textarea value={invMessage} onChange={e => setInvMessage(e.target.value)} rows={3}
                   className="w-full rounded-xl border border-white/10 bg-black/40 p-3 text-xs text-white outline-none focus:border-primary transition placeholder:text-white/20"
-                  placeholder="Ví dụ: Rất mong bạn sẽ đồng hành cùng chiến mã của mình trong giải đua lần này!"
-                />
+                  placeholder="Ví dụ: Rất mong bạn đồng hành cùng chiến mã của tôi!" />
               </div>
 
-              {/* Buttons */}
               <div className="flex justify-end gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowModal(false)}
-                  disabled={isSubmitting}
-                  className="h-10 rounded-xl text-xs font-black uppercase tracking-wider border-white/10 text-white bg-transparent hover:bg-white/5"
-                >
-                  Đóng
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="h-10 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#E10600] hover:bg-[#B80500]"
-                >
+                <Button type="button" variant="outline" onClick={() => setShowModal(false)} disabled={isSubmitting}
+                  className="h-10 rounded-xl text-xs font-black uppercase tracking-wider border-white/10 text-white bg-transparent hover:bg-white/5">Đóng</Button>
+                <Button type="submit" disabled={isSubmitting}
+                  className="h-10 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#E10600] hover:bg-[#B80500]">
                   {isSubmitting ? "Đang gửi..." : "Gửi lời mời"}
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: Jockey profile detail ── */}
+      {selectedJockeyForDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl space-y-6 animate-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setSelectedJockeyForDetail(null)} className="absolute top-4 right-4 size-8 rounded-full bg-black/40 hover:bg-black/80 flex items-center justify-center text-white/70 hover:text-white transition">
+              <X className="size-4" />
+            </button>
+
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#E10600] flex items-center gap-1.5"><Sparkles className="size-4" /> Hồ sơ chi tiết</p>
+              <h3 className="text-xl font-black uppercase text-white mt-1">Thông Tin Jockey</h3>
+            </div>
+
+            {/* Profile header */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-black/30 border border-white/5">
+              <div className="size-16 rounded-full border-2 border-[#E10600]/40 bg-[#E10600]/10 flex items-center justify-center overflow-hidden shrink-0">
+                {selectedJockeyForDetail.avatar ? <img src={selectedJockeyForDetail.avatar} className="size-full object-cover rounded-full" alt="" /> : <User className="size-8 text-[#E10600]" />}
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-lg font-black uppercase text-white">{selectedJockeyForDetail.fullName}</h4>
+                <p className="text-xs text-[#E10600] font-bold mt-0.5">{skillLabel[selectedJockeyForDetail.skillLevel || ""] || "Chưa xác định"}</p>
+                <p className="text-xs text-white/40 font-mono mt-1">{selectedJockeyForDetail.email}</p>
+              </div>
+            </div>
+
+            {/* Biography */}
+            {selectedJockeyForDetail.bio && (
+              <div className="space-y-1.5">
+                <label className="block text-xs font-black uppercase tracking-wider text-white/40">Giới thiệu bản thân</label>
+                <p className="text-xs text-white/70 italic bg-white/5 p-3 rounded-xl border border-white/5 leading-relaxed">
+                  &ldquo;{selectedJockeyForDetail.bio}&rdquo;
+                </p>
+              </div>
+            )}
+
+            {/* Stats section */}
+            <div className="space-y-3">
+              <label className="block text-xs font-black uppercase tracking-wider text-white/40">Thống kê sự nghiệp</label>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="p-3 rounded-xl bg-black/30 border border-white/5">
+                  <Star className="size-4 text-[#E10600] mx-auto mb-1" />
+                  <p className="text-sm font-black text-white">{selectedJockeyForDetail.experienceYears} năm</p>
+                  <p className="text-[9px] text-white/35 uppercase tracking-wider mt-0.5">Kinh nghiệm</p>
+                </div>
+                <div className="p-3 rounded-xl bg-black/30 border border-white/5">
+                  <Flag className="size-4 text-[#E10600] mx-auto mb-1" />
+                  <p className="text-sm font-black text-white">{selectedJockeyForDetail.totalRaces}</p>
+                  <p className="text-[9px] text-white/35 uppercase tracking-wider mt-0.5">Tổng trận</p>
+                </div>
+                <div className="p-3 rounded-xl bg-black/30 border border-white/5">
+                  <Award className="size-4 text-[#E10600] mx-auto mb-1" />
+                  <p className="text-sm font-black text-white">{selectedJockeyForDetail.wins}</p>
+                  <p className="text-[9px] text-white/35 uppercase tracking-wider mt-0.5">Chiến thắng</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Parameters Grid */}
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-xl border border-white/5 bg-black/25 text-xs">
+              <div className="space-y-2">
+                <div className="flex justify-between border-b border-white/5 pb-1.5"><span className="text-white/40">Chiều cao:</span><span className="font-bold text-white">{selectedJockeyForDetail.heightCm} cm</span></div>
+                <div className="flex justify-between border-b border-white/5 pb-1.5"><span className="text-white/40">Cân nặng:</span><span className="font-bold text-white">{selectedJockeyForDetail.weightKg} kg</span></div>
+                {selectedJockeyForDetail.totalRaces > 0 && (
+                  <div className="flex justify-between pb-0.5"><span className="text-white/40">Tỷ lệ thắng:</span><span className="font-bold text-teal-400">{((selectedJockeyForDetail.wins / selectedJockeyForDetail.totalRaces) * 100).toFixed(1)}%</span></div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between border-b border-white/5 pb-1.5"><span className="text-white/40">Sở trường:</span><span className="font-bold text-white truncate max-w-[120px]" title={selectedJockeyForDetail.specialty}>{selectedJockeyForDetail.specialty || "N/A"}</span></div>
+                <div className="flex justify-between border-b border-white/5 pb-1.5"><span className="text-white/40">Tính tình:</span><span className="font-bold text-white truncate max-w-[120px]" title={selectedJockeyForDetail.personality}>{selectedJockeyForDetail.personality || "N/A"}</span></div>
+                <div className="flex justify-between pb-0.5"><span className="text-white/40">Trạng thái:</span><span className="font-bold text-green-400 uppercase text-[9px] tracking-wider bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded">Sẵn sàng</span></div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setSelectedJockeyForDetail(null)}
+                className="h-10 rounded-xl text-xs font-black uppercase tracking-wider border-white/10 text-white bg-transparent hover:bg-white/5">Đóng</Button>
+              <Button onClick={() => { setSelectedJockey(selectedJockeyForDetail); setSelectedJockeyForDetail(null); setShowModal(true); setSelectedReg(""); setSharePercent(30); setInvMessage(""); }}
+                disabled={registrations.length === 0}
+                className="h-10 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#E10600] hover:bg-[#B80500]">
+                <PlusCircle className="size-4 mr-1.5" />
+                {registrations.length === 0 ? "Chưa có slot trống" : "Gửi lời mời ngay"}
+              </Button>
+            </div>
           </div>
         </div>
       )}

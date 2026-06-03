@@ -57,7 +57,8 @@ export default function HorseDetailPage() {
       if (horseRes.ok) {
         const resData = await horseRes.json();
         if (resData.success) {
-          setHorse(resData.data);
+          const raw = resData.data;
+          setHorse({ ...raw, id: raw.id || raw._id });
         }
       } else {
         toast.error("Không thể lấy thông tin chi tiết của ngựa.");

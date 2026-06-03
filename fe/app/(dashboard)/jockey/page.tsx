@@ -51,26 +51,47 @@ type OwnerInfo = {
 };
 
 type HorseInfoCompact = {
-  _id: string;
+  id: string;
   name: string;
   breed: string;
+  age?: number;
+  gender?: string;
+  baseSpeed?: number;
+  staminaScore?: number;
+  image?: string;
 };
 
 type RaceInfoCompact = {
-  _id: string;
+  id: string;
   name: string;
   startTime: string;
   status: string;
+  distanceMeters?: number;
+  lapCount?: number;
+  location?: string;
+  prize?: number;
+};
+
+type TournamentInfoCompact = {
+  id: string;
+  name: string;
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+  status?: string;
 };
 
 type Invitation = {
-  _id: string;
+  id: string;
+  _id?: string;
   registrationId: string;
+  tournamentId: TournamentInfoCompact;
   raceId: RaceInfoCompact;
   horseId: HorseInfoCompact;
   ownerId: OwnerInfo;
   jockeyUserId: string;
   message?: string;
+  jockeySharePercent: number;
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED" | "EXPIRED";
   expiredAt?: string;
   createdAt: string;
@@ -92,7 +113,7 @@ type HorseDetail = {
   image?: string;
   baseSpeed?: number;
   staminaScore?: number;
-  ownerId?: string | { _id: string; fullName: string };
+  ownerId?: string | { _id: string; id: string; fullName: string };
 };
 
 export function JockeyDashboard() {
@@ -125,6 +146,9 @@ export function JockeyDashboard() {
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
   const [horseDetail, setHorseDetail] = useState<HorseDetail | null>(null);
   const [isLoadingHorse, setIsLoadingHorse] = useState(false);
+
+  // Invitation detail modal
+  const [detailInv, setDetailInv] = useState<Invitation | null>(null);
 
   // Fetch initial data
   const fetchData = async () => {
@@ -353,7 +377,7 @@ export function JockeyDashboard() {
                 ) : (
                   <div className="space-y-3">
                     {acceptedInvs.slice(0, 3).map((inv) => (
-                      <div key={inv._id} className="flex justify-between items-center p-3 rounded-xl border border-white/5 bg-black/20 hover:border-white/10 transition">
+                      <div key={inv.id || inv._id} className="flex justify-between items-center p-3 rounded-xl border border-white/5 bg-black/20 hover:border-white/10 transition">
                         <div>
                           <h4 className="text-xs font-bold text-white uppercase">{inv.raceId?.name || "Tên trận đấu"}</h4>
                           <p className="text-[10px] text-white/50 mt-1 flex items-center gap-1">
@@ -363,7 +387,7 @@ export function JockeyDashboard() {
                         </div>
                         <div className="text-right">
                           <button
-                            onClick={() => handleViewHorseDetail(inv.horseId._id)}
+                            onClick={() => handleViewHorseDetail(inv.horseId.id)}
                             className="text-[10px] px-2 py-1 rounded bg-[#E10600]/10 hover:bg-[#E10600]/20 text-primary border border-[#E10600]/20 transition flex items-center gap-1"
                           >
                             <Eye className="size-3" />
@@ -404,11 +428,12 @@ export function JockeyDashboard() {
                 ) : (
                   <div className="space-y-3">
                     {pendingInvs.slice(0, 3).map((inv) => (
-                      <div key={inv._id} className="flex justify-between items-center p-3 rounded-xl border border-[#E10600]/20 bg-[#E10600]/5 hover:border-[#E10600]/40 transition">
+                      <div key={inv.id || inv._id} className="flex justify-between items-center p-3 rounded-xl border border-[#E10600]/20 bg-[#E10600]/5 hover:border-[#E10600]/40 transition">
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-black uppercase text-primary">Lời mời</span>
                             <span className="text-[10px] text-white/40">• {inv.ownerId?.fullName}</span>
+                            <span className="text-[10px] text-teal-400 font-bold">{inv.jockeySharePercent}%</span>
                           </div>
                           <h4 className="text-xs font-bold text-white mt-1 uppercase">Cuộc đua: {inv.raceId?.name}</h4>
                           <p className="text-[10px] text-white/50 mt-0.5">Chiến mã: {inv.horseId?.name}</p>
@@ -457,8 +482,9 @@ export function JockeyDashboard() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {pendingInvs.map((inv) => (
-                  <div key={inv._id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-primary/25 hover:bg-[#1C1C25] transition flex flex-col justify-between shadow-xl">
-                    <div className="absolute top-4 right-4">
+                  <div key={inv.id || inv._id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-primary/25 hover:bg-[#1C1C25] transition flex flex-col justify-between shadow-xl">
+                    <div className="absolute top-4 right-4 flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 font-black text-[10px] border border-teal-500/20">{inv.jockeySharePercent}%</span>
                       <StatusBadge label="Chờ duyệt" tone="yellow" pulse />
                     </div>
 
@@ -473,8 +499,14 @@ export function JockeyDashboard() {
                       </div>
 
                       <div className="p-3 rounded-xl bg-black/20 border border-white/5 space-y-2">
+                        {inv.tournamentId?.name && (
+                          <div>
+                            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Giải đấu</p>
+                            <p className="text-xs font-bold text-teal-400 mt-0.5">🏆 {inv.tournamentId.name}</p>
+                          </div>
+                        )}
                         <div>
-                          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Tên trận đấu</p>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Trận đấu</p>
                           <p className="text-xs font-black uppercase text-white mt-0.5">{inv.raceId?.name}</p>
                           <p className="text-[10px] text-white/50 mt-1 flex items-center gap-1">
                             <Clock className="size-3" />
@@ -488,12 +520,16 @@ export function JockeyDashboard() {
                           <div>
                             <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Ngựa được chỉ định</p>
                             <button
-                              onClick={() => handleViewHorseDetail(inv.horseId._id)}
+                              onClick={() => handleViewHorseDetail(inv.horseId.id)}
                               className="text-xs font-bold text-primary hover:underline flex items-center gap-1 text-left mt-0.5"
                             >
                               {inv.horseId?.name} ({inv.horseId?.breed})
                               <Eye className="size-3" />
                             </button>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Phần thưởng</p>
+                            <p className="text-sm font-black text-teal-400 mt-0.5">{inv.jockeySharePercent}%</p>
                           </div>
                         </div>
                       </div>
@@ -508,21 +544,13 @@ export function JockeyDashboard() {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/5">
+                    <div className="mt-4 pt-4 border-t border-white/5">
                       <Button
-                        onClick={() => handleRespondInvitation(inv._id, "REJECTED")}
-                        disabled={submittingId !== null}
-                        variant="outline"
-                        className="rounded-full border-white/10 hover:bg-white/5 text-xs h-9 uppercase font-bold text-white hover:text-white"
+                        onClick={() => setDetailInv(inv)}
+                        className="w-full rounded-full bg-[#E10600] hover:bg-[#B80500] text-xs h-9 uppercase font-bold text-white flex items-center justify-center gap-1.5"
                       >
-                        {submittingId === inv._id ? "Đang xử lý..." : "Từ chối"}
-                      </Button>
-                      <Button
-                        onClick={() => handleRespondInvitation(inv._id, "ACCEPTED")}
-                        disabled={submittingId !== null}
-                        className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-xs h-9 uppercase font-bold text-white"
-                      >
-                        {submittingId === inv._id ? "Đang xử lý..." : "Chấp nhận"}
+                        <Eye className="size-3.5" />
+                        Xem chi tiết & Phản hồi
                       </Button>
                     </div>
                   </div>
@@ -561,31 +589,35 @@ export function JockeyDashboard() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {acceptedInvs.map((inv) => (
-                  <div key={inv._id} className="rounded-2xl border border-white/5 bg-[#15151E] p-5 shadow-xl hover:border-teal-500/30 hover:bg-[#1C1C25] transition flex flex-col justify-between">
+                  <div key={inv.id || inv._id} className="rounded-2xl border border-white/5 bg-[#15151E] p-5 shadow-xl hover:border-teal-500/30 hover:bg-[#1C1C25] transition flex flex-col justify-between">
                     <div className="space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
                           <span className="text-[9px] font-black uppercase tracking-wider text-teal-400">ĐÃ GÁN PHÂN CÔNG</span>
+                          {inv.tournamentId?.name && <p className="text-[10px] text-teal-400 font-bold mt-0.5">🏆 {inv.tournamentId.name}</p>}
                           <h4 className="text-sm font-black uppercase text-white mt-1">{inv.raceId?.name}</h4>
                         </div>
-                        <StatusBadge
-                          label={
-                            inv.raceId?.status === "PENDING" ? "Chờ chạy" : 
-                            inv.raceId?.status === "READY" ? "Sẵn sàng" : 
-                            inv.raceId?.status === "LIVE" ? "ĐANG CHẠY" : 
-                            inv.raceId?.status === "FINISHED" ? "Đã xong" : 
-                            inv.raceId?.status === "RESULT_PUBLISHED" ? "Đã có kết quả" : inv.raceId?.status
-                          }
-                          tone={
-                            inv.raceId?.status === "LIVE" ? "red" :
-                            inv.raceId?.status === "READY" ? "green" :
-                            inv.raceId?.status === "PENDING" ? "yellow" : "slate"
-                          }
-                          pulse={inv.raceId?.status === "LIVE"}
-                        />
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 font-black text-[10px] border border-teal-500/20">{inv.jockeySharePercent}%</span>
+                          <StatusBadge
+                            label={
+                              inv.raceId?.status === "PENDING" ? "Chờ chạy" : 
+                              inv.raceId?.status === "READY" ? "Sẵn sàng" : 
+                              inv.raceId?.status === "LIVE" ? "ĐANG CHẠY" : 
+                              inv.raceId?.status === "FINISHED" ? "Đã xong" : 
+                              inv.raceId?.status === "RESULT_PUBLISHED" ? "Đã có kết quả" : inv.raceId?.status
+                            }
+                            tone={
+                              inv.raceId?.status === "LIVE" ? "red" :
+                              inv.raceId?.status === "READY" ? "green" :
+                              inv.raceId?.status === "PENDING" ? "yellow" : "slate"
+                            }
+                            pulse={inv.raceId?.status === "LIVE"}
+                          />
+                        </div>
                       </div>
 
-                      <div className="p-3 rounded-xl bg-black/20 border border-white/5 grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-xl bg-black/20 border border-white/5 grid grid-cols-3 gap-3">
                         <div>
                           <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Giờ xuất phát</p>
                           <p className="text-xs font-bold text-white mt-0.5 flex items-center gap-1.5">
@@ -594,8 +626,12 @@ export function JockeyDashboard() {
                           </p>
                         </div>
                         <div>
-                          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Chủ sở hữu chiến mã</p>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Chủ sở hữu</p>
                           <p className="text-xs font-bold text-white mt-0.5">{inv.ownerId?.fullName}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">% Thưởng</p>
+                          <p className="text-sm font-black text-teal-400 mt-0.5">{inv.jockeySharePercent}%</p>
                         </div>
                       </div>
 
@@ -605,7 +641,7 @@ export function JockeyDashboard() {
                           <p className="text-xs font-black text-white mt-0.5">{inv.horseId?.name}</p>
                         </div>
                         <Button
-                          onClick={() => handleViewHorseDetail(inv.horseId._id)}
+                          onClick={() => handleViewHorseDetail(inv.horseId.id)}
                           className="rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-[10px] h-8 font-black uppercase tracking-wider text-white"
                         >
                           <Eye className="size-3 ml-1" />
@@ -625,7 +661,7 @@ export function JockeyDashboard() {
             <div className="flex items-center justify-between">
               <h3 className="text-base font-black uppercase tracking-wider text-white">Chiến mã đang điều khiển</h3>
               <span className="px-2.5 py-0.5 text-xs bg-[#067E6A]/10 text-teal-300 border border-[#067E6A]/20 rounded font-bold uppercase">
-                {Array.from(new Set(acceptedInvs.map(inv => inv.horseId?._id))).length} Ngựa đang cưỡi
+                {Array.from(new Set(acceptedInvs.map(inv => inv.horseId?.id))).length} Ngựa đang cưỡi
               </span>
             </div>
 
@@ -648,10 +684,10 @@ export function JockeyDashboard() {
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {/* Lấy danh sách ngựa duy nhất (unique) từ các lời mời đã chấp nhận */}
-                {Array.from(new Map(acceptedInvs.map(inv => [inv.horseId?._id, inv.horseId])).values()).map((horse) => {
+                {Array.from(new Map(acceptedInvs.map(inv => [inv.horseId?.id, inv.horseId])).values()).map((horse) => {
                   if (!horse) return null;
                   return (
-                    <div key={horse._id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 shadow-xl hover:border-primary/30 hover:bg-[#1C1C25] transition flex flex-col justify-between">
+                    <div key={horse.id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 shadow-xl hover:border-primary/30 hover:bg-[#1C1C25] transition flex flex-col justify-between">
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
                           <div className="size-12 rounded-full border border-primary bg-primary/10 flex items-center justify-center">
@@ -671,7 +707,7 @@ export function JockeyDashboard() {
 
                       <div className="mt-4 pt-4 border-t border-white/5">
                         <Button
-                          onClick={() => handleViewHorseDetail(horse._id)}
+                          onClick={() => handleViewHorseDetail(horse.id)}
                           className="w-full rounded-full bg-[#E10600] hover:bg-[#B80500] text-xs h-9 uppercase font-bold text-white flex items-center justify-center gap-1.5"
                         >
                           <Eye className="size-3.5" />
@@ -918,6 +954,148 @@ export function JockeyDashboard() {
               </Button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: DETAILED INVITATION & RESPONSE ── */}
+      {detailInv && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl space-y-5 animate-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setDetailInv(null)}
+              className="absolute top-4 right-4 size-8 rounded-full bg-black/40 hover:bg-black/80 flex items-center justify-center text-white/70 hover:text-white transition"
+            >
+              <X className="size-4" />
+            </button>
+
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E10600] flex items-center gap-1.5">
+                <Mail className="size-4" /> CHI TIẾT LỜI MỜI CƯỠI NGỰA
+              </span>
+              <h3 className="text-xl font-black uppercase text-white mt-1">Lời mời thi đấu</h3>
+              <p className="text-xs text-white/50 mt-1">Xem chi tiết các thông số ngựa, trận đấu và phân chia thưởng trước khi phản hồi.</p>
+            </div>
+
+            {/* Owner Section */}
+            <div className="p-4 rounded-xl bg-black/25 border border-white/5 space-y-3">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-white/40 block">Chủ chuồng (Owner)</span>
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-full border border-primary bg-primary/10 flex items-center justify-center">
+                  <User className="size-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-white leading-tight">{detailInv.ownerId?.fullName}</h4>
+                  <p className="text-[10px] text-white/40 mt-0.5">{detailInv.ownerId?.email} • SĐT: {detailInv.ownerId?.phone || "Không rõ"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tournament & Race Section */}
+            <div className="p-4 rounded-xl bg-black/25 border border-white/5 space-y-3">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-white/40 block">Thông tin cuộc đua</span>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Giải đấu lớn</p>
+                  <p className="text-xs font-bold text-teal-400 mt-1">🏆 {detailInv.tournamentId?.name || "Giải đấu đơn lẻ"}</p>
+                  {detailInv.tournamentId?.location && (
+                    <p className="text-[10px] text-white/40 mt-0.5">📍 Địa điểm: {detailInv.tournamentId.location}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Trận đấu nhỏ</p>
+                  <p className="text-xs font-black text-white mt-1 uppercase">🏁 {detailInv.raceId?.name}</p>
+                  <p className="text-[10px] text-white/50 mt-1 flex items-center gap-1">
+                    <Clock className="size-3" />
+                    {formatDateTime(detailInv.raceId?.startTime)}
+                  </p>
+                </div>
+              </div>
+
+              {detailInv.raceId?.prize ? (
+                <div className="mt-2 pt-2 border-t border-white/5 flex justify-between items-center text-xs">
+                  <span className="text-white/40">Quỹ giải thưởng:</span>
+                  <span className="font-black text-yellow-400">{detailInv.raceId.prize.toLocaleString()} Điểm</span>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Assigned Horse Section */}
+            <div className="p-4 rounded-xl bg-black/25 border border-white/5 space-y-3">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-white/40 block">Chiến mã được phân công</span>
+              <div className="flex gap-4">
+                {detailInv.horseId?.image ? (
+                  <div className="relative h-20 w-24 rounded-lg overflow-hidden border border-white/5 shrink-0">
+                    <img src={detailInv.horseId.image} className="size-full object-cover" alt="" />
+                  </div>
+                ) : (
+                  <div className="h-20 w-24 rounded-lg bg-black/20 border border-dashed border-white/10 flex items-center justify-center shrink-0">
+                    <HelpCircle className="size-5 text-white/20" />
+                  </div>
+                )}
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <h4 className="text-sm font-black uppercase text-white truncate">{detailInv.horseId?.name}</h4>
+                  <p className="text-[10px] text-white/40 uppercase tracking-wider">{detailInv.horseId?.breed} • {detailInv.horseId?.age} tuổi • {detailInv.horseId?.gender === "male" ? "Đực" : "Cái"}</p>
+                  
+                  {/* Horse stats compact */}
+                  <div className="grid grid-cols-2 gap-2 text-[10px]">
+                    <div className="flex justify-between border-b border-white/5 pb-0.5"><span className="text-white/40">Tốc độ:</span><span className="font-bold text-primary">{detailInv.horseId?.baseSpeed || 60}/100</span></div>
+                    <div className="flex justify-between border-b border-white/5 pb-0.5"><span className="text-white/40">Sức bền:</span><span className="font-bold text-teal-400">{detailInv.horseId?.staminaScore || 70}/100</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Profit Share Split */}
+            <div className="p-4 rounded-xl bg-teal-500/5 border border-teal-500/10 flex justify-between items-center">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-teal-400">Tỷ lệ chia giải thưởng</p>
+                <p className="text-xs text-white/60 mt-0.5">Phần trăm bạn nhận được từ quỹ giải thưởng của trận đấu</p>
+              </div>
+              <div className="text-right">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-teal-500/10 text-teal-400 font-black text-sm border border-teal-500/20">
+                  {detailInv.jockeySharePercent}%
+                </span>
+                <p className="text-[9px] text-white/45 mt-1">Owner nhận: {100 - detailInv.jockeySharePercent}%</p>
+              </div>
+            </div>
+
+            {/* Message Box */}
+            {detailInv.message && (
+              <div className="space-y-1">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">Lời nhắn từ Chủ chuồng</span>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-white/70 italic leading-relaxed">
+                  "{detailInv.message}"
+                </div>
+              </div>
+            )}
+
+            {/* Decision buttons */}
+            <div className="flex justify-end gap-3 pt-3 border-t border-white/5">
+              <Button
+                onClick={async () => {
+                  if (submittingId !== null) return;
+                  await handleRespondInvitation(detailInv.id || detailInv._id!, "REJECTED");
+                  setDetailInv(null);
+                }}
+                disabled={submittingId !== null}
+                variant="outline"
+                className="h-10 rounded-xl text-xs font-black uppercase tracking-wider border-white/10 text-white bg-transparent hover:bg-white/5"
+              >
+                Từ chối
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (submittingId !== null) return;
+                  await handleRespondInvitation(detailInv.id || detailInv._id!, "ACCEPTED");
+                  setDetailInv(null);
+                }}
+                disabled={submittingId !== null}
+                className="h-10 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#E10600] hover:bg-[#B80500]"
+              >
+                Chấp nhận lời mời
+              </Button>
+            </div>
           </div>
         </div>
       )}

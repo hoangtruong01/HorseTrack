@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("access_token")?.value;
@@ -13,34 +13,35 @@ export async function GET(request: Request) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const page = searchParams.get("page") || "1";
-    const limit = searchParams.get("limit") || "100";
+    const formData = await request.formData();
 
-    const response = await fetch(`http://localhost:3000/api/v1/jockeys?page=${page}&limit=${limit}`, {
-      method: "GET",
+    const response = await fetch("http://localhost:3000/api/v1/uploads", {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      body: formData,
     });
 
     const data = await response.json();
 
     if (!response.ok) {
       return NextResponse.json(
-        { message: data.message || "Lấy danh sách Jockey thất bại." },
+        { message: data.message || "Tải tập tin lên thất bại." },
         { status: response.status }
       );
     }
 
     return NextResponse.json({
       success: true,
-      data: data.data || data,
+      url: data.url,
+      publicId: data.publicId,
     });
   } catch (err) {
-    console.error("Lỗi kết nối tới Backend:", err);
+    console.error("Lỗi upload tới Backend:", err);
+    const errorMessage = err instanceof Error ? err.message : "Không thể kết nối đến server Backend.";
     return NextResponse.json(
-      { message: "Không thể kết nối đến server Backend." },
+      { message: errorMessage },
       { status: 500 }
     );
   }

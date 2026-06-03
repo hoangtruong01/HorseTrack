@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Flag, MapPin, Sparkles, Trophy, Users, ShieldAlert, Award } from "lucide-react";
+import { CalendarDays, Flag, MapPin, Sparkles, Trophy, Users, ShieldAlert, Award, Upload, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,49 @@ export function TournamentForm() {
   const [registrationEndDate, setRegistrationEndDate] = useState("");
   const [maxHorses, setMaxHorses] = useState<number>(20);
   const [prizePool, setPrizePool] = useState<number>(0);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Kích thước ảnh không được vượt quá 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || "Tải lên ảnh thất bại.");
+      }
+
+      setImageUrl(resData.url);
+      toast.success("Tải ảnh lên thành công!");
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi tải ảnh lên.");
+      setImagePreview("");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +125,7 @@ export function TournamentForm() {
         registrationEndDate: registrationEndDate || undefined,
         maxHorses,
         prizePool,
+        imageUrl: imageUrl || undefined,
       };
 
       const res = await fetch("/api/admin/tournaments", {
@@ -295,18 +339,55 @@ export function TournamentForm() {
           </label>
         </div>
 
-        {/* Row 5: Mô tả giải đấu */}
-        <label className="grid gap-2 text-sm font-bold text-white">
-          <span>Mô tả giải đấu</span>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={isLoading}
-            rows={4}
-            className="w-full rounded-xl border border-white/10 bg-black/35 p-4 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-primary focus:ring-2 focus:ring-primary/20 resize-y"
-            placeholder="Mô tả tóm tắt về thể lệ giải đấu, giải thưởng hoặc thông tin ban tổ chức..."
-          />
-        </label>
+        {/* Row 5: Mô tả & Ảnh giải đấu */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <label className="grid gap-2 text-sm font-bold text-white">
+            <span>Mô tả giải đấu</span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={isLoading}
+              rows={8}
+              className="w-full rounded-xl border border-white/10 bg-black/35 p-4 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-primary focus:ring-2 focus:ring-primary/20 resize-y"
+              placeholder="Mô tả tóm tắt về thể lệ giải đấu, giải thưởng hoặc thông tin ban tổ chức..."
+            />
+          </label>
+
+          <div className="grid gap-2 text-sm font-bold text-white">
+            <span>Hình ảnh giải đấu</span>
+            <div className={`relative border border-dashed border-white/10 hover:border-primary/50 bg-black/35 rounded-xl min-h-[192px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${uploading ? 'pointer-events-none opacity-60' : ''}`}>
+              {imagePreview ? (
+                <div className="relative w-full h-[160px] rounded-lg overflow-hidden">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">
+                    <span className="text-white text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">Thay đổi ảnh</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center space-y-2">
+                  {uploading ? (
+                    <Loader2 className="size-10 text-primary mx-auto animate-spin" />
+                  ) : (
+                    <Upload className="size-10 text-white/35 mx-auto group-hover:text-primary transition" />
+                  )}
+                  <p className="text-sm font-bold text-white">{uploading ? "Đang tải lên..." : "Tải lên hình ảnh"}</p>
+                  <p className="text-xs text-white/45">Cho phép định dạng PNG, JPG, WEBP tối đa 5MB</p>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                disabled={uploading}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Information box */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-muted-foreground flex gap-3 items-start">

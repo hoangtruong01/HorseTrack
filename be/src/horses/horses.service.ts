@@ -8,7 +8,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateHorseDto } from './dto/create-horse.dto';
 import { UpdateHorseDto } from './dto/update-horse.dto';
-import { Horse, HorseDocument, HorseStatus } from './schemas/horse.schema';
+import {
+  Horse,
+  HorseDocument,
+  HorseStatus,
+  HorseApprovalStatus,
+} from './schemas/horse.schema';
 import {
   Registration,
   RegistrationDocument,
@@ -56,9 +61,44 @@ export class HorsesService {
     return horse;
   }
 
-  /** Admin: list all non-deleted horses with pagination */
-  async findAll(page = 1, limit = 20) {
-    const filter = { status: { $ne: HorseStatus.DELETED } };
+  /** Admin: list all non-deleted horses with pagination and search */
+  async findAll(page = 1, limit = 20, search?: string) {
+    // Tự động dọn dẹp các ngựa bị từ chối quá 24h
+    await this.horseModel.deleteMany({
+      approvalStatus: HorseApprovalStatus.REJECTED,
+      rejectedAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    });
+
+    const filter: {
+      status: { $ne: HorseStatus };
+      $or?: Array<{
+        name?: { $regex: string; $options: string };
+        breed?: { $regex: string; $options: string };
+        color?: { $regex: string; $options: string };
+        ownerId?: { $in: Types.ObjectId[] };
+      }>;
+    } = {
+      status: { $ne: HorseStatus.DELETED },
+    };
+
+    if (search) {
+      // Tìm các user có tên khớp với từ khóa search để tìm kiếm theo tên chủ
+      const UserModel = this.horseModel.db.model('User');
+      const matchedUsers = (await UserModel.find({
+        fullName: { $regex: search, $options: 'i' },
+      })
+        .select('_id')
+        .exec()) as Array<{ _id: Types.ObjectId }>;
+      const userIds = matchedUsers.map((u) => u._id);
+
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { breed: { $regex: search, $options: 'i' } },
+        { color: { $regex: search, $options: 'i' } },
+        { ownerId: { $in: userIds } },
+      ];
+    }
+
     const [docs, total] = await Promise.all([
       this.horseModel
         .find(filter)
@@ -98,7 +138,16 @@ export class HorsesService {
 
   /** Owner: list own horses */
   async findMyHorses(ownerId: string, page = 1, limit = 20) {
-    const filter = { ownerId, status: { $ne: HorseStatus.DELETED } };
+    // Tự động dọn dẹp các ngựa bị từ chối quá 24h
+    await this.horseModel.deleteMany({
+      approvalStatus: HorseApprovalStatus.REJECTED,
+      rejectedAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    });
+
+    const filter = {
+      ownerId: new Types.ObjectId(ownerId),
+      status: { $ne: HorseStatus.DELETED },
+    };
     const [docs, total] = await Promise.all([
       this.horseModel
         .find(filter)
@@ -196,8 +245,62 @@ export class HorsesService {
       }
     }
 
-    Object.assign(horse, dto);
-    if (imageUrl) horse.image = imageUrl;
+    // Nếu không phải là admin và ngựa đã được duyệt
+    if (!isAdmin && horse.approvalStatus === HorseApprovalStatus.APPROVED) {
+      // Chỉ cho phép cập nhật: name, age, weightKg, heightCm, healthStatus, description
+      const allowedKeys = [
+        'name',
+        'age',
+        'weightKg',
+        'heightCm',
+        'healthStatus',
+        'description',
+      ] as const;
+      const updateData: Record<string, unknown> = {};
+
+      for (const key of allowedKeys) {
+        const val = dto[key];
+        if (val !== undefined) {
+          updateData[key] = val;
+        }
+      }
+
+      Object.assign(horse, updateData);
+      // Giữ nguyên approvalStatus là APPROVED, không cần admin duyệt lại
+    } else {
+      // Nếu chưa được duyệt hoặc là Admin
+      Object.assign(horse, dto);
+      if (imageUrl) horse.image = imageUrl;
+
+      // Nếu chủ ngựa sửa ngựa khi đang bị REJECTED, ta reset lại trạng thái duyệt về PENDING
+      if (!isAdmin && horse.approvalStatus === HorseApprovalStatus.REJECTED) {
+        horse.approvalStatus = HorseApprovalStatus.PENDING;
+        horse.rejectionReason = undefined;
+        horse.rejectedAt = undefined;
+      }
+    }
+
+    return (await horse.save()).toJSON() as HorseJson;
+  }
+
+  /** Admin: Approve horse */
+  async approveHorse(id: string): Promise<HorseJson> {
+    const horse = await this.findDocument(id);
+    horse.approvalStatus = HorseApprovalStatus.APPROVED;
+    horse.approvedAt = new Date();
+    horse.status = HorseStatus.ACTIVE;
+    return (await horse.save()).toJSON() as HorseJson;
+  }
+
+  /** Admin: Reject horse with a reason */
+  async rejectHorse(id: string, reason: string): Promise<HorseJson> {
+    if (!reason || reason.trim() === '') {
+      throw new BadRequestException('Lý do không duyệt không được để trống');
+    }
+    const horse = await this.findDocument(id);
+    horse.approvalStatus = HorseApprovalStatus.REJECTED;
+    horse.rejectionReason = reason;
+    horse.rejectedAt = new Date();
     return (await horse.save()).toJSON() as HorseJson;
   }
 

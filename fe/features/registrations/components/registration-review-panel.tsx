@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardCheck, ShieldAlert } from "lucide-react";
+import { ClipboardCheck, ShieldAlert, Trophy } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,15 @@ export function RegistrationReviewPanel({
           </div>
           <div className="grid gap-3 rounded-2xl border border-white/10 bg-black/25 p-4">
             <div className="flex items-center gap-3">
+              <Trophy className="size-5 text-primary" />
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  Tournament
+                </p>
+                <p className="font-black text-white">{registration.tournament}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
               <ClipboardCheck className="size-5 text-primary" />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
@@ -86,6 +95,18 @@ export function RegistrationReviewPanel({
               <dd className="font-bold text-white">{registration.owner}</dd>
               <dd className="text-muted-foreground">
                 {registration.ownerEmail}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Tournament</dt>
+              <dd className="font-bold text-white">
+                {registration.tournament}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Race</dt>
+              <dd className="font-bold text-white">
+                {registration.race}
               </dd>
             </div>
             <div>
@@ -161,6 +182,10 @@ export function RegistrationReviewPanel({
         action={action}
         open={Boolean(action)}
         onClose={() => setAction(null)}
+        onSuccess={() => {
+          setAction(null);
+          window.location.href = "/admin/registrations";
+        }}
       />
     </div>
   );

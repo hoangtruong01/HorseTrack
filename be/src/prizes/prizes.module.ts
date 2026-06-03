@@ -7,6 +7,10 @@ import {
 } from '../race-results/schemas/race-result.schema';
 import { Race, RaceSchema } from '../races/schemas/race.schema';
 import { Horse, HorseSchema } from '../horses/schemas/horse.schema';
+import {
+  Registration,
+  RegistrationSchema,
+} from '../registrations/schemas/registration.schema';
 import { PrizesController } from './prizes.controller';
 import { PrizesService } from './prizes.service';
 import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
@@ -18,6 +22,7 @@ import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-led
       { name: RaceResult.name, schema: RaceResultSchema },
       { name: Race.name, schema: RaceSchema },
       { name: Horse.name, schema: HorseSchema },
+      { name: Registration.name, schema: RegistrationSchema },
     ]),
     RewardPointLedgerModule,
   ],

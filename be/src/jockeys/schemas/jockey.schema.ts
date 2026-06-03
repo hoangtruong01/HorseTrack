@@ -44,6 +44,12 @@ export class Jockey {
 
   @Prop()
   bio?: string;
+
+  @Prop()
+  specialty?: string;
+
+  @Prop()
+  personality?: string;
 }
 
 export const JockeySchema = SchemaFactory.createForClass(Jockey);

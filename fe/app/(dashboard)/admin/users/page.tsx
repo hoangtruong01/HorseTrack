@@ -167,16 +167,16 @@ export default function AdminUsersPage() {
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value)}
         >
-          <option value="">Tất cả Role</option>
-          {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+          <option value="" className="bg-[#15151E] text-white">Tất cả Role</option>
+          {ROLES.map(r => <option key={r} value={r} className="bg-[#15151E] text-white">{r}</option>)}
         </select>
         <select
           className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
-          <option value="">Tất cả Status</option>
-          {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          <option value="" className="bg-[#15151E] text-white">Tất cả Status</option>
+          {STATUSES.map(s => <option key={s} value={s} className="bg-[#15151E] text-white">{s}</option>)}
         </select>
       </div>
 

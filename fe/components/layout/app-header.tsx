@@ -25,7 +25,7 @@ export function AppHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b border-white/5 bg-[#07070A]/90 backdrop-blur-md",
+        "sticky top-0 z-50 border-b border-white/5 bg-[#07070A]/90 backdrop-blur-md",
         className,
       )}
     >

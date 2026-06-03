@@ -26,11 +26,13 @@ const DEMO_ROW_LIMIT = 8;
 export type RegistrationTableProps = {
   registrations: RaceRegistration[];
   limit?: number;
+  onRefresh?: () => void;
 };
 
 export function RegistrationTable({
   registrations,
   limit = DEMO_ROW_LIMIT,
+  onRefresh,
 }: RegistrationTableProps) {
   const visibleRegistrations = registrations.slice(0, limit);
   const [selected, setSelected] = useState<RaceRegistration | null>(null);
@@ -56,7 +58,7 @@ export function RegistrationTable({
           </h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          UI-only · showing {visibleRegistrations.length}/{registrations.length}
+          Đang hiển thị {visibleRegistrations.length}/{registrations.length} đơn đăng ký
         </p>
       </div>
       <div className="mt-5 overflow-x-auto rounded-xl border border-white/10">
@@ -155,6 +157,11 @@ export function RegistrationTable({
         onClose={() => {
           setSelected(null);
           setAction(null);
+        }}
+        onSuccess={() => {
+          setSelected(null);
+          setAction(null);
+          onRefresh?.();
         }}
       />
     </section>

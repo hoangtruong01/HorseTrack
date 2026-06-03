@@ -73,6 +73,9 @@ export class Tournament {
   @Prop({ default: 0 })
   prizePool?: number;
 
+  @Prop()
+  imageUrl?: string;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy!: Types.ObjectId;
 

@@ -125,20 +125,34 @@ export interface HorseItem {
   age?: number;
   gender?: string;
   color?: string;
+  weightKg?: number;
+  heightCm?: number;
+  baseSpeed?: number;
+  staminaScore?: number;
+  description?: string;
   healthStatus: string;
   status: string;
+  approvalStatus?: string;
+  rejectionReason?: string;
+  rejectedAt?: string;
+  approvedAt?: string;
   ownerId?: { _id: string; fullName: string; email: string } | string;
   imageUrl?: string;
+  image?: string;
   createdAt?: string;
 }
 
 export const horsesApi = {
-  list: (params?: { page?: number; limit?: number }) => {
+  list: (params?: { page?: number; limit?: number; search?: string }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.search) qs.set("search", params.search);
     return apiFetch<PaginatedResult<HorseItem>>(`/horses?${qs}`);
   },
+  approve: (id: string) => apiFetch(`/horses/${id}/approve`, { method: "PATCH" }),
+  reject: (id: string, reason: string) =>
+    apiFetch(`/horses/${id}/reject`, { method: "PATCH", body: JSON.stringify({ reason }) }),
   delete: (id: string) => apiFetch(`/horses/${id}`, { method: "DELETE" }),
 };
 
@@ -172,11 +186,16 @@ export interface TournamentItem {
   _id: string;
   name: string;
   description?: string;
+  location?: string;
   status: string;
   startDate?: string;
   endDate?: string;
+  registrationStartDate?: string;
+  registrationEndDate?: string;
   maxHorses?: number;
-  prize?: number;
+  prize?: number;       // backward-compat alias
+  prizePool?: number;   // actual backend field
+  imageUrl?: string;
   createdAt?: string;
 }
 
@@ -187,9 +206,63 @@ export const tournamentsApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<TournamentItem>>(`/tournaments?${qs}`);
   },
+  get: (id: string) => apiFetch<TournamentItem>(`/tournaments/${id}`),
   updateStatus: (id: string, status: string) =>
     apiFetch(`/tournaments/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   delete: (id: string) => apiFetch(`/tournaments/${id}`, { method: "DELETE" }),
+};
+
+// ─── Races ───────────────────────────────────────────────────────────────────
+export interface RaceItem {
+  _id: string;
+  tournamentId: { _id: string; name: string; startDate?: string; endDate?: string } | string;
+  name: string;
+  description?: string;
+  raceNumber?: number;
+  startTime: string;
+  endTime?: string;
+  location?: string;
+  distanceMeters: number;
+  lapCount?: number;
+  maxParticipants?: number;
+  participantsCount?: number;
+  prize?: number;
+  status: string;
+  trackCondition?: string;
+  weatherSnapshot?: string;
+  createdBy?: { _id: string; fullName: string } | string;
+  createdAt?: string;
+}
+
+export const racesApi = {
+  list: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<RaceItem>>(`/races?${qs}`);
+  },
+  listByTournament: (tournamentId: string, params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<RaceItem>>(`/races/tournament/${tournamentId}?${qs}`);
+  },
+  get: (id: string) => apiFetch<RaceItem>(`/races/${id}`),
+  create: (dto: {
+    tournamentId: string;
+    name: string;
+    description?: string;
+    startTime: string;
+    distanceMeters: number;
+    lapCount?: number;
+    maxParticipants?: number;
+    prize?: number;
+    trackCondition?: string;
+    weatherSnapshot?: string;
+  }) => apiFetch<RaceItem>("/races", { method: "POST", body: JSON.stringify(dto) }),
+  updateStatus: (id: string, status: string) =>
+    apiFetch(`/races/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  delete: (id: string) => apiFetch(`/races/${id}`, { method: "DELETE" }),
 };
 
 // ─── Referee Assignments ─────────────────────────────────────────────────────
@@ -331,4 +404,39 @@ export const walletApi = {
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 export const dashboardApi = {
   getAdminStats: () => apiFetch<Record<string, unknown>>("/dashboard/admin"),
+};
+
+// ─── Registrations ───────────────────────────────────────────────────────────
+export interface RegistrationItem {
+  _id: string;
+  tournamentId?: { _id: string; name: string; status: string } | string;
+  raceId?: { _id: string; name: string; startTime: string; status: string } | string;
+  horseId?: { _id: string; name: string; breed: string } | string;
+  ownerId?: { _id: string; fullName: string; email: string } | string;
+  jockeyUserId?: { _id: string; fullName: string; email: string } | string;
+  status: string;
+  note?: string;
+  rejectedReason?: string;
+  approvedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const registrationsApi = {
+  list: (params?: { page?: number; limit?: number; tournamentId?: string; raceId?: string; status?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.tournamentId) qs.set("tournamentId", params.tournamentId);
+    if (params?.raceId) qs.set("raceId", params.raceId);
+    if (params?.status) qs.set("status", params.status);
+    return apiFetch<PaginatedResult<RegistrationItem>>(`/registrations?${qs}`);
+  },
+  get: (id: string) => apiFetch<RegistrationItem>(`/registrations/${id}`),
+  approve: (id: string) => apiFetch<RegistrationItem>(`/registrations/${id}/approve`, { method: "PATCH" }),
+  reject: (id: string, reason?: string) =>
+    apiFetch<RegistrationItem>(`/registrations/${id}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify({ reason }),
+    }),
 };
