@@ -51,7 +51,7 @@ type OwnerInfo = {
 };
 
 type HorseInfoCompact = {
-  _id: string;
+  id: string;
   name: string;
   breed: string;
   age?: number;
@@ -62,7 +62,7 @@ type HorseInfoCompact = {
 };
 
 type RaceInfoCompact = {
-  _id: string;
+  id: string;
   name: string;
   startTime: string;
   status: string;
@@ -73,7 +73,7 @@ type RaceInfoCompact = {
 };
 
 type TournamentInfoCompact = {
-  _id: string;
+  id: string;
   name: string;
   startDate?: string;
   endDate?: string;
@@ -82,7 +82,8 @@ type TournamentInfoCompact = {
 };
 
 type Invitation = {
-  _id: string;
+  id: string;
+  _id?: string;
   registrationId: string;
   tournamentId: TournamentInfoCompact;
   raceId: RaceInfoCompact;
@@ -112,7 +113,7 @@ type HorseDetail = {
   image?: string;
   baseSpeed?: number;
   staminaScore?: number;
-  ownerId?: string | { _id: string; fullName: string };
+  ownerId?: string | { _id: string; id: string; fullName: string };
 };
 
 export function JockeyDashboard() {
@@ -376,7 +377,7 @@ export function JockeyDashboard() {
                 ) : (
                   <div className="space-y-3">
                     {acceptedInvs.slice(0, 3).map((inv) => (
-                      <div key={inv._id} className="flex justify-between items-center p-3 rounded-xl border border-white/5 bg-black/20 hover:border-white/10 transition">
+                      <div key={inv.id || inv._id} className="flex justify-between items-center p-3 rounded-xl border border-white/5 bg-black/20 hover:border-white/10 transition">
                         <div>
                           <h4 className="text-xs font-bold text-white uppercase">{inv.raceId?.name || "Tên trận đấu"}</h4>
                           <p className="text-[10px] text-white/50 mt-1 flex items-center gap-1">
@@ -386,7 +387,7 @@ export function JockeyDashboard() {
                         </div>
                         <div className="text-right">
                           <button
-                            onClick={() => handleViewHorseDetail(inv.horseId._id)}
+                            onClick={() => handleViewHorseDetail(inv.horseId.id)}
                             className="text-[10px] px-2 py-1 rounded bg-[#E10600]/10 hover:bg-[#E10600]/20 text-primary border border-[#E10600]/20 transition flex items-center gap-1"
                           >
                             <Eye className="size-3" />
@@ -427,7 +428,7 @@ export function JockeyDashboard() {
                 ) : (
                   <div className="space-y-3">
                     {pendingInvs.slice(0, 3).map((inv) => (
-                      <div key={inv._id} className="flex justify-between items-center p-3 rounded-xl border border-[#E10600]/20 bg-[#E10600]/5 hover:border-[#E10600]/40 transition">
+                      <div key={inv.id || inv._id} className="flex justify-between items-center p-3 rounded-xl border border-[#E10600]/20 bg-[#E10600]/5 hover:border-[#E10600]/40 transition">
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-black uppercase text-primary">Lời mời</span>
@@ -481,7 +482,7 @@ export function JockeyDashboard() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {pendingInvs.map((inv) => (
-                  <div key={inv._id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-primary/25 hover:bg-[#1C1C25] transition flex flex-col justify-between shadow-xl">
+                  <div key={inv.id || inv._id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 hover:border-primary/25 hover:bg-[#1C1C25] transition flex flex-col justify-between shadow-xl">
                     <div className="absolute top-4 right-4 flex items-center gap-2">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 font-black text-[10px] border border-teal-500/20">{inv.jockeySharePercent}%</span>
                       <StatusBadge label="Chờ duyệt" tone="yellow" pulse />
@@ -519,7 +520,7 @@ export function JockeyDashboard() {
                           <div>
                             <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Ngựa được chỉ định</p>
                             <button
-                              onClick={() => handleViewHorseDetail(inv.horseId._id)}
+                              onClick={() => handleViewHorseDetail(inv.horseId.id)}
                               className="text-xs font-bold text-primary hover:underline flex items-center gap-1 text-left mt-0.5"
                             >
                               {inv.horseId?.name} ({inv.horseId?.breed})
@@ -588,7 +589,7 @@ export function JockeyDashboard() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {acceptedInvs.map((inv) => (
-                  <div key={inv._id} className="rounded-2xl border border-white/5 bg-[#15151E] p-5 shadow-xl hover:border-teal-500/30 hover:bg-[#1C1C25] transition flex flex-col justify-between">
+                  <div key={inv.id || inv._id} className="rounded-2xl border border-white/5 bg-[#15151E] p-5 shadow-xl hover:border-teal-500/30 hover:bg-[#1C1C25] transition flex flex-col justify-between">
                     <div className="space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
@@ -640,7 +641,7 @@ export function JockeyDashboard() {
                           <p className="text-xs font-black text-white mt-0.5">{inv.horseId?.name}</p>
                         </div>
                         <Button
-                          onClick={() => handleViewHorseDetail(inv.horseId._id)}
+                          onClick={() => handleViewHorseDetail(inv.horseId.id)}
                           className="rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-[10px] h-8 font-black uppercase tracking-wider text-white"
                         >
                           <Eye className="size-3 ml-1" />
@@ -660,7 +661,7 @@ export function JockeyDashboard() {
             <div className="flex items-center justify-between">
               <h3 className="text-base font-black uppercase tracking-wider text-white">Chiến mã đang điều khiển</h3>
               <span className="px-2.5 py-0.5 text-xs bg-[#067E6A]/10 text-teal-300 border border-[#067E6A]/20 rounded font-bold uppercase">
-                {Array.from(new Set(acceptedInvs.map(inv => inv.horseId?._id))).length} Ngựa đang cưỡi
+                {Array.from(new Set(acceptedInvs.map(inv => inv.horseId?.id))).length} Ngựa đang cưỡi
               </span>
             </div>
 
@@ -683,10 +684,10 @@ export function JockeyDashboard() {
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {/* Lấy danh sách ngựa duy nhất (unique) từ các lời mời đã chấp nhận */}
-                {Array.from(new Map(acceptedInvs.map(inv => [inv.horseId?._id, inv.horseId])).values()).map((horse) => {
+                {Array.from(new Map(acceptedInvs.map(inv => [inv.horseId?.id, inv.horseId])).values()).map((horse) => {
                   if (!horse) return null;
                   return (
-                    <div key={horse._id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 shadow-xl hover:border-primary/30 hover:bg-[#1C1C25] transition flex flex-col justify-between">
+                    <div key={horse.id} className="group relative rounded-2xl border border-white/5 bg-[#15151E] p-5 shadow-xl hover:border-primary/30 hover:bg-[#1C1C25] transition flex flex-col justify-between">
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
                           <div className="size-12 rounded-full border border-primary bg-primary/10 flex items-center justify-center">
@@ -706,7 +707,7 @@ export function JockeyDashboard() {
 
                       <div className="mt-4 pt-4 border-t border-white/5">
                         <Button
-                          onClick={() => handleViewHorseDetail(horse._id)}
+                          onClick={() => handleViewHorseDetail(horse.id)}
                           className="w-full rounded-full bg-[#E10600] hover:bg-[#B80500] text-xs h-9 uppercase font-bold text-white flex items-center justify-center gap-1.5"
                         >
                           <Eye className="size-3.5" />
@@ -1074,7 +1075,7 @@ export function JockeyDashboard() {
               <Button
                 onClick={async () => {
                   if (submittingId !== null) return;
-                  await handleRespondInvitation(detailInv._id, "REJECTED");
+                  await handleRespondInvitation(detailInv.id || detailInv._id!, "REJECTED");
                   setDetailInv(null);
                 }}
                 disabled={submittingId !== null}
@@ -1086,7 +1087,7 @@ export function JockeyDashboard() {
               <Button
                 onClick={async () => {
                   if (submittingId !== null) return;
-                  await handleRespondInvitation(detailInv._id, "ACCEPTED");
+                  await handleRespondInvitation(detailInv.id || detailInv._id!, "ACCEPTED");
                   setDetailInv(null);
                 }}
                 disabled={submittingId !== null}

@@ -196,7 +196,7 @@ export class JockeyInvitationsService {
       // Check schedule conflict: jockey already accepted another race within 4-hour window
       if (race) {
         const acceptedInvitations = await this.invitationModel.find({
-          jockeyUserId,
+          jockeyUserId: new Types.ObjectId(jockeyUserId),
           status: InvitationStatus.ACCEPTED,
           _id: { $ne: id },
         });
@@ -278,7 +278,7 @@ export class JockeyInvitationsService {
   }
 
   async findMyReceived(jockeyUserId: string, page = 1, limit = 20) {
-    const filter = { jockeyUserId };
+    const filter = { jockeyUserId: new Types.ObjectId(jockeyUserId) };
     const [data, total] = await Promise.all([
       this.invitationModel
         .find(filter)
@@ -300,7 +300,7 @@ export class JockeyInvitationsService {
   }
 
   async findMySent(ownerUserId: string, page = 1, limit = 20) {
-    const filter = { ownerId: ownerUserId };
+    const filter = { ownerId: new Types.ObjectId(ownerUserId) };
     const [data, total] = await Promise.all([
       this.invitationModel
         .find(filter)

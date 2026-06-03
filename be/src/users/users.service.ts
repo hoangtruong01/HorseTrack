@@ -5,23 +5,34 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RoleName, UserDocument, UserStatus } from './schemas/user.schema';
 import { UsersRepository } from './users.repository';
+import {
+  Jockey,
+  JockeyDocument,
+  JockeyStatus,
+  JockeySkillLevel,
+} from '../jockeys/schemas/jockey.schema';
 
 const SALT_ROUNDS = 10;
 
 @Injectable()
 export class UsersService {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(
+    private usersRepository: UsersRepository,
+    @InjectModel(Jockey.name) private jockeyModel: Model<JockeyDocument>,
+  ) {}
 
   async create(dto: CreateUserDto): Promise<UserDocument> {
     const existing = await this.usersRepository.findByEmail(dto.email);
     if (existing) throw new ConflictException('Email already in use');
     const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    return this.usersRepository.create({
+    const user = await this.usersRepository.create({
       fullName: dto.fullName,
       email: dto.email,
       passwordHash,
@@ -31,6 +42,12 @@ export class UsersService {
       avatar: dto.avatar,
       roles: dto.roles,
     });
+
+    if (user.roles && user.roles.includes(RoleName.JOCKEY)) {
+      await this.ensureJockeyProfile(String(user._id));
+    }
+
+    return user;
   }
 
   async validateCredentials(
@@ -122,10 +139,27 @@ export class UsersService {
   async assignRole(userId: string, role: RoleName): Promise<void> {
     const result = await this.usersRepository.addRole(userId, role);
     if (!result) throw new NotFoundException('User not found');
+    if (role === RoleName.JOCKEY) {
+      await this.ensureJockeyProfile(userId);
+    }
   }
 
   async removeRole(userId: string, role: RoleName): Promise<void> {
     const result = await this.usersRepository.removeRole(userId, role);
     if (!result) throw new NotFoundException('User not found');
+  }
+
+  private async ensureJockeyProfile(userId: string): Promise<void> {
+    const existing = await this.jockeyModel.findOne({ userId });
+    if (!existing) {
+      await this.jockeyModel.create({
+        userId,
+        heightCm: 165,
+        weightKg: 50,
+        experienceYears: 0,
+        status: JockeyStatus.AVAILABLE,
+        skillLevel: JockeySkillLevel.BEGINNER,
+      });
+    }
   }
 }
