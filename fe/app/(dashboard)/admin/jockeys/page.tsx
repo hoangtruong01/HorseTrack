@@ -78,8 +78,8 @@ export default function AdminJockeysPage() {
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
-          <option value="">Tất cả Status</option>
-          {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          <option value="" className="bg-[#15151e] text-white">Tất cả Status</option>
+          {STATUSES.map(s => <option key={s} value={s} className="bg-[#15151e] text-white">{s}</option>)}
         </select>
         <div className="text-sm text-muted-foreground flex items-center">
           Tổng: <strong className="text-white ml-1">{meta.total}</strong>
@@ -126,7 +126,7 @@ export default function AdminJockeysPage() {
                         onChange={(e) => handleChangeStatus(j._id, e.target.value)}
                         className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-white focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer"
                       >
-                        {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                        {STATUSES.map(s => <option key={s} value={s} className="bg-[#15151e] text-white">{s}</option>)}
                       </select>
                     </td>
                   </tr>

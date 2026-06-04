@@ -247,9 +247,9 @@ export default function AdminRefereesPage() {
                           onChange={(e) => handleChangeStatus(p._id, e.target.value as any)}
                           className="rounded-lg border border-white/10 bg-black/40 px-3 py-1.5 text-xs text-white focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
                         >
-                          <option value="available">Sẵn sàng</option>
-                          <option value="unavailable">Bận</option>
-                          <option value="suspended">Tạm đình chỉ</option>
+                          <option value="available" className="bg-[#15151e] text-white">Sẵn sàng</option>
+                          <option value="unavailable" className="bg-[#15151e] text-white">Bận</option>
+                          <option value="suspended" className="bg-[#15151e] text-white">Tạm đình chỉ</option>
                         </select>
                       )}
                     </td>

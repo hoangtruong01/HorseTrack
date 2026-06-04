@@ -209,9 +209,9 @@ export default function AdminRefereeAssignmentsPage() {
             value={selectedTournament}
             onChange={(e) => setSelectedTournament(e.target.value)}
           >
-            <option value="">— Chọn giải đấu —</option>
+            <option value="" className="bg-[#15151e] text-white">— Chọn giải đấu —</option>
             {tournaments.map(t => (
-              <option key={t._id} value={t._id}>{t.name} ({t.status})</option>
+              <option key={t._id} value={t._id} className="bg-[#15151e] text-white">{t.name} ({t.status})</option>
             ))}
           </select>
         </div>
@@ -223,9 +223,9 @@ export default function AdminRefereeAssignmentsPage() {
             onChange={(e) => setSelectedRace(e.target.value)}
             disabled={!selectedTournament || racesLoading}
           >
-            <option value="">{racesLoading ? "Đang tải..." : !selectedTournament ? "— Chọn giải đấu trước —" : "— Chọn vòng đua —"}</option>
+            <option value="" className="bg-[#15151e] text-white">{racesLoading ? "Đang tải..." : !selectedTournament ? "— Chọn giải đấu trước —" : "— Chọn vòng đua —"}</option>
             {races.map(r => (
-              <option key={r._id} value={r._id}>
+              <option key={r._id} value={r._id} className="bg-[#15151e] text-white">
                 {r.name} — {r.status} — {new Date(r.startTime).toLocaleDateString("vi-VN")}
               </option>
             ))}
@@ -342,9 +342,9 @@ export default function AdminRefereeAssignmentsPage() {
                   required value={formTournament} onChange={(e) => setFormTournament(e.target.value)}
                   className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
                 >
-                  <option value="">— Chọn giải đấu —</option>
+                  <option value="" className="bg-[#15151e] text-white">— Chọn giải đấu —</option>
                   {tournaments.map(t => (
-                    <option key={t._id} value={t._id}>{t.name} ({t.status})</option>
+                    <option key={t._id} value={t._id} className="bg-[#15151e] text-white">{t.name} ({t.status})</option>
                   ))}
                 </select>
               </label>
@@ -357,11 +357,11 @@ export default function AdminRefereeAssignmentsPage() {
                   disabled={!formTournament || formRacesLoading}
                   className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer disabled:opacity-40"
                 >
-                  <option value="">
+                  <option value="" className="bg-[#15151e] text-white">
                     {formRacesLoading ? "Đang tải..." : !formTournament ? "— Chọn giải đấu trước —" : "— Chọn vòng đua —"}
                   </option>
                   {formRaces.map(r => (
-                    <option key={r._id} value={r._id}>
+                    <option key={r._id} value={r._id} className="bg-[#15151e] text-white">
                       {r.name} — {r.status} — {new Date(r.startTime).toLocaleDateString("vi-VN")}
                     </option>
                   ))}
@@ -388,9 +388,9 @@ export default function AdminRefereeAssignmentsPage() {
                   disabled={!formRace || refereesLoading}
                   className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer disabled:opacity-40"
                 >
-                  <option value="">{!formRace ? "— Chọn vòng đua trước —" : refereesLoading ? "Đang tải trọng tài rảnh..." : "— Chọn trọng tài —"}</option>
+                  <option value="" className="bg-[#15151e] text-white">{!formRace ? "— Chọn vòng đua trước —" : refereesLoading ? "Đang tải trọng tài rảnh..." : "— Chọn trọng tài —"}</option>
                   {filteredReferees.map(u => (
-                    <option key={u._id} value={u._id}>{u.fullName} — {u.email}</option>
+                    <option key={u._id} value={u._id} className="bg-[#15151e] text-white">{u.fullName} — {u.email}</option>
                   ))}
                 </select>
               </label>
