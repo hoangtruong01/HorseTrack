@@ -312,18 +312,11 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Danh sách giải đấu nổi bật đang diễn ra và sắp khởi tranh.",
   },
   {
-    title: "Thông Tin Giải Đấu",
+    title: "Giải Đấu & Lịch Đua",
     href: "/spectator/tournaments",
     role: "Spectator",
-    icon: ListChecks,
-    description: "Thông tin chi tiết, điều lệ và cơ cấu giải thưởng giải đấu.",
-  },
-  {
-    title: "Lịch Thi Đấu",
-    href: "/spectator/races",
-    role: "Spectator",
-    icon: Flag,
-    description: "Lịch đua, sơ đồ đường chạy và thời gian xuất phát chi tiết.",
+    icon: Trophy,
+    description: "Xem giải đấu, lịch trình đua và chi tiết từng trận với đội hình tham gia.",
   },
   {
     title: "Kết Quả Trực Tiếp",
