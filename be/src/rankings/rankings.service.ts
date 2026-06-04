@@ -78,9 +78,19 @@ export class RankingsService {
       },
     ];
 
-    const raw = await this.resultModel.aggregate<any>(pipeline);
+    const raw =
+      await this.resultModel.aggregate<Omit<RankingEntry, 'rank'>>(pipeline);
     return raw.map(
-      (entry, index): RankingEntry => ({ ...entry, rank: index + 1 }),
+      (entry, index): RankingEntry => ({
+        horseId: String(entry.horseId),
+        horseName: entry.horseName,
+        breed: entry.breed,
+        totalPoints: entry.totalPoints,
+        totalRaces: entry.totalRaces,
+        wins: entry.wins,
+        totalFinishTimeMs: entry.totalFinishTimeMs,
+        rank: index + 1,
+      }),
     );
   }
 
@@ -124,9 +134,20 @@ export class RankingsService {
       },
     ];
 
-    const raw = await this.resultModel.aggregate<any>(pipeline);
+    const raw =
+      await this.resultModel.aggregate<Omit<JockeyRankingEntry, 'rank'>>(
+        pipeline,
+      );
     return raw.map(
-      (entry, index): JockeyRankingEntry => ({ ...entry, rank: index + 1 }),
+      (entry, index): JockeyRankingEntry => ({
+        jockeyUserId: String(entry.jockeyUserId),
+        jockeyName: entry.jockeyName,
+        totalPoints: entry.totalPoints,
+        totalRaces: entry.totalRaces,
+        wins: entry.wins,
+        totalFinishTimeMs: entry.totalFinishTimeMs,
+        rank: index + 1,
+      }),
     );
   }
 
@@ -185,9 +206,20 @@ export class RankingsService {
       },
     ];
 
-    const raw = await this.resultModel.aggregate<any>(pipeline);
+    const raw =
+      await this.resultModel.aggregate<Omit<RankingEntry, 'rank'>>(pipeline);
     return raw.map(
-      (entry, index): RankingEntry => ({ ...entry, rank: index + 1 }),
+      (entry, index): RankingEntry => ({
+        horseId: String(entry.horseId),
+        horseName: entry.horseName,
+        breed: entry.breed,
+        ownerName: entry.ownerName,
+        totalPoints: entry.totalPoints,
+        totalRaces: entry.totalRaces,
+        wins: entry.wins,
+        totalFinishTimeMs: entry.totalFinishTimeMs,
+        rank: index + 1,
+      }),
     );
   }
 
@@ -247,9 +279,22 @@ export class RankingsService {
       },
     ];
 
-    const raw = await this.resultModel.aggregate<any>(pipeline);
+    const raw =
+      await this.resultModel.aggregate<Omit<JockeyRankingEntry, 'rank'>>(
+        pipeline,
+      );
     return raw.map(
-      (entry, index): JockeyRankingEntry => ({ ...entry, rank: index + 1 }),
+      (entry, index): JockeyRankingEntry => ({
+        jockeyUserId: String(entry.jockeyUserId),
+        jockeyName: entry.jockeyName,
+        experienceYears: entry.experienceYears,
+        skillLevel: entry.skillLevel,
+        totalPoints: entry.totalPoints,
+        totalRaces: entry.totalRaces,
+        wins: entry.wins,
+        totalFinishTimeMs: entry.totalFinishTimeMs,
+        rank: index + 1,
+      }),
     );
   }
 }

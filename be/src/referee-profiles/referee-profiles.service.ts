@@ -69,7 +69,10 @@ export class RefereeProfilesService {
   }
 
   async findAll(page = 1, limit = 20, approvalStatus?: RefereeApprovalStatus) {
-    const filter: any = { deletedAt: { $exists: false } };
+    const filter: {
+      deletedAt?: { $exists: boolean };
+      approvalStatus?: RefereeApprovalStatus;
+    } = { deletedAt: { $exists: false } };
     if (approvalStatus) {
       filter.approvalStatus = approvalStatus;
     }

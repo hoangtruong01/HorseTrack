@@ -16,6 +16,7 @@ import {
   RefereeAssignment,
   RefereeAssignmentDocument,
   RefereeAssignmentStatus,
+  RefereeRole,
 } from '../referee-assignments/schemas/referee-assignment.schema';
 import {
   Prize,
@@ -152,9 +153,9 @@ export class PrizesService {
           userId: String(ass.refereeUserId),
           points: ass.salary,
           sourceType: LedgerSourceType.REFEREE_SALARY,
-          sourceId: new Types.ObjectId(raceId) as any,
+          sourceId: raceId,
           note: `Lương điều hành cuộc đua "${race.name}" với vai trò ${
-            ass.role === 'main' ? 'Trọng tài chính' : 'Trọng tài phụ'
+            ass.role === RefereeRole.MAIN ? 'Trọng tài chính' : 'Trọng tài phụ'
           }`,
         });
       }
