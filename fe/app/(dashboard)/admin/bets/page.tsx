@@ -35,7 +35,7 @@ export default function AdminBetsPage() {
 
   useEffect(() => { void fetchBets(1); }, [fetchBets]);
 
-  const getName = (field: PredictionItem["userId"] | PredictionItem["raceId"] | PredictionItem["horseId"]) => {
+  const getName = (field: PredictionItem["userId"] | PredictionItem["raceId"] | PredictionItem["predictedHorseId"]) => {
     if (!field) return "—";
     if (typeof field === "object") {
       if ("fullName" in field) return field.fullName;
@@ -99,7 +99,7 @@ export default function AdminBetsPage() {
                   <tr key={b._id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-5 py-4 text-sm text-white">{getName(b.userId)}</td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{getName(b.raceId)}</td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">{getName(b.horseId)}</td>
+                    <td className="px-5 py-4 text-sm text-muted-foreground">{getName(b.predictedHorseId)}</td>
                     <td className="px-5 py-4 text-center font-mono font-black text-primary">{b.rewardPoints ?? 0}</td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${statusColors[b.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>

@@ -312,11 +312,11 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Danh sách giải đấu nổi bật đang diễn ra và sắp khởi tranh.",
   },
   {
-    title: "Giải Đấu & Lịch Đua",
+    title: "Giải Đấu & Dự Đoán",
     href: "/spectator/tournaments",
     role: "Spectator",
     icon: Trophy,
-    description: "Xem giải đấu, lịch trình đua và chi tiết từng trận với đội hình tham gia.",
+    description: "Xem giải đấu, lịch trình đua, đội hình tham gia và đặt dự đoán trực tiếp.",
   },
   {
     title: "Kết Quả Trực Tiếp",
@@ -340,11 +340,11 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Ví điểm dự đoán, lịch sử quy đổi và mã nhận thưởng tại quầy.",
   },
   {
-    title: "Dự Đoán Kết Quả",
+    title: "Lịch Sử Dự Đoán",
     href: "/spectator/predictions",
     role: "Spectator",
     icon: Bell,
-    description: "Tham gia dự đoán ngựa vô địch nhận điểm thưởng miễn phí.",
+    description: "Xem lại danh sách và trạng thái các lượt dự đoán đã thực hiện.",
   },
   // ─── COUNTER STAFF ──────────────────────────────────────────────────
   {

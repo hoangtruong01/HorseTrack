@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Trophy, Calendar, MapPin, Award, ArrowRight, Flag, Bell, Wallet, Activity } from "lucide-react";
+import { Trophy, Calendar, MapPin, Award, ArrowRight, Flag, Bell, Wallet, Activity, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { mockWalletBalances } from "@/features/wallet/mock-wallet";
+import { walletApi } from "@/lib/api-client";
 
 // Mock Featured Tournaments Data
 const mockFeaturedTournaments = [
@@ -81,8 +81,24 @@ const mockUpcomingRaces = [
 ];
 
 export default function SpectatorDashboardPage() {
-  const userId = "user-spectator-1";
-  const [balance] = useState(mockWalletBalances[userId] || 3200);
+  const [balance, setBalance] = useState(0);
+  const [loadingBalance, setLoadingBalance] = useState(true);
+
+  const fetchBalance = useCallback(async () => {
+    setLoadingBalance(true);
+    try {
+      const res = await walletApi.myHistory({ limit: 1 });
+      setBalance(res.points ?? 0);
+    } catch (e: any) {
+      console.error("Lỗi khi lấy số dư điểm ví:", e);
+    } finally {
+      setLoadingBalance(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchBalance();
+  }, [fetchBalance]);
 
   return (
     <main className="space-y-8 max-w-6xl mx-auto pb-12">
@@ -111,7 +127,13 @@ export default function SpectatorDashboardPage() {
               <Wallet className="size-4 text-primary" />
             </div>
             <div className="space-y-1">
-              <p className="text-3xl font-black text-white tracking-tight">{balance.toLocaleString()} Pts</p>
+              {loadingBalance ? (
+                <div className="h-9 flex items-center">
+                  <Loader2 className="size-4 animate-spin text-white" />
+                </div>
+              ) : (
+                <p className="text-3xl font-black text-white tracking-tight">{balance.toLocaleString()} Pts</p>
+              )}
               <p className="text-[10px] text-teal-400 font-bold uppercase tracking-wider">● Tài khoản hoạt động</p>
             </div>
             <Button asChild variant="outline" className="w-full rounded-xl border-white/10 bg-transparent text-white hover:bg-white/5 text-xs font-bold uppercase tracking-wider">
@@ -287,8 +309,8 @@ export default function SpectatorDashboardPage() {
                     ? "bg-teal-500 hover:bg-teal-600 text-white"
                     : "bg-primary hover:bg-[#B80500] text-white"
                 }`}>
-                  <Link href="/spectator/predictions">
-                    {race.status === "LIVE" ? "Xem Trực Tiếp Kết Quả" : "Đặt Dự Đoán Free"}
+                  <Link href={race.status === "LIVE" ? "/spectator/results" : "/spectator/tournaments"}>
+                    {race.status === "LIVE" ? "Xem Trực Tiếp Kết Quả" : "Đặt Dự Đoán"}
                   </Link>
                 </Button>
               </div>

@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { 
   Trophy, Calendar, MapPin, Award, Users, Search, 
-  ArrowLeft, Flag, Loader2, Compass, Layers, Activity, User, ShieldCheck, ChevronRight
+  ArrowLeft, Flag, Loader2, Compass, Layers, Activity, User, ShieldCheck, ChevronRight,
+  CheckCircle, AlertTriangle, Coins, HelpCircle
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,12 @@ import {
   racesApi, 
   registrationsApi, 
   refereeAssignmentsApi,
+  predictionsApi,
   type TournamentItem, 
   type RaceItem,
   type RegistrationItem,
-  type AssignmentItem
+  type AssignmentItem,
+  type PredictionItem
 } from "@/lib/api-client";
 import { toast } from "sonner";
 
@@ -101,6 +104,12 @@ export default function SpectatorTournamentsPage() {
   const [selectedRaceRegistrations, setSelectedRaceRegistrations] = useState<RegistrationItem[]>([]);
   const [selectedRaceReferee, setSelectedRaceReferee] = useState<AssignmentItem | null>(null);
   
+  // Prediction states
+  const [myPredictions, setMyPredictions] = useState<PredictionItem[]>([]);
+  const [selectedHorseId, setSelectedHorseId] = useState("");
+  const [submittingPrediction, setSubmittingPrediction] = useState(false);
+  const [loadingPredictions, setLoadingPredictions] = useState(false);
+  
   // Loaders
   const [loadingTours, setLoadingTours] = useState(true);
   const [loadingAllRaces, setLoadingAllRaces] = useState(true);
@@ -142,10 +151,47 @@ export default function SpectatorTournamentsPage() {
     }
   }, []);
 
+  const fetchMyPredictions = useCallback(async () => {
+    setLoadingPredictions(true);
+    try {
+      const res = await predictionsApi.listMyPredictions({ page: 1, limit: 100 });
+      setMyPredictions(res.data || []);
+    } catch (e: any) {
+      console.error("Lỗi khi tải dự đoán cá nhân:", e);
+    } finally {
+      setLoadingPredictions(false);
+    }
+  }, []);
+
+  const handlePredictSubmit = async () => {
+    if (!selectedRace) return;
+    if (!selectedHorseId) {
+      toast.error("Vui lòng chọn 1 chiến mã trước khi gửi dự đoán!");
+      return;
+    }
+
+    setSubmittingPrediction(true);
+    try {
+      await predictionsApi.create({
+        raceId: selectedRace._id,
+        predictedHorseId: selectedHorseId,
+      });
+      toast.success("Đặt dự đoán thành công!");
+      setSelectedHorseId("");
+      await fetchMyPredictions();
+    } catch (e: any) {
+      console.error("Lỗi khi gửi dự đoán:", e);
+      toast.error(e.message || "Đặt dự đoán thất bại!");
+    } finally {
+      setSubmittingPrediction(false);
+    }
+  };
+
   useEffect(() => {
     void fetchTournaments();
     void fetchAllRaces();
-  }, [fetchTournaments, fetchAllRaces]);
+    void fetchMyPredictions();
+  }, [fetchTournaments, fetchAllRaces, fetchMyPredictions]);
 
   const handleSelectTournament = async (t: TournamentItem) => {
     setSelectedTour(t);
@@ -258,6 +304,11 @@ export default function SpectatorTournamentsPage() {
         ];
     }
   };
+
+  const currentRacePrediction = myPredictions.find((p) => {
+    const pRaceId = typeof p.raceId === "object" ? p.raceId?._id : p.raceId;
+    return pRaceId === selectedRace?._id;
+  });
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
@@ -720,11 +771,106 @@ export default function SpectatorTournamentsPage() {
                   </div>
                 </div>
 
-                {/* Prediction Button */}
-                <div className="pt-2">
-                  <Button asChild className="w-full rounded-xl bg-[#E10600] hover:bg-[#B80500] text-white text-xs font-black uppercase tracking-wider py-2.5">
-                    <Link href="/spectator/predictions">Đặt Dự Đoán Free</Link>
-                  </Button>
+                {/* Prediction embedded panel */}
+                <div className="pt-4 border-t border-white/5 space-y-4">
+                  {currentRacePrediction ? (
+                    <div className="rounded-xl border border-teal-500/20 bg-teal-500/[0.02] p-4 space-y-3">
+                      <div className="flex items-center gap-2 text-teal-400">
+                        <CheckCircle className="size-4" />
+                        <span className="text-[10px] font-black uppercase tracking-wider">Đã đặt dự đoán</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-black/20 rounded-lg p-3 border border-white/5">
+                        <div>
+                          <span className="block text-xs font-black text-white uppercase">
+                            {typeof currentRacePrediction.predictedHorseId === "object"
+                              ? currentRacePrediction.predictedHorseId?.name
+                              : "Chiến mã"}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground block mt-0.5">
+                            Trạng thái:{" "}
+                            <strong className="text-white">
+                              {currentRacePrediction.status === "WON"
+                                ? "Đoán Đúng"
+                                : currentRacePrediction.status === "LOST"
+                                ? "Đoán Sai"
+                                : currentRacePrediction.status === "PENDING"
+                                ? "Đang chờ chạy"
+                                : "Đã hủy"}
+                            </strong>
+                          </span>
+                        </div>
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                          currentRacePrediction.status === "WON"
+                            ? "bg-teal-500/10 border border-teal-500/20 text-teal-400"
+                            : currentRacePrediction.status === "LOST"
+                            ? "bg-primary/10 border border-primary/20 text-primary"
+                            : currentRacePrediction.status === "PENDING"
+                            ? "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"
+                            : "bg-white/5 border border-white/10 text-muted-foreground"
+                        }`}>
+                          {currentRacePrediction.status === "WON" ? "+1 Pts" : currentRacePrediction.status === "LOST" ? "-1 Pts" : "Chờ kết quả"}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    ["SCHEDULED", "CHECKING", "READY"].includes(selectedRace.status) ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-primary">
+                          <Coins className="size-4 animate-pulse" />
+                          <span className="text-xs font-black uppercase tracking-wider">Dự đoán chiến mã về nhất</span>
+                        </div>
+
+                        {selectedRaceRegistrations.length === 0 ? (
+                          <div className="text-center py-4 border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
+                            <p className="text-[10px] text-muted-foreground italic">Chưa có danh sách chiến mã chính thức</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <select
+                              value={selectedHorseId}
+                              onChange={(e) => setSelectedHorseId(e.target.value)}
+                              className="w-full h-11 rounded-xl border border-white/10 bg-black/40 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
+                            >
+                              <option value="" className="bg-[#16161E]">-- Chọn chiến mã dự kiến về nhất --</option>
+                              {selectedRaceRegistrations.map((p) => {
+                                const horseId = typeof p.horseId === "object" ? p.horseId?._id : p.horseId;
+                                const horseName = typeof p.horseId === "object" ? p.horseId?.name : "Chiến mã";
+                                const jockeyName = typeof p.jockeyUserId === "object" ? p.jockeyUserId?.fullName : "Chưa đăng ký";
+                                return (
+                                  <option key={p._id} value={horseId} className="bg-[#16161E]">
+                                    {horseName} (Nài: {jockeyName})
+                                  </option>
+                                );
+                              })}
+                            </select>
+
+                            <Button
+                              onClick={handlePredictSubmit}
+                              disabled={submittingPrediction || !selectedHorseId}
+                              className="w-full rounded-xl bg-primary hover:bg-[#B80500] text-white font-black uppercase tracking-wider text-xs py-5 shadow-[0_4px_16px_rgba(225,6,0,0.25)]"
+                            >
+                              {submittingPrediction ? "Đang gửi..." : "Gửi Dự Đoán (+1 / -1 Pts)"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-white/5 bg-white/[0.01] p-3 text-center text-muted-foreground text-[10px]">
+                        Cổng dự đoán đã đóng cho cuộc đua này (LIVE hoặc Đã kết thúc).
+                      </div>
+                    )
+                  )}
+
+                  {/* Reward rule reminder */}
+                  <div className="rounded-xl border border-[#E10600]/10 bg-[#E10600]/5 p-3.5 space-y-2">
+                    <div className="flex items-center gap-1.5 text-primary">
+                      <Award className="size-3.5" />
+                      <span className="text-[9px] font-black uppercase tracking-wider">Cơ cấu điểm thưởng</span>
+                    </div>
+                    <p className="text-[9px] leading-relaxed text-muted-foreground">
+                      Chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="text-white">+1 điểm</strong>, sai khấu trừ <strong className="text-white">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
+                    </p>
+                  </div>
                 </div>
               </div>
 

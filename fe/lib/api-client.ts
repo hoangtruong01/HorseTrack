@@ -382,7 +382,7 @@ export interface PredictionItem {
   _id: string;
   userId?: { _id: string; fullName: string; email: string } | string;
   raceId?: { _id: string; name: string } | string;
-  horseId?: { _id: string; name: string } | string;
+  predictedHorseId?: { _id: string; name: string; breed?: string } | string;
   rewardPoints?: number;
   status: string;
   createdAt?: string;
@@ -394,6 +394,17 @@ export const predictionsApi = {
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<PredictionItem>>(`/predictions?${qs}`);
+  },
+  create: (dto: { raceId: string; predictedHorseId: string }) =>
+    apiFetch<PredictionItem>("/predictions", {
+      method: "POST",
+      body: JSON.stringify(dto),
+    }),
+  listMyPredictions: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<PredictionItem>>(`/predictions/my-predictions?${qs}`);
   },
 };
 
@@ -422,6 +433,12 @@ export interface CashoutItem {
 }
 
 export const walletApi = {
+  myHistory: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<{ balance: number; points: number; data: WalletTxItem[]; meta: any }>(`/wallet/history?${qs}`);
+  },
   allTransactions: (params?: { page?: number; limit?: number }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
