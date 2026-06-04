@@ -15,6 +15,7 @@ import {
   registrationsApi, 
   refereeAssignmentsApi,
   predictionsApi,
+  walletApi,
   type TournamentItem, 
   type RaceItem,
   type RegistrationItem,
@@ -109,6 +110,9 @@ export default function SpectatorTournamentsPage() {
   const [selectedHorseId, setSelectedHorseId] = useState("");
   const [submittingPrediction, setSubmittingPrediction] = useState(false);
   const [loadingPredictions, setLoadingPredictions] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const [loadingBalance, setLoadingBalance] = useState(true);
+  const [betPointsInput, setBetPointsInput] = useState<string>("1");
   
   // Loaders
   const [loadingTours, setLoadingTours] = useState(true);
@@ -163,10 +167,33 @@ export default function SpectatorTournamentsPage() {
     }
   }, []);
 
+  const fetchBalance = useCallback(async () => {
+    setLoadingBalance(true);
+    try {
+      const res = await walletApi.myHistory();
+      setBalance(res.points ?? 0);
+    } catch (e) {
+      console.error("Lỗi khi lấy số dư ví:", e);
+    } finally {
+      setLoadingBalance(false);
+    }
+  }, []);
+
   const handlePredictSubmit = async () => {
     if (!selectedRace) return;
     if (!selectedHorseId) {
       toast.error("Vui lòng chọn 1 chiến mã trước khi gửi dự đoán!");
+      return;
+    }
+
+    const betPoints = parseInt(betPointsInput) || 1;
+    if (betPoints < 1) {
+      toast.error("Số điểm đặt cược phải lớn hơn hoặc bằng 1!");
+      return;
+    }
+
+    if (betPoints >= 2 && betPoints > balance) {
+      toast.error(`Số dư điểm không đủ (cần ${betPoints} Pts, hiện có ${balance} Pts)!`);
       return;
     }
 
@@ -175,13 +202,21 @@ export default function SpectatorTournamentsPage() {
       await predictionsApi.create({
         raceId: selectedRace._id,
         predictedHorseId: selectedHorseId,
+        betPoints: betPoints,
       });
       toast.success("Đặt dự đoán thành công!");
       setSelectedHorseId("");
+      setBetPointsInput("1");
       await fetchMyPredictions();
+      await fetchBalance();
     } catch (e: any) {
       console.error("Lỗi khi gửi dự đoán:", e);
-      toast.error(e.message || "Đặt dự đoán thất bại!");
+      const errMsg = e.message || "";
+      if (errMsg.includes("already have a prediction") || errMsg.includes("đã đặt dự đoán")) {
+        toast.error("Bạn đã đặt dự đoán cho trận đấu này rồi!");
+      } else {
+        toast.error(errMsg || "Đặt dự đoán thất bại!");
+      }
     } finally {
       setSubmittingPrediction(false);
     }
@@ -191,7 +226,8 @@ export default function SpectatorTournamentsPage() {
     void fetchTournaments();
     void fetchAllRaces();
     void fetchMyPredictions();
-  }, [fetchTournaments, fetchAllRaces, fetchMyPredictions]);
+    void fetchBalance();
+  }, [fetchTournaments, fetchAllRaces, fetchMyPredictions, fetchBalance]);
 
   const handleSelectTournament = async (t: TournamentItem) => {
     setSelectedTour(t);
@@ -772,7 +808,7 @@ export default function SpectatorTournamentsPage() {
                 </div>
 
                 {/* Prediction embedded panel */}
-                <div className="pt-4 border-t border-white/5 space-y-4">
+                <div translate="no" className="pt-4 border-t border-white/5 space-y-4 notranslate">
                   {currentRacePrediction ? (
                     <div className="rounded-xl border border-teal-500/20 bg-teal-500/[0.02] p-4 space-y-3">
                       <div className="flex items-center gap-2 text-teal-400">
@@ -799,17 +835,30 @@ export default function SpectatorTournamentsPage() {
                             </strong>
                           </span>
                         </div>
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
-                          currentRacePrediction.status === "WON"
-                            ? "bg-teal-500/10 border border-teal-500/20 text-teal-400"
-                            : currentRacePrediction.status === "LOST"
-                            ? "bg-primary/10 border border-primary/20 text-primary"
-                            : currentRacePrediction.status === "PENDING"
-                            ? "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"
-                            : "bg-white/5 border border-white/10 text-muted-foreground"
-                        }`}>
-                          {currentRacePrediction.status === "WON" ? "+1 Pts" : currentRacePrediction.status === "LOST" ? "-1 Pts" : "Chờ kết quả"}
-                        </span>
+                        <div className="text-right flex flex-col items-end">
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                            currentRacePrediction.status === "WON"
+                              ? "bg-teal-500/10 border border-teal-500/20 text-teal-400"
+                              : currentRacePrediction.status === "LOST"
+                              ? "bg-primary/10 border border-primary/20 text-primary"
+                              : currentRacePrediction.status === "PENDING"
+                              ? "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"
+                              : "bg-white/5 border border-white/10 text-muted-foreground"
+                          }`}>
+                            {currentRacePrediction.status === "WON" 
+                              ? `+${currentRacePrediction.rewardPoints || 1} Pts` 
+                              : currentRacePrediction.status === "LOST" 
+                              ? `${currentRacePrediction.rewardPoints || -1} Pts` 
+                              : currentRacePrediction.status === "PENDING" 
+                              ? "Chờ kết quả" 
+                              : "Đã hủy"}
+                          </span>
+                          {currentRacePrediction.betPoints !== undefined && currentRacePrediction.betPoints > 0 && (
+                            <span className="text-[8px] text-muted-foreground mt-1 font-mono block">
+                              Cược: {currentRacePrediction.betPoints.toLocaleString("vi-VN")} Pts
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -819,13 +868,13 @@ export default function SpectatorTournamentsPage() {
                           <Coins className="size-4 animate-pulse" />
                           <span className="text-xs font-black uppercase tracking-wider">Dự đoán chiến mã về nhất</span>
                         </div>
-
+ 
                         {selectedRaceRegistrations.length === 0 ? (
                           <div className="text-center py-4 border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
                             <p className="text-[10px] text-muted-foreground italic">Chưa có danh sách chiến mã chính thức</p>
                           </div>
                         ) : (
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             <select
                               value={selectedHorseId}
                               onChange={(e) => setSelectedHorseId(e.target.value)}
@@ -844,12 +893,99 @@ export default function SpectatorTournamentsPage() {
                               })}
                             </select>
 
+                            <div className="space-y-1.5">
+                              <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                                <span>Số điểm cược</span>
+                                <span className="text-teal-400 font-mono">
+                                  Số dư: {loadingBalance ? "..." : `${balance.toLocaleString("vi-VN")} Pts`}
+                                </span>
+                              </div>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={betPointsInput}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === "") {
+                                      setBetPointsInput("");
+                                    } else {
+                                      const parsed = parseInt(val) || 1;
+                                      setBetPointsInput(String(Math.max(1, parsed)));
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    if (!betPointsInput || parseInt(betPointsInput) < 1) {
+                                      setBetPointsInput("1");
+                                    }
+                                  }}
+                                  className="w-full h-11 rounded-xl border border-white/10 bg-black/40 pl-3 pr-12 text-xs text-white outline-none focus:border-primary font-mono font-bold"
+                                  placeholder="Nhập số điểm (1 để đoán miễn phí)"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-muted-foreground font-mono">Pts</span>
+                              </div>
+
+                              {/* Quick Bet Buttons */}
+                              <div className="grid grid-cols-5 gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setBetPointsInput("1")}
+                                  className="py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-[9px] font-bold text-white hover:bg-white/10 hover:border-white/20 transition uppercase"
+                                >
+                                  Free
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setBetPointsInput("10")}
+                                  className="py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-[9px] font-bold text-white hover:bg-white/10 hover:border-white/20 transition font-mono"
+                                >
+                                  10
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setBetPointsInput("50")}
+                                  className="py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-[9px] font-bold text-white hover:bg-white/10 hover:border-white/20 transition font-mono"
+                                >
+                                  50
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setBetPointsInput("100")}
+                                  className="py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-[9px] font-bold text-white hover:bg-white/10 hover:border-white/20 transition font-mono"
+                                >
+                                  100
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setBetPointsInput(String(balance))}
+                                  className="py-1.5 rounded-lg border border-primary/20 bg-primary/10 text-[9px] font-black text-primary hover:bg-primary hover:text-white transition uppercase"
+                                >
+                                  All In
+                                </button>
+                              </div>
+                              {/* Inline Warning for Insufficient Balance */}
+                              {parseInt(betPointsInput) >= 2 && parseInt(betPointsInput) > balance && (
+                                <div className="text-[10px] text-red-400 bg-red-500/5 border border-red-500/10 rounded-xl p-2.5 mt-2">
+                                  <span className="font-black uppercase tracking-wider block text-[#E10600]">⚠️ Không đủ số dư</span>
+                                  <p className="italic font-medium leading-relaxed mt-0.5">
+                                    Bạn cần cược <strong className="text-white font-mono font-bold">{parseInt(betPointsInput).toLocaleString("vi-VN")} Pts</strong> nhưng chỉ có <strong className="text-white font-mono font-bold">{balance.toLocaleString("vi-VN")} Pts</strong>.
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+
+
                             <Button
                               onClick={handlePredictSubmit}
-                              disabled={submittingPrediction || !selectedHorseId}
-                              className="w-full rounded-xl bg-primary hover:bg-[#B80500] text-white font-black uppercase tracking-wider text-xs py-5 shadow-[0_4px_16px_rgba(225,6,0,0.25)]"
+                              disabled={submittingPrediction || !selectedHorseId || (parseInt(betPointsInput) >= 2 && parseInt(betPointsInput) > balance)}
+                              className="w-full rounded-xl bg-primary hover:bg-[#B80500] text-white font-black uppercase tracking-wider text-xs py-5 shadow-[0_4px_16px_rgba(225,6,0,0.25)] mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {submittingPrediction ? "Đang gửi..." : "Gửi Dự Đoán (+1 / -1 Pts)"}
+                              {submittingPrediction 
+                                ? "Đang gửi..." 
+                                : (parseInt(betPointsInput) >= 2 && parseInt(betPointsInput) > balance)
+                                  ? "Không Đủ Số Dư"
+                                  : "Gửi Dự Đoán"}
                             </Button>
                           </div>
                         )}

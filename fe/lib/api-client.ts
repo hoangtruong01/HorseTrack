@@ -384,6 +384,7 @@ export interface PredictionItem {
   raceId?: { _id: string; name: string } | string;
   predictedHorseId?: { _id: string; name: string; breed?: string } | string;
   rewardPoints?: number;
+  betPoints?: number;
   status: string;
   createdAt?: string;
 }
@@ -395,7 +396,7 @@ export const predictionsApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<PredictionItem>>(`/predictions?${qs}`);
   },
-  create: (dto: { raceId: string; predictedHorseId: string }) =>
+  create: (dto: { raceId: string; predictedHorseId: string; betPoints?: number }) =>
     apiFetch<PredictionItem>("/predictions", {
       method: "POST",
       body: JSON.stringify(dto),

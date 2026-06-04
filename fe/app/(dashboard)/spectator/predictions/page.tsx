@@ -146,7 +146,8 @@ export default function SpectatorPredictionsPage() {
                 return (
                   <div
                     key={p._id}
-                    className="group rounded-2xl border border-white/5 bg-[#13131A] p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-white/10 transition duration-300 relative overflow-hidden"
+                    translate="no"
+                    className="group rounded-2xl border border-white/5 bg-[#13131A] p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-white/10 transition duration-300 relative overflow-hidden notranslate"
                   >
                     {p.status === "PENDING" && (
                       <div className="absolute top-0 left-0 w-full h-[2px] bg-yellow-400" />
@@ -178,17 +179,30 @@ export default function SpectatorPredictionsPage() {
                     </div>
 
                     <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
-                      <span className={`text-xs font-black ${
-                        p.status === "WON" 
-                          ? "text-teal-400" 
-                          : p.status === "LOST" 
-                          ? "text-primary" 
-                          : p.status === "PENDING" 
-                          ? "text-yellow-400" 
-                          : "text-muted-foreground"
-                      }`}>
-                        {p.status === "WON" ? "+1 Điểm" : p.status === "LOST" ? "-1 Điểm" : p.status === "PENDING" ? "Chờ kết quả" : "0 Điểm"}
-                      </span>
+                      <div className="text-right">
+                        <span className={`text-xs font-black block ${
+                          p.status === "WON" 
+                            ? "text-teal-400" 
+                            : p.status === "LOST" 
+                            ? "text-primary" 
+                            : p.status === "PENDING" 
+                            ? "text-yellow-400" 
+                            : "text-muted-foreground"
+                        }`}>
+                          {p.status === "WON" 
+                            ? `+${p.rewardPoints || 1} Điểm` 
+                            : p.status === "LOST" 
+                            ? `${p.rewardPoints || -1} Điểm` 
+                            : p.status === "PENDING" 
+                            ? "Chờ kết quả" 
+                            : "0 Điểm"}
+                        </span>
+                        {p.betPoints !== undefined && p.betPoints > 0 && (
+                          <span className="text-[9px] text-muted-foreground block font-mono">
+                            Cược: {p.betPoints.toLocaleString("vi-VN")} Pts
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
