@@ -37,7 +37,7 @@ export function StatusBadge({
           aria-hidden="true"
         />
       ) : null}
-      {label}
+      <span>{label}</span>
     </span>
   );
 }

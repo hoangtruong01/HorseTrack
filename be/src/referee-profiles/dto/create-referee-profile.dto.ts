@@ -12,4 +12,14 @@ export class CreateRefereeProfileDto {
   @IsInt()
   @Min(0)
   experienceYears?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  certificates?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  bio?: string;
 }

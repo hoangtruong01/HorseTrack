@@ -63,6 +63,13 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Quản lý jockey: duyệt profiles, đổi trạng thái.",
   },
   {
+    title: "Referee Management",
+    href: "/admin/referees",
+    role: "Admin",
+    icon: Users,
+    description: "Quản lý trọng tài: duyệt hồ sơ, đổi trạng thái hoạt động.",
+  },
+  {
     title: "Tournament Management",
     href: "/admin/tournaments",
     role: "Admin",
@@ -125,6 +132,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: FileText,
     description: "View system operations and secure transaction trails.",
   },
+  // ─── OWNER ──────────────────────────────────────────────────────────
   {
     title: "Trạm Điều Hành",
     href: "/owner",
@@ -181,6 +189,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Wallet,
     description: "View rewards ledger, split earnings, and request cashouts.",
   },
+  // ─── JOCKEY ──────────────────────────────────────────────────────────
   {
     title: "Trạm Điều Hành",
     href: "/jockey",
@@ -230,6 +239,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Wallet,
     description: "Xem điểm thưởng chia tỷ lệ 30% và lịch sử cashout.",
   },
+  // ─── REFEREE ──────────────────────────────────────────────────────────
   {
     title: "Trạm Điều Hành",
     href: "/referee",
@@ -250,6 +260,13 @@ export const dashboardNavigation: NavigationItem[] = [
     role: "Referee",
     icon: Medal,
     description: "Theo dõi bảng tổng hợp hiệu suất thi đấu của toàn bộ nài ngựa và chiến mã.",
+  },
+  {
+    title: "Ví Của Tôi",
+    href: "/referee/wallet",
+    role: "Referee",
+    icon: Wallet,
+    description: "Xem điểm lương tích lũy và thực hiện yêu cầu rút điểm.",
   },
   {
     title: "Pre-race Check",
@@ -286,6 +303,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: FileText,
     description: "Quản lý và lập biên bản thi đấu chính thức cho các cuộc đua.",
   },
+  // ─── SPECTATOR ──────────────────────────────────────────────────────────
   {
     title: "Giải Đấu Nổi Bật",
     href: "/spectator",

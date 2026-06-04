@@ -38,6 +38,14 @@ export class RefereeAssignmentsController {
     return this.service.create(dto, user.id);
   }
 
+  @Get('available-referees')
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @ApiOperation({ summary: 'List available referees for a race (Admin)' })
+  getAvailableReferees(@Query('raceId') raceId: string) {
+    return this.service.getAvailableReferees(raceId);
+  }
+
   @Get('race/:raceId')
   @ApiOperation({ summary: 'List assignments for a race' })
   findByRace(

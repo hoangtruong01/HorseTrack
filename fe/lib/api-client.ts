@@ -265,13 +265,49 @@ export const racesApi = {
   delete: (id: string) => apiFetch(`/races/${id}`, { method: "DELETE" }),
 };
 
+// ─── Referee Profiles ────────────────────────────────────────────────────────
+export interface RefereeProfileItem {
+  _id: string;
+  userId?: { _id: string; fullName: string; email: string; phone?: string } | string;
+  licenseNo?: string;
+  experienceYears?: number;
+  status: "available" | "unavailable" | "suspended";
+  approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason?: string;
+  certificates?: string;
+  bio?: string;
+  createdAt?: string;
+}
+
+export const refereeProfilesApi = {
+  listAdmin: (params?: { page?: number; limit?: number; approvalStatus?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.approvalStatus) qs.set("approvalStatus", params.approvalStatus);
+    return apiFetch<PaginatedResult<RefereeProfileItem>>(`/referee-profiles?${qs}`);
+  },
+  changeApproval: (id: string, approvalStatus: "APPROVED" | "REJECTED", rejectionReason?: string) =>
+    apiFetch(`/referee-profiles/${id}/approval`, {
+      method: "PATCH",
+      body: JSON.stringify({ approvalStatus, rejectionReason }),
+    }),
+  changeStatus: (id: string, status: "available" | "unavailable" | "suspended") =>
+    apiFetch(`/referee-profiles/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+};
+
 // ─── Referee Assignments ─────────────────────────────────────────────────────
 export interface AssignmentItem {
   _id: string;
-  raceId?: { _id: string; name: string } | string;
+  raceId?: { _id: string; name: string; startTime?: string; status?: string } | string;
   refereeUserId?: { _id: string; fullName: string; email: string } | string;
+  assignedBy?: { _id: string; fullName: string } | string;
+  role: "main" | "assistant";
   status: string;
-  note?: string;
+  salary?: number;
   createdAt?: string;
 }
 
@@ -282,10 +318,13 @@ export const refereeAssignmentsApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<AssignmentItem>>(`/referee-assignments/race/${raceId}?${qs}`);
   },
-  create: (dto: { raceId: string; refereeUserId: string; note?: string }) =>
+  create: (dto: { raceId: string; refereeUserId: string; role?: "main" | "assistant"; salary?: number }) =>
     apiFetch("/referee-assignments", { method: "POST", body: JSON.stringify(dto) }),
   remove: (id: string) => apiFetch(`/referee-assignments/${id}`, { method: "DELETE" }),
+  listAvailable: (raceId: string) =>
+    apiFetch<Array<{ _id: string; fullName: string; email: string }>>(`/referee-assignments/available-referees?raceId=${raceId}`),
 };
+
 
 // ─── Rankings ────────────────────────────────────────────────────────────────
 export interface RankingEntry {

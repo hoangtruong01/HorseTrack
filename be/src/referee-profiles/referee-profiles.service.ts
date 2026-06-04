@@ -13,6 +13,8 @@ import { CreateRefereeProfileDto } from './dto/create-referee-profile.dto';
 import {
   RefereeProfile,
   RefereeProfileDocument,
+  RefereeApprovalStatus,
+  RefereeProfileStatus,
 } from './schemas/referee-profile.schema';
 
 @Injectable()
@@ -39,7 +41,12 @@ export class RefereeProfilesService {
       );
     }
 
-    return this.profileModel.create({ ...dto, userId });
+    return this.profileModel.create({
+      ...dto,
+      userId,
+      approvalStatus: RefereeApprovalStatus.PENDING,
+      status: RefereeProfileStatus.AVAILABLE,
+    });
   }
 
   async findByUserId(userId: string): Promise<RefereeProfileDocument> {
@@ -61,8 +68,11 @@ export class RefereeProfilesService {
     return !!profile;
   }
 
-  async findAll(page = 1, limit = 20) {
-    const filter = { deletedAt: { $exists: false } };
+  async findAll(page = 1, limit = 20, approvalStatus?: RefereeApprovalStatus) {
+    const filter: any = { deletedAt: { $exists: false } };
+    if (approvalStatus) {
+      filter.approvalStatus = approvalStatus;
+    }
     const [data, total] = await Promise.all([
       this.profileModel
         .find(filter)
@@ -104,6 +114,37 @@ export class RefereeProfilesService {
       throw new ForbiddenException('You can only update your own profile');
     }
     Object.assign(profile, dto);
+
+    // If referee updates their own profile, reset approvalStatus to PENDING
+    if (!isAdmin) {
+      profile.approvalStatus = RefereeApprovalStatus.PENDING;
+      profile.rejectionReason = undefined;
+    }
+
+    return profile.save();
+  }
+
+  async changeApproval(
+    id: string,
+    approvalStatus: RefereeApprovalStatus,
+    rejectionReason?: string,
+  ): Promise<RefereeProfileDocument> {
+    const profile = await this.findOne(id);
+    profile.approvalStatus = approvalStatus;
+    if (approvalStatus === RefereeApprovalStatus.REJECTED) {
+      profile.rejectionReason = rejectionReason;
+    } else {
+      profile.rejectionReason = undefined;
+    }
+    return profile.save();
+  }
+
+  async changeStatus(
+    id: string,
+    status: RefereeProfileStatus,
+  ): Promise<RefereeProfileDocument> {
+    const profile = await this.findOne(id);
+    profile.status = status;
     return profile.save();
   }
 }

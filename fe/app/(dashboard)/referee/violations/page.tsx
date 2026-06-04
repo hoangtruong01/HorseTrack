@@ -31,8 +31,10 @@ export default function RefereeViolationsWorkspacePage() {
         const res = await fetch("/api/referee/referee-assignments/my-assignments?limit=100");
         if (!res.ok) throw new Error("Không thể tải danh sách cuộc đua");
         const resData = await res.json();
+        const rawData = resData.data;
+        const rawArray = Array.isArray(rawData) ? rawData : (rawData?.data || []);
         // Only accepted assignments
-        const list = (resData.data?.data || []).filter(
+        const list = rawArray.filter(
           (a: any) => a.status === "accepted" && a.raceId
         );
         setAssignments(list);

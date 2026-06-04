@@ -10,7 +10,7 @@ export type WalletBalanceProps = {
   points: number;
   onRefresh?: () => void;
   onRequestCashout?: () => void;
-  role: "Owner" | "Jockey" | "Spectator";
+  role: "Owner" | "Jockey" | "Spectator" | "Referee";
 };
 
 export function WalletBalance({ points, onRefresh, onRequestCashout, role }: WalletBalanceProps) {
@@ -33,6 +33,8 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
         return "Nài ngựa (Jockey)";
       case "Spectator":
         return "Khán giả (Spectator)";
+      case "Referee":
+        return "Trọng tài (Referee)";
       default:
         return role;
     }
@@ -115,6 +117,8 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
           <strong className="text-primary font-black uppercase tracking-wide mr-1.5">Lưu ý:</strong>
           {role === "Spectator"
             ? "Khán giả tham gia dự đoán cuộc đua miễn phí: dự đoán đúng được +1 điểm, dự đoán sai bị trừ 1 điểm (nếu số dư lớn hơn 0). Tích lũy điểm thưởng để đổi các phần quà giá trị tại quầy."
+            : role === "Referee"
+            ? "Trọng tài nhận lương điểm thưởng trực tiếp cho mỗi vòng đua được phân công giám sát sau khi hoàn thành nhiệm vụ. Thực hiện đổi thưởng điểm thưởng trực tiếp tại quầy."
             : "Chủ ngựa (nhận 70% chia sẻ) và Nài ngựa (nhận 30% chia sẻ) nhận điểm thưởng tự động sau khi kết quả đua được công bố chính thức. Đổi thưởng được thực hiện trực tiếp thông qua mã xác nhận."}
         </p>
       </div>

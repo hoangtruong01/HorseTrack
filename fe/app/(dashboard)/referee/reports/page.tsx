@@ -91,7 +91,9 @@ export default function RefereeReportsPage() {
       const res = await fetch("/api/referee/referee-assignments/my-assignments?limit=100");
       if (!res.ok) throw new Error("Không thể tải danh sách cuộc đua");
       const resData = await res.json();
-      const myAssignments = (resData.data?.data || []).filter(
+      const rawData = resData.data;
+      const rawArray = Array.isArray(rawData) ? rawData : (rawData?.data || []);
+      const myAssignments = rawArray.filter(
         (a: any) => a.status === "accepted" && a.raceId
       );
       setAssignments(myAssignments);

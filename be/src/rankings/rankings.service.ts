@@ -146,7 +146,13 @@ export class RankingsService {
           totalFinishTimeMs: { $sum: { $ifNull: ['$finishTimeMs', 0] } },
         },
       },
-      { $sort: { wins: -1 as const, totalPoints: -1 as const, totalFinishTimeMs: 1 as const } },
+      {
+        $sort: {
+          wins: -1 as const,
+          totalPoints: -1 as const,
+          totalFinishTimeMs: 1 as const,
+        },
+      },
       {
         $lookup: {
           from: 'horses',
@@ -202,7 +208,13 @@ export class RankingsService {
           totalFinishTimeMs: { $sum: { $ifNull: ['$finishTimeMs', 0] } },
         },
       },
-      { $sort: { wins: -1 as const, totalPoints: -1 as const, totalFinishTimeMs: 1 as const } },
+      {
+        $sort: {
+          wins: -1 as const,
+          totalPoints: -1 as const,
+          totalFinishTimeMs: 1 as const,
+        },
+      },
       {
         $lookup: {
           from: 'users',

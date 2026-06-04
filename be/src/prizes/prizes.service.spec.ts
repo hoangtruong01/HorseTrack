@@ -12,6 +12,7 @@ import {
 import { Race } from '../races/schemas/race.schema';
 import { Horse } from '../horses/schemas/horse.schema';
 import { Registration } from '../registrations/schemas/registration.schema';
+import { RefereeAssignment } from '../referee-assignments/schemas/referee-assignment.schema';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 import { Types } from 'mongoose';
@@ -39,6 +40,10 @@ describe('PrizesService', () => {
 
   const mockRegistrationModel = {
     findOne: jest.fn(),
+  };
+
+  const mockAssignmentModel = {
+    find: jest.fn(),
   };
 
   const mockLedgerService = {
@@ -70,6 +75,10 @@ describe('PrizesService', () => {
           useValue: mockRegistrationModel,
         },
         {
+          provide: getModelToken(RefereeAssignment.name),
+          useValue: mockAssignmentModel,
+        },
+        {
           provide: RewardPointLedgerService,
           useValue: mockLedgerService,
         },
@@ -82,6 +91,7 @@ describe('PrizesService', () => {
     );
 
     jest.clearAllMocks();
+    mockAssignmentModel.find.mockResolvedValue([]);
   });
 
   it('should be defined', () => {
