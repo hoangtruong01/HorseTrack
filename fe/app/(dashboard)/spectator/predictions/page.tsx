@@ -63,7 +63,7 @@ export default function SpectatorPredictionsPage() {
             {loadingBalance ? (
               <Loader2 className="size-4 animate-spin text-white mt-1" />
             ) : (
-              <p className="text-xl font-black text-white">{balance.toLocaleString()} Pts</p>
+              <p className="text-xl font-black text-white">{balance.toLocaleString("vi-VN")} Pts</p>
             )}
           </div>
         </div>

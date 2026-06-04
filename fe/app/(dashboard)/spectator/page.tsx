@@ -132,7 +132,7 @@ export default function SpectatorDashboardPage() {
                   <Loader2 className="size-4 animate-spin text-white" />
                 </div>
               ) : (
-                <p className="text-3xl font-black text-white tracking-tight">{balance.toLocaleString()} Pts</p>
+                <p className="text-3xl font-black text-white tracking-tight">{balance.toLocaleString("vi-VN")} Pts</p>
               )}
               <p className="text-[10px] text-teal-400 font-bold uppercase tracking-wider">● Tài khoản hoạt động</p>
             </div>
@@ -243,7 +243,7 @@ export default function SpectatorDashboardPage() {
                     </div>
                     <div className="flex items-center justify-between font-bold text-white border-t border-white/5 pt-2">
                       <span>Tổng Giải Thưởng:</span>
-                      <span className="text-primary text-xs font-black uppercase tracking-wider">{tour.prizePool.toLocaleString()} Pts</span>
+                      <span className="text-primary text-xs font-black uppercase tracking-wider">{tour.prizePool.toLocaleString("vi-VN")} Pts</span>
                     </div>
                   </div>
                 </div>

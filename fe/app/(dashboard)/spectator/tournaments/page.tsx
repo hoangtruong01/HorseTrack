@@ -460,7 +460,7 @@ export default function SpectatorTournamentsPage() {
                         <div className="flex justify-between font-bold text-white border-t border-white/5 pt-2">
                           <span>Quỹ Giải Thưởng:</span>
                           <span className="text-[#E10600] text-xs font-black">
-                            {(tour.prizePool || tour.prize || 0).toLocaleString()} Pts
+                            {(tour.prizePool || tour.prize || 0).toLocaleString("vi-VN")} Pts
                           </span>
                         </div>
                       </div>
@@ -629,7 +629,7 @@ export default function SpectatorTournamentsPage() {
                   <div className="space-y-1">
                     <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Tổng quỹ thưởng giải</span>
                     <p className="text-xl font-black text-[#E10600] leading-none">
-                      {(selectedTour.prizePool || selectedTour.prize || 0).toLocaleString()} Pts
+                      {(selectedTour.prizePool || selectedTour.prize || 0).toLocaleString("vi-VN")} Pts
                     </p>
                   </div>
                   <Award className="size-8 text-[#E10600]" />
