@@ -25,7 +25,7 @@ export default function AdminRankingsPage() {
         const res = await tournamentsApi.list({ limit: 100 });
         setTournaments(res.data);
         if (res.data.length > 0) setSelectedTournament(res.data[0]._id);
-      } catch {}
+      } catch { }
     }
     void loadTournaments();
   }, []);
@@ -70,8 +70,8 @@ export default function AdminRankingsPage() {
           value={selectedTournament}
           onChange={(e) => setSelectedTournament(e.target.value)}
         >
-          <option value="">— Chọn Giải Đấu —</option>
-          {tournaments.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+          <option value="" className="bg-[#15151e] text-white">— Chọn Giải Đấu —</option>
+          {tournaments.map(t => <option key={t._id} value={t._id} className="bg-[#15151e] text-white">{t.name}</option>)}
         </select>
 
         <div className="flex rounded-xl border border-white/10 bg-white/[0.03] p-1">

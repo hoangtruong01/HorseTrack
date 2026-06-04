@@ -184,9 +184,9 @@ export function HorseForm({
                 className={fieldClass}
                 disabled={isApproved}
               >
-                <option value="MALE">Đực (Male)</option>
-                <option value="FEMALE">Cái (Female)</option>
-                <option value="GELDING">Thiến (Gelding)</option>
+                <option value="MALE" className="bg-[#15151e] text-white">Đực (Male)</option>
+                <option value="FEMALE" className="bg-[#15151e] text-white">Cái (Female)</option>
+                <option value="GELDING" className="bg-[#15151e] text-white">Thiến (Gelding)</option>
               </select>
             </div>
             <div className="space-y-2">
@@ -196,10 +196,10 @@ export function HorseForm({
                 onChange={(e) => setHealthStatus(e.target.value as HorseHealthStatus)}
                 className={fieldClass}
               >
-                <option value="HEALTHY">Khỏe mạnh</option>
-                <option value="INJURED">Chấn thương</option>
-                <option value="RECOVERING">Đang hồi phục</option>
-                <option value="RETIRED">Giải nghệ</option>
+                <option value="HEALTHY" className="bg-[#15151e] text-white">Khỏe mạnh</option>
+                <option value="INJURED" className="bg-[#15151e] text-white">Chấn thương</option>
+                <option value="RECOVERING" className="bg-[#15151e] text-white">Đang hồi phục</option>
+                <option value="RETIRED" className="bg-[#15151e] text-white">Giải nghệ</option>
               </select>
             </div>
           </div>
