@@ -226,8 +226,8 @@ export default function RefereeReportsPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-start">
         {/* Reports Create Form */}
-        <section className="rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-lg space-y-4">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-1.5">
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-lg space-y-4">
+          <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-1.5">
             <PlusCircle className="size-4 text-primary" />
             Lập biên bản thi đấu mới
           </h3>
@@ -235,16 +235,16 @@ export default function RefereeReportsPage() {
           <form onSubmit={handleSubmitReport} className="space-y-4 text-xs">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-[10px] font-bold uppercase text-white/50">Chọn cuộc đua phân công</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Chọn cuộc đua phân công</label>
                 <select
                   value={selectedRaceId}
                   onChange={(e) => setSelectedRaceId(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                   required
                 >
-                  <option value="" className="bg-[#15151E]">-- Chọn cuộc đua giám sát --</option>
+                  <option value="" className="bg-card">-- Chọn cuộc đua giám sát --</option>
                   {assignments.map((a) => (
-                    <option key={a.raceId?._id} value={a.raceId?._id} className="bg-[#15151E]">
+                    <option key={a.raceId?._id} value={a.raceId?._id} className="bg-card">
                       {a.raceId?.name} ({a.raceId?.status})
                     </option>
                   ))}
@@ -252,28 +252,28 @@ export default function RefereeReportsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Phân loại biên bản</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Phân loại biên bản</label>
                 <select
                   value={reportType}
                   onChange={(e) => setReportType(e.target.value as any)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                 >
-                  <option value="POST_RACE" className="bg-[#15151E]">Biên bản sau trận (POST_RACE)</option>
-                  <option value="PRE_RACE" className="bg-[#15151E]">Biên bản trước trận (PRE_RACE)</option>
+                  <option value="POST_RACE" className="bg-card">Biên bản sau trận (POST_RACE)</option>
+                  <option value="PRE_RACE" className="bg-card">Biên bản trước trận (PRE_RACE)</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Chiến mã liên quan (Tùy chọn)</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Chiến mã liên quan (Tùy chọn)</label>
                 <select
                   value={selectedHorseId}
                   onChange={(e) => setSelectedHorseId(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                   disabled={!selectedRaceId}
                 >
-                  <option value="" className="bg-[#15151E]">-- Tất cả / Không chọn --</option>
+                  <option value="" className="bg-card">-- Tất cả / Không chọn --</option>
                   {horsesForSelectedRace.map((h) => (
-                    <option key={h.horseId?._id} value={h.horseId?._id} className="bg-[#15151E]">
+                    <option key={h.horseId?._id} value={h.horseId?._id} className="bg-card">
                       {h.horseId?.name}
                     </option>
                   ))}
@@ -281,36 +281,36 @@ export default function RefereeReportsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Sự cố vi phạm (Tùy chọn)</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Sự cố vi phạm (Tùy chọn)</label>
                 <input
                   type="text"
                   value={violation}
                   onChange={(e) => setViolation(e.target.value)}
                   placeholder="Ví dụ: Lấn làn đối thủ"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/20 focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Hình phạt đề xuất (Tùy chọn)</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Hình phạt đề xuất (Tùy chọn)</label>
                 <input
                   type="text"
                   value={penalty}
                   onChange={(e) => setPenalty(e.target.value)}
                   placeholder="Ví dụ: Cộng 3 giây"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/20 focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase text-white/50">Nội dung biên bản chi tiết</label>
+              <label className="text-[10px] font-bold uppercase text-muted-foreground">Nội dung biên bản chi tiết</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ghi nhận tổng quan về diễn biến cuộc đua, các quyết định điều khiển hoặc kiến nghị xử lý..."
                 rows={4}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/20 focus:border-primary focus:outline-none resize-none"
+                className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
                 required
               />
             </div>
@@ -329,12 +329,12 @@ export default function RefereeReportsPage() {
 
         {/* Reports Queue List */}
         <section className="space-y-4">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
+          <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
             Hồ sơ biên bản theo cuộc đua ({assignments.length})
           </h3>
 
           {assignments.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E]/40 text-white/40 text-xs">
+            <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/30 text-muted-foreground text-xs">
               Bạn chưa chấp nhận giám sát cuộc đua nào nên chưa có biên bản lưu trữ.
             </div>
           ) : (
@@ -348,38 +348,38 @@ export default function RefereeReportsPage() {
                 return (
                   <article
                     key={raceId}
-                    className="rounded-xl border border-white/5 bg-[#15151E]/95 shadow overflow-hidden"
+                    className="rounded-xl border border-border bg-card/95 shadow overflow-hidden"
                   >
                     {/* Header bar click to toggle expansion */}
                     <div
                       onClick={() => toggleExpand(raceId)}
-                      className="p-4 flex items-center justify-between cursor-pointer bg-black/25 hover:bg-black/40 transition select-none"
+                      className="p-4 flex items-center justify-between cursor-pointer bg-muted/50 hover:bg-muted transition select-none"
                     >
                       <div className="space-y-0.5">
-                        <h4 className="text-xs font-black uppercase text-white leading-tight">
+                        <h4 className="text-xs font-black uppercase text-foreground leading-tight">
                           {assignment.raceId.name}
                         </h4>
-                        <p className="text-[10px] text-white/40 font-bold uppercase">
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase">
                           Biên bản lưu vết: <strong className="text-teal-400">{raceReports.length} bản</strong>
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-white/40 uppercase font-black">
+                        <span className="text-[10px] text-muted-foreground uppercase font-black">
                           {assignment.raceId.status}
                         </span>
                         {isExpanded ? (
-                          <ChevronUp className="size-4 text-white/50" />
+                          <ChevronUp className="size-4 text-muted-foreground" />
                         ) : (
-                          <ChevronDown className="size-4 text-white/50" />
+                          <ChevronDown className="size-4 text-muted-foreground" />
                         )}
                       </div>
                     </div>
 
                     {/* Reports List for this race */}
                     {isExpanded && (
-                      <div className="p-4 border-t border-white/5 space-y-4 bg-black/10">
+                      <div className="p-4 border-t border-border space-y-4 bg-muted/40">
                         {raceReports.length === 0 ? (
-                          <p className="text-xs text-white/45 italic py-2">
+                          <p className="text-xs text-muted-foreground italic py-2">
                             Cuộc đua này chưa có biên bản nào được lập.
                           </p>
                         ) : (
@@ -387,7 +387,7 @@ export default function RefereeReportsPage() {
                             {raceReports.map((rep) => (
                               <div
                                 key={rep._id}
-                                className="p-3.5 rounded-lg border border-white/5 bg-[#15151E] space-y-2 text-xs"
+                                className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
                               >
                                 <div className="flex justify-between items-center gap-2">
                                   <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${
@@ -397,37 +397,37 @@ export default function RefereeReportsPage() {
                                   }`}>
                                     {rep.type === "PRE_RACE" ? "TRƯỚC TRẬN" : "SAU TRẬN"}
                                   </span>
-                                  <span className="text-[9px] text-white/45">
+                                  <span className="text-[9px] text-muted-foreground">
                                     {new Date(rep.createdAt).toLocaleString("vi-VN")}
                                   </span>
                                 </div>
 
                                 {rep.horseId && (
-                                  <p className="text-[10px] font-bold text-white/80">
+                                  <p className="text-[10px] font-bold text-foreground">
                                     Chiến mã liên quan: <span className="text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
                                   </p>
                                 )}
 
-                                <p className="text-white/80 leading-relaxed font-medium">
+                                <p className="text-foreground leading-relaxed font-medium">
                                   {rep.description}
                                 </p>
 
                                 {(rep.violation || rep.penalty) && (
-                                  <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-black/25 text-[10px]">
+                                  <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-muted/50 text-[10px]">
                                     {rep.violation && (
-                                      <p className="text-white/60">
+                                      <p className="text-muted-foreground">
                                         Lỗi vi phạm: <strong className="text-yellow-400 font-bold">{rep.violation}</strong>
                                       </p>
                                     )}
                                     {rep.penalty && (
-                                      <p className="text-white/60">
+                                      <p className="text-muted-foreground">
                                         Hình phạt: <strong className="text-red-400 font-bold">{rep.penalty}</strong>
                                       </p>
                                     )}
                                   </div>
                                 )}
 
-                                <p className="text-[9px] text-white/40 pt-1.5 border-t border-white/5 text-right uppercase font-bold">
+                                <p className="text-[9px] text-muted-foreground pt-1.5 border-t border-border text-right uppercase font-bold">
                                   Ký tên: {rep.refereeId?.fullName}
                                 </p>
                               </div>
@@ -435,7 +435,7 @@ export default function RefereeReportsPage() {
                           </div>
                         )}
                         <div className="pt-2 flex justify-end">
-                          <Button asChild variant="outline" className="h-9 px-4 rounded-full text-xs font-bold uppercase border-white/10 hover:bg-white/5 text-white hover:text-white">
+                          <Button asChild variant="outline" className="h-9 px-4 rounded-full text-xs font-bold uppercase">
                             <Link href={`/referee/races/${assignment.raceId._id}`}>
                               Đi tới Cuộc Đua <ArrowRight className="size-3.5 ml-1" />
                             </Link>

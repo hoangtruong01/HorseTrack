@@ -46,7 +46,7 @@ export default function SpectatorPredictionsPage() {
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-white/10 pb-6">
+      <div className="flex flex-col gap-6 border-b border-border pb-6 md:flex-row md:items-center md:justify-between">
         <PageHeader
           eyebrow="Prediction Station"
           title="Lịch Sử Dự Đoán"
@@ -54,16 +54,19 @@ export default function SpectatorPredictionsPage() {
         />
 
         {/* Real Points Display */}
-        <div className="shrink-0 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3 flex items-center gap-4">
-          <div className="size-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+        <div className="flex shrink-0 items-center gap-4 rounded-2xl border border-border bg-card px-5 py-3 shadow-sm">
+          <div className="flex size-10 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary">
             <Coins className="size-5" />
           </div>
           <div>
-            <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">Điểm thưởng hiện tại</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Điểm thưởng hiện tại</span>
             {loadingBalance ? (
-              <Loader2 className="size-4 animate-spin text-white mt-1" />
+              <Loader2 className="mt-1 size-4 animate-spin text-primary" />
             ) : (
-              <p className="text-xl font-black text-white">{balance.toLocaleString("vi-VN")} Pts</p>
+              <p className="text-xl font-black text-foreground">
+                {balance.toLocaleString("vi-VN")}{" "}
+                <span className="text-base font-bold text-muted-foreground">Pts</span>
+              </p>
             )}
           </div>
         </div>
@@ -72,27 +75,27 @@ export default function SpectatorPredictionsPage() {
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* Left Side: Summary & Guide */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#16161E] p-6 space-y-5 relative overflow-hidden shadow-xl">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px] pointer-events-none" />
+          <div className="relative space-y-5 overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-lg">
+            <div className="pointer-events-none absolute top-0 right-0 h-48 w-48 rounded-full bg-primary/5 blur-[60px]" />
             
-            <h3 className="text-base font-black uppercase tracking-tight text-white flex items-center gap-2">
-              <Award className="size-5 text-[#E10600]" /> Thể Lệ & Quy Định
+            <h3 className="flex items-center gap-2 text-base font-black uppercase tracking-tight text-foreground">
+              <Award className="size-5 text-primary" /> Thể Lệ & Quy Định
             </h3>
 
-            <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
+            <div className="space-y-4 text-xs leading-relaxed text-muted-foreground">
               <div className="space-y-1">
-                <p className="font-bold text-white uppercase tracking-wider text-[10px]">1. Đặt Dự Đoán</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-foreground">1. Đặt Dự Đoán</p>
                 <p>Khán giả có thể tham gia dự đoán trực tiếp tại trang chi tiết của mỗi trận đấu trước giờ khởi tranh (khi trận đấu ở trạng thái SCHEDULED, CHECKING, hoặc READY).</p>
               </div>
 
               <div className="space-y-1">
-                <p className="font-bold text-white uppercase tracking-wider text-[10px]">2. Điểm thưởng & Khấu trừ</p>
-                <p>Mỗi dự đoán đúng sẽ giúp bạn nhận ngay <strong className="text-white">+1 Điểm</strong>. Ngược lại, nếu dự đoán sai tài khoản sẽ bị trừ <strong className="text-white">-1 Điểm</strong>.</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-foreground">2. Điểm thưởng & Khấu trừ</p>
+                <p>Mỗi dự đoán đúng sẽ giúp bạn nhận ngay <strong className="text-foreground">+1 Điểm</strong>. Ngược lại, nếu dự đoán sai tài khoản sẽ bị trừ <strong className="text-foreground">-1 Điểm</strong>.</p>
               </div>
 
               <div className="space-y-1">
-                <p className="font-bold text-white uppercase tracking-wider text-[10px]">3. Quy đổi điểm thưởng</p>
-                <p>Tích lũy điểm để tạo yêu cầu quy đổi tại <strong className="text-white">Ví điểm thưởng</strong> và mang mã QR nhận quà trực tiếp tại quầy trường đua.</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-foreground">3. Quy đổi điểm thưởng</p>
+                <p>Tích lũy điểm để tạo yêu cầu quy đổi tại <strong className="text-foreground">Ví điểm thưởng</strong> và mang mã QR nhận quà trực tiếp tại quầy trường đua.</p>
               </div>
             </div>
 
@@ -108,20 +111,20 @@ export default function SpectatorPredictionsPage() {
 
         {/* Right Side: List of Predictions */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="border-b border-white/10 pb-3">
-            <h3 className="text-base font-black uppercase tracking-tight text-white flex items-center gap-2">
-              <Activity className="size-5 text-[#E10600]" /> Các lượt đã dự đoán ({myPredictions.length})
+          <div className="border-b border-border pb-3">
+            <h3 className="flex items-center gap-2 text-base font-black uppercase tracking-tight text-foreground">
+              <Activity className="size-5 text-primary" /> Các lượt đã dự đoán ({myPredictions.length})
             </h3>
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-white/55">
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <Loader2 className="size-8 animate-spin text-[#E10600]" />
               <p className="mt-3 text-xs font-mono uppercase tracking-widest">Đang tải lịch sử...</p>
             </div>
           ) : myPredictions.length === 0 ? (
-            <div className="text-center py-16 border border-white/5 rounded-2xl bg-[#13131A] text-muted-foreground text-xs shadow-md">
-              <Bell className="size-10 text-white/10 mx-auto mb-2" />
+            <div className="rounded-2xl border border-border bg-card py-16 text-center text-xs text-muted-foreground shadow-sm">
+              <Bell className="mx-auto mb-2 size-10 text-muted-foreground/30" />
               Bạn chưa thực hiện lượt dự đoán nào.
             </div>
           ) : (
@@ -147,7 +150,7 @@ export default function SpectatorPredictionsPage() {
                   <div
                     key={p._id}
                     translate="no"
-                    className="group rounded-2xl border border-white/5 bg-[#13131A] p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-white/10 transition duration-300 relative overflow-hidden notranslate"
+                    className="group rounded-2xl border border-white/5 bg-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-white/10 transition duration-300 relative overflow-hidden notranslate"
                   >
                     {p.status === "PENDING" && (
                       <div className="absolute top-0 left-0 w-full h-[2px] bg-yellow-400" />

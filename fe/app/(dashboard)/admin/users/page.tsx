@@ -156,38 +156,38 @@ export default function AdminUsersPage() {
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
-            className="w-full rounded-xl border border-white/10 bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
+            className="w-full rounded-xl border border-border bg-muted pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
             placeholder="Tìm theo tên, email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <select
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
+          className="rounded-xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground focus:border-primary/50 focus:outline-none"
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value)}
         >
-          <option value="" className="bg-[#15151E] text-white">Tất cả Role</option>
-          {ROLES.map(r => <option key={r} value={r} className="bg-[#15151E] text-white">{r}</option>)}
+          <option value="" className="bg-card text-foreground">Tất cả Role</option>
+          {ROLES.map(r => <option key={r} value={r} className="bg-card text-foreground">{r}</option>)}
         </select>
         <select
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
+          className="rounded-xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground focus:border-primary/50 focus:outline-none"
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
-          <option value="" className="bg-[#15151E] text-white">Tất cả Status</option>
-          {STATUSES.map(s => <option key={s} value={s} className="bg-[#15151E] text-white">{s}</option>)}
+          <option value="" className="bg-card text-foreground">Tất cả Status</option>
+          {STATUSES.map(s => <option key={s} value={s} className="bg-card text-foreground">{s}</option>)}
         </select>
       </div>
 
       {/* Stats */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Users className="size-4" />
-        <span>Tổng: <strong className="text-white">{meta.total}</strong> users — Trang {meta.page}/{meta.totalPages}</span>
+        <span>Tổng: <strong className="text-foreground">{meta.total}</strong> users — Trang {meta.page}/{meta.totalPages}</span>
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
         ) : users.length === 0 ? (
@@ -196,7 +196,7 @@ export default function AdminUsersPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10 text-left">
+                <tr className="border-b border-border text-left">
                   <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Người dùng</th>
                   <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Roles</th>
                   <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
@@ -206,14 +206,14 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {users.map((u) => (
-                  <tr key={u.id} className="group hover:bg-white/[0.02] transition-colors">
+                  <tr key={u.id} className="group hover:bg-muted transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-black">
                           {u.fullName.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-white">{u.fullName}</p>
+                          <p className="text-sm font-semibold text-foreground">{u.fullName}</p>
                           <p className="text-xs text-muted-foreground">{u.email}</p>
                           {u.phone && <p className="text-xs text-muted-foreground">{u.phone}</p>}
                         </div>
@@ -222,7 +222,7 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-1.5">
                         {u.roles.map(r => (
-                          <span key={r} className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${roleColors[r] ?? "bg-white/5 text-gray-400 border-white/10"}`}>{r}</span>
+                          <span key={r} className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${roleColors[r] ?? "bg-muted text-gray-400 border-border"}`}>{r}</span>
                         ))}
                       </div>
                     </td>
@@ -276,7 +276,7 @@ export default function AdminUsersPage() {
           <button
             onClick={() => fetchUsers(meta.page - 1)}
             disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition"
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition"
           >
             <ChevronLeft className="size-4" /> Trước
           </button>
@@ -284,7 +284,7 @@ export default function AdminUsersPage() {
           <button
             onClick={() => fetchUsers(meta.page + 1)}
             disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition"
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition"
           >
             Sau <ChevronRight className="size-4" />
           </button>
@@ -293,10 +293,10 @@ export default function AdminUsersPage() {
       {/* Modal Phân Quyền */}
       {selectedUserForRoles && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <UserCog className="size-5 text-primary" />
                   Phân Quyền Người Dùng
                 </h3>
@@ -306,7 +306,7 @@ export default function AdminUsersPage() {
               </div>
               <button
                 onClick={() => setSelectedUserForRoles(null)}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-white transition"
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
               >
                 <X className="size-5" />
               </button>
@@ -332,8 +332,8 @@ export default function AdminUsersPage() {
                       }}
                       className={`flex flex-col items-start gap-1 p-3 rounded-xl border text-left transition hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 ${
                         hasRole
-                          ? "border-primary bg-primary/10 text-white"
-                          : "border-white/10 bg-white/[0.02] text-muted-foreground hover:border-white/20 hover:text-white"
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-muted text-muted-foreground hover:border-primary hover:text-foreground"
                       }`}
                     >
                       <div className="flex w-full items-center justify-between">
@@ -361,7 +361,7 @@ export default function AdminUsersPage() {
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setSelectedUserForRoles(null)}
-                className="rounded-xl bg-white/5 border border-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/10 transition"
+                className="rounded-xl bg-muted border border-border px-5 py-2 text-sm font-semibold text-foreground hover:bg-muted transition"
               >
                 Đóng
               </button>
@@ -372,3 +372,5 @@ export default function AdminUsersPage() {
     </main>
   );
 }
+
+

@@ -115,13 +115,13 @@ export default function OwnerRankingsPage() {
       )}
 
       {/* Tab Triggers */}
-      <div className="flex border-b border-white/10 max-w-sm">
+      <div className="flex border-b border-border max-w-sm">
         <button
           onClick={() => setActiveTab("horses")}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "horses"
               ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground hover:text-white"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           🐎 Chiến Mã Vô Địch
@@ -131,7 +131,7 @@ export default function OwnerRankingsPage() {
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "jockeys"
               ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground hover:text-white"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           🏇 Nài Ngựa Hàng Đầu
@@ -141,10 +141,10 @@ export default function OwnerRankingsPage() {
       {activeTab === "horses" ? (
         /* Horses Ranking Table */
         <div className="space-y-4">
-          <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden shadow-2xl">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+            <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-b border-border bg-muted/60 font-black uppercase tracking-wider text-muted-foreground">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Tên Chiến Mã</th>
                   <th className="p-4">Giống Ngựa</th>
@@ -155,12 +155,12 @@ export default function OwnerRankingsPage() {
                   <th className="p-4 text-right">Tổng Điểm Tích Lũy</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {isLoadingHorses ? (
                   [1, 2, 3].map((n) => (
                     <tr key={n} className="animate-pulse">
                       <td className="p-4" colSpan={8}>
-                        <div className="h-6 bg-white/5 rounded" />
+                        <div className="h-6 bg-muted rounded" />
                       </td>
                     </tr>
                   ))
@@ -172,7 +172,7 @@ export default function OwnerRankingsPage() {
                   </tr>
                 ) : (
                   horseRankings.map((horse) => (
-                    <tr key={horse.horseId} className="hover:bg-white/[0.01] transition duration-200">
+                    <tr key={horse.horseId} className="transition duration-200 hover:bg-muted/40">
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
@@ -181,14 +181,14 @@ export default function OwnerRankingsPage() {
                               : horse.rank === 2
                               ? "bg-slate-300 text-black"
                               : horse.rank === 3
-                              ? "bg-[#CD7F32] text-white"
-                              : "bg-white/5 border border-white/10 text-muted-foreground"
+                              ? "bg-[#CD7F32] text-foreground"
+                              : "bg-muted border border-border text-muted-foreground"
                           }`}
                         >
                           {horse.rank}
                         </span>
                       </td>
-                      <td className="p-4 font-black text-white flex items-center gap-2">
+                      <td className="p-4 font-black text-foreground flex items-center gap-2">
                         {horse.horseName}
                         {horse.rank === 1 && (
                           <Flame className="size-3.5 text-primary animate-bounce" />
@@ -196,7 +196,7 @@ export default function OwnerRankingsPage() {
                       </td>
                       <td className="p-4 text-muted-foreground">{horse.breed || "Chưa rõ"}</td>
                       <td className="p-4 text-muted-foreground font-medium">{horse.ownerName || "—"}</td>
-                      <td className="p-4 text-center font-bold text-white">{horse.totalRaces}</td>
+                      <td className="p-4 text-center font-bold text-foreground">{horse.totalRaces}</td>
                       <td className="p-4 text-center text-primary font-black text-sm">{horse.wins}</td>
                       <td className="p-4 text-center font-mono text-muted-foreground">
                         {formatAvgTime(horse.totalFinishTimeMs, horse.totalRaces)}
@@ -214,10 +214,10 @@ export default function OwnerRankingsPage() {
       ) : (
         /* Jockeys Ranking Table */
         <div className="space-y-4">
-          <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden shadow-2xl">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+            <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-b border-border bg-muted/60 font-black uppercase tracking-wider text-muted-foreground">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Họ Tên Nài Ngựa</th>
                   <th className="p-4">Cấp Độ</th>
@@ -227,12 +227,12 @@ export default function OwnerRankingsPage() {
                   <th className="p-4 text-right">Tổng Điểm Tích Lũy</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {isLoadingJockeys ? (
                   [1, 2, 3].map((n) => (
                     <tr key={n} className="animate-pulse">
                       <td className="p-4" colSpan={7}>
-                        <div className="h-6 bg-white/5 rounded" />
+                        <div className="h-6 bg-muted rounded" />
                       </td>
                     </tr>
                   ))
@@ -244,7 +244,7 @@ export default function OwnerRankingsPage() {
                   </tr>
                 ) : (
                   jockeyRankings.map((jockey) => (
-                    <tr key={jockey.jockeyUserId} className="hover:bg-white/[0.01] transition duration-200">
+                    <tr key={jockey.jockeyUserId} className="transition duration-200 hover:bg-muted/40">
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
@@ -253,24 +253,24 @@ export default function OwnerRankingsPage() {
                               : jockey.rank === 2
                               ? "bg-slate-300 text-black"
                               : jockey.rank === 3
-                              ? "bg-[#CD7F32] text-white"
-                              : "bg-white/5 border border-white/10 text-muted-foreground"
+                              ? "bg-[#CD7F32] text-foreground"
+                              : "bg-muted border border-border text-muted-foreground"
                           }`}
                         >
                           {jockey.rank}
                         </span>
                       </td>
-                      <td className="p-4 font-black text-white flex items-center gap-2">
+                      <td className="p-4 font-black text-foreground flex items-center gap-2">
                         {jockey.jockeyName}
                         {jockey.rank === 1 && (
                           <Trophy className="size-3.5 text-primary animate-bounce" />
                         )}
                       </td>
                       <td className="p-4 text-muted-foreground">{getSkillLevelText(jockey.skillLevel)}</td>
-                      <td className="p-4 text-center text-white font-medium">
+                      <td className="p-4 text-center text-foreground font-medium">
                         {jockey.experienceYears ? `${jockey.experienceYears} năm` : "—"}
                       </td>
-                      <td className="p-4 text-center font-bold text-white">{jockey.totalRaces}</td>
+                      <td className="p-4 text-center font-bold text-foreground">{jockey.totalRaces}</td>
                       <td className="p-4 text-center text-primary font-black text-sm">{jockey.wins}</td>
                       <td className="p-4 text-right font-black text-teal-400 text-sm">
                         {jockey.totalPoints} Pts

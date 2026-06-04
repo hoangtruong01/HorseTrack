@@ -24,7 +24,7 @@ export function RolePreviewCard({
         "group relative overflow-hidden rounded-2xl border bg-[#15151E]/85 p-4 text-left shadow-[0_18px_60px_rgba(0,0,0,0.34)] transition duration-200",
         selected
           ? "border-primary/80 ring-2 ring-primary/25"
-          : "border-white/10 hover:border-primary/50",
+          : "border-border/10 hover:border-primary/50",
         compact && "p-3",
       )}
     >
@@ -36,8 +36,8 @@ export function RolePreviewCard({
           className={cn(
             "flex size-11 shrink-0 items-center justify-center rounded-xl border",
             selected
-              ? "border-primary bg-primary text-white"
-              : "border-white/10 bg-white/[0.06] text-primary",
+              ? "border-primary bg-primary text-foreground"
+              : "border-border/10 bg-muted/[0.06] text-primary",
           )}
         >
           <Icon className="size-5" aria-hidden="true" />
@@ -54,7 +54,7 @@ export function RolePreviewCard({
               />
             ) : null}
           </div>
-          <h3 className="mt-1 text-base font-black uppercase text-white">
+          <h3 className="mt-1 text-base font-black uppercase text-foreground">
             {role.label}
           </h3>
           <p className="mt-2 text-sm leading-6 text-white/68">
@@ -71,7 +71,7 @@ export function RolePreviewCard({
           {role.highlights.map((item) => (
             <li
               key={item}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold text-white/78"
+              className="rounded-full border border-border/10 bg-muted/[0.04] px-3 py-1 text-xs font-bold text-white/78"
             >
               {item}
             </li>

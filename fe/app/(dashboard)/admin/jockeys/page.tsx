@@ -74,19 +74,19 @@ export default function AdminJockeysPage() {
 
       <div className="flex gap-3">
         <select
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
+          className="rounded-xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground focus:border-primary/50 focus:outline-none"
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
-          <option value="" className="bg-[#15151e] text-white">Tất cả Status</option>
-          {STATUSES.map(s => <option key={s} value={s} className="bg-[#15151e] text-white">{s}</option>)}
+          <option value="" className="bg-card text-foreground">Tất cả Status</option>
+          {STATUSES.map(s => <option key={s} value={s} className="bg-card text-foreground">{s}</option>)}
         </select>
         <div className="text-sm text-muted-foreground flex items-center">
-          Tổng: <strong className="text-white ml-1">{meta.total}</strong>
+          Tổng: <strong className="text-foreground ml-1">{meta.total}</strong>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
         ) : jockeys.length === 0 ? (
@@ -95,7 +95,7 @@ export default function AdminJockeysPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-border">
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Jockey</th>
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">License</th>
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Kinh nghiệm</th>
@@ -106,14 +106,14 @@ export default function AdminJockeysPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {jockeys.map((j) => (
-                  <tr key={j._id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={j._id} className="hover:bg-muted transition-colors">
                     <td className="px-5 py-4">
-                      <p className="text-sm font-semibold text-white">{getUserName(j.userId)}</p>
+                      <p className="text-sm font-semibold text-foreground">{getUserName(j.userId)}</p>
                       <p className="text-xs text-muted-foreground">{getUserEmail(j.userId)}</p>
                     </td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{j.licenseNumber ?? "—"}</td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{j.experienceYears ?? "—"} năm · {j.weight ?? "?"}kg</td>
-                    <td className="px-5 py-4 text-sm text-white">{j.totalRaces ?? 0} / {j.wins ?? 0}</td>
+                    <td className="px-5 py-4 text-sm text-foreground">{j.totalRaces ?? 0} / {j.wins ?? 0}</td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${statusColors[j.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                         {j.status}
@@ -124,9 +124,9 @@ export default function AdminJockeysPage() {
                         value={j.status}
                         disabled={actionLoading === j._id}
                         onChange={(e) => handleChangeStatus(j._id, e.target.value)}
-                        className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-white focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer"
+                        className="rounded-lg border border-border bg-muted px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer"
                       >
-                        {STATUSES.map(s => <option key={s} value={s} className="bg-[#15151e] text-white">{s}</option>)}
+                        {STATUSES.map(s => <option key={s} value={s} className="bg-card text-foreground">{s}</option>)}
                       </select>
                     </td>
                   </tr>
@@ -140,12 +140,12 @@ export default function AdminJockeysPage() {
       {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchJockeys(meta.page - 1)} disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
             <ChevronLeft className="size-4" /> Trước
           </button>
           <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
           <button onClick={() => fetchJockeys(meta.page + 1)} disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
             Sau <ChevronRight className="size-4" />
           </button>
         </div>
@@ -153,3 +153,5 @@ export default function AdminJockeysPage() {
     </main>
   );
 }
+
+

@@ -15,7 +15,7 @@ export default function NewAdminRacePage() {
         title="Khởi Tạo Trận Đua Mới"
         description="Thiết lập lịch trình, cự ly, bề mặt đường đua và phân bổ giải thưởng cho một vòng đua thuộc giải đấu chính."
         actions={
-          <Button asChild variant="outline" className="rounded-full border-white/10 hover:bg-white/5 text-white">
+          <Button asChild variant="outline" className="rounded-full">
             <Link href="/admin/races">Quay lại danh sách</Link>
           </Button>
         }

@@ -48,14 +48,14 @@ export default function ProfilePage() {
           title="Thông tin hồ sơ"
           description="Quản lý và xem thông tin tài khoản của bạn trên hệ thống HorseTrack."
         />
-        <Button asChild variant="outline" className="rounded-xl border-white/10 hover:bg-white/[0.03]">
+        <Button asChild variant="outline" className="rounded-xl">
           <Link href={`/${user.roles[0]?.toLowerCase() || "spectator"}`}>
             <ArrowLeft className="mr-2 size-4" /> Quay lại Dashboard
           </Link>
         </Button>
       </div>
 
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-white/[0.05] bg-[#111118]/80 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/80 p-8 shadow-2xl backdrop-blur-xl">
         {/* Glow accent */}
         <div className="absolute right-0 top-0 -mr-16 -mt-16 size-48 rounded-full bg-[#E10600]/10 blur-3xl" />
         <div className="absolute left-0 bottom-0 -ml-16 -mb-16 size-48 rounded-full bg-[#F8CD46]/5 blur-3xl" />
@@ -67,20 +67,20 @@ export default function ProfilePage() {
               <User className="size-10" />
             </div>
             <div className="text-center sm:text-left space-y-2">
-              <h2 className="text-2xl font-black uppercase text-white tracking-wide">
+              <h2 className="text-2xl font-black uppercase text-foreground tracking-wide">
                 {user.fullName}
               </h2>
               <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                 {user.roles.map((role) => (
                   <span
                     key={role}
-                    className="inline-flex items-center gap-1 rounded-full border border-[#E10600]/30 bg-[#E10600]/10 px-3.5 py-1 text-[10px] font-black uppercase tracking-wider text-white"
+                    className="inline-flex items-center gap-1 rounded-full border border-[#E10600]/30 bg-[#E10600]/10 px-3.5 py-1 text-[10px] font-black uppercase tracking-wider text-foreground"
                   >
                     <Shield className="size-3 text-[#E10600]" />
                     {role}
                   </span>
                 ))}
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/60">
+                <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   Trạng thái: Hoạt động
                 </span>
               </div>
@@ -90,53 +90,53 @@ export default function ProfilePage() {
           {/* Grid fields */}
           <div className="grid gap-6 sm:grid-cols-2">
             {/* Email field */}
-            <div className="group rounded-2xl border border-white/[0.04] bg-[#07070A]/80 p-5 hover:border-white/10 transition">
+            <div className="group rounded-2xl border border-border bg-card p-5 hover:border-primary/30 transition">
               <div className="flex items-center gap-3 text-muted-foreground group-hover:text-[#E10600] transition">
                 <Mail className="size-4.5" />
                 <span className="text-[10px] font-black uppercase tracking-wider">
                   Địa chỉ Email
                 </span>
               </div>
-              <p className="mt-3 text-sm font-bold text-white break-all">
+              <p className="mt-3 text-sm font-bold text-foreground break-all">
                 {user.email}
               </p>
             </div>
 
             {/* Phone field */}
-            <div className="group rounded-2xl border border-white/[0.04] bg-[#07070A]/80 p-5 hover:border-[#E10600]/30 transition">
+            <div className="group rounded-2xl border border-border bg-card p-5 hover:border-primary/30 transition">
               <div className="flex items-center gap-3 text-muted-foreground group-hover:text-[#E10600] transition">
                 <Phone className="size-4.5" />
                 <span className="text-[10px] font-black uppercase tracking-wider">
                   Số điện thoại
                 </span>
               </div>
-              <p className="mt-3 text-sm font-bold text-white">
+              <p className="mt-3 text-sm font-bold text-foreground">
                 {user.phone || "Chưa cập nhật"}
               </p>
             </div>
 
             {/* DOB field */}
-            <div className="group rounded-2xl border border-white/[0.04] bg-[#07070A]/80 p-5 hover:border-[#E10600]/30 transition">
+            <div className="group rounded-2xl border border-border bg-card p-5 hover:border-primary/30 transition">
               <div className="flex items-center gap-3 text-muted-foreground group-hover:text-[#E10600] transition">
                 <Calendar className="size-4.5" />
                 <span className="text-[10px] font-black uppercase tracking-wider">
                   Ngày sinh
                 </span>
               </div>
-              <p className="mt-3 text-sm font-bold text-white">
+              <p className="mt-3 text-sm font-bold text-foreground">
                 {formattedDob}
               </p>
             </div>
 
             {/* Address field */}
-            <div className="group rounded-2xl border border-white/[0.04] bg-[#07070A]/80 p-5 hover:border-[#E10600]/30 transition sm:col-span-2">
+            <div className="group rounded-2xl border border-border bg-card p-5 hover:border-primary/30 transition sm:col-span-2">
               <div className="flex items-center gap-3 text-muted-foreground group-hover:text-[#E10600] transition">
                 <MapPin className="size-4.5" />
                 <span className="text-[10px] font-black uppercase tracking-wider">
                   Địa chỉ thường trú
                 </span>
               </div>
-              <p className="mt-3 text-sm font-bold text-white leading-relaxed">
+              <p className="mt-3 text-sm font-bold text-foreground leading-relaxed">
                 {user.address || "Chưa cập nhật"}
               </p>
             </div>

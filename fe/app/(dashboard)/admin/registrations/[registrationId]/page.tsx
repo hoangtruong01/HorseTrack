@@ -67,7 +67,7 @@ export default function AdminRegistrationDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 text-white/55">
+      <div className="flex flex-col items-center justify-center py-32 text-muted-foreground">
         <Loader2 className="size-8 animate-spin text-[#E10600]" />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest font-bold">Đang tải chi tiết hồ sơ...</p>
       </div>
@@ -77,7 +77,7 @@ export default function AdminRegistrationDetailPage() {
   if (!registration) {
     return (
       <main className="space-y-6 text-center py-20">
-        <p className="text-white/55">Không tìm thấy hồ sơ đăng ký này hoặc đã bị xóa.</p>
+        <p className="text-muted-foreground">Không tìm thấy hồ sơ đăng ký này hoặc đã bị xóa.</p>
         <Button asChild variant="outline" className="rounded-full">
           <Link href="/admin/registrations">Quay lại danh sách</Link>
         </Button>

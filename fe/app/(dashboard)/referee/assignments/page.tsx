@@ -126,7 +126,7 @@ export default function RefereeAssignmentsPage() {
       />
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 border-b border-white/10 pb-3 overflow-x-auto">
+      <div className="flex gap-2 border-b border-border pb-3 overflow-x-auto">
         {TAB_OPTIONS.map(tab => (
           <button
             key={tab.key}
@@ -134,7 +134,7 @@ export default function RefereeAssignmentsPage() {
             className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition whitespace-nowrap ${
               activeTab === tab.key
                 ? "bg-primary/15 text-primary border border-primary/30"
-                : "text-white/40 hover:text-white/70 border border-transparent hover:border-white/10"
+                : "text-white/40 hover:text-white/70 border border-transparent hover:border-border"
             }`}
           >
             {tab.label}
@@ -148,14 +148,14 @@ export default function RefereeAssignmentsPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E] max-w-lg mx-auto space-y-3">
-          <div className="size-12 rounded-full border border-white/10 flex items-center justify-center text-white/30">
+        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-border bg-card max-w-lg mx-auto space-y-3">
+          <div className="size-12 rounded-full border border-border flex items-center justify-center text-white/30">
             <Calendar className="size-6" />
           </div>
-          <h4 className="font-bold text-white uppercase text-sm">
+          <h4 className="text-sm font-bold uppercase text-foreground">
             {activeTab === "all" ? "Danh sách trống" : `Không có phân công "${TAB_OPTIONS.find(t => t.key === activeTab)?.label}"`}
           </h4>
-          <p className="text-xs text-white/40 leading-relaxed">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             {activeTab === "all"
               ? "Bạn hiện tại chưa được Ban tổ chức phân công điều hành cuộc đua nào."
               : "Không có mục nào phù hợp bộ lọc hiện tại."}
@@ -170,7 +170,7 @@ export default function RefereeAssignmentsPage() {
             return (
               <article
                 key={assignmentId}
-                className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 flex flex-col justify-between space-y-4 hover:border-primary/25 transition shadow-lg"
+                className="rounded-2xl border border-border bg-card/85 p-5 flex flex-col justify-between space-y-4 hover:border-primary/25 transition shadow-lg"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
@@ -187,7 +187,7 @@ export default function RefereeAssignmentsPage() {
                       }
                       pulse={assignment.status === "assigned"}
                     />
-                    <span className="text-[10px] text-white/45 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded uppercase font-black tracking-wider">
+                    <span className="text-[10px] text-white/45 bg-white/5 border border-border px-2.5 py-0.5 rounded uppercase font-black tracking-wider">
                       {assignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}
                     </span>
                   </div>
@@ -247,7 +247,7 @@ export default function RefereeAssignmentsPage() {
                             onClick={() => setConfirmDeclineId(null)}
                             disabled={submittingActionId !== null}
                             variant="outline"
-                            className="rounded-full border-white/10 hover:bg-white/5 text-[10px] h-7 px-3 uppercase font-bold text-white hover:text-white"
+                            className="rounded-full border-border hover:bg-white/5 text-[10px] h-7 px-3 uppercase font-bold text-white hover:text-white"
                           >
                             Hủy
                           </Button>
@@ -266,7 +266,7 @@ export default function RefereeAssignmentsPage() {
                           onClick={() => setConfirmDeclineId(assignmentId)}
                           disabled={submittingActionId !== null}
                           variant="outline"
-                          className="rounded-full border-white/10 hover:bg-white/5 text-xs h-9 uppercase font-bold text-white hover:text-white"
+                          className="rounded-full border-border hover:bg-white/5 text-xs h-9 uppercase font-bold text-white hover:text-white"
                         >
                           Từ chối
                         </Button>

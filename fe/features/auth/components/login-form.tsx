@@ -23,9 +23,9 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const fieldClass =
-  "h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-10 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-xl border border-border bg-input pl-10 pr-10 text-sm text-foreground placeholder:text-foreground/30 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-60";
 const labelClass =
-  "text-xs font-black uppercase tracking-[0.16em] text-white/55";
+  "text-xs font-black uppercase tracking-[0.16em] text-foreground/55";
 
 export function LoginForm() {
   const { login, loginWithGoogle } = useAuth();
@@ -127,11 +127,11 @@ export function LoginForm() {
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       {errorMsg && (
-        <div className="flex items-start gap-3 rounded-xl border border-[#E10600] bg-[#E10600]/10 p-4 shadow-[0_0_15px_rgba(225,6,0,0.15)] animate-[shake_0.4s_ease-in-out]">
-          <AlertTriangle className="size-5 shrink-0 text-[#E10600] mt-0.5" />
+        <div className="flex items-start gap-3 rounded-xl border border-primary bg-primary/10 p-4 shadow-[0_0_15px_rgba(225,6,0,0.15)] animate-[shake_0.4s_ease-in-out]">
+          <AlertTriangle className="size-5 shrink-0 text-primary mt-0.5" />
           <div>
-            <p className="text-xs font-black uppercase text-[#E10600] tracking-[0.1em]">Lỗi truy cập</p>
-            <p className="mt-1 text-sm text-[#E0DEDC] leading-5">{errorMsg}</p>
+            <p className="text-xs font-black uppercase text-primary tracking-[0.1em]">Lỗi truy cập</p>
+            <p className="mt-1 text-sm text-foreground leading-5">{errorMsg}</p>
           </div>
         </div>
       )}
@@ -143,7 +143,7 @@ export function LoginForm() {
         <div className="space-y-2">
           <label className={labelClass}>Email address</label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-foreground/30" />
             <input
               type="email"
               required
@@ -159,7 +159,7 @@ export function LoginForm() {
         <div className="space-y-2">
           <label className={labelClass}>Password</label>
           <div className="relative">
-            <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-white/30" />
+            <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-foreground/30" />
             <input
               type={showPassword ? "text" : "password"}
               required
@@ -171,7 +171,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 focus:outline-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 focus:outline-none"
             >
               {showPassword ? (
                 <EyeOff className="size-4.5" />
@@ -186,17 +186,17 @@ export function LoginForm() {
 
       {/* Remember me & Forgot Password */}
       <div className="flex items-center justify-between text-xs sm:text-sm">
-        <label className="flex items-center gap-2 text-white/60 font-semibold cursor-pointer">
+        <label className="flex items-center gap-2 text-foreground/60 font-semibold cursor-pointer">
           <input
             type="checkbox"
             defaultChecked
-            className="size-4 rounded border-white/10 bg-white/[0.04] accent-[#E10600] focus:ring-offset-0 focus:ring-0"
+            className="size-4 rounded border-border bg-input accent-primary focus:ring-offset-0 focus:ring-0"
           />
           Remember me
         </label>
         <Link
           href="/forgot-password"
-          className="font-bold text-[#E10600] hover:underline"
+          className="font-bold text-primary hover:underline"
         >
           Forgot password?
         </Link>
@@ -207,7 +207,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#E10600] text-sm font-black uppercase tracking-[0.16em] text-white hover:bg-[#B80500] hover:scale-[1.01] active:scale-[0.99] transition-all duration-150"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-black uppercase tracking-[0.16em] text-primary-foreground hover:bg-primary/90 hover:scale-[1.01] active:scale-[0.99] transition-all duration-150"
         >
           {isSubmitting ? (
             <>
@@ -225,9 +225,9 @@ export function LoginForm() {
         {/* Separator */}
         <div className="relative flex items-center justify-center py-2">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/5"></div>
+            <div className="w-full border-t border-border"></div>
           </div>
-          <span className="relative bg-[#111118] px-4 text-xs font-black uppercase tracking-[0.18em] text-white/25">
+          <span className="relative bg-background px-4 text-xs font-black uppercase tracking-[0.18em] text-foreground/25">
             OR
           </span>
         </div>
@@ -235,7 +235,7 @@ export function LoginForm() {
         {/* Google Continue Button wrapper */}
         <div className="relative flex justify-center w-full min-h-[44px]">
           {/* Custom F1 styled Google button */}
-          <div className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] text-sm font-bold text-white hover:bg-white/[0.04] transition-all pointer-events-none">
+          <div className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border bg-secondary/50 text-sm font-bold text-foreground hover:bg-secondary transition-all pointer-events-none">
             <svg className="size-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -251,8 +251,8 @@ export function LoginForm() {
         {/* Try demo account section */}
         <div className="space-y-3 pt-3">
           <div className="relative flex items-center justify-center">
-            <div className="w-full border-t border-white/5"></div>
-            <span className="absolute bg-[#111118] px-3 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+            <div className="w-full border-t border-border"></div>
+            <span className="absolute bg-background px-3 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30">
               Try demo account
             </span>
           </div>
@@ -265,8 +265,8 @@ export function LoginForm() {
               className={cn(
                 "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "admin"
-                  ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
-                  : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
+                  ? "border-primary bg-primary/8 text-primary shadow-[0_0_10px_rgba(225,6,0,0.15)]"
+                  : "border-border bg-secondary/30 text-foreground/40 hover:border-primary/20 hover:text-foreground/70"
               )}
             >
               <CalendarDays className="size-4 shrink-0" />
@@ -280,8 +280,8 @@ export function LoginForm() {
               className={cn(
                 "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "owner"
-                  ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
-                  : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
+                  ? "border-primary bg-primary/8 text-primary shadow-[0_0_10px_rgba(225,6,0,0.15)]"
+                  : "border-border bg-secondary/30 text-foreground/40 hover:border-primary/20 hover:text-foreground/70"
               )}
             >
               <Compass className="size-4 shrink-0" />
@@ -295,8 +295,8 @@ export function LoginForm() {
               className={cn(
                 "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "jockey"
-                  ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
-                  : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
+                  ? "border-primary bg-primary/8 text-primary shadow-[0_0_10px_rgba(225,6,0,0.15)]"
+                  : "border-border bg-secondary/30 text-foreground/40 hover:border-primary/20 hover:text-foreground/70"
               )}
             >
               <User className="size-4 shrink-0" />
@@ -310,8 +310,8 @@ export function LoginForm() {
               className={cn(
                 "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "referee"
-                  ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
-                  : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
+                  ? "border-primary bg-primary/8 text-primary shadow-[0_0_10px_rgba(225,6,0,0.15)]"
+                  : "border-border bg-secondary/30 text-foreground/40 hover:border-primary/20 hover:text-foreground/70"
               )}
             >
               <ShieldCheck className="size-4 shrink-0" />
@@ -325,8 +325,8 @@ export function LoginForm() {
               className={cn(
                 "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "spectator"
-                  ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
-                  : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
+                  ? "border-primary bg-primary/8 text-primary shadow-[0_0_10px_rgba(225,6,0,0.15)]"
+                  : "border-border bg-secondary/30 text-foreground/40 hover:border-primary/20 hover:text-foreground/70"
               )}
             >
               <Tv className="size-4 shrink-0" />
@@ -340,8 +340,8 @@ export function LoginForm() {
               className={cn(
                 "flex flex-col items-center justify-center gap-2 rounded-xl border p-2 transition-all duration-200",
                 selectedDemoRole === "counter_staff"
-                  ? "border-[#E10600] bg-[#E10600]/8 text-[#E10600] shadow-[0_0_10px_rgba(225,6,0,0.15)]"
-                  : "border-white/[0.04] bg-white/[0.01] text-white/40 hover:border-white/10 hover:text-white/70"
+                  ? "border-primary bg-primary/8 text-primary shadow-[0_0_10px_rgba(225,6,0,0.15)]"
+                  : "border-border bg-secondary/30 text-foreground/40 hover:border-primary/20 hover:text-foreground/70"
               )}
             >
               <Wallet className="size-4 shrink-0" />
@@ -351,11 +351,11 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="pt-2 text-center text-xs sm:text-sm text-white/55 font-semibold">
+      <div className="pt-2 text-center text-xs sm:text-sm text-foreground/55 font-semibold">
         New to HorseTrack?{" "}
         <Link
           href="/register"
-          className="font-black text-[#E10600] hover:underline"
+          className="font-black text-primary hover:underline"
         >
           Create an account
         </Link>
