@@ -27,11 +27,12 @@ export function AppHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md",
+        "sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md w-full",
         className,
       )}
     >
-      <div className="f1-container flex min-h-[76px] items-center justify-between gap-4">
+      {/* Đã sửa f1-container thành w-full px-4 md:px-6 để bám sát 2 lề màn hình */}
+      <div className="w-full px-6 md:px-6 flex min-h-[76px] items-center justify-between gap-4">
         <Link
           href="/"
           className="group flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
