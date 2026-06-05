@@ -157,7 +157,7 @@ export default function JockeyRankingsPage() {
 
       {/* Jockey Standing Summary Card */}
       {!isLoadingJockeys && !isLoadingProfile && (
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)]">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-lg">
           <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.12),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(6,126,106,0.1),transparent_25rem)]" />
           
           <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -167,19 +167,19 @@ export default function JockeyRankingsPage() {
               </span>
               {myRankingInfo ? (
                 <div>
-                  <h2 className="text-xl font-black uppercase text-white sm:text-2xl flex items-center gap-2">
+                  <h2 className="flex items-center gap-2 text-xl font-black uppercase text-foreground sm:text-2xl">
                     Bạn đang đứng thứ <span className="text-primary text-3xl font-black">#{myRankingInfo.rank}</span> trên {jockeyRankings.length} nài ngựa!
                   </h2>
-                  <p className="text-xs text-white/50 leading-relaxed max-w-xl">
+                  <p className="max-w-xl text-xs leading-relaxed text-muted-foreground">
                     Tiếp tục chấp nhận lời mời và cưỡi ngựa chiến thắng để nâng hạng của bạn trên Bảng xếp hạng Vô địch.
                   </p>
                 </div>
               ) : (
                 <div>
-                  <h2 className="text-lg font-black uppercase text-white">
+                  <h2 className="text-lg font-black uppercase text-foreground">
                     Bạn chưa có xếp hạng chính thức
                   </h2>
-                  <p className="text-xs text-white/50 leading-relaxed max-w-xl">
+                  <p className="max-w-xl text-xs leading-relaxed text-muted-foreground">
                     Hệ thống chỉ xếp hạng các nài ngựa đã hoàn thành trận đua và được công bố kết quả. Hãy tích cực tham gia đua nhé!
                   </p>
                 </div>
@@ -188,16 +188,16 @@ export default function JockeyRankingsPage() {
 
             {myRankingInfo && (
               <div className="flex gap-4 self-start md:self-auto">
-                <div className="bg-black/30 px-4 py-3 rounded-xl border border-white/5 text-center min-w-[90px]">
-                  <span className="block text-[9px] uppercase tracking-wider text-white/45">Vô địch</span>
+                <div className="min-w-[90px] rounded-xl border border-border bg-muted/50 px-4 py-3 text-center">
+                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Vô địch</span>
                   <span className="text-lg font-black text-primary mt-1 block">{myRankingInfo.wins}</span>
                 </div>
-                <div className="bg-black/30 px-4 py-3 rounded-xl border border-white/5 text-center min-w-[90px]">
-                  <span className="block text-[9px] uppercase tracking-wider text-white/45">Số trận</span>
-                  <span className="text-lg font-black text-white mt-1 block">{myRankingInfo.totalRaces}</span>
+                <div className="min-w-[90px] rounded-xl border border-border bg-muted/50 px-4 py-3 text-center">
+                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Số trận</span>
+                  <span className="mt-1 block text-lg font-black text-foreground">{myRankingInfo.totalRaces}</span>
                 </div>
-                <div className="bg-black/30 px-4 py-3 rounded-xl border border-white/5 text-center min-w-[90px]">
-                  <span className="block text-[9px] uppercase tracking-wider text-white/45">Điểm tích lũy</span>
+                <div className="min-w-[90px] rounded-xl border border-border bg-muted/50 px-4 py-3 text-center">
+                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Điểm tích lũy</span>
                   <span className="text-lg font-black text-teal-400 mt-1 block">{myRankingInfo.totalPoints}đ</span>
                 </div>
               </div>
@@ -207,13 +207,13 @@ export default function JockeyRankingsPage() {
       )}
 
       {/* Tab Triggers */}
-      <div className="flex border-b border-white/10 max-w-sm">
+      <div className="flex max-w-sm border-b border-border">
         <button
           onClick={() => setActiveTab("jockeys")}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "jockeys"
               ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground hover:text-white"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           🏇 Nài Ngựa Hàng Đầu
@@ -223,7 +223,7 @@ export default function JockeyRankingsPage() {
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "horses"
               ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground hover:text-white"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           🐎 Chiến Mã Vô Địch
@@ -233,10 +233,10 @@ export default function JockeyRankingsPage() {
       {activeTab === "jockeys" ? (
         /* Jockeys Ranking Table */
         <div className="space-y-4">
-          <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden shadow-2xl">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-b border-border bg-muted/60 font-black uppercase tracking-wider text-muted-foreground">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Họ Tên Nài Ngựa</th>
                   <th className="p-4">Cấp Độ</th>
@@ -246,12 +246,12 @@ export default function JockeyRankingsPage() {
                   <th className="p-4 text-right">Tổng Điểm Tích Lũy</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {isLoadingJockeys ? (
                   [1, 2, 3].map((n) => (
                     <tr key={n} className="animate-pulse">
                       <td className="p-4" colSpan={7}>
-                        <div className="h-6 bg-white/5 rounded" />
+                        <div className="h-6 rounded bg-muted" />
                       </td>
                     </tr>
                   ))
@@ -270,7 +270,7 @@ export default function JockeyRankingsPage() {
                         className={`transition duration-200 ${
                           isMe
                             ? "bg-primary/5 hover:bg-primary/10 border-l-4 border-l-primary font-bold"
-                            : "hover:bg-white/[0.01]"
+                            : "hover:bg-muted/40"
                         }`}
                       >
                         <td className="p-4 text-center">
@@ -282,13 +282,13 @@ export default function JockeyRankingsPage() {
                                 ? "bg-slate-300 text-black"
                                 : jockey.rank === 3
                                 ? "bg-[#CD7F32] text-white"
-                                : "bg-white/5 border border-white/10 text-muted-foreground"
+                                : "border border-border bg-muted text-muted-foreground"
                             }`}
                           >
                             {jockey.rank}
                           </span>
                         </td>
-                        <td className="p-4 font-black text-white flex items-center gap-2">
+                        <td className="flex items-center gap-2 p-4 font-black text-foreground">
                           {jockey.jockeyName}
                           {isMe && (
                             <span className="ml-2 rounded px-1.5 py-0.5 text-[9px] uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
@@ -300,13 +300,14 @@ export default function JockeyRankingsPage() {
                           )}
                         </td>
                         <td className="p-4 text-muted-foreground">{getSkillLevelText(jockey.skillLevel)}</td>
-                        <td className="p-4 text-center text-white font-medium">
+                        <td className="p-4 text-center font-medium text-foreground">
                           {jockey.experienceYears ? `${jockey.experienceYears} năm` : "—"}
                         </td>
-                        <td className="p-4 text-center font-bold text-white">{jockey.totalRaces}</td>
+                        <td className="p-4 text-center font-bold text-foreground">{jockey.totalRaces}</td>
                         <td className="p-4 text-center text-primary font-black text-sm">{jockey.wins}</td>
-                        <td className="p-4 text-right font-black text-teal-400 text-sm">
-                          {jockey.totalPoints} Pts
+                        <td className="p-4 text-right text-sm">
+                          <span className="font-black text-teal-700">{jockey.totalPoints}</span>{" "}
+                          <span className="font-bold text-muted-foreground">Pts</span>
                         </td>
                       </tr>
                     );
@@ -319,10 +320,10 @@ export default function JockeyRankingsPage() {
       ) : (
         /* Horses Ranking Table */
         <div className="space-y-4">
-          <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden shadow-2xl">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-b border-border bg-muted/60 font-black uppercase tracking-wider text-muted-foreground">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Tên Chiến Mã</th>
                   <th className="p-4">Giống Ngựa</th>
@@ -333,12 +334,12 @@ export default function JockeyRankingsPage() {
                   <th className="p-4 text-right">Tổng Điểm Tích Lũy</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {isLoadingHorses ? (
                   [1, 2, 3].map((n) => (
                     <tr key={n} className="animate-pulse">
                       <td className="p-4" colSpan={8}>
-                        <div className="h-6 bg-white/5 rounded" />
+                        <div className="h-6 rounded bg-muted" />
                       </td>
                     </tr>
                   ))
@@ -366,7 +367,7 @@ export default function JockeyRankingsPage() {
                           {horse.rank}
                         </span>
                       </td>
-                      <td className="p-4 font-black text-white flex items-center gap-2">
+                      <td className="flex items-center gap-2 p-4 font-black text-foreground">
                         {horse.horseName}
                         {horse.rank === 1 && (
                           <Flame className="size-3.5 text-primary animate-bounce" />
@@ -374,13 +375,14 @@ export default function JockeyRankingsPage() {
                       </td>
                       <td className="p-4 text-muted-foreground">{horse.breed || "Chưa rõ"}</td>
                       <td className="p-4 text-muted-foreground font-medium">{horse.ownerName || "—"}</td>
-                      <td className="p-4 text-center font-bold text-white">{horse.totalRaces}</td>
+                      <td className="p-4 text-center font-bold text-foreground">{horse.totalRaces}</td>
                       <td className="p-4 text-center text-primary font-black text-sm">{horse.wins}</td>
                       <td className="p-4 text-center font-mono text-muted-foreground">
                         {formatAvgTime(horse.totalFinishTimeMs, horse.totalRaces)}
                       </td>
-                      <td className="p-4 text-right font-black text-teal-400 text-sm">
-                        {horse.totalPoints} Pts
+                      <td className="p-4 text-right text-sm">
+                        <span className="font-black text-teal-700">{horse.totalPoints}</span>{" "}
+                        <span className="font-bold text-muted-foreground">Pts</span>
                       </td>
                     </tr>
                   ))

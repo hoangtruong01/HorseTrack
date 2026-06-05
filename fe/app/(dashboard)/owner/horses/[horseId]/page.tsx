@@ -127,7 +127,7 @@ export default function HorseDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-white/55">
+      <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
         <Loader2 className="size-8 animate-spin text-[#E10600]" />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải dữ liệu hồ sơ...</p>
       </div>
@@ -136,9 +136,9 @@ export default function HorseDetailPage() {
 
   if (!horse) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-12 text-center max-w-xl mx-auto shadow-2xl">
-        <p className="text-sm text-white/50 mb-4">Chiến mã không tồn tại hoặc bạn không có quyền xem.</p>
-        <Button asChild className="rounded-full bg-white/5 text-white">
+      <div className="rounded-2xl border border-border bg-card/85 p-12 text-center max-w-xl mx-auto shadow-2xl">
+        <p className="text-sm text-muted-foreground mb-4">Chiến mã không tồn tại hoặc bạn không có quyền xem.</p>
+        <Button asChild className="rounded-full bg-muted text-foreground">
           <Link href="/owner/horses">Quay lại chuồng ngựa</Link>
         </Button>
       </div>
@@ -151,7 +151,7 @@ export default function HorseDetailPage() {
         <div>
           <Link
             href={`/owner/horses/${horseId}`}
-            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-white/50 hover:text-white transition mb-3"
+            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition mb-3"
           >
             <ChevronLeft className="size-4" /> Hủy chỉnh sửa
           </Link>
@@ -181,7 +181,7 @@ export default function HorseDetailPage() {
       <div>
         <Link
           href="/owner/horses"
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-white/50 hover:text-white transition mb-3"
+          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition mb-3"
         >
           <ChevronLeft className="size-4" /> Quay lại chuồng ngựa
         </Link>
@@ -193,7 +193,7 @@ export default function HorseDetailPage() {
           actions={
             <Button
               onClick={() => router.push(`/owner/horses/${horseId}?edit=true`)}
-              className="rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white flex items-center gap-2"
+              className="rounded-full bg-muted border border-border hover:bg-white/10 text-foreground flex items-center gap-2"
             >
               <Edit2 className="size-4" />
               Chỉnh sửa hồ sơ
@@ -203,11 +203,11 @@ export default function HorseDetailPage() {
       </div>
 
       {/* Horse Deck Details */}
-      <section className="grid gap-6 md:grid-cols-12 bg-[#15151E] border border-white/10 rounded-2xl overflow-hidden p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
+      <section className="grid gap-6 md:grid-cols-12 bg-card border border-border rounded-2xl overflow-hidden p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
         
         {/* Left Column: Image (span 5) */}
         <div className="md:col-span-5 flex flex-col gap-4">
-          <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/40 border border-white/5 flex items-center justify-center">
+          <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/40 border border-border flex items-center justify-center">
             {horse.image ? (
               <img
                 src={horse.image}
@@ -215,7 +215,7 @@ export default function HorseDetailPage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="flex flex-col items-center justify-center text-white/20">
+              <div className="flex flex-col items-center justify-center text-muted-foreground/40">
                 <Award className="size-20 stroke-[1]" />
                 <span className="text-xs uppercase tracking-widest mt-3">No Image</span>
               </div>
@@ -226,13 +226,13 @@ export default function HorseDetailPage() {
           </div>
 
           {/* Core Speed & Stamina Indicators */}
-          <div className="space-y-4 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+          <div className="space-y-4 bg-muted02] border border-border rounded-xl p-4">
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-white/50 uppercase tracking-wider flex items-center gap-1 font-bold">
+                <span className="text-muted-foreground uppercase tracking-wider flex items-center gap-1 font-bold">
                   <Zap className="size-3.5 text-yellow-400" /> Tốc độ nền
                 </span>
-                <span className="text-white font-mono font-bold">{horse.baseSpeed} km/h</span>
+                <span className="text-foreground font-mono font-bold">{horse.baseSpeed} km/h</span>
               </div>
               <div className="w-full h-2 rounded-full bg-black/40 overflow-hidden">
                 <div
@@ -244,10 +244,10 @@ export default function HorseDetailPage() {
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-white/50 uppercase tracking-wider flex items-center gap-1 font-bold">
+                <span className="text-muted-foreground uppercase tracking-wider flex items-center gap-1 font-bold">
                   <Heart className="size-3.5 text-red-500" /> Thể lực tích lũy
                 </span>
-                <span className="text-white font-mono font-bold">{horse.staminaScore}/100</span>
+                <span className="text-foreground font-mono font-bold">{horse.staminaScore}/100</span>
               </div>
               <div className="w-full h-2 rounded-full bg-black/40 overflow-hidden">
                 <div
@@ -264,53 +264,53 @@ export default function HorseDetailPage() {
           <div className="space-y-5">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E10600]">Thông số sinh học</p>
-              <h3 className="text-2xl font-black uppercase text-white tracking-tight mt-1">{horse.name}</h3>
+              <h3 className="text-2xl font-black uppercase text-foreground tracking-tight mt-1">{horse.name}</h3>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 border-y border-white/5 py-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 border-y border-border py-4 text-sm">
               <div className="space-y-1">
-                <span className="text-xs text-white/40 uppercase tracking-widest">Giống ngựa</span>
-                <p className="text-white font-bold">{horse.breed || "Không rõ giống"}</p>
+                <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">Giống ngựa</span>
+                <p className="text-foreground font-bold">{horse.breed || "Không rõ giống"}</p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-white/40 uppercase tracking-widest">Màu sắc</span>
-                <p className="text-white font-bold">{horse.color || "Không rõ màu sắc"}</p>
+                <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">Màu sắc</span>
+                <p className="text-foreground font-bold">{horse.color || "Không rõ màu sắc"}</p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-white/40 uppercase tracking-widest">Giới tính</span>
-                <p className="text-white font-bold">
+                <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">Giới tính</span>
+                <p className="text-foreground font-bold">
                   {horse.gender === "MALE" ? "Ngựa Đực (Male)" : horse.gender === "FEMALE" ? "Ngựa Cái (Female)" : "Ngựa Thiến (Gelding)"}
                 </p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-white/40 uppercase tracking-widest">Tuổi đời</span>
-                <p className="text-white font-bold">{horse.age ? `${horse.age} tuổi` : "N/A"}</p>
+                <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">Tuổi đời</span>
+                <p className="text-foreground font-bold">{horse.age ? `${horse.age} tuổi` : "N/A"}</p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-white/40 uppercase tracking-widest">Trọng lượng (kg)</span>
-                <p className="text-white font-mono font-bold">{horse.weightKg ? `${horse.weightKg} kg` : "N/A"}</p>
+                <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">Trọng lượng (kg)</span>
+                <p className="text-foreground font-mono font-bold">{horse.weightKg ? `${horse.weightKg} kg` : "N/A"}</p>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-white/40 uppercase tracking-widest">Chiều cao (cm)</span>
-                <p className="text-white font-mono font-bold">{horse.heightCm ? `${horse.heightCm} cm` : "N/A"}</p>
+                <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">Chiều cao (cm)</span>
+                <p className="text-foreground font-mono font-bold">{horse.heightCm ? `${horse.heightCm} cm` : "N/A"}</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs text-white/40 uppercase tracking-widest">Mô tả đặc điểm</span>
-              <p className="text-sm text-white/80 leading-relaxed bg-white/[0.02] border border-white/5 rounded-xl p-4">
+              <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">Mô tả đặc điểm</span>
+              <p className="text-sm text-foreground/80 leading-relaxed bg-muted02] border border-border rounded-xl p-4">
                 {horse.description || "Chiến mã chưa cập nhật thông tin mô tả cụ thể về tính cách hoặc thế mạnh địa hình."}
               </p>
             </div>
           </div>
 
           <div className="pt-4 flex justify-end gap-3">
-            <Button asChild variant="outline" className="rounded-xl border border-white/10 hover:bg-white/5 text-white">
+            <Button asChild variant="outline" className="rounded-xl border border-border hover:bg-muted text-foreground">
               <Link href="/owner/horses">Quay lại chuồng ngựa</Link>
             </Button>
             <Button
               onClick={() => router.push(`/owner/races`)}
-              className="rounded-xl bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase text-xs tracking-wider"
+              className="rounded-xl bg-[#E10600] hover:bg-[#B80500] text-foreground font-bold uppercase text-xs tracking-wider"
             >
               Ghi danh thi đấu
             </Button>
@@ -321,12 +321,12 @@ export default function HorseDetailPage() {
 
       {/* Horse Historical Race Results Section */}
       <section className="space-y-4">
-        <h3 className="text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+        <h3 className="text-lg font-black uppercase tracking-wider text-foreground flex items-center gap-2">
           <Trophy className="size-5 text-[#E10600]" /> Lịch sử thi đấu & Kết quả
         </h3>
 
         {results.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-[#15151E]/50 p-8 text-center text-white/40">
+          <div className="rounded-2xl border border-border bg-card/50 p-8 text-center text-muted-foreground/60">
             <Trophy className="size-12 mx-auto mb-3 opacity-20" />
             <p className="font-bold text-xs uppercase tracking-widest">Chưa có dữ liệu thi đấu</p>
             <p className="text-xs mt-1">Chiến mã này chưa từng tham gia trận đua chính thức nào hoặc kết quả chưa được ghi nhận.</p>
@@ -340,7 +340,7 @@ export default function HorseDetailPage() {
                 "border-slate-300/40 bg-slate-300/5 text-slate-300 shadow-[0_4px_20px_rgba(203,213,225,0.08)]", // 2nd
                 "border-amber-600/40 bg-amber-600/5 text-amber-500 shadow-[0_4px_20px_rgba(217,119,6,0.08)]", // 3rd
               ];
-              const cardBorder = isPodium ? podiumColors[rec.position - 1] : "border-white/10 bg-[#15151E] text-white/80";
+              const cardBorder = isPodium ? podiumColors[rec.position - 1] : "border-border bg-card text-foreground/80";
 
               return (
                 <article
@@ -349,42 +349,42 @@ export default function HorseDetailPage() {
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
                         {new Date(rec.raceStartTime).toLocaleDateString("vi-VN", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
                         })}
                       </p>
-                      <h4 className="font-black uppercase text-sm text-white mt-1 line-clamp-1">{rec.raceName}</h4>
+                      <h4 className="font-black uppercase text-sm text-foreground mt-1 line-clamp-1">{rec.raceName}</h4>
                     </div>
 
                     <div className={`size-10 rounded-lg flex items-center justify-center border font-black text-lg ${
                       rec.position === 1 ? "bg-yellow-500/20 border-yellow-500 text-yellow-400" :
                       rec.position === 2 ? "bg-slate-300/20 border-slate-300 text-slate-200" :
                       rec.position === 3 ? "bg-amber-600/20 border-amber-600 text-amber-500" :
-                      "bg-black/35 border-white/10 text-white/60"
+                      "bg-black/35 border-border text-muted-foreground"
                     }`}>
                       #{rec.position}
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-3 gap-2 text-[10px] border-t border-white/5 pt-3">
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-[10px] border-t border-border pt-3">
                     <div>
-                      <span className="text-white/40 uppercase block">Thời gian</span>
-                      <span className="font-mono font-bold text-white flex items-center gap-1 mt-0.5">
+                      <span className="text-muted-foreground/60 uppercase block">Thời gian</span>
+                      <span className="font-mono font-bold text-foreground flex items-center gap-1 mt-0.5">
                         <Timer className="size-3 text-primary" /> {rec.finishTime}s
                       </span>
                     </div>
                     <div>
-                      <span className="text-white/40 uppercase block">Tốc độ TB</span>
-                      <span className="font-mono font-bold text-white flex items-center gap-1 mt-0.5">
+                      <span className="text-muted-foreground/60 uppercase block">Tốc độ TB</span>
+                      <span className="font-mono font-bold text-foreground flex items-center gap-1 mt-0.5">
                         <Gauge className="size-3 text-primary" /> {rec.speed} km/h
                       </span>
                     </div>
                     <div>
-                      <span className="text-white/40 uppercase block">Cổng xuất phát</span>
-                      <span className="font-mono font-bold text-white block mt-0.5">Cổng {rec.gateNumber}</span>
+                      <span className="text-muted-foreground/60 uppercase block">Cổng xuất phát</span>
+                      <span className="font-mono font-bold text-foreground block mt-0.5">Cổng {rec.gateNumber}</span>
                     </div>
                   </div>
 

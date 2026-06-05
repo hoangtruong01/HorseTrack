@@ -10,7 +10,7 @@ export function ViolationQuickAdd() {
           <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
             <RadioTower className="size-4" /> Quick add
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase text-foreground">
             Log violation
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">

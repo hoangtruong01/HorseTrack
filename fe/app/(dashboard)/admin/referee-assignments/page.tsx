@@ -194,7 +194,7 @@ export default function AdminRefereeAssignmentsPage() {
         title="Phân Công Trọng Tài"
         description="Chọn giải đấu và vòng đua để xem danh sách trọng tài, hoặc tạo phân công mới."
         actions={
-          <Button onClick={openModal} className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase tracking-wider text-xs px-5 h-10 flex items-center gap-1.5">
+          <Button onClick={openModal} className="rounded-full bg-[#E10600] hover:bg-primary text-foreground font-bold uppercase tracking-wider text-xs px-5 h-10 flex items-center gap-1.5">
             <Plus className="size-4" /> Phân Công Mới
           </Button>
         }
@@ -203,29 +203,29 @@ export default function AdminRefereeAssignmentsPage() {
       {/* ── Cascade selectors: Tournament → Race ── */}
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Giải đấu</label>
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Giải đấu</label>
           <select
-            className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
+            className="w-full rounded-xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground focus:border-primary/50 focus:outline-none"
             value={selectedTournament}
             onChange={(e) => setSelectedTournament(e.target.value)}
           >
-            <option value="" className="bg-[#15151e] text-white">— Chọn giải đấu —</option>
+            <option value="" className="bg-card text-foreground">— Chọn giải đấu —</option>
             {tournaments.map(t => (
-              <option key={t._id} value={t._id} className="bg-[#15151e] text-white">{t.name} ({t.status})</option>
+              <option key={t._id} value={t._id} className="bg-card text-foreground">{t.name} ({t.status})</option>
             ))}
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Vòng đua</label>
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Vòng đua</label>
           <select
-            className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none disabled:opacity-40"
+            className="w-full rounded-xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-40"
             value={selectedRace}
             onChange={(e) => setSelectedRace(e.target.value)}
             disabled={!selectedTournament || racesLoading}
           >
-            <option value="" className="bg-[#15151e] text-white">{racesLoading ? "Đang tải..." : !selectedTournament ? "— Chọn giải đấu trước —" : "— Chọn vòng đua —"}</option>
+            <option value="" className="bg-card text-foreground">{racesLoading ? "Đang tải..." : !selectedTournament ? "— Chọn giải đấu trước —" : "— Chọn vòng đua —"}</option>
             {races.map(r => (
-              <option key={r._id} value={r._id} className="bg-[#15151e] text-white">
+              <option key={r._id} value={r._id} className="bg-card text-foreground">
                 {r.name} — {r.status} — {new Date(r.startTime).toLocaleDateString("vi-VN")}
               </option>
             ))}
@@ -234,17 +234,17 @@ export default function AdminRefereeAssignmentsPage() {
       </div>
 
       {selectedRace && (
-        <div className="flex items-center gap-2 text-xs text-white/40">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
           <Trophy className="size-3.5 text-primary" />
-          Đang xem: <span className="text-white font-bold">{selectedRaceName}</span>
-          <span className="text-white/20">|</span>
+          Đang xem: <span className="text-foreground font-bold">{selectedRaceName}</span>
+          <span className="text-muted-foreground/30">|</span>
           <span>{assignments.filter(a => a.status !== "removed").length} trọng tài</span>
         </div>
       )}
 
       {/* ── Assignments table ── */}
       {selectedRace && (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden shadow-2xl relative">
+        <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl relative">
           <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary to-transparent" />
           {loading ? (
             <div className="flex items-center justify-center py-16">
@@ -252,11 +252,11 @@ export default function AdminRefereeAssignmentsPage() {
             </div>
           ) : assignments.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
-              <div className="size-12 rounded-full border border-white/10 flex items-center justify-center">
-                <Users className="size-5 text-white/20" />
+              <div className="size-12 rounded-full border border-border flex items-center justify-center">
+                <Users className="size-5 text-muted-foreground/40" />
               </div>
-              <p className="text-sm text-white/50 font-bold">Chưa có trọng tài nào được phân công</p>
-              <Button onClick={openModal} variant="outline" className="rounded-full border-white/10 text-white text-xs hover:bg-white/5">
+              <p className="text-sm text-muted-foreground font-bold">Chưa có trọng tài nào được phân công</p>
+              <Button onClick={openModal} variant="outline" className="rounded-full border-border text-foreground text-xs hover:bg-muted">
                 <Plus className="size-3.5 mr-1" /> Phân công ngay
               </Button>
             </div>
@@ -264,31 +264,31 @@ export default function AdminRefereeAssignmentsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.02]">
-                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-white/40">#</th>
-                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-white/40">Trọng tài</th>
-                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-white/40">Vai trò</th>
-                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-white/40">Mức lương</th>
-                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-white/40">Trạng thái</th>
-                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-white/40">Ngày tạo</th>
-                    <th className="px-5 py-3.5 text-right text-[10px] font-black uppercase tracking-widest text-white/40">Thao tác</th>
+                  <tr className="border-b border-border bg-muted">
+                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">#</th>
+                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Trọng tài</th>
+                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Vai trò</th>
+                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Mức lương</th>
+                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Trạng thái</th>
+                    <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Ngày tạo</th>
+                    <th className="px-5 py-3.5 text-right text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {assignments.map((a, i) => (
-                    <tr key={a._id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="px-5 py-4 font-mono text-white/30">{i + 1}</td>
+                    <tr key={a._id} className="hover:bg-muted transition-colors">
+                      <td className="px-5 py-4 font-mono text-muted-foreground/60">{i + 1}</td>
                       <td className="px-5 py-4">
-                        <span className="block font-bold text-white">{getRefName(a.refereeUserId)}</span>
-                        <span className="text-[10px] text-white/40">{getRefEmail(a.refereeUserId)}</span>
+                        <span className="block font-bold text-foreground">{getRefName(a.refereeUserId)}</span>
+                        <span className="text-[10px] text-muted-foreground/70">{getRefEmail(a.refereeUserId)}</span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white/70">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-foreground">
                           {a.role === "main" ? <Award className="size-3 text-amber-400" /> : <UserCheck className="size-3 text-blue-400" />}
                           {roleLabel[a.role] || a.role}
                         </span>
                       </td>
-                      <td className="px-5 py-4 font-mono text-white/80">
+                      <td className="px-5 py-4 font-mono text-foreground/70">
                         {a.salary ? a.salary.toLocaleString("vi-VN") : "0"} Điểm
                       </td>
                       <td className="px-5 py-4">
@@ -296,7 +296,7 @@ export default function AdminRefereeAssignmentsPage() {
                           {statusLabel[a.status] || a.status}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-white/40 font-mono">
+                      <td className="px-5 py-4 text-muted-foreground/70 font-mono">
                         {a.createdAt ? new Date(a.createdAt).toLocaleDateString("vi-VN") : "—"}
                       </td>
                       <td className="px-5 py-4 text-right">
@@ -321,47 +321,47 @@ export default function AdminRefereeAssignmentsPage() {
       {/* ── Create assignment modal ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#15151E] p-6 shadow-2xl space-y-5">
+          <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5">
             <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary to-teal-500" />
 
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E10600]">New Assignment</p>
-                <h3 className="text-lg font-black uppercase text-white mt-1">Phân Công Trọng Tài</h3>
+                <h3 className="text-lg font-black uppercase text-foreground mt-1">Phân Công Trọng Tài</h3>
               </div>
-              <button onClick={() => setShowModal(false)} className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg size-8 flex items-center justify-center transition">
+              <button onClick={() => setShowModal(false)} className="text-muted-foreground/70 hover:text-foreground bg-muted hover:bg-muted rounded-lg size-8 flex items-center justify-center transition">
                 <X className="size-4" />
               </button>
             </div>
 
             <form onSubmit={handleCreate} className="space-y-4">
               {/* Tournament */}
-              <label className="grid gap-1.5 text-xs font-bold text-white">
+              <label className="grid gap-1.5 text-xs font-bold text-foreground">
                 Giải đấu <span className="text-primary">*</span>
                 <select
                   required value={formTournament} onChange={(e) => setFormTournament(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
+                  className="h-10 w-full rounded-xl border border-border bg-muted px-3 text-xs text-foreground outline-none focus:border-primary cursor-pointer"
                 >
-                  <option value="" className="bg-[#15151e] text-white">— Chọn giải đấu —</option>
+                  <option value="" className="bg-card text-foreground">— Chọn giải đấu —</option>
                   {tournaments.map(t => (
-                    <option key={t._id} value={t._id} className="bg-[#15151e] text-white">{t.name} ({t.status})</option>
+                    <option key={t._id} value={t._id} className="bg-card text-foreground">{t.name} ({t.status})</option>
                   ))}
                 </select>
               </label>
 
               {/* Race */}
-              <label className="grid gap-1.5 text-xs font-bold text-white">
+              <label className="grid gap-1.5 text-xs font-bold text-foreground">
                 Vòng đua <span className="text-primary">*</span>
                 <select
                   required value={formRace} onChange={(e) => setFormRace(e.target.value)}
                   disabled={!formTournament || formRacesLoading}
-                  className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer disabled:opacity-40"
+                  className="h-10 w-full rounded-xl border border-border bg-muted px-3 text-xs text-foreground outline-none focus:border-primary cursor-pointer disabled:opacity-40"
                 >
-                  <option value="" className="bg-[#15151e] text-white">
+                  <option value="" className="bg-card text-foreground">
                     {formRacesLoading ? "Đang tải..." : !formTournament ? "— Chọn giải đấu trước —" : "— Chọn vòng đua —"}
                   </option>
                   {formRaces.map(r => (
-                    <option key={r._id} value={r._id} className="bg-[#15151e] text-white">
+                    <option key={r._id} value={r._id} className="bg-card text-foreground">
                       {r.name} — {r.status} — {new Date(r.startTime).toLocaleDateString("vi-VN")}
                     </option>
                   ))}
@@ -372,31 +372,31 @@ export default function AdminRefereeAssignmentsPage() {
               </label>
 
               {/* Referee */}
-              <label className="grid gap-1.5 text-xs font-bold text-white">
+              <label className="grid gap-1.5 text-xs font-bold text-foreground">
                 Trọng tài (Chỉ hiển thị các trọng tài rảnh không trùng lịch và đã ĐƯỢC DUYỆT HỒ SƠ) <span className="text-primary">*</span>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-white/30 pointer-events-none" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60 pointer-events-none" />
                   <input
                     type="text" placeholder="Tìm theo tên hoặc email..." value={searchRef}
                     disabled={!formRace}
                     onChange={(e) => setSearchRef(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-white/10 bg-black/45 pl-9 pr-3 text-xs text-white placeholder:text-white/20 outline-none focus:border-primary disabled:opacity-40"
+                    className="h-10 w-full rounded-xl border border-border bg-muted pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary disabled:opacity-40"
                   />
                 </div>
                 <select
                   required value={formReferee} onChange={(e) => setFormReferee(e.target.value)}
                   disabled={!formRace || refereesLoading}
-                  className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer disabled:opacity-40"
+                  className="h-10 w-full rounded-xl border border-border bg-muted px-3 text-xs text-foreground outline-none focus:border-primary cursor-pointer disabled:opacity-40"
                 >
-                  <option value="" className="bg-[#15151e] text-white">{!formRace ? "— Chọn vòng đua trước —" : refereesLoading ? "Đang tải trọng tài rảnh..." : "— Chọn trọng tài —"}</option>
+                  <option value="" className="bg-card text-foreground">{!formRace ? "— Chọn vòng đua trước —" : refereesLoading ? "Đang tải trọng tài rảnh..." : "— Chọn trọng tài —"}</option>
                   {filteredReferees.map(u => (
-                    <option key={u._id} value={u._id} className="bg-[#15151e] text-white">{u.fullName} — {u.email}</option>
+                    <option key={u._id} value={u._id} className="bg-card text-foreground">{u.fullName} — {u.email}</option>
                   ))}
                 </select>
               </label>
 
               {/* Salary */}
-              <label className="grid gap-1.5 text-xs font-bold text-white">
+              <label className="grid gap-1.5 text-xs font-bold text-foreground">
                 Mức lương cho vòng đua (Điểm thưởng) <span className="text-primary">*</span>
                 <input
                   type="number"
@@ -405,20 +405,20 @@ export default function AdminRefereeAssignmentsPage() {
                   value={formSalary}
                   onChange={(e) => setFormSalary(e.target.value)}
                   placeholder="Ví dụ: 1000"
-                  className="h-10 w-full rounded-xl border border-white/10 bg-black/45 px-3 text-xs text-white outline-none focus:border-primary"
+                  className="h-10 w-full rounded-xl border border-border bg-muted px-3 text-xs text-foreground outline-none focus:border-primary"
                 />
               </label>
 
               {/* Role */}
               <fieldset className="space-y-2">
-                <legend className="text-xs font-bold text-white">Vai trò</legend>
+                <legend className="text-xs font-bold text-foreground">Vai trò</legend>
                 <div className="flex gap-3">
                   {(["main", "assistant"] as const).map(r => (
                     <label key={r}
                       className={`flex-1 flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition text-xs font-bold ${
                         formRole === r
-                          ? "border-primary/50 bg-primary/10 text-white"
-                          : "border-white/10 bg-white/[0.02] text-white/50 hover:border-white/20"
+                          ? "border-primary/50 bg-primary/10 text-foreground"
+                          : "border-border bg-muted text-muted-foreground hover:border-primary"
                       }`}
                     >
                       <input type="radio" name="role" value={r} checked={formRole === r}
@@ -432,13 +432,13 @@ export default function AdminRefereeAssignmentsPage() {
                 </div>
               </fieldset>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-white/5">
+              <div className="flex justify-end gap-3 pt-3 border-t border-border">
                 <Button type="button" variant="outline" onClick={() => setShowModal(false)} disabled={submitting}
-                  className="rounded-xl px-4 h-10 border-white/10 hover:bg-white/5 text-white">
+                  className="rounded-xl px-4 h-10 border-border hover:bg-muted text-foreground">
                   Hủy
                 </Button>
                 <Button type="submit" disabled={submitting || !formRace || !formReferee}
-                  className="rounded-xl px-5 h-10 bg-[#E10600] hover:bg-[#B80500] text-white font-bold uppercase tracking-wider text-xs disabled:opacity-40">
+                  className="rounded-xl px-5 h-10 bg-[#E10600] hover:bg-primary text-foreground font-bold uppercase tracking-wider text-xs disabled:opacity-40">
                   {submitting ? <><Loader2 className="size-3.5 animate-spin mr-1" /> Đang xử lý...</> : "Phân Công"}
                 </Button>
               </div>
@@ -449,4 +449,6 @@ export default function AdminRefereeAssignmentsPage() {
     </main>
   );
 }
+
+
 

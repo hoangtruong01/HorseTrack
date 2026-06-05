@@ -70,12 +70,12 @@ export default function RefereeResultEntryWorkspacePage() {
       />
 
       {assignments.length === 0 ? (
-        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E] max-w-lg mx-auto space-y-3">
-          <div className="size-12 rounded-full border border-white/10 flex items-center justify-center text-white/30">
+        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-border bg-muted/30 max-w-lg mx-auto space-y-3">
+          <div className="size-12 rounded-full border border-border flex items-center justify-center text-muted-foreground">
             <Award className="size-6" />
           </div>
-          <h4 className="font-bold text-white uppercase text-sm">Chưa có cuộc đua nào</h4>
-          <p className="text-xs text-white/40 leading-relaxed">
+          <h4 className="font-bold text-foreground uppercase text-sm">Chưa có cuộc đua nào</h4>
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Bạn cần được Ban tổ chức phân công và chấp nhận cuộc đua trước khi nhập kết quả.
           </p>
         </section>
@@ -90,12 +90,12 @@ export default function RefereeResultEntryWorkspacePage() {
             return (
               <article
                 key={a._id}
-                className={`rounded-2xl border p-5 flex flex-col justify-between space-y-4 shadow transition ${
+                className={`rounded-2xl border p-5 flex flex-col justify-between space-y-4 shadow-sm transition ${
                   isFinished
-                    ? "border-teal-500/20 bg-[linear-gradient(135deg,rgba(20,184,166,0.06),rgba(21,21,30,0.95))]"
+                    ? "border-teal-500/20 bg-teal-500/5"
                     : isLive
-                      ? "border-red-500/20 bg-[linear-gradient(135deg,rgba(225,6,0,0.06),rgba(21,21,30,0.95))]"
-                      : "border-white/5 bg-[#15151E]/90 hover:border-white/15"
+                      ? "border-red-500/20 bg-red-500/5"
+                      : "border-border bg-card hover:border-primary/20"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -114,29 +114,26 @@ export default function RefereeResultEntryWorkspacePage() {
                     }
                     pulse={isLive || isFinished}
                   />
-                  <span className="text-[10px] text-white/40 font-bold uppercase">
+                  <span className="text-[10px] text-muted-foreground font-bold uppercase">
                     Nhập biên bản
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-sm font-black uppercase text-white leading-tight">
+                  <h3 className="text-sm font-black uppercase text-foreground leading-tight">
                     {a.raceId.name}
                   </h3>
-                  <p className="text-[10px] text-white/50 flex items-center gap-1">
+                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                     <Clock className="size-3 text-primary shrink-0" />
                     Ngày chạy: {formatDateTime(a.raceId.startTime)}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-white/5 flex justify-end">
+                <div className="pt-2 border-t border-border flex justify-end">
                   <Button
                     asChild
-                    className={`h-9 px-4 rounded-full text-xs font-black uppercase ${
-                      isSelectable
-                        ? "bg-primary hover:bg-primary-dark text-white"
-                        : "bg-white/5 border border-white/10 hover:bg-white/10 text-white"
-                    }`}
+                    variant={isSelectable ? "default" : "outline"}
+                    className="h-9 px-4 rounded-full text-xs font-black uppercase"
                   >
                     <Link href={`/referee/races/${a.raceId._id}/result-entry`}>
                       {isFinished ? "Nhập kết quả ngay" : isPublished ? "Xem kết quả đã khóa" : "Nhập kết quả nháp"}

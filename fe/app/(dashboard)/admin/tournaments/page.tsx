@@ -74,7 +74,7 @@ export default function AdminTournamentsPage() {
         actions={
           <Link
             href="/admin/tournaments/new"
-            className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary/90 transition"
+            className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-foreground hover:bg-primary/90 transition"
           >
             <Plus className="size-4" /> Tạo giải mới
           </Link>
@@ -87,18 +87,18 @@ export default function AdminTournamentsPage() {
         </div>
       )}
 
-      <div className="text-sm text-muted-foreground">Tổng: <strong className="text-white">{meta.total}</strong> giải đấu</div>
+      <div className="text-sm text-muted-foreground">Tổng: <strong className="text-foreground font-semibold">{meta.total}</strong> giải đấu</div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {loading ? (
           Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 h-40" />
+            <div key={i} className="animate-pulse rounded-2xl border border-border bg-card p-5 h-40" />
           ))
         ) : tournaments.map((t) => (
-          <div key={t._id} className="relative rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 flex flex-col justify-between space-y-3 hover:border-primary/30 hover:bg-[#1C1C25] transition duration-200 shadow-lg group">
+          <div key={t._id} className="relative rounded-2xl border border-border bg-card p-5 flex flex-col justify-between space-y-3 hover:border-primary/30 hover:bg-muted/80 transition duration-200 shadow-lg group">
             <Link href={`/admin/tournaments/${t._id}`} className="block space-y-3 cursor-pointer group/card flex-1">
               {t.imageUrl ? (
-                <div className="relative h-36 w-full overflow-hidden rounded-xl border border-white/5 bg-black/40">
+                <div className="relative h-36 w-full overflow-hidden rounded-xl border border-border bg-muted">
                   <img
                     src={t.imageUrl}
                     alt={t.name}
@@ -106,36 +106,36 @@ export default function AdminTournamentsPage() {
                   />
                 </div>
               ) : (
-                <div className="relative h-36 w-full flex items-center justify-center rounded-xl border border-dashed border-white/10 bg-black/20">
-                  <Trophy className="size-8 text-white/10" />
+                <div className="relative h-36 w-full flex items-center justify-center rounded-xl border border-dashed border-border bg-muted/30">
+                  <Trophy className="size-8 text-muted-foreground/30" />
                 </div>
               )}
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-base font-black uppercase text-white leading-tight group-hover:text-primary transition">{t.name}</h3>
+                <h3 className="text-base font-black uppercase text-foreground leading-tight group-hover:text-primary transition">{t.name}</h3>
                 <span className={`shrink-0 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${statusColors[t.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                   {t.status}
                 </span>
               </div>
               {t.description && <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>}
-              <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground border-t border-white/5 pt-2">
-                <span>🏆 Prize: <strong className="text-white">{(t.prizePool || t.prize || 0).toLocaleString()} pts</strong></span>
-                <span>🐴 Max: <strong className="text-white">{t.maxHorses ?? "?"} ngựa</strong></span>
+              <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground border-t border-border pt-2">
+                <span>🏆 Prize: <strong className="text-foreground font-semibold">{(t.prizePool || t.prize || 0).toLocaleString()} pts</strong></span>
+                <span>🐴 Max: <strong className="text-foreground font-semibold">{t.maxHorses ?? "?"} ngựa</strong></span>
                 {t.startDate && <span>📅 {new Date(t.startDate).toLocaleDateString("vi-VN")}</span>}
                 {t.endDate && <span>🏁 {new Date(t.endDate).toLocaleDateString("vi-VN")}</span>}
               </div>
             </Link>
-            <div className="flex items-center gap-2 pt-2 border-t border-white/5 relative z-10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 pt-2 border-t border-border relative z-10" onClick={(e) => e.stopPropagation()}>
               <select
                 value={t.status}
                 disabled={actionLoading === t._id}
                 onChange={(e) => handleStatusChange(t._id, e.target.value)}
-                className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-xs text-white focus:border-primary/50 focus:outline-none disabled:opacity-50"
+                className="flex-1 rounded-lg border border-border bg-muted px-2 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50"
               >
-                {STATUS_OPTIONS.map(s => <option key={s} value={s} className="bg-[#15151E] text-white">{s}</option>)}
+                {STATUS_OPTIONS.map(s => <option key={s} value={s} className="bg-card text-foreground">{s}</option>)}
               </select>
               <Link
                 href={`/admin/tournaments/${t._id}`}
-                className="rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-2.5 py-1.5 text-xs text-white transition flex items-center gap-1 font-semibold"
+                className="rounded-lg border border-border bg-muted hover:bg-muted/80 px-2.5 py-1.5 text-xs text-foreground transition flex items-center gap-1 font-semibold"
               >
                 Vòng đua
               </Link>
@@ -154,12 +154,12 @@ export default function AdminTournamentsPage() {
       {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchTournaments(meta.page - 1)} disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-muted/80 disabled:opacity-40 transition">
             <ChevronLeft className="size-4" /> Trước
           </button>
           <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
           <button onClick={() => fetchTournaments(meta.page + 1)} disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-muted/80 disabled:opacity-40 transition">
             Sau <ChevronRight className="size-4" />
           </button>
         </div>
@@ -167,3 +167,4 @@ export default function AdminTournamentsPage() {
     </main>
   );
 }
+

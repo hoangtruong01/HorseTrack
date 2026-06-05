@@ -129,7 +129,7 @@ export default function AdminRefereesPage() {
         description="Xem danh sách, kiểm tra thông tin bằng cấp và thực hiện phê duyệt / từ chối hồ sơ đăng ký làm trọng tài giám sát cuộc đua."
       />
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-[#15151E]/40 p-4 rounded-2xl border border-white/5">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-card/40 p-4 rounded-2xl border border-border">
         <div className="flex flex-wrap gap-2">
           {APPROVAL_STATUSES.map((tab) => (
             <button
@@ -137,61 +137,61 @@ export default function AdminRefereesPage() {
               onClick={() => setFilterApproval(tab.value)}
               className={`rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
                 filterApproval === tab.value
-                  ? "bg-primary text-white shadow-lg"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                  ? "bg-primary text-foreground shadow-lg"
+                  : "bg-muted text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               {tab.label}
             </button>
           ))}
         </div>
-        <div className="text-xs text-white/50 font-mono">
-          Tổng hồ sơ: <span className="text-white font-bold">{meta.total}</span>
+        <div className="text-xs text-muted-foreground font-mono">
+          Tổng hồ sơ: <span className="text-foreground font-bold">{meta.total}</span>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/80 overflow-hidden shadow-2xl backdrop-blur-md">
+      <div className="rounded-2xl border border-border bg-card/90 overflow-hidden shadow-2xl backdrop-blur-md">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-white/50 space-y-3">
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-3">
             <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             <p className="text-xs font-mono uppercase tracking-widest">Đang tải hồ sơ trọng tài...</p>
           </div>
         ) : profiles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-white/40 space-y-3">
-            <ShieldAlert className="size-10 text-white/20" />
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground/70 space-y-3">
+            <ShieldAlert className="size-10 text-foreground/20" />
             <p className="text-sm font-bold uppercase">Không tìm thấy hồ sơ nào</p>
-            <p className="text-xs text-white/50">Các trọng tài đăng ký hồ sơ sẽ xuất hiện tại đây.</p>
+            <p className="text-xs text-muted-foreground">Các trọng tài đăng ký hồ sơ sẽ xuất hiện tại đây.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10 bg-black/20">
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-white/50">Trọng tài</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-white/50">Giấy phép</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-white/50">Kinh nghiệm</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-white/50">Bằng cấp & Bio</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-white/50">Kiểm duyệt</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-white/50">Hoạt động</th>
-                  <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-white/50">Thao tác</th>
+                <tr className="border-b border-border bg-muted">
+                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trọng tài</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Giấy phép</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kinh nghiệm</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Bằng cấp & Bio</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kiểm duyệt</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Hoạt động</th>
+                  <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {profiles.map((p) => (
-                  <tr key={p._id} className="hover:bg-white/[0.02] transition-colors group">
+                  <tr key={p._id} className="hover:bg-muted transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="size-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                           <User className="size-4" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-white leading-none">{getUserName(p.userId)}</p>
-                          <p className="text-xs text-white/40 mt-1">{getUserEmail(p.userId)}</p>
+                          <p className="text-sm font-semibold text-foreground leading-none">{getUserName(p.userId)}</p>
+                          <p className="text-xs text-muted-foreground/70 mt-1">{getUserEmail(p.userId)}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs font-mono text-white/80">{p.licenseNo ?? "—"}</td>
-                    <td className="px-6 py-4 text-xs text-white/70">{p.experienceYears ?? 0} năm</td>
+                    <td className="px-6 py-4 text-xs font-mono text-foreground/70">{p.licenseNo ?? "—"}</td>
+                    <td className="px-6 py-4 text-xs text-foreground/70">{p.experienceYears ?? 0} năm</td>
                     <td className="px-6 py-4 max-w-xs">
                       <div className="space-y-1">
                         {p.certificates && (
@@ -201,9 +201,9 @@ export default function AdminRefereesPage() {
                           </p>
                         )}
                         {p.bio ? (
-                          <p className="text-[11px] text-white/50 line-clamp-2">{p.bio}</p>
+                          <p className="text-[11px] text-muted-foreground line-clamp-2">{p.bio}</p>
                         ) : (
-                          <p className="text-[11px] text-white/30 italic">Chưa điền tiểu sử</p>
+                          <p className="text-[11px] text-foreground/30 italic">Chưa điền tiểu sử</p>
                         )}
                         {p.approvalStatus === "REJECTED" && p.rejectionReason && (
                           <p className="text-[10px] text-red-400 bg-red-400/5 p-1.5 rounded border border-red-500/10 mt-1">
@@ -245,11 +245,11 @@ export default function AdminRefereesPage() {
                           value={p.status}
                           disabled={actionLoading !== null}
                           onChange={(e) => handleChangeStatus(p._id, e.target.value as any)}
-                          className="rounded-lg border border-white/10 bg-black/40 px-3 py-1.5 text-xs text-white focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
+                          className="rounded-lg border border-border bg-muted/80 px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
                         >
-                          <option value="available" className="bg-[#15151e] text-white">Sẵn sàng</option>
-                          <option value="unavailable" className="bg-[#15151e] text-white">Bận</option>
-                          <option value="suspended" className="bg-[#15151e] text-white">Tạm đình chỉ</option>
+                          <option value="available" className="bg-card text-foreground">Sẵn sàng</option>
+                          <option value="unavailable" className="bg-card text-foreground">Bận</option>
+                          <option value="suspended" className="bg-card text-foreground">Tạm đình chỉ</option>
                         </select>
                       )}
                     </td>
@@ -266,7 +266,7 @@ export default function AdminRefereesPage() {
           <button
             onClick={() => fetchProfiles(meta.page - 1)}
             disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition"
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition"
           >
             <ChevronLeft className="size-4" /> Trước
           </button>
@@ -274,7 +274,7 @@ export default function AdminRefereesPage() {
           <button
             onClick={() => fetchProfiles(meta.page + 1)}
             disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition"
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition"
           >
             Sau <ChevronRight className="size-4" />
           </button>
@@ -284,24 +284,24 @@ export default function AdminRefereesPage() {
       {/* Rejection Modal */}
       {rejectingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-[#15151E] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
+          <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-red-400">
               <ShieldAlert className="size-6 shrink-0" />
               <h3 className="text-lg font-bold uppercase">Từ chối hồ sơ trọng tài</h3>
             </div>
-            <p className="text-xs text-white/60 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Vui lòng nhập lý do từ chối phê duyệt hồ sơ này. Lý do sẽ được hiển thị trên dashboard của trọng tài để họ sửa đổi và nộp lại.
             </p>
             <form onSubmit={handleRejectSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-white/50">Lý do từ chối</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Lý do từ chối</label>
                 <textarea
                   required
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   placeholder="Ví dụ: Giấy phép hết hạn hoặc bằng cấp không hợp lệ..."
                   rows={3}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/30 focus:border-red-500 focus:outline-none resize-none"
+                  className="w-full rounded-xl border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder-white/30 focus:border-red-500 focus:outline-none resize-none"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -311,14 +311,14 @@ export default function AdminRefereesPage() {
                     setRejectingId(null);
                     setRejectionReason("");
                   }}
-                  className="h-10 px-4 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold uppercase text-white"
+                  className="h-10 px-4 rounded-xl border border-border hover:bg-muted text-xs font-bold uppercase text-foreground"
                 >
                   Hủy bỏ
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading !== null}
-                  className="h-10 px-5 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold uppercase text-white disabled:opacity-50"
+                  className="h-10 px-5 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold uppercase text-foreground disabled:opacity-50"
                 >
                   Xác nhận loại
                 </button>
@@ -330,3 +330,5 @@ export default function AdminRefereesPage() {
     </main>
   );
 }
+
+

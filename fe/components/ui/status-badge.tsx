@@ -11,10 +11,14 @@ export type StatusBadgeProps = {
 
 const toneClass: Record<StatusBadgeTone, string> = {
   red: "border-primary/50 bg-primary text-primary-foreground",
-  yellow: "border-[#F8CD46]/50 bg-[#F8CD46] text-[#1C1C25]",
-  green: "border-emerald-400/40 bg-emerald-400/15 text-emerald-200",
-  slate: "border-white/15 bg-white/10 text-white/80",
-  teal: "border-[#067E6A]/50 bg-[#067E6A]/25 text-teal-100",
+  yellow:
+    "border-amber-500/40 bg-amber-50 text-amber-900 dark:border-[#F8CD46]/50 dark:bg-[#F8CD46] dark:text-[#1C1C25]",
+  green:
+    "border-emerald-600/35 bg-emerald-50 text-emerald-800 dark:border-emerald-400/40 dark:bg-emerald-400/15 dark:text-emerald-200",
+  slate:
+    "border-border bg-muted text-muted-foreground dark:border-white/15 dark:bg-white/10 dark:text-white/80",
+  teal:
+    "border-[#067E6A]/40 bg-teal-50 text-teal-900 dark:border-[#067E6A]/50 dark:bg-[#067E6A]/25 dark:text-teal-100",
 };
 
 export function StatusBadge({

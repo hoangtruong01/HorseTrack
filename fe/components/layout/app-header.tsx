@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 
 import { publicNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { NotificationsBell } from "@/components/layout/notifications-bell";
+import { UserDropdownMenu } from "@/components/layout/user-dropdown-menu";
 
 export type AppHeaderProps = {
   className?: string;
@@ -25,23 +27,23 @@ export function AppHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b border-white/5 bg-[#07070A]/90 backdrop-blur-md",
+        "sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md",
         className,
       )}
     >
       <div className="f1-container flex min-h-[76px] items-center justify-between gap-4">
         <Link
           href="/"
-          className="group flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E10600] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070A]"
+          className="group flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="HorseTrack home"
         >
           <img
             src="/logo.png"
             alt="HorseTrack Logo"
-            className="size-11 rounded-2xl border border-white/10 object-cover shadow-[0_0_20px_rgba(225,6,0,0.25)] transition group-hover:scale-105"
+            className="size-11 rounded-2xl border border-border object-cover shadow-[0_0_20px_rgba(225,6,0,0.25)] transition group-hover:scale-105"
           />
-          <span className="text-xl font-black uppercase tracking-[0.16em] text-white">
-            Horse<span className="text-[#E10600]">Track</span>
+          <span className="text-xl font-black uppercase tracking-[0.16em] text-foreground">
+            Horse<span className="text-primary">Track</span>
           </span>
         </Link>
 
@@ -54,7 +56,7 @@ export function AppHeader({
               <Link
                 key={item.href + item.title}
                 href={item.href}
-                className="relative rounded-full px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-white/60 transition-all duration-150 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E10600] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070A]"
+                className="relative rounded-full px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-foreground/60 transition-all duration-150 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {item.title}
               </Link>
@@ -62,25 +64,20 @@ export function AppHeader({
           </nav>
         )}
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           {user ? (
-            <Link href="/profile" className="flex items-center gap-3 group focus:outline-none">
-              <div className="flex flex-col items-end">
-                <span className="text-[11px] font-black uppercase tracking-wider text-white group-hover:text-[#E10600] transition">
-                  {user.fullName}
-                </span>
-                <span className="text-[9px] font-black uppercase tracking-wider text-[#E10600]/80">
-                  {user.roles[0] || "spectator"}
-                </span>
-              </div>
-              <div className="flex size-9 items-center justify-center rounded-xl bg-white/[0.03] border border-white/5 text-white/60 group-hover:border-[#E10600]/30 group-hover:text-white transition">
-                <User className="size-4.5" />
-              </div>
-            </Link>
+            <>
+              <NotificationsBell />
+              <UserDropdownMenu
+                userName={user.fullName}
+                userRole={user.roles[0] || "spectator"}
+                userAvatar={user.avatar}
+              />
+            </>
           ) : (
             <Link
               href="/login"
-              className="rounded-xl border border-white/5 bg-white/[0.02] px-5 py-2 text-sm font-bold text-white/70 transition hover:bg-white/[0.04] hover:text-white"
+              className="rounded-xl border border-border bg-card/50 px-5 py-2 text-sm font-bold text-foreground/70 transition hover:bg-card hover:text-foreground"
             >
               Login
             </Link>
@@ -90,7 +87,7 @@ export function AppHeader({
         <button
           type="button"
           onClick={() => setMobileMenuOpen((open) => !open)}
-          className="flex size-10 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-white hover:bg-white/[0.05] lg:hidden"
+          className="flex size-10 items-center justify-center rounded-xl border border-border bg-card/50 text-foreground hover:bg-card lg:hidden"
           aria-label={
             mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
           }
@@ -105,7 +102,7 @@ export function AppHeader({
       </div>
 
       {mobileMenuOpen && (
-        <div className="border-t border-white/5 bg-[#07070A] px-4 py-5 lg:hidden">
+        <div className="border-t border-border bg-background px-4 py-5 lg:hidden">
           {!user && (
             <nav
               className="flex flex-col gap-2"
@@ -116,21 +113,21 @@ export function AppHeader({
                   key={item.href + item.title}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-white/60 hover:bg-white/[0.02] hover:text-white"
+                  className="rounded-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-foreground/60 hover:bg-secondary hover:text-foreground"
                 >
                   {item.title}
                 </Link>
               ))}
             </nav>
           )}
-          <div className="mt-4 flex flex-col gap-2 border-t border-white/5 pt-4">
+          <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
             {user ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between px-2">
-                  <span className="text-xs font-black uppercase tracking-wider text-white">
+                  <span className="text-xs font-black uppercase tracking-wider text-foreground">
                     {user.fullName}
                   </span>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-[#E10600]">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-primary">
                     {user.roles[0] || "spectator"}
                   </span>
                 </div>
@@ -139,7 +136,7 @@ export function AppHeader({
                     setMobileMenuOpen(false);
                     logout();
                   }}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#E10600] text-sm font-bold text-white cursor-pointer"
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground cursor-pointer hover:bg-primary/90 transition"
                 >
                   <LogOut className="size-4" />
                   Đăng xuất
@@ -149,7 +146,7 @@ export function AppHeader({
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex h-11 w-full items-center justify-center rounded-xl border border-white/5 text-sm font-bold text-white/70"
+                className="flex h-11 w-full items-center justify-center rounded-xl border border-border text-sm font-bold text-foreground/70 hover:bg-secondary hover:text-foreground transition"
               >
                 Login
               </Link>

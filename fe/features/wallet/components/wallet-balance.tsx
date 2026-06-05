@@ -41,14 +41,14 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(21,21,30,0.95),rgba(28,28,37,0.95))] p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
       {/* Decorative radial gradients */}
       <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
       <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-emerald-500/5 blur-3xl" />
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
 
       {/* Wallet Header */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">
             Ví Điểm Thưởng Free
@@ -61,7 +61,7 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
           variant="ghost"
           size="icon"
           onClick={handleRefresh}
-          className="size-9 rounded-full border border-white/10 text-white/60 hover:text-white hover:bg-white/5"
+          className="size-9 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-muted"
           disabled={isRefreshing}
           aria-label="Làm mới số dư"
         >
@@ -72,12 +72,12 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
       {/* Stacked Balance Cards to prevent overflow */}
       <div className="mt-5 space-y-4">
         {/* Available Points card */}
-        <div className="relative overflow-hidden rounded-xl border border-white/5 bg-white/[0.02] p-5">
-          <span className="text-[10px] font-black uppercase tracking-wider text-white/50 flex items-center gap-1.5">
+        <div className="relative overflow-hidden rounded-xl border border-border bg-muted/[0.02] p-5">
+          <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <Star className="size-3.5 text-primary fill-primary animate-pulse" /> Điểm thưởng khả dụng hiện tại
           </span>
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono">
+            <span className="text-4xl sm:text-5xl font-black tracking-tight text-foreground font-mono">
               {points.toLocaleString('vi-VN')}
             </span>
             <span className="text-xs font-black uppercase tracking-widest text-primary">
@@ -93,14 +93,14 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
           <Button
             onClick={onRequestCashout}
             disabled={points <= 0}
-            className="h-12 flex-1 rounded-full text-xs font-black uppercase tracking-wider text-white shadow-[0_4px_16px_rgba(225,6,0,0.3)] bg-primary hover:bg-[#B80500] hover:shadow-[0_4px_20px_rgba(225,6,0,0.5)] transition disabled:opacity-50"
+            className="h-12 flex-1 rounded-full text-xs font-black uppercase tracking-wider text-foreground shadow-[0_4px_16px_rgba(225,6,0,0.3)] bg-primary hover:bg-[#B80500] hover:shadow-[0_4px_20px_rgba(225,6,0,0.5)] transition disabled:opacity-50"
           >
             <Gift className="mr-1.5 size-3.5 shrink-0" /> Đổi thưởng
           </Button>
         )}
         <Button
           variant="outline"
-          className="h-12 flex-1 rounded-full text-xs font-black uppercase tracking-wider border-white/10 text-white bg-white/5 hover:bg-white/10 transition"
+          className="h-12 flex-1 rounded-full text-xs font-black uppercase tracking-wider border-border text-foreground bg-muted hover:bg-muted/60 transition"
           onClick={() =>
             toast.info(
               "Tích lũy điểm để nhận mã quà tặng. Đưa mã cho nhân viên quầy kiểm tra và trao quà vật lý tương ứng!"

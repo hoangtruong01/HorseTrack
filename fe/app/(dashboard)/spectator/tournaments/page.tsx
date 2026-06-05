@@ -58,7 +58,7 @@ const getRaceStatusColor = (status: string) => {
       return "bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse";
     case "FINISHED":
     case "RESULT_PUBLISHED":
-      return "bg-white/5 border border-white/10 text-muted-foreground";
+      return "bg-white/5 border border-border text-muted-foreground";
     case "SCHEDULED":
       return "bg-blue-500/10 border border-blue-500/20 text-blue-400";
     case "CHECKING":
@@ -361,13 +361,13 @@ export default function SpectatorTournamentsPage() {
       {!selectedTour && !selectedRace && (
         <div className="space-y-6">
           {/* Unified Tab Selector */}
-          <div className="flex border-b border-white/10">
+          <div className="flex border-b border-border">
             <button
               onClick={() => { setActiveTab("tournaments"); setSearchTerm(""); }}
               className={`pb-3 px-6 text-sm font-black uppercase tracking-wider transition-colors duration-200 border-b-2 -mb-[2px] flex items-center gap-2 ${
                 activeTab === "tournaments"
                   ? "border-[#E10600] text-white"
-                  : "border-transparent text-muted-foreground hover:text-white"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               <Trophy className="size-4" /> Danh Sách Giải Đấu
@@ -377,7 +377,7 @@ export default function SpectatorTournamentsPage() {
               className={`pb-3 px-6 text-sm font-black uppercase tracking-wider transition-colors duration-200 border-b-2 -mb-[2px] flex items-center gap-2 ${
                 activeTab === "races"
                   ? "border-[#E10600] text-white"
-                  : "border-transparent text-muted-foreground hover:text-white"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               <Flag className="size-4" /> Tất Cả Lịch Đua
@@ -385,7 +385,7 @@ export default function SpectatorTournamentsPage() {
           </div>
 
           {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center rounded-2xl border border-white/5 bg-[#13131A] p-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center rounded-2xl border border-border bg-card p-4">
             <div className="relative w-full sm:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <input
@@ -393,7 +393,7 @@ export default function SpectatorTournamentsPage() {
                 placeholder={activeTab === "tournaments" ? "Tìm kiếm giải đấu, địa điểm..." : "Tìm trận đấu, tên giải, địa điểm..."}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-10 w-full rounded-xl border border-white/10 bg-black/20 pl-10 pr-4 text-sm text-white placeholder:text-muted-foreground outline-none focus:border-primary transition"
+                className="h-10 w-full rounded-xl border border-border bg-muted/50 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
               />
             </div>
 
@@ -407,7 +407,7 @@ export default function SpectatorTournamentsPage() {
                     className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition whitespace-nowrap ${
                       statusFilter === status
                         ? "bg-[#E10600] text-white border border-[#E10600]"
-                        : "bg-white/[0.02] border border-white/5 text-muted-foreground hover:text-white"
+                        : "bg-muted border border-border text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {status === "ALL" ? "Tất cả" : status === "ONGOING" ? "Đang diễn" : status === "OPEN_REGISTRATION" ? "Mở đăng ký" : "Kết thúc"}
@@ -421,7 +421,7 @@ export default function SpectatorTournamentsPage() {
                     className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition whitespace-nowrap ${
                       raceStatusFilter === status
                         ? "bg-[#E10600] text-white border border-[#E10600]"
-                        : "bg-white/[0.02] border border-white/5 text-muted-foreground hover:text-white"
+                        : "bg-muted border border-border text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {status === "ALL" ? "Tất cả" : status === "LIVE" ? "Trực tiếp" : status === "SCHEDULED" ? "Sắp diễn" : status === "FINISHED" ? "Đã xong" : "Đã công bố"}
@@ -434,24 +434,24 @@ export default function SpectatorTournamentsPage() {
           {/* TAB 1: TOURNAMENTS LIST */}
           {activeTab === "tournaments" && (
             loadingTours ? (
-              <div className="flex flex-col items-center justify-center py-20 text-white/55">
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                 <Loader2 className="size-8 animate-spin text-[#E10600]" />
                 <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách giải đấu...</p>
               </div>
             ) : filteredTournaments.length === 0 ? (
-              <div className="text-center py-16 border border-dashed border-white/10 rounded-2xl bg-[#15151D]/45">
-                <Trophy className="size-12 text-white/15 mx-auto mb-3" />
-                <h4 className="text-base font-bold text-white uppercase tracking-wider">Không tìm thấy giải đấu</h4>
-                <p className="text-xs text-white/45 max-w-sm mx-auto mt-1">Vui lòng thử tìm kiếm bằng từ khóa hoặc bộ lọc trạng thái khác.</p>
+              <div className="text-center py-16 border border-dashed border-border rounded-2xl bg-muted/30">
+                <Trophy className="size-12 text-muted-foreground/40 mx-auto mb-3" />
+                <h4 className="text-base font-bold text-foreground uppercase tracking-wider">Không tìm thấy giải đấu</h4>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1">Vui lòng thử tìm kiếm bằng từ khóa hoặc bộ lọc trạng thái khác.</p>
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredTournaments.map((tour) => (
                   <div
                     key={tour._id}
-                    className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#16161E]/90 hover:border-white/15 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
                   >
-                    <div className="h-40 w-full overflow-hidden relative bg-black/40">
+                    <div className="h-40 w-full overflow-hidden relative bg-muted">
                       {tour.imageUrl ? (
                         <img
                           src={tour.imageUrl}
@@ -459,11 +459,11 @@ export default function SpectatorTournamentsPage() {
                           className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-black/20">
+                        <div className="w-full h-full flex items-center justify-center bg-muted/50">
                           <Trophy className="size-12 text-white/5" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#16161E] via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
                       
                       {/* Status Badge */}
                       <span className={`absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white border backdrop-blur-md ${getStatusColor(tour.status)}`}>
@@ -473,7 +473,7 @@ export default function SpectatorTournamentsPage() {
 
                     <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                       <div className="space-y-1">
-                        <h3 className="text-base font-black uppercase tracking-tight text-white leading-tight truncate group-hover:text-primary transition duration-300">
+                        <h3 className="text-base font-black uppercase tracking-tight text-foreground leading-tight truncate group-hover:text-primary transition duration-300">
                           {tour.name}
                         </h3>
                         {tour.description && (
@@ -483,7 +483,7 @@ export default function SpectatorTournamentsPage() {
                         )}
                       </div>
 
-                      <div className="space-y-2 pt-2 border-t border-white/5 text-[10px] text-muted-foreground">
+                      <div className="space-y-2 pt-2 border-t border-border text-[10px] text-muted-foreground">
                         <div className="flex justify-between">
                           <span className="flex items-center gap-1"><MapPin className="size-3 text-[#E10600]" /> {tour.location || "Chưa thiết lập"}</span>
                         </div>
@@ -493,7 +493,7 @@ export default function SpectatorTournamentsPage() {
                             {tour.startDate ? new Date(tour.startDate).toLocaleDateString("vi-VN") : "?"} ~ {tour.endDate ? new Date(tour.endDate).toLocaleDateString("vi-VN") : "?"}
                           </span>
                         </div>
-                        <div className="flex justify-between font-bold text-white border-t border-white/5 pt-2">
+                        <div className="flex justify-between font-bold text-foreground border-t border-border pt-2">
                           <span>Quỹ Giải Thưởng:</span>
                           <span className="text-[#E10600] text-xs font-black">
                             {(tour.prizePool || tour.prize || 0).toLocaleString("vi-VN")} Pts
@@ -505,7 +505,8 @@ export default function SpectatorTournamentsPage() {
                     <div className="px-5 pb-5">
                       <Button
                         onClick={() => handleSelectTournament(tour)}
-                        className="w-full rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"
+                        variant="outline"
+                        className="w-full rounded-xl text-xs font-black uppercase tracking-wider"
                       >
                         Xem Lịch Trình & Chi Tiết
                       </Button>
@@ -519,15 +520,15 @@ export default function SpectatorTournamentsPage() {
           {/* TAB 2: FLAT RACES LIST */}
           {activeTab === "races" && (
             loadingAllRaces ? (
-              <div className="flex flex-col items-center justify-center py-20 text-white/55">
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                 <Loader2 className="size-8 animate-spin text-[#E10600]" />
                 <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách lịch đua...</p>
               </div>
             ) : filteredFlatRaces.length === 0 ? (
-              <div className="text-center py-16 border border-dashed border-white/10 rounded-2xl bg-[#15151D]/45">
-                <Flag className="size-12 text-white/15 mx-auto mb-3" />
-                <h4 className="text-base font-bold text-white uppercase tracking-wider">Không tìm thấy trận đua</h4>
-                <p className="text-xs text-white/45 max-w-sm mx-auto mt-1">Vui lòng thử tìm kiếm bằng từ khóa hoặc bộ lọc khác.</p>
+              <div className="text-center py-16 border border-dashed border-border rounded-2xl bg-muted/30">
+                <Flag className="size-12 text-muted-foreground/40 mx-auto mb-3" />
+                <h4 className="text-base font-bold text-foreground uppercase tracking-wider">Không tìm thấy trận đua</h4>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1">Vui lòng thử tìm kiếm bằng từ khóa hoặc bộ lọc khác.</p>
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -536,7 +537,7 @@ export default function SpectatorTournamentsPage() {
                   return (
                     <div
                       key={race._id}
-                      className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#16161E]/90 hover:border-white/15 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
+                      className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
                     >
                       {race.status === "LIVE" && (
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-rose-500 animate-pulse" />
@@ -553,26 +554,26 @@ export default function SpectatorTournamentsPage() {
                             </span>
                           </div>
 
-                          <h3 className="text-base font-black uppercase tracking-tight text-white leading-tight group-hover:text-primary transition duration-300">
+                          <h3 className="text-base font-black uppercase tracking-tight text-foreground leading-tight group-hover:text-primary transition duration-300">
                             {race.name}
                           </h3>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground bg-white/[0.01] rounded-xl p-3 border border-white/5">
+                        <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground bg-white/[0.01] rounded-xl p-3 border border-border">
                           <div>
                             <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Cự ly</span>
-                            <span className="font-bold text-white text-xs">{race.distanceMeters}m</span>
+                            <span className="font-bold text-foreground text-xs">{race.distanceMeters}m</span>
                           </div>
                           <div>
                             <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black font-mono">Địa điểm</span>
-                            <span className="font-bold text-white text-[10px] truncate block">{race.location || "Trường đua chính"}</span>
+                            <span className="font-bold text-foreground text-[10px] truncate block">{race.location || "Trường đua chính"}</span>
                           </div>
                         </div>
 
                         <div className="space-y-1 text-[10px] text-muted-foreground pt-1">
                           <p className="flex items-center gap-1.5">
                             <Calendar className="size-3.5 text-[#E10600]" /> 
-                            Xuất phát: <span className="font-bold text-white">
+                            Xuất phát: <span className="font-bold text-foreground">
                               {new Date(race.startTime).toLocaleString("vi-VN", {
                                 day: "2-digit",
                                 month: "2-digit",
@@ -587,7 +588,8 @@ export default function SpectatorTournamentsPage() {
                       <div className="px-5 pb-5">
                         <Button
                           onClick={() => handleSelectRace(race)}
-                          className="w-full rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"
+                          variant="outline"
+                          className="w-full rounded-xl text-xs font-black uppercase tracking-wider"
                         >
                           Xem Đội Hình & Chi Tiết
                         </Button>
@@ -607,7 +609,7 @@ export default function SpectatorTournamentsPage() {
           <Button
             onClick={() => setSelectedTour(null)}
             variant="ghost"
-            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white -ml-2 flex items-center gap-1"
+            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground -ml-2 flex items-center gap-1"
           >
             <ArrowLeft className="size-4" /> Quay lại danh sách giải
           </Button>
@@ -615,11 +617,11 @@ export default function SpectatorTournamentsPage() {
           <div className="grid gap-6 lg:grid-cols-12 items-start">
             {/* Left Side: General Info */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-2xl border border-white/10 bg-[#16161E] p-6 space-y-6 relative overflow-hidden flex flex-col shadow-xl">
+              <div className="rounded-2xl border border-border bg-card p-6 space-y-6 relative overflow-hidden flex flex-col shadow-xl">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px] pointer-events-none" />
                 
                 {selectedTour.imageUrl && (
-                  <div className="w-full h-48 overflow-hidden rounded-xl border border-white/5 bg-black/40 mb-2">
+                  <div className="w-full h-48 overflow-hidden rounded-xl border border-border bg-muted mb-2">
                     <img
                       src={selectedTour.imageUrl}
                       alt={selectedTour.name}
@@ -632,32 +634,32 @@ export default function SpectatorTournamentsPage() {
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white border ${getStatusColor(selectedTour.status)}`}>
                     {getStatusLabel(selectedTour.status)}
                   </span>
-                  <h2 className="text-xl font-black uppercase tracking-tight text-white leading-tight">{selectedTour.name}</h2>
+                  <h2 className="text-xl font-black uppercase tracking-tight text-foreground leading-tight">{selectedTour.name}</h2>
                   {selectedTour.description && (
                     <p className="text-xs text-muted-foreground leading-relaxed">{selectedTour.description}</p>
                   )}
                 </div>
 
-                <div className="space-y-3 border-t border-white/5 pt-4 text-xs">
+                <div className="space-y-3 border-t border-border pt-4 text-xs">
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><MapPin className="size-3.5 text-[#E10600]" /> Địa điểm:</span>
-                    <span className="font-bold text-white">{selectedTour.location || "Chưa thiết lập"}</span>
+                    <span className="font-bold text-foreground">{selectedTour.location || "Chưa thiết lập"}</span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Calendar className="size-3.5 text-[#E10600]" /> Thời gian giải:</span>
-                    <span className="font-bold text-white">
+                    <span className="font-bold text-foreground">
                       {selectedTour.startDate ? new Date(selectedTour.startDate).toLocaleDateString("vi-VN") : "?"} ~ {selectedTour.endDate ? new Date(selectedTour.endDate).toLocaleDateString("vi-VN") : "?"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Calendar className="size-3.5 text-teal-400" /> Nhận đăng ký:</span>
-                    <span className="font-bold text-white">
+                    <span className="font-bold text-foreground">
                       {selectedTour.registrationStartDate ? new Date(selectedTour.registrationStartDate).toLocaleDateString("vi-VN") : "Chưa mở"} ~ {selectedTour.registrationEndDate ? new Date(selectedTour.registrationEndDate).toLocaleDateString("vi-VN") : "Chưa mở"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Users className="size-3.5 text-[#E10600]" /> Số lượng ngựa tối đa:</span>
-                    <span className="font-bold text-white">{selectedTour.maxHorses ?? "?"} Chiến mã</span>
+                    <span className="font-bold text-foreground">{selectedTour.maxHorses ?? "?"} Chiến mã</span>
                   </div>
                 </div>
 
@@ -675,19 +677,19 @@ export default function SpectatorTournamentsPage() {
 
             {/* Right Side: Races list inside this tournament */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="border-b border-white/10 pb-3">
-                <h3 className="text-lg font-black uppercase tracking-tight text-white flex items-center gap-2">
+              <div className="border-b border-border pb-3">
+                <h3 className="text-lg font-black uppercase tracking-tight text-foreground flex items-center gap-2">
                   <Flag className="size-5 text-[#E10600]" /> Lịch trình các trận đua ({selectedTourRaces.length})
                 </h3>
               </div>
 
               {loadingTourRaces ? (
-                <div className="flex flex-col items-center justify-center py-20 text-white/55">
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                   <Loader2 className="size-6 animate-spin text-[#E10600]" />
                   <p className="mt-3 text-xs font-mono uppercase tracking-widest">Đang tải lịch trình vòng đua...</p>
                 </div>
               ) : selectedTourRaces.length === 0 ? (
-                <div className="text-center py-12 border border-white/5 rounded-2xl bg-[#13131A] text-muted-foreground text-xs">
+                <div className="text-center py-12 border border-border rounded-2xl bg-card text-muted-foreground text-xs">
                   Chưa có lịch trình trận đua nào được thiết lập cho giải đấu này.
                 </div>
               ) : (
@@ -695,19 +697,19 @@ export default function SpectatorTournamentsPage() {
                   {selectedTourRaces.map((race) => (
                     <div
                       key={race._id}
-                      className="group rounded-2xl border border-white/5 bg-[#13131A] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-white/15 hover:bg-white/[0.01] transition duration-300"
+                      className="group rounded-2xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-primary/20 hover:bg-white/[0.01] transition duration-300"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-black text-white text-base leading-tight uppercase group-hover:text-primary transition duration-300">{race.name}</h4>
+                          <h4 className="font-black text-foreground text-base leading-tight uppercase group-hover:text-primary transition duration-300">{race.name}</h4>
                           {race.status === "LIVE" && (
                             <span className="size-2 rounded-full bg-rose-500 animate-pulse" />
                           )}
                         </div>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
-                          <span>Cự ly: <strong className="text-white">{race.distanceMeters}m</strong></span>
-                          <span>Mặt sân: <strong className="text-white">{race.trackCondition || "Dry turf"}</strong></span>
-                          <span>Bắt đầu: <strong className="text-white">
+                          <span>Cự ly: <strong className="text-foreground">{race.distanceMeters}m</strong></span>
+                          <span>Mặt sân: <strong className="text-foreground">{race.trackCondition || "Dry turf"}</strong></span>
+                          <span>Bắt đầu: <strong className="text-foreground">
                             {new Date(race.startTime).toLocaleString("vi-VN", {
                               day: "2-digit",
                               month: "2-digit",
@@ -719,7 +721,7 @@ export default function SpectatorTournamentsPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
+                      <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-border pt-2 sm:pt-0">
                         <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${getRaceStatusColor(race.status)}`}>
                           {getRaceStatusLabel(race.status)}
                         </span>
@@ -727,7 +729,7 @@ export default function SpectatorTournamentsPage() {
                         <Button
                           onClick={() => handleSelectRace(race)}
                           variant="ghost"
-                          className="text-xs font-black uppercase tracking-wider text-[#E10600] hover:text-white p-0 h-auto flex items-center gap-1 group"
+                          className="text-xs font-black uppercase tracking-wider text-[#E10600] hover:text-foreground p-0 h-auto flex items-center gap-1 group"
                         >
                           Đội Hình <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
                         </Button>
@@ -751,7 +753,7 @@ export default function SpectatorTournamentsPage() {
               setSelectedRaceReferee(null);
             }}
             variant="ghost"
-            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white -ml-2 flex items-center gap-1"
+            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground -ml-2 flex items-center gap-1"
           >
             <ArrowLeft className="size-4" /> Quay lại {selectedTour ? "chi tiết giải đấu" : "danh sách lịch đua"}
           </Button>
@@ -759,27 +761,27 @@ export default function SpectatorTournamentsPage() {
           <div className="grid gap-6 lg:grid-cols-12 items-start">
             {/* Left Side: General Info & Live Timeline */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-2xl border border-white/10 bg-[#16161E] p-6 space-y-6 relative overflow-hidden shadow-xl">
+              <div className="rounded-2xl border border-border bg-card p-6 space-y-6 relative overflow-hidden shadow-xl">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px] pointer-events-none" />
                 
                 <div className="space-y-3">
                   <span className="text-[10px] text-[#E10600] font-black uppercase tracking-wider">
                     {typeof selectedRace.tournamentId === "object" ? selectedRace.tournamentId?.name : "Chi Tiết Trận Đua"}
                   </span>
-                  <h2 className="text-xl font-black uppercase tracking-tight text-white leading-tight">{selectedRace.name}</h2>
+                  <h2 className="text-xl font-black uppercase tracking-tight text-foreground leading-tight">{selectedRace.name}</h2>
                   <div className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider ${getRaceStatusColor(selectedRace.status)}`}>
                     {getRaceStatusLabel(selectedRace.status)}
                   </div>
                 </div>
 
-                <div className="space-y-3 border-t border-white/5 pt-4 text-xs">
+                <div className="space-y-3 border-t border-border pt-4 text-xs">
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><MapPin className="size-3.5 text-[#E10600]" /> Địa điểm:</span>
-                    <span className="font-bold text-white">{selectedRace.location || "Trường đua chính"}</span>
+                    <span className="font-bold text-foreground">{selectedRace.location || "Trường đua chính"}</span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Calendar className="size-3.5 text-[#E10600]" /> Thời gian xuất phát:</span>
-                    <span className="font-bold text-white">
+                    <span className="font-bold text-foreground">
                       {new Date(selectedRace.startTime).toLocaleString("vi-VN", {
                         day: "2-digit",
                         month: "2-digit",
@@ -791,15 +793,15 @@ export default function SpectatorTournamentsPage() {
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Compass className="size-3.5 text-[#E10600]" /> Cự ly thi đấu:</span>
-                    <span className="font-bold text-white">{selectedRace.distanceMeters}m</span>
+                    <span className="font-bold text-foreground">{selectedRace.distanceMeters}m</span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="flex items-center gap-2"><Layers className="size-3.5 text-[#E10600]" /> Bề mặt & Thời tiết:</span>
-                    <span className="font-bold text-white capitalize">{selectedRace.trackCondition || "Dry turf"} ({selectedRace.weatherSnapshot || "Sunny"})</span>
+                    <span className="font-bold text-foreground capitalize">{selectedRace.trackCondition || "Dry turf"} ({selectedRace.weatherSnapshot || "Sunny"})</span>
                   </div>
-                  <div className="flex justify-between items-center text-muted-foreground border-t border-white/5 pt-3">
+                  <div className="flex justify-between items-center text-muted-foreground border-t border-border pt-3">
                     <span className="flex items-center gap-2"><User className="size-3.5 text-teal-400" /> Trọng tài giám sát:</span>
-                    <span className="font-bold text-white">
+                    <span className="font-bold text-foreground">
                       {selectedRaceReferee && typeof selectedRaceReferee.refereeUserId === "object"
                         ? selectedRaceReferee.refereeUserId.fullName
                         : "Chưa phân công"}
@@ -808,23 +810,23 @@ export default function SpectatorTournamentsPage() {
                 </div>
 
                 {/* Prediction embedded panel */}
-                <div translate="no" className="pt-4 border-t border-white/5 space-y-4 notranslate">
+                <div translate="no" className="pt-4 border-t border-border space-y-4 notranslate">
                   {currentRacePrediction ? (
                     <div className="rounded-xl border border-teal-500/20 bg-teal-500/[0.02] p-4 space-y-3">
                       <div className="flex items-center gap-2 text-teal-400">
                         <CheckCircle className="size-4" />
                         <span className="text-[10px] font-black uppercase tracking-wider">Đã đặt dự đoán</span>
                       </div>
-                      <div className="flex justify-between items-center bg-black/20 rounded-lg p-3 border border-white/5">
+                      <div className="flex justify-between items-center bg-muted/50 rounded-lg p-3 border border-border">
                         <div>
-                          <span className="block text-xs font-black text-white uppercase">
+                          <span className="block text-xs font-black text-foreground uppercase">
                             {typeof currentRacePrediction.predictedHorseId === "object"
                               ? currentRacePrediction.predictedHorseId?.name
                               : "Chiến mã"}
                           </span>
                           <span className="text-[9px] text-muted-foreground block mt-0.5">
                             Trạng thái:{" "}
-                            <strong className="text-white">
+                            <strong className="text-foreground">
                               {currentRacePrediction.status === "WON"
                                 ? "Đoán Đúng"
                                 : currentRacePrediction.status === "LOST"
@@ -843,7 +845,7 @@ export default function SpectatorTournamentsPage() {
                               ? "bg-primary/10 border border-primary/20 text-primary"
                               : currentRacePrediction.status === "PENDING"
                               ? "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"
-                              : "bg-white/5 border border-white/10 text-muted-foreground"
+                              : "bg-white/5 border border-border text-muted-foreground"
                           }`}>
                             {currentRacePrediction.status === "WON" 
                               ? `+${currentRacePrediction.rewardPoints || 1} Pts` 
@@ -870,7 +872,7 @@ export default function SpectatorTournamentsPage() {
                         </div>
  
                         {selectedRaceRegistrations.length === 0 ? (
-                          <div className="text-center py-4 border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
+                          <div className="text-center py-4 border border-dashed border-border rounded-xl bg-white/[0.01]">
                             <p className="text-[10px] text-muted-foreground italic">Chưa có danh sách chiến mã chính thức</p>
                           </div>
                         ) : (
@@ -878,15 +880,15 @@ export default function SpectatorTournamentsPage() {
                             <select
                               value={selectedHorseId}
                               onChange={(e) => setSelectedHorseId(e.target.value)}
-                              className="w-full h-11 rounded-xl border border-white/10 bg-black/40 px-3 text-xs text-white outline-none focus:border-primary cursor-pointer"
+                              className="w-full h-11 rounded-xl border border-border bg-muted px-3 text-xs text-foreground outline-none focus:border-primary cursor-pointer"
                             >
-                              <option value="" className="bg-[#16161E]">-- Chọn chiến mã dự kiến về nhất --</option>
+                              <option value="" className="bg-card">-- Chọn chiến mã dự kiến về nhất --</option>
                               {selectedRaceRegistrations.map((p) => {
                                 const horseId = typeof p.horseId === "object" ? p.horseId?._id : p.horseId;
                                 const horseName = typeof p.horseId === "object" ? p.horseId?.name : "Chiến mã";
                                 const jockeyName = typeof p.jockeyUserId === "object" ? p.jockeyUserId?.fullName : "Chưa đăng ký";
                                 return (
-                                  <option key={p._id} value={horseId} className="bg-[#16161E]">
+                                  <option key={p._id} value={horseId} className="bg-card">
                                     {horseName} (Nài: {jockeyName})
                                   </option>
                                 );
@@ -919,7 +921,7 @@ export default function SpectatorTournamentsPage() {
                                       setBetPointsInput("1");
                                     }
                                   }}
-                                  className="w-full h-11 rounded-xl border border-white/10 bg-black/40 pl-3 pr-12 text-xs text-white outline-none focus:border-primary font-mono font-bold"
+                                  className="w-full h-11 rounded-xl border border-border bg-muted pl-3 pr-12 text-xs text-foreground outline-none focus:border-primary font-mono font-bold"
                                   placeholder="Nhập số điểm (1 để đoán miễn phí)"
                                 />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-muted-foreground font-mono">Pts</span>
@@ -930,28 +932,28 @@ export default function SpectatorTournamentsPage() {
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("1")}
-                                  className="py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-[9px] font-bold text-white hover:bg-white/10 hover:border-white/20 transition uppercase"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition uppercase"
                                 >
                                   Free
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("10")}
-                                  className="py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-[9px] font-bold text-white hover:bg-white/10 hover:border-white/20 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
                                 >
                                   10
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("50")}
-                                  className="py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-[9px] font-bold text-white hover:bg-white/10 hover:border-white/20 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
                                 >
                                   50
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("100")}
-                                  className="py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-[9px] font-bold text-white hover:bg-white/10 hover:border-white/20 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
                                 >
                                   100
                                 </button>
@@ -968,7 +970,7 @@ export default function SpectatorTournamentsPage() {
                                 <div className="text-[10px] text-red-400 bg-red-500/5 border border-red-500/10 rounded-xl p-2.5 mt-2">
                                   <span className="font-black uppercase tracking-wider block text-[#E10600]">⚠️ Không đủ số dư</span>
                                   <p className="italic font-medium leading-relaxed mt-0.5">
-                                    Bạn cần cược <strong className="text-white font-mono font-bold">{parseInt(betPointsInput).toLocaleString("vi-VN")} Pts</strong> nhưng chỉ có <strong className="text-white font-mono font-bold">{balance.toLocaleString("vi-VN")} Pts</strong>.
+                                    Bạn cần cược <strong className="text-foreground font-mono font-bold">{parseInt(betPointsInput).toLocaleString("vi-VN")} Pts</strong> nhưng chỉ có <strong className="text-foreground font-mono font-bold">{balance.toLocaleString("vi-VN")} Pts</strong>.
                                   </p>
                                 </div>
                               )}
@@ -991,7 +993,7 @@ export default function SpectatorTournamentsPage() {
                         )}
                       </div>
                     ) : (
-                      <div className="rounded-xl border border-dashed border-white/5 bg-white/[0.01] p-3 text-center text-muted-foreground text-[10px]">
+                      <div className="rounded-xl border border-dashed border-border bg-white/[0.01] p-3 text-center text-muted-foreground text-[10px]">
                         Cổng dự đoán đã đóng cho cuộc đua này (LIVE hoặc Đã kết thúc).
                       </div>
                     )
@@ -1004,14 +1006,14 @@ export default function SpectatorTournamentsPage() {
                       <span className="text-[9px] font-black uppercase tracking-wider">Cơ cấu điểm thưởng</span>
                     </div>
                     <p className="text-[9px] leading-relaxed text-muted-foreground">
-                      Chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="text-white">+1 điểm</strong>, sai khấu trừ <strong className="text-white">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
+                      Chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="text-foreground">+1 điểm</strong>, sai khấu trừ <strong className="text-foreground">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Status Timeline */}
-              <div className="rounded-2xl border border-white/5 bg-[#13131A] p-6 space-y-4 shadow-lg">
+              <div className="rounded-2xl border border-border bg-card p-6 space-y-4 shadow-lg">
                 <h4 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                   <Activity className="size-3.5 text-[#E10600]" /> Tiến độ cuộc đua (Status Timeline)
                 </h4>
@@ -1032,7 +1034,7 @@ export default function SpectatorTournamentsPage() {
                           : "bg-transparent border-white/20 text-transparent"
                       }`} />
                       <div className="space-y-0.5">
-                        <p className={`text-xs font-black uppercase tracking-wider ${step.status === "current" ? "text-teal-400" : "text-white"}`}>{step.step}</p>
+                        <p className={`text-xs font-black uppercase tracking-wider ${step.status === "current" ? "text-teal-400" : "text-muted-foreground"}`}>{step.step}</p>
                         <p className="text-[10px] text-muted-foreground">{step.desc}</p>
                       </div>
                     </div>
@@ -1043,28 +1045,28 @@ export default function SpectatorTournamentsPage() {
 
             {/* Right Side: Participant Horses list */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="border-b border-white/10 pb-3">
-                <h3 className="text-lg font-black uppercase tracking-tight text-white flex items-center gap-2">
+              <div className="border-b border-border pb-3">
+                <h3 className="text-lg font-black uppercase tracking-tight text-foreground flex items-center gap-2">
                   <Users className="size-5 text-[#E10600]" /> Chiến mã xuất kích & Nài ngựa ({selectedRaceRegistrations.length})
                 </h3>
               </div>
 
               {loadingRaceDetails ? (
-                <div className="flex flex-col items-center justify-center py-20 text-white/55">
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                   <Loader2 className="size-6 animate-spin text-[#E10600]" />
                   <p className="mt-3 text-xs font-mono uppercase tracking-widest">Đang tải danh sách đội hình...</p>
                 </div>
               ) : selectedRaceRegistrations.length === 0 ? (
-                <div className="text-center py-16 border border-white/5 rounded-2xl bg-[#13131A] text-muted-foreground text-xs shadow-md">
-                  <ShieldCheck className="size-10 text-white/10 mx-auto mb-2" />
+                <div className="text-center py-16 border border-border rounded-2xl bg-card text-muted-foreground text-xs shadow-md">
+                  <ShieldCheck className="size-10 text-muted-foreground/30 mx-auto mb-2" />
                   Chưa có chiến mã nào được phê duyệt tham gia trận đấu này.
                 </div>
               ) : (
-                <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden shadow-lg">
+                <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-lg">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
-                        <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                        <tr className="border-b border-border bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
                           <th className="p-4 w-16">Cổng (Lane)</th>
                           <th className="p-4">Chiến Mã (Breed)</th>
                           <th className="p-4">Nài Ngựa (Jockey)</th>
@@ -1081,11 +1083,11 @@ export default function SpectatorTournamentsPage() {
                           return (
                             <tr key={p._id} className="hover:bg-white/[0.01] transition duration-200">
                               <td className="p-4 font-mono font-black text-[#E10600] text-sm">{idx + 1}</td>
-                              <td className="p-4 font-bold text-white">
+                              <td className="p-4 font-bold text-foreground">
                                 <span className="block">{horseName}</span>
                                 <span className="text-[9px] font-mono text-muted-foreground">{horseBreed}</span>
                               </td>
-                              <td className="p-4 font-bold text-white">{jockeyName}</td>
+                              <td className="p-4 font-bold text-foreground">{jockeyName}</td>
                               <td className="p-4 text-muted-foreground">{ownerName}</td>
                               <td className="p-4 text-right">
                                 <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[9px] font-black text-teal-400 uppercase tracking-wider">

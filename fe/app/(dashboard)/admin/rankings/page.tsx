@@ -66,24 +66,24 @@ export default function AdminRankingsPage() {
 
       <div className="flex flex-wrap gap-3 items-center">
         <select
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none"
+          className="rounded-xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground focus:border-primary/50 focus:outline-none"
           value={selectedTournament}
           onChange={(e) => setSelectedTournament(e.target.value)}
         >
-          <option value="" className="bg-[#15151e] text-white">— Chọn Giải Đấu —</option>
-          {tournaments.map(t => <option key={t._id} value={t._id} className="bg-[#15151e] text-white">{t.name}</option>)}
+          <option value="" className="bg-card text-foreground">— Chọn Giải Đấu —</option>
+          {tournaments.map(t => <option key={t._id} value={t._id} className="bg-card text-foreground">{t.name}</option>)}
         </select>
 
-        <div className="flex rounded-xl border border-white/10 bg-white/[0.03] p-1">
+        <div className="flex rounded-xl border border-border bg-muted p-1">
           <button
             onClick={() => setActiveTab("horses")}
-            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${activeTab === "horses" ? "bg-primary text-white" : "text-muted-foreground hover:text-white"}`}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${activeTab === "horses" ? "bg-primary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             🐎 Ngựa
           </button>
           <button
             onClick={() => setActiveTab("jockeys")}
-            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${activeTab === "jockeys" ? "bg-primary text-white" : "text-muted-foreground hover:text-white"}`}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${activeTab === "jockeys" ? "bg-primary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             🏇 Jockey
           </button>
@@ -95,14 +95,14 @@ export default function AdminRankingsPage() {
       ) : !selectedTournament ? (
         <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">Chọn giải đấu để xem ranking.</div>
       ) : (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
           {activeTab === "horses" ? (
             horseRankings.length === 0 ? (
               <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có kết quả race nào được công bố.</div>
             ) : (
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-border">
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Hạng</th>
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa</th>
                     <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
@@ -112,9 +112,9 @@ export default function AdminRankingsPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {horseRankings.map((r) => (
-                    <tr key={r.horseId} className={`hover:bg-white/[0.02] transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
+                    <tr key={r.horseId} className={`hover:bg-muted transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
                       <td className="px-5 py-4 text-xl">{rankBadge(r.rank)}</td>
-                      <td className="px-5 py-4 text-sm font-semibold text-white">{r.horseName ?? r.horseId}</td>
+                      <td className="px-5 py-4 text-sm font-semibold text-foreground">{r.horseName ?? r.horseId}</td>
                       <td className="px-5 py-4 text-center font-mono font-black text-primary text-lg">{r.totalPoints}</td>
                       <td className="px-5 py-4 text-center text-sm text-muted-foreground">{r.totalRaces}</td>
                       <td className="px-5 py-4 text-center text-sm text-emerald-400 font-bold">{r.wins}</td>
@@ -129,7 +129,7 @@ export default function AdminRankingsPage() {
             ) : (
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-border">
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Hạng</th>
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Jockey</th>
                     <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
@@ -139,9 +139,9 @@ export default function AdminRankingsPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {jockeyRankings.map((r) => (
-                    <tr key={r.jockeyUserId} className={`hover:bg-white/[0.02] transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
+                    <tr key={r.jockeyUserId} className={`hover:bg-muted transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
                       <td className="px-5 py-4 text-xl">{rankBadge(r.rank)}</td>
-                      <td className="px-5 py-4 text-sm font-semibold text-white">{r.jockeyName ?? r.jockeyUserId}</td>
+                      <td className="px-5 py-4 text-sm font-semibold text-foreground">{r.jockeyName ?? r.jockeyUserId}</td>
                       <td className="px-5 py-4 text-center font-mono font-black text-primary text-lg">{r.totalPoints}</td>
                       <td className="px-5 py-4 text-center text-sm text-muted-foreground">{r.totalRaces}</td>
                       <td className="px-5 py-4 text-center text-sm text-emerald-400 font-bold">{r.wins}</td>
@@ -156,3 +156,5 @@ export default function AdminRankingsPage() {
     </main>
   );
 }
+
+

@@ -177,7 +177,7 @@ export default function OwnerResultsPage() {
               placeholder="Tìm kiếm giải đấu..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-xl border border-white/10 bg-black/20 pl-10 pr-4 text-sm text-white placeholder:text-muted-foreground outline-none focus:border-primary transition"
+              className="h-10 w-full rounded-xl border border-border bg-black/20 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
             />
           </div>
 
@@ -191,11 +191,11 @@ export default function OwnerResultsPage() {
           {isLoadingTournaments ? (
             <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
               {[1, 2, 3].map((n) => (
-                <div key={n} className="h-40 rounded-2xl border border-white/5 bg-[#15151E] animate-pulse" />
+                <div key={n} className="h-40 rounded-2xl border border-border bg-card animate-pulse" />
               ))}
             </div>
           ) : filteredTournaments.length === 0 ? (
-            <div className="text-center py-12 border border-white/5 bg-[#15151E] rounded-2xl">
+            <div className="text-center py-12 border border-border bg-card rounded-2xl">
               <p className="text-muted-foreground text-sm">Không tìm thấy giải đấu nào phù hợp.</p>
             </div>
           ) : (
@@ -203,30 +203,30 @@ export default function OwnerResultsPage() {
               {filteredTournaments.map((t) => (
                 <div
                   key={t.id}
-                  className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#15151E] hover:border-primary/30 hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44"
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
                   <div>
                     <div className="flex justify-between items-start mb-3">
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase bg-white/5 border border-white/10 text-white/70">
+                      <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase bg-muted border border-border text-foreground/70">
                         {t.status}
                       </span>
                     </div>
-                    <h3 className="font-black uppercase text-white group-hover:text-primary transition duration-300 leading-tight tracking-tight line-clamp-2">
+                    <h3 className="font-black uppercase text-foreground group-hover:text-primary transition duration-300 leading-tight tracking-tight line-clamp-2">
                       {t.name}
                     </h3>
-                    <p className="text-xs text-white/50 mt-2 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                       {t.description || "Không có mô tả chi tiết giải đấu."}
                     </p>
                   </div>
                   <div className="flex items-center justify-between mt-4">
-                    <span className="text-[10px] font-mono text-white/40 flex items-center gap-1">
+                    <span className="text-[10px] font-mono text-muted-foreground/60 flex items-center gap-1">
                       <Calendar className="size-3.5" />
                       {t.startDate ? new Date(t.startDate).toLocaleDateString("vi-VN") : "N/A"}
                     </span>
                     <button
                       onClick={() => setSelectedTournament(t)}
-                      className="text-xs font-bold uppercase tracking-wider text-white/80 group-hover:text-primary flex items-center gap-1 transition"
+                      className="text-xs font-bold uppercase tracking-wider text-foreground/80 group-hover:text-primary flex items-center gap-1 transition"
                     >
                       Xem Kết Quả <ChevronRight className="size-3.5" />
                     </button>
@@ -242,7 +242,7 @@ export default function OwnerResultsPage() {
           <Button
             onClick={() => setSelectedTournament(null)}
             variant="ghost"
-            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white -ml-2 rounded-xl"
+            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground -ml-2 rounded-xl"
           >
             <ArrowLeft className="size-4 mr-2" /> Quay lại danh sách giải
           </Button>
@@ -262,11 +262,11 @@ export default function OwnerResultsPage() {
           {isLoadingResults ? (
             <div className="grid gap-6 sm:grid-cols-2">
               {[1, 2].map((n) => (
-                <div key={n} className="h-48 rounded-2xl border border-white/5 bg-[#15151E] animate-pulse" />
+                <div key={n} className="h-48 rounded-2xl border border-border bg-card animate-pulse" />
               ))}
             </div>
           ) : raceGroups.length === 0 ? (
-            <div className="text-center py-12 border border-white/5 bg-[#15151E] rounded-2xl">
+            <div className="text-center py-12 border border-border bg-card rounded-2xl">
               <p className="text-muted-foreground text-sm">Chưa có trận đua nào được công bố kết quả trong giải đấu này.</p>
             </div>
           ) : (
@@ -277,7 +277,7 @@ export default function OwnerResultsPage() {
                 return (
                   <div
                     key={group.raceId}
-                    className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#15151E] hover:border-primary/20 transition duration-300 p-5 flex flex-col justify-between space-y-4"
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/20 transition duration-300 p-5 flex flex-col justify-between space-y-4"
                   >
                     <div className="space-y-2">
                       <div className="flex justify-between items-start">
@@ -288,28 +288,28 @@ export default function OwnerResultsPage() {
                           ● ĐÃ CÔNG BỐ
                         </span>
                       </div>
-                      <h3 className="text-lg font-black uppercase text-white group-hover:text-primary transition duration-300">
+                      <h3 className="text-lg font-black uppercase text-foreground group-hover:text-primary transition duration-300">
                         {group.name}
                       </h3>
                     </div>
 
                     {/* Podium Preview */}
-                    <div className="grid grid-cols-2 gap-2 bg-black/25 rounded-xl p-3 border border-white/5 text-xs">
+                    <div className="grid grid-cols-2 gap-2 bg-black/25 rounded-xl p-3 border border-border text-xs">
                       <div>
                         <span className="block text-[8px] uppercase tracking-wider text-primary font-bold">🏆 Vô Địch</span>
-                        <span className="font-bold text-white text-[11px] block truncate mt-0.5">
+                        <span className="font-bold text-foreground text-[11px] block truncate mt-0.5">
                           {winner?.horseId?.name || "—"}
                         </span>
-                        <span className="text-[9px] text-white/50 block truncate">
+                        <span className="text-[9px] text-muted-foreground block truncate">
                           Nài: {winner?.jockeyUserId?.fullName || "—"}
                         </span>
                       </div>
-                      <div className="border-l border-white/5 pl-3">
-                        <span className="block text-[8px] uppercase tracking-wider text-white/50 font-bold">Hạng 2</span>
-                        <span className="font-bold text-white text-[11px] block truncate mt-0.5">
+                      <div className="border-l border-border pl-3">
+                        <span className="block text-[8px] uppercase tracking-wider text-muted-foreground font-bold">Hạng 2</span>
+                        <span className="font-bold text-foreground text-[11px] block truncate mt-0.5">
                           {runnerUp?.horseId?.name || "—"}
                         </span>
-                        <span className="text-[9px] text-white/50 block truncate">
+                        <span className="text-[9px] text-muted-foreground block truncate">
                           Nài: {runnerUp?.jockeyUserId?.fullName || "—"}
                         </span>
                       </div>
@@ -317,7 +317,7 @@ export default function OwnerResultsPage() {
 
                     <Button
                       onClick={() => setSelectedRaceGroup(group)}
-                      className="w-full rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white transition duration-300 text-xs font-black uppercase tracking-wider"
+                      className="w-full rounded-xl bg-muted border border-border text-foreground hover:bg-primary hover:text-foreground transition duration-300 text-xs font-black uppercase tracking-wider"
                     >
                       Xem Bảng Điểm Chi Tiết
                     </Button>
@@ -333,29 +333,29 @@ export default function OwnerResultsPage() {
           <Button
             onClick={() => setSelectedRaceGroup(null)}
             variant="ghost"
-            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white -ml-2 rounded-xl"
+            className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground -ml-2 rounded-xl"
           >
             <ArrowLeft className="size-4 mr-2" /> Quay lại danh sách trận đua
           </Button>
 
           <div className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-[#15151E] p-6 relative overflow-hidden">
+            <div className="rounded-2xl border border-border bg-card p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px]" />
               <div className="space-y-2">
                 <span className="text-[10px] text-primary font-black uppercase tracking-wider">
                   Trận #{selectedRaceGroup.raceNumber} · {selectedTournament?.name || ""}
                 </span>
-                <h2 className="text-2xl font-black uppercase tracking-tight text-white">
+                <h2 className="text-2xl font-black uppercase tracking-tight text-foreground">
                   {selectedRaceGroup.name}
                 </h2>
               </div>
             </div>
 
             {/* Results Table */}
-            <div className="rounded-2xl border border-white/5 bg-[#13131A] overflow-hidden shadow-2xl">
+            <div className="rounded-2xl border border-border bg-[#13131A] overflow-hidden shadow-2xl">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                  <tr className="border-b border-border bg-muted02] text-muted-foreground font-black uppercase tracking-wider">
                     <th className="p-4 w-16 text-center">Hạng</th>
                     <th className="p-4">Chiến Mã</th>
                     <th className="p-4">Giống Ngựa</th>
@@ -375,7 +375,7 @@ export default function OwnerResultsPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {selectedRaceGroup.results.map((res) => (
-                    <tr key={res.id} className="hover:bg-white/[0.01] transition duration-200">
+                    <tr key={res.id} className="hover:bg-muted01] transition duration-200">
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
@@ -384,17 +384,17 @@ export default function OwnerResultsPage() {
                               : res.rank === 2
                               ? "bg-slate-300 text-black"
                               : res.rank === 3
-                              ? "bg-[#CD7F32] text-white"
-                              : "bg-white/5 border border-white/10 text-muted-foreground"
+                              ? "bg-[#CD7F32] text-foreground"
+                              : "bg-muted border border-border text-muted-foreground"
                           }`}
                         >
                           {res.rank || "—"}
                         </span>
                       </td>
-                      <td className="p-4 font-black text-white">{res.horseId?.name || "Chiến mã ẩn"}</td>
+                      <td className="p-4 font-black text-foreground">{res.horseId?.name || "Chiến mã ẩn"}</td>
                       <td className="p-4 text-muted-foreground">{res.horseId?.breed || "Chưa xác định"}</td>
-                      <td className="p-4 font-bold text-white">{res.jockeyUserId?.fullName || "Nài ngựa ẩn"}</td>
-                      <td className="p-4 font-mono font-black text-white text-sm">
+                      <td className="p-4 font-bold text-foreground">{res.jockeyUserId?.fullName || "Nài ngựa ẩn"}</td>
+                      <td className="p-4 font-mono font-black text-foreground text-sm">
                         {res.outcome === "finished" ? formatTime(res.finishTimeMs) : "Không hoàn thành"}
                       </td>
                       <td className={`p-4 ${res.incident !== "NONE" ? "text-primary font-bold" : "text-muted-foreground"}`}>
