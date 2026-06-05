@@ -66,13 +66,13 @@ export class Race {
   @Prop({ required: true, enum: RaceStatus, default: RaceStatus.SCHEDULED })
   status!: RaceStatus;
 
-  @Prop({ enum: TrackCondition })
+  @Prop({ type: String, enum: TrackCondition })
   trackCondition?: TrackCondition;
 
-  @Prop({ enum: WeatherCondition })
+  @Prop({ type: String, enum: WeatherCondition })
   weather?: WeatherCondition;
 
-  @Prop({ enum: RaceType })
+  @Prop({ type: String, enum: RaceType })
   raceType?: RaceType;
 
   @Prop({ default: 'Sunny' })
