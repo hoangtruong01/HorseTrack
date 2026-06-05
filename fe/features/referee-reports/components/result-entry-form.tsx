@@ -17,7 +17,7 @@ import {
   type ResultEntryRow,
   type RaceViolation,
 } from "@/features/referee-reports/mock-referee-data";
-import { addAuditLog } from "@/features/wallet/mock-wallet";
+import { addAuditLog } from "@/features/audit/mock-audit-logs";
 
 export type ResultEntryFormProps = {
   race: Race;
@@ -259,9 +259,9 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
   };
 
   const stateLabel = published
-    ? "Published · locked"
+    ? "Published Â· locked"
     : enabled
-      ? "Finished · entry enabled"
+      ? "Finished Â· entry enabled"
       : "Locked until race finished";
 
   return (
@@ -569,7 +569,7 @@ export function ResultEntryForm({ race, rows: initialRows }: ResultEntryFormProp
                             {penaltyLabel}
                           </span>
                           <strong className="text-xs font-black uppercase text-foreground">{v.horse}</strong>
-                          <span className="text-[10px] text-muted-foreground">· {v.jockey}</span>
+                          <span className="text-[10px] text-muted-foreground">Â· {v.jockey}</span>
                         </div>
                         <p className="mt-1 text-[11px] text-muted-foreground leading-normal">{v.note}</p>
                       </div>

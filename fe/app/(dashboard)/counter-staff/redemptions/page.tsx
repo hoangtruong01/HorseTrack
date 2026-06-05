@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { CashoutApprovalQueue } from "@/features/wallet/components/cashout-approval-queue";
+import { mapCashoutToQueueRequest } from "@/features/wallet/backend-wallet";
 import { walletApi, type CashoutItem } from "@/lib/api-client";
-import type { CashoutRequest } from "@/features/wallet/mock-wallet";
 
 export default function RedemptionsQueuePage() {
   const [cashouts, setCashouts] = useState<CashoutItem[]>([]);
@@ -19,7 +19,7 @@ export default function RedemptionsQueuePage() {
         setCashouts(res.data);
       }
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi lấy danh sách đổi thưởng.");
+      toast.error(err.message || "Lá»—i khi láº¥y danh sÃ¡ch Ä‘á»•i thÆ°á»Ÿng.");
     } finally {
       setLoading(false);
     }
@@ -32,54 +32,28 @@ export default function RedemptionsQueuePage() {
   const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => {
     try {
       await walletApi.processCashout(id, action);
-      toast.success(`Cập nhật giao dịch thành công sang trạng thái ${action}`);
+      toast.success(`Cáº­p nháº­t giao dá»‹ch thÃ nh cÃ´ng sang tráº¡ng thÃ¡i ${action}`);
       await fetchCashouts();
     } catch (err: any) {
-      toast.error(err.message || `Lỗi khi cập nhật giao dịch sang ${action}`);
+      toast.error(err.message || `Lá»—i khi cáº­p nháº­t giao dá»‹ch sang ${action}`);
       // Reload to ensure state is in sync
       await fetchCashouts();
     }
   };
 
-  // Map CashoutItem to CashoutRequest format required by the component
-  const mappedRequests: CashoutRequest[] = cashouts.map((c) => {
-    const userObj = typeof c.userId === "object" ? c.userId : null;
-    const userFullName = userObj?.fullName ?? "Khách hàng";
-    
-    let userRole: "Owner" | "Jockey" | "Spectator" = "Spectator";
-    if (userObj && Array.isArray((userObj as any).roles)) {
-      const rolesList = (userObj as any).roles as string[];
-      if (rolesList.includes("owner")) {
-        userRole = "Owner";
-      } else if (rolesList.includes("jockey")) {
-        userRole = "Jockey";
-      }
-    }
-
-    return {
-      id: c._id,
-      userId: typeof c.userId === "string" ? c.userId : (userObj?._id ?? ""),
-      userFullName,
-      userRole,
-      points: c.pointsRedeemed,
-      redemptionCode: c.redemptionCode,
-      status: c.status as "PENDING" | "APPROVED" | "PAID" | "REJECTED",
-      rejectReason: "",
-      createdAt: c.createdAt ?? new Date().toISOString(),
-    };
-  });
+  const mappedRequests = cashouts.map(mapCashoutToQueueRequest);
 
   return (
     <main className="space-y-6">
       <PageHeader
         eyebrow="Redemption Queue"
-        title="Duyệt Hàng Đợi Đổi Thưởng"
-        description="Xử lý và hoàn tất các yêu cầu đổi điểm lấy quà tặng vật lý của người dùng khi họ đến quầy trực tiếp."
+        title="Duyá»‡t HÃ ng Äá»£i Äá»•i ThÆ°á»Ÿng"
+        description="Xá»­ lÃ½ vÃ  hoÃ n táº¥t cÃ¡c yÃªu cáº§u Ä‘á»•i Ä‘iá»ƒm láº¥y quÃ  táº·ng váº­t lÃ½ cá»§a ngÆ°á»i dÃ¹ng khi há» Ä‘áº¿n quáº§y trá»±c tiáº¿p."
       />
 
       {loading ? (
         <div className="flex items-center justify-center py-20 text-muted-foreground text-sm font-semibold">
-          Đang tải hàng đợi đổi thưởng từ hệ thống...
+          Äang táº£i hÃ ng Ä‘á»£i Ä‘á»•i thÆ°á»Ÿng tá»« há»‡ thá»‘ng...
         </div>
       ) : (
         <CashoutApprovalQueue requests={mappedRequests} onAction={handleAction} />

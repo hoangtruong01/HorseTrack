@@ -8,68 +8,59 @@ import { Button } from "@/components/ui/button";
 
 export type CashoutRequestFormProps = {
   availablePoints: number;
-  onSubmit: (points: number) => void;
+  onSubmit: (points: number) => void | Promise<void>;
   onCancel: () => void;
 };
 
 export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: CashoutRequestFormProps) {
   const [points, setPoints] = useState<number>(Math.min(100, availablePoints));
   const [isLoading, setIsLoading] = useState(false);
-
   const pointsStr = points === 0 ? "" : points.toString();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (points <= 0) {
-      toast.error("Vui lòng nhập số điểm hợp lệ.");
+      toast.error("Vui long nhap so diem hop le.");
       return;
     }
     if (points > availablePoints) {
-      toast.error("Số điểm đổi vượt quá số dư hiện có của bạn.");
+      toast.error("So diem doi vuot qua so du hien co.");
       return;
     }
     if (points < 10) {
-      toast.error("Số điểm tối thiểu để đổi thưởng là 10 điểm.");
+      toast.error("So diem toi thieu de doi thuong la 10 diem.");
       return;
     }
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsLoading(false);
-
-    onSubmit(points);
-    toast.success(`Yêu cầu đổi thưởng ${points.toLocaleString()} điểm thành công! Hãy lưu lại mã quy đổi.`);
+    try {
+      await onSubmit(points);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-lg sm:p-6">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
-          <Gift className="size-4 animate-pulse" /> Phiếu Quy Đổi Thưởng
+        <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.24em] text-primary">
+          <Gift className="size-4" /> Phieu quy doi thuong
         </p>
-        <h2 className="mt-1 text-2xl font-black uppercase text-foreground">
-          Đổi Điểm Nhận Thưởng
-        </h2>
+        <h2 className="mt-1 text-2xl font-black uppercase text-foreground">Doi diem nhan thuong</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Quy đổi điểm thưởng tích lũy của bạn thành mã rút thưởng. Mang mã này ra quầy giao dịch vật lý để được nhân viên xác nhận và trao thưởng.
+          Tao ma doi thuong tu diem tich luy. Mang ma nay ra quay giao dich vat ly de nhan vien xac nhan va trao thuong.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-        {/* Available Points Display */}
-        <div className="rounded-xl border border-border/5 bg-muted/[0.02] p-4 flex items-center justify-between">
-          <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">
-            Số Dư Điểm Hiện Có
-          </span>
-          <span className="font-mono text-xl font-black text-emerald-400">
-            {availablePoints.toLocaleString('vi-VN')} điểm
-          </span>
+        <div className="flex items-center justify-between rounded-xl border border-border/5 bg-muted/[0.02] p-4">
+          <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">So du diem hien co</span>
+          <span className="font-mono text-xl font-black text-emerald-400">{availablePoints.toLocaleString("vi-VN")} diem</span>
         </div>
 
-        {/* Amount to Redeem in Points */}
         <div className="space-y-2">
           <label htmlFor="points-input" className="block text-xs font-black uppercase tracking-wider text-muted-foreground">
-            Số Điểm Muốn Đổi
+            So diem muon doi
           </label>
           <div className="relative">
             <input
@@ -79,61 +70,58 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
               max={availablePoints}
               value={pointsStr}
               onChange={(e) => {
-                const val = e.target.value === "" ? 0 : parseInt(e.target.value);
-                setPoints(isNaN(val) ? 0 : val);
+                const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                setPoints(Number.isNaN(val) ? 0 : val);
               }}
               required
-              className="h-12 w-full rounded-xl border border-border bg-muted px-4 font-mono font-black text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
-              placeholder="Tối thiểu 10 điểm"
+              className="h-12 w-full rounded-xl border border-border bg-muted px-4 font-mono font-black text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+              placeholder="Toi thieu 10 diem"
             />
             <button
               type="button"
               onClick={() => setPoints(availablePoints)}
-              className="absolute top-1/2 right-4 -translate-y-1/2 rounded bg-primary/20 hover:bg-primary/30 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-primary cursor-pointer"
+              className="absolute right-4 top-1/2 -translate-y-1/2 rounded bg-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-primary hover:bg-primary/30"
             >
-              TỐI ĐA
+              Toi da
             </button>
           </div>
         </div>
 
-        {/* Informative Box */}
-        <div className="rounded-xl border border-primary/10 bg-primary/5 p-4 flex items-center gap-3">
-          <Award className="size-8 text-primary shrink-0" />
+        <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-primary/5 p-4">
+          <Award className="size-8 shrink-0 text-primary" />
           <div className="text-xs">
-            <p className="font-bold text-foreground uppercase tracking-wider">Hệ thống đổi thưởng vật lý</p>
-            <p className="text-muted-foreground mt-0.5">Một mã quy đổi độc duy nhất sẽ được tạo. Điểm chỉ bị trừ khỏi ví của bạn khi nhân viên tại quầy kiểm tra và xác nhận trao thưởng thành công.</p>
+            <p className="font-bold uppercase tracking-wider text-foreground">He thong doi thuong vat ly</p>
+            <p className="mt-0.5 text-muted-foreground">Diem chi bi tru khi nhan vien tai quay xac nhan da trao thuong thanh cong.</p>
           </div>
         </div>
 
-        {/* Disclaimers & Checks */}
-        <div className="rounded-xl border border-border/5 bg-muted/[0.01] p-3 space-y-2">
-          <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-            <AlertTriangle className="size-3.5 text-amber-500 shrink-0 mt-0.5" />
-            <span>Lưu ý: Không đổi điểm quá số điểm hiện có của bạn tại thời điểm nhận quà tại quầy.</span>
+        <div className="space-y-2 rounded-xl border border-border/5 bg-muted/[0.01] p-3">
+          <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+            <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
+            <span>Neu so du khong du tai thoi diem nhan qua, ma se khong the xac nhan PAID.</span>
           </p>
-          <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-            <ShieldCheck className="size-3.5 text-primary shrink-0 mt-0.5" />
-            <span>Giao dịch đổi thưởng được kiểm toán bảo mật và ghi lại trong hệ thống Ledger.</span>
+          <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+            <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" />
+            <span>Giao dich doi thuong duoc ghi lai trong reward ledger.</span>
           </p>
         </div>
 
-        {/* Buttons */}
         <div className="flex flex-col gap-3 pt-3 sm:flex-row">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isLoading}
-            className="h-12 flex-1 rounded-full font-black uppercase tracking-wider border-border/10 text-foreground bg-transparent hover:bg-muted/5"
+            className="h-12 flex-1 rounded-full border-border/10 bg-transparent font-black uppercase tracking-wider text-foreground hover:bg-muted/5"
           >
-            Hủy Bỏ
+            Huy bo
           </Button>
           <Button
             type="submit"
             disabled={isLoading || points <= 0 || points > availablePoints}
-            className="h-12 flex-1 rounded-full font-black uppercase tracking-wider text-foreground bg-primary hover:bg-[#B80500] shadow-[0_4px_16px_rgba(225,6,0,0.35)]"
+            className="h-12 flex-1 rounded-full bg-primary font-black uppercase tracking-wider text-foreground shadow-[0_4px_16px_rgba(225,6,0,0.35)] hover:bg-[#B80500]"
           >
-            {isLoading ? "Đang xử lý..." : "Tạo Mã Nhận Thưởng"}
+            {isLoading ? "Dang xu ly..." : "Tao ma nhan thuong"}
           </Button>
         </div>
       </form>

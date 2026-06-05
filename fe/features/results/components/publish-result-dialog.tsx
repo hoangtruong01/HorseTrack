@@ -8,11 +8,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { RaceResultReview } from "@/features/results/mock-results";
-import {
-  mockWalletBalances,
-  mockTransactions,
-  addAuditLog,
-} from "@/features/wallet/mock-wallet";
 
 export type PublishResultDialogProps = {
   result: RaceResultReview | null;
@@ -40,65 +35,9 @@ export function PublishResultDialog({
     // 1. Update result status to published
     result.status = "published";
     
-    // 2. Perform the 70/30 split logic
-    const totalPrizePoints = 10000;
-    const ownerPoints = totalPrizePoints * 0.7; // 7,000 pts
-    const jockeyPoints = totalPrizePoints * 0.3; // 3,000 pts
-
-    // Credit Owner (user-owner-1)
-    if (mockWalletBalances["user-owner-1"] !== undefined) {
-      mockWalletBalances["user-owner-1"] += ownerPoints;
-    }
-    // Credit Jockey (user-jockey-1)
-    if (mockWalletBalances["user-jockey-1"] !== undefined) {
-      mockWalletBalances["user-jockey-1"] += jockeyPoints;
-    }
-
-    // 3. Insert transaction ledger items
-    const newOwnerTx = {
-      id: `tx-${mockTransactions.length + 1}`,
-      type: "prize_owner" as const,
-      amount: ownerPoints,
-      amountVnd: ownerPoints * 100,
-      description: `Winner prize split (70%) - Crimson Bolt in ${result.race}`,
-      createdAt: new Date().toISOString(),
-      status: "completed" as const,
-    };
-    
-    const newJockeyTx = {
-      id: `tx-${mockTransactions.length + 2}`,
-      type: "prize_jockey" as const,
-      amount: jockeyPoints,
-      amountVnd: jockeyPoints * 100,
-      description: `Winner prize split (30%) - Jockey assignment for Crimson Bolt in ${result.race}`,
-      createdAt: new Date().toISOString(),
-      status: "completed" as const,
-    };
-
-    // Push at the beginning
-    mockTransactions.unshift(newOwnerTx, newJockeyTx);
-
-    // 4. Log to secure System Audit Trail
-    addAuditLog(
-      "RACE_PUBLISHED",
-      "admin@horsetrack.com",
-      `Published results for ${result.race}. Crimson Bolt placed 1st.`
-    );
-    addAuditLog(
-      "PRIZE_SPLIT",
-      "SYSTEM",
-      `Allocated 70% prize (${ownerPoints} pts) to Owner Linh Tran Stable and 30% (${jockeyPoints} pts) to Jockey Minh Khoa`
-    );
-
-    // Trigger spectator payout simulation
-    addAuditLog(
-      "PREDICTION_PAYOUT",
-      "SYSTEM",
-      `Processed spectator prediction win payout multiplier for users who predicted Crimson Bolt.`
-    );
-
+    // Backend result publication owns reward ledger credits and prediction payouts.\r\n
     setPublishedSuccess(true);
-    toast.success("Race results published successfully! Winnings distributed.");
+    toast.success("Race results published successfully! Backend will distribute winnings.");
   };
 
   const handleClose = () => {
@@ -205,7 +144,7 @@ export function PublishResultDialog({
             <div className="space-y-2">
               <h3 className="text-2xl font-black uppercase text-foreground tracking-tight">Race Results Published!</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                Prize splits have been credited to user balances. Ledger transactions and system audit logs successfully updated.
+                Prize splits are handled by the backend ledger when official results are published.
               </p>
             </div>
             <div className="rounded-xl border border-border bg-muted/50 p-4 text-left font-mono text-xs max-w-sm mx-auto space-y-1 text-muted-foreground">

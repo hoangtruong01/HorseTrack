@@ -92,7 +92,7 @@ export class WalletService {
       type: TransactionType.REWARD_CASHOUT,
       amount: 0,
       points: dto.pointsToRedeem,
-      description: `Yêu cầu quy đổi ${dto.pointsToRedeem} điểm thưởng (Mã: ${redemptionCode}). mang mã này ra quầy để nhận thưởng.`,
+      description: `Cashout requested for ${dto.pointsToRedeem} reward points (Code: ${redemptionCode}). Bring this code to the counter to receive the reward.`,
       status: TransactionStatus.PENDING,
       cashoutRequestId: request._id,
     });
@@ -115,11 +115,7 @@ export class WalletService {
       throw new BadRequestException('Request has already been processed');
     }
 
-    // Debit points only when transitioning from PENDING to APPROVED or PAID
-    if (
-      request.status === CashoutStatus.PENDING &&
-      (status === CashoutStatus.APPROVED || status === CashoutStatus.PAID)
-    ) {
+    if (status === CashoutStatus.PAID) {
       const currentPoints = await this.ledgerService.getBalance(
         String(request.userId),
       );
@@ -129,27 +125,20 @@ export class WalletService {
         );
       }
 
-      // Debit points via ledger
       await this.ledgerService.debit({
         userId: String(request.userId),
         points: request.pointsRedeemed,
         sourceType: LedgerSourceType.REDEMPTION,
         sourceId: String(request._id),
-        note: `Đổi thưởng thành công (Mã: ${request.redemptionCode})`,
+        note: `Cashout paid (Code: ${request.redemptionCode})`,
         createdBy: handlerId,
       });
     }
 
-    // Update status
-    const previousStatus = request.status;
     request.status = status;
 
     if (status === CashoutStatus.APPROVED) {
       request.approvedBy = new Types.ObjectId(handlerId);
-      await this.transactionModel.findOneAndUpdate(
-        { cashoutRequestId: request._id, status: TransactionStatus.PENDING },
-        { status: TransactionStatus.SUCCESS },
-      );
     } else if (status === CashoutStatus.PAID) {
       request.paidBy = new Types.ObjectId(handlerId);
       request.paidAt = new Date();
@@ -159,19 +148,6 @@ export class WalletService {
       );
     } else if (status === CashoutStatus.REJECTED) {
       request.approvedBy = new Types.ObjectId(handlerId);
-
-      // Refund points only if they were already debited (i.e. status was APPROVED)
-      if (previousStatus === CashoutStatus.APPROVED) {
-        await this.ledgerService.credit({
-          userId: String(request.userId),
-          points: request.pointsRedeemed,
-          sourceType: LedgerSourceType.REDEMPTION,
-          sourceId: String(request._id),
-          note: `Refund: cashout request ${id} rejected after approval`,
-          createdBy: handlerId,
-        });
-      }
-
       await this.transactionModel.findOneAndUpdate(
         { cashoutRequestId: request._id },
         { status: TransactionStatus.FAILED },
@@ -182,7 +158,7 @@ export class WalletService {
   }
 
   async findMyWalletHistory(userId: string, page = 1, limit = 20) {
-    const filter = { userId };
+    const filter = { userId: { $in: [userId, new Types.ObjectId(userId)] } };
     const [data, total] = await Promise.all([
       this.transactionModel
         .find(filter)
@@ -205,7 +181,7 @@ export class WalletService {
   }
 
   async findMyCashoutRequests(userId: string, page = 1, limit = 20) {
-    const filter = { userId };
+    const filter = { userId: { $in: [userId, new Types.ObjectId(userId)] } };
     const [data, total] = await Promise.all([
       this.cashoutModel
         .find(filter)
@@ -225,7 +201,7 @@ export class WalletService {
     const [data, total] = await Promise.all([
       this.cashoutModel
         .find()
-        .populate('userId', 'fullName email phone')
+        .populate('userId', 'fullName email phone roles')
         .populate('approvedBy', 'fullName')
         .populate('paidBy', 'fullName')
         .skip((page - 1) * limit)

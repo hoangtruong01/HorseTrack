@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { AuditLogsViewer } from "@/features/wallet/components/audit-logs-viewer";
-import { mockAuditLogs } from "@/features/wallet/mock-wallet";
+import { mockAuditLogs } from "@/features/audit/mock-audit-logs";
 
 export default function AdminAuditLogsPage() {
   const [logs] = useState([...mockAuditLogs]);
