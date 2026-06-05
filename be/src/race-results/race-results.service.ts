@@ -556,7 +556,10 @@ export class RaceResultsService {
     };
 
     for (const result of results) {
-      if (result.rawFinishTimeMs === undefined || result.rawFinishTimeMs === null) {
+      if (
+        result.rawFinishTimeMs === undefined ||
+        result.rawFinishTimeMs === null
+      ) {
         result.rawFinishTimeMs = result.finishTimeMs;
       }
 

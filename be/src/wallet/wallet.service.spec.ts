@@ -5,7 +5,10 @@ import { Types } from 'mongoose';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 import { User } from '../users/schemas/user.schema';
-import { CashoutRequest, CashoutStatus } from './schemas/cashout-request.schema';
+import {
+  CashoutRequest,
+  CashoutStatus,
+} from './schemas/cashout-request.schema';
 import {
   TransactionStatus,
   WalletTransaction,
@@ -16,7 +19,12 @@ describe('WalletService', () => {
   let service: WalletService;
   let cashoutModel: { findById: jest.Mock };
   let transactionModel: { findOneAndUpdate: jest.Mock };
-  let ledgerService: { getBalance: jest.Mock; debit: jest.Mock; credit: jest.Mock };
+  let ledgerService: {
+    getBalance: jest.Mock;
+    debit: jest.Mock;
+    credit: jest.Mock;
+    updateNote: jest.Mock;
+  };
 
   const userId = new Types.ObjectId();
   const handlerId = new Types.ObjectId().toHexString();
@@ -40,13 +48,17 @@ describe('WalletService', () => {
       getBalance: jest.fn(),
       debit: jest.fn(),
       credit: jest.fn(),
+      updateNote: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WalletService,
         { provide: getModelToken(User.name), useValue: {} },
-        { provide: getModelToken(WalletTransaction.name), useValue: transactionModel },
+        {
+          provide: getModelToken(WalletTransaction.name),
+          useValue: transactionModel,
+        },
         { provide: getModelToken(CashoutRequest.name), useValue: cashoutModel },
         { provide: RewardPointLedgerService, useValue: ledgerService },
       ],
@@ -59,7 +71,11 @@ describe('WalletService', () => {
     const request = makeRequest();
     cashoutModel.findById.mockResolvedValue(request);
 
-    await service.processCashout(cashoutId.toHexString(), CashoutStatus.APPROVED, handlerId);
+    await service.processCashout(
+      cashoutId.toHexString(),
+      CashoutStatus.APPROVED,
+      handlerId,
+    );
 
     expect(ledgerService.getBalance).not.toHaveBeenCalled();
     expect(ledgerService.debit).not.toHaveBeenCalled();
@@ -69,21 +85,21 @@ describe('WalletService', () => {
     expect(request.save).toHaveBeenCalled();
   });
 
-  it('debits points when cashout is paid', async () => {
+  it('updates ledger note when cashout is paid', async () => {
     const request = makeRequest(CashoutStatus.APPROVED);
     cashoutModel.findById.mockResolvedValue(request);
-    ledgerService.getBalance.mockResolvedValue(5000);
 
-    await service.processCashout(cashoutId.toHexString(), CashoutStatus.PAID, handlerId);
+    await service.processCashout(
+      cashoutId.toHexString(),
+      CashoutStatus.PAID,
+      handlerId,
+    );
 
-    expect(ledgerService.debit).toHaveBeenCalledWith({
-      userId: userId.toHexString(),
-      points: 1000,
-      sourceType: LedgerSourceType.REDEMPTION,
-      sourceId: cashoutId.toHexString(),
-      note: 'Cashout paid (Code: RWD-TEST01)',
-      createdBy: handlerId,
-    });
+    expect(ledgerService.updateNote).toHaveBeenCalledWith(
+      cashoutId.toHexString(),
+      LedgerSourceType.REDEMPTION,
+      `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã thanh toán thành công.`,
+    );
     expect(transactionModel.findOneAndUpdate).toHaveBeenCalledWith(
       { cashoutRequestId: cashoutId },
       { status: TransactionStatus.SUCCESS },
@@ -93,14 +109,29 @@ describe('WalletService', () => {
     expect(request.paidAt).toBeInstanceOf(Date);
   });
 
-  it('rejects pending or approved cashout without refunding points', async () => {
+  it('refunds points and updates ledger note when cashout is rejected', async () => {
     const request = makeRequest(CashoutStatus.APPROVED);
     cashoutModel.findById.mockResolvedValue(request);
 
-    await service.processCashout(cashoutId.toHexString(), CashoutStatus.REJECTED, handlerId);
+    await service.processCashout(
+      cashoutId.toHexString(),
+      CashoutStatus.REJECTED,
+      handlerId,
+    );
 
-    expect(ledgerService.credit).not.toHaveBeenCalled();
-    expect(ledgerService.debit).not.toHaveBeenCalled();
+    expect(ledgerService.updateNote).toHaveBeenCalledWith(
+      cashoutId.toHexString(),
+      LedgerSourceType.REDEMPTION,
+      `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Bị từ chối.`,
+    );
+    expect(ledgerService.credit).toHaveBeenCalledWith({
+      userId: userId.toHexString(),
+      points: 1000,
+      sourceType: LedgerSourceType.REDEMPTION,
+      sourceId: cashoutId.toHexString(),
+      note: `Hoàn điểm do yêu cầu quy đổi bị từ chối (Mã: ${request.redemptionCode})`,
+      createdBy: handlerId,
+    });
     expect(transactionModel.findOneAndUpdate).toHaveBeenCalledWith(
       { cashoutRequestId: cashoutId },
       { status: TransactionStatus.FAILED },
@@ -108,24 +139,15 @@ describe('WalletService', () => {
     expect(request.status).toBe(CashoutStatus.REJECTED);
   });
 
-  it('does not pay cashout when current balance is insufficient', async () => {
-    const request = makeRequest(CashoutStatus.APPROVED);
-    cashoutModel.findById.mockResolvedValue(request);
-    ledgerService.getBalance.mockResolvedValue(500);
-
-    await expect(
-      service.processCashout(cashoutId.toHexString(), CashoutStatus.PAID, handlerId),
-    ).rejects.toThrow(BadRequestException);
-
-    expect(ledgerService.debit).not.toHaveBeenCalled();
-    expect(transactionModel.findOneAndUpdate).not.toHaveBeenCalled();
-  });
-
   it('blocks already processed requests', async () => {
     cashoutModel.findById.mockResolvedValue(makeRequest(CashoutStatus.PAID));
 
     await expect(
-      service.processCashout(cashoutId.toHexString(), CashoutStatus.PAID, handlerId),
+      service.processCashout(
+        cashoutId.toHexString(),
+        CashoutStatus.PAID,
+        handlerId,
+      ),
     ).rejects.toThrow(BadRequestException);
   });
 
@@ -133,7 +155,11 @@ describe('WalletService', () => {
     cashoutModel.findById.mockResolvedValue(null);
 
     await expect(
-      service.processCashout(cashoutId.toHexString(), CashoutStatus.PAID, handlerId),
+      service.processCashout(
+        cashoutId.toHexString(),
+        CashoutStatus.PAID,
+        handlerId,
+      ),
     ).rejects.toThrow(NotFoundException);
   });
 });
