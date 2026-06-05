@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -8,8 +8,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { WalletBalance } from "@/features/wallet/components/wallet-balance";
 import { TransactionHistory } from "@/features/wallet/components/transaction-history";
 import { CashoutRequestForm } from "@/features/wallet/components/cashout-request-form";
-import { mapWalletTransactions, type WalletUiTransaction } from "@/features/wallet/backend-wallet";
-import { walletApi } from "@/lib/api-client";
+import { mapLedgerTransactions, type WalletUiTransaction } from "@/features/wallet/backend-wallet";
+import { walletApi, rewardPointLedgerApi } from "@/lib/api-client";
 
 export default function JockeyWalletPage() {
   const [balance, setBalance] = useState(0);
@@ -20,9 +20,12 @@ export default function JockeyWalletPage() {
   const fetchWalletData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await walletApi.myHistory({ page: 1, limit: 100 });
-      setBalance(res.points ?? 0);
-      setTransactions(mapWalletTransactions(res.data || []));
+      const [historyRes, balanceRes] = await Promise.all([
+        rewardPointLedgerApi.myHistory({ page: 1, limit: 100 }),
+        rewardPointLedgerApi.myBalance(),
+      ]);
+      setBalance(balanceRes.balance ?? 0);
+      setTransactions(mapLedgerTransactions(historyRes.data || []));
     } catch (err: any) {
       toast.error(err.message || "Khong the tai thong tin vi tu Backend.");
     } finally {
@@ -80,7 +83,7 @@ export default function JockeyWalletPage() {
           </div>
 
           <div className="lg:col-span-7">
-            <TransactionHistory transactions={transactions} />
+            <TransactionHistory transactions={transactions} role="jockey" />
           </div>
         </div>
       )}

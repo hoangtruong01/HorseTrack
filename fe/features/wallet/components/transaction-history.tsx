@@ -1,7 +1,8 @@
 "use client";
 
-import { ArrowDownLeft, ArrowUpRight, Award, Calendar, Clock, Coins, Search, Sparkles } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Award, Calendar, Clock, Coins, Copy, Search, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
@@ -9,9 +10,10 @@ import type { WalletUiTransaction } from "../backend-wallet";
 
 export type TransactionHistoryProps = {
   transactions: WalletUiTransaction[];
+  role?: "owner" | "jockey" | "referee" | "spectator" | "admin" | "counter_staff";
 };
 
-export function TransactionHistory({ transactions }: TransactionHistoryProps) {
+export function TransactionHistory({ transactions, role }: TransactionHistoryProps) {
   const [filterType, setFilterType] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -23,6 +25,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
       if (filterType === "prizes") return matchesSearch && (tx.type === "prize_owner" || tx.type === "prize_jockey");
       if (filterType === "cashouts") return matchesSearch && tx.type.startsWith("withdrawal_");
       if (filterType === "predictions") return matchesSearch && (tx.type === "prediction_win" || tx.type === "prediction_refund");
+      if (filterType === "salary") return matchesSearch && tx.type === "salary_bonus";
       return matchesSearch;
     });
   }, [transactions, filterType, searchTerm]);
@@ -36,11 +39,33 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
     withdrawal_approved: { icon: ArrowUpRight, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: "Doi qua (Duyet)" },
     withdrawal_paid: { icon: ArrowUpRight, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Doi qua (Thanh cong)" },
     withdrawal_rejected: { icon: ArrowUpRight, color: "text-red-400 bg-red-500/10 border-red-500/20", label: "Doi qua (Tu choi)" },
+    withdrawal_refund: { icon: ArrowDownLeft, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Hoan diem doi qua" },
     prize_owner: { icon: Award, color: "text-primary bg-primary/10 border-primary/20", label: "Giai Owner" },
     prize_jockey: { icon: Award, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: "Giai Jockey" },
     prediction_win: { icon: Sparkles, color: "text-purple-400 bg-purple-500/10 border-purple-500/20", label: "Du doan thang" },
     prediction_refund: { icon: Coins, color: "text-sky-400 bg-sky-500/10 border-sky-500/20", label: "Hoan diem" },
+    salary_bonus: { icon: Award, color: "text-violet-400 bg-violet-500/10 border-violet-500/20", label: "Luong/Thuong" },
   };
+
+  const filterOptions = useMemo(() => {
+    const options = [{ id: "all", label: "Tat ca" }];
+    
+    if (role !== "referee" && role !== "spectator") {
+      options.push({ id: "prizes", label: "Chu/Nai ngua" });
+    }
+    
+    if (role !== "owner" && role !== "jockey" && role !== "referee") {
+      options.push({ id: "predictions", label: "Du doan" });
+    }
+
+    if (role === "referee" || role === "admin") {
+      options.push({ id: "salary", label: "Luong thuong" });
+    }
+
+    options.push({ id: "cashouts", label: "Doi qua" });
+    
+    return options;
+  }, [role]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
@@ -57,12 +82,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
         </div>
 
         <div className="flex flex-wrap gap-1.5 rounded-xl border border-border bg-muted/50 p-1.5">
-          {[
-            { id: "all", label: "Tat ca" },
-            { id: "prizes", label: "Chu/Nai ngua" },
-            { id: "predictions", label: "Du doan" },
-            { id: "cashouts", label: "Doi qua" },
-          ].map((item) => (
+          {filterOptions.map((item) => (
             <button
               key={item.id}
               onClick={() => setFilterType(item.id)}
@@ -102,7 +122,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
             </p>
           </div>
         ) : (
-          <div className="w-full overflow-x-auto select-none">
+          <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs sm:text-sm">
               <thead className="border-b border-border bg-muted/[0.03] text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                 <tr>
@@ -116,7 +136,9 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                 {filteredTransactions.map((tx) => {
                   const meta = typeMeta[tx.type] || { icon: Coins, color: "text-muted-foreground bg-muted border-border", label: "Giao dich" };
                   const Icon = meta.icon;
-                  const isPositive = ["deposit", "prize_owner", "prize_jockey", "prediction_win", "prediction_refund"].includes(tx.type);
+                  const isPositive = ["deposit", "prize_owner", "prize_jockey", "prediction_win", "prediction_refund", "salary_bonus", "withdrawal_refund"].includes(tx.type);
+                  const codeMatch = tx.description.match(/(RWD-[A-Z0-9]+)/);
+                  const code = codeMatch ? codeMatch[1] : null;
 
                   return (
                     <tr key={tx.id} className="transition hover:bg-muted/[0.015]">
@@ -135,7 +157,24 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                       </td>
                       <td className="px-4 py-3.5">
                         <p className="text-xs font-semibold text-foreground sm:text-sm">{tx.description}</p>
-                        <div className="mt-1 flex items-center gap-2">
+                        {code && (
+                          <div className="mt-1.5 flex items-center gap-2">
+                            <span className="rounded bg-muted px-2 py-0.5 font-mono text-xs font-bold text-foreground border border-border">
+                              {code}
+                            </span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(code);
+                                toast.success(`Da sao chep ma quy doi: ${code}`);
+                              }}
+                              className="cursor-pointer rounded p-1 text-muted-foreground/60 transition hover:bg-muted hover:text-foreground"
+                              title="Sao chep ma"
+                            >
+                              <Copy className="size-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        <div className="mt-1.5 flex items-center gap-2">
                           <StatusBadge
                             label={tx.status === "completed" ? "Thanh cong" : tx.status === "pending" ? "Dang cho" : "Tu choi/Loi"}
                             tone={tx.status === "completed" ? "green" : tx.status === "pending" ? "slate" : "red"}

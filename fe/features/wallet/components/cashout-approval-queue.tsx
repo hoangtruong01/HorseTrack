@@ -136,8 +136,8 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
                       <div className="flex items-center justify-end gap-2">
                         {req.status === "PENDING" && (
                           <>
-                            <Button onClick={() => handleAction(req.id, "APPROVED")} disabled={isProcessing !== null} size="sm" className="h-9 rounded-full bg-emerald-500 text-xs font-bold hover:bg-emerald-600">
-                              Phe duyet ma
+                            <Button onClick={() => handleAction(req.id, "PAID")} disabled={isProcessing !== null} size="sm" className="h-9 rounded-full bg-primary text-xs font-black uppercase shadow-[0_4px_12px_rgba(225,6,0,0.25)] hover:bg-[#B80500]">
+                              <Gift className="mr-1.5 size-3.5" /> Xac nhan trao qua
                             </Button>
                             <Button
                               onClick={() => {
@@ -153,25 +153,7 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
                             </Button>
                           </>
                         )}
-                        {req.status === "APPROVED" && (
-                          <>
-                            <Button onClick={() => handleAction(req.id, "PAID")} disabled={isProcessing !== null} size="sm" className="h-9 rounded-full bg-primary text-xs font-black uppercase shadow-[0_4px_12px_rgba(225,6,0,0.25)] hover:bg-[#B80500]">
-                              <Gift className="mr-1.5 size-3.5" /> Xac nhan trao qua
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                setSelectedRequest(req);
-                                setShowRejectDialog(true);
-                              }}
-                              disabled={isProcessing !== null}
-                              variant="outline"
-                              size="sm"
-                              className="h-9 rounded-full border-border text-xs font-bold text-foreground hover:bg-muted/5"
-                            >
-                              Huy bo duyet
-                            </Button>
-                          </>
-                        )}
+
                       </div>
                     </td>
                   </tr>

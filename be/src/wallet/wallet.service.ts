@@ -125,21 +125,26 @@ export class WalletService {
     }
 
     if (status === CashoutStatus.PAID) {
-      const currentPoints = await this.ledgerService.getBalance(
-        String(request.userId),
+      // Update note to mark it as paid, avoiding double point deduction
+      await this.ledgerService.updateNote(
+        String(request._id),
+        LedgerSourceType.REDEMPTION,
+        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã thanh toán thành công.`
       );
-      if (currentPoints < request.pointsRedeemed) {
-        throw new BadRequestException(
-          `User does not have enough points. Current: ${currentPoints}, required: ${request.pointsRedeemed}`,
-        );
-      }
-
-      await this.ledgerService.debit({
+    } else if (status === CashoutStatus.REJECTED) {
+      // Update original deduction note to show it was rejected
+      await this.ledgerService.updateNote(
+        String(request._id),
+        LedgerSourceType.REDEMPTION,
+        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Bị từ chối.`
+      );
+      // Refund points if cashout is rejected
+      await this.ledgerService.credit({
         userId: String(request.userId),
         points: request.pointsRedeemed,
         sourceType: LedgerSourceType.REDEMPTION,
         sourceId: String(request._id),
-        note: `Cashout paid (Code: ${request.redemptionCode})`,
+        note: `Hoàn điểm do yêu cầu quy đổi bị từ chối (Mã: ${request.redemptionCode})`,
         createdBy: handlerId,
       });
     }

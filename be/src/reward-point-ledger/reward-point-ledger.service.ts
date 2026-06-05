@@ -60,6 +60,13 @@ export class RewardPointLedgerService {
     return entry;
   }
 
+  async updateNote(sourceId: string, sourceType: LedgerSourceType, newNote: string): Promise<void> {
+    await this.ledgerModel.findOneAndUpdate(
+      { sourceId, sourceType },
+      { $set: { note: newNote } }
+    ).exec();
+  }
+
   async debit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
     const current = await this.getBalance(params.userId);
     if (current < params.points) {

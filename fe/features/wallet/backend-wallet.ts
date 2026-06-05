@@ -1,4 +1,4 @@
-import type { CashoutItem, WalletTxItem } from "@/lib/api-client";
+import type { CashoutItem, WalletTxItem, LedgerEntryItem } from "@/lib/api-client";
 
 export type WalletUiTransaction = {
   id: string;
@@ -8,10 +8,12 @@ export type WalletUiTransaction = {
     | "withdrawal_approved"
     | "withdrawal_paid"
     | "withdrawal_rejected"
+    | "withdrawal_refund"
     | "prize_owner"
     | "prize_jockey"
     | "prediction_win"
-    | "prediction_refund";
+    | "prediction_refund"
+    | "salary_bonus";
   amount: number;
   description: string;
   createdAt: string;
@@ -72,6 +74,42 @@ export function mapWalletTransaction(tx: WalletTxItem): WalletUiTransaction {
 
 export function mapWalletTransactions(txs: WalletTxItem[] = []) {
   return txs.map(mapWalletTransaction);
+}
+
+export function mapLedgerTransaction(ledger: LedgerEntryItem): WalletUiTransaction {
+  let type: WalletUiTransaction["type"] = "deposit";
+
+  if (ledger.sourceType === "race_win_reward") {
+    type = "prize_owner";
+  } else if (ledger.sourceType === "prediction_reward") {
+    type = ledger.pointsDelta >= 0 ? "prediction_win" : "prediction_refund";
+  } else if (ledger.sourceType === "redemption") {
+    if (ledger.pointsDelta > 0) {
+      type = "withdrawal_refund";
+    } else {
+      type = "withdrawal_requested";
+      if (ledger.note?.toLowerCase().includes("thanh cong") || ledger.note?.toLowerCase().includes("paid")) {
+        type = "withdrawal_paid";
+      } else if (ledger.note?.toLowerCase().includes("từ chối") || ledger.note?.toLowerCase().includes("tu choi")) {
+        type = "withdrawal_rejected";
+      }
+    }
+  } else if (ledger.sourceType === "referee_salary") {
+    type = "salary_bonus";
+  }
+
+  return {
+    id: ledger._id,
+    type,
+    amount: Math.abs(ledger.pointsDelta || 0),
+    description: ledger.note || "Giao dich vi diem thuong",
+    status: "completed", // Ledger entries are inherently completed
+    createdAt: ledger.createdAt || new Date().toISOString(),
+  };
+}
+
+export function mapLedgerTransactions(ledgers: LedgerEntryItem[] = []) {
+  return ledgers.map(mapLedgerTransaction);
 }
 
 export function mapCashoutToQueueRequest(cashout: CashoutItem): CashoutQueueRequest {
