@@ -111,7 +111,7 @@ export class PredictionsService {
   }
 
   async findMyPredictions(userId: string, page = 1, limit = 20) {
-    const filter = { userId };
+    const filter = { userId: new Types.ObjectId(userId) };
     const [data, total] = await Promise.all([
       this.predictionModel
         .find(filter)
@@ -150,7 +150,7 @@ export class PredictionsService {
 
   async cancelPredictionsForRace(raceId: string): Promise<void> {
     const pending = await this.predictionModel.find({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
       status: PredictionStatus.PENDING,
     });
 
@@ -174,21 +174,21 @@ export class PredictionsService {
     }
 
     await this.predictionModel.updateMany(
-      { raceId, status: PredictionStatus.PENDING },
+      { raceId: new Types.ObjectId(raceId), status: PredictionStatus.PENDING },
       { $set: { status: PredictionStatus.CANCELLED, evaluatedAt: new Date() } },
     );
   }
 
   async payoutBetsForRace(raceId: string): Promise<void> {
     const winners = await this.resultModel.find({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
       status: RaceResultStatus.PUBLISHED,
       rank: 1,
     });
     const winnerHorseIds = winners.map((w) => String(w.horseId));
 
     const predictions = await this.predictionModel.find({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
       status: PredictionStatus.PENDING,
     });
     if (predictions.length === 0) return;
