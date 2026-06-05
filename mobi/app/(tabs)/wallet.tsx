@@ -1,0 +1,338 @@
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
+import { walletApi, predictionsApi, type PredictionItem, type WalletTxItem } from '../../lib/api-client';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
+export default function WalletScreen() {
+  const [balance, setBalance] = useState({ points: 0, cash: 0 });
+  const [activeTab, setActiveTab] = useState<'PREDICTIONS' | 'LEDGER'>('PREDICTIONS');
+  const [predictions, setPredictions] = useState<PredictionItem[]>([]);
+  const [ledger, setLedger] = useState<WalletTxItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadWalletData = async () => {
+    try {
+      // 1. Load wallet history (contains balance and points)
+      const walletRes = await walletApi.myHistory({ page: 1, limit: 100 });
+      if (walletRes) {
+        setBalance({
+          points: walletRes.points ?? 0,
+          cash: walletRes.balance ?? 0,
+        });
+        setLedger(walletRes.data || []);
+      }
+
+      // 2. Load predictions list
+      const predRes = await predictionsApi.listMyPredictions({ page: 1, limit: 100 });
+      if (predRes && predRes.data) {
+        setPredictions(predRes.data);
+      }
+    } catch (err) {
+      console.error('Lỗi tải dữ liệu ví:', err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWalletData();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadWalletData();
+  };
+
+  const getPredictionStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'ĐANG CHỜ';
+      case 'WON': return 'THẮNG';
+      case 'LOST': return 'THUA';
+      case 'CANCELLED': return 'ĐÃ HỦY';
+      default: return status;
+    }
+  };
+
+  const getPredictionStatusColor = (status: string) => {
+    switch (status) {
+      case 'WON': return '#067E6A';
+      case 'LOST': return '#E10600';
+      case 'PENDING': return '#E1A200';
+      default: return '#58585B';
+    }
+  };
+
+  const renderPredictionItem = ({ item }: { item: PredictionItem }) => {
+    const raceName = typeof item.raceId === 'object' ? item.raceId?.name : 'Trận đấu';
+    const horseName = typeof item.predictedHorseId === 'object' ? item.predictedHorseId?.name : 'Chiến mã';
+    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—';
+    const pointsText = item.status === 'WON' ? `+${item.rewardPoints} Pts` : `-${item.betPoints} Pts`;
+
+    return (
+      <View style={styles.listItemCard}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardMainTitle} numberOfLines={1}>{raceName?.toUpperCase()}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: getPredictionStatusColor(item.status) }]}>
+            <Text style={styles.statusBadgeText}>{getPredictionStatusText(item.status)}</Text>
+          </View>
+        </View>
+
+        <View style={styles.cardBody}>
+          <Text style={styles.cardSubText}>Dự đoán chiến mã: <Text style={styles.whiteBoldText}>{horseName?.toUpperCase()}</Text></Text>
+          <Text style={styles.cardSubText}>Đặt cược: <Text style={styles.whiteBoldText}>{item.betPoints} Pts</Text></Text>
+          <Text style={styles.dateText}>{dateStr}</Text>
+        </View>
+
+        {item.status !== 'PENDING' && (
+          <View style={styles.rewardSection}>
+            <Text style={[styles.rewardValue, { color: item.status === 'WON' ? '#067E6A' : '#E10600' }]}>
+              {pointsText}
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderLedgerItem = ({ item }: { item: WalletTxItem }) => {
+    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—';
+    const isPositive = item.points > 0 || item.amount > 0;
+    const valueText = item.points !== 0 ? `${isPositive ? '+' : ''}${item.points} Pts` : `${isPositive ? '+' : ''}${item.amount.toLocaleString()} VNĐ`;
+
+    return (
+      <View style={styles.listItemCard}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardMainTitle} numberOfLines={1}>{item.description || 'Giao dịch ví'}</Text>
+          <Text style={[styles.ledgerValue, { color: isPositive ? '#067E6A' : '#E10600' }]}>{valueText}</Text>
+        </View>
+
+        <View style={styles.cardBody}>
+          <Text style={styles.cardSubText}>Loại giao dịch: <Text style={styles.whiteBoldText}>{item.type.toUpperCase()}</Text></Text>
+          <Text style={styles.cardSubText}>Trạng thái: <Text style={styles.whiteBoldText}>{item.status.toUpperCase()}</Text></Text>
+          <Text style={styles.dateText}>{dateStr}</Text>
+        </View>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#E10600" />
+        <Text style={styles.loadingText}>Đang tải lịch sử giao dịch...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Wallet Summary Card */}
+      <View style={styles.walletHeaderCard}>
+        <View style={styles.walletBox}>
+          <MaterialIcons name="stars" size={24} color="#E10600" />
+          <Text style={styles.walletLabel}>VÍ ĐIỂM DỰ ĐOÁN</Text>
+          <Text style={styles.walletValue}>{balance.points} <Text style={styles.pointsUnit}>Pts</Text></Text>
+        </View>
+        
+        <View style={styles.verticalDivider} />
+
+        <View style={styles.walletBox}>
+          <MaterialIcons name="monetization-on" size={24} color="#067E6A" />
+          <Text style={styles.walletLabel}>VÍ TIỀN MẶT DEMO</Text>
+          <Text style={styles.walletValue}>{balance.cash.toLocaleString()} <Text style={styles.pointsUnit}>đ</Text></Text>
+        </View>
+      </View>
+
+      {/* Internal Sub-Tabs */}
+      <View style={styles.subTabBar}>
+        <TouchableOpacity 
+          style={[styles.subTabButton, activeTab === 'PREDICTIONS' && styles.subTabButtonActive]}
+          onPress={() => setActiveTab('PREDICTIONS')}
+        >
+          <Text style={[styles.subTabText, activeTab === 'PREDICTIONS' && styles.subTabTextActive]}>LỊCH SỬ DỰ ĐOÁN</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.subTabButton, activeTab === 'LEDGER' && styles.subTabButtonActive]}
+          onPress={() => setActiveTab('LEDGER')}
+        >
+          <Text style={[styles.subTabText, activeTab === 'LEDGER' && styles.subTabTextActive]}>BIẾN ĐỘNG SỐ DƯ</Text>
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={(activeTab === 'PREDICTIONS' ? predictions : ledger) as any[]}
+        renderItem={activeTab === 'PREDICTIONS' ? (renderPredictionItem as any) : (renderLedgerItem as any)}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.listContent}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <MaterialIcons name="history" size={40} color="#58585B" />
+            <Text style={styles.emptyText}>Chưa ghi nhận dữ liệu giao dịch nào.</Text>
+          </View>
+        }
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1C1C25',
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#1C1C25',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#AAAAAA',
+    fontSize: 14,
+    marginTop: 12,
+  },
+  walletHeaderCard: {
+    flexDirection: 'row',
+    backgroundColor: '#15151E',
+    borderBottomWidth: 1,
+    borderBottomColor: '#303037',
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  walletBox: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  walletLabel: {
+    color: '#58585B',
+    fontSize: 10,
+    fontWeight: '800',
+    marginTop: 6,
+    letterSpacing: 0.5,
+  },
+  walletValue: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '900',
+    marginTop: 4,
+    fontFamily: Platform.OS === 'ios' ? 'Courier-Bold' : 'monospace',
+  },
+  pointsUnit: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#AAAAAA',
+  },
+  verticalDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#303037',
+  },
+  subTabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#15151E',
+    borderBottomWidth: 1,
+    borderBottomColor: '#303037',
+    height: 40,
+  },
+  subTabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  subTabButtonActive: {
+    borderBottomColor: '#E10600',
+  },
+  subTabText: {
+    color: '#AAAAAA',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  subTabTextActive: {
+    color: '#FFFFFF',
+  },
+  listContent: {
+    padding: 16,
+  },
+  listItemCard: {
+    backgroundColor: '#15151E',
+    borderWidth: 1,
+    borderColor: '#303037',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 12,
+    position: 'relative',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  cardMainTitle: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+    flex: 1,
+    marginRight: 10,
+  },
+  statusBadge: {
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  statusBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 8,
+    fontWeight: '900',
+  },
+  cardBody: {
+    gap: 4,
+  },
+  cardSubText: {
+    color: '#AAAAAA',
+    fontSize: 11,
+  },
+  whiteBoldText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  dateText: {
+    color: '#58585B',
+    fontSize: 10,
+    marginTop: 2,
+  },
+  rewardSection: {
+    position: 'absolute',
+    bottom: 14,
+    right: 14,
+  },
+  rewardValue: {
+    fontSize: 14,
+    fontWeight: '900',
+    fontFamily: Platform.OS === 'ios' ? 'Courier-Bold' : 'monospace',
+  },
+  ledgerValue: {
+    fontSize: 13,
+    fontWeight: '900',
+    fontFamily: Platform.OS === 'ios' ? 'Courier-Bold' : 'monospace',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    color: '#AAAAAA',
+    fontSize: 13,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+});

@@ -56,6 +56,9 @@ export class RaceResult {
   @Prop()
   finishTimeMs?: number;
 
+  @Prop()
+  rawFinishTimeMs?: number;
+
   @Prop({ default: 0 })
   points?: number;
 

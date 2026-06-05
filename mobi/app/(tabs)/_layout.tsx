@@ -1,33 +1,70 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const themeColors = Colors[colorScheme ?? 'dark'];
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarActiveTintColor: themeColors.tint,
+        tabBarInactiveTintColor: themeColors.tabIconDefault,
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: colorScheme === 'dark' ? '#15151E' : '#FFFFFF',
+          borderBottomWidth: 1,
+          borderBottomColor: colorScheme === 'dark' ? '#303037' : '#D3DADE',
+        },
+        headerTitleStyle: {
+          color: themeColors.text,
+          fontWeight: '900',
+          fontSize: 16,
+          letterSpacing: 1,
+        },
+        tabBarStyle: {
+          backgroundColor: colorScheme === 'dark' ? '#15151E' : '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: colorScheme === 'dark' ? '#303037' : '#D3DADE',
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Giải Đấu',
+          headerTitle: 'HORSETRACK TOURNAMENTS',
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="emoji-events" color={color} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Lịch Đua',
+          headerTitle: 'LỊCH TRÌNH GIẢI ĐUA',
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="directions-run" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="wallet"
+        options={{
+          title: 'Dự Đoán',
+          headerTitle: 'VÍ ĐIỂM & DỰ ĐOÁN',
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Cá Nhân',
+          headerTitle: 'HỒ SƠ HỘI VIÊN',
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person" color={color} />,
         }}
       />
     </Tabs>

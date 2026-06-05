@@ -281,6 +281,7 @@ export class RaceResultsService {
           jockeyUserId: res.jockeyUserId,
           rank: res.rank,
           finishTimeMs: res.finishTimeMs,
+          rawFinishTimeMs: res.finishTimeMs,
           outcome: res.outcome,
           incident: res.incident,
           points,
@@ -387,6 +388,7 @@ export class RaceResultsService {
       jockeyUserId: registration.jockeyUserId,
       rank: dto.rank,
       finishTimeMs: dto.finishTimeMs,
+      rawFinishTimeMs: dto.finishTimeMs,
       outcome: dto.outcome,
       points,
       prizeAmount: 0,
@@ -554,6 +556,10 @@ export class RaceResultsService {
     };
 
     for (const result of results) {
+      if (result.rawFinishTimeMs === undefined || result.rawFinishTimeMs === null) {
+        result.rawFinishTimeMs = result.finishTimeMs;
+      }
+
       // Find violations for this registration or horse
       const horseViolations = violations.filter(
         (v) =>
@@ -587,17 +593,28 @@ export class RaceResultsService {
         penaltyTimeMs > 0 &&
         result.outcome === RaceResultOutcome.FINISHED
       ) {
-        // If it was simulated or recorded with a time, apply the penalty
-        if (result.finishTimeMs) {
-          result.finishTimeMs += penaltyTimeMs;
+        if (result.rawFinishTimeMs) {
+          result.finishTimeMs = result.rawFinishTimeMs + penaltyTimeMs;
         }
+      } else {
+        result.finishTimeMs = result.rawFinishTimeMs;
+      }
+
+      let baseNote = result.note || '';
+      const splitIdx = baseNote.indexOf(' | Quy đổi phạt:');
+      if (splitIdx !== -1) {
+        baseNote = baseNote.substring(0, splitIdx);
+      } else if (baseNote.startsWith('Quy đổi phạt:')) {
+        baseNote = '';
       }
 
       if (notes.length > 0) {
         const violationNotes = notes.join(', ');
-        result.note = result.note
-          ? `${result.note} | Quy đổi phạt: ${violationNotes}`
+        result.note = baseNote
+          ? `${baseNote} | Quy đổi phạt: ${violationNotes}`
           : `Quy đổi phạt: ${violationNotes}`;
+      } else {
+        result.note = baseNote || undefined;
       }
 
       await result.save();
@@ -666,7 +683,10 @@ export class RaceResultsService {
     if (dto.outcome !== undefined) result.outcome = dto.outcome;
     if (dto.incident !== undefined) result.incident = dto.incident;
     if (dto.rank !== undefined) result.rank = dto.rank;
-    if (dto.finishTimeMs !== undefined) result.finishTimeMs = dto.finishTimeMs;
+    if (dto.finishTimeMs !== undefined) {
+      result.finishTimeMs = dto.finishTimeMs;
+      result.rawFinishTimeMs = dto.finishTimeMs;
+    }
     if (dto.note !== undefined) result.note = dto.note;
 
     if (result.outcome === RaceResultOutcome.FINISHED && result.rank) {
@@ -675,6 +695,7 @@ export class RaceResultsService {
       result.points = 0;
       result.rank = undefined;
       result.finishTimeMs = undefined;
+      result.rawFinishTimeMs = undefined;
     }
 
     return result.save();
@@ -722,6 +743,7 @@ export class RaceResultsService {
         result.incident = item.incident ?? RaceIncident.NONE;
         result.rank = item.rank;
         result.finishTimeMs = item.finishTimeMs;
+        result.rawFinishTimeMs = item.finishTimeMs;
         result.note = item.note;
         result.points = points;
         await result.save();
@@ -748,6 +770,7 @@ export class RaceResultsService {
           jockeyUserId: registration.jockeyUserId,
           rank: item.rank,
           finishTimeMs: item.finishTimeMs,
+          rawFinishTimeMs: item.finishTimeMs,
           outcome: item.outcome,
           incident: item.incident ?? RaceIncident.NONE,
           points,

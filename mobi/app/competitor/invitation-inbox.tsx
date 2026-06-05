@@ -1,0 +1,264 @@
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
+import { jockeyInvitationsApi } from '../../lib/api-client';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
+export default function InvitationInboxScreen() {
+  const [invitations, setInvitations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadInvitations = async () => {
+    try {
+      const res = await jockeyInvitationsApi.list({ page: 1, limit: 100 });
+      if (res) {
+        setInvitations(res.data || res);
+      }
+    } catch (err) {
+      console.error('Lỗi lấy danh sách lời mời:', err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInvitations();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadInvitations();
+  };
+
+  const handleRespond = async (invitationId: string, response: 'accepted' | 'rejected') => {
+    const actionLabel = response === 'accepted' ? 'chấp nhận' : 'từ chối';
+    Alert.alert('Xác nhận', `Bạn có chắc muốn ${actionLabel} lời mời này?`, [
+      { text: 'Hủy', style: 'cancel' },
+      {
+        text: 'Đồng ý',
+        onPress: async () => {
+          try {
+            await jockeyInvitationsApi.respond(invitationId, response);
+            Alert.alert('Thành công', `Đã ${actionLabel} lời mời!`);
+            loadInvitations();
+          } catch (err: any) {
+            Alert.alert('Lỗi', err.message || 'Không thể phản hồi lời mời.');
+          }
+        },
+      },
+    ]);
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'ĐANG CHỜ';
+      case 'accepted': return 'ĐÃ CHẤP NHẬN';
+      case 'rejected': return 'ĐÃ TỪ CHỐI';
+      default: return status.toUpperCase();
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'accepted': return '#067E6A';
+      case 'rejected': return '#E10600';
+      default: return '#E1A200';
+    }
+  };
+
+  const renderItem = ({ item }: { item: any }) => {
+    const raceName = item.raceId?.name || 'Trận đấu';
+    const tourName = item.tournamentId?.name || 'Giải đua';
+    const horseName = item.horseId?.name || 'Chiến mã';
+    const ownerName = item.ownerId?.fullName || 'Chủ trại';
+    const isPending = item.status === 'pending';
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View>
+            <Text style={styles.tourLabel} numberOfLines={1}>{tourName.toUpperCase()}</Text>
+            <Text style={styles.raceName} numberOfLines={1}>{raceName.toUpperCase()}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+            <Text style={styles.statusBadgeText}>{getStatusText(item.status)}</Text>
+          </View>
+        </View>
+
+        <View style={styles.cardBody}>
+          <View style={styles.infoRow}>
+            <MaterialIcons name="pets" size={14} color="#E10600" />
+            <Text style={styles.infoText}>Chiến mã: <Text style={styles.whiteText}>{horseName.toUpperCase()}</Text></Text>
+          </View>
+          <View style={styles.infoRow}>
+            <MaterialIcons name="person" size={14} color="#AAAAAA" />
+            <Text style={styles.infoText}>Chủ ngựa: <Text style={styles.whiteText}>{ownerName}</Text></Text>
+          </View>
+        </View>
+
+        {isPending && (
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.rejectButton]}
+              onPress={() => handleRespond(item._id, 'rejected')}
+            >
+              <Text style={styles.actionButtonText}>TỪ CHỐI</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.acceptButton]}
+              onPress={() => handleRespond(item._id, 'accepted')}
+            >
+              <Text style={styles.actionButtonText}>CHẤP NHẬN</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#E10600" />
+        <Text style={styles.loadingText}>Đang tải danh sách lời mời...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={invitations}
+        renderItem={renderItem}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.listContent}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <MaterialIcons name="mail-outline" size={48} color="#58585B" />
+            <Text style={styles.emptyText}>Hòm thư lời mời của bạn đang trống.</Text>
+          </View>
+        }
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1C1C25',
+  },
+  listContent: {
+    padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#1C1C25',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#AAAAAA',
+    fontSize: 14,
+    marginTop: 12,
+  },
+  card: {
+    backgroundColor: '#15151E',
+    borderWidth: 1,
+    borderColor: '#303037',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1C1C25',
+    paddingBottom: 10,
+    marginBottom: 10,
+  },
+  tourLabel: {
+    color: '#E10600',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  raceName: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  statusBadge: {
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  statusBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 8,
+    fontWeight: '900',
+  },
+  cardBody: {
+    gap: 6,
+    marginBottom: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  infoText: {
+    color: '#AAAAAA',
+    fontSize: 12,
+  },
+  whiteText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#1C1C25',
+    paddingTop: 12,
+  },
+  actionButton: {
+    flex: 1,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rejectButton: {
+    backgroundColor: '#303037',
+    borderWidth: 1,
+    borderColor: '#E10600',
+  },
+  acceptButton: {
+    backgroundColor: '#E10600',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 80,
+  },
+  emptyText: {
+    color: '#AAAAAA',
+    fontSize: 13,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+});

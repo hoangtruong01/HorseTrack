@@ -1,98 +1,279 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
+import { tournamentsApi, type TournamentItem } from '../../lib/api-client';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useRouter } from 'expo-router';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function TournamentsScreen() {
+  const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
 
-export default function HomeScreen() {
+  const loadTournaments = async () => {
+    try {
+      const res = await tournamentsApi.list({ page: 1, limit: 100 });
+      if (res && res.data) {
+        setTournaments(res.data);
+      }
+    } catch (err) {
+      console.error('Lỗi lấy danh sách giải đấu:', err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTournaments();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadTournaments();
+  };
+
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'active':
+      case 'ACTIVE':
+        return styles.statusActive;
+      case 'completed':
+      case 'COMPLETED':
+        return styles.statusCompleted;
+      default:
+        return styles.statusScheduled;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active':
+      case 'ACTIVE':
+        return 'ĐANG DIỄN RA';
+      case 'completed':
+      case 'COMPLETED':
+        return 'ĐÃ KẾT THÚC';
+      case 'scheduled':
+      case 'SCHEDULED':
+        return 'SẮP DIỄN RA';
+      default:
+        return status;
+    }
+  };
+
+  const renderItem = ({ item }: { item: TournamentItem }) => {
+    const totalPrize = item.prizePool ? `${(item.prizePool / 1000000).toFixed(1)}M Điểm` : '—';
+    const startDate = item.startDate ? new Date(item.startDate).toLocaleDateString('vi-VN') : '—';
+    const endDate = item.endDate ? new Date(item.endDate).toLocaleDateString('vi-VN') : '—';
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.tournamentName} numberOfLines={1}>{item.name.toUpperCase()}</Text>
+          <View style={[styles.statusBadge, getStatusStyle(item.status)]}>
+            <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
+          </View>
+        </View>
+
+        <Text style={styles.description} numberOfLines={2}>
+          {item.description || 'Không có mô tả chi tiết cho giải đấu này.'}
+        </Text>
+
+        <View style={styles.divider} />
+
+        <View style={styles.cardFooter}>
+          <View style={styles.infoRow}>
+            <MaterialIcons name="location-on" size={14} color="#E10600" />
+            <Text style={styles.infoText}>{item.location || 'Trường đua Quốc tế'}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <MaterialIcons name="date-range" size={14} color="#AAAAAA" />
+            <Text style={styles.infoText}>{startDate} - {endDate}</Text>
+          </View>
+        </View>
+
+        <View style={styles.prizeSection}>
+          <Text style={styles.prizeLabel}>TỔNG GIẢI THƯỞNG</Text>
+          <Text style={styles.prizeValue}>{totalPrize}</Text>
+        </View>
+
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => router.push({ pathname: '/(tabs)/explore', params: { tournamentId: item._id } })}
+        >
+          <Text style={styles.actionButtonText}>XEM LỊCH TRÌNH ĐUA</Text>
+          <MaterialIcons name="arrow-forward" size={16} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#E10600" />
+        <Text style={styles.loadingText}>Đang tải danh sách giải đấu...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={tournaments}
+        renderItem={renderItem}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.listContent}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <MaterialIcons name="sentiment-dissatisfied" size={48} color="#58585B" />
+            <Text style={styles.emptyText}>Hiện chưa có giải đấu nào được công bố.</Text>
+          </View>
+        }
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#1C1C25',
+  },
+  listContent: {
+    padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#1C1C25',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#AAAAAA',
+    fontSize: 14,
+    marginTop: 12,
+  },
+  card: {
+    backgroundColor: '#15151E',
+    borderWidth: 1,
+    borderColor: '#303037',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  tournamentName: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '900',
+    flex: 1,
+    marginRight: 8,
+    fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-CondensedBold' : 'sans-serif-condensed',
+  },
+  statusBadge: {
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  statusActive: {
+    backgroundColor: '#E10600',
+  },
+  statusCompleted: {
+    backgroundColor: '#067E6A',
+  },
+  statusScheduled: {
+    backgroundColor: '#303037',
+  },
+  statusText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  description: {
+    color: '#AAAAAA',
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#303037',
+    marginBottom: 12,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+  },
+  infoText: {
+    color: '#E0DEDC',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  prizeSection: {
+    backgroundColor: 'rgba(225, 6, 0, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(225, 6, 0, 0.2)',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  prizeLabel: {
+    color: '#E10600',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
+  prizeValue: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '900',
+    fontFamily: Platform.OS === 'ios' ? 'Courier-Bold' : 'monospace',
+  },
+  actionButton: {
+    backgroundColor: '#E10600',
+    borderRadius: 20,
+    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    color: '#AAAAAA',
+    fontSize: 14,
+    marginTop: 12,
+    textAlign: 'center',
   },
 });

@@ -81,6 +81,11 @@ export class PredictionsService {
     }
 
     const betAmount = dto.betPoints || 0;
+    if (betAmount === 1) {
+      throw new BadRequestException(
+        'Điểm cược không hợp lệ. Chỉ chấp nhận cược miễn phí (0 Pts) hoặc cược từ 2 Pts trở lên.',
+      );
+    }
     if (betAmount >= 2) {
       const balance = await this.ledgerService.getBalance(userId);
       if (balance < betAmount) {
