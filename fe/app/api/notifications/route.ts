@@ -17,24 +17,6 @@ function decodeJwtPayload(token: string): any {
   }
 }
 
-// Fallback mock notifications
-const mockNotifications = [
-  {
-    _id: "notif-1",
-    title: "Chào mừng",
-    body: "Chào mừng bạn đến với hệ thống HorseTrack!",
-    isRead: false,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: "notif-2",
-    title: "Kết quả đua",
-    body: "Cuộc đua số 1 đã có kết quả chính thức.",
-    isRead: false,
-    createdAt: new Date().toISOString(),
-  }
-];
-
 export async function GET(request: Request) {
   try {
     const cookieStore = await cookies();
@@ -67,10 +49,9 @@ export async function GET(request: Request) {
       console.warn("Backend sập hoặc lỗi, fallback dùng mock notifications:", backendError);
     }
 
-    // Fallback
     return NextResponse.json({
       success: true,
-      notifications: mockNotifications,
+      notifications: Notification,
     });
   } catch (err: any) {
     return NextResponse.json(
