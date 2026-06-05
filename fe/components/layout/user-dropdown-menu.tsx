@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { User, Settings, ChevronDown, Globe, Moon, Sun } from "lucide-react";
+import { User, Settings, ChevronDown, Globe, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
 
 export type UserDropdownMenuProps = {
   userName?: string;
@@ -21,6 +22,22 @@ export function UserDropdownMenu({
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { i18n } = useTranslation();
+  const { logout } = useAuth();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const closeMenu = () => {
     setIsOpen(false);
@@ -36,7 +53,7 @@ export function UserDropdownMenu({
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -90,16 +107,21 @@ export function UserDropdownMenu({
               <Settings className="size-4.5" />
               <span>Settings</span>
             </Link>
+
+            {/* Logout Button */}
+            <button
+              onClick={() => {
+                closeMenu();
+                logout();
+              }}
+              className="w-full flex items-center gap-3 border-t border-border px-5 py-3.5 text-sm font-semibold text-red-500 hover:text-red-600 transition hover:bg-secondary text-left cursor-pointer"
+            >
+              <LogOut className="size-4.5" />
+              <span>Logout</span>
+            </button>
           </div>
        )}
 
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={closeMenu}
-          aria-hidden="true"
-        />
-      )}
     </div>
   );
 }
