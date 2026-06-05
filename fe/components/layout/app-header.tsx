@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, Wallet } from "lucide-react";
 
 import { publicNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
@@ -23,15 +23,54 @@ export function AppHeader({
 }: AppHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const [points, setPoints] = useState<number | null>(null);
+
+  const getWalletHref = () => {
+    if (!user) return "#";
+    let role = user.roles[0] || "spectator";
+    if (role === "counter_staff") {
+      role = "counter-staff";
+    }
+    if (role === "counter-staff") {
+      return "/counter-staff";
+    }
+    return `/${role}/wallet`;
+  };
+
+  useEffect(() => {
+    if (!user) {
+      setPoints(null);
+      return;
+    }
+
+    async function fetchPoints() {
+      try {
+        const res = await fetch("/api/wallet");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            setPoints(data.points ?? 0);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch wallet points:", err);
+      }
+    }
+
+    fetchPoints();
+    const interval = setInterval(fetchPoints, 10000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md",
+        "sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md w-full",
         className,
       )}
     >
-      <div className="f1-container flex min-h-[76px] items-center justify-between gap-4">
+      {/* Đã sửa f1-container thành w-full px-4 md:px-6 để bám sát 2 lề màn hình */}
+      <div className="w-full px-6 md:px-6 flex min-h-[76px] items-center justify-between gap-4">
         <Link
           href="/"
           className="group flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -67,6 +106,15 @@ export function AppHeader({
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
             <>
+              <Link
+                href={getWalletHref()}
+                className="flex items-center gap-2 rounded-xl border border-border bg-card/40 hover:bg-card px-4 py-2 text-xs font-black uppercase tracking-wider text-foreground transition duration-150"
+              >
+                <Wallet className="size-4 text-primary" />
+                <span>
+                  {points !== null ? `${points.toLocaleString("vi-VN")} Điểm` : "Lấy số dư..."}
+                </span>
+              </Link>
               <NotificationsBell />
               <UserDropdownMenu
                 userName={user.fullName}
@@ -84,21 +132,38 @@ export function AppHeader({
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen((open) => !open)}
-          className="flex size-10 items-center justify-center rounded-xl border border-border bg-card/50 text-foreground hover:bg-card lg:hidden"
-          aria-label={
-            mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
-          }
-          aria-expanded={mobileMenuOpen}
-        >
-          {mobileMenuOpen ? (
-            <X className="size-5" aria-hidden="true" />
-          ) : (
-            <Menu className="size-5" aria-hidden="true" />
+        <div className="flex items-center gap-2 lg:hidden">
+          {user && (
+            <>
+              <Link
+                href={getWalletHref()}
+                className="flex items-center gap-1.5 rounded-xl border border-border bg-card/40 hover:bg-card px-3 py-1.5 text-xs font-black uppercase tracking-wider text-foreground transition duration-150"
+              >
+                <Wallet className="size-3.5 text-primary" />
+                <span>
+                  {points !== null ? points.toLocaleString("vi-VN") : "..."}
+                </span>
+              </Link>
+              <NotificationsBell />
+            </>
           )}
-        </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            className="flex size-10 items-center justify-center rounded-xl border border-border bg-card/50 text-foreground hover:bg-card"
+            aria-label={
+              mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
+            }
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? (
+              <X className="size-5" aria-hidden="true" />
+            ) : (
+              <Menu className="size-5" aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
 
       {mobileMenuOpen && (
@@ -124,12 +189,24 @@ export function AppHeader({
             {user ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between px-2">
-                  <span className="text-xs font-black uppercase tracking-wider text-foreground">
-                    {user.fullName}
-                  </span>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-primary">
-                    {user.roles[0] || "spectator"}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-black uppercase tracking-wider text-foreground">
+                      {user.fullName}
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-primary">
+                      {user.roles[0] || "spectator"}
+                    </span>
+                  </div>
+                  {points !== null && (
+                    <Link
+                      href={getWalletHref()}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-1.5 rounded-xl border border-border bg-card/60 px-3 py-1.5 text-xs font-bold text-foreground transition"
+                    >
+                      <Wallet className="size-3.5 text-primary" />
+                      <span>{points.toLocaleString("vi-VN")} Điểm</span>
+                    </Link>
+                  )}
                 </div>
                 <button
                   onClick={() => {
