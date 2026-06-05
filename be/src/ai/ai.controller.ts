@@ -5,74 +5,117 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Request } from 'express';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
 import { AiService } from './ai.service';
 import { CreateAiPackageDto } from './dto/create-package.dto';
 import { SubscribePackageDto } from './dto/subscribe-package.dto';
-import { CreateAiPredictionSuggestionDto } from './dto/create-prediction-suggestion.dto';
-import { CreateAiArrangementSuggestionDto } from './dto/create-arrangement-suggestion.dto';
 import { UpdateArrangementStatusDto } from './dto/update-arrangement-status.dto';
 
 @ApiTags('AI Features')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth()
 @Controller('ai')
 export class AiController {
   constructor(private readonly aiService: AiService) {}
 
+  // ─── Packages ───────────────────────────────────────────────────────────────
+
   @Post('packages')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'Create a new AI Prediction package (Admin only)' })
+  @ApiOperation({ summary: 'Tạo gói AI prediction (Admin)' })
   createPackage(@Body() dto: CreateAiPackageDto) {
     return this.aiService.createPackage(dto);
   }
 
   @Get('packages')
-  @ApiOperation({ summary: 'Get list of active AI packages' })
+  @ApiOperation({ summary: 'Danh sách gói AI đang hoạt động' })
   findAllPackages() {
     return this.aiService.findAllPackages();
   }
 
+  // ─── Subscription ────────────────────────────────────────────────────────────
+
   @Post('subscribe')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles(RoleName.SPECTATOR)
   @ApiOperation({
-    summary: 'Subscribe/Purchase an AI package (Spectator only)',
+    summary: 'Khởi tạo thanh toán PayOS để mua subscription AI (Spectator)',
+    description:
+      'Trả về checkoutUrl để user hoàn thành thanh toán qua PayOS. Subscription được kích hoạt sau khi PayOS gửi webhook thành công.',
   })
   subscribe(@Body() dto: SubscribePackageDto, @CurrentUser() user: JwtUser) {
-    return this.aiService.subscribe(dto.packageId, user.id);
+    return this.aiService.initiateSubscription(dto.packageId, user.id);
+  }
+
+  @Post('payments/webhook')
+  @ApiOperation({
+    summary: 'Webhook nhận callback từ PayOS (public)',
+    description: 'Endpoint này dành cho PayOS gọi vào khi thanh toán hoàn tất.',
+  })
+  payosWebhook(@Req() req: Request) {
+    return this.aiService.handlePayosWebhook(req.body as unknown);
+  }
+
+  @Get('payments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(RoleName.ADMIN)
+  @ApiOperation({ summary: 'Xem doanh thu từ subscription AI (Admin)' })
+  findAllPayments() {
+    return this.aiService.findAllPayments();
   }
 
   @Get('check-subscription')
-  @ApiOperation({
-    summary: 'Check if current spectator has active AI subscription',
-  })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Kiểm tra subscription đang hoạt động' })
   checkSubscription(@CurrentUser() user: JwtUser) {
     return this.aiService.checkSubscriptionActive(user.id);
   }
 
-  @Post('predictions')
-  @Roles(RoleName.ADMIN)
+  // ─── Predictions ─────────────────────────────────────────────────────────────
+
+  @Post('predictions/generate/:raceId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary:
-      'Generate/Publish AI prediction suggestion for a race (Admin only)',
+      'Sinh gợi ý dự đoán cho một race (Admin hoặc Spectator có subscription)',
+    description:
+      'Spectator cần subscription đang hoạt động. Admin không cần subscription.',
   })
-  createPredictionSuggestion(@Body() dto: CreateAiPredictionSuggestionDto) {
-    return this.aiService.createPredictionSuggestion(dto);
+  @ApiParam({ name: 'raceId', description: 'ID của race' })
+  generatePrediction(
+    @Param('raceId') raceId: string,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.aiService.generatePrediction(raceId, user.id, user.roles);
   }
 
   @Get('predictions/:raceId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary:
-      'Get AI prediction suggestion for a race (Spectators require an active subscription)',
+      'Xem gợi ý dự đoán AI của race (Spectator cần subscription đang hoạt động)',
   })
+  @ApiParam({ name: 'raceId', description: 'ID của race' })
   getPredictionSuggestion(
     @Param('raceId') raceId: string,
     @CurrentUser() user: JwtUser,
@@ -84,35 +127,49 @@ export class AiController {
     );
   }
 
-  @Post('arrangements')
+  // ─── Arrangements ─────────────────────────────────────────────────────────────
+
+  @Post('arrangements/generate/:tournamentId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles(RoleName.ADMIN)
   @ApiOperation({
-    summary:
-      'Generate AI race arrangements suggestion for a tournament (Admin only)',
+    summary: 'Tự động sinh đề xuất sắp xếp race cho tournament (Admin)',
+    description:
+      'Hệ thống phân bổ ngựa vào các race đề xuất theo thuật toán snake draft dựa trên điểm sức mạnh.',
   })
-  createArrangementSuggestion(@Body() dto: CreateAiArrangementSuggestionDto) {
-    return this.aiService.createArrangementSuggestion(dto);
+  @ApiParam({ name: 'tournamentId', description: 'ID của tournament' })
+  generateArrangement(@Param('tournamentId') tournamentId: string) {
+    return this.aiService.generateArrangement(tournamentId);
   }
 
   @Get('arrangements/tournament/:tournamentId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles(RoleName.ADMIN)
   @ApiOperation({
-    summary:
-      'List AI race arrangements suggestions for a tournament (Admin only)',
+    summary: 'Danh sách đề xuất sắp xếp của một tournament (Admin)',
   })
+  @ApiParam({ name: 'tournamentId', description: 'ID của tournament' })
   getArrangementSuggestions(@Param('tournamentId') tournamentId: string) {
     return this.aiService.getArrangementSuggestions(tournamentId);
   }
 
   @Patch('arrangements/:id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles(RoleName.ADMIN)
   @ApiOperation({
-    summary: 'Apply or Reject an AI arrangement suggestion (Admin only)',
+    summary: 'Áp dụng hoặc từ chối đề xuất sắp xếp (Admin)',
+    description:
+      'APPLIED: tạo Race mới trong tournament. REJECTED: huỷ đề xuất.',
   })
+  @ApiParam({ name: 'id', description: 'ID của arrangement suggestion' })
   updateArrangementStatus(
     @Param('id') id: string,
     @Body() dto: UpdateArrangementStatusDto,
+    @CurrentUser() user: JwtUser,
   ) {
-    return this.aiService.updateArrangementSuggestionStatus(id, dto.status);
+    return this.aiService.updateArrangementStatus(id, dto.status, user.id);
   }
 }

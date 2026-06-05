@@ -174,7 +174,7 @@ export class RaceResultsService {
 
       // 3. Điểm thưởng thích ứng môi trường (RaceConditionBonus)
       let conditionBonusMs = 0;
-      const track = race.trackCondition || 'Dry';
+      const track = (race.trackCondition as string) || 'Dry';
       const weather = race.weatherSnapshot || 'Sunny';
 
       if (weather === 'Sunny' && track === 'Dry') {

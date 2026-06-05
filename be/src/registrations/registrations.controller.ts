@@ -8,18 +8,22 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
-import { PaginationDto } from '../common/dto/pagination.dto';
-import { RegistrationsService } from './registrations.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { RejectRegistrationDto } from './dto/reject-registration.dto';
-import { ListRegistrationsDto } from './dto/list-registrations.dto';
+import { RegistrationsService } from './registrations.service';
 
 @ApiTags('Registrations')
 @ApiBearerAuth()
@@ -39,13 +43,21 @@ export class RegistrationsController {
   @ApiOperation({
     summary: 'List all registrations (Public / Admin / Spectators)',
   })
-  findAll(@Query() query: ListRegistrationsDto) {
+  @ApiQuery({ name: 'tournamentId', required: false })
+  @ApiQuery({ name: 'raceId', required: false })
+  @ApiQuery({ name: 'status', required: false })
+  findAll(
+    @Query() pagination: PaginationDto,
+    @Query('tournamentId') tournamentId?: string,
+    @Query('raceId') raceId?: string,
+    @Query('status') status?: string,
+  ) {
     return this.registrationsService.findAll(
-      query.page,
-      query.limit,
-      query.tournamentId,
-      query.raceId,
-      query.status,
+      pagination.page,
+      pagination.limit,
+      tournamentId,
+      raceId,
+      status,
     );
   }
 
