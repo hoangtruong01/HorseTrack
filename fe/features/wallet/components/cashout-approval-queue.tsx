@@ -31,6 +31,10 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
     setIsProcessing(`${id}-${action}`);
     try {
       await onAction(id, action, reason);
+      // Clear search if successful
+      if (action === "PAID" || action === "REJECTED") {
+        setSearchCode("");
+      }
     } finally {
       setIsProcessing(null);
       setShowRejectDialog(false);
@@ -41,198 +45,151 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(`Da sao chep ma quy doi: ${text}`);
+    toast.success(`Đã sao chép mã quy đổi: ${text}`);
   };
 
-  const activeRequests = requests.filter((r) => {
-    const matchesSearch = searchCode.trim() === "" || r.redemptionCode.toLowerCase().includes(searchCode.toLowerCase());
-    return (r.status === "PENDING" || r.status === "APPROVED") && matchesSearch;
-  });
-
-  const completedRequests = requests.filter((r) => {
-    const matchesSearch = searchCode.trim() === "" || r.redemptionCode.toLowerCase().includes(searchCode.toLowerCase());
-    return (r.status === "PAID" || r.status === "REJECTED") && matchesSearch;
-  });
+  // Find exact match or partial match if only one
+  const searchResult = searchCode.trim() 
+    ? requests.find((r) => r.redemptionCode.toLowerCase() === searchCode.trim().toLowerCase()) ||
+      (requests.filter((r) => r.redemptionCode.toLowerCase().includes(searchCode.trim().toLowerCase())).length === 1
+        ? requests.find((r) => r.redemptionCode.toLowerCase().includes(searchCode.trim().toLowerCase()))
+        : null)
+    : null;
 
   return (
     <section className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-lg">
-        <label htmlFor="search-code-input" className="block text-xs font-black uppercase tracking-[0.2em] text-primary">
-          Tra cuu ma nhan thuong tai quay
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-lg sm:p-8">
+        <label htmlFor="search-code-input" className="block text-sm font-black uppercase tracking-[0.2em] text-primary">
+          Tra cứu mã nhận thưởng tại quầy
         </label>
-        <div className="mt-2 flex gap-3">
+        <p className="mt-1 mb-4 text-sm text-muted-foreground">
+          Nhập mã quy đổi do người dùng cung cấp để kiểm tra thông tin và thực hiện phát quà.
+        </p>
+        <div className="flex gap-3">
           <input
             id="search-code-input"
             type="text"
-            placeholder="Nhap ma quy doi (vd: RWD-YHS9X3)..."
+            placeholder="Nhập mã quy đổi (vd: RWD-YHS9X3)..."
             value={searchCode}
             onChange={(e) => setSearchCode(e.target.value)}
-            className="h-12 flex-1 rounded-xl border border-border bg-muted px-4 font-mono font-black text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
+            className="h-14 flex-1 rounded-xl border border-border bg-muted px-5 font-mono text-lg font-black text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
           />
           {searchCode && (
-            <Button variant="outline" onClick={() => setSearchCode("")} className="h-12 rounded-xl border-border text-foreground">
-              Xoa loc
+            <Button variant="outline" onClick={() => setSearchCode("")} className="h-14 rounded-xl px-6 font-bold border-border text-foreground hover:bg-muted">
+              Xóa
             </Button>
           )}
         </div>
-      </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-lg sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">Danh sach cho xac nhan</p>
-            <h2 className="mt-1 text-2xl font-black uppercase text-foreground">Hang doi doi thuong vat ly</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Tra cuu ma nhan qua tai quay, doi so du diem hien tai, phe duyet ma, roi xac nhan trao qua khi hoan tat.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 overflow-x-auto rounded-xl border border-border">
-          {activeRequests.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
-              <CheckCircle2 className="size-12 animate-bounce text-emerald-500" />
-              <p className="mt-4 text-sm font-black uppercase tracking-wider text-foreground">Hang doi trong!</p>
-              <p className="mt-1 text-xs text-muted-foreground">Khong tim thay yeu cau quy doi qua nao dang cho xu ly.</p>
-            </div>
-          ) : (
-            <table className="min-w-[800px] w-full text-left text-sm">
-              <thead className="bg-muted/[0.04] text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3.5">Nguoi doi qua</th>
-                  <th className="px-4 py-3.5">Ma quy doi</th>
-                  <th className="px-4 py-3.5 text-right">So diem quy doi</th>
-                  <th className="px-4 py-3.5">Trang thai</th>
-                  <th className="px-4 py-3.5 text-right">Hanh dong quay</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border bg-card">
-                {activeRequests.map((req) => (
-                  <tr key={req.id} className="transition hover:bg-muted/[0.02]">
-                    <td className="px-4 py-4.5">
-                      <p className="font-black uppercase tracking-wider text-foreground">{req.userFullName}</p>
-                      <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-primary">{roleLabel(req.userRole)}</p>
-                    </td>
-                    <td className="px-4 py-4.5">
+        {searchCode.trim() !== "" && (
+          <div className="mt-8 animate-in fade-in slide-in-from-top-4 duration-300">
+            {!searchResult ? (
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 p-12 text-center">
+                <AlertCircle className="size-12 text-muted-foreground/50" />
+                <p className="mt-4 text-sm font-black uppercase tracking-wider text-foreground">Không tìm thấy mã</p>
+                <p className="mt-1 text-xs text-muted-foreground">Mã đổi quà không tồn tại hoặc bạn nhập chưa chính xác.</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border bg-muted/10 overflow-hidden shadow-md">
+                <div className="bg-muted/30 px-6 py-4 border-b border-border flex justify-between items-center">
+                  <h3 className="font-black uppercase text-foreground flex items-center gap-2">
+                    <Gift className="size-5 text-primary" /> Thông tin đổi thưởng
+                  </h3>
+                  <StatusBadge 
+                    label={searchResult.status === "PAID" ? "Đã trao quà" : searchResult.status === "REJECTED" ? "Đã từ chối" : "Chờ xử lý"} 
+                    tone={searchResult.status === "PAID" ? "teal" : searchResult.status === "REJECTED" ? "red" : "slate"} 
+                  />
+                </div>
+                
+                <div className="p-6 grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">Người đổi quà</p>
+                      <p className="font-black text-lg text-foreground">{searchResult.userFullName}</p>
+                      <p className="text-xs font-bold text-primary mt-0.5">{roleLabel(searchResult.userRole)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">Mã quy đổi</p>
                       <div className="flex items-center gap-2">
-                        <span className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-sm font-black tracking-wider text-primary">
-                          {req.redemptionCode}
+                        <span className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-base font-black tracking-wider text-primary">
+                          {searchResult.redemptionCode}
                         </span>
                         <button
-                          onClick={() => copyToClipboard(req.redemptionCode)}
-                          className="cursor-pointer rounded p-1 text-muted-foreground/60 hover:bg-muted/5 hover:text-foreground"
-                          title="Sao chep ma"
+                          onClick={() => copyToClipboard(searchResult.redemptionCode)}
+                          className="cursor-pointer rounded p-1 text-muted-foreground/60 hover:bg-muted/10 hover:text-foreground transition"
+                          title="Sao chép mã"
                         >
-                          <Copy className="size-3.5" />
+                          <Copy className="size-4" />
                         </button>
                       </div>
-                      <p className="mt-1 font-mono text-[10px] text-muted-foreground">Tao luc: {new Date(req.createdAt).toLocaleString("vi-VN")}</p>
-                    </td>
-                    <td className="px-4 py-4.5 text-right font-mono text-base font-black text-foreground">{req.points.toLocaleString("vi-VN")}</td>
-                    <td className="px-4 py-4.5">
-                      <StatusBadge label={req.status === "APPROVED" ? "Da duyet" : "Cho tai quay"} tone={req.status === "APPROVED" ? "green" : "slate"} />
-                    </td>
-                    <td className="px-4 py-4.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {req.status === "PENDING" && (
-                          <>
-                            <Button onClick={() => handleAction(req.id, "PAID")} disabled={isProcessing !== null} size="sm" className="h-9 rounded-full bg-primary text-xs font-black uppercase shadow-[0_4px_12px_rgba(225,6,0,0.25)] hover:bg-[#B80500]">
-                              <Gift className="mr-1.5 size-3.5" /> Xac nhan trao qua
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                setSelectedRequest(req);
-                                setShowRejectDialog(true);
-                              }}
-                              disabled={isProcessing !== null}
-                              variant="destructive"
-                              size="sm"
-                              className="h-9 rounded-full text-xs font-bold"
-                            >
-                              Tu choi
-                            </Button>
-                          </>
-                        )}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">Số điểm quy đổi</p>
+                      <p className="font-mono text-3xl font-black text-foreground">{searchResult.points.toLocaleString("vi-VN")} <span className="text-sm text-muted-foreground font-bold">điểm</span></p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">Thời gian tạo</p>
+                      <p className="font-mono text-sm text-foreground">{new Date(searchResult.createdAt).toLocaleString("vi-VN")}</p>
+                    </div>
+                  </div>
+                </div>
 
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
+                {searchResult.status === "PENDING" && (
+                  <div className="bg-muted/20 px-6 py-4 border-t border-border flex justify-end gap-3">
+                    <Button
+                      onClick={() => {
+                        setSelectedRequest(searchResult);
+                        setShowRejectDialog(true);
+                      }}
+                      disabled={isProcessing !== null}
+                      variant="outline"
+                      className="h-11 rounded-full px-6 font-bold text-foreground border-border hover:bg-muted hover:text-red-500 transition-colors"
+                    >
+                      Từ chối
+                    </Button>
+                    <Button 
+                      onClick={() => handleAction(searchResult.id, "PAID")} 
+                      disabled={isProcessing !== null} 
+                      className="h-11 rounded-full px-8 font-black uppercase shadow-[0_4px_12px_rgba(225,6,0,0.25)] hover:bg-[#B80500] transition-colors"
+                    >
+                      <Gift className="mr-2 size-4" /> Xác nhận trao quà
+                    </Button>
+                  </div>
+                )}
 
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-lg sm:p-6">
-        <div>
-          <h3 className="text-lg font-black uppercase text-foreground">Nhat ky doi thuong da xu ly</h3>
-          <p className="text-xs text-muted-foreground">Lich su cac ma doi qua da trao thanh cong hoac bi tu choi.</p>
-        </div>
-
-        <div className="mt-5 overflow-x-auto rounded-xl border border-border">
-          {completedRequests.length === 0 ? (
-            <div className="p-8 text-center text-xs text-muted-foreground">Khong tim thay lich su quy doi nao.</div>
-          ) : (
-            <table className="min-w-[900px] w-full text-left text-sm">
-              <thead className="bg-muted/[0.02] text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Nguoi dung</th>
-                  <th className="px-4 py-3">Ma qua tang</th>
-                  <th className="px-4 py-3 text-right">Diem doi</th>
-                  <th className="px-4 py-3">Nhan vien xu ly</th>
-                  <th className="px-4 py-3">Thoi gian tao</th>
-                  <th className="px-4 py-3">Thoi gian trao</th>
-                  <th className="px-4 py-3">Trang thai</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border bg-muted/30">
-                {completedRequests.map((req) => (
-                  <tr key={req.id} className="opacity-70 transition hover:bg-muted/[0.02] hover:opacity-100">
-                    <td className="px-4 py-3.5">
-                      <p className="font-bold text-foreground">{req.userFullName}</p>
-                      <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{roleLabel(req.userRole)}</p>
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <span className="rounded border border-border bg-muted/50 px-2 py-0.5 font-mono text-xs font-bold text-foreground">{req.redemptionCode}</span>
-                    </td>
-                    <td className="px-4 py-3.5 text-right font-mono font-black text-foreground">{req.points.toLocaleString("vi-VN")}</td>
-                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">{req.paidBy || "-"}</td>
-                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">{new Date(req.createdAt).toLocaleString("vi-VN")}</td>
-                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">{req.paidAt ? new Date(req.paidAt).toLocaleString("vi-VN") : "-"}</td>
-                    <td className="px-4 py-3.5">
-                      <div className="space-y-1">
-                        <StatusBadge label={req.status === "PAID" ? "Da trao qua" : "Da tu choi"} tone={req.status === "PAID" ? "teal" : "red"} />
-                        {req.rejectReason && <p className="max-w-xs text-[10px] leading-4 text-primary">Ly do: {req.rejectReason}</p>}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                {searchResult.status === "REJECTED" && searchResult.rejectReason && (
+                  <div className="bg-red-500/10 px-6 py-4 border-t border-red-500/20">
+                    <p className="text-sm font-bold text-red-500">Lý do từ chối: {searchResult.rejectReason}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {showRejectDialog && selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in zoom-in-95 duration-200">
             <h3 className="flex items-center gap-2 text-xl font-black uppercase text-foreground">
-              <AlertCircle className="size-5 text-primary" /> Tu choi yeu cau doi qua
+              <AlertCircle className="size-5 text-primary" /> Từ chối yêu cầu đổi quà
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Ban co chac chan muon tu choi ma nhan qua <strong className="text-foreground">{selectedRequest.redemptionCode}</strong> cua{" "}
-              <strong className="text-foreground">{selectedRequest.userFullName}</strong> ({selectedRequest.points.toLocaleString("vi-VN")} diem)?
+              Bạn có chắc chắn muốn từ chối mã nhận quà <strong className="text-foreground">{selectedRequest.redemptionCode}</strong> của{" "}
+              <strong className="text-foreground">{selectedRequest.userFullName}</strong> ({selectedRequest.points.toLocaleString("vi-VN")} điểm)?
             </p>
             <div className="mt-4 space-y-2">
               <label htmlFor="reason" className="block text-xs font-black uppercase tracking-wider text-muted-foreground">
-                Ly do tu choi (bat buoc)
+                Lý do từ chối (bắt buộc)
               </label>
               <textarea
                 id="reason"
                 required
                 rows={3}
-                placeholder="Vi du: Ma khong hop le, thong tin tai khoan khong trung khop..."
+                placeholder="Ví dụ: Mã không hợp lệ, thông tin tài khoản không trùng khớp..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 className="w-full rounded-xl border border-border bg-muted p-3 text-sm text-foreground outline-none focus:border-primary"
@@ -246,12 +203,12 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
                   setSelectedRequest(null);
                   setRejectReason("");
                 }}
-                className="h-11 rounded-full border-border text-foreground"
+                className="h-11 rounded-full border-border text-foreground font-bold"
               >
-                Huy bo
+                Hủy bỏ
               </Button>
-              <Button disabled={!rejectReason.trim()} onClick={() => handleAction(selectedRequest.id, "REJECTED", rejectReason)} variant="destructive" className="h-11 rounded-full px-5 font-black uppercase tracking-wide">
-                Tu choi giao dich
+              <Button disabled={!rejectReason.trim()} onClick={() => handleAction(selectedRequest.id, "REJECTED", rejectReason)} variant="destructive" className="h-11 rounded-full px-6 font-black uppercase tracking-wide">
+                Từ chối giao dịch
               </Button>
             </div>
           </div>

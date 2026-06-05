@@ -19,7 +19,7 @@ export default function RedemptionsQueuePage() {
         setCashouts(res.data);
       }
     } catch (err: any) {
-      toast.error(err.message || "Lá»—i khi láº¥y danh sÃ¡ch Ä‘á»•i thÆ°á»Ÿng.");
+      toast.error(err.message || "Lỗi khi lấy danh sách đổi thưởng.");
     } finally {
       setLoading(false);
     }
@@ -32,10 +32,10 @@ export default function RedemptionsQueuePage() {
   const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => {
     try {
       await walletApi.processCashout(id, action);
-      toast.success(`Cáº­p nháº­t giao dá»‹ch thÃ nh cÃ´ng sang tráº¡ng thÃ¡i ${action}`);
+      toast.success(`Cập nhật giao dịch thành công sang trạng thái ${action}`);
       await fetchCashouts();
     } catch (err: any) {
-      toast.error(err.message || `Lá»—i khi cáº­p nháº­t giao dá»‹ch sang ${action}`);
+      toast.error(err.message || `Lỗi khi cập nhật giao dịch sang ${action}`);
       // Reload to ensure state is in sync
       await fetchCashouts();
     }
@@ -46,14 +46,14 @@ export default function RedemptionsQueuePage() {
   return (
     <main className="space-y-6">
       <PageHeader
-        eyebrow="Redemption Queue"
-        title="Duyá»‡t HÃ ng Äá»£i Äá»•i ThÆ°á»Ÿng"
-        description="Xá»­ lÃ½ vÃ  hoÃ n táº¥t cÃ¡c yÃªu cáº§u Ä‘á»•i Ä‘iá»ƒm láº¥y quÃ  táº·ng váº­t lÃ½ cá»§a ngÆ°á»i dÃ¹ng khi há» Ä‘áº¿n quáº§y trá»±c tiáº¿p."
+        eyebrow="Redemption"
+        title="Xác nhận đổi thưởng"
+        description="Xử lý và hoàn tất các yêu cầu đổi điểm lấy quà tặng vật lý của người dùng khi họ đến quầy trực tiếp."
       />
 
       {loading ? (
         <div className="flex items-center justify-center py-20 text-muted-foreground text-sm font-semibold">
-          Äang táº£i hÃ ng Ä‘á»£i Ä‘á»•i thÆ°á»Ÿng tá»« há»‡ thá»‘ng...
+          Đang tải dữ liệu từ hệ thống...
         </div>
       ) : (
         <CashoutApprovalQueue requests={mappedRequests} onAction={handleAction} />
