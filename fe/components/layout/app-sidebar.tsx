@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { dashboardNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/providers/auth-provider";
 import type { NavigationItem, NavigationRole } from "@/types/navigation";
 import { Tooltip } from "radix-ui";
 
@@ -24,7 +23,6 @@ export function AppSidebar({
   activeHref,
   role,
 }: AppSidebarProps) {
-  const { user, logout } = useAuth();
   const pathname = usePathname();
   const [currentHref, setCurrentHref] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -128,73 +126,6 @@ export function AppSidebar({
             })}
           </nav>
         </div>
-
-        {user ? (
-          <div className={cn("mt-auto pt-6 border-t border-border space-y-4 transition-all duration-300", isCollapsed ? "flex flex-col items-center" : "")}>
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <Link
-                  href="/profile"
-                  scroll={false}
-                  className={cn("flex items-center group relative rounded-xl border border-transparent hover:border-border hover:bg-secondary transition-all duration-300", isCollapsed ? "justify-center gap-0 p-0" : "gap-3 p-2")}
-                >
-                  <div className={cn("flex shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary group-hover:scale-105 transition-transform", isCollapsed ? "size-10 mx-auto" : "size-9")}>
-                    <User className="size-4.5" />
-                  </div>
-                  <div className={cn("min-w-0 flex-1 overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap", isCollapsed ? "max-w-0 opacity-0" : "max-w-[150px] opacity-100")}>
-                    <p className="text-xs font-black uppercase tracking-wider text-foreground truncate">
-                      {user.fullName}
-                    </p>
-                    <p className="text-[9px] font-black uppercase tracking-wider text-primary mt-0.5">
-                      {user.roles[0] || "spectator"}
-                    </p>
-                  </div>
-                </Link>
-              </Tooltip.Trigger>
-              {isCollapsed && (
-                <Tooltip.Portal>
-                  <Tooltip.Content
-                    side="right"
-                    align="center"
-                    sideOffset={12}
-                    className="z-50 rounded-md bg-card/95 backdrop-blur-sm border border-border px-3 py-1.5 text-foreground shadow-xl select-none max-w-xs flex flex-col gap-0.5"
-                  >
-                    <span className="text-xs font-bold uppercase tracking-wider">{user.fullName}</span>
-                    <span className="text-[10px] text-primary uppercase font-bold tracking-wider">
-                      {user.roles[0] || "spectator"}
-                    </span>
-                  </Tooltip.Content>
-                </Tooltip.Portal>
-              )}
-            </Tooltip.Root>
-
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <button
-                  onClick={logout}
-                  className={cn("w-full flex items-center rounded-xl bg-primary text-xs font-black uppercase tracking-wider text-primary-foreground shadow-[0_4px_12px_rgba(225,6,0,0.2)] transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] cursor-pointer relative group", isCollapsed ? "justify-center gap-0 p-2.5" : "justify-center gap-2 px-4 py-2.5")}
-                >
-                  <LogOut className={cn("shrink-0 transition-all duration-300", isCollapsed ? "size-4.5 mx-auto" : "size-3.5")} />
-                  <span className={cn("overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap", isCollapsed ? "max-w-0 opacity-0" : "max-w-full opacity-100")}>
-                    Đăng xuất
-                  </span>
-                </button>
-              </Tooltip.Trigger>
-              {isCollapsed && (
-                <Tooltip.Portal>
-                  <Tooltip.Content
-                    side="right"
-                    align="center"
-                    sideOffset={12}
-                    className="z-50 rounded-md bg-card/90 backdrop-blur-sm border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-foreground shadow-xl select-none"
-                  >
-                    Đăng xuất
-                  </Tooltip.Content>
-                </Tooltip.Portal>
-              )}
-            </Tooltip.Root>
-          </div>
-        ) : null}
       </aside>
     </Tooltip.Provider>
   );
