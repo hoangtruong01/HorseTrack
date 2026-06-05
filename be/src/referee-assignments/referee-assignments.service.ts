@@ -23,6 +23,7 @@ import {
   RefereeAssignmentStatus,
   RefereeRole,
 } from './schemas/referee-assignment.schema';
+import { RefereeApprovalStatus } from '../referee-profiles/schemas/referee-profile.schema';
 
 /** Races within this window (ms) are considered conflicting */
 const CONFLICT_WINDOW_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -115,7 +116,59 @@ export class RefereeAssignmentsService {
       refereeUserId: new Types.ObjectId(dto.refereeUserId),
       assignedBy: new Types.ObjectId(assignedBy),
       role: dto.role ?? RefereeRole.MAIN,
+      salary: dto.salary ?? 0,
     });
+  }
+
+  async getAvailableReferees(raceId: string): Promise<any[]> {
+    const race = await this.racesService.findOne(raceId);
+    if (!race) throw new NotFoundException('Race not found');
+
+    // 1. Get all approved referee profiles
+    const approvedProfiles = await this.refereeProfilesService.findAll(
+      1,
+      1000,
+      RefereeApprovalStatus.APPROVED,
+    );
+    const refereeUsers = approvedProfiles.data.map((p) => p.userId);
+
+    // 2. Find assignments that conflict with this race's time window
+    const windowStart = new Date(race.startTime.getTime() - CONFLICT_WINDOW_MS);
+    const windowEnd = new Date(race.startTime.getTime() + CONFLICT_WINDOW_MS);
+
+    // Find all races in this time window
+    const conflictingRaces = await this.raceModel.find({
+      startTime: { $gte: windowStart, $lte: windowEnd },
+      status: { $nin: [RaceStatus.CANCELLED, RaceStatus.RESULT_PUBLISHED] },
+    });
+    const conflictingRaceIds = conflictingRaces.map((r) => r._id);
+
+    // Find active assignments for those conflicting races
+    const activeConflictingAssignments = await this.assignmentModel.find({
+      raceId: { $in: conflictingRaceIds },
+      status: {
+        $in: [
+          RefereeAssignmentStatus.ASSIGNED,
+          RefereeAssignmentStatus.ACCEPTED,
+        ],
+      },
+    });
+
+    const busyRefereeUserIds = new Set(
+      activeConflictingAssignments.map((a) => String(a.refereeUserId)),
+    );
+
+    // 3. Filter out busy referees
+    const availableReferees = refereeUsers.filter((user) => {
+      if (!user) return false;
+      const userIdStr =
+        typeof user === 'object' && '_id' in user
+          ? String((user as { _id: Types.ObjectId })._id)
+          : String(user);
+      return !busyRefereeUserIds.has(userIdStr);
+    });
+
+    return availableReferees;
   }
 
   async respond(
@@ -154,7 +207,7 @@ export class RefereeAssignmentsService {
   }
 
   async findByRace(raceId: string, page = 1, limit = 20) {
-    const filter = { raceId };
+    const filter = { raceId: new Types.ObjectId(raceId) };
     const [data, total] = await Promise.all([
       this.assignmentModel
         .find(filter)
@@ -172,7 +225,7 @@ export class RefereeAssignmentsService {
   }
 
   async findMyAssignments(refereeUserId: string, page = 1, limit = 20) {
-    const filter = { refereeUserId };
+    const filter = { refereeUserId: new Types.ObjectId(refereeUserId) };
     const [data, total] = await Promise.all([
       this.assignmentModel
         .find(filter)

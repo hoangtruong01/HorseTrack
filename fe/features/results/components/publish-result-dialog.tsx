@@ -108,22 +108,22 @@ export function PublishResultDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="publish-dialog-title"
     >
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] shadow-[0_24px_90px_rgba(0,0,0,0.8)]">
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         {!publishedSuccess ? (
           <>
-            <div className="flex items-start justify-between border-b border-white/10 p-5">
+            <div className="flex items-start justify-between border-b border-border p-5">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
                   Publish race result
                 </p>
                 <h2
                   id="publish-dialog-title"
-                  className="mt-2 text-2xl font-black uppercase text-white"
+                  className="mt-2 text-2xl font-black uppercase text-foreground"
                 >
                   {result.race}
                 </h2>
@@ -131,7 +131,7 @@ export function PublishResultDialog({
               <button
                 type="button"
                 onClick={handleClose}
-                className="grid size-10 place-items-center rounded-full border border-white/10 text-white/70 transition hover:bg-white/10 hover:text-white cursor-pointer"
+                className="grid size-10 place-items-center rounded-full border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground cursor-pointer"
                 aria-label="Close publish dialog"
               >
                 <X className="size-4" />
@@ -156,32 +156,32 @@ export function PublishResultDialog({
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                   <div className="flex items-center gap-2">
                     <Award className="size-5 text-primary" />
-                    <span className="text-xs font-black uppercase text-white tracking-wider">Owner Split (70%)</span>
+                    <span className="text-xs font-black uppercase text-foreground tracking-wider">Owner Split (70%)</span>
                   </div>
-                  <p className="mt-2 font-mono text-2xl font-black text-white">7,000 pts</p>
+                  <p className="mt-2 font-mono text-2xl font-black text-foreground">7,000 pts</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">Credits stable: Linh Tran Stable</p>
                 </div>
 
                 <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
                   <div className="flex items-center gap-2">
                     <Award className="size-5 text-blue-400" />
-                    <span className="text-xs font-black uppercase text-white tracking-wider">Jockey Split (30%)</span>
+                    <span className="text-xs font-black uppercase text-foreground tracking-wider">Jockey Split (30%)</span>
                   </div>
-                  <p className="mt-2 font-mono text-2xl font-black text-white">3,000 pts</p>
+                  <p className="mt-2 font-mono text-2xl font-black text-foreground">3,000 pts</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">Credits jockey: Minh Khoa</p>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-black/25 p-4 text-xs text-white/80 leading-relaxed">
+              <div className="rounded-xl border border-border bg-muted/50 p-4 text-xs text-muted-foreground leading-relaxed">
                 <strong className="text-primary font-black uppercase tracking-wide mr-1.5">Referee summary:</strong>
                 {result.refereeSummary}
               </div>
             </div>
-            <div className="flex flex-col-reverse gap-3 border-t border-white/10 p-5 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-border p-5 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 rounded-full border-white/10 text-white"
+                className="min-h-11 rounded-full text-foreground"
                 onClick={handleClose}
                 disabled={isPublishing}
               >
@@ -203,19 +203,19 @@ export function PublishResultDialog({
               <Sparkles className="size-8" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-2xl font-black uppercase text-white tracking-tight">Race Results Published!</h3>
+              <h3 className="text-2xl font-black uppercase text-foreground tracking-tight">Race Results Published!</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
                 Prize splits have been credited to user balances. Ledger transactions and system audit logs successfully updated.
               </p>
             </div>
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 text-left font-mono text-xs max-w-sm mx-auto space-y-1 text-white/80">
+            <div className="rounded-xl border border-border bg-muted/50 p-4 text-left font-mono text-xs max-w-sm mx-auto space-y-1 text-muted-foreground">
               <p className="text-emerald-400 font-bold">+7,000 pts credited to Owner wallet</p>
               <p className="text-blue-400 font-bold">+3,000 pts credited to Jockey wallet</p>
-              <p className="text-white/40 mt-2">Audit action: RACE_PUBLISHED, PRIZE_SPLIT</p>
+              <p className="text-muted-foreground/60 mt-2">Audit action: RACE_PUBLISHED, PRIZE_SPLIT</p>
             </div>
             <Button
               onClick={handleClose}
-              className="h-12 w-full rounded-full font-black uppercase tracking-wider text-white bg-primary hover:bg-[#B80500]"
+              className="h-12 w-full rounded-full font-black uppercase tracking-wider text-foreground bg-primary hover:bg-[#B80500]"
             >
               Done
             </Button>

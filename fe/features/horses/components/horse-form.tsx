@@ -13,9 +13,9 @@ type HorseFormProps = {
 };
 
 const fieldClass =
-  "h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-xl border border-border bg-muted px-4 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-60";
 const labelClass =
-  "text-xs font-black uppercase tracking-[0.16em] text-white/55";
+  "text-xs font-black uppercase tracking-[0.16em] text-muted-foreground";
 
 export function HorseForm({
   initialData,
@@ -88,9 +88,9 @@ export function HorseForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-[#15151E] border border-white/10 rounded-2xl p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-2xl border border-border bg-card p-6 shadow-lg md:p-8">
       {errorMsg && (
-        <div className="rounded-xl border border-[#E10600] bg-[#E10600]/10 p-4 text-sm text-[#E0DEDC]">
+        <div className="rounded-xl border border-primary bg-primary/10 p-4 text-sm text-foreground">
           <span className="font-bold text-[#E10600] uppercase block mb-1">Lỗi nhập liệu</span>
           {errorMsg}
         </div>
@@ -209,7 +209,7 @@ export function HorseForm({
         <div className="space-y-4 flex flex-col">
           <div className="space-y-2 flex-1 flex flex-col">
             <label className={labelClass}>Hình ảnh chiến mã</label>
-            <div className={`relative border border-dashed border-white/10 hover:border-primary/50 bg-white/[0.02] rounded-xl flex-1 min-h-[200px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${isApproved ? 'pointer-events-none opacity-60' : ''}`}>
+            <div className={`relative flex min-h-[200px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 p-4 transition group cursor-pointer hover:border-primary/50 ${isApproved ? "pointer-events-none opacity-60" : ""}`}>
               {imagePreview ? (
                 <div className="relative w-full h-full min-h-[180px] rounded-lg overflow-hidden">
                   <img
@@ -219,15 +219,15 @@ export function HorseForm({
                   />
                   {!isApproved && (
                     <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">
-                      <span className="text-white text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">Thay đổi ảnh</span>
+                      <span className="text-foreground text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">Thay đổi ảnh</span>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="text-center space-y-2">
-                  <Upload className="size-10 text-white/35 mx-auto group-hover:text-primary transition" />
-                  <p className="text-sm font-bold text-white">Tải lên hình ảnh</p>
-                  <p className="text-xs text-white/45">Cho phép định dạng PNG, JPG, WEBP tối đa 5MB</p>
+                  <Upload className="mx-auto size-10 text-muted-foreground transition group-hover:text-primary" />
+                  <p className="text-sm font-bold text-foreground">Tải lên hình ảnh</p>
+                  <p className="text-xs text-muted-foreground">Cho phép định dạng PNG, JPG, WEBP tối đa 5MB</p>
                 </div>
               )}
               {!isApproved && (
@@ -246,7 +246,7 @@ export function HorseForm({
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 min-h-[96px]"
+              className="min-h-[96px] w-full rounded-xl border border-border bg-muted p-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
               placeholder="Nhập mô tả về thế mạnh hoặc đặc điểm nổi bật của ngựa..."
             />
           </div>
@@ -254,19 +254,19 @@ export function HorseForm({
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
         <Button
           type="button"
           onClick={onCancel}
           variant="outline"
-          className="rounded-xl px-5 h-11 border border-white/10 hover:bg-white/5 text-white"
+          className="rounded-xl px-5 h-11 border border-border hover:bg-muted text-foreground"
         >
           Hủy bỏ
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-xl px-6 h-11 bg-[#E10600] hover:bg-[#B80500] text-white flex items-center gap-2 font-bold uppercase text-xs tracking-wider"
+          className="rounded-xl px-6 h-11 bg-primary hover:bg-primary/90 text-foreground flex items-center gap-2 font-bold uppercase text-xs tracking-wider"
         >
           {isSubmitting ? (
             <>

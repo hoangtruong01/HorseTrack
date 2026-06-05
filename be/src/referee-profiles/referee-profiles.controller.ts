@@ -18,6 +18,10 @@ import { RoleName } from '../users/schemas/user.schema';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { RefereeProfilesService } from './referee-profiles.service';
 import { CreateRefereeProfileDto } from './dto/create-referee-profile.dto';
+import {
+  RefereeApprovalStatus,
+  RefereeProfileStatus,
+} from './schemas/referee-profile.schema';
 
 @ApiTags('Referee Profiles')
 @Controller('referee-profiles')
@@ -38,8 +42,15 @@ export class RefereeProfilesController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'List all referee profiles (Admin)' })
-  findAll(@Query() pagination: PaginationDto) {
-    return this.service.findAll(pagination.page, pagination.limit);
+  findAll(
+    @Query() pagination: PaginationDto,
+    @Query('approvalStatus') approvalStatus?: RefereeApprovalStatus,
+  ) {
+    return this.service.findAll(
+      pagination.page,
+      pagination.limit,
+      approvalStatus,
+    );
   }
 
   @Get('me')
@@ -71,5 +82,28 @@ export class RefereeProfilesController {
       user.id,
       user.roles.includes(RoleName.ADMIN),
     );
+  }
+
+  @Patch(':id/approval')
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @ApiOperation({ summary: 'Approve or Reject referee profile (Admin)' })
+  changeApproval(
+    @Param('id') id: string,
+    @Body('approvalStatus') approvalStatus: RefereeApprovalStatus,
+    @Body('rejectionReason') rejectionReason?: string,
+  ) {
+    return this.service.changeApproval(id, approvalStatus, rejectionReason);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @ApiOperation({ summary: 'Suspend or activate referee profile (Admin)' })
+  changeStatus(
+    @Param('id') id: string,
+    @Body('status') status: RefereeProfileStatus,
+  ) {
+    return this.service.changeStatus(id, status);
   }
 }

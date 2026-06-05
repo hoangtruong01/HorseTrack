@@ -101,22 +101,22 @@ export default function AdminWalletPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex rounded-xl border border-white/10 bg-white/[0.03] p-1 w-fit">
+      <div className="flex rounded-xl border border-border bg-muted p-1 w-fit">
         <button
           onClick={() => setActiveTab("cashouts")}
-          className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${activeTab === "cashouts" ? "bg-primary text-white" : "text-muted-foreground hover:text-white"}`}
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${activeTab === "cashouts" ? "bg-primary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
         >
           🎫 Cashout Queue ({cashoutMeta.total})
         </button>
         <button
           onClick={() => setActiveTab("transactions")}
-          className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${activeTab === "transactions" ? "bg-primary text-white" : "text-muted-foreground hover:text-white"}`}
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${activeTab === "transactions" ? "bg-primary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
         >
           📋 Tất cả Giao Dịch ({txMeta.total})
         </button>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
         ) : activeTab === "cashouts" ? (
@@ -126,7 +126,7 @@ export default function AdminWalletPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1000px]">
                 <thead>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-border">
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Người rút</th>
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Mã rút</th>
                     <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Số điểm rút</th>
@@ -139,16 +139,16 @@ export default function AdminWalletPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {cashouts.map((c) => (
-                    <tr key={c._id} className="hover:bg-white/[0.02] transition-colors">
+                    <tr key={c._id} className="hover:bg-muted transition-colors">
                       <td className="px-5 py-4">
-                        <p className="text-sm font-semibold text-white">{getUserName(c.userId)}</p>
+                        <p className="text-sm font-semibold text-foreground">{getUserName(c.userId)}</p>
                         {typeof c.userId === "object" && "email" in c.userId && <p className="text-xs text-muted-foreground">{c.userId.email}</p>}
                       </td>
                       <td className="px-5 py-4">
-                        <code className="rounded bg-white/5 px-2 py-1 text-xs font-mono text-primary border border-primary/20">{c.redemptionCode}</code>
+                        <code className="rounded bg-muted px-2 py-1 text-xs font-mono text-primary border border-primary/20">{c.redemptionCode}</code>
                       </td>
                       <td className="px-5 py-4 text-center font-mono font-black text-primary">{c.pointsRedeemed.toLocaleString()}</td>
-                      <td className="px-5 py-4 text-sm text-white/80">
+                      <td className="px-5 py-4 text-sm text-foreground/70">
                         {getHandlerName(c)}
                       </td>
                       <td className="px-5 py-4 text-xs text-muted-foreground">
@@ -209,7 +209,7 @@ export default function AdminWalletPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-border">
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">User</th>
                     <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Loại</th>
                     <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
@@ -219,8 +219,8 @@ export default function AdminWalletPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {transactions.map((t) => (
-                    <tr key={t._id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="px-5 py-4 text-sm text-white">{getUserName(t.userId)}</td>
+                    <tr key={t._id} className="hover:bg-muted transition-colors">
+                      <td className="px-5 py-4 text-sm text-foreground">{getUserName(t.userId)}</td>
                       <td className="px-5 py-4">
                         <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase ${txTypeColors[t.type] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                           {t.type}
@@ -244,12 +244,12 @@ export default function AdminWalletPage() {
       {activeTab === "cashouts" && cashoutMeta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchCashouts(cashoutMeta.page - 1)} disabled={cashoutMeta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
             <ChevronLeft className="size-4" /> Trước
           </button>
           <span className="text-sm text-muted-foreground">Trang {cashoutMeta.page} / {cashoutMeta.totalPages}</span>
           <button onClick={() => fetchCashouts(cashoutMeta.page + 1)} disabled={cashoutMeta.page >= cashoutMeta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
             Sau <ChevronRight className="size-4" />
           </button>
         </div>
@@ -257,12 +257,12 @@ export default function AdminWalletPage() {
       {activeTab === "transactions" && txMeta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchTransactions(txMeta.page - 1)} disabled={txMeta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
             <ChevronLeft className="size-4" /> Trước
           </button>
           <span className="text-sm text-muted-foreground">Trang {txMeta.page} / {txMeta.totalPages}</span>
           <button onClick={() => fetchTransactions(txMeta.page + 1)} disabled={txMeta.page >= txMeta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white hover:bg-white/[0.06] disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
             Sau <ChevronRight className="size-4" />
           </button>
         </div>
@@ -270,3 +270,5 @@ export default function AdminWalletPage() {
     </main>
   );
 }
+
+

@@ -27,6 +27,8 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
 const TERMINAL_RACE_STATUSES = [
   RaceStatus.LIVE,
@@ -47,6 +49,7 @@ export class TournamentsService {
     private predictionModel: Model<PredictionDocument>,
     private notificationsService: NotificationsService,
     private auditLogsService: AuditLogsService,
+    private ledgerService: RewardPointLedgerService,
   ) {}
 
   async create(
@@ -170,6 +173,32 @@ export class TournamentsService {
       status: { $nin: TERMINAL_RACE_STATUSES },
     });
     const raceIds = races.map((r) => r._id);
+
+    if (raceIds.length > 0) {
+      const pendingPredictions = await this.predictionModel.find({
+        raceId: { $in: raceIds },
+        status: PredictionStatus.PENDING,
+      });
+
+      for (const p of pendingPredictions) {
+        if (p.betPoints && p.betPoints >= 2) {
+          await this.ledgerService.credit({
+            userId: String(p.userId),
+            points: p.betPoints,
+            sourceType: LedgerSourceType.PREDICTION_REWARD,
+            sourceId: String(p._id),
+            note: `Hoàn trả cược dự đoán (+${p.betPoints} điểm) do giải đấu bị hủy`,
+          });
+
+          await this.notificationsService.send(
+            String(p.userId),
+            'Dự đoán bị hủy',
+            `Giải đấu bị hủy, bạn được hoàn trả ${p.betPoints} điểm cược dự đoán.`,
+            NotificationType.PREDICTION,
+          );
+        }
+      }
+    }
 
     await Promise.all([
       // Cancel non-terminal races

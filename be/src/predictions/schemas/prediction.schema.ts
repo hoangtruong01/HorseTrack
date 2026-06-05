@@ -31,6 +31,9 @@ export class Prediction {
   @Prop({ default: 0 })
   rewardPoints!: number;
 
+  @Prop({ default: 0 })
+  betPoints!: number;
+
   @Prop()
   evaluatedAt?: Date;
 }

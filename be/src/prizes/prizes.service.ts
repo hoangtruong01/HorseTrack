@@ -13,6 +13,12 @@ import {
   RegistrationDocument,
 } from '../registrations/schemas/registration.schema';
 import {
+  RefereeAssignment,
+  RefereeAssignmentDocument,
+  RefereeAssignmentStatus,
+  RefereeRole,
+} from '../referee-assignments/schemas/referee-assignment.schema';
+import {
   Prize,
   PrizeDocument,
   PrizePaymentStatus,
@@ -30,6 +36,8 @@ export class PrizesService {
     @InjectModel(Horse.name) private horseModel: Model<HorseDocument>,
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
+    @InjectModel(RefereeAssignment.name)
+    private assignmentModel: Model<RefereeAssignmentDocument>,
     private ledgerService: RewardPointLedgerService,
   ) {}
 
@@ -130,6 +138,26 @@ export class PrizesService {
           paidAt: new Date(),
         });
         createdPrizes.push(jockeyPrize);
+      }
+    }
+
+    // 3. Process Referee Salaries
+    const refereeAssignments = await this.assignmentModel.find({
+      raceId: new Types.ObjectId(raceId),
+      status: RefereeAssignmentStatus.ACCEPTED,
+    });
+
+    for (const ass of refereeAssignments) {
+      if (ass.salary > 0 && ass.refereeUserId) {
+        await this.ledgerService.credit({
+          userId: String(ass.refereeUserId),
+          points: ass.salary,
+          sourceType: LedgerSourceType.REFEREE_SALARY,
+          sourceId: raceId,
+          note: `Lương điều hành cuộc đua "${race.name}" với vai trò ${
+            ass.role === RefereeRole.MAIN ? 'Trọng tài chính' : 'Trọng tài phụ'
+          }`,
+        });
       }
     }
 

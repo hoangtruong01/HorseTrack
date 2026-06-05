@@ -1,0 +1,2296 @@
+{
+  "nav": {
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "settings": "Settings",
+    "login": "Login",
+    "logout": "Log out",
+    "home": "Home",
+    "tournaments": "Tournaments",
+    "races": "Races",
+    "rankings": "Rankings",
+    "predictions": "Predictions",
+    "news": "News",
+    "contact": "Contact"
+  },
+  "roles": {
+    "admin": "Admin",
+    "owner": "Owner",
+    "jockey": "Jockey",
+    "referee": "Referee",
+    "spectator": "Spectator",
+    "counter_staff": "Counter staff"
+  },
+  "notFound": {
+    "title": "Route not found",
+    "description": "This shell only exposes Phase 2 public, auth, and role dashboard entry routes.",
+    "backHome": "Back home"
+  },
+  "wallet": {
+    "balance": {
+      "title": "Free reward wallet",
+      "role": "Role: {{role}}",
+      "refreshAria": "Refresh balance",
+      "refreshSuccess": "Reward balance refreshed!",
+      "availableLabel": "Available reward points",
+      "pointsUnit": "Pts",
+      "redeem": "Redeem",
+      "rules": "Redemption rules",
+      "rulesToast": "Earn points to receive a gift code. Present the code at the counter for physical rewards.",
+      "noteLabel": "Note:",
+      "note": {
+        "owner": "Owners (70%) and jockeys (30%) receive points automatically after official results. Redeem via confirmation code at the counter.",
+        "jockey": "Owners (70%) and jockeys (30%) receive points automatically after official results. Redeem via confirmation code at the counter.",
+        "spectator": "Correct predictions earn +1 point; wrong predictions lose 1 point when balance allows. Redeem accumulated points at the counter."
+      }
+    },
+    "transactions": {
+      "eyebrow": "Reward ledger",
+      "title": "Point transaction history",
+      "searchPlaceholder": "Search by transaction description...",
+      "filters": {
+        "all": "All",
+        "prizes": "Owner/Jockey",
+        "predictions": "Predictions",
+        "cashouts": "Redemptions"
+      },
+      "colType": "Type",
+      "colDetails": "Details",
+      "colTime": "Time",
+      "colPoints": "Points change",
+      "emptyTitle": "No transactions found",
+      "emptyHint": "Try adjusting filters or search keywords.",
+      "statusCompleted": "Completed",
+      "statusPending": "Pending at counter",
+      "statusFailed": "Rejected/Failed",
+      "types": {
+        "deposit": "Initial points",
+        "withdrawalRequested": "Redemption (Pending)",
+        "withdrawalApproved": "Redemption (Approved)",
+        "withdrawalPaid": "Redemption (Paid)",
+        "withdrawalRejected": "Redemption (Rejected)",
+        "prizeOwner": "Owner prize",
+        "prizeJockey": "Jockey prize",
+        "predictionWin": "Prediction win",
+        "predictionRefund": "Point refund",
+        "generic": "Transaction"
+      }
+    },
+    "txHistory": {
+      "title": "TRANSACTION HISTORY",
+      "tabAll": "ALL",
+      "tabPoints": "REWARD POINTS",
+      "tabCashouts": "CASHOUT",
+      "searchPlaceholder": "Search transactions...",
+      "colType": "TRANSACTION TYPE",
+      "colDetails": "DETAILS",
+      "colTime": "TIME",
+      "colPoints": "POINTS",
+      "colValue": "VALUE",
+      "empty": "No transactions found.",
+      "showing": "Showing {{start}} - {{end}} of {{total}} transactions",
+      "typeReceived": "Received Points",
+      "typeCashout": "Cashout",
+      "typeEvent": "Event Reward",
+      "subDeposit": "Deposit",
+      "subOwnerReward": "Owner Reward",
+      "subJockeyReward": "Jockey Reward",
+      "subPredictWin": "Correct Prediction",
+      "subWithdrawReq": "Withdrawal Requested",
+      "subWithdrawApp": "Approved",
+      "subWithdrawPaid": "Bank Transfer",
+      "subWithdrawRej": "Rejected",
+      "subRefundEvent": "Refund/Event"
+    },
+    "cashoutForm": {
+      "eyebrow": "Redemption Voucher",
+      "title": "Redeem Points",
+      "desc": "Convert your accumulated reward points into a redemption code. Bring this code to the physical counter for staff confirmation and gift delivery.",
+      "balanceLabel": "Current Balance",
+      "pointsSuffix": "points",
+      "amountLabel": "Points to Redeem",
+      "inputPlaceholder": "Minimum 10 points",
+      "btnMax": "MAX",
+      "infoTitle": "Physical Redemption System",
+      "infoDesc": "A unique redemption code will be generated. Points are only deducted from your wallet when counter staff successfully verify and process the gift delivery.",
+      "warningOver": "Note: Do not redeem more points than your available balance at the time of receiving gifts at the counter.",
+      "warningAudit": "Redemption transactions are securely audited and logged in the Ledger system.",
+      "btnCancel": "Cancel",
+      "btnSubmit": "Generate Code",
+      "btnProcessing": "Processing...",
+      "errInvalid": "Please enter a valid amount of points.",
+      "errExceed": "Redemption points exceed your current balance.",
+      "errMin": "The minimum points to redeem is 10 points.",
+      "successMsg": "Successfully requested redemption of {{points}} points! Please save your redemption code."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage display and language preferences for HorseTrack.",
+    "themeTitle": "Theme",
+    "themeHint": "Choose light or dark mode.",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "languageTitle": "Language",
+    "languageHint": "Select your preferred language.",
+    "languageEnglish": "English",
+    "languageVietnamese": "Vietnamese"
+  },
+  "homepage": {
+    "badge": "Live Tournament Platform",
+    "heroTitle1": "Manage Horse Racing",
+    "heroTitle2": "Tournaments",
+    "heroTitleHighlight": "Smarter",
+    "heroSubtitle": "Register horses, assign jockeys, schedule races, record results, track rankings and create predictions – all in one platform.",
+    "getStarted": "Get Started",
+    "viewRaces": "View Races",
+    "liveRaceStatus": "Live Race Status",
+    "viewAllRaces": "View All Races",
+    "racingNow": "Racing now",
+    "live": "LIVE",
+    "startsIn": "Starts in",
+    "upcoming": "UPCOMING",
+    "winner": "Winner",
+    "finished": "FINISHED",
+    "quickStats": {
+      "tournaments": {
+        "label": "Active Tournaments",
+        "desc": "Running this season"
+      },
+      "horses": {
+        "label": "Registered Horses",
+        "desc": "Across all tournaments"
+      },
+      "jockeys": {
+        "label": "Assigned Jockeys",
+        "desc": "Ready to compete"
+      },
+      "races": {
+        "label": "Completed Races",
+        "desc": "This season"
+      }
+    },
+    "roles": {
+      "eyebrow": "Access Point Selectors",
+      "title": "Choose Your Role",
+      "learnMore": "Learn more about roles",
+      "admin": {
+        "name": "Admin",
+        "desc": "Manage users, tournaments, races, schedules, results and system settings."
+      },
+      "owner": {
+        "name": "Horse Owner",
+        "desc": "Register horses, choose jockeys, track races and view prizes."
+      },
+      "jockey": {
+        "name": "Jockey",
+        "desc": "Accept race invitations, view assigned races and track performance."
+      },
+      "referee": {
+        "name": "Race Referee",
+        "desc": "Inspect horses, record violations, confirm results and create reports."
+      },
+      "spectator": {
+        "name": "Spectator",
+        "desc": "View races, rankings and make predictions to win exciting rewards."
+      },
+      "explore": "Explore"
+    },
+    "features": {
+      "eyebrow": "Operational Abstractions",
+      "title": "Core Features",
+      "feat1": {
+        "title": "Tournament Management",
+        "desc": "Create, manage and organize tournaments easily."
+      },
+      "feat2": {
+        "title": "Horse Registration",
+        "desc": "Register and manage horses for races."
+      },
+      "feat3": {
+        "title": "Jockey Assignment",
+        "desc": "Assign jockeys to horses and manage agreements."
+      },
+      "feat4": {
+        "title": "Race Scheduling",
+        "desc": "Create race schedules and manage race days."
+      },
+      "feat5": {
+        "title": "Referee Report",
+        "desc": "Record violations and generate referee reports."
+      },
+      "feat6": {
+        "title": "Race Results",
+        "desc": "Record race results and announcements."
+      },
+      "feat7": {
+        "title": "Ranking & Leaderboard",
+        "desc": "Track rankings for horses and jockeys."
+      },
+      "feat8": {
+        "title": "Prediction Management",
+        "desc": "Allow spectators to predict and win rewards."
+      }
+    },
+    "newsletter": {
+      "eyebrow": "Champion Gold Rewards",
+      "title": "Stay Updated",
+      "titleBreak": "With Horse Racing",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe"
+    },
+    "footer": {
+      "desc": "The complete management system for horse racing tournaments.",
+      "quickLinks": "Quick Links",
+      "support": "Support",
+      "followUs": "Follow Us",
+      "copyright": "© 2026 Horse Racing Tournament Management System. All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
+  },
+  "admin": {
+    "overview": {
+      "title": "Admin Command Center",
+      "systemOverview": "System Overview",
+      "subtitle": "Manage users, tournaments, races, and core system configurations.",
+      "activeUsers": "Active Users",
+      "totalRaces": "Total Races",
+      "upcomingRaces": "Upcoming Races",
+      "horses": "Horses",
+      "activeHorses": "Active Horses",
+      "totalHorses": "Total Horses",
+      "jockeys": "Jockeys",
+      "totalJockeys": "Total Jockeys",
+      "activeJockeys": "Active Jockeys",
+      "wallets": "System Wallets",
+      "recentTransactions": "Recent Transactions"
+    },
+    "quickActions": {
+      "title": "Admin Command Grid",
+      "subtitle": "Fast access to your most frequently used management tools.",
+      "manageUsers": "Manage Users",
+      "viewAllUsers": "View all users",
+      "tournaments": "Tournaments",
+      "manageTournaments": "Manage tournaments",
+      "horses": "Horses",
+      "manageHorses": "Manage horses",
+      "prizes": "Prizes & Rewards",
+      "managePrizes": "Manage prizes"
+    },
+    "actions": {
+      "createRace": "Create race",
+      "reviewQueue": "Review queue"
+    },
+    "hero": {
+      "badge": "Mock command deck · Phase 4A",
+      "title": "Admin Command Center",
+      "description": "Race control, tournament containers, registration review, result publish.",
+      "scopeGuard": "Scope guard",
+      "scopeGuardDesc": "No CRUD · No API · No realtime sockets"
+    },
+    "stats": {
+      "tournaments": {
+        "label": "Total tournaments",
+        "helper": "Active containers for independent races",
+        "trend": "+2 this month"
+      },
+      "races": {
+        "label": "Total races",
+        "helper": "Race is the primary operating unit",
+        "trend": "12 scheduled"
+      },
+      "liveRaces": {
+        "label": "Live races",
+        "helper": "Needs race-control visibility now",
+        "trend": "Monitor status"
+      },
+      "pendingRegistrations": {
+        "label": "Pending registrations",
+        "helper": "Horse entries waiting for admin review",
+        "trend": "Action needed"
+      },
+      "upcomingRaces": {
+        "label": "Upcoming races",
+        "helper": "Scheduled races in the next race window",
+        "trend": "Next: 14:30"
+      },
+      "resultsWaiting": {
+        "label": "Results waiting",
+        "helper": "Confirmed results ready for publish review",
+        "trend": "Per-race publishing"
+      }
+    },
+    "quickActionsItems": {
+      "createTournament": {
+        "title": "Create Tournament",
+        "description": "Open a new container for a themed race set.",
+        "label": "Plan container"
+      },
+      "createRace": {
+        "title": "Create Race",
+        "description": "Schedule an independent race with track, time, referee.",
+        "label": "Add race"
+      },
+      "reviewRegistrations": {
+        "title": "Review Registrations",
+        "description": "Approve or reject horse entries for each race.",
+        "label": "Review queue"
+      },
+      "reviewResults": {
+        "title": "Review Results",
+        "description": "Check referee-confirmed race results before publish.",
+        "label": "Publish queue"
+      }
+    },
+    "raceStatus": {
+      "radarEyebrow": "Race status radar",
+      "controlTower": "Control tower",
+      "radarDesc": "One-screen status summary for independent races. No rounds, no stage progression.",
+      "livePriority": "Live priority",
+      "livePriorityDesc": "Live races stay visually dominant so admin can jump to monitoring, registration impact, and result readiness.",
+      "summaryEyebrow": "Upcoming / live / finished",
+      "summaryTitle": "Race summary",
+      "mockOnly": "Mock data only",
+      "horsesCount": "{{count}} horses",
+      "status": {
+        "live": "Live",
+        "upcoming": "Upcoming",
+        "finished": "Finished"
+      },
+      "raceMock": {
+        "race-live-01": {
+          "name": "Saigon Night Sprint",
+          "tournament": "Southern Speed Cup",
+          "startLabel": "Lap timing open",
+          "track": "District 2 Track",
+          "adminNote": "Referee channel active"
+        },
+        "race-live-02": {
+          "name": "Red Line Derby",
+          "tournament": "Independence Trophy",
+          "startLabel": "Final stretch",
+          "track": "Long Thanh Arena",
+          "adminNote": "Result lock pending"
+        },
+        "race-upcoming-01": {
+          "name": "Morning Qualifier Run",
+          "tournament": "Metro Race Weekend",
+          "startLabel": "Today 14:30",
+          "track": "Phu Tho Course",
+          "adminNote": "3 registrations pending"
+        },
+        "race-upcoming-02": {
+          "name": "Heritage Mile",
+          "tournament": "Autumn Stable Series",
+          "startLabel": "Tomorrow 09:00",
+          "track": "Da Lat Highland Track",
+          "adminNote": "Referee assigned"
+        },
+        "race-finished-01": {
+          "name": "Coastal Dash",
+          "tournament": "Central Coast Open",
+          "startLabel": "Finished 11:10",
+          "track": "Nha Trang Sand Track",
+          "adminNote": "Result waiting publish"
+        }
+      }
+    },
+    "activity": {
+      "eyebrow": "Recent activity",
+      "title": "Admin feed",
+      "items": {
+        "act01": {
+          "title": "Registration queue updated",
+          "description": "4 new horses added to Morning Qualifier Run."
+        },
+        "act02": {
+          "title": "Race status changed",
+          "description": "Saigon Night Sprint moved to live monitoring."
+        },
+        "act03": {
+          "title": "Referee result confirmed",
+          "description": "Coastal Dash result ready for admin publish review."
+        }
+      }
+    }
+  },
+  "counterStaff": {
+    "header": {
+      "eyebrow": "Counter operations",
+      "title": "Reward Redemption Counter",
+      "description": "Welcome to the Counter Staff desk. Here you can approve physical gift codes and assist customers with deposits."
+    },
+    "stats": {
+      "pending": {
+        "title": "Pending Approval",
+        "desc": "waiting codes"
+      },
+      "approved": {
+        "title": "Approved (Pending Gift)",
+        "desc": "verified codes"
+      },
+      "paid": {
+        "title": "Paid",
+        "desc": "completed transactions"
+      },
+      "totalPoints": {
+        "title": "Total Redeemed Points",
+        "desc": "points"
+      }
+    },
+    "actions": {
+      "redemption": {
+        "title": "Physical Reward Redemption",
+        "desc": "Look up redemption codes like RWD-XXXXXX provided by users at the counter, verify gift information and update status to successfully delivered.",
+        "link": "Open redemption queue"
+      },
+      "deposit": {
+        "title": "Customer Deposit",
+        "desc": "Assist in depositing cash in exchange for reward points/wallet balance at the counter. Enter customer email/account ID to execute direct deposits quickly.",
+        "link": "Open deposit interface"
+      }
+    },
+    "recentRedemptions": {
+      "title": "Recent Redemptions",
+      "loading": "Loading redemption history...",
+      "empty": "No redemption transactions have been made yet.",
+      "columns": {
+        "code": "Redemption Code",
+        "customer": "Customer",
+        "points": "Points",
+        "status": "Status",
+        "time": "Time"
+      },
+      "statusPaid": "PAID",
+      "customerFallback": "Customer",
+      "statusPending": "PENDING",
+      "statusApproved": "APPROVED"
+    }
+  },
+  "owner": {
+    "header": {
+      "eyebrow": "Owner Dashboard",
+      "title": "Stable Management",
+      "description": "Command center for independent horse owners. Register horses, enter races, and manage 70/30 revenue share from race prizes."
+    },
+    "actions": {
+      "addHorse": "Add Horse",
+      "registerRace": "Enter Race"
+    },
+    "hero": {
+      "badge": "HORSE OWNER COMMAND STATION",
+      "title": "Upgrade your horses. Win on every track.",
+      "description": "Control the process from selection, race registration to optimizing the 70% profit share from the prize pool. Ensure your horses are always healthy and ready before start time.",
+      "rewardSplit": "Reward Split",
+      "rewardSplitDesc": "Owner 70% · Jockey 30%",
+      "wallet": "Reward Wallet",
+      "walletDesc": "Exchange rate: 1 point = 100 VND"
+    },
+    "stats": {
+      "horses": {
+        "label": "Horses in Stable",
+        "helper": "Total number of horses registered in your portfolio.",
+        "trend": "Stable"
+      },
+      "registrations": {
+        "label": "Race Registrations",
+        "helper": "Race entries (pending, approved, cancelled).",
+        "trend": "Entries"
+      },
+      "winnings": {
+        "label": "Total Accumulated Prize",
+        "helperPaid": "Paid",
+        "helperPending": "Pending",
+        "trend": "70/30 Income"
+      }
+    },
+    "quickActions": {
+      "title": "Main Functions",
+      "horses": {
+        "title": "Horse Stable",
+        "desc": "View details, update info and manage your own list of racing horses."
+      },
+      "races": {
+        "title": "Enter Race",
+        "desc": "Find open tournaments and register healthy horses to compete."
+      },
+      "registrations": {
+        "title": "Entry History",
+        "desc": "Track race entry approval progress and cancel or withdraw registrations."
+      },
+      "wallet": {
+        "title": "My Wallet",
+        "desc": "Request cashout, check reward point balance and view wallet statements."
+      }
+    }
+  },
+  "jockey": {
+    "header": {
+      "eyebrow": "Professional Jockey Interface",
+      "title": "Jockey Station",
+      "titleLoading": "Jockey",
+      "description": "Welcome to the Jockey management area. Receive 70/30 profit sharing race invitations from owners, view horse details, manage race schedule and track your personal performance."
+    },
+    "hero": {
+      "badge": "JOCKEY TOOLS",
+      "online": "Online",
+      "title": "Committed 30% of match prize pool",
+      "description": "Default contract between owner and Jockey: 70% belongs to owner, 30% belongs to winning Jockey. All accepted invitations are checked by the system for a 4-hour conflict window to ensure safety.",
+      "newInvites": "New invitations pending approval!",
+      "newInvitesDesc": "You have {count} pending invitations from owners."
+    },
+    "stats": {
+      "races": {
+        "label": "Participated Races",
+        "helper": "Total official races you have completed.",
+        "trend": "Career"
+      },
+      "wins": {
+        "label": "Wins (1st Place)",
+        "helper": "Championship win rate",
+        "trend": "Champion"
+      },
+      "points": {
+        "label": "Total Match Points",
+        "helper": "Rank conversion: 1st place gets 10pts, 2nd gets 7pts, 3rd gets 5pts...",
+        "trend": "Accumulated Points"
+      }
+    },
+    "tabs": {
+      "dashboard": "Dashboard",
+      "invitations": "Invitations",
+      "assigned": "Schedule",
+      "horses": "Horses",
+      "performance": "Performance"
+    },
+    "ui": {
+      "loadError": "Could not connect to server. Please try again.",
+      "accept": "Accept",
+      "reject": "Reject",
+      "processing": "Processing...",
+      "horseFetchError": "Could not load horse details.",
+      "connectionError": "Connection error.",
+      "dateUnknown": "Not scheduled",
+      "dateAt": "at",
+      "scheduleTitle": "Upcoming schedule",
+      "viewAll": "View all",
+      "noAcceptedRaces": "No accepted upcoming races.",
+      "raceNameFallback": "Race name",
+      "horseLabel": "Horse: {{name}}",
+      "inboxTitle": "Invitation inbox ({{count}})",
+      "viewAllInvites": "View all",
+      "inboxEmpty": "Inbox empty. No new invitations.",
+      "inviteBadge": "Invitation",
+      "raceLabel": "Race: {{name}}",
+      "invitationsTitle": "Invitations from owners",
+      "newInvitesCount": "{{count}} new invitations",
+      "inboxEmptyTitle": "Empty inbox",
+      "inboxEmptyDesc": "No ride invitations from owners. When owners need a jockey, invitations will appear here.",
+      "pendingApproval": "Pending approval",
+      "sentByOwner": "Sent by owner",
+      "noPhone": "No phone",
+      "raceNameLabel": "Race name",
+      "startTimeLabel": "Start time",
+      "horseNameLabel": "Horse name",
+      "ownerMessageLabel": "Owner message",
+      "assignedTitle": "Accepted race schedule",
+      "noAssigned": "No accepted races in your schedule.",
+      "horsesTitle": "Horses you ride",
+      "noHorses": "No horses assigned yet.",
+      "viewHorseSpecs": "View horse specs",
+      "profileTitle": "Jockey profile",
+      "proJockey": "Professional jockey",
+      "phone": "Phone",
+      "notUpdated": "Not updated",
+      "performanceTitle": "Official scores & performance",
+      "winsLabel": "Wins (1st place)",
+      "totalRacesLabel": "Total races",
+      "winRateLabel": "Win rate",
+      "pointsLabel": "Race points",
+      "historyNote": "Detailed position and points history comes from official results published by race officials.",
+      "modalTitle": "Horse details",
+      "loadingData": "Loading data...",
+      "noImage": "No horse image uploaded",
+      "breed": "Breed",
+      "age": "Age",
+      "yearsOld": "{{age}} yrs",
+      "gender": "Gender",
+      "male": "Stallion",
+      "female": "Mare",
+      "conditionTitle": "Condition & racing technique",
+      "speedPower": "Speed power",
+      "stamina": "Stamina",
+      "health": "Health",
+      "healthy": "Healthy",
+      "injured": "Injured",
+      "sick": "Sick",
+      "physicalStats": "Physical stats",
+      "weightHeight": "Weight: {{weight}} kg · Height: {{height}} cm",
+      "descriptionLabel": "Horse description",
+      "horseNotFound": "Horse information not found.",
+      "close": "Close",
+      "loadingStation": "Loading command station...",
+      "statusPending": "Pending",
+      "statusReady": "Ready",
+      "statusLive": "LIVE",
+      "statusFinished": "Finished",
+      "statusPublished": "Results published",
+      "respondSuccess": "{{action}} invitation successfully",
+      "respondError": "Failed to {{action}} invitation",
+      "assignedHorseLabel": "Assigned horse",
+      "attachedMessageLabel": "Attached message",
+      "assignedScheduleTitle": "Accepted ride schedule",
+      "upcomingRacesCount": "{{count}} upcoming races",
+      "noScheduleTitle": "No schedule yet",
+      "noScheduleDesc": "When you accept owner invitations, your start schedule will appear here.",
+      "assignedBadge": "ASSIGNED",
+      "departureTimeLabel": "Start time",
+      "ownerLabel": "Horse owner",
+      "ridingHorseLabel": "Horse you ride",
+      "viewHorseDetail": "View horse details",
+      "ridingHorsesTitle": "Horses you ride",
+      "ridingCount": "{{count}} horses riding",
+      "noHorseAssignedTitle": "No horse assigned",
+      "noHorseAssignedDesc": "When you accept invitations, assigned horse details will appear here.",
+      "raceRoleLabel": "Race role",
+      "raceRoleDesc": "Your horse in accepted rides. Stamina and speed greatly affect final results.",
+      "pointsSuffix": "pts"
+    }
+  },
+  "spectator": {
+    "header": {
+      "eyebrow": "Spectator control center",
+      "title": "Tracks & Predictions",
+      "description": "Browse top-tier horse racing tournaments, join free predictions to earn reward points, and redeem exciting physical gifts at the counter."
+    },
+    "wallet": {
+      "title": "Points Balance",
+      "active": "Active Account",
+      "link": "View Wallet & Redeem"
+    },
+    "stats": {
+      "ongoing": {
+        "label": "Ongoing Tournaments",
+        "value": "2 Tournaments",
+        "desc": "Gathering over 30+ registered horses"
+      },
+      "today": {
+        "label": "Today Schedule",
+        "value": "1 LIVE",
+        "desc": "Live results update from the track"
+      },
+      "accuracy": {
+        "label": "Prediction Accuracy",
+        "value": "68.4%",
+        "desc": "+1 pt for correct, -1 pt for wrong prediction"
+      }
+    },
+    "tournaments": {
+      "title": "Featured Tournaments",
+      "desc": "Explore thrilling upcoming or ongoing horse racing tournaments",
+      "viewAll": "View All",
+      "prizePool": "Total Prize Pool:",
+      "detailLink": "Tournament Details"
+    },
+    "upcoming": {
+      "title": "Hot Upcoming Races",
+      "desc": "Follow and place early predictions before start time",
+      "distance": "Distance",
+      "surface": "Surface",
+      "liveNow": "LIVE NOW",
+      "watchLive": "Watch Live Results",
+      "predictFree": "Place Free Prediction"
+    },
+    "rules": {
+      "title": "Reward Rule",
+      "desc": "For each race, you can select 1 horse you expect to finish first. Correct prediction adds +1 point, incorrect deduction is -1 point. Wallet balance cannot drop below 0."
+    }
+  },
+  "referee": {
+    "header": {
+      "eyebrow": "Referee Operations Station",
+      "title": "Supervisory Board",
+      "description": "Manage race officiating schedule, inspect horses pre-race, record violations, and confirm official race result reports."
+    },
+    "profileCheck": {
+      "badge": "PROFILE COMPLETION REQUIRED",
+      "title": "Initialize your Referee Profile",
+      "desc": "Hello **{name}**, you have the Referee role but have not created your professional profile yet. Please enter your license number below to receive race supervision assignments from the Organizing Committee.",
+      "license": "License Number",
+      "experience": "Experience (Years)",
+      "bio": "Short Bio (Optional)",
+      "submit": "Create Profile Now",
+      "submitting": "Processing..."
+    },
+    "dashboard": {
+      "badge": "ONLINE SUPERVISION",
+      "title": "REFEREE WORKSPACE",
+      "desc": "Manage authorized races. Perform full inspections of protective gear, horse health, jockey attendance, and establish standardized rankings after the match is completed.",
+      "licenseInfo": "Licensed Referee"
+    },
+    "alerts": {
+      "newAssignments": "New assignment requests!",
+      "newAssignmentsDesc": "You have {count} new races assigned by the Organizing Committee pending approval.",
+      "approveNow": "Approve Now"
+    },
+    "actions": {
+      "nextTask": "NEXT TASK",
+      "role": "Role:",
+      "status": "Status:",
+      "reject": "Reject",
+      "accept": "Accept Assignment",
+      "checkHorse": "Inspect Horse",
+      "violations": "Violations",
+      "enterResult": "Enter Result"
+    },
+    "report": {
+      "badge": "MATCH REPORT",
+      "title": "Close & Sync",
+      "desc": "When the main referee clicks **Confirm Results**, the system will automatically apply time penalties from the violation board, recalculate the actual horse rankings, and lock modifications.",
+      "viewAll": "View Full Reports"
+    },
+    "assignments": {
+      "title": "Assigned Race List",
+      "detail": "Details"
+    },
+    "empty": {
+      "title": "No assignments yet",
+      "desc": "List is empty. When the Organizing Committee assigns you to a race supervision team, the race details and operational APIs will fully display here."
+    }
+  },
+  "navigation": {
+    "admin": {
+      "dashboard": {
+        "title": "Admin Dashboard",
+        "description": "System overview: users, tournaments, races, bets."
+      },
+      "users": {
+        "title": "User Management",
+        "description": "Manage users: view, ban/unban, delete accounts."
+      },
+      "roles": {
+        "title": "Role Management",
+        "description": "Assign or remove roles for each user."
+      },
+      "horses": {
+        "title": "Horse Management",
+        "description": "Manage all horses and update their status."
+      },
+      "jockeys": {
+        "title": "Jockey Management",
+        "description": "Review jockey profiles and update status."
+      },
+      "tournaments": {
+        "title": "Tournament Management",
+        "description": "Create, update, and change tournament status."
+      },
+      "registrations": {
+        "title": "Registration Approval",
+        "description": "Approve or reject horse race registrations."
+      },
+      "races": {
+        "title": "Race Scheduling",
+        "description": "Create races, schedule runs, and manage status."
+      },
+      "refereeAssignments": {
+        "title": "Referee Assignment",
+        "description": "Assign referees to each race."
+      },
+      "rankings": {
+        "title": "Ranking Management",
+        "description": "View and update horse and jockey rankings."
+      },
+      "prizes": {
+        "title": "Prize Management",
+        "description": "Manage prizes and payment status."
+      },
+      "bets": {
+        "title": "Bet Management",
+        "description": "View all prediction bets in the system."
+      },
+      "wallet": {
+        "title": "Wallet Transactions",
+        "description": "Manage point deposits and cashout queue."
+      },
+      "results": {
+        "title": "Results",
+        "description": "Per-race result review and publish queue."
+      },
+      "auditLogs": {
+        "title": "Audit Logs",
+        "description": "View system operations and secure transaction trails."
+      }
+    },
+    "owner": {
+      "dashboard": {
+        "title": "Command Station",
+        "description": "Stable hub for horses, registration, and jockey handoff."
+      },
+      "horses": {
+        "title": "Horse Stable",
+        "description": "Manage your horses, health status, and details."
+      },
+      "races": {
+        "title": "Race Registration",
+        "description": "Browse open races and enroll healthy horses."
+      },
+      "registrations": {
+        "title": "Registration History",
+        "description": "Track approval progress of your race entries."
+      },
+      "jockeyInvitations": {
+        "title": "Invite Jockey",
+        "description": "Invite professional jockeys for approved horses."
+      },
+      "wallet": {
+        "title": "My Wallet",
+        "description": "View rewards, earnings split, and request cashouts."
+      }
+    },
+    "jockey": {
+      "dashboard": {
+        "title": "Command Station",
+        "description": "Dashboard, race schedule, invitations, and recent results."
+      },
+      "invitations": {
+        "title": "Ride Invitations",
+        "description": "Accept or decline invitations from horse owners."
+      },
+      "assigned": {
+        "title": "Accepted Schedule",
+        "description": "View accepted races and assigned horse details."
+      },
+      "horses": {
+        "title": "Horse Details",
+        "description": "View stats, stamina, and condition of assigned horses."
+      },
+      "performance": {
+        "title": "Personal Performance",
+        "description": "Career stats and race performance history."
+      },
+      "wallet": {
+        "title": "My Wallet",
+        "description": "View 30% reward share and cashout history."
+      }
+    },
+    "referee": {
+      "dashboard": {
+        "title": "Command Station",
+        "description": "Referee supervision dashboard."
+      },
+      "assignments": {
+        "title": "Assigned Races",
+        "description": "Races assigned for officiating and control."
+      },
+      "preRace": {
+        "title": "Pre-race Check",
+        "description": "Horse health checks and jockey attendance before race."
+      },
+      "monitoring": {
+        "title": "Race Monitoring",
+        "description": "Track start status and live race progress."
+      },
+      "resultEntry": {
+        "title": "Confirm Results",
+        "description": "Enter official finish times and rankings."
+      },
+      "violations": {
+        "title": "Record Violations",
+        "description": "Report violations and apply time penalties."
+      },
+      "reports": {
+        "title": "Race Reports",
+        "description": "Manage and publish official race reports."
+      }
+    },
+    "spectator": {
+      "dashboard": {
+        "title": "Featured Tournaments",
+        "description": "Ongoing and upcoming featured tournaments."
+      },
+      "tournaments": {
+        "title": "Tournament Info",
+        "description": "Rules, details, and prize structure."
+      },
+      "races": {
+        "title": "Race Schedule",
+        "description": "Schedules, track maps, and start times."
+      },
+      "results": {
+        "title": "Live Results",
+        "description": "Live finish updates and race status."
+      },
+      "rankings": {
+        "title": "Rankings",
+        "description": "Top horses and jockeys leaderboard."
+      },
+      "wallet": {
+        "title": "Reward Wallet",
+        "description": "Prediction points, redemption history, and codes."
+      },
+      "predictions": {
+        "title": "Predictions",
+        "description": "Predict winners to earn free reward points."
+      }
+    },
+    "counterStaff": {
+      "dashboard": {
+        "title": "Counter Desk",
+        "description": "Counter overview, quick lookup, and stats."
+      },
+      "redemptions": {
+        "title": "Physical Redemptions",
+        "description": "Process redemption queue and confirm gift delivery."
+      },
+      "deposit": {
+        "title": "Wallet Deposit",
+        "description": "Deposit cash or points into user wallets at the counter."
+      }
+    }
+  },
+  "shell": {
+    "Admin": {
+      "badge": "Admin workspace",
+      "description": "Race control, tournament containers, registration review, result publish."
+    },
+    "Owner": {
+      "badge": "Owner workspace",
+      "description": "Stable operations, horse portfolio, race registration, jockey assignment."
+    },
+    "Jockey": {
+      "badge": "Jockey workspace",
+      "description": "Mobile-first assignments and personal race schedule."
+    },
+    "Referee": {
+      "badge": "Referee workspace",
+      "description": "Assigned races, checks, violations, result confirmation."
+    },
+    "Spectator": {
+      "badge": "Spectator workspace",
+      "description": "Race browsing, predictions, and public results."
+    },
+    "CounterStaff": {
+      "badge": "Counter workspace",
+      "description": "Approve redemption codes, lookup accounts, and wallet deposits."
+    }
+  },
+  "pages": {
+    "admin": {
+      "common": {
+        "loading": "Loading...",
+        "prev": "Previous",
+        "next": "Next",
+        "pageOf": "Page {{page}} / {{total}}",
+        "delete": "Delete",
+        "actions": "Actions",
+        "status": "Status",
+        "total": "Total: <strong>{{count}}</strong>",
+        "searchPlaceholder": "Search by name, email...",
+        "allRoles": "All roles",
+        "allStatus": "All statuses",
+        "noResults": "No results found.",
+        "confirmDelete": "Delete \"{{name}}\"? This cannot be undone.",
+        "loadError": "Failed to load data",
+        "removeRole": "Remove role",
+        "ban": "Ban",
+        "unban": "Unban",
+        "selectTournament": "— Select tournament —",
+        "selectRace": "— Select race —",
+        "dash": "—",
+        "backToDashboard": "Back to dashboard",
+        "years": "years",
+        "completed": "Completed"
+      },
+      "users": {
+        "eyebrow": "User Management",
+        "title": "User Management",
+        "description": "View, ban/unban, and delete accounts. Search by name or email.",
+        "searchPlaceholder": "Search by name, email...",
+        "allRoles": "All roles",
+        "allStatus": "All statuses",
+        "stats": "Total: <strong>{{total}}</strong> users — Page {{page}}/{{totalPages}}",
+        "colUser": "User",
+        "colRoles": "Roles",
+        "colStatus": "Status",
+        "colCreated": "Created",
+        "colActions": "Actions",
+        "loading": "Loading...",
+        "empty": "No users found.",
+        "loadError": "Failed to load user list",
+        "toastUnban": "Unbanned {{name}}",
+        "toastBan": "Banned {{name}}",
+        "toastDelete": "Deleted {{name}}",
+        "confirmDelete": "Delete user \"{{name}}\"? This cannot be undone."
+      },
+      "roles": {
+        "eyebrow": "Role Management",
+        "title": "System Roles",
+        "description": "Assign or remove roles per user. Changes take effect immediately.",
+        "searchPlaceholder": "Search by name, email...",
+        "colUser": "User",
+        "colCurrentRoles": "Current roles",
+        "colAddRole": "Add role",
+        "toastRoleAdded": "Added role \"{{role}}\"",
+        "toastRoleRemoved": "Removed role \"{{role}}\""
+      },
+      "horses": {
+        "eyebrow": "Horse Management",
+        "title": "Horse Management",
+        "description": "View all horses in the system. Admins can delete violating horses.",
+        "total": "Total: <strong>{{count}}</strong> horses",
+        "colHorse": "Horse",
+        "colOwner": "Owner",
+        "colHealth": "Health",
+        "colStatus": "Status",
+        "empty": "No horses yet.",
+        "confirmDelete": "Delete horse \"{{name}}\"?",
+        "toastDeleted": "Deleted horse {{name}}"
+      },
+      "jockeys": {
+        "eyebrow": "Jockey Management",
+        "title": "Jockey Management",
+        "description": "View all jockey profiles including inactive/suspended. Change status here.",
+        "allStatus": "All statuses",
+        "total": "Total: <strong>{{count}}</strong>",
+        "colJockey": "Jockey",
+        "colLicense": "License",
+        "colExperience": "Experience",
+        "colRacesWins": "Races / Wins",
+        "colChange": "Change",
+        "experience": "{{years}} years · {{weight}}kg",
+        "empty": "No jockeys found.",
+        "toastStatus": "Updated status → {{status}}",
+        "status": {
+          "ACTIVE": "Active",
+          "UNAVAILABLE": "Unavailable",
+          "SUSPENDED": "Suspended"
+        }
+      },
+      "tournaments": {
+        "eyebrow": "Tournament Management",
+        "title": "Tournament Management",
+        "description": "Create, update status, and delete tournaments. Each tournament contains multiple independent races.",
+        "createNew": "Create tournament",
+        "total": "Total: <strong>{{count}}</strong> tournaments",
+        "prize": "Prize",
+        "maxHorses": "Max",
+        "horsesUnit": "horses",
+        "pts": "pts",
+        "confirmDelete": "Delete tournament \"{{name}}\"?",
+        "toastDeleted": "Tournament deleted",
+        "toastStatus": "Updated status → {{status}}"
+      },
+      "tournamentsNew": {
+        "eyebrow": "Create tournament",
+        "title": "New tournament setup",
+        "description": "Fill in the details below to create a new tournament. It starts in DRAFT status.",
+        "backToDashboard": "Back to dashboard"
+      },
+      "tournamentForm": {
+        "deckEyebrow": "Tournament management deck",
+        "title": "Create new tournament",
+        "subtitle": "Set up a tournament container for upcoming horse races.",
+        "cancel": "Cancel",
+        "save": "Save tournament",
+        "saving": "Saving...",
+        "nameLabel": "Tournament name",
+        "locationLabel": "Venue",
+        "startDateLabel": "Tournament start date",
+        "endDateLabel": "Tournament end date",
+        "sectionRegistration": "Registration window & parameters",
+        "regStartLabel": "Registration opens",
+        "regEndLabel": "Registration closes",
+        "maxHorsesLabel": "Max horses in tournament",
+        "prizePoolLabel": "Prize pool (points)",
+        "descriptionLabel": "Tournament description",
+        "namePlaceholder": "e.g. Spring Velocity Cup 2026",
+        "locationPlaceholder": "e.g. Phu Tho Racecourse, Ho Chi Minh City",
+        "maxHorsesPlaceholder": "Default: 20",
+        "prizePoolPlaceholder": "Default: 0",
+        "descriptionPlaceholder": "Brief rules, prizes, or organizer notes...",
+        "scopeTitle": "System constraints (scope guard)",
+        "scopeBody": "New tournaments start in <1>DRAFT</1>. Update to <2>OPEN REGISTRATION</2> on the detail page so owners can register horses.",
+        "validation": {
+          "nameRequired": "Please enter a tournament name.",
+          "datesRequired": "Please enter tournament start and end dates.",
+          "startBeforeEnd": "Start date must be before end date.",
+          "regStartBeforeEnd": "Registration start must be before registration end.",
+          "regBeforeTournament": "Registration must end before the tournament starts.",
+          "minHorses": "Maximum horses must be at least 2.",
+          "prizeNonNegative": "Prize pool cannot be negative."
+        },
+        "createError": "Failed to create tournament.",
+        "createSuccess": "Tournament \"{{name}}\" created successfully!",
+        "createFailed": "Failed to create tournament. Please try again."
+      },
+      "mockRegistrations": {
+        "tableEyebrow": "Registration queue",
+        "tableTitle": "Admin moderation board",
+        "tableFooter": "UI-only · showing {{shown}}/{{total}}",
+        "colHorse": "Horse",
+        "colOwner": "Owner",
+        "colRace": "Race",
+        "colSubmitted": "Submitted",
+        "colStatus": "Status",
+        "colReviewNote": "Review note",
+        "colActions": "Actions",
+        "viewDetail": "View detail",
+        "review": "Review",
+        "status": {
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        }
+      },
+      "mockRaces": {
+        "tableEyebrow": "Race list",
+        "tableTitle": "Admin schedule board",
+        "tableFooter": "Mock data · showing {{shown}}/{{total}}",
+        "openRace": "Open race",
+        "participants": "Participants",
+        "participantsCount": "{{current}}/{{capacity}} participants",
+        "colRace": "Race",
+        "colStatus": "Status",
+        "colSchedule": "Schedule",
+        "colTrack": "Track",
+        "colParticipants": "Participants",
+        "colAction": "Action",
+        "manage": "Manage",
+        "detailDescription": "Race is the core business object: schedule, participants, referee, status timeline, and metadata are grouped in one admin control view.",
+        "distance": "Distance",
+        "participantsLabel": "Participants",
+        "tournament": "Tournament",
+        "scheduleEyebrow": "Race schedule",
+        "dateWindow": "Date / window",
+        "location": "Location",
+        "course": "Course",
+        "referee": "Referee",
+        "refereeSummary": "Referee summary",
+        "quickActions": "Quick actions",
+        "viewParticipants": "View participants",
+        "assignments": "Assignments",
+        "quickActionsHint": "Placeholders only. No approval/publish workflow.",
+        "metadata": "Race metadata",
+        "participantsEyebrow": "Participants",
+        "horseGrid": "Horse grid",
+        "lanesCount": "{{count}} confirmed lanes",
+        "colLane": "Lane/order",
+        "colHorse": "Horse",
+        "colOwner": "Owner",
+        "colJockey": "Jockey",
+        "status": {
+          "scheduled": "Scheduled",
+          "live": "Live",
+          "finished": "Finished",
+          "result_published": "Result published"
+        },
+        "participantStatus": {
+          "confirmed": "Confirmed",
+          "checked_in": "Checked in",
+          "pending_assignment": "Pending",
+          "scratched": "Scratched"
+        }
+      },
+      "bets": {
+        "eyebrow": "Bet Management",
+        "title": "Prediction Management",
+        "description": "View all user predictions/bets. Results update automatically after race publish.",
+        "total": "Total: <strong>{{count}}</strong> predictions",
+        "colUser": "User",
+        "colRace": "Race",
+        "colHorse": "Horse picked",
+        "colReward": "Reward",
+        "colStatus": "Status",
+        "colDate": "Placed on",
+        "empty": "No predictions yet.",
+        "status": {
+          "PENDING": "Pending",
+          "WON": "Won",
+          "LOST": "Lost",
+          "CANCELLED": "Cancelled"
+        }
+      },
+      "cashouts": {
+        "eyebrow": "Physical Redemption",
+        "title": "Counter Redemption Management",
+        "description": "Verify spectator, owner, and jockey redemption codes at the physical counter and reconcile system ledger points."
+      },
+      "prizes": {
+        "eyebrow": "Prize Management",
+        "title": "Prize Management",
+        "description": "View all prizes auto-created (70% owner / 30% jockey) after race end. Admins can update payment status.",
+        "total": "Total: <strong>{{count}}</strong> prizes",
+        "colRecipient": "Recipient",
+        "colRace": "Race",
+        "colHorse": "Horse",
+        "colPoints": "Points",
+        "colAction": "Action",
+        "markPaid": "Mark PAID",
+        "paidOn": "Paid on {{date}}",
+        "empty": "No prizes yet.",
+        "toastStatus": "Updated status → {{status}}"
+      },
+      "wallet": {
+        "eyebrow": "Wallet Transactions",
+        "title": "Points Transaction Management",
+        "description": "View all wallet transactions and approve user cashout/redemption requests.",
+        "tabCashouts": "Cashout queue ({{count}})",
+        "tabTransactions": "All transactions ({{count}})",
+        "colUser": "User",
+        "colCode": "Redemption code",
+        "colPoints": "Points",
+        "colType": "Type",
+        "colDescription": "Description",
+        "colDate": "Date",
+        "colAction": "Action",
+        "approve": "Approve",
+        "reject": "Reject",
+        "markPaid": "Mark paid",
+        "done": "Done",
+        "emptyCashouts": "No cashout requests.",
+        "emptyTransactions": "No transactions yet.",
+        "toastStatus": "Updated → {{status}}"
+      },
+      "rankings": {
+        "eyebrow": "Ranking Management",
+        "title": "View / Update Rankings",
+        "description": "Rankings are computed in real time from PUBLISHED race results. Select a tournament to view standings.",
+        "selectTournament": "— Select tournament —",
+        "tabHorses": "Horses",
+        "tabJockeys": "Jockeys",
+        "loading": "Calculating rankings...",
+        "selectPrompt": "Select a tournament to view rankings.",
+        "empty": "No published race results yet.",
+        "colRank": "Rank",
+        "colHorse": "Horse",
+        "colJockey": "Jockey",
+        "colPoints": "Points",
+        "colRaces": "Races",
+        "colWins": "Wins"
+      },
+      "refereeAssignments": {
+        "eyebrow": "Referee Assignment",
+        "title": "Referee Assignments",
+        "description": "Select a race to view and manage assigned referees.",
+        "selectRace": "— Select race —",
+        "colReferee": "Referee",
+        "colNote": "Note",
+        "empty": "No referees assigned to this race yet.",
+        "emptyHint": "Use API POST /referee-assignments to assign.",
+        "toastRemoved": "Assignment removed"
+      },
+      "auditLogs": {
+        "eyebrow": "Security & Audit",
+        "title": "Operations Audit Trail",
+        "description": "Verify system log consistency, track referee result entries, automatic prize splits, and wallet redemptions."
+      },
+      "races": {
+        "eyebrow": "Race management",
+        "title": "Race control board",
+        "description": "Core race-centric admin UI: status visibility, schedule board, participant routes, reusable race components. Mock data only.",
+        "createRace": "Create race",
+        "statusStack": "Status stack",
+        "statusTitle": "Scheduled · Live · Finished · Published",
+        "statusDesc": "Phase 4C keeps every race independent. No rounds, stage progression, brackets, qualification, betting, or backend calls."
+      },
+      "racesNew": {
+        "eyebrow": "Create race",
+        "title": "New race setup",
+        "description": "Mock-first race creation UI for schedule, course, capacity, and referee planning. No backend submit.",
+        "backToRaces": "Back to races"
+      },
+      "raceDetail": {
+        "eyebrow": "Race detail",
+        "description": "Race info, schedule/location, participants, referee summary, status timeline, quick actions placeholder, and metadata.",
+        "allRaces": "All races",
+        "participants": "Participants"
+      },
+      "raceAssignments": {
+        "eyebrow": "Assignment overview",
+        "title": "{{name}} assignments",
+        "description": "Continuity placeholder for referee and jockey assignments. No accept/reject workflow, no backend, no realtime.",
+        "backToDetail": "Back to detail",
+        "refereeAssignment": "Referee assignment",
+        "displayOnly": "Display only",
+        "jockeyLanes": "Jockey lanes",
+        "lane": "Lane {{lane}}"
+      },
+      "raceParticipants": {
+        "eyebrow": "Race participants",
+        "title": "{{name}} grid",
+        "description": "Participant organization by horse, owner, jockey, lane/order, and status. Display-only mock data.",
+        "backToDetail": "Back to detail"
+      },
+      "registrations": {
+        "eyebrow": "Registration approval",
+        "title": "Race registration moderation",
+        "description": "Review horse, owner, race target, submission time, and mock eligibility notes before approving or rejecting. FE-first; no backend calls.",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "needsReview": "Needs review",
+        "readyQueue": "Ready queue",
+        "reasonRequired": "Reason required"
+      },
+      "registrationDetail": {
+        "eyebrow": "Registration review",
+        "description": "Single registration moderation panel with eligibility snapshot, note placeholder, approve/reject dialogs, and audit-style mock trail.",
+        "allRegistrations": "All registrations"
+      },
+      "results": {
+        "eyebrow": "Result publish",
+        "title": "Race result review",
+        "description": "Review per-race rankings, referee summary, draft/confirmed/published states, then publish confirmed results. Mock data only.",
+        "ready": "Ready",
+        "published": "Published",
+        "refereeConfirmed": "Referee confirmed",
+        "publicState": "Public state",
+        "reviewResult": "Review result"
+      },
+      "resultDetail": {
+        "eyebrow": "Result review",
+        "description": "Ranking preview, referee summary placeholder, publish state, and publish confirmation. Result belongs to this race only.",
+        "allResults": "All results"
+      },
+      "resultReview": {
+        "heroDescription": "Admin race-result gate: review referee summary, inspect ranking, then publish only when referee-confirmed. Mock data only.",
+        "track": "Track",
+        "rankingRows": "Ranking rows",
+        "referee": "Referee",
+        "raceSummary": "Race summary",
+        "raceSummaryLine": "{{distance}} · {{track}} · finished · {{finishedAt}}",
+        "refereeSummary": "Referee summary",
+        "publishState": "Publish state",
+        "publishConfirmation": "Publish confirmation",
+        "publishedLocked": "Published state locked",
+        "finalGate": "Final admin gate",
+        "alreadyPublished": "Result already published",
+        "publishButton": "Publish result",
+        "status": {
+          "draft": "Draft",
+          "referee_confirmed": "Referee confirmed",
+          "published": "Published"
+        },
+        "publishBadge": {
+          "published": "Published result",
+          "ready": "Ready to publish",
+          "awaiting": "Awaiting referee"
+        },
+        "mock": {
+          "race-aurora-1200": {
+            "refereeSummary": "Referee confirmed finish order. One warning, one mock penalty note. Ready for admin publish review.",
+            "publishState": "Publish enabled after referee confirmation. Admin confirmation remains mock-only."
+          },
+          "race-delta-1600": {
+            "refereeSummary": "Draft result needs referee confirmation before publish CTA becomes available.",
+            "publishState": "Publish disabled until referee confirms race result."
+          },
+          "race-heritage-1400": {
+            "refereeSummary": "Result already published. Public result state is locked for display.",
+            "publishState": "Published result state. Confirmation CTA replaced by status UI."
+          }
+        }
+      },
+      "raceRanking": {
+        "eyebrow": "Race ranking",
+        "showing": "Showing {{visible}}/{{total}}",
+        "colRank": "Rank",
+        "colHorse": "Horse",
+        "colJockey": "Jockey",
+        "colFinishTime": "Finish time",
+        "colPenalty": "Penalty",
+        "colFinalStatus": "Final status",
+        "penalty": {
+          "clean": "Clean",
+          "warning": "Warning",
+          "penalty": "Penalty"
+        },
+        "resultStatus": {
+          "draft": "Draft",
+          "referee_confirmed": "Referee confirmed",
+          "published": "Published"
+        }
+      },
+      "publishDialog": {
+        "eyebrow": "Publish race result",
+        "close": "Close publish dialog",
+        "description": "Publishing makes this race ranking visible as the final official result. This action will automatically trigger the reward splits:",
+        "ownerSplit": "Owner split (70%)",
+        "ownerPoints": "7,000 pts",
+        "ownerCredits": "Credits stable: Linh Tran Stable",
+        "jockeySplit": "Jockey split (30%)",
+        "jockeyPoints": "3,000 pts",
+        "jockeyCredits": "Credits jockey: Minh Khoa",
+        "refereeSummaryLabel": "Referee summary:",
+        "cancel": "Cancel",
+        "confirm": "Confirm & publish",
+        "publishing": "Distributing prize...",
+        "toastSuccess": "Race results published successfully! Winnings distributed.",
+        "successTitle": "Race results published!",
+        "successDescription": "Prize splits have been credited to user balances. Ledger transactions and system audit logs successfully updated.",
+        "successOwnerCredit": "+7,000 pts credited to owner wallet",
+        "successJockeyCredit": "+3,000 pts credited to jockey wallet",
+        "successAudit": "Audit action: RACE_PUBLISHED, PRIZE_SPLIT",
+        "done": "Done",
+        "status": {
+          "draft": "Draft",
+          "referee_confirmed": "Referee confirmed",
+          "published": "Published"
+        }
+      },
+      "auditViewer": {
+        "eyebrow": "System audit trail",
+        "title": "System operations logs",
+        "description": "Immutably tracked security activities, prize disbursements, result publishing, and administrative queue approvals.",
+        "searchPlaceholder": "Filter audit entries by action, user or details...",
+        "empty": "No system operations entries found matching the query.",
+        "colAction": "Action event",
+        "colUser": "User",
+        "colDetails": "Activity details",
+        "colIp": "IP address",
+        "colTime": "Timestamp",
+        "systemUser": "System",
+        "actions": {
+          "USER_LOGIN": "User login",
+          "RACE_PUBLISHED": "Race published",
+          "PRIZE_SPLIT": "Prize split",
+          "CASHOUT_APPROVED": "Cashout approved",
+          "PREDICTION_PAYOUT": "Prediction payout"
+        }
+      },
+      "raceForm": {
+        "eyebrow": "Race form",
+        "title": "Create race mock",
+        "subtitle": "UI-only form. No validation service, no API submit.",
+        "save": "Save mock race",
+        "scopeNote": "Phase 4C scope: form layout only. Registration approval, result publish, realtime, backend integration stay out.",
+        "fields": {
+          "raceName": "Race name",
+          "tournament": "Tournament",
+          "dateTime": "Date & time",
+          "location": "Location",
+          "distance": "Distance",
+          "surface": "Surface",
+          "capacity": "Capacity"
+        },
+        "placeholders": {
+          "raceName": "Aurora Sprint 1200",
+          "tournament": "Spring Velocity Cup",
+          "dateTime": "24 May 2026 · 10:00",
+          "location": "Saigon Grand Track",
+          "distance": "1,200m",
+          "surface": "Dry turf",
+          "capacity": "8"
+        }
+      }
+    },
+    "owner": {
+      "horses": {
+        "eyebrow": "Stable management",
+        "title": "Race Horse List",
+        "description": "Manage technical profiles and health status for each race horse. Horses must be healthy to qualify for tournament registration.",
+        "addHorse": "Add horse",
+        "addHorseNow": "Add horse now",
+        "loading": "Loading stable data...",
+        "emptyTitle": "Empty stable",
+        "emptyDescription": "You have not registered any race horses yet. Add your first horse to start entering exciting tournaments.",
+        "toast": {
+          "fetchFailed": "Unable to fetch horse list from server.",
+          "deleteConfirm": "Are you sure you want to remove this horse from your stable?",
+          "deleteSuccess": "Horse removed successfully.",
+          "deleteFailed": "Failed to remove horse."
+        }
+      },
+      "horseForm": {
+        "fields": {
+          "name": "Horse name *",
+          "breed": "Breed",
+          "color": "Color",
+          "age": "Age",
+          "weight": "Weight (kg)",
+          "height": "Height (cm)",
+          "gender": "Gender",
+          "health": "Health status",
+          "image": "Horse image",
+          "description": "Description / Notes"
+        },
+        "placeholders": {
+          "name": "Enter horse name (e.g. Thunder Bolt)",
+          "breed": "Thoroughbred",
+          "color": "Bay, Black",
+          "description": "Strengths or notable traits..."
+        },
+        "gender": {
+          "MALE": "Stallion",
+          "FEMALE": "Mare",
+          "GELDING": "Gelding"
+        },
+        "health": {
+          "HEALTHY": "Healthy",
+          "INJURED": "Injured",
+          "RECOVERING": "Recovering",
+          "RETIRED": "Retired"
+        },
+        "errors": {
+          "title": "Input error",
+          "nameRequired": "Horse name is required.",
+          "imageSize": "Image must be 5MB or smaller.",
+          "saveFailed": "Failed to save horse profile."
+        },
+        "changeImage": "Change image",
+        "uploadTitle": "Upload image",
+        "uploadHint": "PNG, JPG, WEBP up to 5MB",
+        "cancel": "Cancel",
+        "save": "Save horse",
+        "saving": "Saving..."
+      },
+      "horsesNew": {
+        "eyebrow": "Profile registration",
+        "title": "Add New Race Horse",
+        "description": "Declare technical specifications for your race horse to store in the catalog. This profile is used to review racing eligibility.",
+        "toast": {
+          "createFailed": "Failed to create new horse.",
+          "createSuccess": "Horse added to stable successfully!",
+          "error": "An error occurred while adding the horse."
+        }
+      },
+      "horseDetail": {
+        "eyebrow": "Horse profile",
+        "description": "International standard technical specs and competition history.",
+        "editEyebrow": "Edit profile",
+        "editTitle": "Update {{name}}",
+        "editDescription": "Edit or update the latest health and technical parameters for this race horse.",
+        "cancelEdit": "Cancel edit",
+        "editProfile": "Edit profile",
+        "registerRace": "Register for race",
+        "loading": "Loading profile data...",
+        "notFound": "Horse does not exist or you do not have permission to view it.",
+        "bioSpecs": "Biological specs",
+        "baseSpeed": "Base speed",
+        "stamina": "Stamina score",
+        "breed": "Breed",
+        "color": "Color",
+        "gender": "Gender",
+        "genderMale": "Stallion (Male)",
+        "genderFemale": "Mare (Female)",
+        "genderGelding": "Gelding",
+        "age": "Age",
+        "weight": "Weight (kg)",
+        "height": "Height (cm)",
+        "descriptionLabel": "Description",
+        "noDescription": "No detailed description about temperament or terrain strengths has been added yet.",
+        "raceHistoryTitle": "Race History & Results",
+        "noRaceData": "No race data yet",
+        "noRaceDataDesc": "This horse has not participated in any official race or results have not been recorded.",
+        "finishTime": "Finish time",
+        "avgSpeed": "Avg speed",
+        "startGate": "Start gate",
+        "health": {
+          "HEALTHY": "Healthy",
+          "INJURED": "Injured",
+          "RECOVERING": "Recovering",
+          "RETIRED": "Retired"
+        },
+        "toast": {
+          "fetchFailed": "Unable to fetch horse details.",
+          "updateFailed": "Failed to update horse.",
+          "updateSuccess": "Horse information updated successfully!",
+          "saveError": "An error occurred while saving the horse."
+        }
+      },
+      "races": {
+        "eyebrow": "Horse racing events",
+        "title": "Race List",
+        "description": "Find races currently open for horse registration. Ensure your horse meets health standards before submitting an entry.",
+        "loading": "Searching for available races...",
+        "emptyTitle": "No races available",
+        "emptyDescription": "There are no races currently open for registration. Please check back later!",
+        "openRegistration": "Open registration",
+        "closedRegistration": "Registration closed",
+        "startTime": "Start: {{datetime}}",
+        "distanceSurface": "Distance: {{distance}} · Surface: {{surface}}",
+        "participants": "Entries: {{current}}/{{max}} horses",
+        "raceFull": "Race is full",
+        "registerNow": "Register now",
+        "registrationClosed": "No longer accepting entries",
+        "toast": {
+          "fetchFailed": "Unable to fetch race list from backend."
+        }
+      },
+      "raceRegister": {
+        "eyebrow": "Race registration",
+        "title": "Register: {{raceName}}",
+        "description": "Submit your horse's technical profile for tournament admin approval to join the starting lineup.",
+        "loading": "Initializing registration process...",
+        "notAvailable": "Race is unavailable or has ended.",
+        "toast": {
+          "loadFailed": "Unable to load race or stable information.",
+          "registerFailed": "Failed to register horse.",
+          "registerSuccess": "Your race registration has been submitted successfully!",
+          "submitError": "An error occurred while submitting your entry."
+        }
+      },
+      "registrations": {
+        "eyebrow": "Track procedures",
+        "title": "Registration History",
+        "description": "Monitor approval progress for your horse's tournament entries from the Organizing Committee. You may cancel or withdraw depending on entry status.",
+        "loading": "Loading registration history...",
+        "toast": {
+          "fetchFailed": "Unable to load race registration list."
+        }
+      },
+      "jockeyInvitations": {
+        "eyebrow": "Jockey recruitment",
+        "title": "Jockey Invitation Management",
+        "description": "Send invitations to professional jockeys to ride your horses in approved tournament races.",
+        "inviteJockey": "Invite jockey",
+        "loading": "Loading jockey invitation history...",
+        "sentInvitations": "Sent invitations",
+        "emptyTitle": "Empty inbox",
+        "emptyDescription": "You have not sent any jockey collaboration invitations yet. Send a new invitation to prepare for upcoming races!",
+        "table": {
+          "jockey": "Jockey",
+          "horseAndRace": "Horse & Race",
+          "message": "Message",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "cancelInvitation": "Cancel invitation",
+        "modal": {
+          "eyebrow": "Jockey recruitment",
+          "title": "Send Jockey Invitation",
+          "note": "Note: Only horse registrations approved by the Organizing Committee (APPROVED) and not yet assigned a jockey are shown below.",
+          "selectRegistration": "Select Available Registration",
+          "selectRegistrationPlaceholder": "-- Select race registration --",
+          "selectJockey": "Select Available Jockey (AVAILABLE)",
+          "selectJockeyPlaceholder": "-- Select available jockey --",
+          "messageLabel": "Message to jockey (Optional)",
+          "messagePlaceholder": "E.g.: I hope you will ride my horse in this upcoming race!",
+          "sending": "Sending...",
+          "send": "Send invitation"
+        },
+        "status": {
+          "PENDING": "Awaiting response",
+          "ACCEPTED": "Accepted",
+          "REJECTED": "Rejected",
+          "CANCELLED": "Cancelled",
+          "EXPIRED": "Expired"
+        },
+        "toast": {
+          "noApprovedRegistrations": "No approved registrations without a jockey are available for invitation!",
+          "selectRequired": "Please select both a race registration and a jockey.",
+          "sendFailed": "Failed to send jockey invitation.",
+          "sendSuccess": "Jockey invitation sent successfully!",
+          "genericError": "An error occurred.",
+          "cancelConfirm": "Are you sure you want to cancel this jockey invitation?",
+          "cancelSuccess": "Invitation cancelled successfully.",
+          "cancelFailed": "Failed to cancel invitation."
+        }
+      },
+      "wallet": {
+        "eyebrow": "Reward wallet",
+        "title": "Earnings Management",
+        "description": "Track reward points earned from race results (70/30 split) and submit gift redemption requests at the counter.",
+        "loading": "Loading financial history...",
+        "toast": {
+          "fetchFailed": "Unable to load wallet information from backend.",
+          "connectionFailed": "Wallet connection failed.",
+          "cashoutFailed": "Redemption failed.",
+          "cashoutSuccess": "Redemption request for {{points}} points submitted! Visit the counter to collect your gift.",
+          "cashoutError": "An error occurred while creating the withdrawal request."
+        }
+      }
+    },
+    "jockey": {
+      "wallet": {
+        "eyebrow": "My Wallet",
+        "title": "Jockey Rewards",
+        "description": "View points earned through winning jockey assignments (30% split) and process withdrawals."
+      }
+    },
+    "spectator": {
+      "common": {
+        "filterAll": "All",
+        "backToList": "Back to list",
+        "viewDetails": "View details",
+        "liveNow": "LIVE NOW",
+        "finished": "Finished",
+        "prizePool": "Prize pool:",
+        "location": "Location:",
+        "schedule": "Schedule:",
+        "distance": "Distance",
+        "surface": "Surface",
+        "pts": "Pts"
+      },
+      "tournaments": {
+        "eyebrow": "Tournament Discovery",
+        "title": "Tournament Information",
+        "description": "Search, browse tournament rules, and distances for all active horse racing events.",
+        "searchPlaceholder": "Search tournaments, locations...",
+        "filterOngoing": "Ongoing",
+        "filterOpenRegistration": "Open registration",
+        "filterCompleted": "Completed",
+        "viewTournamentDetails": "View tournament details",
+        "horsesEnrolled": "{{enrolled}} / {{max}} horses",
+        "raceSchedule": "Race schedule ({{count}})",
+        "totalPrizePool": "Total prize pool",
+        "horsesEnrolledLabel": "Horses enrolled:"
+      },
+      "races": {
+        "eyebrow": "Race Schedules",
+        "title": "Race Schedule",
+        "description": "Track all upcoming horse races or watch live events in progress.",
+        "searchPlaceholder": "Search races, tournaments...",
+        "filterLive": "Live",
+        "filterScheduled": "Upcoming",
+        "filterFinished": "Finished",
+        "viewRaceDetails": "View race details",
+        "backToSchedule": "Back to race schedule",
+        "departure": "Departure:",
+        "startTime": "Start time:",
+        "distanceAndTrack": "Distance & track:",
+        "trackSurface": "Track surface:",
+        "mainReferee": "Main referee:",
+        "statusTimeline": "Race progress (Status Timeline)",
+        "participants": "Competing horses & jockeys ({{count}})",
+        "tableLane": "Lane",
+        "tableHorse": "Horse (Code)",
+        "tableJockey": "Jockey",
+        "tableOwner": "Owner",
+        "tableStatus": "Status",
+        "timeline": {
+          "scheduled": "Scheduled",
+          "preCheck": "Pre-check",
+          "liveRace": "Live race",
+          "finished": "Finished"
+        }
+      },
+      "results": {
+        "eyebrow": "Race Results",
+        "title": "Live Results & Race Standings",
+        "description": "Look up official finish rankings, run times, and penalty seconds recorded by referees.",
+        "searchPlaceholder": "Search race results, tournaments...",
+        "published": "PUBLISHED",
+        "rank2": "2nd",
+        "champion": "Champion",
+        "rank3": "3rd",
+        "viewFullScoreboard": "View full scoreboard",
+        "backToResults": "Back to results list",
+        "distanceLabel": "Distance:",
+        "trackLabel": "Track:",
+        "surfaceLabel": "Surface:",
+        "raceDateLabel": "Race date:",
+        "tableRank": "Rank",
+        "tableHorse": "Horse",
+        "tableOfficialTime": "Official time",
+        "tableViolations": "Violations / Penalty",
+        "tablePrize": "Prize"
+      },
+      "rankings": {
+        "eyebrow": "Hall of Fame",
+        "title": "Tournament Rankings",
+        "description": "Aggregate points, wins, and win rates for top horses and jockeys.",
+        "tabHorses": "Champion Horses",
+        "tabJockeys": "Top Jockeys",
+        "tableRank": "Rank",
+        "tableHorseName": "Horse name",
+        "tableBreed": "Breed",
+        "tableRacesRun": "Races run",
+        "tableWins": "Wins",
+        "tableAvgTime": "Avg. time",
+        "tableTotalPoints": "Total points",
+        "tableJockeyName": "Jockey name",
+        "tableLicense": "License no.",
+        "tableMatches": "Total rides",
+        "tableWinRate": "Win rate",
+        "tableCareerPoints": "Career points"
+      },
+      "wallet": {
+        "eyebrow": "My Wallet",
+        "title": "Spectator Points",
+        "description": "Track free prediction reward points (+1 correct, -1 wrong) and create redemption codes for physical gifts at the counter."
+      },
+      "predictions": {
+        "eyebrow": "Prediction Station",
+        "title": "Race Result Predictions",
+        "description": "Predict the winning horse in upcoming races for free and earn real reward points.",
+        "freeBalance": "Free point balance",
+        "placeNewPrediction": "Place new prediction",
+        "step1Label": "1. Select an upcoming race",
+        "step2Label": "2. Pick your predicted winner (1st place)",
+        "jockeyLabel": "Jockey:",
+        "submitPrediction": "Submit prediction (+1 / -1 Pts)",
+        "gateNoticeTitle": "Gate closing notice",
+        "gateNoticeBody": "Predictions close when the race goes LIVE. You can only predict races in SCHEDULED, CHECKING, or READY status.",
+        "myHistory": "My prediction history ({{count}})",
+        "selected": "Selected:",
+        "jockeyShort": "Jockey:",
+        "simulateWin": "Correct",
+        "simulateLose": "Wrong",
+        "selectHorseFirst": "Please select a horse before submitting your prediction!",
+        "alreadyPredicted": "You already placed a prediction for this race!",
+        "predictionRecorded": "Prediction recorded: \"{{horse}}\" to win \"{{race}}\"!",
+        "winToast": "Congratulations! Your prediction was correct — you earned +1 point!",
+        "loseToast": "Sorry! Your predicted horse did not finish first. -1 point deducted.",
+        "statusWon": "Correct",
+        "statusLost": "Wrong",
+        "statusPending": "Awaiting race",
+        "pointsWon": "+1 Pt",
+        "pointsLost": "-1 Pt",
+        "pointsZero": "0 Pt",
+        "pointsPending": "Awaiting result"
+      }
+    },
+    "referee": {
+      "common": {
+        "eyebrow": "Referee operations",
+        "dateUnknown": "Not determined",
+        "dateAt": "at",
+        "noRacesTitle": "No races yet",
+        "loading": "Loading...",
+        "startTime": "Start time",
+        "assignedBy": "Assigned by",
+        "raceStatus": "Race status",
+        "distance": "Distance:",
+        "viewDetails": "View details",
+        "startInspection": "Start inspection",
+        "notStarted": "Not started",
+        "running": "Running",
+        "startTimeLabel": "Start time:"
+      },
+      "assignments": {
+        "eyebrow": "Assigned races",
+        "title": "Assignment list",
+        "description": "Manage all races the organizers assigned you to officiate.",
+        "emptyTitle": "Empty list",
+        "emptyDescription": "You have not been assigned to officiate any races yet.",
+        "statusPending": "Pending",
+        "statusAccepted": "Accepted",
+        "statusDeclined": "Declined",
+        "statusRemoved": "Removed",
+        "roleMain": "Main referee",
+        "roleAssistant": "Assistant referee",
+        "operate": "Operate",
+        "reject": "Decline",
+        "accept": "Accept assignment",
+        "fetchFailed": "Unable to load assignments",
+        "fetchError": "Failed to load assignment data.",
+        "acceptAction": "Accept",
+        "rejectAction": "Decline",
+        "actionFailed": "Action failed",
+        "actionError": "Failed to process action.",
+        "acceptSuccess": "Assignment accepted successfully!",
+        "rejectSuccess": "Assignment declined successfully!",
+        "raceStatusScheduled": "SCHEDULED — awaiting start",
+        "raceStatusChecking": "CHECKING — horse health inspection",
+        "raceStatusReady": "READY — cleared to start",
+        "raceStatusLive": "LIVE — in progress",
+        "raceStatusFinished": "FINISHED — awaiting result confirmation",
+        "raceStatusPublished": "RESULT PUBLISHED — rewards distributed",
+        "raceStatusCancelled": "CANCELLED"
+      },
+      "preRace": {
+        "eyebrow": "Referee operations",
+        "title": "Pre-race Check",
+        "description": "Select a race under inspection to update horse health and jockey attendance before start.",
+        "emptyDescription": "You must be assigned and accept a race before performing pre-race checks.",
+        "statusNotOpen": "Not open",
+        "statusInspecting": "Inspection open",
+        "statusReady": "Ready",
+        "statusDone": "Finished / Done"
+      },
+      "monitoring": {
+        "eyebrow": "Referee operations",
+        "title": "Race Monitoring",
+        "description": "Monitor start status, coordinate live races, and manage race state transitions.",
+        "emptyDescription": "You must be assigned and accept a race before monitoring.",
+        "openMonitoring": "Open monitoring",
+        "openMonitoringRoom": "Enter monitoring room",
+        "activateStart": "Activate start",
+        "statusFinished": "Finished"
+      },
+      "resultEntry": {
+        "eyebrow": "Referee operations",
+        "title": "Confirm Results",
+        "description": "Select a finished race to enter finish times, run the simulation, or lock the official result sheet.",
+        "emptyDescription": "You must be assigned and accept a race before entering results.",
+        "enterResults": "Enter results now",
+        "viewLockedResults": "View locked results",
+        "draftResults": "Draft results"
+      },
+      "violations": {
+        "eyebrow": "Referee operations",
+        "title": "Record Violations",
+        "description": "Select a race to log jockey rule violations and apply penalty seconds.",
+        "emptyDescription": "You must be assigned and accept a race before reporting violations.",
+        "recordViolation": "Record violation",
+        "viewViolationLog": "View violation log"
+      },
+      "reports": {
+        "eyebrow": "Official records",
+        "title": "Race Reports",
+        "description": "Create pre-race or post-race reports to document race events in the system history.",
+        "form": {
+          "createTitle": "Create new race report",
+          "selectRace": "Select assigned race",
+          "selectRacePlaceholder": "— Select supervised race —",
+          "reportType": "Report type",
+          "typePostRace": "Post-race report",
+          "typePreRace": "Pre-race report",
+          "horseOptional": "Related horse (optional)",
+          "horsePlaceholder": "— All / None —",
+          "violationOptional": "Violation (optional)",
+          "violationPlaceholder": "e.g. Lane infringement",
+          "penaltyOptional": "Suggested penalty (optional)",
+          "penaltyPlaceholder": "e.g. +3 seconds",
+          "description": "Report details",
+          "descriptionPlaceholder": "Race summary, officiating decisions, or recommendations...",
+          "submitting": "Submitting...",
+          "submit": "Sign & submit report",
+          "archiveTitle": "Reports by race ({{count}})",
+          "archiveEmpty": "No assigned races yet — no archived reports."
+        },
+        "selectRaceRequired": "Please select a race",
+        "descriptionRequired": "Please enter a report description",
+        "submitFailed": "Failed to create report",
+        "submitSuccess": "Official race report created successfully!",
+        "submitError": "Failed to submit report.",
+        "fetchFailed": "Unable to load race list",
+        "fetchError": "Failed to load race list."
+      },
+      "raceDetail": {
+        "backToAssignments": "Back to assignments",
+        "back": "Go back",
+        "backToWorkspace": "Back to workspace",
+        "backToPreRace": "Back to pre-race check",
+        "notFound": "Race not found",
+        "description": "Inspect safety equipment, horse health, and jockey attendance before start."
+      },
+      "raceResultEntry": {
+        "backToResultEntry": "Back to result entry",
+        "loading": "Loading result data..."
+      },
+      "raceViolations": {
+        "backToViolations": "Back to violations",
+        "loading": "Loading violation data..."
+      }
+    },
+    "counterStaff": {
+      "redemptions": {
+        "eyebrow": "Redemption Queue",
+        "title": "Redemption approval queue",
+        "description": "Process and complete point-to-gift redemption requests when users visit the counter.",
+        "loading": "Loading redemptions queue...",
+        "fetchError": "Failed to fetch redemptions",
+        "updateSuccess": "Status updated to {{status}}",
+        "updateError": "Failed to update status to {{status}}",
+        "defaultCustomer": "Unknown Customer",
+        "searchLabel": "Lookup Redemption Code at Counter",
+        "searchPlaceholder": "Enter redemption code (e.g. RWD-YHS9X3)...",
+        "clearFilter": "Clear filter",
+        "pendingListEyebrow": "Pending Approval List",
+        "pendingListTitle": "Physical Redemption Queue",
+        "pendingListDesc": "Look up redemption codes provided by Spectator/Owner/Jockey at the counter, verify points balance and proceed with physical gift exchange.",
+        "queueEmptyTitle": "Queue is empty!",
+        "queueEmptyDesc": "No pending redemption requests found.",
+        "colUser": "Redeemer",
+        "colCode": "Redemption Code",
+        "colPoints": "Points Redeemed",
+        "colStatus": "Status",
+        "colActions": "Counter Actions",
+        "roleOwner": "Owner",
+        "roleJockey": "Jockey",
+        "roleSpectator": "Spectator",
+        "copiedSuccess": "Copied redemption code: {{code}}",
+        "createdAt": "Created at: {{time}}",
+        "statusApproved": "Approved",
+        "statusPending": "Pending at counter",
+        "btnApprove": "Approve Code",
+        "btnReject": "Reject",
+        "btnConfirmGift": "Confirm Gift Delivery",
+        "btnCancelApprove": "Cancel Approval",
+        "historyTitle": "Processed Redemption Log",
+        "historyDesc": "Transaction history of redemption codes that were successfully delivered or rejected so far.",
+        "historyEmpty": "No historical redemption log found.",
+        "histColUser": "User",
+        "histColCode": "Gift Code",
+        "histColPoints": "Points Redeemed",
+        "histColTime": "Redeemed Time",
+        "histColStatus": "Status",
+        "histStatusPaid": "Gift Delivered",
+        "histStatusRejected": "Rejected",
+        "histRejectReason": "Reason: {{reason}}",
+        "dialogRejectTitle": "Reject Redemption Request",
+        "dialogRejectDesc": "Are you sure you want to reject the gift code <1>{{code}}</1> from <2>{{name}}</2> ({{points}} points)?",
+        "dialogRejectReasonLabel": "Reject Reason (Required)",
+        "dialogRejectReasonPlaceholder": "E.g: Code is expired, account info mismatch...",
+        "dialogBtnCancel": "Cancel",
+        "dialogBtnConfirm": "Reject Transaction"
+      },
+      "deposit": {
+        "eyebrow": "Wallet Top-up",
+        "title": "Customer wallet deposit",
+        "description": "Top up wallet balance at the counter. Customer pays cash; staff converts and credits the digital wallet.",
+        "formTitle": "Deposit transaction details",
+        "step1Label": "1. Search customer account",
+        "searchPlaceholder": "Enter name, email, or phone...",
+        "selectedAccount": "Selected account",
+        "changeAccount": "Change",
+        "step2Label": "2. Deposit amount (VND)",
+        "amountPlaceholder": "e.g. 100000",
+        "pointsConversion": "Equivalent points:",
+        "submitting": "Processing deposit...",
+        "submit": "Confirm wallet deposit",
+        "selectCustomer": "Please select a customer.",
+        "invalidAmount": "Deposit amount must be greater than 0.",
+        "depositSuccess": "Deposit successful for {{name}}!",
+        "depositError": "Error during point deposit.",
+        "successTitle": "Deposit successful",
+        "successDescription": "Transaction recorded in user wallet",
+        "receiptTxId": "Transaction ID",
+        "receiptCustomer": "Customer",
+        "receiptAmount": "Deposit amount",
+        "receiptTime": "Time",
+        "depositAgain": "Make another deposit",
+        "safeModeTitle": "Secure counter mode",
+        "safeModeDescription": "All counter deposits are strictly audited and stored as audit logs. Confirm you received full cash payment before approving the wallet credit."
+      }
+    },
+    "public": {
+      "tournaments": {
+        "eyebrow": "Public shell",
+        "title": "Tournaments",
+        "description": "Published tournament containers will live here. Phase 2 only confirms the public route shell.",
+        "cardContainers": "Mock containers",
+        "cardLinks": "Race-first links",
+        "cardBackend": "Backend",
+        "cardReady": "Ready",
+        "cardOff": "Off",
+        "cta": "Browse races",
+        "emptyTitle": "Phase 2 shell only",
+        "emptyDesc": "Placeholder route with local mock copy only. Business screens, backend calls, auth guards, and restricted MVP concepts are intentionally not implemented yet."
+      },
+      "tournamentDetail": {
+        "eyebrow": "Public tournament detail",
+        "title": "Tournament {{id}}",
+        "description": "Container detail placeholder. Later phases list independent races inside this tournament.",
+        "cardRole": "Tournament role",
+        "cardRoleValue": "Container",
+        "cardRaceList": "Race list",
+        "cardDeferred": "Deferred",
+        "cardMockId": "Mock id",
+        "cta": "Back to tournaments"
+      },
+      "races": {
+        "eyebrow": "Public shell",
+        "title": "Races",
+        "description": "Race discovery shell with upcoming, live, and published-result placeholders. No live tracking yet.",
+        "cardUpcoming": "Upcoming",
+        "cardUpcomingValue": "4 mock",
+        "cardLive": "Live",
+        "cardLiveValue": "1 mock",
+        "cardScope": "Result scope",
+        "cardPerRace": "Per race",
+        "cta": "Open mock race"
+      },
+      "raceDetail": {
+        "eyebrow": "Public race detail",
+        "title": "Race {{id}}",
+        "description": "Public-only race detail placeholder. Future UI shows public schedule, status, participants, and published race result.",
+        "cardUnit": "Race unit",
+        "cardIndependent": "Independent",
+        "cardPrediction": "Prediction",
+        "cardLoginLater": "Login CTA later",
+        "cardMockId": "Mock id",
+        "cta": "Back to races"
+      }
+    }
+  },
+  "common": {
+    "backToStable": "Back to stable",
+    "backToRaces": "Back to race list",
+    "backendConnectionFailed": "Failed to connect to backend.",
+    "backendError": "Backend connection error.",
+    "networkError": "Network connection error.",
+    "serverError": "Failed to connect to server.",
+    "close": "Close",
+    "na": "N/A",
+    "noImage": "No Image",
+    "unknownBreed": "Unknown breed",
+    "unknownColor": "Unknown color",
+    "unknownRace": "Unknown race",
+    "unknownHorse": "Unknown horse",
+    "unknownJockey": "Unknown jockey",
+    "anonymous": "Anonymous",
+    "freeTournament": "Open tournament",
+    "freeRace": "Open race",
+    "yearsOld": "{{age}} years old",
+    "experienceYears": "({{years}} years experience)",
+    "gateNumber": "Gate {{number}}",
+    "noMessage": "No message.",
+    "walletTransaction": "Wallet transaction",
+    "errorState": {
+      "title": "Race control interrupted",
+      "description": "The current view could not be loaded. This mock-first shell keeps actions local and safe.",
+      "retry": "Retry shell"
+    }
+  },
+  "profile": {
+    "loginRequired": "Please sign in to view your profile.",
+    "login": "Sign in",
+    "eyebrow": "Personal account",
+    "title": "Profile information",
+    "description": "Manage and view your HorseTrack account details.",
+    "backToDashboard": "Back to dashboard",
+    "statusLabel": "Status:",
+    "statusActive": "Active",
+    "email": "Email address",
+    "phone": "Phone number",
+    "dob": "Date of birth",
+    "address": "Residential address",
+    "notUpdated": "Not updated",
+    "roles": {
+      "admin": "Admin",
+      "owner": "Owner",
+      "jockey": "Jockey",
+      "referee": "Referee",
+      "spectator": "Spectator",
+      "counterstaff": "Counter Staff"
+    }
+  },
+  "auth": {
+    "marketing": {
+      "brandSubtitle": "Race Control System",
+      "titleLine1": "Horse Racing",
+      "titleLine2": "Tournament",
+      "titleHighlight": "Management",
+      "description": "Manage tournaments, horse registrations, jockey assignments, race schedules, referee reports, results, rankings and prediction rewards in one platform.",
+      "footerSecure": "Secure login",
+      "footerJwt": "Protected by JWT",
+      "footerSafe": "Your data is safe with us",
+      "features": {
+        "scheduling": {
+          "title": "Tournament scheduling",
+          "description": "Create and manage race tournaments, rounds and race schedules."
+        },
+        "registration": {
+          "title": "Horse registration",
+          "description": "Register horses, manage profiles, history and performance."
+        },
+        "jockey": {
+          "title": "Jockey assignment",
+          "description": "Invite jockeys, assign rides and manage participation."
+        },
+        "results": {
+          "title": "Race results",
+          "description": "Record results, calculate rankings and manage prize money."
+        },
+        "predictions": {
+          "title": "Prediction management",
+          "description": "Allow spectators to make predictions and reward accurate predictors."
+        }
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "description": "Password recovery is not available in this demo build. Contact an admin or use a demo account.",
+      "backToLogin": "Back to login"
+    },
+    "login": {
+      "title": "Sign in to Race Control",
+      "description": "Access your account and manage races like a pro."
+    },
+    "register": {
+      "title": "Claim your grid slot",
+      "description": "Create a mock profile request, select the intended role, and preview the HorseTrack MVP."
+    },
+    "loginForm": {
+      "accessError": "Access error",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "signingIn": "Signing in...",
+      "signIn": "Sign in",
+      "or": "OR",
+      "continueWithGoogle": "Continue with Google",
+      "tryDemoAccount": "Try demo account",
+      "newToHorseTrack": "New to HorseTrack?",
+      "createAccount": "Create an account",
+      "loginSuccess": "Signed in successfully! Welcome back, {{name}}.",
+      "googleAuthFailed": "Google account verification failed.",
+      "loginFailed": "Sign in failed. Please check your credentials.",
+      "roles": {
+        "admin": "Admin",
+        "owner": "Owner",
+        "jockey": "Jockey",
+        "referee": "Referee",
+        "spectator": "Spec",
+        "counter_staff": "Desk"
+      }
+    },
+    "registerForm": {
+      "registrationError": "Registration error",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "e.g. John Doe",
+      "email": "Email",
+      "emailPlaceholder": "you@horsetrack.local",
+      "password": "Password",
+      "passwordPlaceholder": "At least 6 characters",
+      "phone": "Phone number",
+      "phonePlaceholder": "e.g. 0912345678",
+      "dob": "Date of birth",
+      "address": "Address",
+      "addressPlaceholder": "e.g. 1 Main Street, District 1, Ho Chi Minh City",
+      "requestRole": "Request role",
+      "spectatorRole": "Spectator",
+      "acceptPolicy": "I understand this is a mock registration with visual-only role assignment.",
+      "creatingProfile": "Creating mock profile...",
+      "continueAs": "Continue as {{role}}",
+      "alreadyStaged": "Already staged?",
+      "loginInstead": "Login instead",
+      "registerSuccess": "Registration successful! Redirecting...",
+      "registerFailed": "Registration failed."
+    },
+    "roleDescriptions": {
+      "admin": {
+        "eyebrow": "Control tower",
+        "label": "Admin",
+        "description": "Operate tournaments, race schedules, approvals, result publishing, and user role governance."
+      },
+      "owner": {
+        "eyebrow": "Stable lane",
+        "label": "Horse Owner",
+        "description": "Manage horses, track registrations, invite jockeys, and follow race outcomes per independent race."
+      },
+      "jockey": {
+        "eyebrow": "Starting gate",
+        "label": "Jockey",
+        "description": "Review assignments, confirm rides, inspect race schedule, and stay aligned before race start."
+      },
+      "referee": {
+        "eyebrow": "Race control",
+        "label": "Referee",
+        "description": "Monitor assigned races, capture violations, confirm results, and prepare reports for publishing."
+      },
+      "spectator": {
+        "eyebrow": "Grandstand",
+        "label": "Spectator",
+        "description": "Browse races, follow live status, make mock predictions, and view published rankings."
+      },
+      "counter_staff": {
+        "eyebrow": "Redemption desk",
+        "label": "Counter Staff",
+        "description": "Manage physical point redemptions, verify exchange codes, view audit logs, and deposit funds to customer wallets."
+      }
+    }
+  },
+  "forbidden": {
+    "title": "Forbidden placeholder",
+    "description": "Real RBAC is intentionally deferred. This route documents the future 403 destination.",
+    "action": "Go to mock login"
+  }
+}

@@ -63,6 +63,13 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Quản lý jockey: duyệt profiles, đổi trạng thái.",
   },
   {
+    title: "Referee Management",
+    href: "/admin/referees",
+    role: "Admin",
+    icon: Users,
+    description: "Quản lý trọng tài: duyệt hồ sơ, đổi trạng thái hoạt động.",
+  },
+  {
     title: "Tournament Management",
     href: "/admin/tournaments",
     role: "Admin",
@@ -125,6 +132,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: FileText,
     description: "View system operations and secure transaction trails.",
   },
+  // ─── OWNER ──────────────────────────────────────────────────────────
   {
     title: "Trạm Điều Hành",
     href: "/owner",
@@ -161,12 +169,27 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Invite professional jockeys for your approved horses.",
   },
   {
+    title: "Kết Quả Thi Đấu",
+    href: "/owner/results",
+    role: "Owner",
+    icon: Activity,
+    description: "Theo dõi kết quả các trận đua và xếp hạng cán đích chính thức.",
+  },
+  {
+    title: "Bảng Xếp Hạng",
+    href: "/owner/rankings",
+    role: "Owner",
+    icon: Medal,
+    description: "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch.",
+  },
+  {
     title: "Ví Của Tôi",
     href: "/owner/wallet",
     role: "Owner",
     icon: Wallet,
     description: "View rewards ledger, split earnings, and request cashouts.",
   },
+  // ─── JOCKEY ──────────────────────────────────────────────────────────
   {
     title: "Trạm Điều Hành",
     href: "/jockey",
@@ -203,12 +226,20 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Xem chi tiết chỉ số kỹ năng nghề nghiệp và kết quả sự nghiệp.",
   },
   {
+    title: "Bảng Xếp Hạng",
+    href: "/jockey/rankings",
+    role: "Jockey",
+    icon: Medal,
+    description: "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch.",
+  },
+  {
     title: "Ví Của Tôi",
     href: "/jockey/wallet",
     role: "Jockey",
     icon: Wallet,
     description: "Xem điểm thưởng chia tỷ lệ 30% và lịch sử cashout.",
   },
+  // ─── REFEREE ──────────────────────────────────────────────────────────
   {
     title: "Trạm Điều Hành",
     href: "/referee",
@@ -222,6 +253,20 @@ export const dashboardNavigation: NavigationItem[] = [
     role: "Referee",
     icon: Flag,
     description: "Danh sách các cuộc đua được phân công giám sát và điều hành.",
+  },
+  {
+    title: "Bảng Xếp Hạng",
+    href: "/referee/rankings",
+    role: "Referee",
+    icon: Medal,
+    description: "Theo dõi bảng tổng hợp hiệu suất thi đấu của toàn bộ nài ngựa và chiến mã.",
+  },
+  {
+    title: "Ví Của Tôi",
+    href: "/referee/wallet",
+    role: "Referee",
+    icon: Wallet,
+    description: "Xem điểm lương tích lũy và thực hiện yêu cầu rút điểm.",
   },
   {
     title: "Pre-race Check",
@@ -258,6 +303,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: FileText,
     description: "Quản lý và lập biên bản thi đấu chính thức cho các cuộc đua.",
   },
+  // ─── SPECTATOR ──────────────────────────────────────────────────────────
   {
     title: "Giải Đấu Nổi Bật",
     href: "/spectator",
@@ -266,18 +312,11 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Danh sách giải đấu nổi bật đang diễn ra và sắp khởi tranh.",
   },
   {
-    title: "Thông Tin Giải Đấu",
+    title: "Giải Đấu & Dự Đoán",
     href: "/spectator/tournaments",
     role: "Spectator",
-    icon: ListChecks,
-    description: "Thông tin chi tiết, điều lệ và cơ cấu giải thưởng giải đấu.",
-  },
-  {
-    title: "Lịch Thi Đấu",
-    href: "/spectator/races",
-    role: "Spectator",
-    icon: Flag,
-    description: "Lịch đua, sơ đồ đường chạy và thời gian xuất phát chi tiết.",
+    icon: Trophy,
+    description: "Xem giải đấu, lịch trình đua, đội hình tham gia và đặt dự đoán trực tiếp.",
   },
   {
     title: "Kết Quả Trực Tiếp",
@@ -301,11 +340,11 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Ví điểm dự đoán, lịch sử quy đổi và mã nhận thưởng tại quầy.",
   },
   {
-    title: "Dự Đoán Kết Quả",
+    title: "Lịch Sử Dự Đoán",
     href: "/spectator/predictions",
     role: "Spectator",
     icon: Bell,
-    description: "Tham gia dự đoán ngựa vô địch nhận điểm thưởng miễn phí.",
+    description: "Xem lại danh sách và trạng thái các lượt dự đoán đã thực hiện.",
   },
   // ─── COUNTER STAFF ──────────────────────────────────────────────────
   {

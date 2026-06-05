@@ -35,6 +35,9 @@ export class RefereeAssignment {
     default: RefereeAssignmentStatus.ASSIGNED,
   })
   status!: RefereeAssignmentStatus;
+
+  @Prop({ default: 0, min: 0 })
+  salary!: number;
 }
 
 export const RefereeAssignmentSchema =

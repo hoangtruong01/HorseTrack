@@ -23,12 +23,12 @@ export default function AdminResultsPage() {
         description="Review per-race rankings, referee summary, draft/confirmed/published states, then publish confirmed results. Mock data only."
       />
       <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border border-border bg-card p-5">
           <Trophy className="size-5 text-primary" />
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Ready
           </p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="mt-2 font-mono text-4xl font-black text-foreground">
             {counts.referee_confirmed}
           </p>
           <StatusBadge
@@ -38,11 +38,11 @@ export default function AdminResultsPage() {
             pulse
           />
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Published
           </p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="mt-2 font-mono text-4xl font-black text-foreground">
             {counts.published}
           </p>
           <StatusBadge className="mt-3" label="Public state" tone="teal" />
@@ -52,7 +52,7 @@ export default function AdminResultsPage() {
         {mockRaceResults.map((result) => (
           <article
             key={result.raceId}
-            className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5 transition hover:border-primary/40"
+            className="rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40"
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -67,7 +67,7 @@ export default function AdminResultsPage() {
                   }
                   pulse={result.status === "referee_confirmed"}
                 />
-                <h2 className="mt-3 text-2xl font-black uppercase text-white">
+                <h2 className="mt-3 text-2xl font-black uppercase text-foreground">
                   {result.race}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -90,3 +90,5 @@ export default function AdminResultsPage() {
     </main>
   );
 }
+
+

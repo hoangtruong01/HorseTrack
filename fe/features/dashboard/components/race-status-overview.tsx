@@ -28,20 +28,20 @@ const statusMeta: Record<
   finished: {
     label: "Finished",
     className: "f1-status-finished",
-    marker: "bg-white/55",
+    marker: "bg-muted/55",
   },
 };
 
 export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
   return (
     <section className="grid gap-4 xl:grid-cols-[0.9fr_1.4fr]">
-      <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-[#1C1C25] p-5 shadow-[0_18px_56px_rgba(0,0,0,0.32)] sm:p-6">
+      <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-card p-5 shadow-[0_18px_56px_rgba(0,0,0,0.32)] dark:shadow-[0_18px_56px_rgba(0,0,0,0.32)] sm:p-6">
         <div className="absolute -right-16 -top-16 size-48 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Race status radar
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
             Control tower
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -56,9 +56,9 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
               return (
                 <div
                   key={status}
-                  className="rounded-xl border border-white/10 bg-white/[0.04] p-3 text-center"
+                  className="rounded-xl border border-border bg-muted p-3 text-center"
                 >
-                  <p className="text-3xl font-black leading-none text-white">
+                  <p className="text-3xl font-black leading-none text-foreground">
                     {count}
                   </p>
                   <p className="mt-2 text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">
@@ -69,8 +69,8 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
             })}
           </div>
 
-          <div className="mt-6 rounded-xl border border-white/10 bg-black/20 p-4">
-            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <div className="mt-6 rounded-xl border border-border bg-muted p-4">
+            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-foreground">
               <RadioTower className="size-4 text-primary" />
               Live priority
             </div>
@@ -82,13 +82,13 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#15151E]/80 p-4 sm:p-6">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
               Upcoming / live / finished
             </p>
-            <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+            <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
               Race summary
             </h2>
           </div>
@@ -102,7 +102,7 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
             return (
               <article
                 key={race.id}
-                className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] p-4 transition duration-200 hover:border-white/25 hover:bg-white/[0.055]"
+                className="group relative overflow-hidden rounded-xl border border-border bg-muted p-4 transition duration-200 hover:border-primary/30 hover:bg-muted/80"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="min-w-0">
@@ -112,20 +112,20 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
                         {race.tournament}
                       </span>
                     </div>
-                    <h3 className="mt-3 text-lg font-black uppercase tracking-tight text-white">
+                    <h3 className="mt-3 text-lg font-black uppercase tracking-tight text-foreground">
                       {race.name}
                     </h3>
                     <div className="mt-3 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
                       <span className="inline-flex items-center gap-2">
-                        <Timer className="size-4 text-white/60" />
+                        <Timer className="size-4 text-muted-foreground" />
                         {race.startLabel}
                       </span>
                       <span className="inline-flex items-center gap-2">
-                        <MapPin className="size-4 text-white/60" />
+                        <MapPin className="size-4 text-muted-foreground" />
                         {race.track}
                       </span>
                       <span className="inline-flex items-center gap-2">
-                        <Users className="size-4 text-white/60" />
+                        <Users className="size-4 text-muted-foreground" />
                         {race.horses} horses
                       </span>
                     </div>
@@ -138,7 +138,7 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
                       )}
                       aria-hidden="true"
                     />
-                    <p className="text-sm font-semibold leading-5 text-white/80">
+                    <p className="text-sm font-semibold leading-5 text-foreground/70">
                       {race.adminNote}
                     </p>
                   </div>

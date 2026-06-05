@@ -10,6 +10,8 @@ import {
 export interface RankingEntry {
   horseId: string;
   horseName?: string;
+  breed?: string;
+  ownerName?: string;
   totalPoints: number;
   totalRaces: number;
   wins: number;
@@ -20,6 +22,8 @@ export interface RankingEntry {
 export interface JockeyRankingEntry {
   jockeyUserId: string;
   jockeyName?: string;
+  experienceYears?: number;
+  skillLevel?: string;
   totalPoints: number;
   totalRaces: number;
   wins: number;
@@ -65,6 +69,7 @@ export class RankingsService {
         $project: {
           horseId: '$_id',
           horseName: '$horse.name',
+          breed: '$horse.breed',
           totalPoints: 1,
           totalRaces: 1,
           wins: 1,
@@ -73,16 +78,19 @@ export class RankingsService {
       },
     ];
 
-    const raw = await this.resultModel.aggregate<{
-      horseId: string;
-      horseName?: string;
-      totalPoints: number;
-      totalRaces: number;
-      wins: number;
-      totalFinishTimeMs: number;
-    }>(pipeline);
+    const raw =
+      await this.resultModel.aggregate<Omit<RankingEntry, 'rank'>>(pipeline);
     return raw.map(
-      (entry, index): RankingEntry => ({ ...entry, rank: index + 1 }),
+      (entry, index): RankingEntry => ({
+        horseId: String(entry.horseId),
+        horseName: entry.horseName,
+        breed: entry.breed,
+        totalPoints: entry.totalPoints,
+        totalRaces: entry.totalRaces,
+        wins: entry.wins,
+        totalFinishTimeMs: entry.totalFinishTimeMs,
+        rank: index + 1,
+      }),
     );
   }
 
@@ -126,16 +134,167 @@ export class RankingsService {
       },
     ];
 
-    const raw = await this.resultModel.aggregate<{
-      jockeyUserId: string;
-      jockeyName?: string;
-      totalPoints: number;
-      totalRaces: number;
-      wins: number;
-      totalFinishTimeMs: number;
-    }>(pipeline);
+    const raw =
+      await this.resultModel.aggregate<Omit<JockeyRankingEntry, 'rank'>>(
+        pipeline,
+      );
     return raw.map(
-      (entry, index): JockeyRankingEntry => ({ ...entry, rank: index + 1 }),
+      (entry, index): JockeyRankingEntry => ({
+        jockeyUserId: String(entry.jockeyUserId),
+        jockeyName: entry.jockeyName,
+        totalPoints: entry.totalPoints,
+        totalRaces: entry.totalRaces,
+        wins: entry.wins,
+        totalFinishTimeMs: entry.totalFinishTimeMs,
+        rank: index + 1,
+      }),
+    );
+  }
+
+  async getGlobalHorseRankings(): Promise<RankingEntry[]> {
+    const pipeline = [
+      {
+        $match: {
+          status: RaceResultStatus.PUBLISHED,
+        },
+      },
+      {
+        $group: {
+          _id: '$horseId',
+          totalPoints: { $sum: '$points' },
+          totalRaces: { $sum: 1 },
+          wins: { $sum: { $cond: [{ $eq: ['$rank', 1] }, 1, 0] } },
+          totalFinishTimeMs: { $sum: { $ifNull: ['$finishTimeMs', 0] } },
+        },
+      },
+      {
+        $sort: {
+          wins: -1 as const,
+          totalPoints: -1 as const,
+          totalFinishTimeMs: 1 as const,
+        },
+      },
+      {
+        $lookup: {
+          from: 'horses',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'horse',
+        },
+      },
+      { $unwind: { path: '$horse', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'horse.ownerId',
+          foreignField: '_id',
+          as: 'owner',
+        },
+      },
+      { $unwind: { path: '$owner', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          horseId: '$_id',
+          horseName: '$horse.name',
+          breed: '$horse.breed',
+          ownerName: '$owner.fullName',
+          totalPoints: 1,
+          totalRaces: 1,
+          wins: 1,
+          totalFinishTimeMs: 1,
+        },
+      },
+    ];
+
+    const raw =
+      await this.resultModel.aggregate<Omit<RankingEntry, 'rank'>>(pipeline);
+    return raw.map(
+      (entry, index): RankingEntry => ({
+        horseId: String(entry.horseId),
+        horseName: entry.horseName,
+        breed: entry.breed,
+        ownerName: entry.ownerName,
+        totalPoints: entry.totalPoints,
+        totalRaces: entry.totalRaces,
+        wins: entry.wins,
+        totalFinishTimeMs: entry.totalFinishTimeMs,
+        rank: index + 1,
+      }),
+    );
+  }
+
+  async getGlobalJockeyRankings(): Promise<JockeyRankingEntry[]> {
+    const pipeline = [
+      {
+        $match: {
+          status: RaceResultStatus.PUBLISHED,
+          jockeyUserId: { $exists: true, $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: '$jockeyUserId',
+          totalPoints: { $sum: '$points' },
+          totalRaces: { $sum: 1 },
+          wins: { $sum: { $cond: [{ $eq: ['$rank', 1] }, 1, 0] } },
+          totalFinishTimeMs: { $sum: { $ifNull: ['$finishTimeMs', 0] } },
+        },
+      },
+      {
+        $sort: {
+          wins: -1 as const,
+          totalPoints: -1 as const,
+          totalFinishTimeMs: 1 as const,
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'jockeys',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'jockeyProfile',
+        },
+      },
+      { $unwind: { path: '$jockeyProfile', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          jockeyUserId: '$_id',
+          jockeyName: '$user.fullName',
+          experienceYears: '$jockeyProfile.experienceYears',
+          skillLevel: '$jockeyProfile.skillLevel',
+          totalPoints: 1,
+          totalRaces: 1,
+          wins: 1,
+          totalFinishTimeMs: 1,
+        },
+      },
+    ];
+
+    const raw =
+      await this.resultModel.aggregate<Omit<JockeyRankingEntry, 'rank'>>(
+        pipeline,
+      );
+    return raw.map(
+      (entry, index): JockeyRankingEntry => ({
+        jockeyUserId: String(entry.jockeyUserId),
+        jockeyName: entry.jockeyName,
+        experienceYears: entry.experienceYears,
+        skillLevel: entry.skillLevel,
+        totalPoints: entry.totalPoints,
+        totalRaces: entry.totalRaces,
+        wins: entry.wins,
+        totalFinishTimeMs: entry.totalFinishTimeMs,
+        rank: index + 1,
+      }),
     );
   }
 }

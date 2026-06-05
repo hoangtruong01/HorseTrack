@@ -21,13 +21,13 @@ export type ViolationListProps = {
 
 export function ViolationList({ violations }: ViolationListProps) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#15151E]/90 p-4 sm:p-6">
+    <section className="rounded-2xl border border-border/10 bg-[#15151E]/90 p-4 sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Violation log
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase text-foreground">
             Steward notes
           </h2>
         </div>
@@ -44,15 +44,15 @@ export function ViolationList({ violations }: ViolationListProps) {
             return (
               <article
                 key={violation.id}
-                className="grid gap-4 rounded-xl border border-white/10 bg-black/25 p-4 md:grid-cols-[7rem_1fr_auto] md:items-center"
+                className="grid gap-4 rounded-xl border border-border/10 bg-black/25 p-4 md:grid-cols-[7rem_1fr_auto] md:items-center"
               >
-                <div className="font-mono text-2xl font-black text-white">
+                <div className="font-mono text-2xl font-black text-foreground">
                   {violation.time}
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Icon className="size-4 text-primary" />
-                    <h3 className="font-black uppercase text-white">
+                    <h3 className="font-black uppercase text-foreground">
                       {violation.horse}
                     </h3>
                     <span className="text-sm text-muted-foreground">

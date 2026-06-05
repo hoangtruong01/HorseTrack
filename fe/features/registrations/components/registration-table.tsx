@@ -47,13 +47,13 @@ export function RegistrationTable({
   };
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-4 sm:p-6">
+    <section className="rounded-2xl border border-border/10 bg-[#15151E]/85 p-4 sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Registration queue
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
             Admin moderation board
           </h2>
         </div>
@@ -61,9 +61,9 @@ export function RegistrationTable({
           Đang hiển thị {visibleRegistrations.length}/{registrations.length} đơn đăng ký
         </p>
       </div>
-      <div className="mt-5 overflow-x-auto rounded-xl border border-white/10">
+      <div className="mt-5 overflow-x-auto rounded-xl border border-border/10">
         <table className="min-w-[980px] w-full text-left text-sm">
-          <thead className="bg-white/[0.04] text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <thead className="bg-muted/[0.04] text-xs uppercase tracking-[0.18em] text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Horse</th>
               <th className="px-4 py-3">Owner</th>
@@ -78,10 +78,10 @@ export function RegistrationTable({
             {visibleRegistrations.map((registration) => (
               <tr
                 key={registration.id}
-                className="transition hover:bg-white/[0.04]"
+                className="transition hover:bg-muted/[0.04]"
               >
                 <td className="px-4 py-4">
-                  <p className="font-black uppercase text-white">
+                  <p className="font-black uppercase text-foreground">
                     {registration.horse}
                   </p>
                   <p className="font-mono text-xs text-muted-foreground">

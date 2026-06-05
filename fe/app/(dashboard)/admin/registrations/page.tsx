@@ -83,12 +83,12 @@ export default function AdminRegistrationsPage() {
       />
       
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border border-border bg-card p-5">
           <ClipboardCheck className="size-5 text-primary" />
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Chờ duyệt (PENDING)
           </p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="mt-2 font-mono text-4xl font-black text-foreground">
             {isLoading ? "..." : counts.pending}
           </p>
           <StatusBadge
@@ -98,20 +98,20 @@ export default function AdminRegistrationsPage() {
             pulse={counts.pending > 0}
           />
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Đã duyệt (APPROVED)
           </p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="mt-2 font-mono text-4xl font-black text-foreground">
             {isLoading ? "..." : counts.approved}
           </p>
           <StatusBadge className="mt-3" label="Sẵn sàng thi đấu" tone="green" />
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Từ chối (REJECTED)
           </p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="mt-2 font-mono text-4xl font-black text-foreground">
             {isLoading ? "..." : counts.rejected}
           </p>
           <StatusBadge className="mt-3" label="Đã từ chối" tone="red" />
@@ -119,7 +119,7 @@ export default function AdminRegistrationsPage() {
       </section>
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-white/55">
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách đăng ký...</p>
         </div>
@@ -133,3 +133,5 @@ export default function AdminRegistrationsPage() {
     </main>
   );
 }
+
+

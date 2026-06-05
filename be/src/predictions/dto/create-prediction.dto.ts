@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNotEmpty } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsMongoId, IsNotEmpty, IsOptional, IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreatePredictionDto {
   @ApiProperty({ description: 'Race ID to place prediction for' })
@@ -11,4 +12,11 @@ export class CreatePredictionDto {
   @IsNotEmpty()
   @IsMongoId()
   predictedHorseId!: string;
+
+  @ApiPropertyOptional({ description: 'Number of points to bet (0 for free prediction)', minimum: 0, default: 0 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  betPoints?: number;
 }

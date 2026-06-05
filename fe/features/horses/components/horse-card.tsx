@@ -59,11 +59,11 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
   };
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 hover:bg-[#1C1C25] flex flex-col justify-between min-h-[380px]">
+    <article className="group relative flex min-h-[380px] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-lg transition duration-200 hover:border-primary/40 hover:bg-muted/30">
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#E10600] via-white/20 to-transparent" />
       
       {/* Horse Image background blur or thumbnail */}
-      <div className="relative w-full h-44 rounded-xl overflow-hidden bg-black/40 flex items-center justify-center border border-white/5 mb-4 shrink-0">
+      <div className="relative mb-4 flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/50">
         {horse.image ? (
           <img
             src={horse.image}
@@ -90,34 +90,34 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
       <div className="flex-1 flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-start gap-2">
-            <h2 className="text-xl font-black uppercase tracking-tight text-white line-clamp-1 group-hover:text-primary transition">
+            <h2 className="text-xl font-black uppercase tracking-tight text-foreground line-clamp-1 group-hover:text-primary transition">
               {horse.name}
             </h2>
           </div>
 
-          <p className="text-xs text-white/40 mt-1 uppercase tracking-wider font-semibold">
+          <p className="text-xs text-muted-foreground/60 mt-1 uppercase tracking-wider font-semibold">
             {horse.breed || "Chưa rõ giống"} · {horse.color || "Chưa rõ màu"}
           </p>
 
           {/* Horse Stats Grid */}
-          <div className="mt-4 grid grid-cols-2 gap-3 bg-white/[0.02] border border-white/5 rounded-xl p-3 text-xs">
+          <div className="mt-4 grid grid-cols-2 gap-3 bg-muted/[0.02] border border-border/5 rounded-xl p-3 text-xs">
             <div className="space-y-1">
-              <span className="text-white/40 uppercase tracking-widest text-[10px]">Tốc độ nền</span>
-              <p className="text-white font-mono font-bold text-sm">{horse.baseSpeed} km/h</p>
+              <span className="text-muted-foreground/60 uppercase tracking-widest text-[10px]">Tốc độ nền</span>
+              <p className="text-foreground font-mono font-bold text-sm">{horse.baseSpeed} km/h</p>
             </div>
             <div className="space-y-1">
-              <span className="text-white/40 uppercase tracking-widest text-[10px]">Thể lực</span>
-              <p className="text-white font-mono font-bold text-sm">{horse.staminaScore}/100</p>
+              <span className="text-muted-foreground/60 uppercase tracking-widest text-[10px]">Thể lực</span>
+              <p className="text-foreground font-mono font-bold text-sm">{horse.staminaScore}/100</p>
             </div>
             <div className="space-y-1">
-              <span className="text-white/40 uppercase tracking-widest text-[10px]">Tuổi / Giới</span>
-              <p className="text-white uppercase font-bold text-[11px]">
+              <span className="text-muted-foreground/60 uppercase tracking-widest text-[10px]">Tuổi / Giới</span>
+              <p className="text-foreground uppercase font-bold text-[11px]">
                 {horse.age ? `${horse.age} tuổi` : "N/A"} · {horse.gender === "MALE" ? "Đực" : horse.gender === "FEMALE" ? "Cái" : "Thiến"}
               </p>
             </div>
             <div className="space-y-1">
-              <span className="text-white/40 uppercase tracking-widest text-[10px]">Cân nặng</span>
-              <p className="text-white font-mono font-bold text-[11px]">
+              <span className="text-muted-foreground/60 uppercase tracking-widest text-[10px]">Cân nặng</span>
+              <p className="text-foreground font-mono font-bold text-[11px]">
                 {horse.weightKg ? `${horse.weightKg} kg` : "N/A"}
               </p>
             </div>
@@ -138,13 +138,13 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
         </div>
 
         {/* Action buttons */}
-        <div className="mt-5 flex gap-2 w-full pt-2 border-t border-white/5">
-          <Button asChild className="rounded-xl flex-1 text-xs py-2 h-9 bg-white/5 hover:bg-white/10 text-white border border-white/10">
+        <div className="mt-5 flex gap-2 w-full pt-2 border-t border-border/5">
+          <Button asChild className="rounded-xl flex-1 text-xs py-2 h-9 bg-muted/5 hover:bg-muted/10 text-foreground border border-border/10">
             <Link href={`/owner/horses/${horse.id}`}>
               Chi tiết
             </Link>
           </Button>
-          <Button asChild variant="outline" className="rounded-xl p-2 size-9 shrink-0 bg-white/5 hover:bg-white/10 hover:text-yellow-400 border border-white/10 text-white/70">
+          <Button asChild variant="outline" className="rounded-xl p-2 size-9 shrink-0 bg-muted/5 hover:bg-muted/10 hover:text-yellow-400 border border-border/10 text-white/70">
             <Link href={`/owner/horses/${horse.id}?edit=true`}>
               <Edit2 className="size-4" />
             </Link>
@@ -153,7 +153,7 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
             <Button
               onClick={() => onDelete(horse.id)}
               variant="outline"
-              className="rounded-xl p-2 size-9 shrink-0 bg-white/5 hover:bg-red-950/40 hover:text-[#E10600] border border-white/10 text-white/70 transition"
+              className="rounded-xl p-2 size-9 shrink-0 bg-muted/5 hover:bg-red-950/40 hover:text-[#E10600] border border-border/10 text-white/70 transition"
             >
               <Trash2 className="size-4" />
             </Button>

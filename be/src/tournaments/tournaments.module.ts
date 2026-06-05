@@ -12,6 +12,7 @@ import {
 } from '../predictions/schemas/prediction.schema';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
 import { TournamentsController } from './tournaments.controller';
 import { TournamentsService } from './tournaments.service';
 
@@ -25,6 +26,7 @@ import { TournamentsService } from './tournaments.service';
     ]),
     NotificationsModule,
     AuditLogsModule,
+    RewardPointLedgerModule,
   ],
   controllers: [TournamentsController],
   providers: [TournamentsService],

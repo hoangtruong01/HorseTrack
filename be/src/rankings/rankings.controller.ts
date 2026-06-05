@@ -18,4 +18,20 @@ export class RankingsController {
   getJockeyRankings(@Param('tournamentId') tournamentId: string) {
     return this.rankingsService.getJockeyRankings(tournamentId);
   }
+
+  @Get('global/horses')
+  @ApiOperation({
+    summary: 'Global horse rankings by wins/championships (public)',
+  })
+  getGlobalHorseRankings() {
+    return this.rankingsService.getGlobalHorseRankings();
+  }
+
+  @Get('global/jockeys')
+  @ApiOperation({
+    summary: 'Global jockey rankings by wins/championships (public)',
+  })
+  getGlobalJockeyRankings() {
+    return this.rankingsService.getGlobalJockeyRankings();
+  }
 }

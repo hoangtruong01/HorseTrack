@@ -28,13 +28,13 @@ export function RaceChecklist({ items }: RaceChecklistProps) {
   const completed = items.filter((item) => item.status === "complete").length;
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#15151E]/90 p-4 shadow-[0_18px_56px_rgba(0,0,0,0.3)] sm:p-6">
+    <section className="rounded-2xl border border-border/10 bg-[#15151E]/90 p-4 shadow-[0_18px_56px_rgba(0,0,0,0.3)] sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Pre-race checklist
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
             Race readiness grid
           </h2>
         </div>
@@ -54,7 +54,7 @@ export function RaceChecklist({ items }: RaceChecklistProps) {
                 "rounded-xl border p-4",
                 item.status === "attention"
                   ? "border-[#F8CD46]/35 bg-[#F8CD46]/10"
-                  : "border-white/10 bg-black/20",
+                  : "border-border/10 bg-black/20",
               )}
             >
               <div className="flex items-start justify-between gap-3">
@@ -70,7 +70,7 @@ export function RaceChecklist({ items }: RaceChecklistProps) {
                 />
                 <StatusBadge label={meta.label} tone={meta.tone} />
               </div>
-              <h3 className="mt-4 font-black uppercase text-white">
+              <h3 className="mt-4 font-black uppercase text-foreground">
                 {item.label}
               </h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">

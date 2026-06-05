@@ -83,7 +83,7 @@ export default function HorsesStablePage() {
       label: "Chuồng đua chính thức",
       count: approvedHorses.length,
       icon: <ShieldCheck className="size-4" />,
-      color: "text-white/50",
+      color: "text-muted-foreground",
       activeColor: "text-emerald-400 border-emerald-500 bg-emerald-500/5",
     },
     {
@@ -91,7 +91,7 @@ export default function HorsesStablePage() {
       label: "Chờ phê duyệt",
       count: pendingOrRejectedHorses.length,
       icon: <Clock className="size-4" />,
-      color: "text-white/50",
+      color: "text-muted-foreground",
       activeColor: "text-yellow-400 border-yellow-500 bg-yellow-500/5",
     },
   ];
@@ -103,7 +103,7 @@ export default function HorsesStablePage() {
         title="Danh Sách Chiến Mã"
         description="Quản lý hồ sơ kỹ thuật, trạng thái sức khỏe của từng chiến mã. Chiến mã phải được phê duyệt và khỏe mạnh mới đủ điều kiện đăng ký tham dự giải đấu."
         actions={
-          <Button asChild className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
+          <Button asChild className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-foreground">
             <Link href="/owner/horses/new">
               Thêm chiến mã
               <PlusCircle className="size-4 ml-1.5" />
@@ -113,7 +113,7 @@ export default function HorsesStablePage() {
       />
 
       {/* ── Tab Navigation ── */}
-      <div className="flex gap-2 border-b border-white/10 pb-0">
+      <div className="flex gap-2 border-b border-border pb-0">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -125,7 +125,7 @@ export default function HorsesStablePage() {
                 transition-all duration-200 border-b-2 -mb-[1px] rounded-t-xl
                 ${isActive
                   ? tab.activeColor
-                  : `${tab.color} border-transparent hover:text-white/80 hover:bg-white/[0.02]`
+                  : `${tab.color} border-transparent hover:text-foreground/80 hover:bg-muted02]`
                 }
               `}
             >
@@ -138,7 +138,7 @@ export default function HorsesStablePage() {
                   ? tab.key === "approved"
                     ? "bg-emerald-500/20 text-emerald-300"
                     : "bg-yellow-500/20 text-yellow-300"
-                  : "bg-white/[0.06] text-white/40"
+                  : "bg-muted06] text-muted-foreground/60"
                 }
               `}>
                 {tab.count}
@@ -150,20 +150,20 @@ export default function HorsesStablePage() {
 
       {/* ── Tab Content ── */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-white/55">
+        <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải dữ liệu chuồng ngựa...</p>
         </div>
       ) : currentHorses.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
+        <div className="rounded-2xl border border-border bg-card/85 p-12 text-center shadow-[0_18px_56px_rgba(0,0,0,0.28)]">
           {activeTab === "approved" ? (
             <>
-              <Award className="size-16 text-white/15 mx-auto mb-4 stroke-[1]" />
-              <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">Chuồng chính trống</h3>
-              <p className="text-sm text-white/50 max-w-md mx-auto mb-6">
+              <Award className="size-16 text-foreground/15 mx-auto mb-4 stroke-[1]" />
+              <h3 className="text-xl font-black text-foreground uppercase tracking-tight mb-2">Chuồng chính trống</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
                 Bạn chưa có chiến mã nào được phê duyệt hoạt động. Vui lòng thêm chiến mã mới hoặc đợi Admin duyệt hồ sơ.
               </p>
-              <Button asChild className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
+              <Button asChild className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-foreground">
                 <Link href="/owner/horses/new">
                   Thêm chiến mã ngay
                   <PlusCircle className="size-4 ml-1.5" />
@@ -172,9 +172,9 @@ export default function HorsesStablePage() {
             </>
           ) : (
             <>
-              <Clock className="size-16 text-white/15 mx-auto mb-4 stroke-[1]" />
-              <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">Không có hồ sơ chờ duyệt</h3>
-              <p className="text-sm text-white/50 max-w-md mx-auto">
+              <Clock className="size-16 text-foreground/15 mx-auto mb-4 stroke-[1]" />
+              <h3 className="text-xl font-black text-foreground uppercase tracking-tight mb-2">Không có hồ sơ chờ duyệt</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
                 Tất cả chiến mã của bạn đã được phê duyệt hoặc bạn chưa đăng ký chiến mã mới.
               </p>
             </>

@@ -20,6 +20,7 @@ import {
   Sparkles,
   User,
   XCircle,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -74,6 +75,8 @@ export default function RefereeRaceDetailPage({
   const [isLoading, setIsLoading] = useState(true);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [myAssignment, setMyAssignment] = useState<any>(null);
 
   // Editing state for checklist items
   const [editingCheckId, setEditingCheckId] = useState<string | null>(null);
@@ -87,17 +90,45 @@ export default function RefereeRaceDetailPage({
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch race info
+      // 1. Fetch user info
+      let activeUser = currentUser;
+      if (!activeUser) {
+        const userRes = await fetch("/api/auth/me");
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          activeUser = userData.user;
+          setCurrentUser(activeUser);
+        }
+      }
+
+      // 2. Fetch race info
       const raceRes = await fetch(`/api/referee/races/${raceId}`);
       if (!raceRes.ok) throw new Error("Không thể tải thông tin cuộc đua");
       const raceData = await raceRes.json();
       setRace(raceData.data);
 
-      // 2. Fetch pre-race checks
+      // 3. Fetch pre-race checks
       const checksRes = await fetch(`/api/referee/race-checks/race/${raceId}`);
       if (checksRes.ok) {
         const checksData = await checksRes.json();
         setChecks(checksData.data || []);
+      }
+
+      // 4. Fetch assignments for this race
+      if (activeUser) {
+        const assRes = await fetch(`/api/referee/referee-assignments/race/${raceId}`);
+        if (assRes.ok) {
+          const assData = await assRes.json();
+          const rawData = assData.data;
+          const assignmentsList = Array.isArray(rawData) ? rawData : (rawData?.data || []);
+          const match = assignmentsList.find((a: any) => {
+            const refUserId = typeof a.refereeUserId === "object"
+              ? (a.refereeUserId._id || a.refereeUserId.id)
+              : a.refereeUserId;
+            return String(refUserId) === String(activeUser._id || activeUser.id);
+          });
+          setMyAssignment(match || null);
+        }
       }
     } catch (err: any) {
       console.error(err);
@@ -248,6 +279,43 @@ export default function RefereeRaceDetailPage({
           </div>
         }
       />
+
+      {/* Thông tin phân công từ Admin */}
+      {myAssignment && (
+        <section className="rounded-2xl border border-teal-500/30 bg-[linear-gradient(135deg,rgba(20,184,166,0.08),rgba(21,21,30,0.95))] p-5 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="size-10 rounded-xl bg-teal-500/10 border border-teal-500/25 flex items-center justify-center text-teal-400 shrink-0 mt-0.5">
+              <ShieldAlert className="size-5" />
+            </div>
+            <div>
+              <span className="text-[9px] font-black tracking-widest text-teal-400 uppercase">Quyết định phân công nhiệm vụ</span>
+              <h4 className="text-sm font-black text-white mt-0.5">
+                Bạn đã được chỉ định làm: <span className="text-teal-400 uppercase">{myAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}</span>
+              </h4>
+              <p className="text-[11px] text-white/50 mt-1 leading-relaxed">
+                Mức lương giám sát vòng đua: <strong className="text-white font-mono">{myAssignment.salary?.toLocaleString("vi-VN") || 0} Điểm thưởng</strong>
+                {myAssignment.assignedBy && (
+                  <> · Người phân công: <strong className="text-white">{myAssignment.assignedBy.fullName || "Ban tổ chức"}</strong></>
+                )}
+                {myAssignment.createdAt && (
+                  <> · Ngày phân công: <strong className="text-white/70">{new Date(myAssignment.createdAt).toLocaleDateString("vi-VN")}</strong></>
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
+              myAssignment.status === "accepted" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" :
+              myAssignment.status === "declined" ? "text-red-400 bg-red-400/10 border-red-400/20" :
+              "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
+            }`}>
+              {myAssignment.status === "accepted" ? "Đã nhận nhiệm vụ" :
+               myAssignment.status === "declined" ? "Đã từ chối" :
+               "Đang chờ phê duyệt"}
+            </span>
+          </div>
+        </section>
+      )}
 
       {/* Race Status Control Panel */}
       <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-lg">

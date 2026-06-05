@@ -35,12 +35,12 @@ export function RefereeActionCenter({
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#15151E] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.36)] sm:p-7 lg:p-8">
+      <section className="relative overflow-hidden rounded-3xl border border-border/10 bg-[#15151E] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.36)] sm:p-7 lg:p-8">
         <div className="absolute inset-0 bg-[linear-gradient(125deg,rgba(225,6,0,0.28),transparent_34%),radial-gradient(circle_at_88%_20%,rgba(6,126,106,0.22),transparent_28rem)]" />
         <div className="relative grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div>
             <StatusBadge label="Tablet referee desk" tone="red" pulse />
-            <h1 className="mt-5 text-4xl font-black uppercase leading-tight text-white sm:text-5xl">
+            <h1 className="mt-5 text-4xl font-black uppercase leading-tight text-foreground sm:text-5xl">
               Race control action center
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -48,11 +48,11 @@ export function RefereeActionCenter({
               entry stay race-centric. Mock data only.
             </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+          <div className="rounded-2xl border border-border/10 bg-black/25 p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
               Referee
             </p>
-            <p className="mt-2 text-2xl font-black uppercase text-white">
+            <p className="mt-2 text-2xl font-black uppercase text-foreground">
               {profile.name}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -66,7 +66,7 @@ export function RefereeActionCenter({
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Next required action
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase text-foreground">
             {active.race.name}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">{active.callout}</p>
@@ -88,11 +88,11 @@ export function RefereeActionCenter({
             </Button>
           </div>
         </article>
-        <article className="rounded-2xl border border-white/10 bg-[#15151E]/90 p-5">
+        <article className="rounded-2xl border border-border/10 bg-[#15151E]/90 p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Report queue
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase text-white">
+          <h2 className="mt-2 text-2xl font-black uppercase text-foreground">
             Confirmation ≠ published
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -111,14 +111,14 @@ export function RefereeActionCenter({
         {assignments.map((assignment) => (
           <article
             key={assignment.race.id}
-            className="rounded-2xl border border-white/10 bg-[#15151E]/85 p-5"
+            className="rounded-2xl border border-border/10 bg-[#15151E]/85 p-5"
           >
             <StatusBadge
               label={assignment.priority}
               tone={priorityTone[assignment.priority]}
               pulse={assignment.priority === "now"}
             />
-            <h3 className="mt-4 text-xl font-black uppercase text-white">
+            <h3 className="mt-4 text-xl font-black uppercase text-foreground">
               {assignment.race.name}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">

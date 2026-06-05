@@ -63,13 +63,13 @@ export function RaceRegistrationForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 bg-[#15151E] border border-white/10 rounded-2xl p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)] max-w-2xl mx-auto"
+      className="space-y-6 bg-[#15151E] border border-border/10 rounded-2xl p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)] max-w-2xl mx-auto"
     >
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
           Đăng ký trận đua
         </p>
-        <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+        <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
           Thủ tục ghi tên chiến mã
         </h2>
       </div>
@@ -82,25 +82,25 @@ export function RaceRegistrationForm({
       )}
 
       {/* Race Overview Card */}
-      <div className="rounded-xl border border-white/5 bg-white/[0.01] p-4 space-y-3">
+      <div className="rounded-xl border border-border/5 bg-muted/[0.01] p-4 space-y-3">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-black text-lg text-white uppercase">{race.name}</h3>
-            <p className="text-xs text-white/40 uppercase tracking-widest">{race.tournamentName || "Giải tự do"}</p>
+            <h3 className="font-black text-lg text-foreground uppercase">{race.name}</h3>
+            <p className="text-xs text-muted-foreground/60 uppercase tracking-widest">{race.tournamentName || "Giải tự do"}</p>
           </div>
-          <span className="text-xs font-mono text-white/60 bg-white/5 border border-white/10 px-2 py-1 rounded">
+          <span className="text-xs font-mono text-muted-foreground bg-muted/5 border border-border/10 px-2 py-1 rounded">
             {race.distance} · {race.surface}
           </span>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 text-xs text-white/60 pt-2 border-t border-white/5">
+        <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground pt-2 border-t border-border/5">
           <div>
-            <span className="text-white/30 block uppercase tracking-widest text-[9px] mb-0.5">Thời gian</span>
-            <p className="text-white font-mono font-bold">{race.date} · {race.startTime}</p>
+            <span className="text-muted-foreground/60 block uppercase tracking-widest text-[9px] mb-0.5">Thời gian</span>
+            <p className="text-foreground font-mono font-bold">{race.date} · {race.startTime}</p>
           </div>
           <div>
-            <span className="text-white/30 block uppercase tracking-widest text-[9px] mb-0.5">Số lượng tham gia</span>
-            <p className="text-white font-mono font-bold">{race.participantsCount || 0}/{race.capacity || 20} chiến mã</p>
+            <span className="text-muted-foreground/60 block uppercase tracking-widest text-[9px] mb-0.5">Số lượng tham gia</span>
+            <p className="text-foreground font-mono font-bold">{race.participantsCount || 0}/{race.capacity || 20} chiến mã</p>
           </div>
         </div>
       </div>
@@ -112,7 +112,7 @@ export function RaceRegistrationForm({
         </label>
         
         {horses.length === 0 ? (
-          <div className="rounded-xl border border-white/5 bg-white/[0.01] p-6 text-center text-sm text-white/40">
+          <div className="rounded-xl border border-border/5 bg-muted/[0.01] p-6 text-center text-sm text-muted-foreground/60">
             Bạn chưa đăng ký chiến mã nào trong hệ thống. Vui lòng thêm chiến mã vào chuồng trước khi đăng ký trận đua.
           </div>
         ) : (
@@ -120,7 +120,7 @@ export function RaceRegistrationForm({
             <select
               value={selectedHorseId}
               onChange={(e) => setSelectedHorseId(e.target.value)}
-              className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15"
+              className="h-11 w-full rounded-xl border border-border/10 bg-muted/[0.04] px-4 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15"
             >
               <option value="" className="bg-[#15151E]">-- Chọn chiến mã khỏe mạnh --</option>
               
@@ -128,7 +128,7 @@ export function RaceRegistrationForm({
               {eligibleHorses.length > 0 && (
                 <optgroup label="ĐỦ ĐIỀU KIỆN ĐĂNG KÝ" className="bg-[#15151E] text-green-400 font-bold">
                   {eligibleHorses.map((h) => (
-                    <option key={h.id} value={h.id} className="text-white">
+                    <option key={h.id} value={h.id} className="text-foreground">
                       {h.name} ({h.breed || "Không rõ giống"}) - Tốc độ: {h.baseSpeed} km/h
                     </option>
                   ))}
@@ -139,7 +139,7 @@ export function RaceRegistrationForm({
               {ineligibleHorses.length > 0 && (
                 <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHẤN THƯƠNG/GIẢI NGHỆ)" className="bg-[#15151E] text-red-500 font-bold" disabled>
                   {ineligibleHorses.map((h) => (
-                    <option key={h.id} value={h.id} disabled className="text-white/30">
+                    <option key={h.id} value={h.id} disabled className="text-muted-foreground/60">
                       {h.name} - {h.healthStatus === "INJURED" ? "Chấn thương" : h.healthStatus === "RECOVERING" ? "Đang hồi phục" : "Giải nghệ"}
                     </option>
                   ))}
@@ -152,13 +152,13 @@ export function RaceRegistrationForm({
               <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4 flex gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
                 <CheckCircle className="size-5 text-green-400 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-1">
-                  <p className="font-bold text-white uppercase text-[13px]">{selectedHorse.name}</p>
-                  <p className="text-white/60">
+                  <p className="font-bold text-foreground uppercase text-[13px]">{selectedHorse.name}</p>
+                  <p className="text-muted-foreground">
                     Chiến mã ở trạng thái thể lực rất tốt. Đủ điều kiện kỹ thuật để ghi danh thi đấu.
                   </p>
-                  <div className="grid grid-cols-2 gap-4 mt-2 pt-2 border-t border-white/5 text-white/50">
-                    <p>Tốc độ nền: <span className="text-white font-bold">{selectedHorse.baseSpeed} km/h</span></p>
-                    <p>Thể lực: <span className="text-white font-bold">{selectedHorse.staminaScore}/100</span></p>
+                  <div className="grid grid-cols-2 gap-4 mt-2 pt-2 border-t border-border/5 text-muted-foreground">
+                    <p>Tốc độ nền: <span className="text-foreground font-bold">{selectedHorse.baseSpeed} km/h</span></p>
+                    <p>Thể lực: <span className="text-foreground font-bold">{selectedHorse.staminaScore}/100</span></p>
                   </div>
                 </div>
               </div>
@@ -168,19 +168,19 @@ export function RaceRegistrationForm({
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+      <div className="flex justify-end gap-3 pt-4 border-t border-border/5">
         <Button
           type="button"
           onClick={onCancel}
           variant="outline"
-          className="rounded-xl px-5 h-11 border border-white/10 hover:bg-white/5 text-white"
+          className="rounded-xl px-5 h-11 border border-border/10 hover:bg-muted/5 text-foreground"
         >
           Hủy bỏ
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting || !selectedHorseId}
-          className="rounded-xl px-6 h-11 bg-[#E10600] hover:bg-[#B80500] text-white flex items-center gap-2 font-bold uppercase text-xs tracking-wider disabled:opacity-40"
+          className="rounded-xl px-6 h-11 bg-[#E10600] hover:bg-[#B80500] text-foreground flex items-center gap-2 font-bold uppercase text-xs tracking-wider disabled:opacity-40"
         >
           {isSubmitting ? (
             <>

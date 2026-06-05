@@ -27,7 +27,7 @@ export function RaceCard({ race }: RaceCardProps) {
   const meta = statusMeta[race.status];
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 hover:bg-[#1C1C25]">
+    <article className="group relative overflow-hidden rounded-2xl border border-border/10 bg-[#15151E] p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 hover:bg-[#1C1C25]">
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-white/20 to-transparent" />
       <div className="absolute -right-12 -top-12 size-36 rounded-full bg-primary/10 blur-3xl transition group-hover:bg-primary/20" />
       <div className="relative">
@@ -37,7 +37,7 @@ export function RaceCard({ race }: RaceCardProps) {
             {race.tournament}
           </span>
         </div>
-        <h2 className="mt-5 text-2xl font-black uppercase tracking-tight text-white">
+        <h2 className="mt-5 text-2xl font-black uppercase tracking-tight text-foreground">
           {race.name}
         </h2>
         <div className="mt-5 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
