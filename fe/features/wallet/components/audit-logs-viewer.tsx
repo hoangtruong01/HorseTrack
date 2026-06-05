@@ -3,7 +3,7 @@
 import { Shield, Terminal } from "lucide-react";
 import { useState } from "react";
 
-import type { AuditLog } from "../mock-wallet";
+import type { AuditLog } from "../../audit/mock-audit-logs";
 
 export type AuditLogsViewerProps = {
   logs: AuditLog[];

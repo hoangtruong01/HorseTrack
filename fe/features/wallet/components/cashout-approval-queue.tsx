@@ -1,20 +1,27 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, Copy, Gift, Ticket } from "lucide-react";
+import { AlertCircle, CheckCircle2, Copy, Gift } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import type { CashoutRequest } from "../mock-wallet";
+import type { CashoutQueueRequest } from "../backend-wallet";
 
 export type CashoutApprovalQueueProps = {
-  requests: CashoutRequest[];
-  onAction: (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => void;
+  requests: CashoutQueueRequest[];
+  onAction: (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => void | Promise<void>;
+};
+
+const roleLabel = (role: string) => {
+  if (role === "Owner") return "Chu Ngua";
+  if (role === "Jockey") return "Nai Ngua";
+  if (role === "Referee") return "Trong Tai";
+  return "Khan Gia";
 };
 
 export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueueProps) {
-  const [selectedRequest, setSelectedRequest] = useState<CashoutRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<CashoutQueueRequest | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
@@ -22,21 +29,21 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
 
   const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => {
     setIsProcessing(`${id}-${action}`);
-    // Simulate latency
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    onAction(id, action, reason);
-    setIsProcessing(null);
-    setShowRejectDialog(false);
-    setRejectReason("");
-    setSelectedRequest(null);
+    try {
+      await onAction(id, action, reason);
+    } finally {
+      setIsProcessing(null);
+      setShowRejectDialog(false);
+      setRejectReason("");
+      setSelectedRequest(null);
+    }
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(`Đã sao chép mã quy đổi: ${text}`);
+    toast.success(`Da sao chep ma quy doi: ${text}`);
   };
 
-  // Filter queue by search code (if entered)
   const activeRequests = requests.filter((r) => {
     const matchesSearch = searchCode.trim() === "" || r.redemptionCode.toLowerCase().includes(searchCode.toLowerCase());
     return (r.status === "PENDING" || r.status === "APPROVED") && matchesSearch;
@@ -49,44 +56,34 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
 
   return (
     <section className="space-y-6">
-      {/* Search redemption code for counter staff */}
       <div className="rounded-2xl border border-border bg-card p-5 shadow-lg">
         <label htmlFor="search-code-input" className="block text-xs font-black uppercase tracking-[0.2em] text-primary">
-          Tra cứu mã nhận thưởng tại quầy
+          Tra cuu ma nhan thuong tai quay
         </label>
         <div className="mt-2 flex gap-3">
           <input
             id="search-code-input"
             type="text"
-            placeholder="Nhập mã quy đổi (ví dụ: RWD-YHS9X3)..."
+            placeholder="Nhap ma quy doi (vd: RWD-YHS9X3)..."
             value={searchCode}
             onChange={(e) => setSearchCode(e.target.value)}
             className="h-12 flex-1 rounded-xl border border-border bg-muted px-4 font-mono font-black text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
           />
           {searchCode && (
-            <Button
-              variant="outline"
-              onClick={() => setSearchCode("")}
-              className="h-12 rounded-xl border-border text-foreground"
-            >
-              Xóa lọc
+            <Button variant="outline" onClick={() => setSearchCode("")} className="h-12 rounded-xl border-border text-foreground">
+              Xoa loc
             </Button>
           )}
         </div>
       </div>
 
-      {/* Pending Queue Card */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-lg sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">
-              Danh sách chờ xác nhận
-            </p>
-            <h2 className="mt-1 text-2xl font-black uppercase text-foreground">
-              Hàng Đợi Đổi Thưởng Vật Lý
-            </h2>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">Danh sach cho xac nhan</p>
+            <h2 className="mt-1 text-2xl font-black uppercase text-foreground">Hang doi doi thuong vat ly</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Tra cứu mã nhận quà do Khán giả/Chủ ngựa/Nài ngựa cung cấp tại quầy, đối soát số dư điểm và tiến hành trao quà vật lý tương ứng.
+              Tra cuu ma nhan qua tai quay, doi so du diem hien tai, phe duyet ma, roi xac nhan trao qua khi hoan tat.
             </p>
           </div>
         </div>
@@ -94,82 +91,53 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
         <div className="mt-6 overflow-x-auto rounded-xl border border-border">
           {activeRequests.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-center">
-              <CheckCircle2 className="size-12 text-emerald-500 animate-bounce" />
-              <p className="mt-4 text-sm font-black uppercase tracking-wider text-foreground">
-                Hàng đợi trống!
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Không tìm thấy yêu cầu quy đổi quà nào đang chờ xử lý.
-              </p>
+              <CheckCircle2 className="size-12 animate-bounce text-emerald-500" />
+              <p className="mt-4 text-sm font-black uppercase tracking-wider text-foreground">Hang doi trong!</p>
+              <p className="mt-1 text-xs text-muted-foreground">Khong tim thay yeu cau quy doi qua nao dang cho xu ly.</p>
             </div>
           ) : (
             <table className="min-w-[800px] w-full text-left text-sm">
               <thead className="bg-muted/[0.04] text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3.5">Người đổi quà</th>
-                  <th className="px-4 py-3.5">Mã quy đổi</th>
-                  <th className="px-4 py-3.5 text-right">Số điểm quy đổi</th>
-                  <th className="px-4 py-3.5">Trạng thái</th>
-                  <th className="px-4 py-3.5 text-right">Hành động quầy</th>
+                  <th className="px-4 py-3.5">Nguoi doi qua</th>
+                  <th className="px-4 py-3.5">Ma quy doi</th>
+                  <th className="px-4 py-3.5 text-right">So diem quy doi</th>
+                  <th className="px-4 py-3.5">Trang thai</th>
+                  <th className="px-4 py-3.5 text-right">Hanh dong quay</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border bg-card">
                 {activeRequests.map((req) => (
                   <tr key={req.id} className="transition hover:bg-muted/[0.02]">
-                    {/* User */}
                     <td className="px-4 py-4.5">
-                      <p className="font-black uppercase tracking-wider text-foreground">
-                        {req.userFullName}
-                      </p>
-                      <p className="text-[10px] text-primary font-black uppercase mt-0.5 tracking-widest">
-                        {req.userRole === "Owner" ? "Chủ Ngựa" : req.userRole === "Jockey" ? "Nài Ngựa" : "Khán Giả"}
-                      </p>
+                      <p className="font-black uppercase tracking-wider text-foreground">{req.userFullName}</p>
+                      <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-primary">{roleLabel(req.userRole)}</p>
                     </td>
-
-                    {/* Redemption Code */}
                     <td className="px-4 py-4.5">
                       <div className="flex items-center gap-2">
-                        <span className="rounded-lg bg-primary/10 border border-primary/20 px-3 py-1 font-mono font-black text-sm text-primary tracking-wider">
+                        <span className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-sm font-black tracking-wider text-primary">
                           {req.redemptionCode}
                         </span>
                         <button
                           onClick={() => copyToClipboard(req.redemptionCode)}
-                          className="text-muted-foreground/60 hover:text-foreground p-1 rounded hover:bg-muted/5 cursor-pointer"
-                          title="Sao chép mã"
+                          className="cursor-pointer rounded p-1 text-muted-foreground/60 hover:bg-muted/5 hover:text-foreground"
+                          title="Sao chep ma"
                         >
                           <Copy className="size-3.5" />
                         </button>
                       </div>
-                      <p className="text-[10px] text-muted-foreground mt-1 font-mono">
-                        Tạo lúc: {new Date(req.createdAt).toLocaleString('vi-VN')}
-                      </p>
+                      <p className="mt-1 font-mono text-[10px] text-muted-foreground">Tao luc: {new Date(req.createdAt).toLocaleString("vi-VN")}</p>
                     </td>
-
-                    {/* Points */}
-                    <td className="px-4 py-4.5 text-right font-mono font-black text-foreground text-base">
-                      {req.points.toLocaleString('vi-VN')}
-                    </td>
-
-                    {/* Status */}
+                    <td className="px-4 py-4.5 text-right font-mono text-base font-black text-foreground">{req.points.toLocaleString("vi-VN")}</td>
                     <td className="px-4 py-4.5">
-                      <StatusBadge
-                        label={req.status === "APPROVED" ? "Đã Duyệt" : "Chờ tại quầy"}
-                        tone={req.status === "APPROVED" ? "green" : "slate"}
-                      />
+                      <StatusBadge label={req.status === "APPROVED" ? "Da duyet" : "Cho tai quay"} tone={req.status === "APPROVED" ? "green" : "slate"} />
                     </td>
-
-                    {/* Actions */}
                     <td className="px-4 py-4.5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {req.status === "PENDING" && (
                           <>
-                            <Button
-                              onClick={() => handleAction(req.id, "APPROVED")}
-                              disabled={isProcessing !== null}
-                              size="sm"
-                              className="h-9 rounded-full bg-emerald-500 hover:bg-emerald-600 font-bold text-xs"
-                            >
-                              Phê duyệt mã
+                            <Button onClick={() => handleAction(req.id, "APPROVED")} disabled={isProcessing !== null} size="sm" className="h-9 rounded-full bg-emerald-500 text-xs font-bold hover:bg-emerald-600">
+                              Phe duyet ma
                             </Button>
                             <Button
                               onClick={() => {
@@ -179,21 +147,16 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
                               disabled={isProcessing !== null}
                               variant="destructive"
                               size="sm"
-                              className="h-9 rounded-full font-bold text-xs"
+                              className="h-9 rounded-full text-xs font-bold"
                             >
-                              Từ chối
+                              Tu choi
                             </Button>
                           </>
                         )}
                         {req.status === "APPROVED" && (
                           <>
-                            <Button
-                              onClick={() => handleAction(req.id, "PAID")}
-                              disabled={isProcessing !== null}
-                              size="sm"
-                              className="h-9 rounded-full bg-primary hover:bg-[#B80500] font-black uppercase text-xs shadow-[0_4px_12px_rgba(225,6,0,0.25)]"
-                            >
-                              <Gift className="mr-1.5 size-3.5" /> Xác nhận trao quà
+                            <Button onClick={() => handleAction(req.id, "PAID")} disabled={isProcessing !== null} size="sm" className="h-9 rounded-full bg-primary text-xs font-black uppercase shadow-[0_4px_12px_rgba(225,6,0,0.25)] hover:bg-[#B80500]">
+                              <Gift className="mr-1.5 size-3.5" /> Xac nhan trao qua
                             </Button>
                             <Button
                               onClick={() => {
@@ -203,9 +166,9 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
                               disabled={isProcessing !== null}
                               variant="outline"
                               size="sm"
-                              className="h-9 rounded-full font-bold text-xs border-border text-foreground hover:bg-muted/5"
+                              className="h-9 rounded-full border-border text-xs font-bold text-foreground hover:bg-muted/5"
                             >
-                              Hủy bỏ duyệt
+                              Huy bo duyet
                             </Button>
                           </>
                         )}
@@ -219,72 +182,46 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
         </div>
       </div>
 
-      {/* Processed History Card */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-lg sm:p-6">
         <div>
-          <h3 className="text-lg font-black uppercase text-foreground">
-            Nhật Ký Đổi Thưởng Đã Xử Lý
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Lịch sử giao dịch các mã đổi quà đã được trao thành công hoặc bị từ chối từ trước tới nay.
-          </p>
+          <h3 className="text-lg font-black uppercase text-foreground">Nhat ky doi thuong da xu ly</h3>
+          <p className="text-xs text-muted-foreground">Lich su cac ma doi qua da trao thanh cong hoac bi tu choi.</p>
         </div>
 
         <div className="mt-5 overflow-x-auto rounded-xl border border-border">
           {completedRequests.length === 0 ? (
-            <div className="p-8 text-center text-xs text-muted-foreground">
-              Không tìm thấy nhật ký quy đổi lịch sử nào.
-            </div>
+            <div className="p-8 text-center text-xs text-muted-foreground">Khong tim thay lich su quy doi nao.</div>
           ) : (
             <table className="min-w-[900px] w-full text-left text-sm">
               <thead className="bg-muted/[0.02] text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">Người dùng</th>
-                  <th className="px-4 py-3">Mã quà tặng</th>
-                  <th className="px-4 py-3 text-right">Điểm đổi</th>
-                  <th className="px-4 py-3">Nhân viên duyệt</th>
-                  <th className="px-4 py-3">Thời gian tạo</th>
-                  <th className="px-4 py-3">Thời gian rút</th>
-                  <th className="px-4 py-3">Trạng thái</th>
+                  <th className="px-4 py-3">Nguoi dung</th>
+                  <th className="px-4 py-3">Ma qua tang</th>
+                  <th className="px-4 py-3 text-right">Diem doi</th>
+                  <th className="px-4 py-3">Nhan vien xu ly</th>
+                  <th className="px-4 py-3">Thoi gian tao</th>
+                  <th className="px-4 py-3">Thoi gian trao</th>
+                  <th className="px-4 py-3">Trang thai</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border bg-muted/30">
                 {completedRequests.map((req) => (
-                  <tr key={req.id} className="opacity-70 transition hover:opacity-100 hover:bg-muted/[0.02]">
+                  <tr key={req.id} className="opacity-70 transition hover:bg-muted/[0.02] hover:opacity-100">
                     <td className="px-4 py-3.5">
                       <p className="font-bold text-foreground">{req.userFullName}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
-                        {req.userRole === "Owner" ? "Chủ Ngựa" : req.userRole === "Jockey" ? "Nài Ngựa" : "Khán Giả"}
-                      </p>
+                      <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{roleLabel(req.userRole)}</p>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="rounded border border-border bg-muted/50 px-2 py-0.5 font-mono text-xs font-bold text-foreground">
-                        {req.redemptionCode}
-                      </span>
+                      <span className="rounded border border-border bg-muted/50 px-2 py-0.5 font-mono text-xs font-bold text-foreground">{req.redemptionCode}</span>
                     </td>
-                    <td className="px-4 py-3.5 text-right font-mono font-black text-foreground">
-                      {req.points.toLocaleString('vi-VN')}
-                    </td>
-                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">
-                      {req.paidBy || "—"}
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-muted-foreground font-mono">
-                      {new Date(req.createdAt).toLocaleString('vi-VN')}
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-muted-foreground font-mono">
-                      {req.paidAt ? new Date(req.paidAt).toLocaleString('vi-VN') : "—"}
-                    </td>
+                    <td className="px-4 py-3.5 text-right font-mono font-black text-foreground">{req.points.toLocaleString("vi-VN")}</td>
+                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">{req.paidBy || "-"}</td>
+                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">{new Date(req.createdAt).toLocaleString("vi-VN")}</td>
+                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">{req.paidAt ? new Date(req.paidAt).toLocaleString("vi-VN") : "-"}</td>
                     <td className="px-4 py-3.5">
                       <div className="space-y-1">
-                        <StatusBadge
-                          label={req.status === "PAID" ? "Đã Trao Quà" : "Đã Từ Chối"}
-                          tone={req.status === "PAID" ? "teal" : "red"}
-                        />
-                        {req.rejectReason && (
-                          <p className="text-[10px] text-primary max-w-xs leading-4">
-                            Lý do: {req.rejectReason}
-                          </p>
-                        )}
+                        <StatusBadge label={req.status === "PAID" ? "Da trao qua" : "Da tu choi"} tone={req.status === "PAID" ? "teal" : "red"} />
+                        {req.rejectReason && <p className="max-w-xs text-[10px] leading-4 text-primary">Ly do: {req.rejectReason}</p>}
                       </div>
                     </td>
                   </tr>
@@ -295,25 +232,25 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
         </div>
       </div>
 
-      {/* Reject Reason Dialog */}
       {showRejectDialog && selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl">
-            <h3 className="text-xl font-black uppercase text-foreground flex items-center gap-2">
-              <AlertCircle className="size-5 text-primary" /> Từ chối yêu cầu đổi quà
+            <h3 className="flex items-center gap-2 text-xl font-black uppercase text-foreground">
+              <AlertCircle className="size-5 text-primary" /> Tu choi yeu cau doi qua
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Bạn có chắc chắn muốn từ chối mã nhận quà <strong className="text-foreground">{selectedRequest.redemptionCode}</strong> của <strong className="text-foreground">{selectedRequest.userFullName}</strong> ({selectedRequest.points} điểm)?
+              Ban co chac chan muon tu choi ma nhan qua <strong className="text-foreground">{selectedRequest.redemptionCode}</strong> cua{" "}
+              <strong className="text-foreground">{selectedRequest.userFullName}</strong> ({selectedRequest.points.toLocaleString("vi-VN")} diem)?
             </p>
             <div className="mt-4 space-y-2">
               <label htmlFor="reason" className="block text-xs font-black uppercase tracking-wider text-muted-foreground">
-                Lý do từ chối (Bắt buộc)
+                Ly do tu choi (bat buoc)
               </label>
               <textarea
                 id="reason"
                 required
                 rows={3}
-                placeholder="Ví dụ: Mã đã quá hạn sử dụng, thông tin tài khoản không trùng khớp..."
+                placeholder="Vi du: Ma khong hop le, thong tin tai khoan khong trung khop..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 className="w-full rounded-xl border border-border bg-muted p-3 text-sm text-foreground outline-none focus:border-primary"
@@ -329,15 +266,10 @@ export function CashoutApprovalQueue({ requests, onAction }: CashoutApprovalQueu
                 }}
                 className="h-11 rounded-full border-border text-foreground"
               >
-                Hủy bỏ
+                Huy bo
               </Button>
-              <Button
-                disabled={!rejectReason.trim()}
-                onClick={() => handleAction(selectedRequest.id, "REJECTED", rejectReason)}
-                variant="destructive"
-                className="h-11 rounded-full font-black uppercase tracking-wide px-5"
-              >
-                Từ Chối Giao Dịch
+              <Button disabled={!rejectReason.trim()} onClick={() => handleAction(selectedRequest.id, "REJECTED", rejectReason)} variant="destructive" className="h-11 rounded-full px-5 font-black uppercase tracking-wide">
+                Tu choi giao dich
               </Button>
             </div>
           </div>

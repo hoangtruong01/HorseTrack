@@ -427,7 +427,7 @@ export interface WalletTxItem {
 
 export interface CashoutItem {
   _id: string;
-  userId?: { _id: string; fullName: string; email: string; phone?: string } | string;
+  userId?: { _id: string; fullName: string; email: string; phone?: string; roles?: string[] } | string;
   pointsRedeemed: number;
   redemptionCode: string;
   status: string;

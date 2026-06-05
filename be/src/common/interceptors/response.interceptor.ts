@@ -75,8 +75,15 @@ export class ResponseInterceptor<T> implements NestInterceptor<
         if (data && typeof data === 'object') {
           const obj = data as Record<string, unknown>;
           if ('meta' in obj && obj.meta && typeof obj.meta === 'object') {
-            meta = obj.meta as Record<string, unknown>;
-            responseData = 'data' in obj ? obj.data : obj;
+            const keys = Object.keys(obj);
+            const isPlainPaginatedResponse = keys.every((key) =>
+              ['data', 'meta'].includes(key),
+            );
+
+            if (isPlainPaginatedResponse) {
+              meta = obj.meta as Record<string, unknown>;
+              responseData = 'data' in obj ? obj.data : obj;
+            }
           }
         }
 

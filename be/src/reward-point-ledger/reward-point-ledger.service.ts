@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   LedgerSourceType,
   RewardPointLedger,
@@ -26,19 +26,22 @@ export class RewardPointLedgerService {
     private userModel: Model<UserDocument>,
   ) {}
 
+  private buildUserIdFilter(userId: string) {
+    return { $in: [userId, new Types.ObjectId(userId)] };
+  }
+
   async getBalance(userId: string): Promise<number> {
     const latest = await this.ledgerModel
-      .findOne({ userId })
+      .findOne({ userId: this.buildUserIdFilter(userId) })
       .sort({ createdAt: -1 })
       .exec();
     return latest?.balanceAfter ?? 0;
   }
-
   async credit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
     const current = await this.getBalance(params.userId);
     const balanceAfter = current + params.points;
     const entry = await this.ledgerModel.create({
-      userId: params.userId,
+      userId: new Types.ObjectId(params.userId),
       sourceType: params.sourceType,
       sourceId: params.sourceId,
       pointsDelta: params.points,
@@ -66,7 +69,7 @@ export class RewardPointLedgerService {
     }
     const balanceAfter = current - params.points;
     const entry = await this.ledgerModel.create({
-      userId: params.userId,
+      userId: new Types.ObjectId(params.userId),
       sourceType: params.sourceType,
       sourceId: params.sourceId,
       pointsDelta: -params.points,
@@ -86,7 +89,7 @@ export class RewardPointLedgerService {
   }
 
   async findByUser(userId: string, page = 1, limit = 20) {
-    const filter = { userId };
+    const filter = { userId: this.buildUserIdFilter(userId) };
     const [data, total] = await Promise.all([
       this.ledgerModel
         .find(filter)
