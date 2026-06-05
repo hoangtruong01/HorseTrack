@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -16,6 +24,13 @@ import { CreatePredictionDto } from './dto/create-prediction.dto';
 @Controller('predictions')
 export class PredictionsController {
   constructor(private readonly predictionsService: PredictionsService) {}
+
+  @Post(':id/cancel')
+  @Roles(RoleName.SPECTATOR, RoleName.ADMIN)
+  @ApiOperation({ summary: 'Cancel/refund a pending prediction' })
+  cancelPrediction(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+    return this.predictionsService.cancelPrediction(id, user.id);
+  }
 
   @Post()
   @Roles(RoleName.SPECTATOR, RoleName.ADMIN)

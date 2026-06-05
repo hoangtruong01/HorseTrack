@@ -381,7 +381,7 @@ export const prizesApi = {
 export interface PredictionItem {
   _id: string;
   userId?: { _id: string; fullName: string; email: string } | string;
-  raceId?: { _id: string; name: string } | string;
+  raceId?: { _id: string; name: string; startTime?: string; status?: string } | string;
   predictedHorseId?: { _id: string; name: string; breed?: string } | string;
   rewardPoints?: number;
   betPoints?: number;
@@ -407,6 +407,10 @@ export const predictionsApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<PredictionItem>>(`/predictions/my-predictions?${qs}`);
   },
+  cancel: (id: string) =>
+    apiFetch<PredictionItem>(`/predictions/${id}/cancel`, {
+      method: "POST",
+    }),
 };
 
 // ─── Wallet Transactions ─────────────────────────────────────────────────────
@@ -438,8 +442,13 @@ export const walletApi = {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
-    return apiFetch<{ balance: number; points: number; data: WalletTxItem[]; meta: any }>(`/wallet/history?${qs}`);
+    return apiFetch<{ balance: number; points: number; data: WalletTxItem[]; meta: Record<string, unknown> }>(`/wallet/history?${qs}`);
   },
+  requestCashout: (dto: { pointsToRedeem: number }) =>
+    apiFetch<CashoutItem>("/wallet/cashout", {
+      method: "POST",
+      body: JSON.stringify(dto),
+    }),
   allTransactions: (params?: { page?: number; limit?: number }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
@@ -456,6 +465,29 @@ export const walletApi = {
     apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status }) }),
   depositForUser: (userId: string, amount: number) =>
     apiFetch(`/wallet/deposit/for-user/${userId}`, { method: "POST", body: JSON.stringify({ amount }) }),
+};
+
+// ─── Reward Point Ledger ─────────────────────────────────────────────────────
+export interface LedgerEntryItem {
+  _id: string;
+  userId: string;
+  sourceType: string;
+  sourceId?: string;
+  pointsDelta: number;
+  balanceAfter: number;
+  note?: string;
+  createdBy?: string;
+  createdAt: string;
+}
+
+export const rewardPointLedgerApi = {
+  myHistory: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<LedgerEntryItem>>(`/reward-point-ledger/my-history?${qs}`);
+  },
+  myBalance: () => apiFetch<{ balance: number }>("/reward-point-ledger/my-balance"),
 };
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

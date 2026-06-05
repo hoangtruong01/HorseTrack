@@ -13,6 +13,7 @@ export default function SpectatorPredictionsPage() {
   const [myPredictions, setMyPredictions] = useState<PredictionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingBalance, setLoadingBalance] = useState(true);
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
 
   const fetchBalance = useCallback(async () => {
     setLoadingBalance(true);
@@ -38,6 +39,24 @@ export default function SpectatorPredictionsPage() {
       setLoading(false);
     }
   }, []);
+
+  const handleCancelPrediction = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn hủy lượt dự đoán này và nhận lại điểm cược (nếu có)?")) {
+      return;
+    }
+    setCancelingId(id);
+    try {
+      await predictionsApi.cancel(id);
+      toast.success("Hủy đặt cược và hoàn điểm thành công!");
+      void fetchBalance();
+      void fetchPredictions();
+    } catch (e: any) {
+      console.error("Lỗi khi hủy đặt cược:", e);
+      toast.error(e.message || "Không thể hủy cược dự đoán lúc này");
+    } finally {
+      setCancelingId(null);
+    }
+  };
 
   useEffect(() => {
     void fetchBalance();
@@ -94,7 +113,12 @@ export default function SpectatorPredictionsPage() {
               </div>
 
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-foreground">3. Quy đổi điểm thưởng</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-foreground">3. Hủy dự đoán / Hoàn cược</p>
+                <p>Bạn có thể tự do hủy dự đoán và nhận lại 100% điểm cược trước thời gian diễn ra cuộc đua ít nhất 2 tiếng. Dưới 2 tiếng hoặc khi cuộc đua đã bắt đầu/kết thúc sẽ không thể hủy.</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-foreground">4. Quy đổi điểm thưởng</p>
                 <p>Tích lũy điểm để tạo yêu cầu quy đổi tại <strong className="text-foreground">Ví điểm thưởng</strong> và mang mã QR nhận quà trực tiếp tại quầy trường đua.</p>
               </div>
             </div>
@@ -146,6 +170,21 @@ export default function SpectatorPredictionsPage() {
                 else if (p.status === "LOST") statusLabel = "Đoán Sai";
                 else if (p.status === "CANCELLED") statusLabel = "Đã Hủy";
 
+                const isCancelable = (() => {
+                  if (p.status !== "PENDING") return false;
+                  if (!p.raceId || typeof p.raceId !== "object") return false;
+                  const raceStatus = p.raceId.status;
+                  if (raceStatus !== "SCHEDULED" && raceStatus !== "CHECKING" && raceStatus !== "READY") return false;
+                  
+                  const startTime = p.raceId.startTime;
+                  if (!startTime) return false;
+                  
+                  const start = new Date(startTime).getTime();
+                  const now = new Date().getTime();
+                  const twoHoursInMs = 2 * 60 * 60 * 1000;
+                  return (start - now) >= twoHoursInMs;
+                })();
+
                 return (
                   <div
                     key={p._id}
@@ -157,6 +196,9 @@ export default function SpectatorPredictionsPage() {
                     )}
                     {p.status === "WON" && (
                       <div className="absolute top-0 left-0 w-full h-[2px] bg-teal-500" />
+                    )}
+                    {p.status === "CANCELLED" && (
+                      <div className="absolute top-0 left-0 w-full h-[2px] bg-muted-foreground/30" />
                     )}
 
                     <div className="space-y-1">
@@ -206,6 +248,20 @@ export default function SpectatorPredictionsPage() {
                           </span>
                         )}
                       </div>
+
+                      {isCancelable && (
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleCancelPrediction(p._id)}
+                          disabled={cancelingId === p._id}
+                          className="h-8 rounded-xl text-[10px] font-black uppercase tracking-wider bg-primary hover:bg-[#B80500] text-white px-3.5 transition shadow-[0_2px_8px_rgba(225,6,0,0.2)]"
+                        >
+                          {cancelingId === p._id ? (
+                            <Loader2 className="size-3 animate-spin mr-1" />
+                          ) : null}
+                          Hoàn Cược
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );

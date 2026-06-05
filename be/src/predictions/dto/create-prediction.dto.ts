@@ -13,7 +13,11 @@ export class CreatePredictionDto {
   @IsMongoId()
   predictedHorseId!: string;
 
-  @ApiPropertyOptional({ description: 'Number of points to bet (0 for free prediction)', minimum: 0, default: 0 })
+  @ApiPropertyOptional({
+    description: 'Number of points to bet (0 for free prediction)',
+    minimum: 0,
+    default: 0,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

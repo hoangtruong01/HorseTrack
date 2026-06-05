@@ -72,6 +72,7 @@ export class PredictionsService {
     const existing = await this.predictionModel.findOne({
       raceId: new Types.ObjectId(dto.raceId),
       userId: new Types.ObjectId(userId),
+      status: { $ne: PredictionStatus.CANCELLED },
     });
     if (existing) {
       throw new ConflictException(
@@ -110,8 +111,86 @@ export class PredictionsService {
     return prediction;
   }
 
+  async cancelPrediction(
+    predictionId: string,
+    userId: string,
+  ): Promise<PredictionDocument> {
+    const prediction = await this.predictionModel.findById(predictionId);
+    if (!prediction) {
+      throw new NotFoundException('Dự đoán không tồn tại');
+    }
+    if (String(prediction.userId) !== userId) {
+      throw new BadRequestException('Bạn không có quyền hủy dự đoán này');
+    }
+    if (prediction.status !== PredictionStatus.PENDING) {
+      throw new BadRequestException(
+        'Chỉ có thể hủy dự đoán ở trạng thái chờ (PENDING)',
+      );
+    }
+
+    const race = await this.raceModel.findById(prediction.raceId);
+    if (!race) {
+      throw new NotFoundException('Trận đấu không tồn tại');
+    }
+
+    // Check time limit: current time must be more than 2 hours before race startTime
+    const now = new Date();
+    const startTime = new Date(race.startTime);
+    const timeDiff = startTime.getTime() - now.getTime();
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+
+    if (
+      race.status !== RaceStatus.SCHEDULED &&
+      race.status !== RaceStatus.CHECKING &&
+      race.status !== RaceStatus.READY
+    ) {
+      throw new BadRequestException(
+        'Trận đấu đã diễn ra hoặc không ở trạng thái hợp lệ để hủy cược',
+      );
+    }
+
+    if (timeDiff < twoHoursInMs) {
+      throw new BadRequestException(
+        'Không thể hủy dự đoán trước giờ thi đấu dưới 2 tiếng hoặc khi trận đấu đã bắt đầu',
+      );
+    }
+
+    // Refund bet points if betPoints >= 2
+    if (prediction.betPoints && prediction.betPoints >= 2) {
+      await this.ledgerService.credit({
+        userId,
+        points: prediction.betPoints,
+        sourceType: LedgerSourceType.PREDICTION_REWARD,
+        sourceId: String(prediction._id),
+        note: `Hoàn trả cược dự đoán (+${prediction.betPoints} điểm) do người dùng tự hủy cược`,
+      });
+
+      await this.notificationsService.send(
+        userId,
+        'Hủy cược thành công',
+        `Bạn đã hủy cược dự đoán thành công cho trận đấu ${race.name} và được hoàn lại ${prediction.betPoints} điểm.`,
+        NotificationType.PREDICTION,
+      );
+    } else {
+      await this.notificationsService.send(
+        userId,
+        'Hủy dự đoán thành công',
+        `Bạn đã hủy dự đoán thành công cho trận đấu ${race.name}.`,
+        NotificationType.PREDICTION,
+      );
+    }
+
+    // Delete the prediction document entirely
+    await this.predictionModel.findByIdAndDelete(predictionId);
+
+    return prediction;
+  }
+
   async findMyPredictions(userId: string, page = 1, limit = 20) {
-    const filter = { userId: new Types.ObjectId(userId) };
+    const filter = {
+      userId: new Types.ObjectId(userId),
+      status: { $ne: PredictionStatus.CANCELLED },
+    };
     const [data, total] = await Promise.all([
       this.predictionModel
         .find(filter)
@@ -215,8 +294,12 @@ export class PredictionsService {
       }
 
       const pointsDelta = won
-        ? (prediction.betPoints >= 2 ? prediction.betPoints : 1)
-        : (prediction.betPoints >= 2 ? -prediction.betPoints : -1);
+        ? prediction.betPoints >= 2
+          ? prediction.betPoints
+          : 1
+        : prediction.betPoints >= 2
+          ? -prediction.betPoints
+          : -1;
 
       return {
         updateOne: {
@@ -237,7 +320,9 @@ export class PredictionsService {
     // 1. Reward winners:
     await Promise.all(
       winnersList.map(async (w) => {
-        const prediction = predictions.find((p) => String(p._id) === w.predictionId);
+        const prediction = predictions.find(
+          (p) => String(p._id) === w.predictionId,
+        );
         const betAmount = prediction?.betPoints || 0;
         const reward = betAmount >= 2 ? betAmount * 2 : 1;
 
@@ -246,9 +331,10 @@ export class PredictionsService {
           points: reward,
           sourceType: LedgerSourceType.PREDICTION_REWARD,
           sourceId: w.predictionId,
-          note: betAmount >= 2
-            ? `Thắng dự đoán (Nhận lại cược x2: +${reward} điểm) cho trận đấu ${raceId}`
-            : `Thắng dự đoán miễn phí (+1 điểm) cho trận đấu ${raceId}`,
+          note:
+            betAmount >= 2
+              ? `Thắng dự đoán (Nhận lại cược x2: +${reward} điểm) cho trận đấu ${raceId}`
+              : `Thắng dự đoán miễn phí (+1 điểm) cho trận đấu ${raceId}`,
         });
 
         // Send realtime notification
@@ -266,7 +352,9 @@ export class PredictionsService {
     // 2. Handle losers:
     await Promise.all(
       losersList.map(async (l) => {
-        const prediction = predictions.find((p) => String(p._id) === l.predictionId);
+        const prediction = predictions.find(
+          (p) => String(p._id) === l.predictionId,
+        );
         const betAmount = prediction?.betPoints || 0;
 
         if (betAmount >= 2) {

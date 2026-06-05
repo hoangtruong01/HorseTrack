@@ -6,6 +6,7 @@ import {
   RewardPointLedger,
   RewardPointLedgerDocument,
 } from './schemas/reward-point-ledger.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 
 export interface LedgerParams {
   userId: string;
@@ -21,6 +22,8 @@ export class RewardPointLedgerService {
   constructor(
     @InjectModel(RewardPointLedger.name)
     private ledgerModel: Model<RewardPointLedgerDocument>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
   ) {}
 
   async getBalance(userId: string): Promise<number> {
@@ -34,7 +37,7 @@ export class RewardPointLedgerService {
   async credit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
     const current = await this.getBalance(params.userId);
     const balanceAfter = current + params.points;
-    return this.ledgerModel.create({
+    const entry = await this.ledgerModel.create({
       userId: params.userId,
       sourceType: params.sourceType,
       sourceId: params.sourceId,
@@ -43,6 +46,15 @@ export class RewardPointLedgerService {
       note: params.note,
       createdBy: params.createdBy,
     });
+
+    // Synchronize current reward points to user wallet/points field
+    await this.userModel
+      .findByIdAndUpdate(params.userId, {
+        $set: { points: balanceAfter },
+      })
+      .exec();
+
+    return entry;
   }
 
   async debit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
@@ -53,7 +65,7 @@ export class RewardPointLedgerService {
       );
     }
     const balanceAfter = current - params.points;
-    return this.ledgerModel.create({
+    const entry = await this.ledgerModel.create({
       userId: params.userId,
       sourceType: params.sourceType,
       sourceId: params.sourceId,
@@ -62,6 +74,15 @@ export class RewardPointLedgerService {
       note: params.note,
       createdBy: params.createdBy,
     });
+
+    // Synchronize current reward points to user wallet/points field
+    await this.userModel
+      .findByIdAndUpdate(params.userId, {
+        $set: { points: balanceAfter },
+      })
+      .exec();
+
+    return entry;
   }
 
   async findByUser(userId: string, page = 1, limit = 20) {

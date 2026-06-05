@@ -4,6 +4,7 @@ import {
   RewardPointLedger,
   RewardPointLedgerSchema,
 } from './schemas/reward-point-ledger.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 import { RewardPointLedgerController } from './reward-point-ledger.controller';
 import { RewardPointLedgerService } from './reward-point-ledger.service';
 
@@ -11,6 +12,7 @@ import { RewardPointLedgerService } from './reward-point-ledger.service';
   imports: [
     MongooseModule.forFeature([
       { name: RewardPointLedger.name, schema: RewardPointLedgerSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [RewardPointLedgerController],
