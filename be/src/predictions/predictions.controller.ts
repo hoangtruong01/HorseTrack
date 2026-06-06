@@ -17,6 +17,7 @@ import { RoleName } from '../users/schemas/user.schema';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PredictionsService } from './predictions.service';
 import { CreatePredictionDto } from './dto/create-prediction.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
 @ApiTags('Predictions')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -28,7 +29,10 @@ export class PredictionsController {
   @Post(':id/cancel')
   @Roles(RoleName.SPECTATOR, RoleName.ADMIN)
   @ApiOperation({ summary: 'Cancel/refund a pending prediction' })
-  cancelPrediction(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+  cancelPrediction(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     return this.predictionsService.cancelPrediction(id, user.id);
   }
 

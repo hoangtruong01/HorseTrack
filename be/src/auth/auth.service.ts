@@ -119,6 +119,7 @@ export class AuthService {
           password: placeholderPassword,
           phone: '',
           avatar: googleProfile.picture,
+          provider: 'google',
         });
       }
 

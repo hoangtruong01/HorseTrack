@@ -7,9 +7,13 @@ import {
   MinLength,
   IsDateString,
   IsArray,
-  IsEnum,
+  Matches,
 } from 'class-validator';
 import { RoleName } from '../../users/schemas/user.schema';
+import { IsIn } from 'class-validator';
+
+/** Only these roles may be chosen during self-registration */
+const SELF_REGISTER_ROLES = [RoleName.SPECTATOR, RoleName.OWNER] as const;
 
 export class RegisterDto {
   @ApiProperty()
@@ -21,9 +25,17 @@ export class RegisterDto {
   @IsEmail()
   email!: string;
 
-  @ApiProperty({ minLength: 8 })
+  @ApiProperty({
+    minLength: 8,
+    description:
+      'At least 8 chars, must include uppercase, lowercase, and digit',
+  })
   @IsNotEmpty()
   @MinLength(8)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, {
+    message:
+      'Password must contain at least one uppercase letter, one lowercase letter, and one digit',
+  })
   password!: string;
 
   @ApiPropertyOptional()
@@ -41,9 +53,12 @@ export class RegisterDto {
   @IsDateString()
   dob?: string;
 
-  @ApiPropertyOptional({ enum: RoleName, isArray: true })
+  @ApiPropertyOptional({ enum: SELF_REGISTER_ROLES, isArray: true })
   @IsOptional()
   @IsArray()
-  @IsEnum(RoleName, { each: true })
+  @IsIn(SELF_REGISTER_ROLES, {
+    each: true,
+    message: 'Self-registration only allows spectator or owner roles',
+  })
   roles?: RoleName[];
 }

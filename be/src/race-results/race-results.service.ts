@@ -35,6 +35,8 @@ import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { Jockey } from '../jockeys/schemas/jockey.schema';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
+import { JwtUser } from '../common/interfaces/jwt-user.interface';
+import { RoleName } from '../users/schemas/user.schema';
 
 import {
   RaceViolation,
@@ -405,11 +407,27 @@ export class RaceResultsService {
     });
   }
 
-  async findByRace(raceId: string) {
+  async findByRace(raceId: string, user?: JwtUser) {
+    const isPrivileged =
+      user &&
+      user.roles &&
+      (user.roles.includes(RoleName.ADMIN) ||
+        user.roles.includes(RoleName.REFEREE));
+
+    const statusFilter = isPrivileged
+      ? {
+          $in: [
+            RaceResultStatus.DRAFT,
+            RaceResultStatus.CONFIRMED,
+            RaceResultStatus.PUBLISHED,
+          ],
+        }
+      : RaceResultStatus.PUBLISHED;
+
     return this.resultModel
       .find({
         raceId: new Types.ObjectId(raceId),
-        status: RaceResultStatus.PUBLISHED,
+        status: statusFilter,
       })
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
@@ -418,11 +436,27 @@ export class RaceResultsService {
       .exec();
   }
 
-  async findByTournament(tournamentId: string) {
+  async findByTournament(tournamentId: string, user?: JwtUser) {
+    const isPrivileged =
+      user &&
+      user.roles &&
+      (user.roles.includes(RoleName.ADMIN) ||
+        user.roles.includes(RoleName.REFEREE));
+
+    const statusFilter = isPrivileged
+      ? {
+          $in: [
+            RaceResultStatus.DRAFT,
+            RaceResultStatus.CONFIRMED,
+            RaceResultStatus.PUBLISHED,
+          ],
+        }
+      : RaceResultStatus.PUBLISHED;
+
     return this.resultModel
       .find({
         tournamentId: new Types.ObjectId(tournamentId),
-        status: RaceResultStatus.PUBLISHED,
+        status: statusFilter,
       })
       .populate('raceId', 'name raceNumber')
       .populate('horseId', 'name breed')

@@ -7,6 +7,7 @@ import {
   Post,
   Query,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -20,6 +21,7 @@ import { WalletService } from './wallet.service';
 import { DepositDto } from './dto/deposit.dto';
 import { CreateCashoutDto } from './dto/create-cashout.dto';
 import { ProcessCashoutDto } from './dto/process-cashout.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
 @ApiTags('Wallet & Transactions')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -28,17 +30,19 @@ import { ProcessCashoutDto } from './dto/process-cashout.dto';
 export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
-  @Post('deposit')
-  @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'Deposit money to user wallet (Admin only)' })
-  deposit(@Body() dto: DepositDto, @CurrentUser() user: JwtUser) {
-    return this.walletService.deposit(user.id, dto.amount);
-  }
-
   @Post('deposit/for-user/:userId')
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Admin deposits money to a specific user wallet' })
-  depositForUser(@Param('userId') userId: string, @Body() dto: DepositDto) {
+  depositForUser(
+    @Param('userId', ParseObjectIdPipe) userId: string,
+    @Body() dto: DepositDto,
+    @CurrentUser() adminUser: JwtUser,
+  ) {
+    if (userId === adminUser.id) {
+      throw new BadRequestException(
+        'Admins cannot deposit money into their own wallets',
+      );
+    }
     return this.walletService.deposit(userId, dto.amount);
   }
 
@@ -59,7 +63,7 @@ export class WalletController {
       'Process, Approve, Reject or Pay out cashout requests (Admin / Counter Staff)',
   })
   processCashout(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: ProcessCashoutDto,
     @CurrentUser() user: JwtUser,
   ) {
@@ -84,7 +88,7 @@ export class WalletController {
     summary: 'Get wallet history for a specific user (Admin only)',
   })
   findUserHistory(
-    @Param('userId') userId: string,
+    @Param('userId', ParseObjectIdPipe) userId: string,
     @Query() pagination: PaginationDto,
   ) {
     return this.walletService.findMyWalletHistory(

@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import mongoose from 'mongoose';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -14,18 +15,23 @@ mongoose.plugin(mongooseTransformPlugin);
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // ── Security: HTTP headers ──
+  app.use(helmet());
+
   // ── Serve uploads statically ──
   app.useStaticAssets(join(__dirname, '..', 'public'));
 
   // ── CORS: allow both Web (Next.js) and Mobile (React Native) ──
+  const corsOrigins = [
+    process.env.CORS_ORIGIN,
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:8081',
+    'http://localhost:19006',
+  ].filter(Boolean) as string[];
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000', // Next.js dev
-      'http://localhost:3001', // Next.js alt
-      'http://localhost:8081', // React Native / Expo
-      'http://localhost:19006', // Expo web
-      process.env.CORS_ORIGIN,
-    ].filter(Boolean) as string[],
+    origin: corsOrigins,
     credentials: true,
   });
 

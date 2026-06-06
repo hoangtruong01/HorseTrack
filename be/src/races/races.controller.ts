@@ -23,6 +23,7 @@ import { RacesService } from './races.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
 import { UpdateRaceStatusDto } from './dto/update-race-status.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
 @ApiTags('Races')
 @Controller('races')
@@ -47,7 +48,7 @@ export class RacesController {
   @Get('tournament/:tournamentId')
   @ApiOperation({ summary: 'List races by tournament (public)' })
   findByTournament(
-    @Param('tournamentId') tournamentId: string,
+    @Param('tournamentId', ParseObjectIdPipe) tournamentId: string,
     @Query() pagination: PaginationDto,
   ) {
     return this.racesService.findByTournament(
@@ -59,7 +60,7 @@ export class RacesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get race detail (public)' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.racesService.findOne(id);
   }
 
@@ -68,7 +69,10 @@ export class RacesController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update race (Admin)' })
-  update(@Param('id') id: string, @Body() dto: UpdateRaceDto) {
+  update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() dto: UpdateRaceDto,
+  ) {
     return this.racesService.update(id, dto);
   }
 
@@ -77,7 +81,10 @@ export class RacesController {
   @Roles(RoleName.ADMIN, RoleName.REFEREE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change race status (Admin/Referee)' })
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateRaceStatusDto) {
+  updateStatus(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() dto: UpdateRaceStatusDto,
+  ) {
     return this.racesService.updateStatus(id, dto.status);
   }
 
@@ -87,7 +94,7 @@ export class RacesController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete race (Admin)' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseObjectIdPipe) id: string) {
     await this.racesService.softDelete(id);
     return { message: 'Race deleted' };
   }

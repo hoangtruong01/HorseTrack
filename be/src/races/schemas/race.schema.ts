@@ -87,3 +87,4 @@ RaceSchema.index({ tournamentId: 1 });
 RaceSchema.index({ startTime: 1 });
 RaceSchema.index({ status: 1 });
 RaceSchema.index({ tournamentId: 1, startTime: 1 });
+RaceSchema.index({ deletedAt: 1 });

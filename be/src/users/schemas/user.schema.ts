@@ -54,6 +54,9 @@ export class User {
   @Prop({ default: 0 })
   balance!: number;
 
+  @Prop({ default: 'local' })
+  provider?: string;
+
   @Prop()
   deletedAt?: Date;
 }

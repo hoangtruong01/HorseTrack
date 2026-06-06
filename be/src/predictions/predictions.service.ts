@@ -278,25 +278,12 @@ export class PredictionsService {
     if (predictions.length === 0) return;
 
     const now = new Date();
-    const winnersList: { predictionId: string; userId: string }[] = [];
-    const losersList: { predictionId: string; userId: string }[] = [];
 
-    const bulkOps = predictions.map((prediction) => {
+    // Process each prediction atomically to prevent race conditions (double payouts)
+    for (const prediction of predictions) {
       const won =
         winners.length > 0 &&
         winnerHorseIds.includes(String(prediction.predictedHorseId));
-
-      if (won) {
-        winnersList.push({
-          predictionId: String(prediction._id),
-          userId: String(prediction.userId),
-        });
-      } else {
-        losersList.push({
-          predictionId: String(prediction._id),
-          userId: String(prediction.userId),
-        });
-      }
 
       const pointsDelta = won
         ? prediction.betPoints >= 2
@@ -306,36 +293,41 @@ export class PredictionsService {
           ? -prediction.betPoints
           : -1;
 
-      return {
-        updateOne: {
-          filter: { _id: prediction._id },
-          update: {
+      const targetStatus = won ? PredictionStatus.WON : PredictionStatus.LOST;
+
+      // Atomic update. If returned doc is null, another concurrent request processed this prediction.
+      const updatedPrediction = await this.predictionModel
+        .findOneAndUpdate(
+          {
+            _id: prediction._id,
+            status: PredictionStatus.PENDING,
+          },
+          {
             $set: {
-              status: won ? PredictionStatus.WON : PredictionStatus.LOST,
+              status: targetStatus,
               rewardPoints: pointsDelta,
               evaluatedAt: now,
             },
           },
-        },
-      };
-    });
+          { new: true },
+        )
+        .exec();
 
-    await this.predictionModel.bulkWrite(bulkOps);
+      if (!updatedPrediction) {
+        // Concurrent execution safety: Skip if already processed
+        continue;
+      }
 
-    // 1. Reward winners:
-    await Promise.all(
-      winnersList.map(async (w) => {
-        const prediction = predictions.find(
-          (p) => String(p._id) === w.predictionId,
-        );
-        const betAmount = prediction?.betPoints || 0;
+      const betAmount = prediction.betPoints || 0;
+
+      if (won) {
         const reward = betAmount >= 2 ? betAmount * 2 : 1;
 
         await this.ledgerService.credit({
-          userId: w.userId,
+          userId: String(prediction.userId),
           points: reward,
           sourceType: LedgerSourceType.PREDICTION_REWARD,
-          sourceId: w.predictionId,
+          sourceId: String(prediction._id),
           note:
             betAmount >= 2
               ? `Thắng dự đoán (Nhận lại cược x2: +${reward} điểm) cho trận đấu ${raceId}`
@@ -344,46 +336,38 @@ export class PredictionsService {
 
         // Send realtime notification
         await this.notificationsService.send(
-          w.userId,
+          String(prediction.userId),
           'Dự đoán chính xác!',
           betAmount > 0
             ? `Chúc mừng! Bạn đã dự đoán chính xác chiến mã vô địch trong cuộc đua và nhận được ${reward} điểm (nhận lại cược x2).`
             : `Chúc mừng! Bạn đã dự đoán chính xác chiến mã vô địch trong cuộc đua và nhận được 1 điểm thưởng.`,
           NotificationType.PREDICTION,
         );
-      }),
-    );
-
-    // 2. Handle losers:
-    await Promise.all(
-      losersList.map(async (l) => {
-        const prediction = predictions.find(
-          (p) => String(p._id) === l.predictionId,
-        );
-        const betAmount = prediction?.betPoints || 0;
-
+      } else {
         if (betAmount >= 2) {
           // Points were already debited at creation. Just send notification.
           await this.notificationsService.send(
-            l.userId,
+            String(prediction.userId),
             'Dự đoán không chính xác',
             `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất. Bạn đã mất ${betAmount} điểm đặt cược.`,
             NotificationType.PREDICTION,
           );
         } else {
           // Free prediction: deduct 1 point if possible
-          const currentPoints = await this.ledgerService.getBalance(l.userId);
+          const currentPoints = await this.ledgerService.getBalance(
+            String(prediction.userId),
+          );
           if (currentPoints >= 1) {
             await this.ledgerService.debit({
-              userId: l.userId,
+              userId: String(prediction.userId),
               points: 1,
               sourceType: LedgerSourceType.PREDICTION_REWARD,
-              sourceId: l.predictionId,
+              sourceId: String(prediction._id),
               note: `Phạt dự đoán sai miễn phí (-1 điểm) cho trận đấu ${raceId}`,
             });
 
             await this.notificationsService.send(
-              l.userId,
+              String(prediction.userId),
               'Dự đoán không chính xác',
               `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất. Bạn bị trừ 1 điểm.`,
               NotificationType.PREDICTION,
@@ -391,22 +375,22 @@ export class PredictionsService {
           } else {
             // Balance is already 0, record a 0 points transaction
             await this.ledgerService.credit({
-              userId: l.userId,
+              userId: String(prediction.userId),
               points: 0,
               sourceType: LedgerSourceType.PREDICTION_REWARD,
-              sourceId: l.predictionId,
+              sourceId: String(prediction._id),
               note: `Không trừ điểm dự đoán sai do số dư ví đã ở mức 0 (trận đấu ${raceId})`,
             });
 
             await this.notificationsService.send(
-              l.userId,
+              String(prediction.userId),
               'Dự đoán không chính xác',
               `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất.`,
               NotificationType.PREDICTION,
             );
           }
         }
-      }),
-    );
+      }
+    }
   }
 }
