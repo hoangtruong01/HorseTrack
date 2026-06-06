@@ -30,7 +30,7 @@ describe('WalletService', () => {
   const handlerId = new Types.ObjectId().toHexString();
   const cashoutId = new Types.ObjectId();
 
-  function makeRequest(status = CashoutStatus.PENDING) {
+  function makeRequest(status = CashoutStatus.PENDING): any {
     return {
       _id: cashoutId,
       userId,
