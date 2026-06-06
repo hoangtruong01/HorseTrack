@@ -159,7 +159,7 @@ export class RacesService {
     // Validate prize does not exceed tournament budget
     if (dto.prize !== undefined) {
       const tournament = await this.tournamentsService.findOne(
-        ((race.tournamentId as any)._id || race.tournamentId).toString(),
+        this.getTournamentIdString(race.tournamentId),
       );
       const [agg] = await this.raceModel.aggregate<{ total: number }>([
         {
@@ -209,7 +209,7 @@ export class RacesService {
     try {
       if (status === RaceStatus.LIVE) {
         const tournament = await this.tournamentsService.findOne(
-          ((race.tournamentId as any)._id || race.tournamentId).toString(),
+          this.getTournamentIdString(race.tournamentId),
         );
         if (tournament.status === TournamentStatus.OPEN_REGISTRATION) {
           await this.tournamentsService.updateStatus(
@@ -234,7 +234,7 @@ export class RacesService {
         ].includes(status)
       ) {
         const tournament = await this.tournamentsService.findOne(
-          ((race.tournamentId as any)._id || race.tournamentId).toString(),
+          this.getTournamentIdString(race.tournamentId),
         );
         if (tournament.status === TournamentStatus.ONGOING) {
           const activeRacesCount = await this.raceModel.countDocuments({
@@ -330,5 +330,21 @@ export class RacesService {
     }
     race.deletedAt = new Date();
     await race.save();
+  }
+
+  private getTournamentIdString(tournamentId: unknown): string {
+    if (!tournamentId) return '';
+    if (typeof tournamentId === 'object') {
+      if ('_id' in tournamentId && tournamentId._id) {
+        const obj = tournamentId;
+        return obj._id instanceof Types.ObjectId
+          ? obj._id.toHexString()
+          : String(obj._id);
+      }
+      if (tournamentId instanceof Types.ObjectId) {
+        return tournamentId.toHexString();
+      }
+    }
+    return typeof tournamentId === 'string' ? tournamentId : '';
   }
 }

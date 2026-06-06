@@ -407,7 +407,10 @@ export class RaceResultsService {
 
   async findByRace(raceId: string) {
     return this.resultModel
-      .find({ raceId: new Types.ObjectId(raceId), status: RaceResultStatus.PUBLISHED })
+      .find({
+        raceId: new Types.ObjectId(raceId),
+        status: RaceResultStatus.PUBLISHED,
+      })
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
       .populate('recordedBy', 'fullName')
@@ -417,7 +420,10 @@ export class RaceResultsService {
 
   async findByTournament(tournamentId: string) {
     return this.resultModel
-      .find({ tournamentId: new Types.ObjectId(tournamentId), status: RaceResultStatus.PUBLISHED })
+      .find({
+        tournamentId: new Types.ObjectId(tournamentId),
+        status: RaceResultStatus.PUBLISHED,
+      })
       .populate('raceId', 'name raceNumber')
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
@@ -428,7 +434,9 @@ export class RaceResultsService {
   async confirmResultsForRace(raceId: string, refereeId: string) {
     await this.validateRefereeAssigned(raceId, refereeId);
 
-    const results = await this.resultModel.find({ raceId: new Types.ObjectId(raceId) });
+    const results = await this.resultModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
     if (results.length === 0) {
       throw new BadRequestException('No results recorded for this race yet');
     }
@@ -478,7 +486,9 @@ export class RaceResultsService {
       );
     }
 
-    const results = await this.resultModel.find({ raceId: new Types.ObjectId(raceId) });
+    const results = await this.resultModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
     if (results.length === 0) {
       throw new BadRequestException('No results to publish for this race');
     }
@@ -551,11 +561,15 @@ export class RaceResultsService {
   }
 
   async applyViolationsToResults(raceId: string): Promise<void> {
-    const results = await this.resultModel.find({ raceId: new Types.ObjectId(raceId) });
+    const results = await this.resultModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
     if (results.length === 0) return;
 
     // Fetch all violations recorded for this race
-    const violations = await this.violationModel.find({ raceId: new Types.ObjectId(raceId) });
+    const violations = await this.violationModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
 
     const PENALTY_TIME_RULES: Record<ViolationSeverity, number> = {
       [ViolationSeverity.MINOR]: 3000,

@@ -10,6 +10,7 @@ import { Model, Types } from 'mongoose';
 import { HorsesService } from '../horses/horses.service';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { RacesService } from '../races/races.service';
+import { RaceStatus } from '../races/schemas/race.schema';
 import {
   HorseDocument,
   HorseHealthStatus,
@@ -55,8 +56,7 @@ export class RegistrationsService {
     }
 
     // 2. Validate registration window dates & race status
-    const now = new Date();
-    if (race.status !== 'SCHEDULED') {
+    if (race.status !== RaceStatus.SCHEDULED) {
       throw new BadRequestException(
         'Chỉ có thể đăng ký tham gia trận đua đang lên lịch (SCHEDULED)',
       );

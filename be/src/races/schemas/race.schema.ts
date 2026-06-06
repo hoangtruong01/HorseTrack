@@ -1,10 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import {
-  TrackCondition,
-  WeatherCondition,
-  RaceType,
-} from '../../common/enums/race.enums';
+import { WeatherCondition, RaceType } from '../../common/enums/race.enums';
 
 export type RaceDocument = Race & Document;
 
