@@ -18,6 +18,7 @@ import { RoleName } from '../users/schemas/user.schema';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { RefereeProfilesService } from './referee-profiles.service';
 import { CreateRefereeProfileDto } from './dto/create-referee-profile.dto';
+import { ListRefereeProfilesDto } from './dto/list-referee-profiles.dto';
 import {
   RefereeApprovalStatus,
   RefereeProfileStatus,
@@ -43,13 +44,12 @@ export class RefereeProfilesController {
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'List all referee profiles (Admin)' })
   findAll(
-    @Query() pagination: PaginationDto,
-    @Query('approvalStatus') approvalStatus?: RefereeApprovalStatus,
+    @Query() query: ListRefereeProfilesDto,
   ) {
     return this.service.findAll(
-      pagination.page,
-      pagination.limit,
-      approvalStatus,
+      query.page,
+      query.limit,
+      query.approvalStatus,
     );
   }
 

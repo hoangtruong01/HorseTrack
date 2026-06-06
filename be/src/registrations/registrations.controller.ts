@@ -23,6 +23,7 @@ import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { RejectRegistrationDto } from './dto/reject-registration.dto';
+import { ListRegistrationsDto } from './dto/list-registrations.dto';
 import { RegistrationsService } from './registrations.service';
 import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
@@ -48,17 +49,14 @@ export class RegistrationsController {
   @ApiQuery({ name: 'raceId', required: false })
   @ApiQuery({ name: 'status', required: false })
   findAll(
-    @Query() pagination: PaginationDto,
-    @Query('tournamentId') tournamentId?: string,
-    @Query('raceId') raceId?: string,
-    @Query('status') status?: string,
+    @Query() query: ListRegistrationsDto,
   ) {
     return this.registrationsService.findAll(
-      pagination.page,
-      pagination.limit,
-      tournamentId,
-      raceId,
-      status,
+      query.page,
+      query.limit,
+      query.tournamentId,
+      query.raceId,
+      query.status,
     );
   }
 

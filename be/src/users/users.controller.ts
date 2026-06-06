@@ -31,6 +31,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PublicUserResponseDto } from './dto/public-user-response.dto';
+import { ListUsersDto } from './dto/list-users.dto';
 import { UsersService } from './users.service';
 import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
@@ -77,17 +78,14 @@ export class UsersController {
   })
   @ApiResponse({ status: 200 })
   async findAll(
-    @Query() pagination: PaginationDto,
-    @Query('search') search?: string,
-    @Query('role') role?: RoleName,
-    @Query('status') status?: UserStatus,
+    @Query() query: ListUsersDto,
   ) {
     const result = await this.usersService.findAll(
-      pagination.page,
-      pagination.limit,
-      search,
-      role,
-      status,
+      query.page,
+      query.limit,
+      query.search,
+      query.role,
+      query.status,
     );
     return {
       data: result.data.map((u) =>

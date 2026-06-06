@@ -23,6 +23,7 @@ import { RoleName } from '../users/schemas/user.schema';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { BankTransactionsService } from './bank-transactions.service';
 import { WebhookDto } from './dto/webhook.dto';
+import { ListBankTransactionsDto } from './dto/list-bank-transactions.dto';
 import { BankTransactionMatchedType } from './schemas/bank-transaction.schema';
 
 @ApiTags('Bank Transactions')
@@ -51,13 +52,12 @@ export class BankTransactionsController {
     required: false,
   })
   findAll(
-    @Query() pagination: PaginationDto,
-    @Query('matchedType') matchedType?: BankTransactionMatchedType,
+    @Query() query: ListBankTransactionsDto,
   ) {
     return this.bankTransactionsService.findAll(
-      pagination.page,
-      pagination.limit,
-      matchedType,
+      query.page,
+      query.limit,
+      query.matchedType,
     );
   }
 }

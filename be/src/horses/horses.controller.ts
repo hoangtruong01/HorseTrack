@@ -35,6 +35,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { HorsesService } from './horses.service';
 import { CreateHorseDto } from './dto/create-horse.dto';
 import { UpdateHorseDto } from './dto/update-horse.dto';
+import { ListHorsesDto } from './dto/list-horses.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
@@ -124,13 +125,12 @@ export class HorsesController {
   @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
   @ApiOperation({ summary: 'List all horses (Admin & Spectators)' })
   findAll(
-    @Query() pagination: PaginationDto,
-    @Query('search') search?: string,
+    @Query() query: ListHorsesDto,
   ) {
     return this.horsesService.findAll(
-      pagination.page,
-      pagination.limit,
-      search,
+      query.page,
+      query.limit,
+      query.search,
     );
   }
 
