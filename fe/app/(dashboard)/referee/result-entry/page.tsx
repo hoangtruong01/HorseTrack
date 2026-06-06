@@ -135,7 +135,7 @@ export default function RefereeResultEntryWorkspacePage() {
                     variant={isSelectable ? "default" : "outline"}
                     className="h-9 px-4 rounded-full text-xs font-black uppercase"
                   >
-                    <Link href={`/referee/races/${a.raceId._id}/result-entry`}>
+                    <Link href={`/referee/races/${a.raceId?._id || (a.raceId as any)?.id}/result-entry`}>
                       {isFinished ? "Nhập kết quả ngay" : isPublished ? "Xem kết quả đã khóa" : "Nhập kết quả nháp"}
                       <ArrowRight className="size-3.5 ml-1" />
                     </Link>

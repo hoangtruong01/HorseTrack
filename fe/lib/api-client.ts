@@ -330,18 +330,24 @@ export const refereeAssignmentsApi = {
 export interface RankingEntry {
   horseId: string;
   horseName?: string;
+  breed?: string;
+  ownerName?: string;
   totalPoints: number;
   totalRaces: number;
   wins: number;
+  totalFinishTimeMs?: number;
   rank?: number;
 }
 
 export interface JockeyRankingEntry {
   jockeyUserId: string;
   jockeyName?: string;
+  experienceYears?: number;
+  skillLevel?: string;
   totalPoints: number;
   totalRaces: number;
   wins: number;
+  totalFinishTimeMs?: number;
   rank?: number;
 }
 
@@ -350,6 +356,10 @@ export const rankingsApi = {
     apiFetch<RankingEntry[]>(`/rankings/tournament/${tournamentId}/horses`),
   getJockeyRankings: (tournamentId: string) =>
     apiFetch<JockeyRankingEntry[]>(`/rankings/tournament/${tournamentId}/jockeys`),
+  getGlobalHorseRankings: () =>
+    apiFetch<RankingEntry[]>("/rankings/global/horses"),
+  getGlobalJockeyRankings: () =>
+    apiFetch<JockeyRankingEntry[]>("/rankings/global/jockeys"),
 };
 
 // ─── Prizes ─────────────────────────────────────────────────────────────────
