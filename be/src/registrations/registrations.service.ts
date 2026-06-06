@@ -54,19 +54,12 @@ export class RegistrationsService {
       throw new BadRequestException('Tournament is not open for registration');
     }
 
-    // 2. Validate registration window dates
+    // 2. Validate registration window dates & race status
     const now = new Date();
-    if (
-      tournament.registrationStartDate &&
-      now < tournament.registrationStartDate
-    ) {
-      throw new BadRequestException('Registration window has not opened yet');
-    }
-    if (
-      tournament.registrationEndDate &&
-      now > tournament.registrationEndDate
-    ) {
-      throw new BadRequestException('Registration window has closed');
+    if (race.status !== 'SCHEDULED') {
+      throw new BadRequestException(
+        'Chỉ có thể đăng ký tham gia trận đua đang lên lịch (SCHEDULED)',
+      );
     }
 
     // 3. Horse must belong to owner — use raw (unpopulated) document so that

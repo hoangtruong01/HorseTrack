@@ -177,13 +177,21 @@ export class RaceResultsService {
       const track = (race.trackCondition as string) || 'Dry';
       const weather = race.weatherSnapshot || 'Sunny';
 
-      if (weather === 'Sunny' && track === 'Dry') {
+      const isDryTrack =
+        track === 'Dry' ||
+        track === 'Dry turf' ||
+        track === 'GOOD' ||
+        track === 'FIRM';
+      const isMuddyTrack =
+        track === 'Muddy' || track === 'MUDDY' || track === 'HEAVY';
+
+      if (weather === 'Sunny' && isDryTrack) {
         conditionBonusMs += 2000; // Chạy nhanh hơn 2s
       } else if (weather === 'Rainy' || weather === 'Stormy') {
         conditionBonusMs -= 6000; // Chạy chậm đi 6s
       }
 
-      if (track === 'Muddy') {
+      if (isMuddyTrack) {
         const weight = horse.weightKg || 450;
         conditionBonusMs -= weight < 450 ? 4000 : 1000; // Ngựa nhẹ bị phạt nặng hơn
       }
