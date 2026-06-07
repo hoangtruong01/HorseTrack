@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -61,11 +61,15 @@ export function AppSidebar({
           className="absolute -right-3 top-1/2 -translate-y-1/2 flex size-6 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-all hover:bg-secondary hover:text-foreground z-50 cursor-pointer"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {isCollapsed ? <ChevronRight className="size-5" /> : <ChevronLeft className="size-5" />}
+          {isCollapsed ? (
+            <ChevronRight className="size-5" />
+          ) : (
+            <ChevronLeft className="size-5" />
+          )}
         </button>
 
         <div className="flex flex-col flex-1 overflow-hidden">
-          <nav className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <nav className="space-y-2 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {visibleItems.map((item) => {
               const Icon = item.icon;
               // Xác định active dựa trên cả path và query param
@@ -83,16 +87,27 @@ export function AppSidebar({
                       className={cn(
                         "group relative flex items-center rounded-lg border border-transparent p-3 text-sm transition-all duration-300 ease-in-out hover:border-border hover:bg-secondary hover:text-foreground",
                         isCollapsed ? "justify-center gap-0" : "gap-3",
-                        isActive && "border-primary/60 bg-primary/10 text-foreground",
+                        isActive &&
+                          "border-primary/60 bg-primary/10 text-foreground",
                       )}
                     >
                       {Icon ? (
                         <Icon
-                          className={cn("shrink-0 text-primary transition-all duration-300", isCollapsed ? "size-5 mx-auto" : "mt-0.5 size-4")}
+                          className={cn(
+                            "shrink-0 text-primary transition-all duration-300",
+                            isCollapsed ? "size-5 mx-auto" : "mt-0.5 size-4",
+                          )}
                           aria-hidden="true"
                         />
                       ) : null}
-                      <span className={cn("overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap flex flex-col justify-center", isCollapsed ? "max-w-0 opacity-0" : "max-w-[200px] opacity-100")}>
+                      <span
+                        className={cn(
+                          "overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap flex flex-col justify-center",
+                          isCollapsed
+                            ? "max-w-0 opacity-0"
+                            : "max-w-[200px] opacity-100",
+                        )}
+                      >
                         <span className="block font-bold uppercase tracking-[0.08em]">
                           {item.title}
                         </span>
@@ -112,7 +127,9 @@ export function AppSidebar({
                         sideOffset={12}
                         className="z-50 rounded-md bg-card/95 backdrop-blur-sm border border-border px-3 py-1.5 text-foreground shadow-xl select-none max-w-xs flex flex-col gap-0.5"
                       >
-                        <span className="text-xs font-bold uppercase tracking-wider">{item.title}</span>
+                        <span className="text-xs font-bold uppercase tracking-wider">
+                          {item.title}
+                        </span>
                         {item.description && (
                           <span className="text-[10px] text-muted-foreground normal-case font-normal leading-snug">
                             {item.description}
