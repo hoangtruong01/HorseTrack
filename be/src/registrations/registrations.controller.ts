@@ -48,9 +48,7 @@ export class RegistrationsController {
   @ApiQuery({ name: 'tournamentId', required: false })
   @ApiQuery({ name: 'raceId', required: false })
   @ApiQuery({ name: 'status', required: false })
-  findAll(
-    @Query() query: ListRegistrationsDto,
-  ) {
+  findAll(@Query() query: ListRegistrationsDto) {
     return this.registrationsService.findAll(
       query.page,
       query.limit,

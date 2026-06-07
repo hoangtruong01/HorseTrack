@@ -20,7 +20,6 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RoleName } from '../users/schemas/user.schema';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { BankTransactionsService } from './bank-transactions.service';
 import { WebhookDto } from './dto/webhook.dto';
 import { ListBankTransactionsDto } from './dto/list-bank-transactions.dto';
@@ -51,9 +50,7 @@ export class BankTransactionsController {
     enum: BankTransactionMatchedType,
     required: false,
   })
-  findAll(
-    @Query() query: ListBankTransactionsDto,
-  ) {
+  findAll(@Query() query: ListBankTransactionsDto) {
     return this.bankTransactionsService.findAll(
       query.page,
       query.limit,
