@@ -30,7 +30,19 @@ describe('WalletService', () => {
   const handlerId = new Types.ObjectId().toHexString();
   const cashoutId = new Types.ObjectId();
 
-  function makeRequest(status = CashoutStatus.PENDING): any {
+  interface MockCashoutRequest {
+    _id: Types.ObjectId;
+    userId: Types.ObjectId;
+    pointsRedeemed: number;
+    redemptionCode: string;
+    status: CashoutStatus;
+    approvedBy?: Types.ObjectId;
+    paidBy?: Types.ObjectId;
+    paidAt?: Date;
+    save: jest.Mock;
+  }
+
+  function makeRequest(status = CashoutStatus.PENDING): MockCashoutRequest {
     return {
       _id: cashoutId,
       userId,

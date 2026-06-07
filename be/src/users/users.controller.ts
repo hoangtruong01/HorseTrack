@@ -24,7 +24,6 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { RoleName, UserStatus } from './schemas/user.schema';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -77,9 +76,7 @@ export class UsersController {
     description: 'Filter by status',
   })
   @ApiResponse({ status: 200 })
-  async findAll(
-    @Query() query: ListUsersDto,
-  ) {
+  async findAll(@Query() query: ListUsersDto) {
     const result = await this.usersService.findAll(
       query.page,
       query.limit,

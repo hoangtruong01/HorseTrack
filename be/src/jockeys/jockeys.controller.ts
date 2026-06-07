@@ -50,9 +50,7 @@ export class JockeysController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all jockeys with any status (Admin only)' })
-  findAllAdmin(
-    @Query() query: ListJockeysDto,
-  ) {
+  findAllAdmin(@Query() query: ListJockeysDto) {
     return this.jockeysService.findAllAdmin(
       query.page,
       query.limit,

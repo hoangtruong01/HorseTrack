@@ -124,14 +124,8 @@ export class HorsesController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
   @ApiOperation({ summary: 'List all horses (Admin & Spectators)' })
-  findAll(
-    @Query() query: ListHorsesDto,
-  ) {
-    return this.horsesService.findAll(
-      query.page,
-      query.limit,
-      query.search,
-    );
+  findAll(@Query() query: ListHorsesDto) {
+    return this.horsesService.findAll(query.page, query.limit, query.search);
   }
 
   @Patch(':id/approve')
