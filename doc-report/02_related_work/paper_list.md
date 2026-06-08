@@ -46,3 +46,4 @@ Dưới đây là danh sách 10 bài báo khoa học nghiên cứu được trí
 - **Bài 08 (PMC, 2024):** Framework hỏi đáp giáo dục dựa trên RAG và Code Interpreter.
 - **Bài 09 (Puerto et al., 2023):** AI Tutor theo môn học, sử dụng course materials để trả lời chính xác theo tài liệu.
 - **Bài 10 (MDPI, 2025):** Survey về chatbot RAG trong giáo dục, bao gồm AI Tutor, academic QA, personalized learning và learning assistants.
+
