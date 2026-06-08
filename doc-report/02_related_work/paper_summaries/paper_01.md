@@ -1,412 +1,67 @@
-# Paper 01 Summary
+# Citation
+* **Tác giả:** Elnaz Davoodi, Ali Reza Khanteymoori.
+* **Đơn vị công tác:** Khoa Toán và Khoa học Máy tính, Viện Nghiên cứu Nâng cao về Khoa học Cơ bản (IASBS), Zanjan, Iran.
+* **Tên bài báo:** Horse Racing Prediction Using Artificial Neural Networks.
+* **Nguồn xuất bản:** RECENT ADVANCES in NEURAL NETWORKS, FUZZY SYSTEMS & EVOLUTIONARY COMPUTING.
+* **Link:** https://www.researchgate.net/publication/228847950_Horse_racing_prediction_using_artificial_neural_networks
 
-## Citation
-
-Tên bài:
-Smart Tournament Scheduling Using a POX-HeuristicGenetic Algorithm
-
-Tác giả:
-Mu-Chun Su, Jieh-Haur Chen, Achmad Muhyidin Arifai, Che-Hsuan Chang, Hsi-Hsien Wei
-
-Năm:
-2025
-
-Nguồn:
-International Journal of Information Technology & Decision Making (Vol. 24, No. 6)
-
-DOI/Link:
-https://doi.org/10.1142/S0219622025500221
-
----
-
-## Problem
-
+# Problem
 Bài báo giải quyết vấn đề gì?
+* Bài báo giải quyết bài toán dự đoán thời gian hoàn thành cuộc đua và xếp hạng thứ tự của các con ngựa khi tham gia thi đấu.
+* Khắc phục các hạn chế của phương pháp hồi quy tuyến tính truyền thống (vốn có xu hướng ép các mối quan hệ phức tạp thành dạng tuyến tính và áp dụng phương trình cồng kềnh trên toàn bộ không gian đầu vào).
+* Thay thế mô hình chuỗi thời gian ARIMA – phương pháp đòi hỏi tối thiểu phải có 40 điểm dữ liệu lịch sử cho mỗi thực thể, một điều kiện hoàn toàn không khả thi và không phù hợp trong bối cảnh đua ngựa.
 
-Các hệ thống sắp xếp lịch thi đấu giải đấu (Tournament Scheduling) thường gặp khó khăn khi phải xử lý:
-
-* Đảm bảo tính công bằng cho tất cả các đối thủ tham gia.
-* Tránh việc xếp các trận đấu liên tiếp khiến người tham gia không có đủ thời gian nghỉ ngơi.
-* Khối lượng trận đấu lớn, nhiều ràng buộc phức tạp làm việc xếp lịch thủ công tốn quá nhiều thời gian và nhân lực.
-* Các toán tử di truyền truyền thống không thể áp dụng trực tiếp do cấu trúc mã hóa đặc thù của nhiễm sắc thể trong bài toán lịch trình.
-
-Trong bài toán lập lịch thi đấu, việc giải quyết các nhiễm sắc thể chứa "gene chất lượng kém" (poorly performing genes) thường làm giảm hiệu suất và tốc độ hội tụ của thuật toán tối ưu.
-
-Ngoài ra, các app lập lịch online thông thường thường gặp vấn đề:
-
-* Chỉ hỗ trợ các hệ thống giải đấu vòng tròn (league-type) đơn giản.
-* Không tự động tối ưu hóa thời gian nghỉ của người chơi, dễ gây ra hiện tượng xếp lịch thi đấu liên tục
-* Khi số lượng đăng ký vượt giới hạn hệ thống hoặc trải rộng trên nhiều địa điểm, độ chính xác và hiệu suất xử lý có thể giảm.
-
-Bài báo đề xuất nâng cao hiệu quả tự động lập lịch giải đấu ở nhiều quy mô khác nhau thông qua việc kết hợp thuật toán di truyền (GA), toán tử lai POX và kỹ thuật đột biến Heuristic.
-
----
-
-## Method
-
+# Method
 Bài báo dùng phương pháp/model/hệ thống nào?
+* Kiến trúc mô hình: Sử dụng Mạng nơ-ron truyền thẳng đa lớp (Multilayer Feedforward Neural Network - MLFF). Mô hình áp dụng mạng độc lập cho từng con ngựa để dự đoán thời gian về đích, sau đó sắp xếp tăng dần để tìm ra thứ hạng cuộc đua.
+* Cấu trúc mạng tối ưu: Được xác định bằng phương pháp phát triển mạng dần dần (network growing), mạng bao gồm 4 lớp theo cấu trúc hình học 8-5-7-1 (8 nơ-ron đầu vào, lớp ẩn thứ nhất có 5 nơ-ron, lớp ẩn thứ hai có 7 nơ-ron, lớp đầu ra có 1 nơ-ron trả về thời gian). Mạng ở trạng thái liên kết đầy đủ (fully connected).
+* Thuật toán huấn luyện áp dụng: Bài báo thực hiện phân tích và so sánh hiệu năng của 5 thuật toán học có giám sát khác nhau:
+  1. Lan truyền ngược độ dốc giảm dần tiêu chuẩn (Gradient Descent BP).
+  2. Lan truyền ngược kết hợp hệ số động lượng (Gradient Descent BP with Momentum).
+  3. Thuật toán Quasi-Newton BFGS.
+  4. Thuật toán Levenberg-Marquardt (LM).
+  5. Thuật toán Gradient liên hợp giảm dần (Conjugate Gradient Descent).
+* Xử lý dữ liệu: Sử dụng hàm kích hoạt Sigmoid tiêu chuẩn. Thực hiện chuẩn hóa dữ liệu đầu vào dựa trên giá trị trung bình (mean) và phương sai (variance) để tối ưu hóa quá trình học. Chuyển đổi các dữ liệu biểu tượng dạng chữ (symbolic) sang dạng số liên tục.
 
-Tác giả đề xuất framework:
-
-# POX-heuristic GA
-
-(POX-Heuristic Genetic Algorithm)
-
-Framework kết hợp:
-
-```text
-Tournament Restrictions
-↓
-Chromosome Encoding (Sequence & Venue)
-↓
-POX Crossover & Heuristic Mutation
-↓
-Objective Function Optimization (Minimize Delays)
-↓
-Optimal Tournament Schedule
-```
-
----
-
-### Thành phần Mã hóa & Tối ưu hóa
-
-Hệ thống sử dụng bộ đôi nhiễm sắc thể đặc thù để:
-
-* Mã hóa chính xác thứ tự trận đấu (Schedule Sequence Chromosome) và mã hóa phân bổ địa điểm (Schedule Venue Chromosome).
-* Thiết lập hàm mục tiêu tập trung vào việc giảm thiểu chỉ số trì hoãn tổng thể (DelayNum = One Round Delay + Two Round Delay).
-* Ngăn chặn triệt để tình trạng chồng chéo khung giờ hoặc phân bổ thiếu thời gian hồi sức giữa các chặng đấu liên tiếp.
-
----
-
-### Long-context Reasoning
-
-Framework được thiết kế để xử lý:
-
-```text
-Information
-spread across
-multiple lessons
-```
-
-thay vì chỉ dựa vào một đoạn văn đơn lẻ.
-
----
-
-### Transfer Learning
-
-Mô hình tận dụng transfer learning để:
-
-* Cải thiện khả năng hiểu ngữ cảnh học thuật.
-* Tăng khả năng suy luận trên textbook QA.
-
----
-
-## Dataset
-
+# Dataset
 Bài báo dùng dữ liệu gì?
+* Nguồn dữ liệu: Dữ liệu đua ngựa thực tế thu thập từ trường đua AQUEDUCT Race Track tại New York, Mỹ.
+* Quy mô: Bao gồm thông tin của 100 cuộc đua thực tế diễn ra liên tục từ ngày 1 tháng 1 đến ngày 29 tháng 1 năm 2010.
+* Các đặc trưng đầu vào (8 đặc trưng): Cân nặng của ngựa (tính theo pound), loại cuộc đua, thông tin huấn luyện viên, thông tin nài ngựa (jockey), tổng số lượng ngựa tham gia trong cuộc đua đó, khoảng cách đường đua (được quy đổi từ Furlong và Mile sang mét), điều kiện mặt sân đua và tình hình thời tiết.
 
-Nghiên cứu tập trung vào:
-
-### Textual Multiple-choice Question Answering
-
-Dữ liệu gồm:
-
-* Textbook.
-* Educational Reading Materials.
-* Multiple-choice Questions.
-
-Các câu hỏi yêu cầu:
-
-* Reading Comprehension.
-* Knowledge Retrieval.
-* Multi-section Reasoning.
-
----
-
-## Evaluation
-
+# Evaluation
 Bài báo đánh giá bằng metric nào?
+* Sai số bình phương trung bình (MSE - Mean Squared Error): Sử dụng làm thước đo chính để đánh giá và lựa chọn cấu trúc tầng ẩn tối ưu cho mạng nơ-ron thông qua 10 lần chạy thử nghiệm ngẫu nhiên.
+* Độ chính xác phân vị trí (Ranking Accuracy Metrics): Thống kê số lượng trận đoán trúng dựa trên các tiêu chí thực tế:
+  - Số trận dự đoán chính xác tuyệt đối ngựa về vị trí thứ nhất (First Position).
+  - Số trận dự đoán chính xác tuyệt đối ngựa về vị trí cuối cùng (Last Position).
+  - Số lượng trận đoán trúng chính xác 1 con ngựa, trúng từ 2 con ngựa trở lên, hoặc hoàn toàn không đoán đúng con ngựa nào trong bảng xếp hạng cuộc đua.
 
-### Accuracy
-
-Đánh giá độ chính xác của câu trả lời.
-
----
-
-### Validation Performance
-
-So sánh:
-
-* Baseline Models.
-* LLM-only Systems.
-* RAG-based Framework.
-
----
-
-### Test Performance
-
-Đánh giá khả năng tổng quát hóa trên tập kiểm tra.
-
----
-
-## Results
-
+# Results
 Kết quả chính là gì?
+* Mạng nơ-ron nhân tạo chứng minh khả năng thích ứng và dự đoán rất tốt trong môi trường đua ngựa phức tạp, đạt độ chính xác dự đoán trung bình trên các thuật toán là 77%.
+* Hiệu năng riêng biệt của từng thuật toán (trên 100 cuộc đua mẫu):
+  - Dự đoán ngựa vô địch: Thuật toán Lan truyền ngược tiêu chuẩn (BP) và Lan truyền ngược kèm động lượng (BPM với hệ số động lượng 0.7) cho kết quả tối ưu nhất khi đoán chính xác vị trí đầu tiên trong 39 cuộc đua.
+  - Dự đoán ngựa về chót: Thuật toán Gradient liên hợp giảm dần (CGD) đạt hiệu quả cao nhất khi đoán đúng vị trí cuối cùng trong 37 cuộc đua (đặc biệt hữu ích giúp người tham gia tránh đặt cược sai).
+  - Tốc độ xử lý: Thuật toán Levenberg-Marquardt (LM) có tốc độ hội tụ và xử lý nhanh nhất.
+  - Thuật toán BP có độ chính xác tổng thể nhỉnh hơn một chút nhưng đánh đổi lại thời gian huấn luyện lâu hơn và quy trình chọn tham số phức tạp.
 
-Framework PLRTQA đạt:
-
-### Validation Set
-
-Tăng:
-
-```text
-+4.12%
-```
-
-Accuracy so với baseline.
-
----
-
-### Test Set
-
-Tăng:
-
-```text
-+9.84%
-```
-
-Accuracy so với baseline.
-
----
-
-### Main Findings
-
-Kết quả cho thấy:
-
-* RAG giúp tăng khả năng grounding.
-* Long-context retrieval cải thiện reasoning.
-* Hệ thống hoạt động tốt hơn trên các câu hỏi mà kiến thức nằm ở nhiều phần khác nhau của textbook.
-
-Tác giả kết luận rằng:
-
-> Retrieval-Augmented Generation là hướng tiếp cận hiệu quả để nâng cao chất lượng Textbook Question Answering trong môi trường giáo dục.
-
----
-
-## Limitations
-
+# Limitations
 Hạn chế của bài báo là gì?
+* Vấn đề dữ liệu trống / Ngựa mới (Cold Start Problem): Nhiều con ngựa không có đủ lịch sử thi đấu trong quá khứ (chỉ mới đua 1 hoặc 2 trận), lượng thông tin này không đủ để mạng nơ-ron học tập. Nhóm nghiên cứu bắt buộc phải xóa bỏ các con ngựa này khỏi tập dữ liệu hoặc xáo trộn thứ tự thủ công để chạy thử nghiệm.
+* Chi phí tính toán: Thuật toán có độ chính xác tốt nhất (BP) tốn nhiều thời gian xử lý khi mạng phình to. Đồng thời, mô hình nhạy cảm với việc chọn tỷ lệ học (learning rate), dễ rơi vào trạng thái mất ổn định hoặc hội tụ chậm.
 
-### 1. Chỉ tập trung vào Textbook QA
-
-Nghiên cứu chủ yếu đánh giá trên:
-
-```text
-Textbook
-```
-
-chưa mở rộng sang:
-
-* PDF học tập đa dạng.
-* Lecture Notes.
-* Syllabus.
-* Course Slides.
-
----
-
-### 2. Chưa có Self-Evaluation
-
-Framework:
-
-```text
-Retrieve
-→ Generate
-```
-
-chưa có:
-
-```text
-Self-Critique
-```
-
-như Self-RAG.
-
----
-
-### 3. Chưa có Retrieval Correction
-
-Nếu retrieval sai:
-
-```text
-Bad Retrieval
-→ Bad Answer
-```
-
-vẫn là vấn đề.
-
----
-
-### 4. Chưa hỗ trợ Personalized Learning
-
-Hệ thống chưa xem xét:
-
-* Trình độ người học.
-* Lịch sử học tập.
-* Adaptive Learning.
-
----
-
-## Relevance to our topic
-
+# Relevance to our topic
 Bài báo liên quan gì đến đề tài của nhóm?
+* Đề tài của nhóm là "Hệ thống quản lý giải đua ngựa (Horse Racing Tournament Management System)". Trong đó, hệ thống bắt buộc phải giải quyết hai luồng nghiệp vụ cốt lõi: Khán giả (Spectator) thực hiện "Dự đoán kết quả", và Admin thực hiện "Quản lý dự đoán kết quả".
+* Nghiên cứu này cung cấp mô hình toán học và cấu trúc dữ liệu đầu vào thực tế để hiện thực hóa tính năng "Dự đoán kết quả". Các thực thể cốt lõi mà hệ thống của nhóm đang quản lý bao gồm Horse Owner, Jockey, Horse, Tournament, và Race đều khớp hoàn toàn với các biến đầu vào (Inputs) của mạng nơ-ron (như cân nặng ngựa, thông tin jockey, huấn luyện viên, khoảng cách chặng đua, điều kiện sân bãi).
+* Thay vì để Spectator dự đoán theo cảm tính, nghiên cứu này là cơ sở kỹ thuật giúp nhóm xây dựng một Trợ lý ảo / Phân hệ dự đoán thông minh (Prediction Module) tích hợp sẵn trong hệ thống quản lý, giúp tự động tính toán cơ hội chiến thắng của từng con ngựa dựa trên dữ liệu giải đấu đang lưu trữ.
 
-Mức độ liên quan:
-
-# Rất cao (Educational QA Paper)
-
-Đề tài:
-
-**AI Study Hub – Hệ thống hỏi đáp tài liệu học tập ứng dụng RAG**
-
-Bài báo gần với AI Study Hub vì đều tập trung vào:
-
-```text
-Educational Question Answering
-```
-
-trên:
-
-* Tài liệu học tập.
-* Textbook.
-* Hệ thống Retrieval.
-
----
-
-### PLRTQA
-
-```text
-Textbook
-↓
-Retrieve
-↓
-LLM
-↓
-Answer
-```
-
-### AI Study Hub
-
-```text
-PDF
-↓
-Chunking
-↓
-Embedding
-↓
-Pinecone
-↓
-RAG
-↓
-Answer
-```
-
----
-
-Paper này là bằng chứng học thuật cho thấy:
-
-> Retrieval-Augmented Generation giúp cải thiện đáng kể khả năng trả lời câu hỏi học thuật khi kiến thức nằm phân tán trong nhiều phần của tài liệu học tập.
-
----
-
-## Possible improvement
-
+# Possible improvement
 Nhóm có thể cải tiến hoặc mở rộng điểm nào?
-
-### 1. Kết hợp DR-RAG
-
-Pipeline:
-
-```text
-Question
-↓
-Retrieve
-↓
-Dynamic Retrieval
-↓
-Answer
-```
-
-để xử lý các câu hỏi cần nhiều nguồn thông tin.
-
----
-
-### 2. Kết hợp CRAG
-
-Thêm:
-
-```text
-Retrieval Evaluation
-```
-
-giúp giảm retrieve sai chunk.
-
----
-
-### 3. Kết hợp Self-RAG
-
-Pipeline:
-
-```text
-Question
-↓
-Retrieve
-↓
-Generate
-↓
-Self-Evaluate
-```
-
-giúp tăng độ tin cậy của câu trả lời.
-
----
-
-### 4. Hỗ trợ tài liệu học tập đa định dạng
-
-Mở rộng từ:
-
-```text
-Textbook
-```
-
-sang:
-
-* PDF.
-* Slides.
-* Lecture Notes.
-* Course Materials.
-
----
-
-### 5. Hướng nghiên cứu cho AI Study Hub
-
-So sánh:
-
-```text
-LLM Only
-vs
-Basic RAG
-vs
-PLRTQA-style Educational RAG
-vs
-AI Study Hub
-```
-
-Đánh giá:
-
-* Accuracy
-* Recall
-* Faithfulness
-* Hallucination Rate
-* Response Time
-
-để chứng minh hệ thống hỏi đáp học tập sử dụng RAG mang lại hiệu quả cao hơn các chatbot AI tổng quát trong môi trường giáo dục.
+1. Giải quyết triệt để bài toán Ngựa mới (Cold Start): Thay vì xóa bỏ các con ngựa thiếu dữ liệu lịch sử như bài báo, hệ thống quản lý của nhóm có thể áp dụng các thuật toán gán giá trị mặc định thông minh (Imputation) dựa trên chỉ số trung bình của dòng giống ngựa, thứ hạng của chính Jockey điều khiển, hoặc uy tín của Horse Owner nhằm đảm bảo mọi con ngựa đăng ký tham gia hệ thống đều có thể đưa vào mô hình dự đoán.
+2. Làm phong phú đặc trưng đầu vào nhờ dữ liệu hệ thống độc quyền: Bài báo chỉ sử dụng 8 đặc trưng tĩnh cơ bản. Vì nhóm làm hệ thống quản lý toàn diện, nhóm có thể bổ sung các trường dữ liệu động, có độ nhạy bén cao mà bài báo không có như:
+   - Phong độ 3 trận gần nhất của nài ngựa (Jockey) và ngựa (Horse).
+   - Lịch sử vi phạm kỷ luật của cặp ngựa - nài ngựa trích xuất từ thực thể Biên bản trọng tài (Referee Report).
+   - Tần suất phối hợp thành công giữa chủ ngựa và jockey cụ thể.
+3. Hiện đại hóa công nghệ tích hợp: Bài báo gốc thực hiện huấn luyện bằng công cụ Matlab cũ kỹ. Nhóm có thể cải tiến bằng cách xây dựng Phân hệ dự đoán này dưới dạng một dịch vụ độc lập (Microservice) bằng Python (sử dụng thư viện Scikit-learn hoặc PyTorch). Dịch vụ này sẽ kết nối trực tiếp với Cơ sở dữ liệu của hệ thống quản lý giải đấu để tự động cập nhật trọng số và đưa ra dự đoán theo thời gian thực (Real-time Prediction) ngay khi Admin công bố lịch thi đấu cuộc đua (Race).
