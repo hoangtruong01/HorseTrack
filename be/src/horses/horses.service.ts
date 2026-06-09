@@ -63,12 +63,6 @@ export class HorsesService {
 
   /** Admin: list all non-deleted horses with pagination and search */
   async findAll(page = 1, limit = 20, search?: string) {
-    // Tự động dọn dẹp các ngựa bị từ chối quá 24h
-    await this.horseModel.deleteMany({
-      approvalStatus: HorseApprovalStatus.REJECTED,
-      rejectedAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-    });
-
     const filter: {
       status: { $ne: HorseStatus };
       $or?: Array<{
@@ -110,25 +104,7 @@ export class HorsesService {
       this.horseModel.countDocuments(filter),
     ]);
 
-    const data = await Promise.all(
-      docs.map(async (d) => {
-        const json = d.toJSON() as unknown as HorseJson;
-        const [totalRaces, wins] = await Promise.all([
-          this.resultModel.countDocuments({
-            horseId: d._id,
-            status: RaceResultStatus.PUBLISHED,
-          }),
-          this.resultModel.countDocuments({
-            horseId: d._id,
-            status: RaceResultStatus.PUBLISHED,
-            rank: 1,
-          }),
-        ]);
-        json.totalRaces = totalRaces;
-        json.wins = wins;
-        return json;
-      }),
-    );
+    const data = await this.enrichHorsesWithStats(docs);
 
     return {
       data,
@@ -138,12 +114,6 @@ export class HorsesService {
 
   /** Owner: list own horses */
   async findMyHorses(ownerId: string, page = 1, limit = 20) {
-    // Tự động dọn dẹp các ngựa bị từ chối quá 24h
-    await this.horseModel.deleteMany({
-      approvalStatus: HorseApprovalStatus.REJECTED,
-      rejectedAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-    });
-
     const filter = {
       ownerId: new Types.ObjectId(ownerId),
       status: { $ne: HorseStatus.DELETED },
@@ -158,25 +128,7 @@ export class HorsesService {
       this.horseModel.countDocuments(filter),
     ]);
 
-    const data = await Promise.all(
-      docs.map(async (d) => {
-        const json = d.toJSON() as unknown as HorseJson;
-        const [totalRaces, wins] = await Promise.all([
-          this.resultModel.countDocuments({
-            horseId: d._id,
-            status: RaceResultStatus.PUBLISHED,
-          }),
-          this.resultModel.countDocuments({
-            horseId: d._id,
-            status: RaceResultStatus.PUBLISHED,
-            rank: 1,
-          }),
-        ]);
-        json.totalRaces = totalRaces;
-        json.wins = wins;
-        return json;
-      }),
-    );
+    const data = await this.enrichHorsesWithStats(docs);
 
     return {
       data,
@@ -187,21 +139,51 @@ export class HorsesService {
   /** Get single horse by id */
   async findOne(id: string): Promise<HorseJson> {
     const doc = await this.findDocument(id);
-    const json = doc.toJSON() as unknown as HorseJson;
-    const [totalRaces, wins] = await Promise.all([
-      this.resultModel.countDocuments({
-        horseId: new Types.ObjectId(id),
-        status: RaceResultStatus.PUBLISHED,
-      }),
-      this.resultModel.countDocuments({
-        horseId: new Types.ObjectId(id),
-        status: RaceResultStatus.PUBLISHED,
-        rank: 1,
-      }),
+    const [enriched] = await this.enrichHorsesWithStats([doc]);
+    return enriched;
+  }
+
+  /**
+   * Batch-enrich horse docs with totalRaces & wins stats.
+   * Uses aggregation pipeline to avoid N+1 query problem.
+   */
+  private async enrichHorsesWithStats(
+    docs: HorseDocument[],
+  ): Promise<HorseJson[]> {
+    if (docs.length === 0) return [];
+
+    const horseIds = docs.map((d) => d._id);
+
+    // Single aggregation query replaces 2*N individual countDocuments calls
+    const statsAgg = await this.resultModel.aggregate<{
+      _id: Types.ObjectId;
+      totalRaces: number;
+      wins: number;
+    }>([
+      {
+        $match: {
+          horseId: { $in: horseIds },
+          status: RaceResultStatus.PUBLISHED,
+        },
+      },
+      {
+        $group: {
+          _id: '$horseId',
+          totalRaces: { $sum: 1 },
+          wins: { $sum: { $cond: [{ $eq: ['$rank', 1] }, 1, 0] } },
+        },
+      },
     ]);
-    json.totalRaces = totalRaces;
-    json.wins = wins;
-    return json;
+
+    const statsMap = new Map(statsAgg.map((s) => [String(s._id), s]));
+
+    return docs.map((d) => {
+      const json = d.toJSON() as unknown as HorseJson;
+      const stats = statsMap.get(String(d._id));
+      json.totalRaces = stats?.totalRaces ?? 0;
+      json.wins = stats?.wins ?? 0;
+      return json;
+    });
   }
 
   /**

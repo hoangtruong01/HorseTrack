@@ -38,8 +38,17 @@ export class RewardPointLedgerService {
     return latest?.balanceAfter ?? 0;
   }
   async credit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
-    const current = await this.getBalance(params.userId);
-    const balanceAfter = current + params.points;
+    // Atomic increment on User — prevents race conditions
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        params.userId,
+        { $inc: { points: params.points } },
+        { new: true },
+      )
+      .exec();
+
+    const balanceAfter = updatedUser?.points ?? params.points;
+
     const entry = await this.ledgerModel.create({
       userId: new Types.ObjectId(params.userId),
       sourceType: params.sourceType,
@@ -50,31 +59,42 @@ export class RewardPointLedgerService {
       createdBy: params.createdBy,
     });
 
-    // Synchronize current reward points to user wallet/points field
-    await this.userModel
-      .findByIdAndUpdate(params.userId, {
-        $set: { points: balanceAfter },
-      })
-      .exec();
-
     return entry;
   }
 
-  async updateNote(sourceId: string, sourceType: LedgerSourceType, newNote: string): Promise<void> {
-    await this.ledgerModel.findOneAndUpdate(
-      { sourceId, sourceType },
-      { $set: { note: newNote } }
-    ).exec();
+  async updateNote(
+    sourceId: string,
+    sourceType: LedgerSourceType,
+    newNote: string,
+  ): Promise<void> {
+    await this.ledgerModel
+      .findOneAndUpdate({ sourceId, sourceType }, { $set: { note: newNote } })
+      .exec();
   }
 
   async debit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
-    const current = await this.getBalance(params.userId);
-    if (current < params.points) {
+    // Atomic: decrement ONLY if balance is sufficient — prevents race conditions
+    const updatedUser = await this.userModel
+      .findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(params.userId),
+          points: { $gte: params.points },
+        },
+        { $inc: { points: -params.points } },
+        { new: true },
+      )
+      .exec();
+
+    if (!updatedUser) {
+      // Either user not found or insufficient balance
+      const currentBalance = await this.getBalance(params.userId);
       throw new BadRequestException(
-        `Insufficient points. Current balance: ${current}, required: ${params.points}`,
+        `Insufficient points. Current balance: ${currentBalance}, required: ${params.points}`,
       );
     }
-    const balanceAfter = current - params.points;
+
+    const balanceAfter = updatedUser.points;
+
     const entry = await this.ledgerModel.create({
       userId: new Types.ObjectId(params.userId),
       sourceType: params.sourceType,
@@ -84,13 +104,6 @@ export class RewardPointLedgerService {
       note: params.note,
       createdBy: params.createdBy,
     });
-
-    // Synchronize current reward points to user wallet/points field
-    await this.userModel
-      .findByIdAndUpdate(params.userId, {
-        $set: { points: balanceAfter },
-      })
-      .exec();
 
     return entry;
   }

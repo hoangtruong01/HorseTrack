@@ -41,6 +41,7 @@ export class UsersService {
       dob: dto.dob ? new Date(dto.dob) : undefined,
       avatar: dto.avatar,
       roles: dto.roles,
+      provider: dto.provider || 'local',
     });
 
     if (user.roles && user.roles.includes(RoleName.JOCKEY)) {
@@ -114,11 +115,16 @@ export class UsersService {
   ): Promise<void> {
     const user = await this.usersRepository.findById(id, true);
     if (!user) throw new NotFoundException('User not found');
-    const match = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!match)
-      throw new UnauthorizedException('Current password is incorrect');
+
+    // Google users don't know their placeholder password, so they can bypass old password validation for the first password setup
+    if (user.provider !== 'google') {
+      const match = await bcrypt.compare(oldPassword, user.passwordHash);
+      if (!match)
+        throw new UnauthorizedException('Current password is incorrect');
+    }
+
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    await this.usersRepository.update(id, { passwordHash });
+    await this.usersRepository.update(id, { passwordHash, provider: 'local' });
   }
 
   async softDelete(id: string): Promise<void> {

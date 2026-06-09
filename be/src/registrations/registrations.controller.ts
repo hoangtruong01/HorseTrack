@@ -23,16 +23,18 @@ import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { RejectRegistrationDto } from './dto/reject-registration.dto';
+import { ListRegistrationsDto } from './dto/list-registrations.dto';
 import { RegistrationsService } from './registrations.service';
+import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
 @ApiTags('Registrations')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('registrations')
 export class RegistrationsController {
   constructor(private readonly registrationsService: RegistrationsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.OWNER)
   @ApiOperation({ summary: 'Register horse for tournament (Owner)' })
   create(@Body() dto: CreateRegistrationDto, @CurrentUser() user: JwtUser) {
@@ -41,28 +43,22 @@ export class RegistrationsController {
 
   @Get()
   @ApiOperation({
-    summary: 'List all registrations (Public / Admin / Spectators)',
+    summary: 'List all registrations (Admin / Spectators)',
   })
   @ApiQuery({ name: 'tournamentId', required: false })
   @ApiQuery({ name: 'raceId', required: false })
   @ApiQuery({ name: 'status', required: false })
-  findAll(
-    @Query() pagination: PaginationDto,
-    @Query('tournamentId') tournamentId?: string,
-    @Query('raceId') raceId?: string,
-    @Query('status') status?: string,
-  ) {
+  findAll(@Query() query: ListRegistrationsDto) {
     return this.registrationsService.findAll(
-      pagination.page,
-      pagination.limit,
-      tournamentId,
-      raceId,
-      status,
+      query.page,
+      query.limit,
+      query.tournamentId,
+      query.raceId,
+      query.status,
     );
   }
 
   @Get('my-registrations')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.OWNER)
   @ApiOperation({ summary: 'List my registrations (Owner)' })
   findMine(@Query() pagination: PaginationDto, @CurrentUser() user: JwtUser) {
@@ -74,42 +70,50 @@ export class RegistrationsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get registration detail (Public)' })
-  findOne(@Param('id') id: string) {
+  @ApiOperation({ summary: 'Get registration detail' })
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.registrationsService.findOne(id);
   }
 
   @Patch(':id/approve')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Approve registration (Admin)' })
-  approve(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+  approve(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     return this.registrationsService.approve(id, user.id);
   }
 
   @Patch(':id/reject')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Reject registration (Admin)' })
-  reject(@Param('id') id: string, @Body() dto: RejectRegistrationDto) {
+  reject(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() dto: RejectRegistrationDto,
+  ) {
     return this.registrationsService.reject(id, dto.reason);
   }
 
   @Patch(':id/cancel')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.OWNER)
   @ApiOperation({
     summary: 'Cancel own registration (Owner) — only PENDING/REJECTED',
   })
-  cancel(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+  cancel(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     return this.registrationsService.cancel(id, user.id);
   }
 
   @Patch(':id/withdraw')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.OWNER)
   @ApiOperation({ summary: 'Withdraw approved registration (Owner)' })
-  withdraw(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+  withdraw(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     return this.registrationsService.withdraw(id, user.id);
   }
 }

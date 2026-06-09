@@ -23,6 +23,7 @@ import { TournamentsService } from './tournaments.service';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
 @ApiTags('Tournaments')
 @Controller('tournaments')
@@ -46,7 +47,7 @@ export class TournamentsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get tournament detail (public)' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.tournamentsService.findOne(id);
   }
 
@@ -55,7 +56,10 @@ export class TournamentsController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update tournament (Admin)' })
-  update(@Param('id') id: string, @Body() dto: UpdateTournamentDto) {
+  update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() dto: UpdateTournamentDto,
+  ) {
     return this.tournamentsService.update(id, dto);
   }
 
@@ -65,7 +69,7 @@ export class TournamentsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change tournament status (Admin)' })
   updateStatus(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdateStatusDto,
     @CurrentUser() user: JwtUser,
   ) {
@@ -78,7 +82,7 @@ export class TournamentsController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete tournament (Admin)' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseObjectIdPipe) id: string) {
     await this.tournamentsService.softDelete(id);
     return { message: 'Tournament deleted' };
   }

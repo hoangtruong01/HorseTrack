@@ -159,7 +159,7 @@ export class RacesService {
     // Validate prize does not exceed tournament budget
     if (dto.prize !== undefined) {
       const tournament = await this.tournamentsService.findOne(
-        race.tournamentId.toString(),
+        this.getTournamentIdString(race.tournamentId),
       );
       const [agg] = await this.raceModel.aggregate<{ total: number }>([
         {
@@ -209,7 +209,7 @@ export class RacesService {
     try {
       if (status === RaceStatus.LIVE) {
         const tournament = await this.tournamentsService.findOne(
-          race.tournamentId.toString(),
+          this.getTournamentIdString(race.tournamentId),
         );
         if (tournament.status === TournamentStatus.OPEN_REGISTRATION) {
           await this.tournamentsService.updateStatus(
@@ -234,7 +234,7 @@ export class RacesService {
         ].includes(status)
       ) {
         const tournament = await this.tournamentsService.findOne(
-          race.tournamentId.toString(),
+          this.getTournamentIdString(race.tournamentId),
         );
         if (tournament.status === TournamentStatus.ONGOING) {
           const activeRacesCount = await this.raceModel.countDocuments({
@@ -268,7 +268,7 @@ export class RacesService {
   private async validateReadyConditions(raceId: string): Promise<void> {
     // 1. At least 1 referee_assignment must be ACCEPTED
     const acceptedReferee = await this.refereeAssignmentModel.findOne({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
       status: RefereeAssignmentStatus.ACCEPTED,
     });
     if (!acceptedReferee) {
@@ -279,7 +279,7 @@ export class RacesService {
 
     // 2. All APPROVED registrations must have a PASSED race_check and Jockey roll-called (if assigned)
     const approvedRegs = await this.registrationModel.find({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
       status: RegistrationStatus.APPROVED,
     });
     if (approvedRegs.length === 0) {
@@ -289,7 +289,7 @@ export class RacesService {
     }
 
     const checks = await this.raceCheckModel.find({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
     });
 
     for (const reg of approvedRegs) {
@@ -330,5 +330,21 @@ export class RacesService {
     }
     race.deletedAt = new Date();
     await race.save();
+  }
+
+  private getTournamentIdString(tournamentId: unknown): string {
+    if (!tournamentId) return '';
+    if (typeof tournamentId === 'object') {
+      if ('_id' in tournamentId && tournamentId._id) {
+        const obj = tournamentId;
+        return obj._id instanceof Types.ObjectId
+          ? obj._id.toHexString()
+          : String(obj._id);
+      }
+      if (tournamentId instanceof Types.ObjectId) {
+        return tournamentId.toHexString();
+      }
+    }
+    return typeof tournamentId === 'string' ? tournamentId : '';
   }
 }

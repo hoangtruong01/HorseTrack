@@ -1,10 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import {
-  TrackCondition,
-  WeatherCondition,
-  RaceType,
-} from '../../common/enums/race.enums';
+import { WeatherCondition, RaceType } from '../../common/enums/race.enums';
 
 export type RaceDocument = Race & Document;
 
@@ -66,8 +62,8 @@ export class Race {
   @Prop({ required: true, enum: RaceStatus, default: RaceStatus.SCHEDULED })
   status!: RaceStatus;
 
-  @Prop({ type: String, enum: TrackCondition })
-  trackCondition?: TrackCondition;
+  @Prop({ type: String })
+  trackCondition?: string;
 
   @Prop({ type: String, enum: WeatherCondition })
   weather?: WeatherCondition;
@@ -91,3 +87,4 @@ RaceSchema.index({ tournamentId: 1 });
 RaceSchema.index({ startTime: 1 });
 RaceSchema.index({ status: 1 });
 RaceSchema.index({ tournamentId: 1, startTime: 1 });
+RaceSchema.index({ deletedAt: 1 });

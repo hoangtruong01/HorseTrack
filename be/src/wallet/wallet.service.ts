@@ -129,14 +129,14 @@ export class WalletService {
       await this.ledgerService.updateNote(
         String(request._id),
         LedgerSourceType.REDEMPTION,
-        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã thanh toán thành công.`
+        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã thanh toán thành công.`,
       );
     } else if (status === CashoutStatus.REJECTED) {
       // Update original deduction note to show it was rejected
       await this.ledgerService.updateNote(
         String(request._id),
         LedgerSourceType.REDEMPTION,
-        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Bị từ chối.`
+        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Bị từ chối.`,
       );
       // Refund points if cashout is rejected
       await this.ledgerService.credit({

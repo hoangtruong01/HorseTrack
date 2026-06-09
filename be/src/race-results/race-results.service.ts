@@ -35,6 +35,8 @@ import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { Jockey } from '../jockeys/schemas/jockey.schema';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
+import { JwtUser } from '../common/interfaces/jwt-user.interface';
+import { RoleName } from '../users/schemas/user.schema';
 
 import {
   RaceViolation,
@@ -72,8 +74,8 @@ export class RaceResultsService {
     refereeUserId: string,
   ): Promise<void> {
     const assignment = await this.assignmentModel.findOne({
-      raceId,
-      refereeUserId,
+      raceId: new Types.ObjectId(raceId),
+      refereeUserId: new Types.ObjectId(refereeUserId),
       status: RefereeAssignmentStatus.ACCEPTED,
     });
     if (!assignment) {
@@ -96,12 +98,12 @@ export class RaceResultsService {
     await this.validateRefereeAssigned(raceId, refereeId);
 
     // Xóa kết quả nháp cũ nếu có
-    await this.resultModel.deleteMany({ raceId });
+    await this.resultModel.deleteMany({ raceId: new Types.ObjectId(raceId) });
 
     // Lấy các đăng ký đã duyệt
     const registrations = await this.registrationModel
       .find({
-        raceId,
+        raceId: new Types.ObjectId(raceId),
         status: RegistrationStatus.APPROVED,
       })
       .populate('horseId')
@@ -177,13 +179,21 @@ export class RaceResultsService {
       const track = (race.trackCondition as string) || 'Dry';
       const weather = race.weatherSnapshot || 'Sunny';
 
-      if (weather === 'Sunny' && track === 'Dry') {
+      const isDryTrack =
+        track === 'Dry' ||
+        track === 'Dry turf' ||
+        track === 'GOOD' ||
+        track === 'FIRM';
+      const isMuddyTrack =
+        track === 'Muddy' || track === 'MUDDY' || track === 'HEAVY';
+
+      if (weather === 'Sunny' && isDryTrack) {
         conditionBonusMs += 2000; // Chạy nhanh hơn 2s
       } else if (weather === 'Rainy' || weather === 'Stormy') {
         conditionBonusMs -= 6000; // Chạy chậm đi 6s
       }
 
-      if (track === 'Muddy') {
+      if (isMuddyTrack) {
         const weight = horse.weightKg || 450;
         conditionBonusMs -= weight < 450 ? 4000 : 1000; // Ngựa nhẹ bị phạt nặng hơn
       }
@@ -300,7 +310,7 @@ export class RaceResultsService {
     await this.applyViolationsToResults(raceId);
 
     return this.resultModel
-      .find({ raceId })
+      .find({ raceId: new Types.ObjectId(raceId) })
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
       .populate('recordedBy', 'fullName')
@@ -397,9 +407,28 @@ export class RaceResultsService {
     });
   }
 
-  async findByRace(raceId: string) {
+  async findByRace(raceId: string, user?: JwtUser) {
+    const isPrivileged =
+      user &&
+      user.roles &&
+      (user.roles.includes(RoleName.ADMIN) ||
+        user.roles.includes(RoleName.REFEREE));
+
+    const statusFilter = isPrivileged
+      ? {
+          $in: [
+            RaceResultStatus.DRAFT,
+            RaceResultStatus.CONFIRMED,
+            RaceResultStatus.PUBLISHED,
+          ],
+        }
+      : RaceResultStatus.PUBLISHED;
+
     return this.resultModel
-      .find({ raceId, status: RaceResultStatus.PUBLISHED })
+      .find({
+        raceId: new Types.ObjectId(raceId),
+        status: statusFilter,
+      })
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
       .populate('recordedBy', 'fullName')
@@ -407,9 +436,28 @@ export class RaceResultsService {
       .exec();
   }
 
-  async findByTournament(tournamentId: string) {
+  async findByTournament(tournamentId: string, user?: JwtUser) {
+    const isPrivileged =
+      user &&
+      user.roles &&
+      (user.roles.includes(RoleName.ADMIN) ||
+        user.roles.includes(RoleName.REFEREE));
+
+    const statusFilter = isPrivileged
+      ? {
+          $in: [
+            RaceResultStatus.DRAFT,
+            RaceResultStatus.CONFIRMED,
+            RaceResultStatus.PUBLISHED,
+          ],
+        }
+      : RaceResultStatus.PUBLISHED;
+
     return this.resultModel
-      .find({ tournamentId, status: RaceResultStatus.PUBLISHED })
+      .find({
+        tournamentId: new Types.ObjectId(tournamentId),
+        status: statusFilter,
+      })
       .populate('raceId', 'name raceNumber')
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
@@ -420,7 +468,9 @@ export class RaceResultsService {
   async confirmResultsForRace(raceId: string, refereeId: string) {
     await this.validateRefereeAssigned(raceId, refereeId);
 
-    const results = await this.resultModel.find({ raceId });
+    const results = await this.resultModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
     if (results.length === 0) {
       throw new BadRequestException('No results recorded for this race yet');
     }
@@ -435,7 +485,7 @@ export class RaceResultsService {
 
     // All APPROVED registrations must have a result
     const approvedCount = await this.registrationModel.countDocuments({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
       status: RegistrationStatus.APPROVED,
     });
     if (results.length < approvedCount) {
@@ -448,7 +498,7 @@ export class RaceResultsService {
     await this.applyViolationsToResults(raceId);
 
     await this.resultModel.updateMany(
-      { raceId, status: RaceResultStatus.DRAFT },
+      { raceId: new Types.ObjectId(raceId), status: RaceResultStatus.DRAFT },
       {
         $set: {
           status: RaceResultStatus.CONFIRMED,
@@ -470,7 +520,9 @@ export class RaceResultsService {
       );
     }
 
-    const results = await this.resultModel.find({ raceId });
+    const results = await this.resultModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
     if (results.length === 0) {
       throw new BadRequestException('No results to publish for this race');
     }
@@ -543,11 +595,15 @@ export class RaceResultsService {
   }
 
   async applyViolationsToResults(raceId: string): Promise<void> {
-    const results = await this.resultModel.find({ raceId });
+    const results = await this.resultModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
     if (results.length === 0) return;
 
     // Fetch all violations recorded for this race
-    const violations = await this.violationModel.find({ raceId });
+    const violations = await this.violationModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
 
     const PENALTY_TIME_RULES: Record<ViolationSeverity, number> = {
       [ViolationSeverity.MINOR]: 3000,
@@ -556,7 +612,10 @@ export class RaceResultsService {
     };
 
     for (const result of results) {
-      if (result.rawFinishTimeMs === undefined || result.rawFinishTimeMs === null) {
+      if (
+        result.rawFinishTimeMs === undefined ||
+        result.rawFinishTimeMs === null
+      ) {
         result.rawFinishTimeMs = result.finishTimeMs;
       }
 
@@ -623,7 +682,7 @@ export class RaceResultsService {
     // Recalculate ranks for all FINISHED outcomes in this race
     const finishedResults = await this.resultModel
       .find({
-        raceId,
+        raceId: new Types.ObjectId(raceId),
         outcome: RaceResultOutcome.FINISHED,
       })
       .sort({ finishTimeMs: 1 });
@@ -637,7 +696,7 @@ export class RaceResultsService {
 
     // Double check disqualified results
     const dqResults = await this.resultModel.find({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
       outcome: RaceResultOutcome.DISQUALIFIED,
     });
     for (const dq of dqResults) {
@@ -723,8 +782,8 @@ export class RaceResultsService {
     for (const item of dto.results) {
       // Find existing result
       const result = await this.resultModel.findOne({
-        raceId,
-        horseId: item.horseId,
+        raceId: new Types.ObjectId(raceId),
+        horseId: new Types.ObjectId(item.horseId),
       });
 
       const points =
@@ -791,7 +850,7 @@ export class RaceResultsService {
     await this.applyViolationsToResults(raceId);
 
     return this.resultModel
-      .find({ raceId })
+      .find({ raceId: new Types.ObjectId(raceId) })
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
       .populate('recordedBy', 'fullName')

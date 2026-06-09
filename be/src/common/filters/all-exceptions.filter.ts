@@ -32,8 +32,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
               String(raw);
       }
     } else if (exception instanceof Error) {
-      console.error('AllExceptionsFilter caught exception:', exception);
-      message = exception.message;
+      // Only log unexpected errors (non-HTTP exceptions → real 500s)
+      console.error(
+        'AllExceptionsFilter caught unexpected exception:',
+        exception.message,
+        exception.stack,
+      );
+      message = 'Internal server error';
     }
 
     response.status(status).json({

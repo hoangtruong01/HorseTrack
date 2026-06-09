@@ -15,9 +15,9 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { RefereeProfilesService } from './referee-profiles.service';
 import { CreateRefereeProfileDto } from './dto/create-referee-profile.dto';
+import { ListRefereeProfilesDto } from './dto/list-referee-profiles.dto';
 import {
   RefereeApprovalStatus,
   RefereeProfileStatus,
@@ -42,15 +42,8 @@ export class RefereeProfilesController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'List all referee profiles (Admin)' })
-  findAll(
-    @Query() pagination: PaginationDto,
-    @Query('approvalStatus') approvalStatus?: RefereeApprovalStatus,
-  ) {
-    return this.service.findAll(
-      pagination.page,
-      pagination.limit,
-      approvalStatus,
-    );
+  findAll(@Query() query: ListRefereeProfilesDto) {
+    return this.service.findAll(query.page, query.limit, query.approvalStatus);
   }
 
   @Get('me')

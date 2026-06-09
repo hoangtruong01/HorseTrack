@@ -9,8 +9,8 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RoleName } from '../users/schemas/user.schema';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { AuditLogsService } from './audit-logs.service';
+import { ListAuditLogsDto } from './dto/list-audit-logs.dto';
 
 @ApiTags('Audit Logs')
 @Controller('audit-logs')
@@ -23,14 +23,11 @@ export class AuditLogsController {
   @Get()
   @ApiOperation({ summary: 'List audit logs (Admin)' })
   @ApiQuery({ name: 'entityType', required: false })
-  findAll(
-    @Query() pagination: PaginationDto,
-    @Query('entityType') entityType?: string,
-  ) {
+  findAll(@Query() query: ListAuditLogsDto) {
     return this.auditLogsService.findAll(
-      pagination.page,
-      pagination.limit,
-      entityType,
+      query.page,
+      query.limit,
+      query.entityType,
     );
   }
 }

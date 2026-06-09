@@ -51,4 +51,8 @@ export class CreateUserDto {
   @IsArray()
   @IsEnum(RoleName, { each: true })
   roles?: RoleName[];
+
+  @IsOptional()
+  @IsString()
+  provider?: string;
 }

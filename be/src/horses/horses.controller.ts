@@ -35,7 +35,9 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { HorsesService } from './horses.service';
 import { CreateHorseDto } from './dto/create-horse.dto';
 import { UpdateHorseDto } from './dto/update-horse.dto';
+import { ListHorsesDto } from './dto/list-horses.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
 interface MulterFile {
   fieldname: string;
@@ -122,22 +124,15 @@ export class HorsesController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
   @ApiOperation({ summary: 'List all horses (Admin & Spectators)' })
-  findAll(
-    @Query() pagination: PaginationDto,
-    @Query('search') search?: string,
-  ) {
-    return this.horsesService.findAll(
-      pagination.page,
-      pagination.limit,
-      search,
-    );
+  findAll(@Query() query: ListHorsesDto) {
+    return this.horsesService.findAll(query.page, query.limit, query.search);
   }
 
   @Patch(':id/approve')
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Admin: Approve a horse' })
-  async approve(@Param('id') id: string) {
+  async approve(@Param('id', ParseObjectIdPipe) id: string) {
     return this.horsesService.approveHorse(id);
   }
 
@@ -145,7 +140,10 @@ export class HorsesController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'Admin: Reject a horse' })
-  async reject(@Param('id') id: string, @Body('reason') reason: string) {
+  async reject(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body('reason') reason: string,
+  ) {
     return this.horsesService.rejectHorse(id, reason);
   }
 
@@ -166,7 +164,7 @@ export class HorsesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get horse detail' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.horsesService.findOne(id);
   }
 
@@ -178,7 +176,7 @@ export class HorsesController {
   @ApiBody({ schema: UPDATE_HORSE_SCHEMA })
   @ApiOperation({ summary: 'Update horse (Owner / Admin)' })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdateHorseDto,
     @UploadedFile() file: MulterFile | undefined,
     @CurrentUser() user: JwtUser,
@@ -195,7 +193,10 @@ export class HorsesController {
   @Roles(RoleName.OWNER, RoleName.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete horse (Owner / Admin)' })
-  async remove(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+  async remove(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     const isAdmin = user.roles.includes(RoleName.ADMIN);
     await this.horsesService.softDelete(id, user.id, isAdmin);
     return { message: 'Horse deleted' };

@@ -18,6 +18,8 @@ import { RaceResultsService } from './race-results.service';
 import { CreateRaceResultDto } from './dto/create-race-result.dto';
 import { UpdateRaceResultDto } from './dto/update-race-result.dto';
 import { BulkRaceResultsDto } from './dto/bulk-race-results.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 
 @ApiTags('Race Results')
 @Controller('race-results')
@@ -29,7 +31,10 @@ export class RaceResultsController {
   @Roles(RoleName.REFEREE, RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Simulate results for a race (Referee/Admin)' })
-  simulate(@Param('raceId') raceId: string, @CurrentUser() user: JwtUser) {
+  simulate(
+    @Param('raceId', ParseObjectIdPipe) raceId: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     return this.raceResultsService.simulateRaceResults(raceId, user.id);
   }
 
@@ -43,15 +48,29 @@ export class RaceResultsController {
   }
 
   @Get('race/:raceId')
-  @ApiOperation({ summary: 'Get results by race (public)' })
-  findByRace(@Param('raceId') raceId: string) {
-    return this.raceResultsService.findByRace(raceId);
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({
+    summary:
+      'Get results by race (public, draft/confirmed visible to referee/admin)',
+  })
+  findByRace(
+    @Param('raceId', ParseObjectIdPipe) raceId: string,
+    @CurrentUser() user?: JwtUser,
+  ) {
+    return this.raceResultsService.findByRace(raceId, user);
   }
 
   @Get('tournament/:tournamentId')
-  @ApiOperation({ summary: 'Get results by tournament (public)' })
-  findByTournament(@Param('tournamentId') tournamentId: string) {
-    return this.raceResultsService.findByTournament(tournamentId);
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({
+    summary:
+      'Get results by tournament (public, draft/confirmed visible to referee/admin)',
+  })
+  findByTournament(
+    @Param('tournamentId', ParseObjectIdPipe) tournamentId: string,
+    @CurrentUser() user?: JwtUser,
+  ) {
+    return this.raceResultsService.findByTournament(tournamentId, user);
   }
 
   @Patch('race/:raceId/confirm')
@@ -59,7 +78,10 @@ export class RaceResultsController {
   @Roles(RoleName.REFEREE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Confirm results for a race (Referee)' })
-  confirm(@Param('raceId') raceId: string, @CurrentUser() user: JwtUser) {
+  confirm(
+    @Param('raceId', ParseObjectIdPipe) raceId: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     return this.raceResultsService.confirmResultsForRace(raceId, user.id);
   }
 
@@ -68,7 +90,10 @@ export class RaceResultsController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Publish results for a race (Admin)' })
-  publish(@Param('raceId') raceId: string, @CurrentUser() user: JwtUser) {
+  publish(
+    @Param('raceId', ParseObjectIdPipe) raceId: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     return this.raceResultsService.publishByRace(raceId, user.id);
   }
 
@@ -78,7 +103,7 @@ export class RaceResultsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a race result (Referee/Admin)' })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdateRaceResultDto,
     @CurrentUser() user: JwtUser,
   ) {
@@ -93,7 +118,7 @@ export class RaceResultsController {
     summary: 'Bulk record/update results for a race (Referee/Admin)',
   })
   bulkCreate(
-    @Param('raceId') raceId: string,
+    @Param('raceId', ParseObjectIdPipe) raceId: string,
     @Body() dto: BulkRaceResultsDto,
     @CurrentUser() user: JwtUser,
   ) {

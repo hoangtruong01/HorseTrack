@@ -19,6 +19,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { JockeysService } from './jockeys.service';
 import { CreateJockeyProfileDto } from './dto/create-jockey.dto';
 import { UpdateJockeyProfileDto } from './dto/update-jockey.dto';
+import { ListJockeysDto } from './dto/list-jockeys.dto';
 import { JockeyStatus } from './schemas/jockey.schema';
 
 @ApiTags('Jockeys')
@@ -49,14 +50,11 @@ export class JockeysController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all jockeys with any status (Admin only)' })
-  findAllAdmin(
-    @Query() pagination: PaginationDto,
-    @Query('status') status?: JockeyStatus,
-  ) {
+  findAllAdmin(@Query() query: ListJockeysDto) {
     return this.jockeysService.findAllAdmin(
-      pagination.page,
-      pagination.limit,
-      status,
+      query.page,
+      query.limit,
+      query.status,
     );
   }
 

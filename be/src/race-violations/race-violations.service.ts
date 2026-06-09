@@ -45,8 +45,8 @@ export class RaceViolationsService {
 
     // Reporter must be an accepted referee for this race
     const assignment = await this.assignmentModel.findOne({
-      raceId: dto.raceId,
-      refereeUserId: reportedBy,
+      raceId: new Types.ObjectId(dto.raceId),
+      refereeUserId: new Types.ObjectId(reportedBy),
       status: RefereeAssignmentStatus.ACCEPTED,
     });
     if (!assignment) {

@@ -33,7 +33,11 @@ function injectUnderscoreId(val: any): any {
   return val;
 }
 
-export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+interface CustomRequestInit extends RequestInit {
+  _retry?: boolean;
+}
+
+export async function apiFetch<T>(path: string, options: CustomRequestInit = {}): Promise<T> {
   const token = await getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -49,7 +53,24 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   } catch {
     raw = text;
   }
+
   if (!res.ok) {
+    // Check if unauthorized and not already retried
+    if (res.status === 401 && !options._retry) {
+      try {
+        const refreshRes = await fetch("/api/auth/refresh", { method: "POST" });
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          if (refreshData.success) {
+            // Retry the original request with the new token
+            return apiFetch<T>(path, { ...options, _retry: true });
+          }
+        }
+      } catch (err) {
+        console.error("Auto token refresh failed:", err);
+      }
+    }
+
     const errMsg =
       (raw as { message?: string })?.message ??
       (raw as { error?: string })?.error ??
@@ -59,6 +80,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   // ResponseInterceptor wraps payload as { success, message, data, meta? }
   // Unwrap if the wrapper is present
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let result: any = raw;
   if (
     raw &&
@@ -330,18 +352,24 @@ export const refereeAssignmentsApi = {
 export interface RankingEntry {
   horseId: string;
   horseName?: string;
+  breed?: string;
+  ownerName?: string;
   totalPoints: number;
   totalRaces: number;
   wins: number;
+  totalFinishTimeMs?: number;
   rank?: number;
 }
 
 export interface JockeyRankingEntry {
   jockeyUserId: string;
   jockeyName?: string;
+  experienceYears?: number;
+  skillLevel?: string;
   totalPoints: number;
   totalRaces: number;
   wins: number;
+  totalFinishTimeMs?: number;
   rank?: number;
 }
 
@@ -350,6 +378,10 @@ export const rankingsApi = {
     apiFetch<RankingEntry[]>(`/rankings/tournament/${tournamentId}/horses`),
   getJockeyRankings: (tournamentId: string) =>
     apiFetch<JockeyRankingEntry[]>(`/rankings/tournament/${tournamentId}/jockeys`),
+  getGlobalHorseRankings: () =>
+    apiFetch<RankingEntry[]>("/rankings/global/horses"),
+  getGlobalJockeyRankings: () =>
+    apiFetch<JockeyRankingEntry[]>("/rankings/global/jockeys"),
 };
 
 // ─── Prizes ─────────────────────────────────────────────────────────────────
