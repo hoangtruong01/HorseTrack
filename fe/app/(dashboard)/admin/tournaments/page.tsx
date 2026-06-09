@@ -1,9 +1,20 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Plus, Link as LinkIcon, Trophy } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trophy } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { tournamentsApi, type TournamentItem } from "@/lib/api-client";
 
 const STATUS_OPTIONS = [
@@ -25,12 +36,7 @@ export default function AdminTournamentsPage() {
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 10, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
-
-  const showToast = (msg: string, type: "ok" | "err" = "ok") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+  const [deleteTarget, setDeleteTarget] = useState<TournamentItem | null>(null);
 
   const fetchTournaments = useCallback(async (page = 1) => {
     setLoading(true);
@@ -38,7 +44,7 @@ export default function AdminTournamentsPage() {
       const res = await tournamentsApi.list({ page, limit: 10 });
       setTournaments(res.data);
       setMeta(res.meta);
-    } catch (e: any) { showToast(e.message ?? "Lỗi tải dữ liệu", "err"); }
+    } catch (e: any) { toast.error(e.message ?? "Lỗi tải dữ liệu"); }
     finally { setLoading(false); }
   }, []);
 
@@ -48,21 +54,28 @@ export default function AdminTournamentsPage() {
     setActionLoading(id);
     try {
       await tournamentsApi.updateStatus(id, status);
-      showToast(`Đã cập nhật status → ${status}`);
+      toast.success(`Đã cập nhật trạng thái → ${status}`);
       await fetchTournaments(meta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: any) { toast.error(e.message); }
     finally { setActionLoading(null); }
   };
 
-  const handleDelete = async (t: TournamentItem) => {
-    if (!confirm(`Xóa giải "${t.name}"?`)) return;
-    setActionLoading(t._id);
+  const handleDelete = (t: TournamentItem) => {
+    setDeleteTarget(t);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setActionLoading(deleteTarget._id);
     try {
-      await tournamentsApi.delete(t._id);
-      showToast("Đã xóa giải đấu");
+      await tournamentsApi.delete(deleteTarget._id);
+      toast.success("Đã xóa giải đấu thành công.");
       await fetchTournaments(meta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
-    finally { setActionLoading(null); }
+    } catch (e: any) { toast.error(e.message); }
+    finally {
+      setActionLoading(null);
+      setDeleteTarget(null);
+    }
   };
 
   return (
@@ -80,12 +93,6 @@ export default function AdminTournamentsPage() {
           </Link>
         }
       />
-
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
-          {toast.msg}
-        </div>
-      )}
 
       <div className="text-sm text-muted-foreground">Tổng: <strong className="text-foreground font-semibold">{meta.total}</strong> giải đấu</div>
 
@@ -164,6 +171,20 @@ export default function AdminTournamentsPage() {
           </button>
         </div>
       )}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa giải đấu</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn sắp xóa giải <strong className="text-foreground">"{deleteTarget?.name}"</strong>. Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Xóa giải đấu</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

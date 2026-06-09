@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { predictionsApi, type PredictionItem } from "@/lib/api-client";
 
@@ -16,12 +17,6 @@ export default function AdminBetsPage() {
   const [bets, setBets] = useState<PredictionItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
-
-  const showToast = (msg: string, type: "ok" | "err" = "ok") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const fetchBets = useCallback(async (page = 1) => {
     setLoading(true);
@@ -29,7 +24,7 @@ export default function AdminBetsPage() {
       const res = await predictionsApi.list({ page, limit: 20 });
       setBets(res.data);
       setMeta(res.meta);
-    } catch (e: any) { showToast(e.message ?? "Lỗi tải dữ liệu", "err"); }
+    } catch (e: any) { toast.error(e.message ?? "Lỗi tải dữ liệu"); }
     finally { setLoading(false); }
   }, []);
 
@@ -56,12 +51,6 @@ export default function AdminBetsPage() {
         title="Quản Lý Dự Đoán"
         description="Xem tất cả predictions/bets của user trong hệ thống. Kết quả được cập nhật tự động sau khi race publish."
       />
-
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
-          {toast.msg}
-        </div>
-      )}
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { prizesApi, type PrizeItem } from "@/lib/api-client";
 
@@ -15,12 +16,6 @@ export default function AdminPrizesPage() {
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
-
-  const showToast = (msg: string, type: "ok" | "err" = "ok") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const fetchPrizes = useCallback(async (page = 1) => {
     setLoading(true);
@@ -28,7 +23,7 @@ export default function AdminPrizesPage() {
       const res = await prizesApi.list({ page, limit: 15 });
       setPrizes(res.data);
       setMeta(res.meta);
-    } catch (e: any) { showToast(e.message ?? "Lỗi tải dữ liệu", "err"); }
+    } catch (e: any) { toast.error(e.message ?? "Lỗi tải dữ liệu"); }
     finally { setLoading(false); }
   }, []);
 
@@ -38,9 +33,9 @@ export default function AdminPrizesPage() {
     setActionLoading(id);
     try {
       await prizesApi.updateStatus(id, status);
-      showToast(`Cập nhật status → ${status}`);
+      toast.success(`Cập nhật status → ${status}`);
       await fetchPrizes(meta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: any) { toast.error(e.message); }
     finally { setActionLoading(null); }
   };
 
@@ -60,12 +55,6 @@ export default function AdminPrizesPage() {
         title="Quản Lý Giải Thưởng"
         description="Xem tất cả prizes được tạo tự động (70% owner / 30% jockey) sau khi race kết thúc. Admin có thể cập nhật trạng thái thanh toán."
       />
-
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
-          {toast.msg}
-        </div>
-      )}
 
       <div className="text-sm text-muted-foreground">Tổng: <strong className="text-foreground">{meta.total}</strong> prizes</div>
 

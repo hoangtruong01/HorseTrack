@@ -2,7 +2,18 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Trash2, ShieldAlert, User, LayoutGrid, List, Search } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { horsesApi, type HorseItem } from "@/lib/api-client";
 
 const healthColors: Record<string, string> = {
@@ -23,7 +34,7 @@ export default function AdminHorsesPage() {
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<HorseItem | null>(null);
 
   // View mode
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -34,11 +45,6 @@ export default function AdminHorsesPage() {
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionInput, setRejectionInput] = useState("");
 
-  const showToast = (msg: string, type: "ok" | "err" = "ok") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
-
   const fetchHorses = useCallback(async (page = 1, currentSearch = search) => {
     setLoading(true);
     try {
@@ -46,7 +52,7 @@ export default function AdminHorsesPage() {
       setHorses(res.data);
       setMeta(res.meta);
     } catch (e: any) {
-      showToast(e.message ?? "Lỗi tải dữ liệu", "err");
+      toast.error(e.message ?? "Lỗi tải dữ liệu");
     } finally { setLoading(false); }
   }, [search]);
 
@@ -57,26 +63,33 @@ export default function AdminHorsesPage() {
     void fetchHorses(1, search);
   };
 
-  const handleDelete = async (h: HorseItem) => {
-    if (!confirm(`Xóa ngựa "${h.name}"?`)) return;
-    setActionLoading(h._id);
+  const handleDelete = (h: HorseItem) => {
+    setDeleteTarget(h);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setActionLoading(deleteTarget._id);
     try {
-      await horsesApi.delete(h._id);
-      showToast(`Đã xóa ngựa ${h.name}`);
+      await horsesApi.delete(deleteTarget._id);
+      toast.success(`Đã xóa ngựa ${deleteTarget.name}`);
       await fetchHorses(meta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
-    finally { setActionLoading(null); }
+    } catch (e: any) { toast.error(e.message); }
+    finally {
+      setActionLoading(null);
+      setDeleteTarget(null);
+    }
   };
 
   const handleApprove = async (id: string) => {
     setActionLoading(id);
     try {
       await horsesApi.approve(id);
-      showToast("Phê duyệt chiến mã thành công!");
+      toast.success("Phê duyệt chiến mã thành công!");
       setSelectedHorse(null);
       await fetchHorses(meta.page);
     } catch (e: any) {
-      showToast(e.message ?? "Phê duyệt thất bại", "err");
+      toast.error(e.message ?? "Phê duyệt thất bại");
     } finally {
       setActionLoading(null);
     }
@@ -84,19 +97,19 @@ export default function AdminHorsesPage() {
 
   const handleReject = async (id: string) => {
     if (!rejectionInput.trim()) {
-      showToast("Vui lòng nhập lý do từ chối", "err");
+      toast.error("Vui lòng nhập lý do từ chối");
       return;
     }
     setActionLoading(id);
     try {
       await horsesApi.reject(id, rejectionInput);
-      showToast("Đã từ chối kiểm duyệt chiến mã.");
+      toast.success("Đã từ chối kiểm duyệt chiến mã.");
       setSelectedHorse(null);
       setShowRejectForm(false);
       setRejectionInput("");
       await fetchHorses(meta.page);
     } catch (e: any) {
-      showToast(e.message ?? "Từ chối thất bại", "err");
+      toast.error(e.message ?? "Từ chối thất bại");
     } finally {
       setActionLoading(null);
     }
@@ -115,12 +128,6 @@ export default function AdminHorsesPage() {
         title="Quản Lý Ngựa"
         description="Xem toàn bộ danh sách ngựa trong hệ thống. Admin kiểm duyệt hồ sơ và xử lý các chiến mã đăng ký mới."
       />
-
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl transition duration-200 ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
-          {toast.msg}
-        </div>
-      )}
 
       {/* Search and Metadata grid */}
       <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
@@ -356,6 +363,21 @@ export default function AdminHorsesPage() {
           </button>
         </div>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa chiến mã</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn sắp xóa chiến mã <strong className="text-foreground">"{deleteTarget?.name}"</strong>. Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Xóa chiến mã</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Modal chi tiết chiến mã */}
       {selectedHorse && (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Wallet } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { walletApi, type WalletTxItem, type CashoutItem } from "@/lib/api-client";
 
@@ -26,12 +27,6 @@ export default function AdminWalletPage() {
   const [cashoutMeta, setCashoutMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
-
-  const showToast = (msg: string, type: "ok" | "err" = "ok") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const fetchTransactions = useCallback(async (page = 1) => {
     setLoading(true);
@@ -39,7 +34,7 @@ export default function AdminWalletPage() {
       const res = await walletApi.allTransactions({ page, limit: 20 });
       setTransactions(res.data);
       setTxMeta(res.meta);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: any) { toast.error(e.message); }
     finally { setLoading(false); }
   }, []);
 
@@ -49,7 +44,7 @@ export default function AdminWalletPage() {
       const res = await walletApi.allCashouts({ page, limit: 20 });
       setCashouts(res.data);
       setCashoutMeta(res.meta);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: any) { toast.error(e.message); }
     finally { setLoading(false); }
   }, []);
 
@@ -62,9 +57,9 @@ export default function AdminWalletPage() {
     setActionLoading(id);
     try {
       await walletApi.processCashout(id, status);
-      showToast(`Đã cập nhật → ${status}`);
+      toast.success(`Đã cập nhật → ${status}`);
       await fetchCashouts(cashoutMeta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e: any) { toast.error(e.message); }
     finally { setActionLoading(null); }
   };
 
@@ -93,12 +88,6 @@ export default function AdminWalletPage() {
         title="Quản Lý Giao Dịch Điểm"
         description="Xem tất cả giao dịch wallet và duyệt yêu cầu cashout/quy đổi điểm của users."
       />
-
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
-          {toast.msg}
-        </div>
-      )}
 
       {/* Tabs */}
       <div className="flex rounded-xl border border-border bg-muted p-1 w-fit">
