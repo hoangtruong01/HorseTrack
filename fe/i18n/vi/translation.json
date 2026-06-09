@@ -41,7 +41,8 @@
       "note": {
         "owner": "Chủ ngựa (70%) và nài ngựa (30%) nhận điểm tự động sau khi kết quả được công bố. Đổi thưởng qua mã xác nhận tại quầy.",
         "jockey": "Chủ ngựa (70%) và nài ngựa (30%) nhận điểm tự động sau khi kết quả được công bố. Đổi thưởng qua mã xác nhận tại quầy.",
-        "spectator": "Dự đoán đúng +1 điểm, sai -1 điểm (nếu còn dư). Tích lũy điểm để đổi quà tại quầy."
+        "spectator": "Dự đoán đúng +1 điểm, sai -1 điểm (nếu còn dư). Tích lũy điểm để đổi quà tại quầy.",
+        "referee": "Trọng tài nhận điểm lương sau khi hoàn thành nhiệm vụ điều hành cuộc đua và có thể đổi thưởng tại quầy."
       }
     },
     "transactions": {
@@ -122,6 +123,45 @@
       "errExceed": "Số điểm đổi vượt quá số dư hiện có của bạn.",
       "errMin": "Số điểm tối thiểu để đổi thưởng là 10 điểm.",
       "successMsg": "Yêu cầu đổi thưởng {{points}} điểm thành công! Hãy lưu lại mã quy đổi."
+    },
+    "redemption": {
+      "lookupTitle": "Tra cứu mã đổi thưởng tại quầy",
+      "lookupDesc": "Nhập mã quy đổi do người dùng cung cấp để kiểm tra thông tin và thực hiện phát quà.",
+      "placeholder": "Nhập mã quy đổi (vd: RWD-YHS9X3)...",
+      "btnLookup": "Tra cứu",
+      "btnClear": "Xóa",
+      "emptyLookup": "Không tìm thấy mã đổi thưởng này.",
+      "loadingLookup": "Đang tra cứu dữ liệu...",
+      "resultTitle": "Thông tin đổi thưởng",
+      "userLabel": "Người đổi quà",
+      "codeLabel": "Mã quy đổi",
+      "pointsLabel": "Số điểm quy đổi",
+      "pointsSuffix": "điểm",
+      "timeLabel": "Thời gian tạo",
+      "btnConfirmPaid": "Xác nhận trao quà",
+      "btnReject": "Từ chối",
+      "rejectDialogTitle": "Từ chối yêu cầu đổi quà",
+      "rejectConfirmText": "Bạn có chắc chắn muốn từ chối mã nhận quà {{code}} của {{name}} ({{points}} điểm)?",
+      "rejectReasonLabel": "Lý do từ chối (bắt buộc)",
+      "rejectReasonPlaceholder": "Ví dụ: Mã không hợp lệ, thông tin tài khoản không trùng khớp...",
+      "btnCancel": "Hủy bỏ",
+      "btnRejectSubmit": "Từ chối giao dịch",
+      "historyTitle": "Lịch sử giao dịch đổi thưởng",
+      "historyDesc": "Danh sách đầy đủ tất cả giao dịch quy đổi điểm thưởng từ hệ thống.",
+      "colUser": "Người rút",
+      "colCode": "Mã rút",
+      "colPoints": "Số điểm rút",
+      "colHandler": "Nhân viên duyệt rút",
+      "colTimeCreated": "Thời gian tạo lệnh",
+      "colTimeProcessed": "Thời gian rút",
+      "colStatus": "Trạng thái",
+      "colAction": "Hành động",
+      "btnApprove": "Duyệt",
+      "btnPaid": "Đã chi tiền",
+      "statusFinished": "Hoàn tất",
+      "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} kết quả",
+      "btnPrev": "Trang trước",
+      "btnNext": "Trang sau"
     }
   },
   "settings": {
