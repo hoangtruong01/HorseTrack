@@ -50,7 +50,7 @@ export default function AdminRaceDetailPage() {
   const raceId = params.raceId as string;
 
   const [race, setRace] = useState<RaceItem | null>(null);
-  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [registrations, setRegistrations] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [changingStatus, setChangingStatus] = useState(false);
   const [conditionsForm, setConditionsForm] = useState({

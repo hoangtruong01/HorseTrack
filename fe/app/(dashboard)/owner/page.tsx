@@ -8,10 +8,8 @@ import {
   Flag,
   Users,
   Wallet,
-  ArrowRight,
   ClipboardCheck,
   ChevronRight,
-  TrendingUp,
   Activity,
   Medal,
 } from "lucide-react";

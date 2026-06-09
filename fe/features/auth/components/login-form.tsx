@@ -37,19 +37,19 @@ export function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleGoogleCredentialResponse = async (response: any) => {
+  const handleGoogleCredentialResponse = async (response: unknown) => {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
-      const user = await loginWithGoogle(response.credential);
+      const user = await loginWithGoogle((response as { credential: string }).credential);
       let firstRole = user.roles[0] || "spectator";
       if (firstRole === "counter_staff") {
         firstRole = "counter-staff";
       }
       toast.success(`Đăng nhập thành công! Chào mừng ${user.fullName} trở lại.`);
       window.location.href = `/${firstRole}`;
-    } catch (err: any) {
-      const errMsg = err.message || "Xác thực tài khoản Google thất bại.";
+    } catch (err) {
+      const errMsg = (err as Error).message || "Xác thực tài khoản Google thất bại.";
       setErrorMsg(errMsg);
       toast.error(errMsg);
       setIsSubmitting(false);
@@ -65,13 +65,15 @@ export function LoginForm() {
     document.body.appendChild(script);
 
     script.onload = () => {
-      if ((window as any).google) {
-        (window as any).google.accounts.id.initialize({
+      type GoogleSDK = { accounts: { id: { initialize: (c: object) => void; renderButton: (el: HTMLElement | null, c: object) => void } } };
+      const g = (window as Window & { google?: GoogleSDK }).google;
+      if (g) {
+        g.accounts.id.initialize({
           client_id: "721959779344-gdt1a37c0eb8999p2g1g5a1g12g12g12.apps.googleusercontent.com",
           callback: handleGoogleCredentialResponse,
         });
-        (window as any).google.accounts.id.renderButton(
-          document.getElementById("google-native-btn"),
+        g.accounts.id.renderButton(
+          document.getElementById("google-native-btn") as HTMLElement | null,
           {
             theme: "dark",
             size: "large",
@@ -88,6 +90,7 @@ export function LoginForm() {
         document.body.removeChild(script);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -108,8 +111,8 @@ export function LoginForm() {
 
       toast.success(`Đăng nhập thành công! Chào mừng ${user.fullName} trở lại.`);
       window.location.href = `/${targetRole}`;
-    } catch (err: any) {
-      const errMsg = err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+    } catch (err) {
+      const errMsg = (err as Error).message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
       setErrorMsg(errMsg);
       toast.error(errMsg);
       setIsSubmitting(false);

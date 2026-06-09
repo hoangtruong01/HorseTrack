@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -13,7 +13,6 @@ import { toast } from "sonner";
 
 export default function AdminRegistrationDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const registrationId = params?.registrationId as string;
   const [registration, setRegistration] = useState<RaceRegistration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +21,7 @@ export default function AdminRegistrationDetailPage() {
     if (!registrationId) return;
     setIsLoading(true);
     try {
-      const item = (await registrationsApi.get(registrationId)) as any;
+      const item = await registrationsApi.get(registrationId);
       
       const statusVal = item.status || "PENDING";
       const statusLower = statusVal.toLowerCase();
@@ -53,9 +52,9 @@ export default function AdminRegistrationDetailPage() {
           item.approvedAt ? `Được duyệt vào ${new Date(item.approvedAt).toLocaleString("vi-VN")}` : "Chờ duyệt",
         ],
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi khi tải chi tiết hồ sơ đăng ký.");
+      toast.error((err as Error).message || "Lỗi khi tải chi tiết hồ sơ đăng ký.");
     } finally {
       setIsLoading(false);
     }

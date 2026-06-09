@@ -25,8 +25,8 @@ export default function RefereePreRaceWorkspacePage() {
             (a.raceId.status === "SCHEDULED" || a.raceId.status === "CHECKING")
         );
         setAssignments(list);
-      } catch (err: any) {
-        toast.error(err.message || "Lỗi tải danh sách cuộc đua.");
+      } catch (err) {
+        toast.error((err as Error).message || "Lỗi tải danh sách cuộc đua.");
       } finally {
         setIsLoading(false);
       }

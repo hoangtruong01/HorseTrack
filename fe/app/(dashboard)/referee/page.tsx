@@ -7,13 +7,8 @@ import {
   ClipboardList,
   FileText,
   Flag,
-  Home,
-  ShieldCheck,
   Siren,
-  Sparkles,
   User,
-  CheckCircle2,
-  XCircle,
   Clock,
   ShieldAlert,
 } from "lucide-react";
@@ -61,8 +56,8 @@ export default function RefereeDashboardPage() {
         setExperienceYears(profileData.experienceYears || 1);
         setBio(profileData.bio || "");
         setCertificates(profileData.certificates || "");
-      } catch (err: any) {
-        if (err.message?.toLowerCase().includes("not found")) {
+      } catch (err) {
+        if ((err as Error).message?.toLowerCase().includes("not found")) {
           setProfile(null);
         } else {
           throw err;
@@ -71,9 +66,9 @@ export default function RefereeDashboardPage() {
 
       const assignmentsResult = await refereeAssignmentsApi.myAssignments({ limit: 50 });
       setAssignments(assignmentsResult.data || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Không thể tải dữ liệu trọng tài.");
+      toast.error((err as Error).message || "Không thể tải dữ liệu trọng tài.");
     } finally {
       setIsLoading(false);
     }
@@ -111,8 +106,8 @@ export default function RefereeDashboardPage() {
         toast.success("Khởi tạo hồ sơ thành công! Đang chờ duyệt.");
       }
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi lưu hồ sơ.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi lưu hồ sơ.");
     } finally {
       setIsSubmittingProfile(false);
     }
@@ -126,8 +121,8 @@ export default function RefereeDashboardPage() {
       await refereeAssignmentsApi.respond(assignmentId, apiStatus);
       toast.success(`${actionLabel} phân công thi đấu thành công!`);
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi xử lý thao tác.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi xử lý thao tác.");
     } finally {
       setSubmittingActionId(null);
     }
@@ -180,7 +175,7 @@ export default function RefereeDashboardPage() {
             {profile?.approvalStatus === "REJECTED" && (
               <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-xs text-red-400 font-bold space-y-1">
                 <p className="uppercase tracking-wider text-[10px] text-red-500">Lý do từ chối từ Ban tổ chức:</p>
-                <p className="italic text-foreground">"{profile.rejectionReason || "Không có lý do chi tiết"}"</p>
+                <p className="italic text-foreground">&quot;{profile.rejectionReason || "Không có lý do chi tiết"}&quot;</p>
               </div>
             )}
 
@@ -282,7 +277,7 @@ export default function RefereeDashboardPage() {
                 {profile.bio && (
                   <div className="sm:col-span-2">
                     <span className="text-muted-foreground block mb-1">Tiểu sử (Bio):</span>
-                    <p className="text-muted-foreground italic">"{profile.bio}"</p>
+                    <p className="text-muted-foreground italic">&quot;{profile.bio}&quot;</p>
                   </div>
                 )}
               </div>
@@ -405,11 +400,11 @@ export default function RefereeDashboardPage() {
 
       {/* Next required action center */}
       {profile && profile.approvalStatus === "APPROVED" && activeAssignment && (() => {
-        const assignmentId = activeAssignment._id || (activeAssignment as any).id;
+        const assignmentId = activeAssignment._id || (activeAssignment as { id?: string }).id;
         const raceIdRaw = activeAssignment.raceId;
         const raceId = typeof raceIdRaw === "string"
           ? raceIdRaw
-          : raceIdRaw?._id || (raceIdRaw as any)?.id;
+          : raceIdRaw?._id || (raceIdRaw as unknown as { id?: string })?.id;
         const raceObj = typeof raceIdRaw !== "string" ? raceIdRaw : null;
         return (
           <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
@@ -508,11 +503,11 @@ export default function RefereeDashboardPage() {
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {assignments.map((assignment) => {
-              const assignmentId = assignment._id || (assignment as any).id;
+              const assignmentId = assignment._id || (assignment as { id?: string }).id;
               const raceIdRaw2 = assignment.raceId;
               const raceId = typeof raceIdRaw2 === "string"
                 ? raceIdRaw2
-                : raceIdRaw2?._id || (raceIdRaw2 as any)?.id;
+                : raceIdRaw2?._id || (raceIdRaw2 as unknown as { id?: string })?.id;
               const raceObj2 = typeof raceIdRaw2 !== "string" ? raceIdRaw2 : null;
               if (!assignment.raceId) return null;
               return (

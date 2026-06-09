@@ -15,18 +15,19 @@ async function getToken(): Promise<string | null> {
   return null;
 }
 
-function injectUnderscoreId(val: any): any {
+function injectUnderscoreId(val: unknown): unknown {
   if (val === null || val === undefined) return val;
   if (Array.isArray(val)) {
     return val.map(injectUnderscoreId);
   }
   if (typeof val === "object") {
-    if (typeof val.id === "string" && !("_id" in val)) {
-      val._id = val.id;
+    const obj = val as Record<string, unknown>;
+    if (typeof obj.id === "string" && !("_id" in obj)) {
+      obj._id = obj.id;
     }
-    for (const key in val) {
-      if (Object.prototype.hasOwnProperty.call(val, key)) {
-        val[key] = injectUnderscoreId(val[key]);
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        obj[key] = injectUnderscoreId(obj[key]);
       }
     }
   }
@@ -80,8 +81,7 @@ export async function apiFetch<T>(path: string, options: CustomRequestInit = {})
 
   // ResponseInterceptor wraps payload as { success, message, data, meta? }
   // Unwrap if the wrapper is present
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let result: any = raw;
+  let result: unknown = raw;
   if (
     raw &&
     typeof raw === "object" &&
@@ -565,11 +565,11 @@ export const rewardPointLedgerApi = {
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 export const dashboardApi = {
-  getAdminStats: () => apiFetch<Record<string, any>>("/dashboard/admin"),
-  getOwnerStats: () => apiFetch<Record<string, any>>("/dashboard/owner"),
-  getJockeyStats: () => apiFetch<Record<string, any>>("/dashboard/jockey"),
-  getRefereeStats: () => apiFetch<Record<string, any>>("/dashboard/referee"),
-  getSpectatorStats: () => apiFetch<Record<string, any>>("/dashboard/spectator"),
+  getAdminStats: () => apiFetch<Record<string, unknown>>("/dashboard/admin"),
+  getOwnerStats: () => apiFetch<Record<string, unknown>>("/dashboard/owner"),
+  getJockeyStats: () => apiFetch<Record<string, unknown>>("/dashboard/jockey"),
+  getRefereeStats: () => apiFetch<Record<string, unknown>>("/dashboard/referee"),
+  getSpectatorStats: () => apiFetch<Record<string, unknown>>("/dashboard/spectator"),
 };
 
 // ─── Registrations ───────────────────────────────────────────────────────────

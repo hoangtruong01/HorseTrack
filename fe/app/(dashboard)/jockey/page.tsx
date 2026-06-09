@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -15,15 +16,9 @@ import {
   ShieldAlert,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
   User,
-  Users,
   X,
-  XCircle,
-  TrendingDown,
-  CheckCircle,
   HelpCircle,
-  DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/data-display/stat-card";
@@ -139,7 +134,7 @@ export function JockeyDashboard() {
   const [submittingId, setSubmittingId] = useState<string | null>(null);
 
   // Profile status
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<{ fullName?: string; avatar?: string; email?: string; phone?: string } | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   // Selected horse detail for Modal
@@ -218,9 +213,9 @@ export function JockeyDashboard() {
       toast.success(`${actionLabel} lời mời thành công!`);
       // Reload data to reflect change
       await fetchData();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || `Lỗi khi thực hiện thao tác.`);
+      toast.error((err as Error).message || `Lỗi khi thực hiện thao tác.`);
     } finally {
       setSubmittingId(null);
     }
@@ -538,7 +533,7 @@ export function JockeyDashboard() {
                         <div>
                           <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Tin nhắn đính kèm</p>
                           <p className="text-xs italic text-muted-foreground mt-1 bg-muted/50 p-2 rounded-lg leading-relaxed">
-                            "{inv.message}"
+                            &quot;{inv.message}&quot;
                           </p>
                         </div>
                       )}
@@ -740,7 +735,7 @@ export function JockeyDashboard() {
                   <div className="space-y-4 text-center">
                     <div className="size-20 rounded-full border-2 border-primary bg-primary/10 mx-auto flex items-center justify-center">
                       {profile?.avatar ? (
-                        <img src={profile.avatar} alt={profile.fullName} className="size-full rounded-full object-cover" />
+                        <Image src={profile.avatar} alt={profile.fullName} className="size-full rounded-full object-cover" width={80} height={80} />
                       ) : (
                         <User className="size-10 text-primary" />
                       )}
@@ -855,7 +850,7 @@ export function JockeyDashboard() {
                   {/* Horse Image Preview */}
                   {horseDetail.image ? (
                     <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-border">
-                      <img src={horseDetail.image} alt={horseDetail.name} className="size-full object-cover" />
+                      <Image src={horseDetail.image} alt={horseDetail.name} className="object-cover" fill />
                     </div>
                   ) : (
                     <div className="h-32 w-full rounded-2xl bg-muted/50 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground text-xs">
@@ -1026,7 +1021,7 @@ export function JockeyDashboard() {
               <div className="flex gap-4">
                 {detailInv.horseId?.image ? (
                   <div className="relative h-20 w-24 rounded-lg overflow-hidden border border-border shrink-0">
-                    <img src={detailInv.horseId.image} className="size-full object-cover" alt="" />
+                    <Image src={detailInv.horseId.image} className="object-cover" alt="" fill />
                   </div>
                 ) : (
                   <div className="h-20 w-24 rounded-lg bg-muted/50 border border-dashed border-border flex items-center justify-center shrink-0">
@@ -1065,7 +1060,7 @@ export function JockeyDashboard() {
               <div className="space-y-1">
                 <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Lời nhắn từ Chủ chuồng</span>
                 <div className="p-3 rounded-xl bg-muted/50 border border-border text-xs text-muted-foreground italic leading-relaxed">
-                  "{detailInv.message}"
+                  &quot;{detailInv.message}&quot;
                 </div>
               </div>
             )}

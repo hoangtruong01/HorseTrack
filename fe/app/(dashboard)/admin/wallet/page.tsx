@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Wallet } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { walletApi, type WalletTxItem, type CashoutItem } from "@/lib/api-client";
@@ -34,7 +34,7 @@ export default function AdminWalletPage() {
       const res = await walletApi.allTransactions({ page, limit: 20 });
       setTransactions(res.data);
       setTxMeta(res.meta);
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e) { toast.error((e as Error).message); }
     finally { setLoading(false); }
   }, []);
 
@@ -44,7 +44,7 @@ export default function AdminWalletPage() {
       const res = await walletApi.allCashouts({ page, limit: 20 });
       setCashouts(res.data);
       setCashoutMeta(res.meta);
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e) { toast.error((e as Error).message); }
     finally { setLoading(false); }
   }, []);
 
@@ -59,7 +59,7 @@ export default function AdminWalletPage() {
       await walletApi.processCashout(id, status);
       toast.success(`Đã cập nhật → ${status}`);
       await fetchCashouts(cashoutMeta.page);
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e) { toast.error((e as Error).message); }
     finally { setActionLoading(null); }
   };
 

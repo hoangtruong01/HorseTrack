@@ -28,9 +28,9 @@ export default function SpectatorRankingsPage() {
         setIsLoadingHorses(true);
         const data = await rankingsApi.getGlobalHorseRankings();
         setHorseRankings(data || []);
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
-        setError(err.message || "Không thể tải bảng xếp hạng ngựa.");
+        setError((err as Error).message || "Không thể tải bảng xếp hạng ngựa.");
       } finally {
         setIsLoadingHorses(false);
       }
@@ -44,9 +44,9 @@ export default function SpectatorRankingsPage() {
         setIsLoadingJockeys(true);
         const data = await rankingsApi.getGlobalJockeyRankings();
         setJockeyRankingEntries(data || []);
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
-        setError(err.message || "Không thể tải bảng xếp hạng jockey.");
+        setError((err as Error).message || "Không thể tải bảng xếp hạng jockey.");
       } finally {
         setIsLoadingJockeys(false);
       }
@@ -72,13 +72,6 @@ export default function SpectatorRankingsPage() {
       professional: "Chuyên nghiệp",
     };
     return map[level.toLowerCase()] || level;
-  };
-
-  const rankBadge = (rank: number | undefined) => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return `#${rank}`;
   };
 
   return (

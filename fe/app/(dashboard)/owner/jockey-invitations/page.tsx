@@ -1,13 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Users, Loader2, Send, Calendar, Clock, XCircle, PlusCircle,
-  MessageSquare, Sparkles, Eye, Trophy, Flag, Percent, Search,
-  Star, Award, TrendingUp, ChevronRight, X, User,
+  Sparkles, Eye, Trophy, Flag, Percent, Search,
+  Star, Award, X, User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -78,24 +79,28 @@ export default function JockeyInvitationsPage() {
         const d = await jockeysRes.json();
         if (d.success) {
           const raw = d.data?.data || d.data || [];
-          setJockeys(raw.map((j: any) => ({
-            id: j.id || j._id,
-            userId: j.userId?._id || j.userId?.id || j.userId || "",
-            fullName: j.userId?.fullName || "Ẩn danh",
-            email: j.userId?.email || "",
-            phone: j.userId?.phone,
-            avatar: j.userId?.avatar,
-            heightCm: j.heightCm || 0,
-            weightKg: j.weightKg || 0,
-            experienceYears: j.experienceYears || 0,
-            status: j.status,
-            skillLevel: j.skillLevel,
-            bio: j.bio,
-            specialty: j.specialty,
-            personality: j.personality,
-            totalRaces: j.totalRaces || 0,
-            wins: j.wins || 0,
-          })));
+          setJockeys(raw.map((j: Record<string, unknown>) => {
+            const userId = j.userId as Record<string, unknown> | string | undefined;
+            const userObj = typeof userId === "object" && userId !== null ? userId : null;
+            return {
+              id: (j.id || j._id) as string,
+              userId: (userObj?._id || userObj?.id || j.userId || "") as string,
+              fullName: (userObj?.fullName as string) || "Ẩn danh",
+              email: (userObj?.email as string) || "",
+              phone: userObj?.phone as string | undefined,
+              avatar: userObj?.avatar as string | undefined,
+              heightCm: (j.heightCm as number) || 0,
+              weightKg: (j.weightKg as number) || 0,
+              experienceYears: (j.experienceYears as number) || 0,
+              status: j.status as string,
+              skillLevel: j.skillLevel as string | undefined,
+              bio: j.bio as string | undefined,
+              specialty: j.specialty as string | undefined,
+              personality: j.personality as string | undefined,
+              totalRaces: (j.totalRaces as number) || 0,
+              wins: (j.wins as number) || 0,
+            };
+          }));
         }
       }
 
@@ -103,17 +108,22 @@ export default function JockeyInvitationsPage() {
         const d = await regsRes.json();
         if (d.success) {
           const raw = d.data?.data || d.data || [];
-          setRegistrations(raw
-            .filter((r: any) => r.status === "APPROVED" && !r.jockeyUserId)
-            .map((r: any) => ({
-              id: r.id || r._id,
-              raceName: r.raceId?.name || "Không rõ",
-              horseName: r.horseId?.name || "Không rõ",
-              raceStartTime: r.raceId?.startTime || "",
-              tournamentName: r.tournamentId?.name || "Không rõ giải",
-              tournamentId: r.tournamentId?._id || r.tournamentId?.id || "",
-              raceId: r.raceId?._id || r.raceId?.id || "",
-            })));
+          setRegistrations((raw as Record<string, unknown>[])
+            .filter((r) => r.status === "APPROVED" && !r.jockeyUserId)
+            .map((r) => {
+              const raceId = r.raceId as Record<string, unknown> | null | undefined;
+              const horseId = r.horseId as Record<string, unknown> | null | undefined;
+              const tournamentId = r.tournamentId as Record<string, unknown> | null | undefined;
+              return {
+                id: (r.id || r._id) as string,
+                raceName: (raceId?.name as string) || "Không rõ",
+                horseName: (horseId?.name as string) || "Không rõ",
+                raceStartTime: (raceId?.startTime as string) || "",
+                tournamentName: (tournamentId?.name as string) || "Không rõ giải",
+                tournamentId: ((tournamentId?._id || tournamentId?.id) as string) || "",
+                raceId: ((raceId?._id || raceId?.id) as string) || "",
+              };
+            }));
         }
       }
 
@@ -121,20 +131,26 @@ export default function JockeyInvitationsPage() {
         const d = await invsRes.json();
         if (d.success) {
           const raw = d.data?.data || d.data || [];
-          setInvitations(raw.map((i: any) => ({
-            id: i.id || i._id,
-            jockeyName: i.jockeyUserId?.fullName || "Không rõ",
-            jockeyEmail: i.jockeyUserId?.email || "",
-            horseName: i.horseId?.name || "Không rõ",
-            horseBreed: i.horseId?.breed || "",
-            raceName: i.raceId?.name || "Không rõ",
-            raceStartTime: i.raceId?.startTime || "",
-            tournamentName: i.tournamentId?.name || "",
-            status: i.status,
-            message: i.message,
-            jockeySharePercent: i.jockeySharePercent ?? 30,
-            createdAt: i.createdAt || "",
-          })));
+          setInvitations((raw as Record<string, unknown>[]).map((i) => {
+            const jockeyUserId = i.jockeyUserId as Record<string, unknown> | null | undefined;
+            const horseId = i.horseId as Record<string, unknown> | null | undefined;
+            const raceId = i.raceId as Record<string, unknown> | null | undefined;
+            const tournamentId = i.tournamentId as Record<string, unknown> | null | undefined;
+            return {
+              id: (i.id || i._id) as string,
+              jockeyName: (jockeyUserId?.fullName as string) || "Không rõ",
+              jockeyEmail: (jockeyUserId?.email as string) || "",
+              horseName: (horseId?.name as string) || "Không rõ",
+              horseBreed: (horseId?.breed as string) || "",
+              raceName: (raceId?.name as string) || "Không rõ",
+              raceStartTime: (raceId?.startTime as string) || "",
+              tournamentName: (tournamentId?.name as string) || "",
+              status: i.status as string,
+              message: i.message as string | undefined,
+              jockeySharePercent: (i.jockeySharePercent as number) ?? 30,
+              createdAt: (i.createdAt as string) || "",
+            };
+          }));
         }
       }
     } catch { toast.error("Lỗi kết nối tới Backend."); }
@@ -163,7 +179,7 @@ export default function JockeyInvitationsPage() {
       toast.success("Đã gửi lời mời thành công!");
       setShowModal(false); setSelectedReg(""); setInvMessage(""); setSharePercent(30);
       setSelectedJockey(null); loadData();
-    } catch (err: any) { toast.error(err.message); }
+    } catch (err) { toast.error((err as Error).message); }
     finally { setIsSubmitting(false); }
   };
 
@@ -238,7 +254,7 @@ export default function JockeyInvitationsPage() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
                           <div className="size-12 rounded-full border-2 border-[#E10600]/40 bg-[#E10600]/10 flex items-center justify-center overflow-hidden shrink-0">
-                            {j.avatar ? <img src={j.avatar} className="size-full object-cover rounded-full" alt="" /> : <User className="size-5 text-[#E10600]" />}
+                            {j.avatar ? <Image src={j.avatar} className="size-full object-cover rounded-full" alt="" width={48} height={48} /> : <User className="size-5 text-[#E10600]" />}
                           </div>
                           <div className="min-w-0">
                             <h4 className="text-sm font-black uppercase text-foreground truncate">{j.fullName}</h4>
@@ -373,7 +389,7 @@ export default function JockeyInvitationsPage() {
             {/* Jockey summary */}
             <div className="p-3 rounded-xl bg-black/30 border border-border flex items-center gap-3">
               <div className="size-10 rounded-full border border-[#E10600]/40 bg-[#E10600]/10 flex items-center justify-center shrink-0">
-                {selectedJockey.avatar ? <img src={selectedJockey.avatar} className="size-full object-cover rounded-full" alt="" /> : <User className="size-4 text-[#E10600]" />}
+                {selectedJockey.avatar ? <Image src={selectedJockey.avatar} className="size-full object-cover rounded-full" alt="" width={40} height={40} /> : <User className="size-4 text-[#E10600]" />}
               </div>
               <div className="text-xs">
                 <p className="font-black text-foreground">{selectedJockey.fullName}</p>
@@ -453,7 +469,7 @@ export default function JockeyInvitationsPage() {
             {/* Profile header */}
             <div className="flex items-center gap-4 p-4 rounded-xl bg-black/30 border border-border">
               <div className="size-16 rounded-full border-2 border-[#E10600]/40 bg-[#E10600]/10 flex items-center justify-center overflow-hidden shrink-0">
-                {selectedJockeyForDetail.avatar ? <img src={selectedJockeyForDetail.avatar} className="size-full object-cover rounded-full" alt="" /> : <User className="size-8 text-[#E10600]" />}
+                {selectedJockeyForDetail.avatar ? <Image src={selectedJockeyForDetail.avatar} className="size-full object-cover rounded-full" alt="" width={64} height={64} /> : <User className="size-8 text-[#E10600]" />}
               </div>
               <div className="min-w-0">
                 <h4 className="text-lg font-black uppercase text-foreground">{selectedJockeyForDetail.fullName}</h4>

@@ -40,9 +40,9 @@ export function ApprovalDialog({
         toast.success(`Đã phê duyệt đơn đăng ký của ngựa ${registration.horse} thành công!`);
       }
       onSuccess?.();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi xử lý duyệt đơn đăng ký.");
+      toast.error((err as Error).message || "Lỗi xử lý duyệt đơn đăng ký.");
     } finally {
       setIsSubmitting(false);
     }

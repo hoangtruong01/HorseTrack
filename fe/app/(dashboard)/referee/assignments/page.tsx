@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Calendar, Clock, Filter, Flag, User } from "lucide-react";
+import { ArrowRight, Calendar, Clock, User } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -61,9 +61,9 @@ export default function RefereeAssignmentsPage() {
       const resData = await res.json();
       const rawData = resData.data;
       setAssignments(Array.isArray(rawData) ? rawData : (rawData?.data || []));
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi tải dữ liệu phân công.");
+      toast.error((err as Error).message || "Lỗi tải dữ liệu phân công.");
     } finally {
       setIsLoading(false);
     }
@@ -87,8 +87,8 @@ export default function RefereeAssignmentsPage() {
       toast.success(`${actionLabel} phân công thành công!`);
       setConfirmDeclineId(null);
       await fetchAssignments();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi xử lý thao tác.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi xử lý thao tác.");
     } finally {
       setSubmittingActionId(null);
     }
@@ -164,8 +164,8 @@ export default function RefereeAssignmentsPage() {
       ) : (
          <section className="grid gap-4 lg:grid-cols-2">
           {filtered.map((assignment) => {
-            const assignmentId = assignment._id || (assignment as any).id;
-            const raceId = assignment.raceId?._id || (assignment.raceId as any)?.id;
+            const assignmentId = assignment._id || (assignment as { id?: string }).id;
+            const raceId = assignment.raceId?._id || (assignment.raceId as unknown as { id?: string })?.id;
             if (!assignment.raceId) return null;
             return (
               <article

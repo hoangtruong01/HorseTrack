@@ -26,6 +26,7 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -62,7 +63,7 @@ export default function AdminTournamentDetailPage() {
 
   // Race Details Modal State
   const [selectedRace, setSelectedRace] = useState<RaceItem | null>(null);
-  const [raceRegistrations, setRaceRegistrations] = useState<any[]>([]);
+  const [raceRegistrations, setRaceRegistrations] = useState<unknown[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [conditionsForm, setConditionsForm] = useState({ trackCondition: "", weatherSnapshot: "" });
   const [savingConditions, setSavingConditions] = useState(false);
@@ -75,7 +76,7 @@ export default function AdminTournamentDetailPage() {
     });
     setLoadingRegistrations(true);
     try {
-      const res = await apiFetch<any>(
+      const res = await apiFetch<{ data?: unknown[] }>(
         `/registrations?raceId=${race._id}&limit=100`,
       );
       setRaceRegistrations(res.data || []);
@@ -234,10 +235,11 @@ export default function AdminTournamentDetailPage() {
           {/* Tournament Image on Left */}
           {tournament.imageUrl ? (
             <div className="w-full md:w-64 h-48 md:h-auto relative shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/80">
-              <img
+              <Image
                 src={tournament.imageUrl}
                 alt={tournament.name}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           ) : (
@@ -725,7 +727,7 @@ export default function AdminTournamentDetailPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5 text-foreground/70">
-                      {raceRegistrations.map((reg, idx) => (
+                      {(raceRegistrations as Record<string, unknown>[]).map((reg, idx) => (
                         <tr key={reg._id} className="hover:bg-white/[0.01]">
                           <td className="p-2.5 font-mono font-bold text-muted-foreground/70">
                             #{reg.gateNumber ?? idx + 1}

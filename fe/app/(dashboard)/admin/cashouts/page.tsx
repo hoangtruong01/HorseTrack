@@ -19,8 +19,8 @@ export default function AdminCashoutsPage() {
     try {
       const res = await walletApi.allCashouts({ page: 1, limit: 100 });
       setRequests((res.data || []).map(mapCashoutToQueueRequest));
-    } catch (err: any) {
-      toast.error(err.message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
+    } catch (err) {
+      toast.error((err as Error).message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
     } finally {
       setLoading(false);
     }
@@ -39,8 +39,8 @@ export default function AdminCashoutsPage() {
           : `Successfully updated transaction to ${action}`
       );
       await fetchCashouts();
-    } catch (err: any) {
-      toast.error(err.message || `Lỗi khi cập nhật giao dịch sang ${action}`);
+    } catch (err) {
+      toast.error((err as Error).message || `Lỗi khi cập nhật giao dịch sang ${action}`);
       await fetchCashouts();
     }
   };

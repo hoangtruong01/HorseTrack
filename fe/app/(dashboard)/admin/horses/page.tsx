@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Trash2, ShieldAlert, User, LayoutGrid, List, Search } from "lucide-react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight, Trash2, User, LayoutGrid, List, Search } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import {
@@ -16,18 +17,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { horsesApi, type HorseItem } from "@/lib/api-client";
 
-const healthColors: Record<string, string> = {
-  HEALTHY: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  SICK: "text-red-400 bg-red-400/10 border-red-400/20",
-  INJURED: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-  RETIRED: "text-gray-400 bg-gray-400/10 border-gray-400/20",
-};
-
-const statusColors: Record<string, string> = {
-  ACTIVE: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  INACTIVE: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  DELETED: "text-gray-400 bg-gray-400/10 border-gray-400/20",
-};
 
 export default function AdminHorsesPage() {
   const [horses, setHorses] = useState<HorseItem[]>([]);
@@ -51,11 +40,12 @@ export default function AdminHorsesPage() {
       const res = await horsesApi.list({ page, limit: 15, search: currentSearch });
       setHorses(res.data);
       setMeta(res.meta);
-    } catch (e: any) {
-      toast.error(e.message ?? "Lỗi tải dữ liệu");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Lỗi tải dữ liệu");
     } finally { setLoading(false); }
   }, [search]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { void fetchHorses(1); }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -74,7 +64,7 @@ export default function AdminHorsesPage() {
       await horsesApi.delete(deleteTarget._id);
       toast.success(`Đã xóa ngựa ${deleteTarget.name}`);
       await fetchHorses(meta.page);
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e) { toast.error((e as Error).message); }
     finally {
       setActionLoading(null);
       setDeleteTarget(null);
@@ -88,8 +78,8 @@ export default function AdminHorsesPage() {
       toast.success("Phê duyệt chiến mã thành công!");
       setSelectedHorse(null);
       await fetchHorses(meta.page);
-    } catch (e: any) {
-      toast.error(e.message ?? "Phê duyệt thất bại");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Phê duyệt thất bại");
     } finally {
       setActionLoading(null);
     }
@@ -108,8 +98,8 @@ export default function AdminHorsesPage() {
       setShowRejectForm(false);
       setRejectionInput("");
       await fetchHorses(meta.page);
-    } catch (e: any) {
-      toast.error(e.message ?? "Từ chối thất bại");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Từ chối thất bại");
     } finally {
       setActionLoading(null);
     }
@@ -180,10 +170,11 @@ export default function AdminHorsesPage() {
                 {/* Phần ảnh đầu Card */}
                 <div className="relative aspect-video w-full bg-muted/80 overflow-hidden border-b border-border flex items-center justify-center">
                   {h.imageUrl || h.image ? (
-                    <img
-                      src={h.imageUrl || h.image}
+                    <Image
+                      src={h.imageUrl || h.image || ""}
                       alt={h.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className="text-4xl">🐎</div>
@@ -279,10 +270,11 @@ export default function AdminHorsesPage() {
                 {/* Ảnh ngựa dẹt */}
                 <div className="relative h-24 w-32 shrink-0 bg-muted/80 overflow-hidden rounded-xl border border-border flex items-center justify-center">
                   {h.imageUrl || h.image ? (
-                    <img
-                      src={h.imageUrl || h.image}
+                    <Image
+                      src={h.imageUrl || h.image || ""}
                       alt={h.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className="text-3xl">🐎</div>
@@ -369,7 +361,7 @@ export default function AdminHorsesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa chiến mã</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn sắp xóa chiến mã <strong className="text-foreground">"{deleteTarget?.name}"</strong>. Hành động này không thể hoàn tác.
+              Bạn sắp xóa chiến mã <strong className="text-foreground">&quot;{deleteTarget?.name}&quot;</strong>. Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -403,10 +395,11 @@ export default function AdminHorsesPage() {
               <div className="md:col-span-5 space-y-4">
                 <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted/80 border border-border flex items-center justify-center">
                   {selectedHorse.image || selectedHorse.imageUrl ? (
-                    <img
-                      src={selectedHorse.image || selectedHorse.imageUrl}
+                    <Image
+                      src={selectedHorse.image || selectedHorse.imageUrl || ""}
                       alt={selectedHorse.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="text-5xl">🐎</div>

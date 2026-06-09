@@ -6,22 +6,11 @@ import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
   Flag,
-  Play,
-  RotateCcw,
-  Save,
-  ShieldCheck,
-  Siren,
-  Sparkles,
   AlertTriangle,
-  User,
   PlusCircle,
-  Calendar,
-  Clock,
-  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { racesApi, raceChecksApi, raceViolationsApi, type ViolationItem } from "@/lib/api-client";
 
@@ -69,18 +58,18 @@ export default function RefereeViolationsPage() {
     try {
       // 1. Fetch race info
       const raceData = await racesApi.get(raceId);
-      setRace(raceData as any);
+      setRace(raceData as unknown as Race);
 
       // 2. Fetch approved horses (from pre-race checks list)
       const checksData = await raceChecksApi.listByRace(raceId);
-      setHorses((checksData || []) as any);
+      setHorses((checksData || []) as unknown as RaceCheck[]);
 
       // 3. Fetch violations
       const violationsData = await raceViolationsApi.listByRace(raceId);
       setViolations(violationsData || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi khi tải dữ liệu.");
+      toast.error((err as Error).message || "Lỗi khi tải dữ liệu.");
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +78,7 @@ export default function RefereeViolationsPage() {
   useEffect(() => {
     if (!raceId || raceId === "undefined") return;
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
   const handleSubmitViolation = async (e: React.FormEvent) => {
@@ -105,7 +95,7 @@ export default function RefereeViolationsPage() {
       if (!selectedHorse) throw new Error("Không tìm thấy thông tin ngựa đã chọn");
 
       // Extract jockey ID
-      const reg = selectedHorse.raceRegistrationId as any;
+      const reg = selectedHorse.raceRegistrationId as { _id: string; jockeyUserId?: string | { _id: string } };
       const jockeyUserId = typeof reg?.jockeyUserId === "object" ? reg?.jockeyUserId?._id : reg?.jockeyUserId;
 
       const payload = {
@@ -140,17 +130,11 @@ export default function RefereeViolationsPage() {
       
       // Reload violations
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi lưu vi phạm.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi lưu vi phạm.");
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return "Chưa xác định";
-    const d = new Date(dateStr);
-    return `${d.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} ngày ${d.toLocaleDateString("vi-VN")}`;
   };
 
   if (isLoading) {

@@ -57,8 +57,8 @@ export function OwnerRegistrationTable({
 
       toast.success(actionType === "cancel" ? "Đã hủy đăng ký thành công" : "Đã rút đăng ký thành công");
       onRefresh();
-    } catch (err: any) {
-      toast.error(err.message || "Có lỗi xảy ra. Vui lòng thử lại.");
+    } catch (err) {
+      toast.error((err as Error).message || "Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setProcessingId(null);
     }
@@ -70,7 +70,7 @@ export function OwnerRegistrationTable({
         <AlertCircle className="size-10 text-muted-foreground/60 mx-auto mb-3" />
         <h3 className="text-lg font-bold text-foreground mb-1">Chưa có đăng ký nào</h3>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Chiến mã của bạn chưa đăng ký tham gia trận đua nào. Hãy vào mục "Đăng ký giải đấu" để lựa chọn trận đấu phù hợp!
+          Chiến mã của bạn chưa đăng ký tham gia trận đua nào. Hãy vào mục &quot;Đăng ký giải đấu&quot; để lựa chọn trận đấu phù hợp!
         </p>
       </div>
     );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Medal, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { rankingsApi, tournamentsApi, type RankingEntry, type JockeyRankingEntry, type TournamentItem } from "@/lib/api-client";
@@ -33,7 +32,7 @@ export default function AdminRankingsPage() {
     ]).then(([h, j]) => {
       setHorseRankings(h);
       setJockeyRankings(j);
-    }).catch((e) => toast.error(e.message))
+    }).catch((e) => toast.error((e as Error).message))
       .finally(() => setLoading(false));
   }, [selectedTournament]);
 

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { tournamentsApi, type TournamentItem } from "@/lib/api-client";
 import { ChevronLeft, ChevronRight, Eye, Plus, Trash2, Trophy } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -68,7 +69,6 @@ export default function AdminTournamentsPage() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchTournaments(1);
   }, [fetchTournaments]);
 
@@ -147,10 +147,11 @@ export default function AdminTournamentsPage() {
                 >
                   {t.imageUrl ? (
                     <div className="relative h-36 w-full overflow-hidden rounded-xl border border-border bg-muted">
-                      <img
+                      <Image
                         src={t.imageUrl}
                         alt={t.name}
-                        className="h-full w-full object-cover group-hover:scale-105 transition duration-300"
+                        fill
+                        className="object-cover group-hover:scale-105 transition duration-300"
                       />
                     </div>
                   ) : (

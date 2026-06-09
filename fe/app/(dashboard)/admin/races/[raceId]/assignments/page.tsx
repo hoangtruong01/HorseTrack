@@ -21,7 +21,7 @@ export default function AdminRaceAssignmentsPage() {
 
   const [race, setRace] = useState<RaceItem | null>(null);
   const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
-  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [registrations, setRegistrations] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-function decodeJwtPayload(token: string): any {
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -12,7 +12,7 @@ function decodeJwtPayload(token: string): any {
         .join("")
     );
     return JSON.parse(jsonPayload);
-  } catch (err) {
+  } catch {
     return null;
   }
 }
@@ -70,9 +70,9 @@ export async function GET() {
       points,
       balance: 0,
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { message: err.message || "Lấy thông tin ví thất bại" },
+      { message: (err as Error).message || "Lấy thông tin ví thất bại" },
       { status: 500 }
     );
   }

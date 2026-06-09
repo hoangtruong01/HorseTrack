@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
-  CalendarDays,
   Compass,
   UserCheck,
   Trophy,
@@ -58,45 +58,6 @@ const quickStats = [
     color: "text-[#3B82F6]",
     bg: "bg-[#3B82F6]/8",
     border: "border-[#3B82F6]/10",
-  },
-];
-
-const upcomingRaces = [
-  {
-    day: "24",
-    month: "MAY",
-    weekday: "SAT",
-    title: "Morning Heat",
-    tournament: "Saigon Derby Tournament",
-    time: "08:30 AM",
-    location: "Ho Chi Minh City Arena",
-    horses: "12 Horses",
-    badge: "Registration Open",
-    badgeClass: "bg-[#067E6A]/10 text-[#067E6A] border-[#067E6A]/20",
-  },
-  {
-    day: "24",
-    month: "MAY",
-    weekday: "SAT",
-    title: "Coastal Dash",
-    tournament: "Coastal Championship",
-    time: "11:30 AM",
-    location: "Da Nang Racecourse",
-    horses: "10 Horses",
-    badge: "Registration Closing",
-    badgeClass: "bg-[#F8CD46]/10 text-[#F8CD46] border-[#F8CD46]/20",
-  },
-  {
-    day: "24",
-    month: "MAY",
-    weekday: "SAT",
-    title: "Night Circuit",
-    tournament: "Winter Racing Series",
-    time: "18:45 PM",
-    location: "Hanoi Racecourse",
-    horses: "14 Horses",
-    badge: "Upcoming",
-    badgeClass: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/20",
   },
 ];
 
@@ -536,9 +497,11 @@ export default function Home() {
                href="/"
                className="flex items-center gap-3 group focus:outline-none"
              >
-               <img
+               <Image
                  src="/logo.png"
                  alt="HorseTrack Logo"
+                 width={44}
+                 height={44}
                  className="size-11 rounded-2xl object-cover border border-border shadow-[0_0_20px_rgba(225,6,0,0.25)] transition group-hover:scale-105"
                />
                <span className="text-xl font-black uppercase tracking-[0.16em]">

@@ -63,8 +63,8 @@ export function RegisterForm() {
       await register(payload);
       toast.success("Đăng ký tài khoản thành công! Đang chuyển hướng...");
       window.location.href = selectedPreview.entryPath;
-    } catch (err: any) {
-      const errMsg = err.message || "Đăng ký tài khoản thất bại.";
+    } catch (err) {
+      const errMsg = (err as Error).message || "Đăng ký tài khoản thất bại.";
       setErrorMsg(errMsg);
       toast.error(errMsg);
       setIsSubmitting(false);

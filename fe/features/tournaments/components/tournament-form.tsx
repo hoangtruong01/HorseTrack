@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   Award,
   CalendarDays,
@@ -360,10 +361,11 @@ export function TournamentForm() {
             >
               {imagePreview ? (
                 <div className="relative w-full h-[160px] rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">
                     <span className="text-foreground text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">

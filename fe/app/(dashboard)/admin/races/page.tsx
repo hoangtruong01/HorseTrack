@@ -41,8 +41,8 @@ export default function AdminRacesPage() {
       const res = await racesApi.list({ page: p, limit: 20 });
       setRaces(res.data || []);
       setMeta({ total: res.meta?.total || 0, page: res.meta?.page || 1, totalPages: res.meta?.totalPages || 1 });
-    } catch (e: any) {
-      toast.error(e.message || "Không thể lấy danh sách trận đua");
+    } catch (e) {
+      toast.error((e as Error).message || "Không thể lấy danh sách trận đua");
     } finally {
       setLoading(false);
     }
@@ -58,8 +58,8 @@ export default function AdminRacesPage() {
       await racesApi.updateStatus(id, newStatus);
       toast.success(`Đã cập nhật trạng thái: ${newStatus}`);
       void fetchRaces(page);
-    } catch (e: any) {
-      toast.error(e.message || "Cập nhật trạng thái thất bại");
+    } catch (e) {
+      toast.error((e as Error).message || "Cập nhật trạng thái thất bại");
     } finally {
       setActionLoading(null);
     }
@@ -72,8 +72,8 @@ export default function AdminRacesPage() {
       await racesApi.delete(id);
       toast.success("Đã xóa trận đua thành công");
       void fetchRaces(page);
-    } catch (e: any) {
-      toast.error(e.message || "Không thể xóa trận đua");
+    } catch (e) {
+      toast.error((e as Error).message || "Không thể xóa trận đua");
     } finally {
       setActionLoading(null);
     }

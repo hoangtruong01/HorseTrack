@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Award, ShieldAlert, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Horse } from "@/features/horses/components/horse-card";
 
@@ -53,8 +53,8 @@ export function RaceRegistrationForm({
 
     try {
       await onSubmit(selectedHorseId);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Đăng ký tham gia trận đua thất bại.");
+    } catch (err) {
+      setErrorMsg((err as Error).message || "Đăng ký tham gia trận đua thất bại.");
     }
   };
 

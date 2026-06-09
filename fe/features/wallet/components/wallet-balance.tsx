@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, Gift, RefreshCw, Star } from "lucide-react";
+import { Gift, RefreshCw, Star } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";

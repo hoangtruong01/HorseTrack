@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flag, Calendar, Award, User, ArrowLeft, Siren, Timer, Search, ChevronRight } from "lucide-react";
+import { Calendar, ArrowLeft, Siren, Timer, Search, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 
@@ -52,7 +52,6 @@ interface RaceGroup {
 export default function OwnerResultsPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
-  const [results, setResults] = useState<RaceResultItem[]>([]);
   const [raceGroups, setRaceGroups] = useState<RaceGroup[]>([]);
   const [selectedRaceGroup, setSelectedRaceGroup] = useState<RaceGroup | null>(null);
   const [isLoadingTournaments, setIsLoadingTournaments] = useState(true);
@@ -86,7 +85,6 @@ export default function OwnerResultsPage() {
   // Load results when tournament is selected
   useEffect(() => {
     if (!selectedTournament) {
-      setResults([]);
       setRaceGroups([]);
       setSelectedRaceGroup(null);
       return;
@@ -102,7 +100,6 @@ export default function OwnerResultsPage() {
         const resData = await res.json();
         if (res.ok && resData.success) {
           const rawResults: RaceResultItem[] = resData.data || [];
-          setResults(rawResults);
 
           // Group by raceId
           const groups: Record<string, RaceGroup> = {};

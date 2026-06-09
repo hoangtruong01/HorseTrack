@@ -34,8 +34,8 @@ export default function RedemptionsQueuePage() {
         setTotalPages(res.meta?.totalPages ?? 1);
         setTotal(res.meta?.total ?? res.data.length);
       }
-    } catch (err: any) {
-      toast.error(err.message || t("wallet.errors.fetchFailed"));
+    } catch (err) {
+      toast.error((err as Error).message || t("wallet.errors.fetchFailed"));
     } finally {
       setLoading(false);
     }
@@ -56,9 +56,9 @@ export default function RedemptionsQueuePage() {
         setLookupResult(null);
         setSearchError("Mã đổi thưởng không tồn tại.");
       }
-    } catch (err: any) {
+    } catch (err) {
       setLookupResult(null);
-      setSearchError(err.message || "Không tìm thấy mã đổi thưởng.");
+      setSearchError((err as Error).message || "Không tìm thấy mã đổi thưởng.");
     } finally {
       setIsSearching(false);
     }
@@ -69,7 +69,7 @@ export default function RedemptionsQueuePage() {
     setSearchError(null);
   };
 
-  const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => {
+  const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED") => {
     try {
       await walletApi.processCashout(id, action);
       toast.success(
@@ -92,8 +92,8 @@ export default function RedemptionsQueuePage() {
           setLookupResult(null);
         }
       }
-    } catch (err: any) {
-      toast.error(err.message || `Lỗi khi cập nhật giao dịch sang ${action}`);
+    } catch (err) {
+      toast.error((err as Error).message || `Lỗi khi cập nhật giao dịch sang ${action}`);
       await fetchCashouts(page);
     }
   };

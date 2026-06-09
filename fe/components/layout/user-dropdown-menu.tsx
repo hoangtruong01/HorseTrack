@@ -2,9 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { User, Settings, ChevronDown, Globe, Moon, Sun, LogOut } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useTranslation } from "react-i18next";
+import { User, Settings, ChevronDown, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -20,8 +18,6 @@ export function UserDropdownMenu({
   userAvatar,
 }: UserDropdownMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const { i18n } = useTranslation();
   const { logout } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -41,15 +37,6 @@ export function UserDropdownMenu({
 
   const closeMenu = () => {
     setIsOpen(false);
-  };
-
-  const toggleLanguage = () => {
-    const newLanguage = i18n.language === "en" ? "vi" : "en";
-    i18n.changeLanguage(newLanguage);
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (

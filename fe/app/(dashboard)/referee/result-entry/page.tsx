@@ -21,8 +21,8 @@ export default function RefereeResultEntryWorkspacePage() {
           (a) => a.status === "accepted" && typeof a.raceId === "object" && a.raceId !== null
         );
         setAssignments(list);
-      } catch (err: any) {
-        toast.error(err.message || "Lỗi tải danh sách cuộc đua.");
+      } catch (err) {
+        toast.error((err as Error).message || "Lỗi tải danh sách cuộc đua.");
       } finally {
         setIsLoading(false);
       }

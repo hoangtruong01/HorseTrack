@@ -24,7 +24,7 @@ export default function AdminBetsPage() {
       const res = await predictionsApi.list({ page, limit: 20 });
       setBets(res.data);
       setMeta(res.meta);
-    } catch (e: any) { toast.error(e.message ?? "Lỗi tải dữ liệu"); }
+    } catch (e) { toast.error((e as Error).message ?? "Lỗi tải dữ liệu"); }
     finally { setLoading(false); }
   }, []);
 

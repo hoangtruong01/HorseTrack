@@ -1,6 +1,5 @@
 import {
   Activity,
-  AlertTriangle,
   Award,
   Bell,
   ClipboardCheck,
@@ -11,7 +10,6 @@ import {
   Home,
   ListChecks,
   Medal,
-  PlusCircle,
   ShieldCheck,
   Siren,
   Star,

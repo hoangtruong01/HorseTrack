@@ -19,7 +19,7 @@ export default function AdminRegistrationsPage() {
       const res = await registrationsApi.list({ limit: 100 });
       const rawList = res.data || [];
       
-      const mapped = rawList.map((item: any): RaceRegistration => {
+      const mapped = rawList.map((item): RaceRegistration => {
         const statusVal = item.status || "PENDING";
         const statusLower = statusVal.toLowerCase();
         
@@ -52,9 +52,9 @@ export default function AdminRegistrationsPage() {
       });
 
       setRegistrations(mapped);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi khi tải danh sách đăng ký.");
+      toast.error((err as Error).message || "Lỗi khi tải danh sách đăng ký.");
     } finally {
       setIsLoading(false);
     }

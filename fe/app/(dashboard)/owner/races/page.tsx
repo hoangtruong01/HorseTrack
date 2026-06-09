@@ -68,20 +68,26 @@ export default function OwnerRacesBrowserPage() {
         const resData = await response.json();
         if (resData.success) {
           const rawList = resData.data?.data || resData.data || [];
-          const mapped: Registration[] = rawList.map((item: any) => ({
-            id: item.id || item._id,
-            tournamentId: item.tournamentId?._id || item.tournamentId?.id || "",
-            tournamentName: item.tournamentId?.name || "Giải đấu tự do",
-            raceId: item.raceId?._id || item.raceId?.id || "",
-            raceName: item.raceId?.name || "Không rõ trận đua",
-            horseId: item.horseId?._id || item.horseId?.id || "",
-            horseName: item.horseId?.name || "Không rõ chiến mã",
-            ownerId: item.ownerId?._id || item.ownerId || "",
-            status: item.status,
-            note: item.note,
-            rejectedReason: item.rejectedReason,
-            createdAt: item.createdAt || new Date().toISOString(),
-          }));
+          const mapped: Registration[] = (rawList as Record<string, unknown>[]).map((item) => {
+            const tournamentId = item.tournamentId as Record<string, unknown> | null | undefined;
+            const raceId = item.raceId as Record<string, unknown> | null | undefined;
+            const horseId = item.horseId as Record<string, unknown> | null | undefined;
+            const ownerId = item.ownerId as Record<string, unknown> | string | null | undefined;
+            return {
+              id: (item.id || item._id) as string,
+              tournamentId: ((tournamentId?._id || tournamentId?.id) as string) || "",
+              tournamentName: (tournamentId?.name as string) || "Giải đấu tự do",
+              raceId: ((raceId?._id || raceId?.id) as string) || "",
+              raceName: (raceId?.name as string) || "Không rõ trận đua",
+              horseId: ((horseId?._id || horseId?.id) as string) || "",
+              horseName: (horseId?.name as string) || "Không rõ chiến mã",
+              ownerId: (typeof ownerId === "object" && ownerId !== null ? ((ownerId._id || ownerId.id) as string) : ownerId as string) || "",
+              status: item.status as string,
+              note: item.note as string | undefined,
+              rejectedReason: item.rejectedReason as string | undefined,
+              createdAt: (item.createdAt as string) || new Date().toISOString(),
+            };
+          });
           setRegistrations(mapped);
         }
       }
@@ -98,7 +104,7 @@ export default function OwnerRacesBrowserPage() {
     try {
       const data = await tournamentsApi.list({ limit: 100 });
       setTournaments(data.data || []);
-    } catch (err) {
+    } catch {
       toast.error("Không thể tải danh sách giải đấu.");
     } finally {
       setLoadingTournaments(false);
@@ -111,7 +117,7 @@ export default function OwnerRacesBrowserPage() {
     try {
       const data = await racesApi.listByTournament(tournamentId, { limit: 100 });
       setRaces(data.data || []);
-    } catch (err) {
+    } catch {
       toast.error("Không thể tải danh sách vòng đua.");
     } finally {
       setLoadingRaces(false);

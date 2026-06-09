@@ -59,8 +59,8 @@ export default function AdminUsersPage() {
       });
       setUsers(res.data);
       setMeta(res.meta);
-    } catch (e: any) {
-      toast.error(e.message ?? "Không tải được danh sách users");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Không tải được danh sách users");
     } finally {
       setLoading(false);
     }
@@ -79,8 +79,8 @@ export default function AdminUsersPage() {
         toast.success(`Đã ban ${u.fullName}`);
       }
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e) {
+      toast.error((e as Error).message);
     } finally {
       setActionLoading(null);
     }
@@ -97,8 +97,8 @@ export default function AdminUsersPage() {
       await usersApi.delete(deleteTarget.id);
       toast.success(`Đã xóa ${deleteTarget.fullName}`);
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e) {
+      toast.error((e as Error).message);
     } finally {
       setActionLoading(null);
       setDeleteTarget(null);
@@ -117,8 +117,8 @@ export default function AdminUsersPage() {
         });
       }
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e) {
+      toast.error((e as Error).message);
     } finally {
       setRolesActionLoading(null);
     }
@@ -140,8 +140,8 @@ export default function AdminUsersPage() {
         });
       }
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e) {
+      toast.error((e as Error).message);
     } finally {
       setRolesActionLoading(null);
     }
@@ -299,7 +299,7 @@ export default function AdminUsersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa người dùng</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn sắp xóa tài khoản <strong className="text-foreground">"{deleteTarget?.fullName}"</strong>. Hành động này không thể hoàn tác.
+              Bạn sắp xóa tài khoản <strong className="text-foreground">&quot;{deleteTarget?.fullName}&quot;</strong>. Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

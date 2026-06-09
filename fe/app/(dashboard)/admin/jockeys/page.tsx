@@ -26,8 +26,8 @@ export default function AdminJockeysPage() {
       const res = await jockeysApi.listAdmin({ page, limit: 15, status: filterStatus || undefined });
       setJockeys(res.data);
       setMeta(res.meta);
-    } catch (e: any) {
-      toast.error(e.message ?? "Lỗi tải dữ liệu");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Lỗi tải dữ liệu");
     } finally { setLoading(false); }
   }, [filterStatus]);
 
@@ -39,7 +39,7 @@ export default function AdminJockeysPage() {
       await jockeysApi.changeStatus(id, status);
       toast.success(`Đã cập nhật status → ${status}`);
       await fetchJockeys(meta.page);
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e) { toast.error((e as Error).message); }
     finally { setActionLoading(null); }
   };
 

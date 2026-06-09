@@ -13,7 +13,7 @@ export async function POST() {
       success: true,
       message: "Đăng xuất thành công.",
     });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json(
       { message: "Đăng xuất thất bại." },
       { status: 500 }

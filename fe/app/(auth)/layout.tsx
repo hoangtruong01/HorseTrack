@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -27,9 +28,11 @@ export default function AuthLayout({
             aria-label="HorseTrack home"
           >
             {/* Custom high-fidelity horse head SVG outline logo */}
-            <img
+            <Image
               src="/logo.png"
               alt="HorseTrack Logo"
+              width={44}
+              height={44}
               className="size-11 rounded-2xl object-cover border border-border shadow-[0_0_24px_rgba(225,6,0,0.22)] transition group-hover:scale-105"
             />
             <span>

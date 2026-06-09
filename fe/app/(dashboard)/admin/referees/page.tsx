@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, CheckCircle2, XCircle, ShieldAlert, FileText, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldAlert, FileText, User } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { refereeProfilesApi, type RefereeProfileItem } from "@/lib/api-client";
 import { toast } from "sonner";
@@ -46,8 +46,8 @@ export default function AdminRefereesPage() {
       });
       setProfiles(res.data);
       setMeta(res.meta);
-    } catch (e: any) {
-      toast.error(e.message ?? "Lỗi tải dữ liệu trọng tài");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Lỗi tải dữ liệu trọng tài");
     } finally {
       setLoading(false);
     }
@@ -63,8 +63,8 @@ export default function AdminRefereesPage() {
       await refereeProfilesApi.changeApproval(id, "APPROVED");
       toast.success("Đã phê duyệt hồ sơ trọng tài thành công!");
       void fetchProfiles(meta.page);
-    } catch (e: any) {
-      toast.error(e.message ?? "Lỗi phê duyệt");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Lỗi phê duyệt");
     } finally {
       setActionLoading(null);
     }
@@ -85,8 +85,8 @@ export default function AdminRefereesPage() {
       setRejectingId(null);
       setRejectionReason("");
       void fetchProfiles(meta.page);
-    } catch (e: any) {
-      toast.error(e.message ?? "Lỗi từ chối hồ sơ");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Lỗi từ chối hồ sơ");
     } finally {
       setActionLoading(null);
     }
@@ -98,8 +98,8 @@ export default function AdminRefereesPage() {
       await refereeProfilesApi.changeStatus(id, status);
       toast.success(`Đã cập nhật trạng thái hoạt động: ${status}`);
       void fetchProfiles(meta.page);
-    } catch (e: any) {
-      toast.error(e.message ?? "Lỗi cập nhật trạng thái");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Lỗi cập nhật trạng thái");
     } finally {
       setActionLoading(null);
     }
@@ -114,11 +114,6 @@ export default function AdminRefereesPage() {
   const getUserEmail = (userId: RefereeProfileItem["userId"]) => {
     if (!userId || typeof userId !== "object") return "";
     return userId.email;
-  };
-
-  const getUserPhone = (userId: RefereeProfileItem["userId"]) => {
-    if (!userId || typeof userId !== "object") return "";
-    return userId.phone ?? "Không có số điện thoại";
   };
 
   return (
@@ -244,7 +239,7 @@ export default function AdminRefereesPage() {
                         <select
                           value={p.status}
                           disabled={actionLoading !== null}
-                          onChange={(e) => handleChangeStatus(p._id, e.target.value as any)}
+                          onChange={(e) => handleChangeStatus(p._id, e.target.value as "available" | "unavailable" | "suspended")}
                           className="rounded-lg border border-border bg-muted/80 px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
                         >
                           <option value="available" className="bg-card text-foreground">Sẵn sàng</option>
