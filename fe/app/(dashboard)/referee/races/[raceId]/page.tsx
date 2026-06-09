@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
   Calendar,
@@ -42,12 +42,9 @@ type Race = {
 };
 
 
-export default function RefereeRaceDetailPage({
-  params,
-}: {
-  params: Promise<{ raceId: string }>;
-}) {
-  const { raceId } = use(params);
+export default function RefereeRaceDetailPage() {
+  const params = useParams();
+  const raceId = params.raceId as string;
   const router = useRouter();
 
   const [race, setRace] = useState<Race | null>(null);
@@ -124,6 +121,7 @@ export default function RefereeRaceDetailPage({
   };
 
   useEffect(() => {
+    if (!raceId || raceId === "undefined") return;
     fetchData();
   }, [raceId]);
 
@@ -250,12 +248,12 @@ export default function RefereeRaceDetailPage({
         actions={
           <div className="flex items-center gap-3">
             <Button asChild variant="outline" className="h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white">
-              <Link href={`/referee/races/${race._id}/violations`}>
+              <Link href={`/referee/races/${raceId}/violations`}>
                 <Siren className="size-4 mr-1 text-primary" /> Lỗi vi phạm
               </Link>
             </Button>
             <Button asChild className="h-11 rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
-              <Link href={`/referee/races/${race._id}/result-entry`}>
+              <Link href={`/referee/races/${raceId}/result-entry`}>
                 <Flag className="size-4 mr-1" /> Nhập kết quả
               </Link>
             </Button>

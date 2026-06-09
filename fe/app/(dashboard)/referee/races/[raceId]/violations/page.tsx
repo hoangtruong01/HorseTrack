@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
   Flag,
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { racesApi, raceChecksApi, raceViolationsApi, type ViolationItem } from "@/lib/api-client";
 
 // Types
 type Race = {
@@ -45,38 +46,14 @@ type RaceCheck = {
   };
 };
 
-type Violation = {
-  _id: string;
-  type: string;
-  severity: string;
-  penalty: string;
-  horseId?: {
-    _id: string;
-    name: string;
-  };
-  jockeyUserId?: {
-    _id: string;
-    fullName: string;
-  };
-  description?: string;
-  reportedBy: {
-    _id: string;
-    fullName: string;
-  };
-  createdAt: string;
-};
-
-export default function RefereeViolationsPage({
-  params,
-}: {
-  params: Promise<{ raceId: string }>;
-}) {
-  const { raceId } = use(params);
+export default function RefereeViolationsPage() {
+  const params = useParams();
+  const raceId = params.raceId as string;
   const router = useRouter();
 
   const [race, setRace] = useState<Race | null>(null);
   const [horses, setHorses] = useState<RaceCheck[]>([]);
-  const [violations, setViolations] = useState<Violation[]>([]);
+  const [violations, setViolations] = useState<ViolationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,24 +68,16 @@ export default function RefereeViolationsPage({
     setIsLoading(true);
     try {
       // 1. Fetch race info
-      const raceRes = await fetch(`/api/referee/races/${raceId}`);
-      if (!raceRes.ok) throw new Error("Không thể tải thông tin cuộc đua");
-      const raceData = await raceRes.json();
-      setRace(raceData.data);
+      const raceData = await racesApi.get(raceId);
+      setRace(raceData as any);
 
       // 2. Fetch approved horses (from pre-race checks list)
-      const checksRes = await fetch(`/api/referee/race-checks/race/${raceId}`);
-      if (checksRes.ok) {
-        const checksData = await checksRes.json();
-        setHorses(checksData.data || []);
-      }
+      const checksData = await raceChecksApi.listByRace(raceId);
+      setHorses((checksData || []) as any);
 
       // 3. Fetch violations
-      const violationsRes = await fetch(`/api/referee/race-violations/race/${raceId}`);
-      if (violationsRes.ok) {
-        const violationsData = await violationsRes.json();
-        setViolations(violationsData.data || []);
-      }
+      const violationsData = await raceViolationsApi.listByRace(raceId);
+      setViolations(violationsData || []);
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Lỗi khi tải dữ liệu.");
@@ -118,6 +87,7 @@ export default function RefereeViolationsPage({
   };
 
   useEffect(() => {
+    if (!raceId || raceId === "undefined") return;
     fetchData();
   }, [raceId]);
 
@@ -214,7 +184,7 @@ export default function RefereeViolationsPage({
         actions={
           <div className="flex items-center gap-3">
             <Button asChild className="h-11 rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
-              <Link href={`/referee/races/${race._id}/result-entry`}>
+              <Link href={`/referee/races/${raceId}/result-entry`}>
                 <Flag className="size-4 mr-1" /> Nhập kết quả
               </Link>
             </Button>

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
   Flag,
@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { racesApi, raceChecksApi, raceResultsApi, type RaceResultItem } from "@/lib/api-client";
 
 // Types
 type Race = {
@@ -60,17 +61,14 @@ type RaceResult = {
   note?: string;
 };
 
-export default function RefereeResultEntryPage({
-  params,
-}: {
-  params: Promise<{ raceId: string }>;
-}) {
-  const { raceId } = use(params);
+export default function RefereeResultEntryPage() {
+  const params = useParams();
+  const raceId = params.raceId as string;
   const router = useRouter();
 
   const [race, setRace] = useState<Race | null>(null);
   const [horses, setHorses] = useState<RaceCheck[]>([]);
-  const [results, setResults] = useState<RaceResult[]>([]);
+  const [results, setResults] = useState<RaceResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Operations loading
@@ -97,27 +95,22 @@ export default function RefereeResultEntryPage({
     setIsLoading(true);
     try {
       // 1. Fetch race info
-      const raceRes = await fetch(`/api/referee/races/${raceId}`);
-      if (!raceRes.ok) throw new Error("Không thể tải thông tin cuộc đua");
-      const raceData = await raceRes.json();
-      setRace(raceData.data);
+      const raceData = await racesApi.get(raceId);
+      setRace(raceData as any);
 
       // 2. Fetch horses (pre-race checks list represents the approved horses list)
-      const checksRes = await fetch(`/api/referee/race-checks/race/${raceId}`);
       let horsesList: RaceCheck[] = [];
-      if (checksRes.ok) {
-        const checksData = await checksRes.json();
-        horsesList = checksData.data || [];
-        setHorses(horsesList);
-      }
+      const checksData = await raceChecksApi.listByRace(raceId);
+      horsesList = (checksData || []) as any;
+      setHorses(horsesList);
 
       // 3. Fetch current race results
-      const resultsRes = await fetch(`/api/referee/race-results/race/${raceId}`);
-      let existingResults: RaceResult[] = [];
-      if (resultsRes.ok) {
-        const resultsData = await resultsRes.json();
-        existingResults = resultsData.data || [];
+      let existingResults: RaceResultItem[] = [];
+      try {
+        existingResults = await raceResultsApi.listByRace(raceId) || [];
         setResults(existingResults);
+      } catch {
+        existingResults = [];
       }
 
       // 4. Map existing results or initialize blank rows
@@ -149,6 +142,7 @@ export default function RefereeResultEntryPage({
   };
 
   useEffect(() => {
+    if (!raceId || raceId === "undefined") return;
     fetchData();
   }, [raceId]);
 
@@ -279,7 +273,7 @@ export default function RefereeResultEntryPage({
         actions={
           <div className="flex items-center gap-3">
             <Button asChild variant="outline" className="h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white">
-              <Link href={`/referee/races/${race._id}/violations`}>
+              <Link href={`/referee/races/${raceId}/violations`}>
                 <Siren className="size-4 mr-1 text-primary" /> Vi phạm
               </Link>
             </Button>

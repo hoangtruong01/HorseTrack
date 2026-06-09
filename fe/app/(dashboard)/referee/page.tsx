@@ -406,7 +406,10 @@ export default function RefereeDashboardPage() {
       {/* Next required action center */}
       {profile && profile.approvalStatus === "APPROVED" && activeAssignment && (() => {
         const assignmentId = activeAssignment._id || (activeAssignment as any).id;
-        const raceId = activeAssignment.raceId?._id || (activeAssignment.raceId as any)?.id;
+        const raceIdRaw = activeAssignment.raceId;
+        const raceId = typeof raceIdRaw === "string"
+          ? raceIdRaw
+          : raceIdRaw?._id || (raceIdRaw as any)?.id;
         return (
           <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
             <article className="rounded-2xl border border-primary/25 bg-[linear-gradient(135deg,rgba(225,6,0,0.12),rgba(21,21,30,0.95))] p-5 flex flex-col justify-between space-y-4">
@@ -448,7 +451,7 @@ export default function RefereeDashboardPage() {
                     Chấp nhận phân công
                   </Button>
                 </div>
-              ) : (
+              ) : raceId ? (
                 <div className="grid gap-2.5 sm:grid-cols-3 pt-2">
                   <Button asChild className="h-11 rounded-full bg-white/5 border border-border hover:bg-white/10 hover:border-white/20 text-white">
                     <Link href={`/referee/races/${raceId}`}>
@@ -469,7 +472,7 @@ export default function RefereeDashboardPage() {
                     </Link>
                   </Button>
                 </div>
-              )}
+              ) : null}
             </article>
 
             <article className="rounded-2xl border border-border bg-card/90 p-5 flex flex-col justify-between">
@@ -505,7 +508,10 @@ export default function RefereeDashboardPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {assignments.map((assignment) => {
               const assignmentId = assignment._id || (assignment as any).id;
-              const raceId = assignment.raceId?._id || (assignment.raceId as any)?.id;
+              const raceIdRaw2 = assignment.raceId;
+              const raceId = typeof raceIdRaw2 === "string"
+                ? raceIdRaw2
+                : raceIdRaw2?._id || (raceIdRaw2 as any)?.id;
               if (!assignment.raceId) return null;
               return (
                 <article
@@ -548,17 +554,19 @@ export default function RefereeDashboardPage() {
                       }
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-border flex justify-end">
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="h-9 px-4 rounded-full text-xs font-bold uppercase border-border hover:bg-white/5 text-white hover:text-white"
-                    >
-                      <Link href={`/referee/races/${raceId}`}>
-                        Chi tiết <ArrowRight className="size-3.5 ml-1" />
-                      </Link>
-                    </Button>
-                  </div>
+                  {raceId && (
+                    <div className="pt-2 border-t border-border flex justify-end">
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="h-9 px-4 rounded-full text-xs font-bold uppercase border-border hover:bg-white/5 text-white hover:text-white"
+                      >
+                        <Link href={`/referee/races/${raceId}`}>
+                          Chi tiết <ArrowRight className="size-3.5 ml-1" />
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
                 </article>
               );
             })}

@@ -7,35 +7,18 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-
-type RaceInfo = {
-  _id: string;
-  name: string;
-  startTime: string;
-  status: string;
-};
-
-type Assignment = {
-  _id: string;
-  status: string;
-  raceId: RaceInfo;
-};
+import { refereeAssignmentsApi, type AssignmentItem } from "@/lib/api-client";
 
 export default function RefereeMonitoringWorkspacePage() {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const res = await fetch("/api/referee/referee-assignments/my-assignments?limit=100");
-        if (!res.ok) throw new Error("Không thể tải danh sách cuộc đua");
-        const resData = await res.json();
-        const rawData = resData.data;
-        const rawArray = Array.isArray(rawData) ? rawData : (rawData?.data || []);
-        // Only accepted assignments
-        const list = rawArray.filter(
-          (a: any) => a.status === "accepted" && a.raceId
+        const result = await refereeAssignmentsApi.myAssignments({ limit: 100 });
+        const list = (result.data || []).filter(
+          (a) => a.status === "accepted" && typeof a.raceId === "object" && a.raceId !== null
         );
         setAssignments(list);
       } catch (err: any) {
@@ -82,10 +65,12 @@ export default function RefereeMonitoringWorkspacePage() {
       ) : (
         <section className="grid gap-4 sm:grid-cols-2">
           {assignments.map((a) => {
-            const isLive = a.raceId.status === "LIVE";
-            const isReady = a.raceId.status === "READY";
+            const race = typeof a.raceId === "object" ? a.raceId : null;
+            if (!race) return null;
+            const isLive = race.status === "LIVE";
+            const isReady = race.status === "READY";
             const isActive = isLive || isReady;
-            
+
             return (
               <article
                 key={a._id}
@@ -100,15 +85,15 @@ export default function RefereeMonitoringWorkspacePage() {
                 <div className="flex items-center justify-between">
                   <StatusBadge
                     label={
-                      a.raceId.status === "SCHEDULED" ? "Chưa mở" :
-                      a.raceId.status === "CHECKING" ? "Kiểm duyệt" :
-                      a.raceId.status === "READY" ? "SẴN SÀNG" :
-                      a.raceId.status === "LIVE" ? "ĐANG CHẠY TRỰC TIẾP" : "ĐÃ KẾT THÚC"
+                      race.status === "SCHEDULED" ? "Chưa mở" :
+                      race.status === "CHECKING" ? "Kiểm duyệt" :
+                      race.status === "READY" ? "SẴN SÀNG" :
+                      race.status === "LIVE" ? "ĐANG CHẠY TRỰC TIẾP" : "ĐÃ KẾT THÚC"
                     }
                     tone={
                       isLive ? "red" :
                       isReady ? "green" :
-                      a.raceId.status === "CHECKING" ? "yellow" : "slate"
+                      race.status === "CHECKING" ? "yellow" : "slate"
                     }
                     pulse={isLive || isReady}
                   />
@@ -119,11 +104,11 @@ export default function RefereeMonitoringWorkspacePage() {
 
                 <div className="space-y-1">
                   <h3 className="text-sm font-black uppercase text-foreground leading-tight">
-                    {a.raceId.name}
+                    {race.name}
                   </h3>
                   <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                     <Clock className="size-3 text-primary shrink-0" />
-                    Giờ xuất phát: {formatDateTime(a.raceId.startTime)}
+                    Giờ xuất phát: {formatDateTime(race.startTime)}
                   </p>
                 </div>
 
@@ -133,7 +118,7 @@ export default function RefereeMonitoringWorkspacePage() {
                     variant={isActive ? "default" : "outline"}
                     className="h-9 px-4 rounded-full text-xs font-black uppercase"
                   >
-                    <Link href={`/referee/races/${a.raceId._id}`}>
+                    <Link href={`/referee/races/${race._id}`}>
                       {isLive ? "Vào phòng giám sát" : isReady ? "Kích hoạt xuất phát" : "Xem chi tiết"}
                       <ArrowRight className="size-3.5 ml-1" />
                     </Link>

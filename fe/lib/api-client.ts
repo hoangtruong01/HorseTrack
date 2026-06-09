@@ -635,3 +635,42 @@ export const raceChecksApi = {
     jockeyNote?: string;
   }) => apiFetch<RaceCheckItem>(`/race-checks/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
 };
+
+// ─── Race Violations ────────────────────────────────────────────────────────
+export interface ViolationItem {
+  _id: string;
+  raceId: string;
+  type: string;
+  severity: string;
+  penalty: string;
+  horseId?: { _id: string; name: string };
+  jockeyUserId?: { _id: string; fullName: string };
+  raceRegistrationId?: string;
+  description?: string;
+  reportedBy: { _id: string; fullName: string };
+  createdAt: string;
+}
+
+export const raceViolationsApi = {
+  listByRace: (raceId: string) =>
+    apiFetch<ViolationItem[]>(`/race-violations/race/${raceId}`),
+};
+
+// ─── Race Results ────────────────────────────────────────────────────────────
+export interface RaceResultItem {
+  _id: string;
+  raceRegistrationId: string;
+  horseId: { _id: string; name: string; breed: string } | string;
+  rank?: number;
+  finishTimeMs?: number;
+  outcome: "finished" | "disqualified" | "did_not_start" | "did_not_finish";
+  incident: "none" | "minor_stumble" | "lane_drift" | "gate_delay" | "collision" | "injury";
+  points: number;
+  status: "DRAFT" | "CONFIRMED" | "PUBLISHED" | "CANCELLED";
+  note?: string;
+}
+
+export const raceResultsApi = {
+  listByRace: (raceId: string) =>
+    apiFetch<RaceResultItem[]>(`/race-results/race/${raceId}`),
+};
