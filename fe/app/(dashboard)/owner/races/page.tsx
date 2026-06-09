@@ -37,7 +37,7 @@ type Race = {
   participantsCount?: number;
   prize?: number;
   status: string;
-  tournamentId: { _id: string; name: string; status: string } | string;
+  tournamentId: { _id: string; name: string; startDate?: string; endDate?: string } | string;
 };
 
 const tournamentStatusLabel: Record<string, { label: string; tone: "green" | "yellow" | "red" | "slate" | "teal" }> = {

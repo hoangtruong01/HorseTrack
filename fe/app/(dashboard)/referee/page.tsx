@@ -151,7 +151,7 @@ export default function RefereeDashboardPage() {
   const pendingAssignments = assignments.filter((a) => a.status === "assigned");
   const acceptedAssignments = assignments.filter((a) => a.status === "accepted");
   const activeAssignment = acceptedAssignments.find(
-    (a) => a.raceId?.status === "READY" || a.raceId?.status === "LIVE" || a.raceId?.status === "CHECKING"
+    (a) => typeof a.raceId !== "string" && (a.raceId?.status === "READY" || a.raceId?.status === "LIVE" || a.raceId?.status === "CHECKING")
   ) || acceptedAssignments[0] || assignments[0];
 
   return (
@@ -410,6 +410,7 @@ export default function RefereeDashboardPage() {
         const raceId = typeof raceIdRaw === "string"
           ? raceIdRaw
           : raceIdRaw?._id || (raceIdRaw as any)?.id;
+        const raceObj = typeof raceIdRaw !== "string" ? raceIdRaw : null;
         return (
           <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
             <article className="rounded-2xl border border-primary/25 bg-[linear-gradient(135deg,rgba(225,6,0,0.12),rgba(21,21,30,0.95))] p-5 flex flex-col justify-between space-y-4">
@@ -418,11 +419,11 @@ export default function RefereeDashboardPage() {
                   NHIỆM VỤ TIẾP THEO
                 </p>
                 <h3 className="mt-2 text-2xl font-black uppercase text-white leading-tight">
-                  {activeAssignment.raceId?.name}
+                  {raceObj?.name}
                 </h3>
                 <p className="mt-1 text-xs text-white/50 flex items-center gap-1.5">
                   <Clock className="size-3.5" />
-                  {formatDateTime(activeAssignment.raceId?.startTime)}
+                  {formatDateTime(raceObj?.startTime)}
                 </p>
                 <div className="mt-2 flex items-center gap-2">
                   <span className="text-xs text-white/70">Vai trò: <strong>{activeAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}</strong></span>
@@ -512,6 +513,7 @@ export default function RefereeDashboardPage() {
               const raceId = typeof raceIdRaw2 === "string"
                 ? raceIdRaw2
                 : raceIdRaw2?._id || (raceIdRaw2 as any)?.id;
+              const raceObj2 = typeof raceIdRaw2 !== "string" ? raceIdRaw2 : null;
               if (!assignment.raceId) return null;
               return (
                 <article
@@ -538,19 +540,19 @@ export default function RefereeDashboardPage() {
                   </div>
                   <div>
                     <h4 className="text-sm font-black uppercase text-white leading-tight">
-                      {assignment.raceId.name}
+                      {raceObj2?.name}
                     </h4>
                     <p className="text-[10px] text-white/50 mt-1 flex items-center gap-1">
                       <Clock className="size-3 shrink-0" />
-                      {formatDateTime(assignment.raceId.startTime)}
+                      {formatDateTime(raceObj2?.startTime)}
                     </p>
                     <p className="text-[10px] text-white/40 mt-1 uppercase font-bold">
                       Trận đua: {
-                        assignment.raceId.status === "SCHEDULED" ? "Đã lên lịch" :
-                        assignment.raceId.status === "CHECKING" ? "Đang kiểm tra" :
-                        assignment.raceId.status === "READY" ? "Sẵn sàng" :
-                        assignment.raceId.status === "LIVE" ? "Đang đua" :
-                        assignment.raceId.status === "FINISHED" ? "Hoàn thành" : "Đã công bố"
+                        raceObj2?.status === "SCHEDULED" ? "Đã lên lịch" :
+                        raceObj2?.status === "CHECKING" ? "Đang kiểm tra" :
+                        raceObj2?.status === "READY" ? "Sẵn sàng" :
+                        raceObj2?.status === "LIVE" ? "Đang đua" :
+                        raceObj2?.status === "FINISHED" ? "Hoàn thành" : "Đã công bố"
                       }
                     </p>
                   </div>

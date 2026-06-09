@@ -101,7 +101,7 @@ export default function AdminJockeysPage() {
                       <p className="text-xs text-muted-foreground">{getUserEmail(j.userId)}</p>
                     </td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{j.licenseNumber ?? "—"}</td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">{j.experienceYears ?? "—"} năm · {j.weight ?? "?"}kg</td>
+                    <td className="px-5 py-4 text-sm text-muted-foreground">{j.experienceYears ?? "—"} năm · {j.weightKg ?? "?"}kg</td>
                     <td className="px-5 py-4 text-sm text-foreground">{j.totalRaces ?? 0} / {j.wins ?? 0}</td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${statusColors[j.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
