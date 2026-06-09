@@ -735,7 +735,7 @@ export function JockeyDashboard() {
                   <div className="space-y-4 text-center">
                     <div className="size-20 rounded-full border-2 border-primary bg-primary/10 mx-auto flex items-center justify-center">
                       {profile?.avatar ? (
-                        <Image src={profile.avatar} alt={profile.fullName} className="size-full rounded-full object-cover" width={80} height={80} />
+                        <Image src={profile.avatar} alt={profile.fullName ?? ""} className="size-full rounded-full object-cover" width={80} height={80} />
                       ) : (
                         <User className="size-10 text-primary" />
                       )}

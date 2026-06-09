@@ -164,7 +164,7 @@ export default function RefereeAssignmentsPage() {
       ) : (
          <section className="grid gap-4 lg:grid-cols-2">
           {filtered.map((assignment) => {
-            const assignmentId = assignment._id || (assignment as { id?: string }).id;
+            const assignmentId = assignment._id || (assignment as { id?: string }).id || "";
             const raceId = assignment.raceId?._id || (assignment.raceId as unknown as { id?: string })?.id;
             if (!assignment.raceId) return null;
             return (

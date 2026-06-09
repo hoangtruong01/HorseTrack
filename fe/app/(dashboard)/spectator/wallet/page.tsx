@@ -16,7 +16,7 @@ export default function SpectatorWalletPage() {
   const { t } = useTranslation();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<WalletUiTransaction[]>([]);
-  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
+  const [stats, setStats] = useState<{ predictions?: { winRate?: number; total?: number; totalRewardPoints?: number } } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCashoutForm, setShowCashoutForm] = useState(false);
 

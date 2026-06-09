@@ -8,6 +8,7 @@ import {
   tournamentsApi,
   type RaceItem,
   type TournamentItem,
+  type RegistrationItem,
 } from "@/lib/api-client";
 import {
   AlertCircle,
@@ -63,7 +64,7 @@ export default function AdminTournamentDetailPage() {
 
   // Race Details Modal State
   const [selectedRace, setSelectedRace] = useState<RaceItem | null>(null);
-  const [raceRegistrations, setRaceRegistrations] = useState<unknown[]>([]);
+  const [raceRegistrations, setRaceRegistrations] = useState<RegistrationItem[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [conditionsForm, setConditionsForm] = useState({ trackCondition: "", weatherSnapshot: "" });
   const [savingConditions, setSavingConditions] = useState(false);
@@ -76,7 +77,7 @@ export default function AdminTournamentDetailPage() {
     });
     setLoadingRegistrations(true);
     try {
-      const res = await apiFetch<{ data?: unknown[] }>(
+      const res = await apiFetch<{ data?: RegistrationItem[] }>(
         `/registrations?raceId=${race._id}&limit=100`,
       );
       setRaceRegistrations(res.data || []);
@@ -727,30 +728,30 @@ export default function AdminTournamentDetailPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5 text-foreground/70">
-                      {(raceRegistrations as Record<string, unknown>[]).map((reg, idx) => (
+                      {raceRegistrations.map((reg, idx) => (
                         <tr key={reg._id} className="hover:bg-white/[0.01]">
                           <td className="p-2.5 font-mono font-bold text-muted-foreground/70">
-                            #{reg.gateNumber ?? idx + 1}
+                            #{idx + 1}
                           </td>
                           <td className="p-2.5 font-bold text-foreground">
-                            {reg.horseId?.name || "Chiến mã ẩn"}
-                            {reg.horseId?.breed && (
+                            {(typeof reg.horseId === "object" ? reg.horseId?.name : null) || "Chiến mã ẩn"}
+                            {typeof reg.horseId === "object" && reg.horseId?.breed && (
                               <span className="block text-[9px] text-muted-foreground/60 font-normal">
                                 {reg.horseId.breed}
                               </span>
                             )}
                           </td>
                           <td className="p-2.5">
-                            {reg.ownerId?.fullName || "N/A"}
-                            {reg.ownerId?.email && (
+                            {(typeof reg.ownerId === "object" ? reg.ownerId?.fullName : null) || "N/A"}
+                            {typeof reg.ownerId === "object" && reg.ownerId?.email && (
                               <span className="block text-[9px] text-muted-foreground/60">
                                 {reg.ownerId.email}
                               </span>
                             )}
                           </td>
                           <td className="p-2.5">
-                            {reg.jockeyUserId?.fullName || "Chưa gán"}
-                            {reg.jockeyUserId?.email && (
+                            {(typeof reg.jockeyUserId === "object" ? reg.jockeyUserId?.fullName : null) || "Chưa gán"}
+                            {typeof reg.jockeyUserId === "object" && reg.jockeyUserId?.email && (
                               <span className="block text-[9px] text-muted-foreground/60">
                                 {reg.jockeyUserId.email}
                               </span>

@@ -12,6 +12,7 @@ import {
   registrationsApi,
   type AssignmentItem,
   type RaceItem,
+  type RegistrationItem,
 } from "@/lib/api-client";
 import { toast } from "sonner";
 
@@ -21,7 +22,7 @@ export default function AdminRaceAssignmentsPage() {
 
   const [race, setRace] = useState<RaceItem | null>(null);
   const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
-  const [registrations, setRegistrations] = useState<Record<string, unknown>[]>([]);
+  const [registrations, setRegistrations] = useState<RegistrationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -140,15 +141,15 @@ export default function AdminRaceAssignmentsPage() {
                 <article key={reg._id} className="rounded-xl border border-border bg-muted/50 p-4 space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[10px] text-muted-foreground/50 bg-muted rounded px-1.5 py-0.5">
-                      #{reg.gateNumber ?? idx + 1}
+                      #{idx + 1}
                     </span>
                     <span className="font-black text-foreground text-sm truncate">
-                      {reg.jockeyUserId?.fullName || "Chưa gán nài"}
+                      {(typeof reg.jockeyUserId === "object" ? reg.jockeyUserId?.fullName : null) || "Chưa gán nài"}
                     </span>
                   </div>
                   <p className="text-[10px] text-muted-foreground/60">
-                    Ngựa: <span className="font-bold text-foreground/80">{reg.horseId?.name || "—"}</span>
-                    {reg.horseId?.breed && ` · ${reg.horseId.breed}`}
+                    Ngựa: <span className="font-bold text-foreground/80">{(typeof reg.horseId === "object" ? reg.horseId?.name : null) || "—"}</span>
+                    {typeof reg.horseId === "object" && reg.horseId?.breed && ` · ${reg.horseId.breed}`}
                   </p>
                   <span className={`inline-flex rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider border ${
                     reg.status === "APPROVED"

@@ -33,7 +33,7 @@ export default function OwnerRegistrationsPage() {
               horseId: ((horseId?._id || horseId?.id) as string) || "",
               horseName: (horseId?.name as string) || "Không rõ chiến mã",
               ownerId: (typeof ownerId === "object" && ownerId !== null ? ((ownerId._id || ownerId.id) as string) : ownerId as string) || "",
-              status: item.status as string,
+              status: item.status as "APPROVED" | "REJECTED" | "PENDING" | "CANCELLED" | "WITHDRAWN",
               note: item.note as string | undefined,
               rejectedReason: item.rejectedReason as string | undefined,
               createdAt: (item.createdAt as string) || new Date().toISOString(),

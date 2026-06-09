@@ -35,14 +35,14 @@ export default function AdminRegistrationDetailPage() {
       const formattedDate = createdDate.toLocaleDateString("vi-VN") + " · " + createdDate.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
 
       setRegistration({
-        id: item._id || item.id,
-        horse: item.horseId?.name || "Không rõ chiến mã",
-        horseCode: item.horseId?.breed || "HB-00",
-        owner: item.ownerId?.fullName || "Không rõ chủ ngựa",
-        ownerEmail: item.ownerId?.email || "",
-        raceId: item.raceId?._id || item.raceId || "",
-        race: item.raceId?.name || "Không rõ vòng đua",
-        tournament: item.tournamentId?.name || "Không rõ giải đấu",
+        id: item._id,
+        horse: (typeof item.horseId === "object" ? item.horseId?.name : null) || "Không rõ chiến mã",
+        horseCode: (typeof item.horseId === "object" ? item.horseId?.breed : null) || "HB-00",
+        owner: (typeof item.ownerId === "object" ? item.ownerId?.fullName : null) || "Không rõ chủ ngựa",
+        ownerEmail: (typeof item.ownerId === "object" ? item.ownerId?.email : null) || "",
+        raceId: (typeof item.raceId === "object" ? item.raceId?._id : item.raceId) || "",
+        race: (typeof item.raceId === "object" ? item.raceId?.name : null) || "Không rõ vòng đua",
+        tournament: (typeof item.tournamentId === "object" ? item.tournamentId?.name : null) || "Không rõ giải đấu",
         submittedAt: formattedDate,
         status: statusMapped,
         eligibility: `Trạng thái thực tế: ${statusVal}. ${item.note || ""}`,

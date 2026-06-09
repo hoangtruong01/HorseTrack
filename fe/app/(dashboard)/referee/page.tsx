@@ -400,7 +400,7 @@ export default function RefereeDashboardPage() {
 
       {/* Next required action center */}
       {profile && profile.approvalStatus === "APPROVED" && activeAssignment && (() => {
-        const assignmentId = activeAssignment._id || (activeAssignment as { id?: string }).id;
+        const assignmentId = activeAssignment._id || (activeAssignment as { id?: string }).id || "";
         const raceIdRaw = activeAssignment.raceId;
         const raceId = typeof raceIdRaw === "string"
           ? raceIdRaw
@@ -503,7 +503,7 @@ export default function RefereeDashboardPage() {
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {assignments.map((assignment) => {
-              const assignmentId = assignment._id || (assignment as { id?: string }).id;
+              const assignmentId = assignment._id || (assignment as { id?: string }).id || "";
               const raceIdRaw2 = assignment.raceId;
               const raceId = typeof raceIdRaw2 === "string"
                 ? raceIdRaw2

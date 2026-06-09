@@ -40,7 +40,7 @@ export async function GET() {
     }
 
     const payload = decodeJwtPayload(token);
-    const email = payload?.email || "";
+    const email = (payload?.email as string) || "";
 
     try {
       const response = await fetch("http://localhost:3000/api/v1/wallet/history?page=1&limit=1", {

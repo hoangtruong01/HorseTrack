@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { AlertCircle, ChevronLeft, Loader2, Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { racesApi, registrationsApi, type RaceItem } from "@/lib/api-client";
+import { racesApi, registrationsApi, type RaceItem, type RegistrationItem } from "@/lib/api-client";
 import { toast } from "sonner";
 
 export default function AdminRaceParticipantsPage() {
@@ -14,7 +14,7 @@ export default function AdminRaceParticipantsPage() {
   const raceId = params.raceId as string;
 
   const [race, setRace] = useState<RaceItem | null>(null);
-  const [registrations, setRegistrations] = useState<Record<string, unknown>[]>([]);
+  const [registrations, setRegistrations] = useState<RegistrationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -122,23 +122,23 @@ export default function AdminRaceParticipantsPage() {
                 {registrations.map((reg, idx) => (
                   <tr key={reg._id} className="hover:bg-white/[0.02]">
                     <td className="p-4 font-mono font-bold text-muted-foreground/70">
-                      #{reg.gateNumber ?? idx + 1}
+                      #{idx + 1}
                     </td>
                     <td className="p-4 font-bold text-foreground">
-                      {reg.horseId?.name || "Chiến mã ẩn"}
-                      {reg.horseId?.breed && (
+                      {(typeof reg.horseId === "object" ? reg.horseId?.name : null) || "Chiến mã ẩn"}
+                      {typeof reg.horseId === "object" && reg.horseId?.breed && (
                         <span className="block text-[10px] text-muted-foreground/60 font-normal">{reg.horseId.breed}</span>
                       )}
                     </td>
                     <td className="p-4">
-                      <span className="block font-bold text-foreground">{reg.ownerId?.fullName || "N/A"}</span>
-                      {reg.ownerId?.email && (
+                      <span className="block font-bold text-foreground">{(typeof reg.ownerId === "object" ? reg.ownerId?.fullName : null) || "N/A"}</span>
+                      {typeof reg.ownerId === "object" && reg.ownerId?.email && (
                         <span className="block text-[10px] text-muted-foreground/60">{reg.ownerId.email}</span>
                       )}
                     </td>
                     <td className="p-4">
-                      <span className="block font-bold text-foreground">{reg.jockeyUserId?.fullName || "Chưa gán"}</span>
-                      {reg.jockeyUserId?.email && (
+                      <span className="block font-bold text-foreground">{(typeof reg.jockeyUserId === "object" ? reg.jockeyUserId?.fullName : null) || "Chưa gán"}</span>
+                      {typeof reg.jockeyUserId === "object" && reg.jockeyUserId?.email && (
                         <span className="block text-[10px] text-muted-foreground/60">{reg.jockeyUserId.email}</span>
                       )}
                     </td>
