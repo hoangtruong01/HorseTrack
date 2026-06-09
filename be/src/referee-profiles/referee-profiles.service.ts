@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { UsersService } from '../users/users.service';
 import { RoleName } from '../users/schemas/user.schema';
 import { CreateRefereeProfileDto } from './dto/create-referee-profile.dto';
@@ -34,7 +34,9 @@ export class RefereeProfilesService {
       throw new BadRequestException('User does not have REFEREE role');
     }
 
-    const existing = await this.profileModel.findOne({ userId });
+    const existing = await this.profileModel.findOne({
+      userId: new Types.ObjectId(userId),
+    });
     if (existing) {
       throw new ConflictException(
         'Referee profile already exists for this user',
@@ -43,7 +45,7 @@ export class RefereeProfilesService {
 
     return this.profileModel.create({
       ...dto,
-      userId,
+      userId: new Types.ObjectId(userId),
       approvalStatus: RefereeApprovalStatus.PENDING,
       status: RefereeProfileStatus.AVAILABLE,
     });
@@ -51,7 +53,7 @@ export class RefereeProfilesService {
 
   async findByUserId(userId: string): Promise<RefereeProfileDocument> {
     const profile = await this.profileModel
-      .findOne({ userId })
+      .findOne({ userId: new Types.ObjectId(userId) })
       .populate('userId', 'fullName email phone')
       .exec();
     if (!profile || profile.deletedAt) {
@@ -62,7 +64,7 @@ export class RefereeProfilesService {
 
   async existsForUser(userId: string): Promise<boolean> {
     const profile = await this.profileModel.findOne({
-      userId,
+      userId: new Types.ObjectId(userId),
       deletedAt: { $exists: false },
     });
     return !!profile;

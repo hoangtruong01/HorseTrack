@@ -328,6 +328,19 @@ export const refereeProfilesApi = {
     if (params?.approvalStatus) qs.set("approvalStatus", params.approvalStatus);
     return apiFetch<PaginatedResult<RefereeProfileItem>>(`/referee-profiles?${qs}`);
   },
+  getMe: () => apiFetch<RefereeProfileItem>("/referee-profiles/me"),
+  createProfile: (dto: {
+    licenseNo?: string;
+    experienceYears?: number;
+    certificates?: string;
+    bio?: string;
+  }) => apiFetch<RefereeProfileItem>("/referee-profiles", { method: "POST", body: JSON.stringify(dto) }),
+  updateProfile: (id: string, dto: {
+    licenseNo?: string;
+    experienceYears?: number;
+    certificates?: string;
+    bio?: string;
+  }) => apiFetch<RefereeProfileItem>(`/referee-profiles/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
   changeApproval: (id: string, approvalStatus: "APPROVED" | "REJECTED", rejectionReason?: string) =>
     apiFetch(`/referee-profiles/${id}/approval`, {
       method: "PATCH",
@@ -364,6 +377,13 @@ export const refereeAssignmentsApi = {
   remove: (id: string) => apiFetch(`/referee-assignments/${id}`, { method: "DELETE" }),
   listAvailable: (raceId: string) =>
     apiFetch<Array<{ _id: string; fullName: string; email: string }>>(`/referee-assignments/available-referees?raceId=${raceId}`),
+  myAssignments: (params?: { limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<AssignmentItem>>(`/referee-assignments/my-assignments?${qs}`);
+  },
+  respond: (id: string, status: "accepted" | "declined") =>
+    apiFetch(`/referee-assignments/${id}/respond`, { method: "PATCH", body: JSON.stringify({ status }) }),
 };
 
 

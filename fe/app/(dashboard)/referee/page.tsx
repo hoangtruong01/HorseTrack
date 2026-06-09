@@ -21,8 +21,8 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { refereeProfilesApi, refereeAssignmentsApi, type RefereeProfileItem, type AssignmentItem } from "@/lib/api-client";
 
-// Types
 type UserInfo = {
   _id: string;
   fullName: string;
@@ -31,42 +31,14 @@ type UserInfo = {
   roles: string[];
 };
 
-type RefereeProfileInfo = {
-  _id: string;
-  licenseNo?: string;
-  experienceYears: number;
-  bio?: string;
-  certificates?: string;
-  approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
-  rejectionReason?: string;
-};
-
-type RaceInfo = {
-  _id: string;
-  name: string;
-  startTime: string;
-  status: string;
-};
-
-type Assignment = {
-  _id: string;
-  role: "main" | "assistant";
-  status: "assigned" | "accepted" | "declined" | "removed";
-  raceId: RaceInfo;
-  assignedBy: {
-    _id: string;
-    fullName: string;
-  };
-  createdAt: string;
-};
-
 export default function RefereeDashboardPage() {
   const [user, setUser] = useState<UserInfo | null>(null);
-  const [profile, setProfile] = useState<RefereeProfileInfo | null>(null);
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [profile, setProfile] = useState<RefereeProfileItem | null>(null);
+  const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   const [submittingActionId, setSubmittingActionId] = useState<string | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   // Profile form state
   const [licenseNumber, setLicenseNumber] = useState("");
@@ -77,34 +49,28 @@ export default function RefereeDashboardPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch user general info
       const userRes = await fetch("/api/auth/me");
       if (!userRes.ok) throw new Error("Không thể tải thông tin cá nhân");
       const userData = await userRes.json();
       setUser(userData.user);
 
-      // 2. Fetch referee profile info
-      const profileRes = await fetch("/api/referee/referee-profiles/me");
-      if (profileRes.ok) {
-        const profileData = await profileRes.json();
-        setProfile(profileData.data);
-        if (profileData.data) {
-          setLicenseNumber(profileData.data.licenseNo || "");
-          setExperienceYears(profileData.data.experienceYears || 1);
-          setBio(profileData.data.bio || "");
-          setCertificates(profileData.data.certificates || "");
+      try {
+        const profileData = await refereeProfilesApi.getMe();
+        setProfile(profileData);
+        setLicenseNumber(profileData.licenseNo || "");
+        setExperienceYears(profileData.experienceYears || 1);
+        setBio(profileData.bio || "");
+        setCertificates(profileData.certificates || "");
+      } catch (err: any) {
+        if (err.message?.toLowerCase().includes("not found")) {
+          setProfile(null);
+        } else {
+          throw err;
         }
-      } else if (profileRes.status === 404) {
-        setProfile(null);
       }
 
-      // 3. Fetch assignments
-      const assigmentsRes = await fetch("/api/referee/referee-assignments/my-assignments?limit=50");
-      if (assigmentsRes.ok) {
-        const assignmentsData = await assigmentsRes.json();
-        const rawData = assignmentsData.data;
-        setAssignments(Array.isArray(rawData) ? rawData : (rawData?.data || []));
-      }
+      const assignmentsResult = await refereeAssignmentsApi.myAssignments({ limit: 50 });
+      setAssignments(assignmentsResult.data || []);
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Không thể tải dữ liệu trọng tài.");
@@ -130,29 +96,20 @@ export default function RefereeDashboardPage() {
 
     setIsSubmittingProfile(true);
     try {
-      const isEditing = !!profile;
-      const url = isEditing
-        ? `/api/referee/referee-profiles/${profile._id}`
-        : "/api/referee/referee-profiles";
-      const method = isEditing ? "PATCH" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          licenseNo: licenseNumber,
-          experienceYears: Number(experienceYears),
-          bio,
-          certificates,
-        }),
-      });
-
-      const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.message || "Lưu hồ sơ trọng tài thất bại");
+      const dto = {
+        licenseNo: licenseNumber,
+        experienceYears: Number(experienceYears),
+        bio,
+        certificates,
+      };
+      if (profile) {
+        await refereeProfilesApi.updateProfile(profile._id, dto);
+        toast.success("Cập nhật hồ sơ thành công! Chờ duyệt lại.");
+        setIsEditingProfile(false);
+      } else {
+        await refereeProfilesApi.createProfile(dto);
+        toast.success("Khởi tạo hồ sơ thành công! Đang chờ duyệt.");
       }
-
-      toast.success(isEditing ? "Cập nhật hồ sơ thành công! Chờ duyệt lại." : "Khởi tạo hồ sơ thành công! Đang chờ duyệt.");
       await fetchData();
     } catch (err: any) {
       toast.error(err.message || "Lỗi lưu hồ sơ.");
@@ -166,17 +123,7 @@ export default function RefereeDashboardPage() {
     const apiStatus = status === "ACCEPTED" ? "accepted" : "declined";
     const actionLabel = status === "ACCEPTED" ? "Chấp nhận" : "Từ chối";
     try {
-      const res = await fetch(`/api/referee/referee-assignments/${assignmentId}/respond`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: apiStatus }),
-      });
-
-      const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.message || `Thao tác ${actionLabel.toLowerCase()} thất bại`);
-      }
-
+      await refereeAssignmentsApi.respond(assignmentId, apiStatus);
       toast.success(`${actionLabel} phân công thi đấu thành công!`);
       await fetchData();
     } catch (err: any) {
@@ -357,17 +304,84 @@ export default function RefereeDashboardPage() {
                 Quản lý các cuộc đua được ủy quyền. Thực hiện kiểm duyệt đầy đủ tình trạng thiết bị bảo hộ, sức khỏe ngựa, jockey điểm danh và xác lập thứ hạng chuẩn hóa sau khi trận đấu hoàn thành.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-muted/50 p-4 shrink-0 min-w-[240px]">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-white/45">Trọng tài được cấp phép</p>
-              <p className="mt-1 text-lg font-black uppercase text-white flex items-center gap-1.5">
-                <User className="size-4 text-primary" />
-                {user?.fullName}
-              </p>
-              <p className="mt-1 text-xs text-white/60">
-                License: <strong className="text-teal-400">{profile.licenseNo}</strong> · {profile.experienceYears} năm kinh nghiệm
-              </p>
+            <div className="rounded-2xl border border-border bg-muted/50 p-4 shrink-0 min-w-[240px] space-y-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/45">Trọng tài được cấp phép</p>
+                <p className="mt-1 text-lg font-black uppercase text-white flex items-center gap-1.5">
+                  <User className="size-4 text-primary" />
+                  {user?.fullName}
+                </p>
+                <p className="mt-1 text-xs text-white/60">
+                  License: <strong className="text-teal-400">{profile.licenseNo}</strong> · {profile.experienceYears} năm kinh nghiệm
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditingProfile((v) => !v)}
+                className="w-full h-8 rounded-xl border-border hover:bg-white/5 text-xs font-bold uppercase text-white hover:text-white"
+              >
+                {isEditingProfile ? "Hủy chỉnh sửa" : "Chỉnh sửa hồ sơ"}
+              </Button>
             </div>
           </div>
+
+          {isEditingProfile && (
+            <form onSubmit={handleCreateProfile} className="relative mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end bg-muted/50 p-4 rounded-xl border border-border">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Số giấy phép (License)</label>
+                <input
+                  type="text"
+                  value={licenseNumber}
+                  onChange={(e) => setLicenseNumber(e.target.value)}
+                  placeholder="Ví dụ: RF-7799"
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Kinh nghiệm (Năm)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={experienceYears}
+                  onChange={(e) => setExperienceYears(Number(e.target.value))}
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Thông tin bằng cấp & Chứng chỉ</label>
+                <textarea
+                  value={certificates}
+                  onChange={(e) => setCertificates(e.target.value)}
+                  placeholder="Ví dụ: Bằng Trọng tài Quốc gia môn Đua ngựa cổ điển..."
+                  rows={2}
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
+                  required
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Tiểu sử ngắn / Bio (Tùy chọn)</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Ghi chú thêm về kinh nghiệm làm việc..."
+                  rows={2}
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
+                />
+              </div>
+              <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={isSubmittingProfile}
+                  className="rounded-full bg-primary hover:bg-primary-dark font-black uppercase text-xs h-10 px-6 text-white"
+                >
+                  {isSubmittingProfile ? "Đang xử lý..." : "Gửi lại hồ sơ kiểm duyệt"}
+                </Button>
+              </div>
+            </form>
+          )}
         </section>
       )}
 
