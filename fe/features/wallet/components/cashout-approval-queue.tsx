@@ -1,7 +1,7 @@
 "use client";
 
+import React, { useState } from "react";
 import { AlertCircle, CheckCircle2, Copy, Gift, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
@@ -41,6 +41,7 @@ export function CashoutApprovalQueue({
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [searchCode, setSearchCode] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const handleLookupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -309,44 +310,93 @@ export function CashoutApprovalQueue({
                   {t("wallet.transactions.emptyTitle") || "Không có giao dịch đổi thưởng nào."}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs min-w-[700px]">
+                <div className="w-full overflow-hidden">
+                  <table className="w-full text-left text-xs table-auto border-collapse">
                     <thead>
                       <tr className="border-b border-border bg-muted/20 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                        <th className="py-2.5 px-3">{t("wallet.redemption.colCode")}</th>
-                        <th className="py-2.5 px-3">{t("wallet.redemption.colUser")}</th>
-                        <th className="py-2.5 px-3 text-center">{t("wallet.redemption.colPoints")}</th>
-                        <th className="py-2.5 px-3">{t("wallet.redemption.colHandler")}</th>
-                        <th className="py-2.5 px-3">{t("wallet.redemption.colTimeCreated")}</th>
-                        <th className="py-2.5 px-3">{t("wallet.redemption.colStatus")}</th>
+                        <th className="py-3 px-3">{t("wallet.redemption.colCode") || "Mã"}</th>
+                        <th className="py-3 px-3">{t("wallet.redemption.colUser") || "Khách hàng"}</th>
+                        <th className="py-3 px-3 text-center w-[120px]">{t("wallet.redemption.colPoints") || "Điểm"}</th>
+                        <th className="py-3 px-3 w-[140px] text-center">{t("wallet.redemption.colStatus") || "Trạng thái"}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border text-foreground">
                       {historyItems.map((item) => (
-                        <tr key={item.id} className="hover:bg-muted/40 transition">
-                          <td className="py-2.5 px-3 font-mono font-bold text-primary">
-                            {item.redemptionCode}
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <p className="font-semibold text-foreground truncate max-w-[120px]">{item.userFullName}</p>
-                            <p className="text-[10px] text-muted-foreground">{getRoleLabel(item.userRole)}</p>
-                          </td>
-                          <td className="py-2.5 px-3 text-center font-mono font-bold text-amber-700 dark:text-yellow-500">
-                            {item.points.toLocaleString("vi-VN")}
-                          </td>
-                          <td className="py-2.5 px-3 text-muted-foreground truncate max-w-[100px]">
-                            {item.paidBy || "—"}
-                          </td>
-                          <td className="py-2.5 px-3 text-muted-foreground font-mono">
-                            {item.createdAt ? new Date(item.createdAt).toLocaleDateString("vi-VN") : "—"}
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <StatusBadge
-                              label={getStatusText(item.status)}
-                              tone={getStatusTone(item.status)}
-                            />
-                          </td>
-                        </tr>
+                        <React.Fragment key={item.id}>
+                          <tr 
+                            className="hover:bg-muted/40 transition cursor-pointer"
+                            onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                          >
+                            <td className="py-3 px-3 font-mono font-bold text-primary">
+                              {item.redemptionCode}
+                            </td>
+                            <td className="py-3 px-3">
+                              <p className="font-semibold text-foreground truncate">{item.userFullName}</p>
+                              <p className="text-[10px] text-muted-foreground">{getRoleLabel(item.userRole)}</p>
+                            </td>
+                            <td className="py-3 px-3 text-center font-mono font-bold text-amber-500">
+                              {item.points.toLocaleString("vi-VN")}
+                            </td>
+                            <td className="py-3 px-3 text-center">
+                              <StatusBadge
+                                label={getStatusText(item.status)}
+                                tone={getStatusTone(item.status)}
+                                className="w-full justify-center text-[9px] px-1 py-0.5 tracking-[0.02em]"
+                              />
+                            </td>
+                          </tr>
+
+                          {/* Chi tiết mở rộng */}
+                          {expandedId === item.id && (
+                            <tr>
+                              <td colSpan={4} className="bg-muted/[0.02] p-0">
+                                <div className="border-t border-border/50 px-4 py-4 sm:px-6">
+                                  <div className="grid gap-6 sm:grid-cols-2">
+                                    <div className="space-y-4">
+                                      <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 mb-1">Mã quy đổi</p>
+                                        <div className="inline-flex items-center gap-1.5 rounded bg-muted/50 px-2 py-1 font-mono text-xs font-bold border border-border">
+                                          <span className="text-primary">{item.redemptionCode}</span>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              copyToClipboard(item.redemptionCode);
+                                            }}
+                                            className="cursor-pointer rounded p-0.5 text-muted-foreground transition hover:bg-muted-foreground/20"
+                                          >
+                                            <Copy className="size-3" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                      {item.status === "REJECTED" && item.rejectReason && (
+                                        <div>
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-red-500/70 mb-1">Lý do từ chối</p>
+                                          <p className="text-[11px] leading-relaxed text-red-400 font-medium bg-red-500/10 p-2 rounded-lg border border-red-500/20">
+                                            {item.rejectReason}
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="space-y-4 sm:text-right">
+                                      <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 mb-1">Người xử lý</p>
+                                        <p className="font-semibold text-[11px] text-foreground">
+                                          {item.paidBy || "—"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 mb-1">Thời gian tạo</p>
+                                        <p className="font-mono text-[11px] text-muted-foreground">
+                                          {item.createdAt ? new Date(item.createdAt).toLocaleString("vi-VN") : "—"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>
