@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
-  Flag, Loader2, RefreshCw, Plus, Trash2, Search, Trophy
+  Eye, Flag, Loader2, RefreshCw, Plus, Trash2, Search, Trophy
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -222,10 +222,11 @@ export default function AdminRacesPage() {
                       </td>
                       <td className="p-4 text-right flex items-center justify-end gap-2">
                         <Link
-                          href={`/admin/races/${race._id}/participants`}
-                          className="rounded-lg border border-border bg-muted hover:bg-muted px-2.5 py-1.5 text-[10px] text-foreground transition font-bold"
+                          href={`/admin/races/${race._id}`}
+                          title="Xem chi tiết"
+                          className="rounded-lg border border-border bg-muted hover:bg-white/10 p-2 text-muted-foreground hover:text-foreground transition"
                         >
-                          Ngựa
+                          <Eye className="size-3.5" />
                         </Link>
                         <button
                           onClick={() => handleDelete(race._id, race.name)}
