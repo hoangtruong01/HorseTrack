@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { racesApi, raceChecksApi, type RaceCheckItem } from "@/lib/api-client";
 
 // Types
 type Race = {
@@ -36,31 +37,10 @@ type Race = {
   tournamentId: string;
   description?: string;
   distanceMeter: number;
+  trackCondition?: string;
+  weatherSnapshot?: string;
 };
 
-type RaceCheck = {
-  _id: string;
-  raceId: string;
-  raceRegistrationId: {
-    _id: string;
-    status: string;
-  };
-  horseId: {
-    _id: string;
-    name: string;
-    breed: string;
-  };
-  checkedBy: {
-    _id: string;
-    fullName: string;
-  };
-  status: "pending" | "passed" | "failed";
-  healthNote?: string;
-  equipmentNote?: string;
-  jockeyCheckedIn: boolean;
-  jockeyNote?: string;
-  checkedAt?: string;
-};
 
 export default function RefereeRaceDetailPage({
   params,
@@ -71,12 +51,17 @@ export default function RefereeRaceDetailPage({
   const router = useRouter();
 
   const [race, setRace] = useState<Race | null>(null);
-  const [checks, setChecks] = useState<RaceCheck[]>([]);
+  const [checks, setChecks] = useState<RaceCheckItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [myAssignment, setMyAssignment] = useState<any>(null);
+
+  // Conditions form state
+  const [trackCondition, setTrackCondition] = useState("");
+  const [weatherSnapshot, setWeatherSnapshot] = useState("");
+  const [isSubmittingConditions, setIsSubmittingConditions] = useState(false);
 
   // Editing state for checklist items
   const [editingCheckId, setEditingCheckId] = useState<string | null>(null);
@@ -105,14 +90,14 @@ export default function RefereeRaceDetailPage({
       const raceRes = await fetch(`/api/referee/races/${raceId}`);
       if (!raceRes.ok) throw new Error("Không thể tải thông tin cuộc đua");
       const raceData = await raceRes.json();
-      setRace(raceData.data);
+      const raceInfo = raceData.data;
+      setRace(raceInfo);
+      setTrackCondition(raceInfo?.trackCondition || "");
+      setWeatherSnapshot(raceInfo?.weatherSnapshot || "");
 
       // 3. Fetch pre-race checks
-      const checksRes = await fetch(`/api/referee/race-checks/race/${raceId}`);
-      if (checksRes.ok) {
-        const checksData = await checksRes.json();
-        setChecks(checksData.data || []);
-      }
+      const checksData = await raceChecksApi.listByRace(raceId);
+      setChecks(checksData || []);
 
       // 4. Fetch assignments for this race
       if (activeUser) {
@@ -145,13 +130,7 @@ export default function RefereeRaceDetailPage({
   const handleInitializeChecks = async () => {
     setIsInitializing(true);
     try {
-      const res = await fetch(`/api/referee/race-checks/race/${raceId}/initialize`, {
-        method: "POST",
-      });
-      const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.message || "Không thể khởi tạo bản kiểm tra");
-      }
+      await raceChecksApi.initialize(raceId);
       toast.success("Khởi tạo danh sách kiểm tra ngựa thành công!");
       await fetchData();
     } catch (err: any) {
@@ -184,6 +163,20 @@ export default function RefereeRaceDetailPage({
     }
   };
 
+  const handleUpdateConditions = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingConditions(true);
+    try {
+      await racesApi.updateConditions(raceId, { trackCondition, weatherSnapshot });
+      toast.success("Cập nhật điều kiện đường đua thành công!");
+      await fetchData();
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi cập nhật điều kiện.");
+    } finally {
+      setIsSubmittingConditions(false);
+    }
+  };
+
   const startEdit = (check: RaceCheck) => {
     setEditingCheckId(check._id);
     setEditStatus(check.status);
@@ -200,23 +193,13 @@ export default function RefereeRaceDetailPage({
   const saveCheckEdit = async (checkId: string) => {
     setIsSavingCheck(true);
     try {
-      const res = await fetch(`/api/referee/race-checks/${checkId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: editStatus,
-          healthNote: editHealthNote,
-          equipmentNote: editEquipmentNote,
-          jockeyCheckedIn: editJockeyCheckedIn,
-          jockeyNote: editJockeyNote,
-        }),
+      await raceChecksApi.update(checkId, {
+        status: editStatus,
+        healthNote: editHealthNote,
+        equipmentNote: editEquipmentNote,
+        jockeyCheckedIn: editJockeyCheckedIn,
+        jockeyNote: editJockeyNote,
       });
-
-      const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.message || "Không thể cập nhật kết quả kiểm tra");
-      }
-
       toast.success("Cập nhật kết quả kiểm tra thành công!");
       setEditingCheckId(null);
       await fetchData();
@@ -390,6 +373,55 @@ export default function RefereeRaceDetailPage({
         </div>
       </section>
 
+      {/* Race Conditions */}
+      {race.status !== "LIVE" && race.status !== "FINISHED" && race.status !== "RESULT_PUBLISHED" && race.status !== "CANCELLED" && (
+        <section className="rounded-2xl border border-white/10 bg-[#15151E] p-5 space-y-4">
+          <div>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-teal-400">ĐIỀU KIỆN ĐƯỜNG ĐUA</span>
+            <p className="text-xs text-white/40 mt-0.5">Ghi nhận tình trạng mặt đường và thời tiết trước khi xuất phát.</p>
+          </div>
+          <form onSubmit={handleUpdateConditions} className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase text-white/50">Tình trạng mặt đường (Track Condition)</label>
+              <select
+                value={trackCondition}
+                onChange={(e) => setTrackCondition(e.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-[#15151E] px-3 py-2 text-xs text-white focus:border-teal-500 focus:outline-none"
+              >
+                <option value="">-- Chưa xác định --</option>
+                <option value="Dry turf">Dry turf (Cỏ khô)</option>
+                <option value="Wet turf">Wet turf (Cỏ ướt)</option>
+                <option value="Muddy">Muddy (Bùn đất)</option>
+                <option value="Synthetic">Synthetic (Nhân tạo)</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase text-white/50">Thời tiết (Weather Snapshot)</label>
+              <select
+                value={weatherSnapshot}
+                onChange={(e) => setWeatherSnapshot(e.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-[#15151E] px-3 py-2 text-xs text-white focus:border-teal-500 focus:outline-none"
+              >
+                <option value="">-- Chưa xác định --</option>
+                <option value="Sunny">Sunny (Nắng)</option>
+                <option value="Cloudy">Cloudy (Mây)</option>
+                <option value="Rainy">Rainy (Mưa)</option>
+                <option value="Windy">Windy (Gió)</option>
+              </select>
+            </div>
+            <div className="sm:col-span-2 flex justify-end">
+              <Button
+                type="submit"
+                disabled={isSubmittingConditions}
+                className="h-9 px-5 rounded-full bg-teal-500 hover:bg-teal-600 text-black text-xs font-black uppercase"
+              >
+                {isSubmittingConditions ? "Đang lưu..." : "Lưu điều kiện"}
+              </Button>
+            </div>
+          </form>
+        </section>
+      )}
+
       {/* Pre-race checklist items */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
@@ -422,6 +454,7 @@ export default function RefereeRaceDetailPage({
         ) : (
           <div className="grid gap-4">
             {checks.map((check) => {
+              const horse = typeof check.horseId === "object" ? check.horseId : null;
               const isEditing = editingCheckId === check._id;
               return (
                 <article
@@ -442,7 +475,7 @@ export default function RefereeRaceDetailPage({
                       <div className="flex justify-between items-center pb-3 border-b border-white/5">
                         <div>
                           <h4 className="text-xs font-black uppercase text-primary">Cập nhật kiểm tra sức khỏe</h4>
-                          <h3 className="text-sm font-bold text-white uppercase mt-0.5">{check.horseId?.name}</h3>
+                          <h3 className="text-sm font-bold text-white uppercase mt-0.5">{horse?.name}</h3>
                         </div>
                         <StatusBadge
                           label={editStatus === "passed" ? "ĐẠT" : editStatus === "failed" ? "K. ĐẠT" : "Chờ duyệt"}
@@ -541,8 +574,8 @@ export default function RefereeRaceDetailPage({
                             tone={check.status === "passed" ? "green" : check.status === "failed" ? "red" : "yellow"}
                             pulse={check.status === "pending"}
                           />
-                          <h4 className="text-sm font-black uppercase text-white">{check.horseId?.name}</h4>
-                          <span className="text-[10px] text-white/40">({check.horseId?.breed})</span>
+                          <h4 className="text-sm font-black uppercase text-white">{horse?.name}</h4>
+                          <span className="text-[10px] text-white/40">({horse?.breed})</span>
                         </div>
 
                         <div className="grid gap-2 sm:grid-cols-2 text-xs text-white/60">

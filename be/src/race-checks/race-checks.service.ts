@@ -53,8 +53,8 @@ export class RaceChecksService {
 
     // 2. Referee must have an ACCEPTED assignment for this race
     const assignment = await this.assignmentModel.findOne({
-      raceId: dto.raceId,
-      refereeUserId: checkedBy,
+      raceId: new Types.ObjectId(dto.raceId),
+      refereeUserId: new Types.ObjectId(checkedBy),
       status: RefereeAssignmentStatus.ACCEPTED,
     });
     if (!assignment) {
@@ -95,8 +95,8 @@ export class RaceChecksService {
 
     // 4. One check per (raceId, raceRegistrationId) — unique index handles it
     const existing = await this.checkModel.findOne({
-      raceId: dto.raceId,
-      raceRegistrationId: dto.raceRegistrationId,
+      raceId: new Types.ObjectId(dto.raceId),
+      raceRegistrationId: new Types.ObjectId(dto.raceRegistrationId),
     });
     if (existing) {
       throw new ConflictException(
@@ -140,7 +140,7 @@ export class RaceChecksService {
 
   async findByRace(raceId: string) {
     return this.checkModel
-      .find({ raceId })
+      .find({ raceId: new Types.ObjectId(raceId) })
       .populate('raceRegistrationId', 'status')
       .populate('horseId', 'name breed')
       .populate('checkedBy', 'fullName')
@@ -150,15 +150,16 @@ export class RaceChecksService {
 
   /** Returns true if all APPROVED registrations for the race have a PASSED check */
   async areAllPassed(raceId: string): Promise<boolean> {
+    const raceOid = new Types.ObjectId(raceId);
     const approvedCount = await this.registrationModel.countDocuments({
-      raceId,
+      raceId: raceOid,
       status: RegistrationStatus.APPROVED,
     });
 
     if (approvedCount === 0) return false;
 
     const passedCount = await this.checkModel.countDocuments({
-      raceId,
+      raceId: raceOid,
       status: RaceCheckStatus.PASSED,
     });
 
@@ -170,9 +171,10 @@ export class RaceChecksService {
     refereeUserId: string,
   ): Promise<RaceCheckDocument[]> {
     // Validate referee is assigned to this race
+    const raceOid = new Types.ObjectId(raceId);
     const assignment = await this.assignmentModel.findOne({
-      raceId,
-      refereeUserId,
+      raceId: raceOid,
+      refereeUserId: new Types.ObjectId(refereeUserId),
       status: RefereeAssignmentStatus.ACCEPTED,
     });
     if (!assignment) {
@@ -182,14 +184,14 @@ export class RaceChecksService {
     }
 
     const registrations = await this.registrationModel.find({
-      raceId,
+      raceId: raceOid,
       status: RegistrationStatus.APPROVED,
     });
 
     const checks: RaceCheckDocument[] = [];
     for (const reg of registrations) {
       let check = await this.checkModel.findOne({
-        raceId,
+        raceId: raceOid,
         raceRegistrationId: reg._id,
       });
 

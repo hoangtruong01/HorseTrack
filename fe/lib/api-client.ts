@@ -606,3 +606,32 @@ export const registrationsApi = {
       body: JSON.stringify({ reason }),
     }),
 };
+
+// ─── Race Checks ─────────────────────────────────────────────────────────────
+export interface RaceCheckItem {
+  _id: string;
+  raceId: string;
+  raceRegistrationId: { _id: string; status: string } | string;
+  horseId: { _id: string; name: string; breed: string } | string;
+  checkedBy: { _id: string; fullName: string } | string;
+  status: "pending" | "passed" | "failed";
+  healthNote?: string;
+  equipmentNote?: string;
+  jockeyCheckedIn: boolean;
+  jockeyNote?: string;
+  checkedAt?: string;
+}
+
+export const raceChecksApi = {
+  listByRace: (raceId: string) =>
+    apiFetch<RaceCheckItem[]>(`/race-checks/race/${raceId}`),
+  initialize: (raceId: string) =>
+    apiFetch<RaceCheckItem[]>(`/race-checks/race/${raceId}/initialize`, { method: "POST" }),
+  update: (id: string, dto: {
+    status?: "pending" | "passed" | "failed";
+    healthNote?: string;
+    equipmentNote?: string;
+    jockeyCheckedIn?: boolean;
+    jockeyNote?: string;
+  }) => apiFetch<RaceCheckItem>(`/race-checks/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
+};
