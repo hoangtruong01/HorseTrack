@@ -187,7 +187,8 @@ export function addCashoutRequest(
     throw new Error(`Số dư điểm không đủ. Hiện có: ${currentPoints}, cần: ${points}`);
   }
 
-  // NOTE: Do not deduct points immediately! Points are deducted only when confirmed (PAID/APPROVED) by the staff at the counter.
+  // Deduct points immediately, matching Backend behavior
+  mockWalletBalances[userId] -= points;
 
   const redemptionCode = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -209,7 +210,7 @@ export function addCashoutRequest(
     id: `tx-${mockTransactions.length + 1}`,
     type: "withdrawal_requested",
     amount: points,
-    description: `Tạo yêu cầu đổi ${points.toLocaleString()} điểm lấy quà. Mã quy đổi: ${redemptionCode}. Mang mã ra quầy để nhận.`,
+    description: `Tạo yêu cầu đổi ${points.toLocaleString()} điểm lấy quà. Mã quy đổi: ${redemptionCode}. Mang mã này ra quầy để nhận.`,
     createdAt: new Date().toISOString(),
     status: "pending",
   };
@@ -241,6 +242,12 @@ export function updateCashoutStatus(
 
   const req = mockCashoutRequests[requestIndex];
   const previousStatus = req.status;
+
+  if (previousStatus === "PAID" || previousStatus === "REJECTED") {
+    // Request has already been processed fully, cannot modify
+    return req;
+  }
+
   req.status = status;
   if (rejectReason) req.rejectReason = rejectReason;
 
@@ -249,62 +256,45 @@ export function updateCashoutStatus(
     req.paidAt = new Date().toISOString();
   }
 
-  // Deduct points only when transitioning to APPROVED or PAID (if not already deducted)
-  if (previousStatus === "PENDING" && (status === "APPROVED" || status === "PAID")) {
-    const currentPoints = mockWalletBalances[req.userId] || 0;
-    if (currentPoints < req.points) {
-      req.status = "REJECTED";
-      req.rejectReason = "Người dùng không đủ số dư điểm tại thời điểm xác nhận.";
-      // Mark transaction as failed
-      const txIndex = mockTransactions.findIndex(
-        (t) =>
-          t.type === "withdrawal_requested" &&
-          t.amount === req.points &&
-          t.description.includes(req.redemptionCode)
-      );
-      if (txIndex !== -1) {
-        mockTransactions[txIndex].status = "rejected";
-        mockTransactions[txIndex].description += " (Thất bại: Không đủ điểm)";
-      }
-      return req;
-    }
-
-    // Actually deduct points
-    mockWalletBalances[req.userId] -= req.points;
-  }
-
-  // Update transaction status
+  // Find the original pending transaction index
   const txIndex = mockTransactions.findIndex(
     (t) =>
       t.type === "withdrawal_requested" &&
       t.amount === req.points &&
       t.description.includes(req.redemptionCode)
   );
-  if (txIndex !== -1) {
-    if (status === "APPROVED" || status === "PAID") {
-      mockTransactions[txIndex].status = "completed";
-      mockTransactions[txIndex].description = `Đã nhận quà quy đổi từ ${req.points.toLocaleString()} điểm thưởng (Mã: ${req.redemptionCode}).`;
-    }
-    if (status === "REJECTED") {
-      mockTransactions[txIndex].status = "rejected";
-      mockTransactions[txIndex].description = `Yêu cầu đổi thưởng bị từ chối (Mã: ${req.redemptionCode}). Lý do: ${rejectReason || "Không xác định"}`;
+
+  // If approved or paid, update original transaction status
+  if (status === "APPROVED" || status === "PAID") {
+    if (txIndex !== -1) {
+      if (status === "PAID") {
+        mockTransactions[txIndex].status = "completed";
+        mockTransactions[txIndex].description = `Đã nhận quà quy đổi từ ${req.points.toLocaleString()} điểm thưởng (Mã: ${req.redemptionCode}).`;
+      } else {
+        mockTransactions[txIndex].status = "pending"; // keeps pending until paid
+      }
     }
   }
 
-  // If rejected after being APPROVED, refund points
-  if (status === "REJECTED" && previousStatus === "APPROVED") {
+  // If rejected, refund the points (since they were deducted immediately at request time)
+  if (status === "REJECTED" && (previousStatus === "PENDING" || previousStatus === "APPROVED")) {
     mockWalletBalances[req.userId] += req.points;
 
-    // Add refund transaction
-    const newTx: WalletTransaction = {
+    if (txIndex !== -1) {
+      mockTransactions[txIndex].status = "rejected";
+      mockTransactions[txIndex].description = `Yêu cầu đổi thưởng bị từ chối (Mã: ${req.redemptionCode}). Lý do: ${rejectReason || "Không xác định"}`;
+    }
+
+    // Add refund transaction to ledger log
+    const refundTx: WalletTransaction = {
       id: `tx-${mockTransactions.length + 1}`,
       type: "prediction_refund",
       amount: req.points,
-      description: `Hoàn trả ${req.points.toLocaleString()} điểm do yêu cầu đổi thưởng mã ${req.redemptionCode} bị hủy sau khi duyệt`,
+      description: `Hoàn trả ${req.points.toLocaleString()} điểm do yêu cầu đổi thưởng mã ${req.redemptionCode} bị từ chối`,
       createdAt: new Date().toISOString(),
       status: "completed",
     };
-    mockTransactions = [newTx, ...mockTransactions];
+    mockTransactions = [refundTx, ...mockTransactions];
   }
 
   // Add audit log

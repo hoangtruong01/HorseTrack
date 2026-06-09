@@ -10,8 +10,8 @@ export default function CounterStaffDashboard() {
   const [stats, setStats] = useState({
     totalCount: 0,
     pendingCount: 0,
-    approvedCount: 0,
     paidCount: 0,
+    rejectedCount: 0,
     totalPoints: 0,
   });
   const [recentCashouts, setRecentCashouts] = useState<CashoutItem[]>([]);
@@ -25,20 +25,20 @@ export default function CounterStaffDashboard() {
           const list = res.data;
           const totalCount = res.meta?.total ?? list.length;
           const pendingCount = list.filter((c) => c.status === "PENDING").length;
-          const approvedCount = list.filter((c) => c.status === "APPROVED").length;
           const paidCount = list.filter((c) => c.status === "PAID").length;
+          const rejectedCount = list.filter((c) => c.status === "REJECTED").length;
           const totalPoints = list
-            .filter((c) => c.status === "PAID" || c.status === "APPROVED")
+            .filter((c) => c.status === "PAID")
             .reduce((sum, c) => sum + c.pointsRedeemed, 0);
 
           setStats({
             totalCount,
             pendingCount,
-            approvedCount,
             paidCount,
+            rejectedCount,
             totalPoints,
           });
-          setRecentCashouts(list.slice(0, 5));
+          setRecentCashouts(list);
         }
       } catch (err) {
         console.error("Lỗi lấy dữ liệu quầy:", err);
@@ -74,18 +74,18 @@ export default function CounterStaffDashboard() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm transition duration-300 hover:border-blue-300 dark:border-blue-500/10 dark:bg-gradient-to-br dark:from-[#121724]/90 dark:to-[#0E121C]/90">
+        <div className="relative overflow-hidden rounded-2xl border border-red-200 bg-red-50 p-5 shadow-sm transition duration-300 hover:border-red-300 dark:border-red-500/10 dark:bg-gradient-to-br dark:from-[#1A1212]/90 dark:to-[#120A0A]/90">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-widest text-blue-800 dark:text-blue-400/80">
-              Đã Duyệt (Chờ Trao Quà)
+            <p className="text-xs font-black uppercase tracking-widest text-red-800 dark:text-red-400/80">
+              Đã Từ Chối
             </p>
-            <Sparkles className="size-5 text-blue-600 dark:text-blue-400" />
+            <Sparkles className="size-5 text-red-600 dark:text-red-400" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-black text-foreground">
-              {loading ? "—" : stats.approvedCount}
+              {loading ? "—" : stats.rejectedCount}
             </span>
-            <span className="text-xs text-muted-foreground">mã đã xác thực</span>
+            <span className="text-xs text-muted-foreground">mã bị hủy</span>
           </div>
         </div>
 
@@ -144,74 +144,162 @@ export default function CounterStaffDashboard() {
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
-        <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-foreground">
-          Các lượt quy đổi gần đây
-        </h3>
-        {loading ? (
-          <div className="py-8 text-center text-xs text-muted-foreground">
-            Đang tải lịch sử đổi...
-          </div>
-        ) : recentCashouts.length === 0 ? (
-          <div className="py-8 text-center text-xs text-muted-foreground">
-            Chưa có giao dịch quy đổi nào được thực hiện.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-border text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                  <th className="pb-3 pr-4">Mã Đổi Quà</th>
-                  <th className="pb-3 pr-4">Khách hàng</th>
-                  <th className="pb-3 pr-4 text-center">Điểm đổi</th>
-                  <th className="pb-3 pr-4">Trạng thái</th>
-                  <th className="pb-3 text-right">Thời gian</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border text-foreground">
-                {recentCashouts.map((item) => (
-                  <tr key={item._id} className="hover:bg-muted/40">
-                    <td className="py-3 pr-4 font-mono font-bold text-primary">
-                      {item.redemptionCode}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {typeof item.userId === "object"
-                        ? item.userId.fullName
-                        : "Khách hàng"}
-                      <span className="block text-[10px] text-muted-foreground">
-                        {typeof item.userId === "object" ? item.userId.email : "—"}
-                      </span>
-                    </td>
-                    <td className="py-3 pr-4 text-center font-mono font-bold text-amber-700 dark:text-yellow-500">
-                      {item.pointsRedeemed.toLocaleString()}
-                    </td>
-                    <td className="py-3 pr-4">
-                      <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
-                          item.status === "PENDING"
-                            ? "border border-amber-500/30 bg-amber-50 text-amber-800"
-                            : item.status === "APPROVED"
-                              ? "border border-blue-500/30 bg-blue-50 text-blue-800"
-                              : item.status === "PAID"
-                                ? "border border-emerald-500/30 bg-emerald-50 text-emerald-800"
-                                : "border border-red-500/30 bg-red-50 text-red-800"
-                        }`}
-                      >
-                        {item.status === "PAID" ? "ĐÃ TRAO QUÀ" : item.status}
-                      </span>
-                    </td>
-                    <td className="py-3 text-right text-muted-foreground">
-                      {item.createdAt
-                        ? new Date(item.createdAt).toLocaleDateString("vi-VN")
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <HistoryTable loading={loading} recentCashouts={recentCashouts} />
     </main>
+  );
+}
+
+function HistoryTable({ loading, recentCashouts }: { loading: boolean; recentCashouts: CashoutItem[] }) {
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  const filtered = recentCashouts.filter((item) => {
+    let matchSearch = true;
+    if (search) {
+      matchSearch = item.redemptionCode.toLowerCase().includes(search.toLowerCase());
+    }
+    let matchStart = true;
+    let matchEnd = true;
+    if (item.createdAt) {
+      const d = new Date(item.createdAt);
+      d.setHours(0,0,0,0);
+      if (startDate) {
+        const s = new Date(startDate);
+        s.setHours(0,0,0,0);
+        matchStart = d.getTime() >= s.getTime();
+      }
+      if (endDate) {
+        const e = new Date(endDate);
+        e.setHours(0,0,0,0);
+        matchEnd = d.getTime() <= e.getTime();
+      }
+    }
+    return matchSearch && matchStart && matchEnd;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / limit));
+  const currentData = filtered.slice((page - 1) * limit, page * limit);
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
+            Lịch sử giao dịch thông minh
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">Tra cứu, lọc và phân trang dữ liệu thật từ hệ thống.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="text"
+            placeholder="Tìm theo mã..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="h-9 rounded-lg border border-border bg-muted/50 px-3 text-xs outline-none focus:border-primary"
+          />
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+            className="h-9 rounded-lg border border-border bg-muted/50 px-3 text-xs outline-none focus:border-primary"
+          />
+          <span className="text-xs text-muted-foreground">-</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+            className="h-9 rounded-lg border border-border bg-muted/50 px-3 text-xs outline-none focus:border-primary"
+          />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="py-8 text-center text-xs text-muted-foreground">
+          Đang tải lịch sử đổi...
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-8 text-center text-xs text-muted-foreground">
+          Không tìm thấy giao dịch quy đổi nào phù hợp.
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-border bg-muted/20 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                <th className="py-3 px-4">Mã Đổi Quà</th>
+                <th className="py-3 px-4">Khách hàng</th>
+                <th className="py-3 px-4 text-center">Điểm đổi</th>
+                <th className="py-3 px-4">Trạng thái</th>
+                <th className="py-3 px-4 text-right">Thời gian</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border text-foreground">
+              {currentData.map((item) => (
+                <tr key={item._id} className="hover:bg-muted/40 transition">
+                  <td className="py-3 px-4 font-mono font-bold text-primary">
+                    {item.redemptionCode}
+                  </td>
+                  <td className="py-3 px-4">
+                    {typeof item.userId === "object"
+                      ? item.userId.fullName
+                      : "Khách hàng"}
+                    <span className="block text-[10px] text-muted-foreground">
+                      {typeof item.userId === "object" ? item.userId.email : "—"}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center font-mono font-bold text-amber-700 dark:text-yellow-500">
+                    {item.pointsRedeemed.toLocaleString()}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`inline-block rounded-md px-2 py-1 text-[9px] font-black uppercase tracking-wider ${
+                        item.status === "PENDING"
+                          ? "border border-amber-500/30 bg-amber-50 text-amber-800"
+                          : item.status === "APPROVED"
+                            ? "border border-blue-500/30 bg-blue-50 text-blue-800"
+                            : item.status === "PAID"
+                              ? "border border-emerald-500/30 bg-emerald-50 text-emerald-800"
+                              : "border border-red-500/30 bg-red-50 text-red-800"
+                      }`}
+                    >
+                      {item.status === "PAID" ? "ĐÃ TRAO QUÀ" : item.status === "REJECTED" ? "TỪ CHỐI" : "CHỜ TẠI QUẦY"}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-right text-muted-foreground">
+                    {item.createdAt
+                      ? new Date(item.createdAt).toLocaleString("vi-VN")
+                      : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-xs">
+            <span className="text-muted-foreground">
+              Hiển thị {(page - 1) * limit + 1} đến {Math.min(page * limit, filtered.length)} trong tổng số {filtered.length} kết quả
+            </span>
+            <div className="flex gap-2">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage(p => p - 1)}
+                className="rounded border border-border px-3 py-1.5 transition hover:bg-muted disabled:opacity-50"
+              >
+                Trang trước
+              </button>
+              <button
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => p + 1)}
+                className="rounded border border-border px-3 py-1.5 transition hover:bg-muted disabled:opacity-50"
+              >
+                Trang sau
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -127,6 +127,18 @@ export class WalletController {
     );
   }
 
+  @Get('cashout/lookup')
+  @Roles(RoleName.ADMIN, RoleName.COUNTER_STAFF)
+  @ApiOperation({
+    summary: 'Lookup a specific cashout request by code (Admin / Counter Staff only)',
+  })
+  lookupCashout(@Query('code') code: string) {
+    if (!code) {
+      throw new BadRequestException('Redemption code is required');
+    }
+    return this.walletService.lookupCashout(code);
+  }
+
   @Get('cashout/all')
   @Roles(RoleName.ADMIN, RoleName.COUNTER_STAFF)
   @ApiOperation({
