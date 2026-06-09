@@ -16,6 +16,7 @@ import {
   Siren,
   Star,
   Trophy,
+  UserCircle,
   Users,
   Wallet,
 } from "lucide-react";
@@ -238,6 +239,13 @@ export const dashboardNavigation: NavigationItem[] = [
     role: "Jockey",
     icon: Medal,
     description: "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch.",
+  },
+  {
+    title: "Hồ Sơ Của Tôi",
+    href: "/jockey/profile",
+    role: "Jockey",
+    icon: UserCircle,
+    description: "Tạo và cập nhật hồ sơ nài ngựa: chiều cao, cân nặng, kinh nghiệm.",
   },
   {
     title: "Ví Của Tôi",

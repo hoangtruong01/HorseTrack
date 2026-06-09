@@ -184,7 +184,11 @@ export interface JockeyItem {
   userId?: { _id: string; fullName: string; email: string } | string;
   licenseNumber?: string;
   experienceYears?: number;
-  weight?: number;
+  heightCm?: number;
+  weightKg?: number;
+  skillLevel?: string;
+  bio?: string;
+  specialty?: string;
   status: string;
   totalRaces?: number;
   wins?: number;
@@ -199,6 +203,21 @@ export const jockeysApi = {
     if (params?.status) qs.set("status", params.status);
     return apiFetch<PaginatedResult<JockeyItem>>(`/jockeys/admin/all?${qs}`);
   },
+  getMe: () => apiFetch<JockeyItem>("/jockeys/me"),
+  createProfile: (dto: {
+    heightCm: number;
+    weightKg: number;
+    experienceYears?: number;
+    skillLevel?: string;
+    bio?: string;
+  }) => apiFetch<JockeyItem>("/jockeys/profile", { method: "POST", body: JSON.stringify(dto) }),
+  updateProfile: (id: string, dto: {
+    heightCm?: number;
+    weightKg?: number;
+    experienceYears?: number;
+    skillLevel?: string;
+    bio?: string;
+  }) => apiFetch<JockeyItem>(`/jockeys/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
   changeStatus: (id: string, status: string) =>
     apiFetch(`/jockeys/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
 };
