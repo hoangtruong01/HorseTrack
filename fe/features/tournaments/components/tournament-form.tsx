@@ -18,7 +18,6 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import Image from "next/image";
 
 export function TournamentForm() {
   const router = useRouter();
@@ -160,7 +159,7 @@ export function TournamentForm() {
       toast.success(`Giải đấu "${name}" đã được tạo thành công!`);
 
       // Redirect back to Admin dashboard
-      router.push("/admin");
+      router.push("/admin/tournaments");
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -361,7 +360,7 @@ export function TournamentForm() {
             >
               {imagePreview ? (
                 <div className="relative w-full h-[160px] rounded-lg overflow-hidden">
-                  <Image
+                  <img
                     src={imagePreview}
                     alt="Preview"
                     className="w-full h-full object-cover"
