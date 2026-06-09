@@ -16,21 +16,30 @@ function RootLayoutContent() {
   const { user, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const [isMounted, setIsMounted] = React.useState(false);
 
   useEffect(() => {
-    if (isLoading) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
-    // Nếu chưa đăng nhập và không nằm trong thư mục xác thực, chuyển hướng sang login
-    if (!user && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } 
-    // Nếu đã đăng nhập và đang ở màn hình login/register, chuyển hướng về trang chủ
-    else if (user && inAuthGroup) {
-      router.replace('/(tabs)');
-    }
-  }, [user, isLoading, segments]);
+    const timer = setTimeout(() => {
+      // Nếu chưa đăng nhập và không nằm trong thư mục xác thực, chuyển hướng sang login
+      if (!user && !inAuthGroup) {
+        router.replace('/(auth)/login');
+      } 
+      // Nếu đã đăng nhập và đang ở màn hình login/register, chuyển hướng về trang chủ
+      else if (user && inAuthGroup) {
+        router.replace('/(tabs)');
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [user, isLoading, segments, isMounted]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
