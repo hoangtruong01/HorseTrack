@@ -3,6 +3,7 @@
 import { ArrowDownLeft, ArrowUpRight, Award, Calendar, Clock, Coins, Copy, Search, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ export type TransactionHistoryProps = {
 };
 
 export function TransactionHistory({ transactions, role }: TransactionHistoryProps) {
+  const { t } = useTranslation();
   const [filterType, setFilterType] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -34,38 +36,38 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
     WalletUiTransaction["type"],
     { icon: React.ComponentType<{ className?: string }>; color: string; label: string }
   > = {
-    deposit: { icon: ArrowDownLeft, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Diem ban dau" },
-    withdrawal_requested: { icon: ArrowUpRight, color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: "Doi qua (Cho)" },
-    withdrawal_approved: { icon: ArrowUpRight, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: "Doi qua (Duyet)" },
-    withdrawal_paid: { icon: ArrowUpRight, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Doi qua (Thanh cong)" },
-    withdrawal_rejected: { icon: ArrowUpRight, color: "text-red-400 bg-red-500/10 border-red-500/20", label: "Doi qua (Tu choi)" },
-    withdrawal_refund: { icon: ArrowDownLeft, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Hoan diem doi qua" },
-    prize_owner: { icon: Award, color: "text-primary bg-primary/10 border-primary/20", label: "Giai Owner" },
-    prize_jockey: { icon: Award, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: "Giai Jockey" },
-    prediction_win: { icon: Sparkles, color: "text-purple-400 bg-purple-500/10 border-purple-500/20", label: "Du doan thang" },
-    prediction_refund: { icon: Coins, color: "text-sky-400 bg-sky-500/10 border-sky-500/20", label: "Hoan diem" },
-    salary_bonus: { icon: Award, color: "text-violet-400 bg-violet-500/10 border-violet-500/20", label: "Luong/Thuong" },
+    deposit: { icon: ArrowDownLeft, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: t("wallet.transactions.types.deposit") },
+    withdrawal_requested: { icon: ArrowUpRight, color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: t("wallet.transactions.types.withdrawalRequested") },
+    withdrawal_approved: { icon: ArrowUpRight, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: t("wallet.transactions.types.withdrawalApproved") },
+    withdrawal_paid: { icon: ArrowUpRight, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: t("wallet.transactions.types.withdrawalPaid") },
+    withdrawal_rejected: { icon: ArrowUpRight, color: "text-red-400 bg-red-500/10 border-red-500/20", label: t("wallet.transactions.types.withdrawalRejected") },
+    withdrawal_refund: { icon: ArrowDownLeft, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: t("wallet.transactions.types.predictionRefund") },
+    prize_owner: { icon: Award, color: "text-primary bg-primary/10 border-primary/20", label: t("wallet.transactions.types.prizeOwner") },
+    prize_jockey: { icon: Award, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: t("wallet.transactions.types.prizeJockey") },
+    prediction_win: { icon: Sparkles, color: "text-purple-400 bg-purple-500/10 border-purple-500/20", label: t("wallet.transactions.types.predictionWin") },
+    prediction_refund: { icon: Coins, color: "text-sky-400 bg-sky-500/10 border-sky-500/20", label: t("wallet.transactions.types.predictionRefund") },
+    salary_bonus: { icon: Award, color: "text-violet-400 bg-violet-500/10 border-violet-500/20", label: t("wallet.transactions.types.generic") },
   };
 
   const filterOptions = useMemo(() => {
-    const options = [{ id: "all", label: "Tat ca" }];
+    const options = [{ id: "all", label: t("wallet.transactions.filters.all") }];
     
     if (role !== "referee" && role !== "spectator") {
-      options.push({ id: "prizes", label: "Chu/Nai ngua" });
+      options.push({ id: "prizes", label: t("wallet.transactions.filters.prizes") });
     }
     
     if (role !== "owner" && role !== "jockey" && role !== "referee") {
-      options.push({ id: "predictions", label: "Du doan" });
+      options.push({ id: "predictions", label: t("wallet.transactions.filters.predictions") });
     }
 
     if (role === "referee" || role === "admin") {
-      options.push({ id: "salary", label: "Luong thuong" });
+      options.push({ id: "salary", label: t("wallet.transactions.filters.salary") || "Lương thưởng" });
     }
 
-    options.push({ id: "cashouts", label: "Doi qua" });
+    options.push({ id: "cashouts", label: t("wallet.transactions.filters.cashouts") });
     
     return options;
-  }, [role]);
+  }, [role, t]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
@@ -74,10 +76,10 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
       <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.24em] text-primary">
-            <Coins className="size-3.5 animate-pulse" /> So cai diem thuong
+            <Coins className="size-3.5 animate-pulse" /> {t("wallet.transactions.eyebrow")}
           </p>
           <h2 className="mt-1.5 text-xl font-black uppercase tracking-tight text-foreground sm:text-2xl">
-            Lich su giao dich diem
+            {t("wallet.transactions.title")}
           </h2>
         </div>
 
@@ -103,7 +105,7 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
         <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
         <input
           type="text"
-          placeholder="Tim kiem theo mo ta giao dich..."
+          placeholder={t("wallet.transactions.searchPlaceholder")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="h-12 w-full rounded-xl border border-border bg-muted/50 pl-11 pr-6 text-sm text-foreground outline-none placeholder:text-muted-foreground transition focus:border-primary"
@@ -115,10 +117,10 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
           <div className="flex flex-col items-center justify-center p-12 text-center">
             <Coins className="size-10 text-muted-foreground/30" />
             <p className="mt-4 text-xs font-black uppercase tracking-wider text-muted-foreground/60">
-              Khong tim thay giao dich nao
+              {t("wallet.transactions.emptyTitle")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Thu doi bo loc hoac tu khoa tim kiem.
+              {t("wallet.transactions.emptyHint")}
             </p>
           </div>
         ) : (
@@ -126,15 +128,15 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
             <table className="w-full border-collapse text-left text-xs sm:text-sm">
               <thead className="border-b border-border bg-muted/[0.03] text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">Loai giao dich</th>
-                  <th className="px-4 py-3">Chi tiet</th>
-                  <th className="px-4 py-3">Thoi gian</th>
-                  <th className="px-4 py-3 text-right">Bien dong diem</th>
+                  <th className="px-4 py-3">{t("wallet.transactions.colType")}</th>
+                  <th className="px-4 py-3">{t("wallet.transactions.colDetails")}</th>
+                  <th className="px-4 py-3">{t("wallet.transactions.colTime")}</th>
+                  <th className="px-4 py-3 text-right">{t("wallet.transactions.colPoints")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {filteredTransactions.map((tx) => {
-                  const meta = typeMeta[tx.type] || { icon: Coins, color: "text-muted-foreground bg-muted border-border", label: "Giao dich" };
+                  const meta = typeMeta[tx.type] || { icon: Coins, color: "text-muted-foreground bg-muted border-border", label: t("wallet.transactions.types.generic") };
                   const Icon = meta.icon;
                   const isPositive = ["deposit", "prize_owner", "prize_jockey", "prediction_win", "prediction_refund", "salary_bonus", "withdrawal_refund"].includes(tx.type);
                   const codeMatch = tx.description.match(/(RWD-[A-Z0-9]+)/);
@@ -165,10 +167,10 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
                             <button
                               onClick={() => {
                                 navigator.clipboard.writeText(code);
-                                toast.success(`Da sao chep ma quy doi: ${code}`);
+                                toast.success(t("wallet.balance.refreshSuccess") ? `Đã sao chép mã: ${code}` : `Copied code: ${code}`);
                               }}
                               className="cursor-pointer rounded p-1 text-muted-foreground/60 transition hover:bg-muted hover:text-foreground"
-                              title="Sao chep ma"
+                              title="Sao chép"
                             >
                               <Copy className="size-3.5" />
                             </button>
@@ -176,7 +178,7 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
                         )}
                         <div className="mt-1.5 flex items-center gap-2">
                           <StatusBadge
-                            label={tx.status === "completed" ? "Thanh cong" : tx.status === "pending" ? "Dang cho" : "Tu choi/Loi"}
+                            label={tx.status === "completed" ? t("wallet.transactions.statusCompleted") : tx.status === "pending" ? t("wallet.transactions.statusPending") : t("wallet.transactions.statusFailed")}
                             tone={tx.status === "completed" ? "green" : tx.status === "pending" ? "slate" : "red"}
                           />
                         </div>
@@ -195,7 +197,7 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
                       </td>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right">
                         <span className={cn("font-mono text-xs font-black sm:text-sm", isPositive ? "text-emerald-400" : "text-primary")}>
-                          {isPositive ? "+" : "-"}{tx.amount.toLocaleString("vi-VN")} diem
+                          {isPositive ? "+" : "-"}{tx.amount.toLocaleString("vi-VN")} {t("wallet.balance.pointsUnit")}
                         </span>
                       </td>
                     </tr>

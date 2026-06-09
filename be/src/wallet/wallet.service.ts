@@ -230,6 +230,20 @@ export class WalletService {
     };
   }
 
+  async lookupCashout(code: string): Promise<CashoutRequestDocument> {
+    const request = await this.cashoutModel
+      .findOne({ redemptionCode: { $regex: new RegExp(`^${code}$`, 'i') } })
+      .populate('userId', 'fullName email phone roles')
+      .populate('approvedBy', 'fullName')
+      .populate('paidBy', 'fullName')
+      .exec();
+
+    if (!request) {
+      throw new NotFoundException('Cashout request not found');
+    }
+    return request;
+  }
+
   async findAllTransactions(page = 1, limit = 20) {
     const [data, total] = await Promise.all([
       this.transactionModel

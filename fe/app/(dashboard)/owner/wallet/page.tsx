@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { WalletBalance } from "@/features/wallet/components/wallet-balance";
@@ -12,6 +13,7 @@ import { mapLedgerTransactions, type WalletUiTransaction } from "@/features/wall
 import { walletApi, rewardPointLedgerApi } from "@/lib/api-client";
 
 export default function OwnerWalletPage() {
+  const { t } = useTranslation();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<WalletUiTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,11 +29,11 @@ export default function OwnerWalletPage() {
       setBalance(balanceRes.balance ?? 0);
       setTransactions(mapLedgerTransactions(historyRes.data || []));
     } catch (err: any) {
-      toast.error(err.message || "Khong the tai thong tin vi tu Backend.");
+      toast.error(err.message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchWalletData();
@@ -40,26 +42,26 @@ export default function OwnerWalletPage() {
   const handleCashoutSubmit = async (points: number) => {
     try {
       await walletApi.requestCashout({ pointsToRedeem: points });
-      toast.success(`Yeu cau doi ${points.toLocaleString("vi-VN")} diem da duoc gui.`);
+      toast.success(t("wallet.cashoutForm.successMsg", { points: points.toLocaleString("vi-VN") }));
       setShowCashoutForm(false);
       await fetchWalletData();
     } catch (err: any) {
-      toast.error(err.message || "Da xay ra loi khi tao yeu cau rut diem.");
+      toast.error(err.message || t("wallet.cashoutForm.errInvalid", "Đã xảy ra lỗi khi tạo yêu cầu rút điểm."));
     }
   };
 
   return (
     <main className="space-y-6 max-w-5xl mx-auto">
       <PageHeader
-        eyebrow="Vi diem thuong"
-        title="Quan Ly Thu Nhap"
-        description="Theo doi so du diem thuong tich luy tu ket qua giai dua va tao ma doi thuong tai quay."
+        eyebrow={t("owner.hero.wallet")}
+        title={t("owner.quickActions.wallet.title")}
+        description={t("owner.quickActions.wallet.desc")}
       />
 
       {isLoading && transactions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
-          <p className="mt-4 text-xs font-mono uppercase tracking-widest">Dang tai lich su tai chinh...</p>
+          <p className="mt-4 text-xs font-mono uppercase tracking-widest">{t("counterStaff.recentRedemptions.loading", "Đang tải lịch sử tài chính...")}</p>
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-12 items-start">

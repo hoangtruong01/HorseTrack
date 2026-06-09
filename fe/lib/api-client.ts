@@ -493,6 +493,8 @@ export const walletApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<CashoutItem>>(`/wallet/cashout/all?${qs}`);
   },
+  lookupCashout: (code: string) =>
+    apiFetch<CashoutItem>(`/wallet/cashout/lookup?code=${code}`),
   processCashout: (id: string, status: string) =>
     apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status }) }),
   depositForUser: (userId: string, amount: number) =>
