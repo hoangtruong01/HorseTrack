@@ -92,268 +92,300 @@ export function CashoutApprovalQueue({
     return "slate";
   };
 
+  // Tính toán các chỉ số KPI tại quầy giao dịch (Processed Today & Pending Queue)
+  const processedTodayCount = historyItems.filter(
+    (item) => item.status === "PAID" || item.status === "REJECTED"
+  ).length;
+
+  const pendingQueueCount = historyItems.filter(
+    (item) => item.status === "PENDING"
+  ).length;
+
   return (
-    <section className="space-y-8 animate-[fadeIn_0.5s_ease-out]">
-      {/* 1. Tra cứu mã đổi thưởng tại quầy */}
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-lg sm:p-8">
-        <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary">
-          {t("wallet.redemption.lookupTitle")}
-        </h2>
-        <p className="mt-1 mb-4 text-sm text-muted-foreground">
-          {t("wallet.redemption.lookupDesc")}
-        </p>
+    <section className="animate-[fadeIn_0.5s_ease-out]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
+        {/* CỘT TRÁI (col-span-5): Tra cứu & Xử lý nhanh */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-lg sm:p-6">
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary">
+              {t("wallet.redemption.lookupTitle")}
+            </h2>
+            <p className="mt-1 mb-4 text-xs text-muted-foreground">
+              {t("wallet.redemption.lookupDesc")}
+            </p>
 
-        <form onSubmit={handleLookupSubmit} className="flex gap-3">
-          <input
-            id="search-code-input"
-            type="text"
-            placeholder={t("wallet.redemption.placeholder")}
-            value={searchCode}
-            onChange={(e) => setSearchCode(e.target.value)}
-            disabled={isSearching}
-            className="h-14 flex-1 rounded-xl border border-border bg-muted px-5 font-mono text-lg font-black text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition disabled:opacity-50"
-          />
-          <Button
-            type="submit"
-            disabled={isSearching || !searchCode.trim()}
-            className="h-14 rounded-xl px-8 font-black uppercase bg-primary hover:bg-[#B80500] text-white shadow-md transition-colors"
-          >
-            {isSearching ? (
-              <Loader2 className="size-5 animate-spin" />
-            ) : (
-              t("wallet.redemption.btnLookup")
-            )}
-          </Button>
-          {(searchCode || lookupResult || searchError) && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClear}
-              className="h-14 rounded-xl px-6 font-bold border-border text-foreground hover:bg-muted"
-            >
-              {t("wallet.redemption.btnClear")}
-            </Button>
-          )}
-        </form>
-
-        {/* Kết quả tra cứu */}
-        <div className="mt-6">
-          {isSearching && (
-            <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-              <Loader2 className="size-8 animate-spin text-primary" />
-              <p className="mt-2 text-xs font-semibold">{t("wallet.redemption.loadingLookup")}</p>
-            </div>
-          )}
-
-          {!isSearching && searchError && (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 p-8 text-center animate-in fade-in duration-200">
-              <AlertCircle className="size-12 text-primary" />
-              <p className="mt-4 text-sm font-black uppercase tracking-wider text-foreground">
-                {t("wallet.redemption.emptyLookup")}
-              </p>
-            </div>
-          )}
-
-          {!isSearching && lookupResult && (
-            <div className="rounded-xl border border-border bg-muted/10 overflow-hidden shadow-md animate-in fade-in duration-300">
-              <div className="bg-muted/30 px-6 py-4 border-b border-border flex justify-between items-center">
-                <h3 className="font-black uppercase text-foreground flex items-center gap-2">
-                  <Gift className="size-5 text-primary" /> {t("wallet.redemption.resultTitle")}
-                </h3>
-                <StatusBadge
-                  label={getStatusText(lookupResult.status)}
-                  tone={getStatusTone(lookupResult.status)}
-                />
-              </div>
-
-              <div className="p-6 grid gap-6 sm:grid-cols-2">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">
-                      {t("wallet.redemption.userLabel")}
-                    </p>
-                    <p className="font-black text-lg text-foreground">{lookupResult.userFullName}</p>
-                    <p className="text-xs font-bold text-primary mt-0.5">{getRoleLabel(lookupResult.userRole)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">
-                      {t("wallet.redemption.codeLabel")}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-base font-black tracking-wider text-primary">
-                        {lookupResult.redemptionCode}
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(lookupResult.redemptionCode)}
-                        type="button"
-                        className="cursor-pointer rounded p-1 text-muted-foreground/60 hover:bg-muted/10 hover:text-foreground transition"
-                        title="Sao chép"
-                      >
-                        <Copy className="size-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">
-                      {t("wallet.redemption.pointsLabel")}
-                    </p>
-                    <p className="font-mono text-3xl font-black text-foreground">
-                      {lookupResult.points.toLocaleString("vi-VN")}{" "}
-                      <span className="text-sm text-muted-foreground font-bold">
-                        {t("wallet.redemption.pointsSuffix")}
-                      </span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">
-                      {t("wallet.redemption.timeLabel")}
-                    </p>
-                    <p className="font-mono text-sm text-foreground">
-                      {new Date(lookupResult.createdAt).toLocaleString("vi-VN")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {(lookupResult.status === "PENDING" || lookupResult.status === "APPROVED") && (
-                <div className="bg-muted/20 px-6 py-4 border-t border-border flex justify-end gap-3">
+            <form onSubmit={handleLookupSubmit} className="flex flex-col gap-3 sm:flex-row">
+              <input
+                id="search-code-input"
+                type="text"
+                placeholder={t("wallet.redemption.placeholder")}
+                value={searchCode}
+                onChange={(e) => setSearchCode(e.target.value)}
+                disabled={isSearching}
+                className="h-12 flex-1 rounded-xl border border-border bg-muted px-4 font-mono text-base font-black text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition disabled:opacity-50"
+              />
+              <div className="flex gap-2 shrink-0">
+                <Button
+                  type="submit"
+                  disabled={isSearching || !searchCode.trim()}
+                  className="h-12 rounded-xl px-5 font-black uppercase bg-primary hover:bg-[#B80500] text-white shadow-md transition-colors"
+                >
+                  {isSearching ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    t("wallet.redemption.btnLookup")
+                  )}
+                </Button>
+                {(searchCode || lookupResult || searchError) && (
                   <Button
-                    onClick={() => {
-                      setSelectedRequest(lookupResult);
-                      setShowRejectDialog(true);
-                    }}
-                    disabled={isProcessing !== null}
+                    type="button"
                     variant="outline"
-                    className="h-11 rounded-full px-6 font-bold text-foreground border-border hover:bg-muted hover:text-red-500 transition-colors"
+                    onClick={handleClear}
+                    className="h-12 rounded-xl px-4 font-bold border-border text-foreground hover:bg-muted"
                   >
-                    {t("wallet.redemption.btnReject")}
+                    {t("wallet.redemption.btnClear")}
                   </Button>
-                  <Button
-                    onClick={() => handleAction(lookupResult.id, "PAID")}
-                    disabled={isProcessing !== null}
-                    className="h-11 rounded-full px-8 font-black uppercase shadow-[0_4px_12px_rgba(225,6,0,0.25)] hover:bg-[#B80500] transition-colors"
-                  >
-                    {isProcessing === `${lookupResult.id}-PAID` ? (
-                      <Loader2 className="size-4 animate-spin mr-2" />
-                    ) : (
-                      <Gift className="mr-2 size-4" />
-                    )}
-                    {t("wallet.redemption.btnConfirmPaid")}
-                  </Button>
+                )}
+              </div>
+            </form>
+
+            {/* Kết quả tra cứu */}
+            <div className="mt-5">
+              {isSearching && (
+                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                  <Loader2 className="size-6 animate-spin text-primary" />
+                  <p className="mt-2 text-xs font-semibold">{t("wallet.redemption.loadingLookup")}</p>
                 </div>
               )}
 
-              {lookupResult.status === "REJECTED" && lookupResult.rejectReason && (
-                <div className="bg-red-500/10 px-6 py-4 border-t border-red-500/20">
-                  <p className="text-sm font-bold text-red-500">
-                    {t("wallet.redemption.btnReject")}: {lookupResult.rejectReason}
+              {!isSearching && searchError && (
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 p-6 text-center animate-in fade-in duration-200">
+                  <AlertCircle className="size-10 text-primary" />
+                  <p className="mt-3 text-xs font-black uppercase tracking-wider text-foreground">
+                    {t("wallet.redemption.emptyLookup")}
                   </p>
                 </div>
               )}
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* 2. Lịch sử giao dịch đổi thưởng */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
-        <div>
-          <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
-            {t("wallet.redemption.historyTitle")}
-          </h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t("wallet.redemption.historyDesc")}
-          </p>
-        </div>
+              {!isSearching && lookupResult && (
+                <div className="rounded-xl border border-border bg-muted/10 overflow-hidden shadow-sm animate-in fade-in duration-300">
+                  <div className="bg-muted/30 px-4 py-3 border-b border-border flex justify-between items-center">
+                    <h3 className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
+                      <Gift className="size-4 text-primary" /> {t("wallet.redemption.resultTitle")}
+                    </h3>
+                    <StatusBadge
+                      label={getStatusText(lookupResult.status)}
+                      tone={getStatusTone(lookupResult.status)}
+                    />
+                  </div>
 
-        <div className="mt-6 overflow-hidden rounded-xl border border-border bg-muted/30">
-          {historyItems.length === 0 ? (
-            <div className="py-12 text-center text-xs text-muted-foreground">
-              {t("wallet.transactions.emptyTitle") || "Không có giao dịch đổi thưởng nào."}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[800px]">
-                <thead>
-                  <tr className="border-b border-border bg-muted/20 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                    <th className="py-3 px-4">{t("wallet.redemption.colCode")}</th>
-                    <th className="py-3 px-4">{t("wallet.redemption.colUser")}</th>
-                    <th className="py-3 px-4 text-center">{t("wallet.redemption.colPoints")}</th>
-                    <th className="py-3 px-4">{t("wallet.redemption.colHandler")}</th>
-                    <th className="py-3 px-4">{t("wallet.redemption.colTimeCreated")}</th>
-                    <th className="py-3 px-4">{t("wallet.redemption.colTimeProcessed")}</th>
-                    <th className="py-3 px-4">{t("wallet.redemption.colStatus")}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border text-foreground">
-                  {historyItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-muted/40 transition">
-                      <td className="py-3 px-4 font-mono font-bold text-primary">
-                        {item.redemptionCode}
-                      </td>
-                      <td className="py-3 px-4">
-                        <p className="font-semibold text-foreground">{item.userFullName}</p>
-                        <p className="text-[10px] text-muted-foreground">{getRoleLabel(item.userRole)}</p>
-                      </td>
-                      <td className="py-3 px-4 text-center font-mono font-bold text-amber-700 dark:text-yellow-500">
-                        {item.points.toLocaleString("vi-VN")}
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground">
-                        {item.paidBy || "—"}
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground font-mono">
-                        {item.createdAt ? new Date(item.createdAt).toLocaleString("vi-VN") : "—"}
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground font-mono">
-                        {item.paidAt ? new Date(item.paidAt).toLocaleString("vi-VN") : "—"}
-                      </td>
-                      <td className="py-3 px-4">
-                        <StatusBadge
-                          label={getStatusText(item.status)}
-                          tone={getStatusTone(item.status)}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                  <div className="p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                          {t("wallet.redemption.userLabel")}
+                        </p>
+                        <p className="font-black text-sm text-foreground truncate">{lookupResult.userFullName}</p>
+                        <p className="text-[10px] font-bold text-primary mt-0.5">{getRoleLabel(lookupResult.userRole)}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                          {t("wallet.redemption.codeLabel")}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="rounded bg-primary/10 border border-primary/20 px-2 py-0.5 font-mono text-xs font-black text-primary">
+                            {lookupResult.redemptionCode}
+                          </span>
+                          <button
+                            onClick={() => copyToClipboard(lookupResult.redemptionCode)}
+                            type="button"
+                            className="cursor-pointer rounded p-0.5 text-muted-foreground/60 hover:bg-muted/10 hover:text-foreground transition"
+                            title="Sao chép"
+                          >
+                            <Copy className="size-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
 
-        {/* Phân trang */}
-        {pagination && pagination.totalPages > 1 && (
-          <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-xs">
-            <span className="text-muted-foreground">
-              {t("wallet.redemption.showing", {
-                start: (pagination.page - 1) * 10 + 1,
-                end: Math.min(pagination.page * 10, pagination.total),
-                total: pagination.total,
-              })}
-            </span>
-            <div className="flex gap-2">
-              <button
-                disabled={pagination.page <= 1}
-                onClick={() => pagination.onPageChange(pagination.page - 1)}
-                className="flex items-center gap-1 rounded border border-border px-3 py-1.5 transition hover:bg-muted disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="size-3.5" />
-                {t("wallet.redemption.btnPrev")}
-              </button>
-              <button
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() => pagination.onPageChange(pagination.page + 1)}
-                className="flex items-center gap-1 rounded border border-border px-3 py-1.5 transition hover:bg-muted disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-              >
-                {t("wallet.redemption.btnNext")}
-                <ChevronRight className="size-3.5" />
-              </button>
+                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/40">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                          {t("wallet.redemption.pointsLabel")}
+                        </p>
+                        <p className="font-mono text-xl font-black text-foreground">
+                          {lookupResult.points.toLocaleString("vi-VN")}{" "}
+                          <span className="text-[10px] text-muted-foreground font-bold">
+                            {t("wallet.redemption.pointsSuffix")}
+                          </span>
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                          {t("wallet.redemption.timeLabel")}
+                        </p>
+                        <p className="font-mono text-xs text-foreground truncate">
+                          {new Date(lookupResult.createdAt).toLocaleDateString("vi-VN")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {(lookupResult.status === "PENDING" || lookupResult.status === "APPROVED") && (
+                    <div className="bg-muted/20 px-4 py-2.5 border-t border-border flex justify-end gap-2">
+                      <Button
+                        onClick={() => {
+                          setSelectedRequest(lookupResult);
+                          setShowRejectDialog(true);
+                        }}
+                        disabled={isProcessing !== null}
+                        variant="outline"
+                        className="h-9 rounded-full px-4 text-xs font-bold text-foreground border-border hover:bg-muted hover:text-red-500 transition-colors"
+                      >
+                        {t("wallet.redemption.btnReject")}
+                      </Button>
+                      <Button
+                        onClick={() => handleAction(lookupResult.id, "PAID")}
+                        disabled={isProcessing !== null}
+                        className="h-9 rounded-full px-5 text-xs font-black uppercase shadow-[0_2px_8px_rgba(225,6,0,0.25)] hover:bg-[#B80500] transition-colors"
+                      >
+                        {isProcessing === `${lookupResult.id}-PAID` ? (
+                          <Loader2 className="size-3 animate-spin mr-1.5" />
+                        ) : (
+                          <Gift className="mr-1.5 size-3.5" />
+                        )}
+                        {t("wallet.redemption.btnConfirmPaid")}
+                      </Button>
+                    </div>
+                  )}
+
+                  {lookupResult.status === "REJECTED" && lookupResult.rejectReason && (
+                    <div className="bg-red-500/10 px-4 py-2.5 border-t border-red-500/20">
+                      <p className="text-xs font-bold text-red-500">
+                        {t("wallet.redemption.btnReject")}: {lookupResult.rejectReason}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
+
+        {/* CỘT PHẢI (col-span-7): Danh sách lịch sử giao dịch & KPI ca trực */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Thẻ KPI phụ dành cho Counter Staff */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Đã xử lý hôm nay</p>
+                <p className="mt-1 font-mono text-2xl font-black text-emerald-400">{processedTodayCount}</p>
+              </div>
+              <CheckCircle2 className="size-8 text-emerald-500/20" />
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Đang chờ tại quầy</p>
+                <p className="mt-1 font-mono text-2xl font-black text-amber-500">{pendingQueueCount}</p>
+              </div>
+              <AlertCircle className="size-8 text-amber-500/20" />
+            </div>
+          </div>
+
+          {/* Bảng lịch sử đổi thưởng */}
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-lg sm:p-6">
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
+                {t("wallet.redemption.historyTitle")}
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("wallet.redemption.historyDesc")}
+              </p>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-xl border border-border bg-muted/30">
+              {historyItems.length === 0 ? (
+                <div className="py-10 text-center text-xs text-muted-foreground">
+                  {t("wallet.transactions.emptyTitle") || "Không có giao dịch đổi thưởng nào."}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs min-w-[700px]">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/20 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                        <th className="py-2.5 px-3">{t("wallet.redemption.colCode")}</th>
+                        <th className="py-2.5 px-3">{t("wallet.redemption.colUser")}</th>
+                        <th className="py-2.5 px-3 text-center">{t("wallet.redemption.colPoints")}</th>
+                        <th className="py-2.5 px-3">{t("wallet.redemption.colHandler")}</th>
+                        <th className="py-2.5 px-3">{t("wallet.redemption.colTimeCreated")}</th>
+                        <th className="py-2.5 px-3">{t("wallet.redemption.colStatus")}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border text-foreground">
+                      {historyItems.map((item) => (
+                        <tr key={item.id} className="hover:bg-muted/40 transition">
+                          <td className="py-2.5 px-3 font-mono font-bold text-primary">
+                            {item.redemptionCode}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <p className="font-semibold text-foreground truncate max-w-[120px]">{item.userFullName}</p>
+                            <p className="text-[10px] text-muted-foreground">{getRoleLabel(item.userRole)}</p>
+                          </td>
+                          <td className="py-2.5 px-3 text-center font-mono font-bold text-amber-700 dark:text-yellow-500">
+                            {item.points.toLocaleString("vi-VN")}
+                          </td>
+                          <td className="py-2.5 px-3 text-muted-foreground truncate max-w-[100px]">
+                            {item.paidBy || "—"}
+                          </td>
+                          <td className="py-2.5 px-3 text-muted-foreground font-mono">
+                            {item.createdAt ? new Date(item.createdAt).toLocaleDateString("vi-VN") : "—"}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <StatusBadge
+                              label={getStatusText(item.status)}
+                              tone={getStatusTone(item.status)}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Phân trang */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-[11px]">
+                <span className="text-muted-foreground">
+                  {t("wallet.redemption.showing", {
+                    start: (pagination.page - 1) * 10 + 1,
+                    end: Math.min(pagination.page * 10, pagination.total),
+                    total: pagination.total,
+                  })}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    disabled={pagination.page <= 1}
+                    onClick={() => pagination.onPageChange(pagination.page - 1)}
+                    className="flex items-center gap-1 rounded border border-border px-2.5 py-1.25 transition hover:bg-muted disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="size-3" />
+                    {t("wallet.redemption.btnPrev")}
+                  </button>
+                  <button
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() => pagination.onPageChange(pagination.page + 1)}
+                    className="flex items-center gap-1 rounded border border-border px-2.5 py-1.25 transition hover:bg-muted disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    {t("wallet.redemption.btnNext")}
+                    <ChevronRight className="size-3" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Dialog từ chối */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDownLeft, ArrowUpRight, Award, Calendar, Clock, Coins, Copy, Search, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +18,7 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
   const { t } = useTranslation();
   const [filterType, setFilterType] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filteredTransactions = useMemo(() => {
     const query = searchTerm.toLowerCase();
@@ -124,14 +125,14 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
             </p>
           </div>
         ) : (
-          <div className="w-full overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs sm:text-sm">
-              <thead className="border-b border-border bg-muted/[0.03] text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="w-full overflow-hidden">
+            <table className="w-full table-auto border-collapse text-left text-xs">
+              <thead className="border-b border-border bg-muted/[0.03] text-[9px] font-black uppercase tracking-wider text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">{t("wallet.transactions.colType")}</th>
-                  <th className="px-4 py-3">{t("wallet.transactions.colDetails")}</th>
-                  <th className="px-4 py-3">{t("wallet.transactions.colTime")}</th>
-                  <th className="px-4 py-3 text-right">{t("wallet.transactions.colPoints")}</th>
+                  <th className="px-3 py-3">{t("wallet.transactions.colType")}</th>
+                  <th className="px-3 py-3 hidden sm:table-cell w-[90px]">{t("wallet.transactions.colTime")}</th>
+                  <th className="px-3 py-3 text-center w-[120px]">{t("wallet.redemption.colStatus") || "Trạng thái"}</th>
+                  <th className="px-3 py-3 text-right w-[100px]">{t("wallet.transactions.colPoints")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -142,65 +143,110 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
                   const codeMatch = tx.description.match(/(RWD-[A-Z0-9]+)/);
                   const code = codeMatch ? codeMatch[1] : null;
 
+                  // Ánh xạ trạng thái thực tế dựa trên loại giao dịch rút tiền
+                  let displayStatus: "pending" | "completed" | "failed" = "completed";
+                  if (tx.type === "withdrawal_requested") {
+                    displayStatus = "pending";
+                  } else if (tx.type === "withdrawal_rejected") {
+                    displayStatus = "failed";
+                  }
+
                   return (
-                    <tr key={tx.id} className="transition hover:bg-muted/[0.015]">
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-3">
-                          <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl border", meta.color)}>
-                            <Icon className="size-4" />
+                    <React.Fragment key={tx.id}>
+                      <tr 
+                        className="cursor-pointer transition hover:bg-muted/[0.015]"
+                        onClick={() => setExpandedId(expandedId === tx.id ? null : tx.id)}
+                      >
+                        {/* 1. Loại */}
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg border", meta.color)}>
+                              <Icon className="size-3.5" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[10px] font-black uppercase tracking-wider text-foreground sm:text-xs">
+                                {meta.label}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-[11px] font-black uppercase tracking-wider text-foreground sm:text-xs">
-                              {meta.label}
-                            </p>
-                            <p className="mt-0.5 font-mono text-[9px] text-muted-foreground">#{tx.id}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <p className="text-xs font-semibold text-foreground sm:text-sm">{tx.description}</p>
-                        {code && (
-                          <div className="mt-1.5 flex items-center gap-2">
-                            <span className="rounded bg-muted px-2 py-0.5 font-mono text-xs font-bold text-foreground border border-border">
-                              {code}
-                            </span>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(code);
-                                toast.success(t("wallet.balance.refreshSuccess") ? `Đã sao chép mã: ${code}` : `Copied code: ${code}`);
-                              }}
-                              className="cursor-pointer rounded p-1 text-muted-foreground/60 transition hover:bg-muted hover:text-foreground"
-                              title="Sao chép"
-                            >
-                              <Copy className="size-3.5" />
-                            </button>
-                          </div>
-                        )}
-                        <div className="mt-1.5 flex items-center gap-2">
+                        </td>
+
+                        {/* 2. Thời gian (Desktop only) */}
+                        <td className="px-3 py-3 hidden sm:table-cell whitespace-nowrap font-mono text-[10px] text-muted-foreground">
+                          {new Date(tx.createdAt).toLocaleDateString("vi-VN")}
+                        </td>
+
+                        {/* 3. Trạng thái */}
+                        <td className="px-3 py-3 text-center whitespace-nowrap">
                           <StatusBadge
-                            label={tx.status === "completed" ? t("wallet.transactions.statusCompleted") : tx.status === "pending" ? t("wallet.transactions.statusPending") : t("wallet.transactions.statusFailed")}
-                            tone={tx.status === "completed" ? "green" : tx.status === "pending" ? "slate" : "red"}
+                            label={
+                              displayStatus === "completed"
+                                ? t("wallet.transactions.statusCompleted")
+                                : displayStatus === "pending"
+                                ? t("wallet.transactions.statusPending")
+                                : t("wallet.transactions.statusFailed")
+                            }
+                            tone={
+                              displayStatus === "completed"
+                                ? "green"
+                                : displayStatus === "pending"
+                                ? "yellow"
+                                : "red"
+                            }
+                            className="w-full justify-center text-[9px] px-1 py-0.5 tracking-[0.02em]"
                           />
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 font-mono text-[11px] leading-relaxed text-muted-foreground">
-                        <div className="flex flex-col">
-                          <span className="flex items-center gap-1 font-bold text-foreground">
-                            <Calendar className="size-3 shrink-0 text-primary" />
-                            {new Date(tx.createdAt).toLocaleDateString("vi-VN")}
+                        </td>
+
+                        {/* 4. Điểm biến động */}
+                        <td className="px-3 py-3 text-right whitespace-nowrap font-mono text-xs font-black sm:text-sm">
+                          <span className={isPositive ? "text-emerald-400" : "text-primary"}>
+                            {isPositive ? "+" : "-"}{tx.amount.toLocaleString("vi-VN")}
                           </span>
-                          <span className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground/60">
-                            <Clock className="size-3 shrink-0" />
-                            {new Date(tx.createdAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right">
-                        <span className={cn("font-mono text-xs font-black sm:text-sm", isPositive ? "text-emerald-400" : "text-primary")}>
-                          {isPositive ? "+" : "-"}{tx.amount.toLocaleString("vi-VN")} {t("wallet.balance.pointsUnit")}
-                        </span>
-                      </td>
-                    </tr>
+                        </td>
+                      </tr>
+
+                      {/* Chi tiết (hiện khi click) */}
+                      {expandedId === tx.id && (
+                        <tr>
+                          <td colSpan={4} className="bg-muted/[0.02] p-0">
+                            <div className="border-t border-border/50 px-4 py-3 sm:px-6">
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="space-y-1">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Mô tả giao dịch</p>
+                                  <p className="text-[11px] leading-relaxed text-foreground/80">{tx.description}</p>
+                                </div>
+                                <div className="flex flex-col gap-3 sm:items-end">
+                                  {code && (
+                                    <div className="space-y-1 sm:text-right">
+                                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Mã quy đổi</p>
+                                      <div className="inline-flex items-center gap-1.5 rounded bg-muted/50 px-2 py-1 font-mono text-xs font-bold border border-border">
+                                        <span className="text-primary">{code}</span>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigator.clipboard.writeText(code);
+                                            toast.success(`Đã sao chép mã: ${code}`);
+                                          }}
+                                          className="cursor-pointer rounded p-0.5 text-muted-foreground transition hover:bg-muted-foreground/20"
+                                        >
+                                          <Copy className="size-3" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="space-y-1 sm:text-right">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Thời gian tạo</p>
+                                    <p className="font-mono text-[11px] text-muted-foreground">
+                                      {new Date(tx.createdAt).toLocaleString("vi-VN")}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </tbody>

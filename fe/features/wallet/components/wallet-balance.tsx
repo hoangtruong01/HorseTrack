@@ -64,26 +64,19 @@ export function WalletBalance({ points, onRefresh, onRequestCashout, role }: Wal
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-8 flex flex-col gap-3">
         {onRequestCashout && (
           <Button
             onClick={onRequestCashout}
             disabled={points <= 0}
-            className="h-12 flex-1 rounded-full bg-primary text-xs font-black uppercase tracking-wider text-foreground shadow-[0_4px_16px_rgba(225,6,0,0.3)] transition hover:bg-[#B80500] disabled:opacity-50"
+            className="h-14 w-full rounded-2xl bg-primary text-sm font-black uppercase tracking-widest text-foreground shadow-[0_8px_24px_rgba(225,6,0,0.4)] transition-all hover:-translate-y-0.5 hover:bg-[#B80500] disabled:pointer-events-none disabled:opacity-50"
           >
-            <Gift className="mr-1.5 size-3.5 shrink-0" /> {t("wallet.balance.redeem")}
+            <Gift className="mr-2.5 size-5 shrink-0" /> {t("wallet.balance.redeem")}
           </Button>
         )}
-        <Button
-          variant="outline"
-          className="h-12 flex-1 rounded-full border-border bg-muted text-xs font-black uppercase tracking-wider text-foreground transition hover:bg-muted/60"
-          onClick={() => toast.info(t("wallet.balance.rulesToast"))}
-        >
-          <Award className="mr-1.5 size-3.5 shrink-0" /> {t("wallet.balance.rules")}
-        </Button>
       </div>
 
-      <div className="mt-4 rounded-xl border border-primary/10 bg-primary/5 p-3.5">
+      <div className="mt-6 rounded-2xl border border-border/50 bg-muted/10 p-4">
         <p className="text-[11px] leading-relaxed text-muted-foreground">
           <strong className="mr-1.5 font-black uppercase tracking-wide text-primary">{t("wallet.balance.noteLabel")}</strong>
           {t(`wallet.balance.note.${role.toLowerCase()}`)}

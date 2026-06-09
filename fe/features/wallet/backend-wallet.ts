@@ -88,7 +88,7 @@ export function mapLedgerTransaction(ledger: LedgerEntryItem): WalletUiTransacti
       type = "withdrawal_refund";
     } else {
       type = "withdrawal_requested";
-      if (ledger.note?.toLowerCase().includes("thanh cong") || ledger.note?.toLowerCase().includes("paid")) {
+      if (ledger.note?.toLowerCase().includes("thành công") || ledger.note?.toLowerCase().includes("thanh cong") || ledger.note?.toLowerCase().includes("paid")) {
         type = "withdrawal_paid";
       } else if (ledger.note?.toLowerCase().includes("từ chối") || ledger.note?.toLowerCase().includes("tu choi")) {
         type = "withdrawal_rejected";
