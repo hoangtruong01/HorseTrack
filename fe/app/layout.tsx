@@ -42,7 +42,7 @@ export default function RootLayout({
           <I18nProvider>
             <AuthProvider>
               {children}
-              <Toaster position="top-right" />
+              <Toaster position="top-right" duration={2000} />
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>

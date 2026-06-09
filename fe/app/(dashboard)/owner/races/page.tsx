@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { OwnerRegistrationTable, type Registration } from "@/features/registrations/components/owner-registration-table";
+import { tournamentsApi, racesApi } from "@/lib/api-client";
 
 type Tournament = {
   _id: string;
@@ -95,19 +96,9 @@ export default function OwnerRacesBrowserPage() {
   const fetchTournaments = useCallback(async () => {
     setLoadingTournaments(true);
     try {
-      const response = await fetch("/api/auth/token");
-      const tokenData = await response.json();
-      const token = tokenData.token;
-
-      const res = await fetch("http://localhost:3000/api/v1/tournaments?limit=100", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setTournaments(data.data?.data || data.data || []);
-      }
+      const data = await tournamentsApi.list({ limit: 100 });
+      setTournaments(data.data || []);
     } catch (err) {
-      console.error("Lỗi tải giải đấu:", err);
       toast.error("Không thể tải danh sách giải đấu.");
     } finally {
       setLoadingTournaments(false);
@@ -118,19 +109,9 @@ export default function OwnerRacesBrowserPage() {
   const fetchRaces = useCallback(async (tournamentId: string) => {
     setLoadingRaces(true);
     try {
-      const response = await fetch("/api/auth/token");
-      const tokenData = await response.json();
-      const token = tokenData.token;
-
-      const res = await fetch(`http://localhost:3000/api/v1/races/tournament/${tournamentId}?limit=100`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setRaces(data.data?.data || data.data || []);
-      }
+      const data = await racesApi.listByTournament(tournamentId, { limit: 100 });
+      setRaces(data.data || []);
     } catch (err) {
-      console.error("Lỗi tải vòng đua:", err);
       toast.error("Không thể tải danh sách vòng đua.");
     } finally {
       setLoadingRaces(false);

@@ -146,8 +146,9 @@ export class TournamentsService {
 
     if (newStatus === TournamentStatus.OPEN_REGISTRATION) {
       const raceCount = await this.raceModel.countDocuments({
-        tournamentId: id,
+        tournamentId: new Types.ObjectId(id),
         status: { $ne: RaceStatus.CANCELLED },
+        deletedAt: { $exists: false },
       });
       if (raceCount === 0) {
         throw new BadRequestException(
