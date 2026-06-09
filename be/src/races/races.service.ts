@@ -10,6 +10,7 @@ import { PredictionsService } from '../predictions/predictions.service';
 import { TournamentStatus } from '../tournaments/schemas/tournament.schema';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
+import { UpdateRaceConditionsDto } from './dto/update-race-conditions.dto';
 import {
   Race,
   RaceDocument,
@@ -195,6 +196,11 @@ export class RacesService {
 
     // Guard: CHECKING → READY requires all checks passed + at least 1 referee accepted
     if (status === RaceStatus.READY) {
+      if (!race.trackCondition || !race.weatherSnapshot) {
+        throw new BadRequestException(
+          'Race cannot be marked READY: trackCondition and weatherSnapshot must be set',
+        );
+      }
       await this.validateReadyConditions(id);
     }
 
@@ -316,6 +322,20 @@ export class RacesService {
         );
       }
     }
+  }
+
+  async updateConditions(
+    id: string,
+    dto: UpdateRaceConditionsDto,
+  ): Promise<RaceDocument> {
+    const race = await this.findOne(id);
+    if (LOCKED_STATUSES.includes(race.status)) {
+      throw new BadRequestException(
+        'Cannot update conditions for a race that is live, finished, or has published results',
+      );
+    }
+    Object.assign(race, dto);
+    return race.save();
   }
 
   async softDelete(id: string): Promise<void> {

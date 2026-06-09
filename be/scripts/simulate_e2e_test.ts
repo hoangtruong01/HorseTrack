@@ -147,8 +147,6 @@ async function runSimulation() {
       lapCount: 1,
       maxParticipants: 8,
       prize: 10000,
-      trackCondition: 'GOOD',
-      weatherSnapshot: 'Sunny',
     }, String(adminUser._id));
 
     console.log(`- Race created: ${race.name} (${race._id})`);
@@ -274,6 +272,7 @@ async function runSimulation() {
     console.log('- Pre-race checks inserted and passed for both horses.');
 
     await racesService.updateStatus(String(race._id), RaceStatus.CHECKING);
+    await racesService.updateConditions(String(race._id), { trackCondition: 'GOOD', weatherSnapshot: 'Sunny' });
     await racesService.updateStatus(String(race._id), RaceStatus.READY);
     await racesService.updateStatus(String(race._id), RaceStatus.LIVE);
     console.log('- Race is now LIVE');

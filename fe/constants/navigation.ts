@@ -77,6 +77,13 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Quản lý giải: tạo, cập nhật, thay đổi trạng thái.",
   },
   {
+    title: "Race Management",
+    href: "/admin/races",
+    role: "Admin",
+    icon: Flag,
+    description: "Quản lý vòng đua: tạo, cập nhật trạng thái các race.",
+  },
+  {
     title: "Registration Approval",
     href: "/admin/registrations",
     role: "Admin",

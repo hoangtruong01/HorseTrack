@@ -63,16 +63,6 @@ export class CreateRaceDto {
   @Min(2)
   maxParticipants?: number;
 
-  @ApiPropertyOptional({ example: 'Dry' })
-  @IsOptional()
-  @IsString()
-  trackCondition?: string;
-
-  @ApiPropertyOptional({ example: 'Sunny' })
-  @IsOptional()
-  @IsString()
-  weatherSnapshot?: string;
-
   @ApiPropertyOptional({ example: 10000000 })
   @IsOptional()
   @IsNumber()

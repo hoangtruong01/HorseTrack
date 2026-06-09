@@ -279,11 +279,11 @@ export const racesApi = {
     lapCount?: number;
     maxParticipants?: number;
     prize?: number;
-    trackCondition?: string;
-    weatherSnapshot?: string;
   }) => apiFetch<RaceItem>("/races", { method: "POST", body: JSON.stringify(dto) }),
   updateStatus: (id: string, status: string) =>
     apiFetch(`/races/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  updateConditions: (id: string, dto: { trackCondition?: string; weatherSnapshot?: string }) =>
+    apiFetch<RaceItem>(`/races/${id}/conditions`, { method: "PATCH", body: JSON.stringify(dto) }),
   delete: (id: string) => apiFetch(`/races/${id}`, { method: "DELETE" }),
 };
 

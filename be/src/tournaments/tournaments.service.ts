@@ -145,6 +145,15 @@ export class TournamentsService {
     const now = new Date();
 
     if (newStatus === TournamentStatus.OPEN_REGISTRATION) {
+      const raceCount = await this.raceModel.countDocuments({
+        tournamentId: id,
+        status: { $ne: RaceStatus.CANCELLED },
+      });
+      if (raceCount === 0) {
+        throw new BadRequestException(
+          'Cannot open registration: tournament has no races',
+        );
+      }
       if (
         tournament.registrationStartDate &&
         now < tournament.registrationStartDate
