@@ -34,7 +34,7 @@ export default function HorsesStablePage() {
         const resData = await response.json();
         if (resData.success) {
           const rawList = resData.data?.data || resData.data || [];
-          const normalized = rawList.map((h: any) => ({
+          const normalized = rawList.map((h: Horse & { _id?: string }) => ({
             ...h,
             id: h.id || h._id,
           }));
@@ -52,7 +52,8 @@ export default function HorsesStablePage() {
   };
 
   useEffect(() => {
-    fetchHorses();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchHorses();
   }, []);
 
   const handleDelete = (id: string) => {

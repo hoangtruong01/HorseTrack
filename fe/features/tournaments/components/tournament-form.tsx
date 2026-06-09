@@ -1,11 +1,12 @@
 "use client";
 
-import { CalendarDays, Flag, MapPin, Sparkles, Trophy, Users, ShieldAlert, Award, Upload, Loader2 } from "lucide-react";
+import { Flag, MapPin, Sparkles, Trophy, Users, ShieldAlert, Award, Upload, Loader2, CalendarDays } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export function TournamentForm() {
   const router = useRouter();
@@ -235,35 +236,33 @@ export function TournamentForm() {
 
         {/* Row 2: Thời gian giải đấu */}
         <div className="grid gap-6 md:grid-cols-2">
-          <label className="grid gap-2 text-sm font-bold text-foreground">
+          <div className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-primary" />
               Ngày bắt đầu giải đấu <span className="text-primary">*</span>
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
+              onChange={setStartDate}
+              placeholder="Chọn ngày bắt đầu"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              disablePast
             />
-          </label>
+          </div>
 
-          <label className="grid gap-2 text-sm font-bold text-foreground">
+          <div className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-primary" />
               Ngày kết thúc giải đấu <span className="text-primary">*</span>
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              required
+              onChange={setEndDate}
+              placeholder="Chọn ngày kết thúc"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              disablePast
             />
-          </label>
+          </div>
         </div>
 
         {/* Section divider */}
@@ -275,33 +274,33 @@ export function TournamentForm() {
 
         {/* Row 3: Thời gian mở/đóng đăng ký */}
         <div className="grid gap-6 md:grid-cols-2">
-          <label className="grid gap-2 text-sm font-bold text-foreground">
+          <div className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-teal-400" />
               Ngày bắt đầu nhận đăng ký
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={registrationStartDate}
-              onChange={(e) => setRegistrationStartDate(e.target.value)}
+              onChange={setRegistrationStartDate}
+              placeholder="Chọn ngày mở đăng ký"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              disablePast
             />
-          </label>
+          </div>
 
-          <label className="grid gap-2 text-sm font-bold text-foreground">
+          <div className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-teal-400" />
               Ngày đóng cổng đăng ký
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={registrationEndDate}
-              onChange={(e) => setRegistrationEndDate(e.target.value)}
+              onChange={setRegistrationEndDate}
+              placeholder="Chọn ngày đóng đăng ký"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              disablePast
             />
-          </label>
+          </div>
         </div>
 
         {/* Row 4: Sức chứa & Giải thưởng */}
