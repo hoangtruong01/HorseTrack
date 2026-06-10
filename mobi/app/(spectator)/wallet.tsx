@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
-import { C, Card, StatCard, ListItemCard, LoadingState, SectionHeader, PrimaryButton, formatDateTime } from '@/components/ui/shared';
-import { rewardPointLedgerApi, walletApi } from '@/lib/api-client';
+import { ScrollView, Text, StyleSheet } from 'react-native';
+import { C, Card, ListItemCard, LoadingState, SectionHeader, formatDateTime } from '@/components/ui/shared';
+import { rewardPointLedgerApi } from '@/lib/api-client';
 
 export default function SpectatorWallet() {
   const [balance, setBalance] = useState(0);

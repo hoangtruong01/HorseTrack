@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
-import { walletApi, predictionsApi, type PredictionItem, type WalletTxItem } from '../../lib/api-client';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, SafeAreaView } from 'react-native';
+import { walletApi, type WalletTxItem } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function WalletScreen() {
   const [balance, setBalance] = useState({ points: 0, cash: 0 });
-  const [activeTab, setActiveTab] = useState<'PREDICTIONS' | 'LEDGER'>('PREDICTIONS');
-  const [predictions, setPredictions] = useState<PredictionItem[]>([]);
   const [ledger, setLedger] = useState<WalletTxItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -21,12 +19,6 @@ export default function WalletScreen() {
           cash: walletRes.balance ?? 0,
         });
         setLedger(walletRes.data || []);
-      }
-
-      // 2. Load predictions list
-      const predRes = await predictionsApi.listMyPredictions({ page: 1, limit: 100 });
-      if (predRes && predRes.data) {
-        setPredictions(predRes.data);
       }
     } catch (err) {
       console.error('Lỗi tải dữ liệu ví:', err);
@@ -43,57 +35,6 @@ export default function WalletScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     loadWalletData();
-  };
-
-  const getPredictionStatusText = (status: string) => {
-    switch (status) {
-      case 'PENDING': return 'ĐANG CHỜ';
-      case 'WON': return 'THẮNG';
-      case 'LOST': return 'THUA';
-      case 'CANCELLED': return 'ĐÃ HỦY';
-      default: return status;
-    }
-  };
-
-  const getPredictionStatusColor = (status: string) => {
-    switch (status) {
-      case 'WON': return '#067E6A';
-      case 'LOST': return '#E10600';
-      case 'PENDING': return '#E1A200';
-      default: return '#58585B';
-    }
-  };
-
-  const renderPredictionItem = ({ item }: { item: PredictionItem }) => {
-    const raceName = typeof item.raceId === 'object' ? item.raceId?.name : 'Trận đấu';
-    const horseName = typeof item.predictedHorseId === 'object' ? item.predictedHorseId?.name : 'Chiến mã';
-    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—';
-    const pointsText = item.status === 'WON' ? `+${item.rewardPoints} Pts` : `-${item.betPoints} Pts`;
-
-    return (
-      <View style={styles.listItemCard}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardMainTitle} numberOfLines={1}>{raceName?.toUpperCase()}</Text>
-          <View style={[styles.statusBadge, { backgroundColor: getPredictionStatusColor(item.status) }]}>
-            <Text style={styles.statusBadgeText}>{getPredictionStatusText(item.status)}</Text>
-          </View>
-        </View>
-
-        <View style={styles.cardBody}>
-          <Text style={styles.cardSubText}>Dự đoán chiến mã: <Text style={styles.whiteBoldText}>{horseName?.toUpperCase()}</Text></Text>
-          <Text style={styles.cardSubText}>Đặt cược: <Text style={styles.whiteBoldText}>{item.betPoints} Pts</Text></Text>
-          <Text style={styles.dateText}>{dateStr}</Text>
-        </View>
-
-        {item.status !== 'PENDING' && (
-          <View style={styles.rewardSection}>
-            <Text style={[styles.rewardValue, { color: item.status === 'WON' ? '#067E6A' : '#E10600' }]}>
-              {pointsText}
-            </Text>
-          </View>
-        )}
-      </View>
-    );
   };
 
   const renderLedgerItem = ({ item }: { item: WalletTxItem }) => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { ScrollView, View, Text, StyleSheet, Alert, TextInput, RefreshControl } from 'react-native';
+import { ScrollView, Text, StyleSheet, Alert, TextInput, RefreshControl } from 'react-native';
 import { C, Card, ListItemCard, LoadingState, SectionHeader, PrimaryButton, StatCard, formatDateTime } from '@/components/ui/shared';
 import { rewardPointLedgerApi, walletApi } from '@/lib/api-client';
 

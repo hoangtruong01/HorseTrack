@@ -193,7 +193,7 @@ export default function OwnerInvitations() {
                       {j.specialty && <Text style={s.infoText}>⭐ {j.specialty}</Text>}
                     </View>
 
-                    {j.bio && <Text style={s.bioText} numberOfLines={2}>"{j.bio}"</Text>}
+                    {j.bio && <Text style={s.bioText} numberOfLines={2}>&quot;{j.bio}&quot;</Text>}
 
                     <PrimaryButton
                       title={approvedRegs.length > 0 ? '＋ Gửi lời mời' : 'Chưa có slot trống'}
