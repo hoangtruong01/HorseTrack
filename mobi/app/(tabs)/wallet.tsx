@@ -126,53 +126,38 @@ export default function WalletScreen() {
     );
   }
 
+  const withdrawals = ledger.filter(
+    item => item.type?.toLowerCase() === 'reward_cashout' ||
+            item.description?.toLowerCase().includes('quy đổi') ||
+            item.description?.toLowerCase().includes('rút') ||
+            item.description?.toLowerCase().includes('cashout')
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Wallet Summary Card */}
       <View style={styles.walletHeaderCard}>
         <View style={styles.walletBox}>
           <MaterialIcons name="stars" size={24} color="#E10600" />
-          <Text style={styles.walletLabel}>VÍ ĐIỂM DỰ ĐOÁN</Text>
+          <Text style={styles.walletLabel}>ĐIỂM HIỆN TẠI</Text>
           <Text style={styles.walletValue}>{balance.points} <Text style={styles.pointsUnit}>Pts</Text></Text>
         </View>
-        
-        <View style={styles.verticalDivider} />
-
-        <View style={styles.walletBox}>
-          <MaterialIcons name="monetization-on" size={24} color="#067E6A" />
-          <Text style={styles.walletLabel}>VÍ TIỀN MẶT DEMO</Text>
-          <Text style={styles.walletValue}>{balance.cash.toLocaleString()} <Text style={styles.pointsUnit}>đ</Text></Text>
-        </View>
-      </View>
-
-      {/* Internal Sub-Tabs */}
-      <View style={styles.subTabBar}>
-        <TouchableOpacity 
-          style={[styles.subTabButton, activeTab === 'PREDICTIONS' && styles.subTabButtonActive]}
-          onPress={() => setActiveTab('PREDICTIONS')}
-        >
-          <Text style={[styles.subTabText, activeTab === 'PREDICTIONS' && styles.subTabTextActive]}>LỊCH SỬ DỰ ĐOÁN</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.subTabButton, activeTab === 'LEDGER' && styles.subTabButtonActive]}
-          onPress={() => setActiveTab('LEDGER')}
-        >
-          <Text style={[styles.subTabText, activeTab === 'LEDGER' && styles.subTabTextActive]}>BIẾN ĐỘNG SỐ DƯ</Text>
-        </TouchableOpacity>
       </View>
 
       <FlatList
-        data={(activeTab === 'PREDICTIONS' ? predictions : ledger) as any[]}
-        renderItem={activeTab === 'PREDICTIONS' ? (renderPredictionItem as any) : (renderLedgerItem as any)}
+        data={withdrawals}
+        renderItem={renderLedgerItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         onRefresh={onRefresh}
         refreshing={refreshing}
+        ListHeaderComponent={
+          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '900', letterSpacing: 0.5, marginBottom: 12 }}>LỊCH SỬ RÚT</Text>
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <MaterialIcons name="history" size={40} color="#58585B" />
-            <Text style={styles.emptyText}>Chưa ghi nhận dữ liệu giao dịch nào.</Text>
+            <Text style={styles.emptyText}>Bạn chưa thực hiện yêu cầu rút điểm nào.</Text>
           </View>
         }
       />

@@ -19,7 +19,7 @@ export default function CounterLayout() {
       <Tabs.Screen name="index" options={{ title: 'Trang chủ', headerTitle: 'COUNTER DASHBOARD', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="home" color={color} /> }} />
       <Tabs.Screen name="scan" options={{ title: 'Đối soát', headerTitle: 'ĐỐI SOÁT MÃ QUY ĐỔI', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="qr-code-scanner" color={color} /> }} />
       <Tabs.Screen name="queue" options={{ title: 'Hàng đợi', headerTitle: 'HÀNG ĐỢI CHI TRẢ', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="queue" color={color} /> }} />
-      <Tabs.Screen name="deposit" options={{ title: 'Nạp điểm', headerTitle: 'NẠP ĐIỂM TIỀN MẶT', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="monetization-on" color={color} /> }} />
+      <Tabs.Screen name="deposit" options={{ href: null }} />
       <Tabs.Screen name="stats" options={{ title: 'Báo cáo', headerTitle: 'BÁO CÁO DOANH THU', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="bar-chart" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person" color={color} /> }} />
     </Tabs>

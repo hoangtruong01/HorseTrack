@@ -50,12 +50,7 @@ export default function OperationsLayout() {
           headerBackTitle: 'Trở lại',
         }}
       />
-      <Stack.Screen
-        name="counter/quick-deposit"
-        options={{
-          title: 'NẠP ĐIỂM KHÁN GIẢ',
-        }}
-      />
+
     </Stack>
   );
 }

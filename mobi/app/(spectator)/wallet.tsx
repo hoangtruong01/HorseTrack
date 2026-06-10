@@ -19,19 +19,26 @@ export default function SpectatorWallet() {
       } catch {} finally { setLoading(false); }
     })();
   }, []);
+  const withdrawals = history.filter(
+    h => h.sourceType === 'redemption' ||
+         h.note?.toLowerCase().includes('quy đổi') ||
+         h.note?.toLowerCase().includes('rút') ||
+         h.note?.toLowerCase().includes('redemption')
+  );
+
   if (loading) return <LoadingState />;
   return (
     <ScrollView style={s.c} contentContainerStyle={s.p}>
       <Card>
-        <Text style={s.label}>SỐ DƯ VÍ ĐIỂM</Text>
+        <Text style={s.label}>ĐIỂM HIỆN TẠI</Text>
         <Text style={s.balance}>{balance.toLocaleString()} <Text style={s.unit}>Pts</Text></Text>
         <Text style={s.hint}>Dự đoán đúng +1đ · Sai -1đ · Không thể âm</Text>
       </Card>
-      <SectionHeader title="Lịch sử giao dịch" />
-      {history.length === 0 ? <Text style={s.empty}>Chưa có giao dịch nào.</Text> :
-        history.map(h => (
+      <SectionHeader title="Lịch sử rút" />
+      {withdrawals.length === 0 ? <Text style={s.empty}>Chưa có lịch sử rút điểm nào.</Text> :
+        withdrawals.map(h => (
           <ListItemCard key={h._id}
-            title={h.note || 'Giao dịch'}
+            title={h.note || 'Rút điểm thưởng'}
             subtitle={formatDateTime(h.createdAt)}
             rightText={`${h.pointsDelta > 0 ? '+' : ''}${h.pointsDelta}`}
             rightColor={h.pointsDelta > 0 ? '#34D399' : '#EF4444'}

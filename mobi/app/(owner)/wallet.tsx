@@ -56,9 +56,13 @@ export default function OwnerWallet() {
 
   if (loading) return <LoadingState />;
 
-  // Tính toán KPI
-  const totalRedeemed = history.filter(h => h.pointsDelta < 0).reduce((acc, h) => acc + Math.abs(h.pointsDelta), 0);
-  const totalEarned = history.filter(h => h.pointsDelta > 0).reduce((acc, h) => acc + h.pointsDelta, 0);
+  // Lọc lịch sử rút
+  const withdrawals = history.filter(
+    h => h.sourceType === 'redemption' ||
+         h.note?.toLowerCase().includes('quy đổi') ||
+         h.note?.toLowerCase().includes('rút') ||
+         h.note?.toLowerCase().includes('redemption')
+  );
 
   return (
     <ScrollView
@@ -67,17 +71,10 @@ export default function OwnerWallet() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
     >
       {/* KPI Cards */}
-      <View style={s.statsRow}>
-        <StatCard label="Điểm khả dụng" value={`${balance.toLocaleString()} PTS`} icon="stars" color="#F59E0B" />
-        <StatCard label="Tổng tích lũy" value={`${totalEarned.toLocaleString()} PTS`} icon="trending-up" color={C.tealLight} />
-      </View>
-      <View style={s.statsRow}>
-        <StatCard label="Đã đổi thưởng" value={`${totalRedeemed.toLocaleString()} PTS`} icon="redeem" color="#A855F7" />
-        <StatCard label="Giao dịch" value={`${history.length}`} icon="receipt-long" color={C.textSecondary} />
-      </View>
+      <StatCard label="Điểm hiện tại" value={`${balance.toLocaleString()} PTS`} icon="stars" color="#F59E0B" />
 
       {/* Cashout Form */}
-      <Card style={{ gap: 12 }}>
+      <Card style={{ gap: 12, marginTop: 12 }}>
         <Text style={s.sectionSubTitle}>Yêu Cầu Rút Điểm / Quy Đổi</Text>
         <TextInput
           style={s.input}
@@ -91,11 +88,11 @@ export default function OwnerWallet() {
       </Card>
 
       {/* Transaction History */}
-      <SectionHeader title="Lịch sử giao dịch" />
-      {history.length === 0 ? <Text style={s.empty}>Chưa có lịch sử giao dịch nào.</Text> :
-        history.map(h => (
+      <SectionHeader title="Lịch sử rút" />
+      {withdrawals.length === 0 ? <Text style={s.empty}>Chưa có lịch sử rút điểm nào.</Text> :
+        withdrawals.map(h => (
           <ListItemCard key={h._id}
-            title={h.note || 'Giao dịch ví'}
+            title={h.note || 'Rút điểm thưởng'}
             subtitle={formatDateTime(h.createdAt)}
             rightText={`${h.pointsDelta > 0 ? '+' : ''}${h.pointsDelta?.toLocaleString() || 0} PTS`}
             rightColor={h.pointsDelta > 0 ? '#34D399' : '#EF4444'}

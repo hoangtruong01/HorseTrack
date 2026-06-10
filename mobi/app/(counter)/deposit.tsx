@@ -1,6 +1,11 @@
 import React from 'react';
-import QuickDepositScreen from '../operations/counter/quick-deposit';
+import { View, Text } from 'react-native';
 
 export default function CounterDeposit() {
-  return <QuickDepositScreen />;
+  return (
+    <View style={{ flex: 1, backgroundColor: '#1C1C25', justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ color: '#AAAAAA' }}>Chức năng này đã được đóng.</Text>
+    </View>
+  );
 }
+

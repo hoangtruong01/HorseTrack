@@ -24,7 +24,7 @@ export default function CounterHome() {
       <Card>
         <Text style={styles.welcomeLabel}>COUNTER DESK</Text>
         <Text style={styles.welcomeTitle}>Quầy Giao Dịch & Đổi Thưởng</Text>
-        <Text style={styles.welcomeSub}>Hỗ trợ khách hàng nạp điểm trực tiếp bằng tiền mặt và kiểm tra, đối soát chi trả tiền mặt dựa trên mã redemption.</Text>
+        <Text style={styles.welcomeSub}>Hỗ trợ khách hàng kiểm tra, đối soát chi trả tiền mặt dựa trên mã redemption.</Text>
       </Card>
 
       <View style={styles.statsRow}>
