@@ -23,7 +23,7 @@ export default function CashoutRequestScreen() {
       }
 
       // 2. Fetch past cashout requests
-      const cashoutsRes = await walletApi.allCashouts({ page: 1, limit: 100 });
+      const cashoutsRes = await walletApi.myCashouts({ page: 1, limit: 100 });
       if (cashoutsRes && cashoutsRes.data) {
         setCashouts(cashoutsRes.data);
       }
@@ -133,7 +133,7 @@ export default function CashoutRequestScreen() {
       {/* Balance Summary Header */}
       <View style={styles.balanceHeaderCard}>
         <View style={styles.balanceInfo}>
-          <Text style={styles.balanceLabel}>ĐIỂM THƯỞNG HIỆN CÓ</Text>
+          <Text style={styles.balanceLabel}>ĐIỂM HIỆN TẠI</Text>
           <Text style={styles.balanceValue}>{walletBalance.points} <Text style={styles.ptsUnit}>Pts</Text></Text>
         </View>
         <MaterialIcons name="account-balance-wallet" size={32} color="#E10600" />

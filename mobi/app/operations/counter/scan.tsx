@@ -231,16 +231,8 @@ export default function CounterScanScreen() {
         />
       </View>
 
-      {/* Switch to deposit */}
+      {/* Switch to spectator portal */}
       <View style={styles.bottomNavContainer}>
-        <TouchableOpacity 
-          style={styles.depositButton}
-          onPress={() => router.push('/operations/counter/quick-deposit')}
-        >
-          <MaterialIcons name="monetization-on" size={18} color="#FFFFFF" />
-          <Text style={styles.depositButtonText}>NẠP ĐIỂM TIỀN MẶT CHO KHÁN GIẢ</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity 
           style={styles.backHomeBtn}
           onPress={() => router.replace('/(tabs)')}
@@ -249,6 +241,7 @@ export default function CounterScanScreen() {
           <Text style={styles.backHomeText}>QUAY LẠI CỔNG KHÁN GIẢ</Text>
         </TouchableOpacity>
       </View>
+
     </SafeAreaView>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { StatCard } from "@/components/data-display/stat-card";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 import {
   Award,
   Calendar,
@@ -11,19 +11,16 @@ import {
   Clock,
   Eye,
   Flag,
-  Info,
+  HelpCircle,
   Mail,
   ShieldAlert,
-  ShieldCheck,
   Sparkles,
   User,
   X,
-  HelpCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { StatCard } from "@/components/data-display/stat-card";
-import { PageHeader } from "@/components/layout/page-header";
-import { StatusBadge } from "@/components/ui/status-badge";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 // Types
@@ -112,26 +109,13 @@ type HorseDetail = {
 };
 
 export function JockeyDashboard() {
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
-
-  // Navigation tabs
-  const [activeTab, setActiveTab] = useState<"dashboard" | "invitations" | "assigned" | "horses" | "performance">("dashboard");
-
-  useEffect(() => {
-    if (tabParam === "invitations" || tabParam === "assigned" || tabParam === "horses" || tabParam === "performance") {
-      setActiveTab(tabParam);
-    } else {
-      setActiveTab("dashboard");
-    }
-  }, [tabParam]);
+  const router = useRouter();
 
   // State variables
   const [stats, setStats] = useState<JockeyStats | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingInvs, setIsLoadingInvs] = useState(true);
-  const [submittingId, setSubmittingId] = useState<string | null>(null);
 
   // Profile status
   const [profile, setProfile] = useState<{ fullName?: string; avatar?: string; email?: string; phone?: string } | null>(null);
@@ -141,9 +125,6 @@ export function JockeyDashboard() {
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
   const [horseDetail, setHorseDetail] = useState<HorseDetail | null>(null);
   const [isLoadingHorse, setIsLoadingHorse] = useState(false);
-
-  // Invitation detail modal
-  const [detailInv, setDetailInv] = useState<Invitation | null>(null);
 
   // Fetch initial data
   const fetchData = async () => {
@@ -248,7 +229,7 @@ export function JockeyDashboard() {
   // Filtering invitations for specific sections
   const pendingInvs = invitations.filter((inv) => inv.status === "PENDING");
   const acceptedInvs = invitations.filter((inv) => inv.status === "ACCEPTED");
-  
+
   // Format Date utility
   const formatDateTime = (dateStr?: string) => {
     if (!dateStr) return "Chưa xác định";
@@ -261,7 +242,7 @@ export function JockeyDashboard() {
     {
       label: "Số trận đã tham gia",
       value: isLoadingStats ? "..." : (stats?.races.participated || 0).toString(),
-      helper: "Tổng số cuộc đua chính thức bạn đã điều khiển ngựa hoàn thành.",
+      helper: "Tổng số cuộc đua chính thức",
       icon: Flag,
       tone: "neutral" as const,
       trend: "Sự nghiệp",
@@ -269,53 +250,65 @@ export function JockeyDashboard() {
     {
       label: "Chiến thắng (Hạng 1)",
       value: isLoadingStats ? "..." : (stats?.races.wins || 0).toString(),
-      helper: `Tỷ lệ giành chức vô địch: ${isLoadingStats ? "..." : (stats?.races.winRate || 0)}%`,
+      helper: `Tỷ lệ thắng: ${isLoadingStats ? "..." : (stats?.races.winRate || 0)}%`,
       icon: Award,
       tone: "red" as const,
       trend: "Vô địch",
     },
     {
       label: "Tổng điểm thi đấu",
-      value: isLoadingStats ? "..." : `${stats?.totalPoints || 0} Điểm`,
-      helper: "Quy đổi thứ hạng: Hạng 1 nhận 10đ, Hạng 2 nhận 7đ, Hạng 3 nhận 5đ...",
+      value: isLoadingStats ? "..." : `${stats?.totalPoints || 0}đ`,
+      helper: "Điểm tích lũy hạng",
       icon: ClipboardCheck,
       tone: "teal" as const,
-      trend: "Điểm tích lũy",
+      trend: "Tích lũy",
     },
   ];
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
-      {/* Page Header */}
       <PageHeader
-        eyebrow="Giao diện nài ngựa chuyên nghiệp"
-        title={isLoadingProfile ? "Nài Ngựa" : `Trạm Của Jockey: ${profile?.fullName}`}
-        description="Chào mừng bạn đến với khu vực quản lý nài ngựa. Tiếp nhận lời mời thi đấu phân chia lợi nhuận 70/30 từ chủ chuồng, xem chi tiết chiến mã, quản lý lịch thi đấu và theo dõi bảng thành tích cá nhân của bạn."
+        eyebrow="Quản lý"
+        title="Trạm Điều Hành Jockey"
+        description="Giao diện làm việc chuyên nghiệp dành cho nài ngựa. Quản lý lịch thi đấu, phản hồi lời mời và theo dõi thành tích cá nhân."
       />
 
-      {/* Profile/Status Alert Banner */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-lg sm:p-6">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.1),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(6,126,106,0.1),transparent_25rem)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E10600] to-transparent" />
+      {/* Main Content */}
+      <section className="min-h-[400px]">
+        <div className="space-y-6">
 
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-                CÔNG CỤ NÀI NGỰA
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
-                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Đang trực tuyến
-              </span>
+          {/* Top Area: Profile & Alerts */}
+          <div className="flex flex-col md:flex-row gap-6">
+
+            {/* User Profile Block */}
+            <div className="flex-1 rounded-2xl border border-border bg-card p-5 shadow-sm relative overflow-hidden">
+              {isLoadingProfile ? (
+                <div className="flex items-center gap-4 animate-pulse">
+                  <div className="size-16 rounded-full bg-muted/50" />
+                  <div className="space-y-2">
+                    <div className="h-5 w-32 bg-muted/50 rounded" />
+                    <div className="h-4 w-48 bg-muted/50 rounded" />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <div className="size-16 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
+                    {profile?.avatar ? (
+                      <img src={profile.avatar} alt={profile.fullName} className="size-full object-cover" />
+                    ) : (
+                      <User className="size-8 text-primary" />
+                    )}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black uppercase text-foreground">{profile?.fullName}</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                      <span>{profile?.email}</span>
+                      {profile?.phone && <span>• {profile.phone}</span>}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-            <h2 className="mt-3 text-xl font-black uppercase tracking-tight text-foreground sm:text-2xl">
-              Cam kết 30% quỹ thưởng trận đấu
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground leading-relaxed max-w-xl">
-              Hợp đồng mặc định giữa chủ ngựa và Jockey: 70% thuộc về chủ chuồng, 30% thuộc về Jockey chiến thắng. Mọi lời mời chấp nhận sẽ được hệ thống kiểm tra xung đột thời gian 4 tiếng để bảo đảm an toàn.
-            </p>
-          </div>
 
           {pendingInvs.length > 0 && (
             <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3 text-foreground max-w-sm self-start md:self-auto animate-bounce">
@@ -343,72 +336,71 @@ export function JockeyDashboard() {
               ))}
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Box 1: Upcoming Schedule */}
-              <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
-                    <Calendar className="size-4 text-teal-400" />
-                    Lịch thi đấu gần nhất
-                  </h3>
-                  <button 
-                    onClick={() => setActiveTab("assigned")} 
-                    className="text-xs text-primary font-bold hover:underline flex items-center"
-                  >
-                    Tất cả <ChevronRight className="size-3.5" />
-                  </button>
-                </div>
-
-                {isLoadingInvs ? (
-                  <div className="space-y-3">
-                    {[1, 2].map((i) => (
-                      <div key={i} className="h-16 rounded-xl bg-muted/50 animate-pulse" />
-                    ))}
-                  </div>
-                ) : acceptedInvs.length === 0 ? (
-                  <div className="text-center py-8 rounded-xl border border-dashed border-border text-muted-foreground text-xs">
-                    Không có cuộc đua nào được chấp nhận sắp tới.
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {acceptedInvs.slice(0, 3).map((inv) => (
-                      <div key={inv.id || inv._id} className="flex justify-between items-center p-3 rounded-xl border border-border bg-muted/50 hover:border-border transition">
-                        <div>
-                          <h4 className="text-xs font-bold text-foreground uppercase">{inv.raceId?.name || "Tên trận đấu"}</h4>
-                          <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                            <Clock className="size-3 shrink-0" />
-                            {formatDateTime(inv.raceId?.startTime)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <button
-                            onClick={() => handleViewHorseDetail(inv.horseId.id)}
-                            className="text-[10px] px-2 py-1 rounded bg-[#E10600]/10 hover:bg-[#E10600]/20 text-primary border border-[#E10600]/20 transition flex items-center gap-1"
-                          >
-                            <Eye className="size-3" />
-                            Chiến mã: {inv.horseId?.name}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Box 1: Upcoming Schedule */}
+            <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <Calendar className="size-4 text-teal-400" />
+                  Lịch thi đấu gần nhất
+                </h3>
+                <button
+                  onClick={() => router.push("/jockey/assign")}
+                  className="text-xs text-primary font-bold hover:underline flex items-center transition"
+                >
+                  Xem tất cả <ChevronRight className="size-3.5" />
+                </button>
               </div>
 
-              {/* Box 2: Pending Invitations summary */}
-              <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
-                    <Mail className="size-4 text-primary" />
-                    Hòm thư lời mời ({pendingInvs.length})
-                  </h3>
-                  <button 
-                    onClick={() => setActiveTab("invitations")} 
-                    className="text-xs text-primary font-bold hover:underline flex items-center"
-                  >
-                    Xem hết <ChevronRight className="size-3.5" />
-                  </button>
+              {isLoadingInvs ? (
+                <div className="space-y-3">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="h-16 rounded-xl bg-muted/50 animate-pulse" />
+                  ))}
                 </div>
+              ) : acceptedInvs.length === 0 ? (
+                <div className="text-center py-8 rounded-xl border border-dashed border-border text-muted-foreground text-xs">
+                  Chưa có cuộc đua nào sắp diễn ra.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {acceptedInvs.slice(0, 3).map((inv) => (
+                    <div key={inv.id || inv._id} className="group p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition flex justify-between items-center">
+                      <div className="flex flex-col gap-1">
+                        <h4 className="text-xs font-bold text-foreground uppercase truncate max-w-[180px]">{inv.raceId?.name}</h4>
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1.5" title="Thời gian thi đấu">
+                          <Clock className="size-3" />
+                          {formatDateTime(inv.raceId?.startTime)}
+                        </span>
+                      </div>
+                      <button
+                        title="Xem chi tiết ngựa"
+                        onClick={() => handleViewHorseDetail(inv.horseId.id)}
+                        className="flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-bold uppercase transition"
+                      >
+                        <Eye className="size-3" />
+                        {inv.horseId?.name}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Box 2: Pending Invitations */}
+            <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <Mail className="size-4 text-primary" />
+                  Lời mời gần đây
+                </h3>
+                <button
+                  onClick={() => router.push("/jockey/invite")}
+                  className="text-xs text-primary font-bold hover:underline flex items-center transition"
+                >
+                  Xem tất cả <ChevronRight className="size-3.5" />
+                </button>
+              </div>
 
                 {isLoadingInvs ? (
                   <div className="space-y-3">
@@ -811,33 +803,31 @@ export function JockeyDashboard() {
       {selectedHorseId && (
         <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl animate-scale-up">
-            
-            {/* Header / Banner decoration */}
+
             <div className="relative flex h-28 items-end bg-muted/50 p-5">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-teal-500/10" />
               <div className="absolute inset-x-0 bottom-0 h-px bg-muted/50" />
-              
-              <button 
+
+              <button
                 onClick={() => setSelectedHorseId(null)}
-                className="absolute top-4 right-4 size-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-white transition"
+                className="absolute top-4 right-4 size-8 rounded-full bg-background/80 hover:bg-background flex items-center justify-center text-muted-foreground hover:text-foreground transition shadow-sm backdrop-blur-md"
               >
                 <X className="size-4" />
               </button>
 
               <div className="relative flex items-center gap-3">
-                <div className="size-14 rounded-full border border-primary bg-primary/10 flex items-center justify-center">
+                <div className="size-14 rounded-full border border-primary bg-primary/10 flex items-center justify-center backdrop-blur-md">
                   <Sparkles className="size-6 text-primary" />
                 </div>
                 <div>
                   <span className="text-[9px] font-bold uppercase tracking-widest text-primary">CHI TIẾT CHIẾN MÃ</span>
-                  <h3 className="text-lg font-black uppercase text-white mt-0.5">
-                    {isLoadingHorse ? "Đang tải dữ liệu..." : horseDetail?.name}
+                  <h3 className="text-lg font-black uppercase text-foreground mt-0.5 drop-shadow-sm">
+                    {isLoadingHorse ? "Đang tải..." : horseDetail?.name}
                   </h3>
                 </div>
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
               {isLoadingHorse ? (
                 <div className="space-y-4 py-8 animate-pulse text-center">
@@ -847,103 +837,94 @@ export function JockeyDashboard() {
                 </div>
               ) : horseDetail ? (
                 <div className="space-y-4">
-                  {/* Horse Image Preview */}
                   {horseDetail.image ? (
                     <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-border">
                       <Image src={horseDetail.image} alt={horseDetail.name} className="object-cover" fill />
                     </div>
                   ) : (
-                    <div className="h-32 w-full rounded-2xl bg-muted/50 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground text-xs">
-                      <HelpCircle className="size-8 text-muted-foreground/60 mb-2" />
-                      Chưa tải lên hình ảnh của chiến mã
+                    <div className="h-32 w-full rounded-2xl bg-muted/30 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground text-xs">
+                      <HelpCircle className="size-8 text-muted-foreground/40 mb-2" />
+                      Chưa cập nhật hình ảnh
                     </div>
                   )}
 
-                  {/* Core specifications */}
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-muted/50 p-2.5 rounded-xl border border-border">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Giống ngựa</p>
-                      <p className="text-xs font-bold text-foreground mt-0.5 truncate">{horseDetail.breed}</p>
+                    <div className="bg-muted/30 p-2.5 rounded-xl border border-border">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Giống</p>
+                      <p className="text-xs font-bold text-foreground mt-0.5 truncate" title={horseDetail.breed}>{horseDetail.breed}</p>
                     </div>
-                    <div className="bg-muted/50 p-2.5 rounded-xl border border-border">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Tuổi đời</p>
-                      <p className="text-xs font-bold text-foreground mt-0.5">{horseDetail.age} tuổi</p>
+                    <div className="bg-muted/30 p-2.5 rounded-xl border border-border">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Tuổi</p>
+                      <p className="text-xs font-bold text-foreground mt-0.5">{horseDetail.age}</p>
                     </div>
-                    <div className="bg-muted/50 p-2.5 rounded-xl border border-border">
+                    <div className="bg-muted/30 p-2.5 rounded-xl border border-border">
                       <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Giới tính</p>
                       <p className="text-xs font-bold text-foreground mt-0.5">{horseDetail.gender === "male" ? "Đực" : "Cái"}</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 p-3 rounded-xl border border-border bg-muted/50">
+                  <div className="grid grid-cols-2 gap-3 p-3 rounded-xl border border-border bg-muted/30">
                     <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Thể trạng & Kỹ thuật thi đấu</p>
-                      <div className="space-y-2 mt-2">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Kỹ thuật thi đấu</p>
+                      <div className="space-y-3 mt-3">
                         <div>
-                          <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
-                            <span>Sức mạnh tốc độ</span>
-                            <span className="font-bold text-primary">{horseDetail.baseSpeed || 60} / 100</span>
+                          <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                            <span>Tốc độ</span>
+                            <span className="font-bold text-primary">{horseDetail.baseSpeed || 60}/100</span>
                           </div>
-                          <div className="w-full h-1 bg-muted/50 rounded-full overflow-hidden">
-                            <div className="bg-primary h-full" style={{ width: `${horseDetail.baseSpeed || 60}%` }} />
+                          <div className="w-full h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                            <div className="bg-primary h-full rounded-full" style={{ width: `${horseDetail.baseSpeed || 60}%` }} />
                           </div>
                         </div>
 
                         <div>
-                          <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
-                            <span>Sức bền dẻo dai</span>
-                            <span className="font-bold text-teal-400">{horseDetail.staminaScore || 70} / 100</span>
+                          <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                            <span>Sức bền</span>
+                            <span className="font-bold text-teal-400">{horseDetail.staminaScore || 70}/100</span>
                           </div>
-                          <div className="w-full h-1 bg-muted/50 rounded-full overflow-hidden">
-                            <div className="bg-teal-400 h-full" style={{ width: `${horseDetail.staminaScore || 70}%` }} />
+                          <div className="w-full h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                            <div className="bg-teal-400 h-full rounded-full" style={{ width: `${horseDetail.staminaScore || 70}%` }} />
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Sức khỏe</p>
-                        <div className="mt-1">
-                          <StatusBadge 
-                            label={
-                              horseDetail.healthStatus === "HEALTHY" ? "Khỏe mạnh" : 
-                              horseDetail.healthStatus === "INJURED" ? "Chấn thương" : "Bị ốm"
-                            } 
-                            tone={horseDetail.healthStatus === "HEALTHY" ? "green" : "red"} 
-                            pulse={horseDetail.healthStatus === "HEALTHY"}
-                          />
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">Sức khỏe</p>
+                        <div className="inline-flex px-2 py-1 items-center gap-1.5 rounded-md border text-xs font-bold bg-green-500/10 text-green-500 border-green-500/20">
+                          {horseDetail.healthStatus === "HEALTHY" ? "Khỏe mạnh" : horseDetail.healthStatus === "INJURED" ? "Chấn thương" : "Bị ốm"}
                         </div>
                       </div>
 
                       <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Thông số vật lý</p>
-                        <p className="text-xs text-foreground mt-1 leading-relaxed">
-                          Nặng: <span className="font-bold">{horseDetail.weightKg} kg</span> · Cao: <span className="font-bold">{horseDetail.heightCm} cm</span>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">Thông số vật lý</p>
+                        <p className="text-xs text-foreground bg-background border border-border rounded-lg p-2 flex items-center justify-between">
+                          <span>Cân nặng: <b>{horseDetail.weightKg}kg</b></span>
+                          <span>Chiều cao: <b>{horseDetail.heightCm}cm</b></span>
                         </p>
                       </div>
                     </div>
                   </div>
 
                   {horseDetail.description && (
-                    <div className="space-y-1">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Mô tả đặc điểm chiến mã</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed bg-muted/50 p-3 rounded-xl border border-border">
+                    <div className="space-y-1.5">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Mô tả đặc điểm</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-xl border border-border">
                         {horseDetail.description}
                       </p>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-center py-6 text-muted-foreground">Không tìm thấy thông tin chiến mã.</div>
+                <div className="text-center py-6 text-muted-foreground text-sm">Không tìm thấy thông tin chiến mã.</div>
               )}
             </div>
 
-            {/* Footer */}
-            <div className="flex justify-end border-t border-border bg-muted/30 p-4">
+            <div className="flex justify-end border-t border-border bg-muted/10 p-4">
               <Button
                 onClick={() => setSelectedHorseId(null)}
-                className="rounded-full bg-muted/50 border border-border hover:bg-muted text-xs font-bold uppercase px-6 text-white"
+                className="rounded-xl bg-muted/50 border border-border hover:bg-muted text-xs font-bold uppercase px-6 text-foreground transition"
               >
                 Đóng
               </Button>
@@ -1101,7 +1082,7 @@ export function JockeyDashboard() {
 export default function JockeyDashboardPage() {
   return (
     <Suspense fallback={
-      <div className="flex flex-col items-center justify-center py-20 text-white/55">
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
         <div className="size-8 animate-spin border-4 border-primary border-t-transparent rounded-full" />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải trạm điều hành...</p>
       </div>
