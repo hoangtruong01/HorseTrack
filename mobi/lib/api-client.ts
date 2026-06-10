@@ -226,8 +226,17 @@ export const horsesApi = {
     if (params?.search) qs.set('search', params.search);
     return apiFetch<PaginatedResult<HorseItem>>(`/horses?${qs}`);
   },
-  create: (dto: { name: string; breed?: string; age?: number; gender?: string; color?: string; weightKg?: number; heightCm?: number; baseSpeed?: number; staminaScore?: number; description?: string }) =>
-    apiFetch<HorseItem>('/horses', { method: 'POST', body: JSON.stringify(dto) }),
+  listMine: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    return apiFetch<PaginatedResult<HorseItem>>(`/horses/my-horses?${qs}`);
+  },
+  create: (body: FormData | { name: string; breed?: string; age?: number; gender?: string; color?: string; weightKg?: number; heightCm?: number; baseSpeed?: number; staminaScore?: number; description?: string }) =>
+    apiFetch<HorseItem>('/horses', {
+      method: 'POST',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    }),
 };
 
 export const tournamentsApi = {
@@ -332,6 +341,10 @@ export const registrationsApi = {
   },
   create: (dto: { tournamentId: string; raceId: string; horseId: string; jockeyUserId?: string; note?: string }) =>
     apiFetch<RegistrationItem>('/registrations', { method: 'POST', body: JSON.stringify(dto) }),
+  cancel: (id: string) =>
+    apiFetch<any>(`/registrations/${id}/cancel`, { method: 'PATCH' }),
+  withdraw: (id: string) =>
+    apiFetch<any>(`/registrations/${id}/withdraw`, { method: 'PATCH' }),
 };
 
 export const raceResultsApi = {
@@ -348,17 +361,46 @@ export const raceChecksApi = {
 };
 
 export const jockeyInvitationsApi = {
+  listSent: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    return apiFetch<any>(`/jockey-invitations/sent?${qs}`);
+  },
   list: (params?: { page?: number; limit?: number }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     return apiFetch<any>(`/jockey-invitations?${qs}`);
   },
+  create: (dto: { registrationId: string; jockeyId: string; message?: string; jockeySharePercent: number }) =>
+    apiFetch<any>('/jockey-invitations', { method: 'POST', body: JSON.stringify(dto) }),
+  cancel: (id: string) =>
+    apiFetch<any>(`/jockey-invitations/${id}/cancel`, { method: 'PATCH' }),
   respond: (invitationId: string, response: 'accepted' | 'rejected') =>
     apiFetch<any>(`/jockey-invitations/${invitationId}/respond`, {
       method: 'PATCH',
       body: JSON.stringify({ response }),
     }),
+};
+
+export const jockeysApi = {
+  list: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    return apiFetch<any>(`/jockeys?${qs}`);
+  },
+  get: (id: string) => apiFetch<any>(`/jockeys/${id}`),
+};
+
+export const dashboardApi = {
+  getOwnerStats: () => apiFetch<any>('/dashboard/owner'),
+};
+
+export const rankingsApi = {
+  globalHorses: () => apiFetch<any>('/rankings/global/horses'),
+  globalJockeys: () => apiFetch<any>('/rankings/global/jockeys'),
 };
 
 export const raceViolationsApi = {
@@ -374,6 +416,4 @@ export const raceViolationsApi = {
   }) => apiFetch<any>('/race-violations', { method: 'POST', body: JSON.stringify(dto) }),
   listByRace: (raceId: string) => apiFetch<any>(`/race-violations/race/${raceId}`),
 };
-
-
 

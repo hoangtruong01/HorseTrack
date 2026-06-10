@@ -22,6 +22,9 @@ export default function OwnerLayout() {
       <Tabs.Screen name="invitations" options={{ title: 'Mời Jockey', headerTitle: 'MỜI JOCKEY', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person-add" color={color} /> }} />
       <Tabs.Screen name="wallet" options={{ title: 'Ví thưởng', headerTitle: 'VÍ THƯỞNG', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person" color={color} /> }} />
+      <Tabs.Screen name="results" options={{ href: null, title: 'Kết quả', headerTitle: 'KẾT QUẢ THI ĐẤU' }} />
+      <Tabs.Screen name="rankings" options={{ href: null, title: 'Bảng xếp hạng', headerTitle: 'BẢNG XẾP HẠNG' }} />
+      <Tabs.Screen name="races" options={{ href: null, title: 'Đăng ký thi đấu', headerTitle: 'ĐĂNG KÝ THI ĐẤU' }} />
     </Tabs>
   );
 }
