@@ -199,31 +199,17 @@ export const dashboardNavigation: NavigationItem[] = [
   },
   {
     title: "Lời Mời Cưỡi Ngựa",
-    href: "/jockey?tab=invitations",
+    href: "/jockey/invite",
     role: "Jockey",
     icon: Users,
     description: "Tiếp nhận và phản hồi lời mời thi đấu từ các chủ ngựa.",
   },
   {
     title: "Lịch Thi Đấu Đã Nhận",
-    href: "/jockey?tab=assigned",
+    href: "/jockey/assign",
     role: "Jockey",
     icon: Flag,
     description: "Xem chi tiết lịch đua đã nhận lời và thông tin chiến mã.",
-  },
-  {
-    title: "Thông Tin Chiến Mã",
-    href: "/jockey?tab=horses",
-    role: "Jockey",
-    icon: ShieldCheck,
-    description: "Xem chi tiết chỉ số sức mạnh, sức bền và thể trạng các ngựa điều khiển.",
-  },
-  {
-    title: "Thành Tích Cá Nhân",
-    href: "/jockey?tab=performance",
-    role: "Jockey",
-    icon: Award,
-    description: "Xem chi tiết chỉ số kỹ năng nghề nghiệp và kết quả sự nghiệp.",
   },
   {
     title: "Bảng Xếp Hạng",
