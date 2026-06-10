@@ -89,6 +89,14 @@ export class AiController {
     return this.aiService.checkSubscriptionActive(user.id);
   }
 
+  @Get('my-subscription')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lấy thông tin subscription đang hoạt động của user' })
+  getMySubscription(@CurrentUser() user: JwtUser) {
+    return this.aiService.getMySubscription(user.id);
+  }
+
   // ─── Predictions ─────────────────────────────────────────────────────────────
 
   @Post('predictions/generate/:raceId')

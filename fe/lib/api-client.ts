@@ -56,19 +56,21 @@ export async function apiFetch<T>(path: string, options: CustomRequestInit = {})
   }
 
   if (!res.ok) {
-    // Check if unauthorized and not already retried
     if (res.status === 401 && !options._retry) {
       try {
         const refreshRes = await fetch("/api/auth/refresh", { method: "POST" });
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json();
           if (refreshData.success) {
-            // Retry the original request with the new token
             return apiFetch<T>(path, { ...options, _retry: true });
           }
         }
       } catch (err) {
         console.error("Auto token refresh failed:", err);
+      }
+      // Refresh failed or token still invalid — session expired, redirect to login
+      if (typeof window !== "undefined") {
+        window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
       }
     }
 
@@ -673,4 +675,169 @@ export interface RaceResultItem {
 export const raceResultsApi = {
   listByRace: (raceId: string) =>
     apiFetch<RaceResultItem[]>(`/race-results/race/${raceId}`),
+};
+
+// ─── AI Packages ─────────────────────────────────────────────────────────────
+export interface AiPackageItem {
+  _id: string;
+  name: string;
+  description?: string;
+  price: number;
+  durationDays: number;
+  accuracyRate?: number;
+  status: "ACTIVE" | "INACTIVE";
+  createdAt?: string;
+}
+
+// ─── AI Payments / Subscriptions ─────────────────────────────────────────────
+export interface AiPaymentItem {
+  _id: string;
+  userId: { _id: string; fullName: string; email: string } | string;
+  packageId: { _id: string; name: string } | string;
+  amount: number;
+  paymentMethod: string;
+  status: "PENDING" | "SUCCESS" | "FAILED";
+  payosOrderCode?: number;
+  createdAt?: string;
+}
+
+// ─── AI Predictions ───────────────────────────────────────────────────────────
+export interface AiHorseRanking {
+  horseId: { _id: string; name: string; breed?: string } | string;
+  predictedRank: number;
+  winProbability: number;
+  strengthScore: number;
+}
+
+export interface AiPredictionItem {
+  _id: string;
+  raceId: string;
+  rankings: AiHorseRanking[];
+  source: "MANUAL" | "RULE_BASED" | "LLM";
+  confidenceLevel: number;
+  reasoning?: string;
+  generatedAt: string;
+}
+
+// ─── AI Arrangements ─────────────────────────────────────────────────────────
+export interface AiRaceEntry {
+  horseId: { _id: string; name: string } | string;
+  strengthScore: number;
+  jockeyUserId?: { _id: string; fullName: string } | string;
+}
+
+export interface AiProposedRace {
+  entries: AiRaceEntry[];
+  raceType: string;
+  distanceMeters: number;
+  maxParticipants: number;
+  startTime: string;
+  trackCondition: string;
+  weather: string;
+  avgStrength: number;
+  strengthSpread: number;
+}
+
+export interface AiFairnessReport {
+  avgStrengthPerRace: number[];
+  strengthSpreadPerRace: number[];
+  violations: string[];
+}
+
+export interface AiArrangementItem {
+  _id: string;
+  tournamentId: { _id: string; name: string } | string;
+  proposedRaces: AiProposedRace[];
+  fairnessReport?: AiFairnessReport;
+  reasoning?: string;
+  status: "PENDING" | "APPLIED" | "REJECTED";
+  createdRaceIds?: string[];
+  createdAt?: string;
+}
+
+export const aiApi = {
+  listPackages: () =>
+    apiFetch<AiPackageItem[]>("/ai/packages"),
+
+  createPackage: (dto: {
+    name: string;
+    description?: string;
+    price: number;
+    durationDays: number;
+    accuracyRate?: number;
+  }) =>
+    apiFetch<AiPackageItem>("/ai/packages", {
+      method: "POST",
+      body: JSON.stringify(dto),
+    }),
+
+  subscribe: (packageId: string) =>
+    apiFetch<{ checkoutUrl: string; orderCode: number }>("/ai/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ packageId }),
+    }),
+
+  getMySubscription: () =>
+    apiFetch<{
+      _id: string;
+      packageId: AiPackageItem | string;
+      startDate: string;
+      endDate: string;
+      status: "ACTIVE" | "EXPIRED" | "CANCELLED";
+    } | null>("/ai/my-subscription"),
+
+  listRevenue: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<AiPaymentItem>>(`/ai/payments?${qs}`);
+  },
+
+  generatePrediction: (raceId: string) =>
+    apiFetch<AiPredictionItem>(`/ai/predictions/generate/${raceId}`, {
+      method: "POST",
+    }),
+
+  getPrediction: (raceId: string) =>
+    apiFetch<AiPredictionItem>(`/ai/predictions/${raceId}`),
+
+  generateArrangement: (tournamentId: string) =>
+    apiFetch<AiArrangementItem>(`/ai/arrangements/generate/${tournamentId}`, {
+      method: "POST",
+    }),
+
+  listArrangements: (tournamentId: string) =>
+    apiFetch<AiArrangementItem[]>(`/ai/arrangements/tournament/${tournamentId}`),
+
+  updateArrangementStatus: (id: string, status: "APPLIED" | "REJECTED") =>
+    apiFetch<AiArrangementItem>(`/ai/arrangements/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+};
+
+// ─── Bank Transactions ───────────────────────────────────────────────────────
+export interface BankTxItem {
+  _id: string;
+  provider: "sepay" | "manual" | "other";
+  providerTransactionId?: string;
+  direction: "in" | "out";
+  amount: number;
+  currency: string;
+  description?: string;
+  counterAccountNo?: string;
+  counterAccountName?: string;
+  transactionTime: string;
+  matchedType: "payment" | "payout" | "unknown";
+  createdAt?: string;
+}
+
+export const bankTransactionsApi = {
+  list: (params?: { page?: number; limit?: number; matchedType?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.matchedType) qs.set("matchedType", params.matchedType);
+    return apiFetch<PaginatedResult<BankTxItem>>(`/bank-transactions?${qs}`);
+  },
 };
