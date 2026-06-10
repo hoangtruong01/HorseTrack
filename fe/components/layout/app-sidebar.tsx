@@ -88,7 +88,7 @@ export function AppSidebar({
                         "group relative flex items-center rounded-lg border border-transparent p-3 text-sm transition-all duration-300 ease-in-out hover:border-border hover:bg-secondary hover:text-foreground",
                         isCollapsed ? "justify-center gap-0" : "gap-3",
                         isActive &&
-                          "border-primary/60 bg-primary/10 text-foreground",
+                        "border-primary/60 bg-primary/10 text-foreground",
                       )}
                     >
                       {Icon ? (
