@@ -115,7 +115,7 @@ export default function AdminAiArrangementsPage() {
 
       {!loading && selectedTournamentId && arrangements.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border bg-card/50 py-16 text-center text-muted-foreground text-sm">
-          Chưa có đề xuất nào. Nhấn <strong className="text-foreground">"Sinh đề xuất mới"</strong> để tạo.
+          Chưa có đề xuất nào. Nhấn <strong className="text-foreground">&quot;Sinh đề xuất mới&quot;</strong> để tạo.
         </div>
       )}
 

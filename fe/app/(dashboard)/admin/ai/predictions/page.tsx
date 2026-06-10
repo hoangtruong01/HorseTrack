@@ -109,7 +109,7 @@ export default function AdminAiPredictionsPage() {
 
       {!loading && selectedRaceId && !prediction && (
         <div className="rounded-2xl border border-dashed border-border bg-card/50 py-16 text-center text-muted-foreground text-sm">
-          Chưa có dự đoán cho race này. Nhấn <strong className="text-foreground">"Sinh dự đoán AI"</strong> để tạo.
+          Chưa có dự đoán cho race này. Nhấn <strong className="text-foreground">&quot;Sinh dự đoán AI&quot;</strong> để tạo.
         </div>
       )}
 

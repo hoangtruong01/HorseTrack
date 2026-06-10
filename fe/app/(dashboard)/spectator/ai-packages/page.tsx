@@ -46,7 +46,7 @@ export default function SpectatorAiPackagesPage() {
     setSubscribing(pkg._id);
     try {
       const { checkoutUrl } = await aiApi.subscribe(pkg._id);
-      window.location.href = checkoutUrl;
+      window.location.assign(checkoutUrl);
     } catch (e) {
       toast.error((e as Error).message ?? "Không thể khởi tạo thanh toán");
       setSubscribing(null);

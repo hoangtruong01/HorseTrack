@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Brain, Lock } from "lucide-react";
-import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { aiApi, racesApi, type AiPredictionItem, type RaceItem } from "@/lib/api-client";
 

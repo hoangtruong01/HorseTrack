@@ -147,9 +147,9 @@ export function JockeyInvitePage() {
 
       toast.success(`${actionLabel} lời mời thành công!`);
       await fetchInvitations();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || `Lỗi khi thực hiện thao tác.`);
+      toast.error((err as Error).message || `Lỗi khi thực hiện thao tác.`);
     } finally {
       setSubmittingId(null);
     }
@@ -519,7 +519,7 @@ export function JockeyInvitePage() {
               <div className="space-y-1.5 pt-2">
                 <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Info className="size-3"/> Lời nhắn đính kèm</span>
                 <div className="p-3 rounded-xl bg-muted/20 border border-border text-xs text-muted-foreground italic leading-relaxed">
-                  "{detailInv.message}"
+                  &quot;{detailInv.message}&quot;
                 </div>
               </div>
             )}

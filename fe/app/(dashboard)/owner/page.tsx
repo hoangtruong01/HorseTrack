@@ -5,11 +5,16 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
+  AlertTriangle,
   Award,
   ChevronRight,
   ClipboardCheck,
+  Clock,
   Flag,
+  Mail,
   PlusCircle,
+  Sparkles,
+  User,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -285,7 +290,7 @@ export function OwnerDashboard() {
                         <div className="flex items-center gap-2 text-xs">
                           <span className="font-bold text-foreground">
                             {typeof inv.jockeyUserId === "object"
-                              ? (inv.jockeyUserId as any)?.fullName
+                              ? (inv.jockeyUserId as Record<string, string>)?.fullName
                               : "Jockey"}
                           </span>
                           <span className="text-muted-foreground">•</span>

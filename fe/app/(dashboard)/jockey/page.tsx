@@ -12,13 +12,16 @@ import {
   Eye,
   Flag,
   HelpCircle,
+  Info,
   Mail,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
   User,
   X,
 } from "lucide-react";
 import Image from "next/image";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -125,6 +128,10 @@ export function JockeyDashboard() {
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
   const [horseDetail, setHorseDetail] = useState<HorseDetail | null>(null);
   const [isLoadingHorse, setIsLoadingHorse] = useState(false);
+
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [detailInv, setDetailInv] = useState<Invitation | null>(null);
 
   // Fetch initial data
   const fetchData = async () => {
@@ -319,6 +326,7 @@ export function JockeyDashboard() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </section>
 
