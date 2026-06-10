@@ -493,6 +493,8 @@ export const walletApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<CashoutItem>>(`/wallet/cashout/all?${qs}`);
   },
+  lookupCashout: (code: string) =>
+    apiFetch<CashoutItem>(`/wallet/cashout/lookup?code=${code}`),
   processCashout: (id: string, status: string) =>
     apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status }) }),
   depositForUser: (userId: string, amount: number) =>
@@ -524,7 +526,11 @@ export const rewardPointLedgerApi = {
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 export const dashboardApi = {
-  getAdminStats: () => apiFetch<Record<string, unknown>>("/dashboard/admin"),
+  getAdminStats: () => apiFetch<Record<string, any>>("/dashboard/admin"),
+  getOwnerStats: () => apiFetch<Record<string, any>>("/dashboard/owner"),
+  getJockeyStats: () => apiFetch<Record<string, any>>("/dashboard/jockey"),
+  getRefereeStats: () => apiFetch<Record<string, any>>("/dashboard/referee"),
+  getSpectatorStats: () => apiFetch<Record<string, any>>("/dashboard/spectator"),
 };
 
 // ─── Registrations ───────────────────────────────────────────────────────────

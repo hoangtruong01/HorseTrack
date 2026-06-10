@@ -41,7 +41,8 @@
       "note": {
         "owner": "Owners (70%) and jockeys (30%) receive points automatically after official results. Redeem via confirmation code at the counter.",
         "jockey": "Owners (70%) and jockeys (30%) receive points automatically after official results. Redeem via confirmation code at the counter.",
-        "spectator": "Correct predictions earn +1 point; wrong predictions lose 1 point when balance allows. Redeem accumulated points at the counter."
+        "spectator": "Correct predictions earn +1 point; wrong predictions lose 1 point when balance allows. Redeem accumulated points at the counter.",
+        "referee": "Referees receive salary points after completing officiating assignments and can redeem rewards at the counter."
       }
     },
     "transactions": {
@@ -122,6 +123,45 @@
       "errExceed": "Redemption points exceed your current balance.",
       "errMin": "The minimum points to redeem is 10 points.",
       "successMsg": "Successfully requested redemption of {{points}} points! Please save your redemption code."
+    },
+    "redemption": {
+      "lookupTitle": "Redemption Code Verification",
+      "lookupDesc": "Enter the redemption code provided by the user to check details and deliver gifts.",
+      "placeholder": "Enter redemption code (e.g., RWD-YHS9X3)...",
+      "btnLookup": "Lookup",
+      "btnClear": "Clear",
+      "emptyLookup": "This redemption code was not found.",
+      "loadingLookup": "Looking up code data...",
+      "resultTitle": "Redemption Details",
+      "userLabel": "Customer",
+      "codeLabel": "Redemption Code",
+      "pointsLabel": "Points to Redeem",
+      "pointsSuffix": "points",
+      "timeLabel": "Created Time",
+      "btnConfirmPaid": "Confirm Gift Delivery",
+      "btnReject": "Reject",
+      "rejectDialogTitle": "Reject Redemption Request",
+      "rejectConfirmText": "Are you sure you want to reject redemption code {{code}} for {{name}} ({{points}} points)?",
+      "rejectReasonLabel": "Reason for Rejection (required)",
+      "rejectReasonPlaceholder": "E.g., Invalid code, incorrect account details...",
+      "btnCancel": "Cancel",
+      "btnRejectSubmit": "Reject Transaction",
+      "historyTitle": "Redemption Transaction History",
+      "historyDesc": "Complete list of all point redemption transactions in the system.",
+      "colUser": "Customer",
+      "colCode": "Redemption Code",
+      "colPoints": "Redeemed Points",
+      "colHandler": "Processed By",
+      "colTimeCreated": "Created At",
+      "colTimeProcessed": "Processed At",
+      "colStatus": "Status",
+      "colAction": "Actions",
+      "btnApprove": "Approve",
+      "btnPaid": "Paid",
+      "statusFinished": "Completed",
+      "showing": "Showing {{start}} to {{end}} of {{total}} results",
+      "btnPrev": "Previous",
+      "btnNext": "Next"
     }
   },
   "settings": {

@@ -7,39 +7,60 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '../providers/auth-provider';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+function getRoleRoute(roles: string[]): string {
+  const role = (roles[0] || 'spectator').toLowerCase();
+  switch (role) {
+    case 'admin': return '/(admin)';
+    case 'owner':
+    case 'horse_owner':
+      return '/(owner)';
+    case 'jockey': return '/(jockey)';
+    case 'referee': return '/(referee)';
+    case 'counter_staff': return '/(counter)';
+    case 'spectator':
+    default: return '/(spectator)';
+  }
+}
+
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
   const { user, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const [isMounted, setIsMounted] = React.useState(false);
 
   useEffect(() => {
-    if (isLoading) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
-    // Nếu chưa đăng nhập và không nằm trong thư mục xác thực, chuyển hướng sang login
-    if (!user && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } 
-    // Nếu đã đăng nhập và đang ở màn hình login/register, chuyển hướng về trang chủ
-    else if (user && inAuthGroup) {
-      router.replace('/(tabs)');
-    }
-  }, [user, isLoading, segments]);
+    const timer = setTimeout(() => {
+      if (!user && !inAuthGroup) {
+        router.replace('/(auth)/login');
+      } else if (user && inAuthGroup) {
+        const route = getRoleRoute(user.roles);
+        router.replace(route as any);
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [user, isLoading, segments, isMounted]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="competitor" options={{ headerShown: false }} />
-        <Stack.Screen name="operations" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Chi tiết' }} />
+        <Stack.Screen name="(spectator)" options={{ headerShown: false }} />
+        <Stack.Screen name="(owner)" options={{ headerShown: false }} />
+        <Stack.Screen name="(jockey)" options={{ headerShown: false }} />
+        <Stack.Screen name="(referee)" options={{ headerShown: false }} />
+        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+        <Stack.Screen name="(counter)" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
@@ -53,4 +74,3 @@ export default function RootLayout() {
     </AuthProvider>
   );
 }
-

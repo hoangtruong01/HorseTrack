@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../providers/auth-provider';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('spectator@wdp.com');
+  const [email, setEmail] = useState('spectator@horsetrack.local');
   const [password, setPassword] = useState('password123');
   const [loading, setLoading] = useState(false);
   
@@ -100,29 +100,29 @@ export default function LoginScreen() {
           <View style={styles.quickLoginContainer}>
             <Text style={styles.quickLoginHelp}>Chọn nhanh vai trò để thử nghiệm hệ thống:</Text>
             <View style={styles.grid}>
-              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('spectator@wdp.com')}>
+              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('spectator@horsetrack.local')}>
                 <Text style={styles.quickCardTitle}>KHÁN GIẢ</Text>
-                <Text style={styles.quickCardEmail}>spectator@wdp.com</Text>
+                <Text style={styles.quickCardEmail}>spectator@horsetrack.local</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('owner@wdp.com')}>
+              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('owner@horsetrack.local')}>
                 <Text style={styles.quickCardTitle}>CHỦ NGỰA</Text>
-                <Text style={styles.quickCardEmail}>owner@wdp.com</Text>
+                <Text style={styles.quickCardEmail}>owner@horsetrack.local</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('jockey@wdp.com')}>
+              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('jockey@horsetrack.local')}>
                 <Text style={styles.quickCardTitle}>NÀI NGỰA (JOCKEY)</Text>
-                <Text style={styles.quickCardEmail}>jockey@wdp.com</Text>
+                <Text style={styles.quickCardEmail}>jockey@horsetrack.local</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('referee@wdp.com')}>
+              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('referee@horsetrack.local')}>
                 <Text style={styles.quickCardTitle}>TRỌNG TÀI</Text>
-                <Text style={styles.quickCardEmail}>referee@wdp.com</Text>
+                <Text style={styles.quickCardEmail}>referee@horsetrack.local</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.quickCard, { width: '100%' }]} onPress={() => loginAsRole('counter@wdp.com')}>
+              <TouchableOpacity style={[styles.quickCard, { width: '100%' }]} onPress={() => loginAsRole('counter@horsetrack.local')}>
                 <Text style={styles.quickCardTitle}>NHÂN VIÊN QUẦY (COUNTER)</Text>
-                <Text style={styles.quickCardEmail}>counter@wdp.com</Text>
+                <Text style={styles.quickCardEmail}>counter@horsetrack.local</Text>
               </TouchableOpacity>
             </View>
           </View>
