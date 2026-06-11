@@ -37,6 +37,20 @@ export class RewardPointLedgerService {
       .exec();
     return latest?.balanceAfter ?? 0;
   }
+
+  async exists(
+    userId: string,
+    sourceType: LedgerSourceType,
+    sourceId: string,
+  ): Promise<boolean> {
+    const entry = await this.ledgerModel.findOne({
+      userId: new Types.ObjectId(userId),
+      sourceType,
+      sourceId: new Types.ObjectId(sourceId),
+    });
+    return !!entry;
+  }
+
   async credit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
     // Atomic increment on User — prevents race conditions
     const updatedUser = await this.userModel

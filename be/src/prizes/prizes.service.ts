@@ -46,98 +46,97 @@ export class PrizesService {
     const race = await this.raceModel.findById(raceId);
     if (!race) throw new NotFoundException('Race not found');
 
-    const totalPrize = race.prize ?? 0;
-    if (totalPrize === 0) return [];
-
-    const winnerResult = await this.resultModel.findOne({
-      raceId,
-      status: RaceResultStatus.PUBLISHED,
-      rank: 1,
-    });
-    if (!winnerResult) return [];
-
-    const horse = await this.horseModel.findById(winnerResult.horseId);
-    if (!horse) return [];
-
     const createdPrizes: PrizeDocument[] = [];
+    const totalPrize = race.prize ?? 0;
 
-    // Read jockeySharePercent from registration (fallback to 30% if not set)
-    let jockeySharePct = 30;
-    if (winnerResult.horseId) {
-      const registration = await this.registrationModel.findOne({
+    if (totalPrize > 0) {
+      const winnerResult = await this.resultModel.findOne({
         raceId,
-        horseId: winnerResult.horseId,
-      });
-      if (registration?.jockeySharePercent) {
-        jockeySharePct = registration.jockeySharePercent;
-      }
-    }
-
-    const ownerSharePct = 100 - jockeySharePct;
-    const ownerAmount = Math.round(totalPrize * (ownerSharePct / 100));
-    const jockeyAmount = totalPrize - ownerAmount;
-
-    // 1. Process Horse Owner Prize
-    if (ownerAmount > 0 && horse.ownerId) {
-      const existingOwnerPrize = await this.prizeModel.findOne({
-        raceId,
-        horseId: winnerResult.horseId,
-        ownerId: horse.ownerId,
+        status: RaceResultStatus.PUBLISHED,
+        rank: 1,
       });
 
-      if (!existingOwnerPrize) {
-        // Credit owner's ledger directly
-        await this.ledgerService.credit({
-          userId: String(horse.ownerId),
-          points: ownerAmount,
-          sourceType: LedgerSourceType.RACE_WIN_REWARD,
-          sourceId: raceId,
-          note: `Received ${ownerSharePct}% winner reward for race "${race.name}" (Horse: ${horse.name})`,
-        });
+      if (winnerResult) {
+        const horse = await this.horseModel.findById(winnerResult.horseId);
+        if (horse) {
+          // Read jockeySharePercent from registration (fallback to 30% if not set)
+          let jockeySharePct = 30;
+          const registration = await this.registrationModel.findOne({
+            raceId,
+            horseId: winnerResult.horseId,
+          });
+          if (registration?.jockeySharePercent) {
+            jockeySharePct = registration.jockeySharePercent;
+          }
 
-        const ownerPrize = await this.prizeModel.create({
-          tournamentId: race.tournamentId,
-          raceId: new Types.ObjectId(raceId),
-          horseId: winnerResult.horseId,
-          ownerId: horse.ownerId,
-          rank: 1,
-          amount: ownerAmount,
-          status: PrizePaymentStatus.PAID,
-          paidAt: new Date(),
-        });
-        createdPrizes.push(ownerPrize);
-      }
-    }
+          const ownerSharePct = 100 - jockeySharePct;
+          const ownerAmount = Math.round(totalPrize * (ownerSharePct / 100));
+          const jockeyAmount = totalPrize - ownerAmount;
 
-    // 2. Process Jockey Prize
-    if (jockeyAmount > 0 && winnerResult.jockeyUserId) {
-      const existingJockeyPrize = await this.prizeModel.findOne({
-        raceId,
-        horseId: winnerResult.horseId,
-        ownerId: winnerResult.jockeyUserId,
-      });
+          // 1. Process Horse Owner Prize
+          if (ownerAmount > 0 && horse.ownerId) {
+            const existingOwnerPrize = await this.prizeModel.findOne({
+              raceId,
+              horseId: winnerResult.horseId,
+              ownerId: horse.ownerId,
+            });
 
-      if (!existingJockeyPrize) {
-        // Credit jockey's ledger directly
-        await this.ledgerService.credit({
-          userId: String(winnerResult.jockeyUserId),
-          points: jockeyAmount,
-          sourceType: LedgerSourceType.RACE_WIN_REWARD,
-          sourceId: raceId,
-          note: `Received ${jockeySharePct}% winner reward for race "${race.name}" (Jockey share)`,
-        });
+            if (!existingOwnerPrize) {
+              // Credit owner's ledger directly
+              await this.ledgerService.credit({
+                userId: String(horse.ownerId),
+                points: ownerAmount,
+                sourceType: LedgerSourceType.RACE_WIN_REWARD,
+                sourceId: raceId,
+                note: `Received ${ownerSharePct}% winner reward for race "${race.name}" (Horse: ${horse.name})`,
+              });
 
-        const jockeyPrize = await this.prizeModel.create({
-          tournamentId: race.tournamentId,
-          raceId: new Types.ObjectId(raceId),
-          horseId: winnerResult.horseId,
-          ownerId: winnerResult.jockeyUserId,
-          rank: 1,
-          amount: jockeyAmount,
-          status: PrizePaymentStatus.PAID,
-          paidAt: new Date(),
-        });
-        createdPrizes.push(jockeyPrize);
+              const ownerPrize = await this.prizeModel.create({
+                tournamentId: race.tournamentId,
+                raceId: new Types.ObjectId(raceId),
+                horseId: winnerResult.horseId,
+                ownerId: horse.ownerId,
+                rank: 1,
+                amount: ownerAmount,
+                status: PrizePaymentStatus.PAID,
+                paidAt: new Date(),
+              });
+              createdPrizes.push(ownerPrize);
+            }
+          }
+
+          // 2. Process Jockey Prize
+          if (jockeyAmount > 0 && winnerResult.jockeyUserId) {
+            const existingJockeyPrize = await this.prizeModel.findOne({
+              raceId,
+              horseId: winnerResult.horseId,
+              ownerId: winnerResult.jockeyUserId,
+            });
+
+            if (!existingJockeyPrize) {
+              // Credit jockey's ledger directly
+              await this.ledgerService.credit({
+                userId: String(winnerResult.jockeyUserId),
+                points: jockeyAmount,
+                sourceType: LedgerSourceType.RACE_WIN_REWARD,
+                sourceId: raceId,
+                note: `Received ${jockeySharePct}% winner reward for race "${race.name}" (Jockey share)`,
+              });
+
+              const jockeyPrize = await this.prizeModel.create({
+                tournamentId: race.tournamentId,
+                raceId: new Types.ObjectId(raceId),
+                horseId: winnerResult.horseId,
+                ownerId: winnerResult.jockeyUserId,
+                rank: 1,
+                amount: jockeyAmount,
+                status: PrizePaymentStatus.PAID,
+                paidAt: new Date(),
+              });
+              createdPrizes.push(jockeyPrize);
+            }
+          }
+        }
       }
     }
 
@@ -149,15 +148,23 @@ export class PrizesService {
 
     for (const ass of refereeAssignments) {
       if (ass.salary > 0 && ass.refereeUserId) {
-        await this.ledgerService.credit({
-          userId: String(ass.refereeUserId),
-          points: ass.salary,
-          sourceType: LedgerSourceType.REFEREE_SALARY,
-          sourceId: raceId,
-          note: `Lương điều hành cuộc đua "${race.name}" với vai trò ${
-            ass.role === RefereeRole.MAIN ? 'Trọng tài chính' : 'Trọng tài phụ'
-          }`,
-        });
+        const alreadyPaid = await this.ledgerService.exists(
+          String(ass.refereeUserId),
+          LedgerSourceType.REFEREE_SALARY,
+          raceId,
+        );
+
+        if (!alreadyPaid) {
+          await this.ledgerService.credit({
+            userId: String(ass.refereeUserId),
+            points: ass.salary,
+            sourceType: LedgerSourceType.REFEREE_SALARY,
+            sourceId: raceId,
+            note: `Lương điều hành cuộc đua "${race.name}" với vai trò ${
+              ass.role === RefereeRole.MAIN ? 'Trọng tài chính' : 'Trọng tài phụ'
+            }`,
+          });
+        }
       }
     }
 
