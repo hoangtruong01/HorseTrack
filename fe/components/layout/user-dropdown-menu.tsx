@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { User, Settings, ChevronDown, LogOut } from "lucide-react";
+import { User, Settings, ChevronDown, LogOut, LayoutDashboard } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
@@ -39,6 +39,14 @@ export function UserDropdownMenu({
 
   const closeMenu = () => {
     setIsOpen(false);
+  };
+
+  const getDashboardHref = () => {
+    let role = userRole;
+    if (role === "counter_staff") {
+      role = "counter-staff";
+    }
+    return `/${role}`;
   };
 
   return (
@@ -85,6 +93,16 @@ export function UserDropdownMenu({
            >
              <User className="size-4.5" />
              <span>{t("nav.profile", "Profile")}</span>
+           </Link>
+
+           {/* Dashboard Link */}
+           <Link
+             href={getDashboardHref()}
+             onClick={closeMenu}
+             className="flex items-center gap-3 border-b border-border px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+           >
+             <LayoutDashboard className="size-4.5" />
+             <span>{t("nav.dashboard", "Dashboard")}</span>
            </Link>
 
             {/* Settings Link */}
