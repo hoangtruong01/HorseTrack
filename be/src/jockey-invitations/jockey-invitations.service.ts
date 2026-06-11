@@ -9,6 +9,7 @@ import { Model, Types } from 'mongoose';
 import {
   Registration,
   RegistrationDocument,
+  RegistrationStatus,
 } from '../registrations/schemas/registration.schema';
 import { UsersService } from '../users/users.service';
 import { RoleName } from '../users/schemas/user.schema';
@@ -16,6 +17,7 @@ import {
   Jockey,
   JockeyDocument,
   JockeyStatus,
+  JockeyApprovalStatus,
 } from '../jockeys/schemas/jockey.schema';
 import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
@@ -90,12 +92,13 @@ export class JockeyInvitationsService {
       throw new BadRequestException('Target user does not have JOCKEY role');
     }
 
-    // 5. Verify jockey profile exists and is AVAILABLE
+    // 5. Verify jockey profile exists, is APPROVED, and is AVAILABLE
     const jockeyProfile = await this.jockeyModel.findOne({
       userId: new Types.ObjectId(dto.jockeyId),
+      approvalStatus: JockeyApprovalStatus.APPROVED,
     });
     if (!jockeyProfile) {
-      throw new BadRequestException('Jockey profile not found');
+      throw new BadRequestException('Jockey profile not found or has not been approved by Admin');
     }
     if (jockeyProfile.status !== JockeyStatus.AVAILABLE) {
       throw new BadRequestException(
@@ -111,7 +114,7 @@ export class JockeyInvitationsService {
     });
     if (existing) {
       throw new BadRequestException(
-        'A pending invitation already exists for this jockey and registration',
+        'Bạn đã gửi lời mời cho Jockey này rồi.',
       );
     }
 
@@ -175,13 +178,21 @@ export class JockeyInvitationsService {
 
     // When accepting, run additional checks
     if (status === InvitationStatus.ACCEPTED) {
-      // Check registration doesn't already have a jockey
+      // Check registration exists, is APPROVED and doesn't already have a jockey
       const registration = await this.registrationModel.findById(
         invitation.registrationId,
       );
-      if (registration?.jockeyUserId) {
+      if (!registration) {
+        throw new NotFoundException('Registration not found');
+      }
+      if (registration.status !== RegistrationStatus.APPROVED) {
         throw new BadRequestException(
-          'This registration already has a jockey assigned',
+          'Đăng ký thi đấu này không còn hiệu lực hoặc đã bị hủy',
+        );
+      }
+      if (registration.jockeyUserId) {
+        throw new BadRequestException(
+          'Đăng ký thi đấu này đã được phân công nài ngựa khác',
         );
       }
 
@@ -226,25 +237,44 @@ export class JockeyInvitationsService {
       }
 
       // Bind jockey to registration + save jockeySharePercent
-      await this.registrationModel.findByIdAndUpdate(
+      const updatedReg = await this.registrationModel.findByIdAndUpdate(
         invitation.registrationId,
         {
           jockeyUserId: invitation.jockeyUserId,
           jockeySharePercent: invitation.jockeySharePercent,
         },
-      );
+        { new: true }
+      ).populate('horseId');
 
-      // Auto-cancel all other PENDING invitations for the same registration
-      await this.invitationModel.updateMany(
-        {
-          registrationId: invitation.registrationId,
-          _id: { $ne: invitation._id },
-          status: InvitationStatus.PENDING,
-        },
-        {
-          status: InvitationStatus.CANCELLED,
-        },
-      );
+      // Find other pending invitations to auto-cancel and notify other jockeys
+      const otherPending = await this.invitationModel.find({
+        registrationId: invitation.registrationId,
+        _id: { $ne: invitation._id },
+        status: InvitationStatus.PENDING,
+      });
+
+      if (otherPending.length > 0) {
+        await this.invitationModel.updateMany(
+          {
+            _id: { $in: otherPending.map((inv) => inv._id) },
+          },
+          {
+            status: InvitationStatus.CANCELLED,
+          },
+        );
+
+        // Notify other jockeys
+        for (const otherInv of otherPending) {
+          const horseName = (updatedReg?.horseId as any)?.name || 'ngựa';
+          const raceName = race?.name || 'Trận đấu';
+          await this.notificationsService.send(
+            String(otherInv.jockeyUserId),
+            'Lời mời thi đấu đã bị hủy',
+            `Lời mời tham gia trận đấu "${raceName}" cùng chiến mã "${horseName}" đã bị tự động hủy do nài ngựa khác đã chấp nhận trước.`,
+            NotificationType.RACE,
+          );
+        }
+      }
     }
 
     invitation.status = status;

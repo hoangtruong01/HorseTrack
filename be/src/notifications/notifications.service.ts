@@ -40,7 +40,9 @@ export class NotificationsService {
     });
 
     // Send realtime event!
-    this.gateway.sendToUser(userId, 'notification', notif);
+    if (this.gateway && typeof this.gateway.sendToUser === 'function') {
+      this.gateway.sendToUser(userId, 'notification', notif);
+    }
 
     return notif;
   }

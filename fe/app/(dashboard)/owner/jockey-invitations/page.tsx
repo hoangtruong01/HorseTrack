@@ -109,7 +109,16 @@ export default function JockeyInvitationsPage() {
         if (d.success) {
           const raw = d.data?.data || d.data || [];
           setRegistrations((raw as Record<string, unknown>[])
-            .filter((r) => r.status === "APPROVED" && !r.jockeyUserId)
+            .filter((r) => {
+              const raceId = r.raceId as Record<string, unknown> | null | undefined;
+              const raceStatus = raceId?.status as string | undefined;
+              return (
+                r.status === "APPROVED" &&
+                !r.jockeyUserId &&
+                raceStatus &&
+                ["SCHEDULED", "CHECKING"].includes(raceStatus)
+              );
+            })
             .map((r) => {
               const raceId = r.raceId as Record<string, unknown> | null | undefined;
               const horseId = r.horseId as Record<string, unknown> | null | undefined;
@@ -175,12 +184,19 @@ export default function JockeyInvitationsPage() {
         }),
       });
       const d = await res.json();
-      if (!res.ok) throw new Error(d.message || "Gửi lời mời thất bại.");
+      if (!res.ok) {
+        toast.error(d.message || "Gửi lời mời thất bại.");
+        return;
+      }
       toast.success("Đã gửi lời mời thành công!");
       setShowModal(false); setSelectedReg(""); setInvMessage(""); setSharePercent(30);
       setSelectedJockey(null); loadData();
-    } catch (err) { toast.error((err as Error).message); }
-    finally { setIsSubmitting(false); }
+    } catch (err) {
+      console.error("Lỗi khi gửi lời mời:", err);
+      toast.error("Đã xảy ra lỗi hệ thống khi gửi lời mời.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = async (id: string) => {

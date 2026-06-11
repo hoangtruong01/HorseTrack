@@ -68,4 +68,9 @@ export class CreateRaceDto {
   @IsNumber()
   @Min(0)
   prize?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

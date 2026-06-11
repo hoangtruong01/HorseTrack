@@ -373,13 +373,20 @@ export default function AdminTournamentDetailPage() {
           <h3 className="text-lg font-black uppercase tracking-tight text-foreground flex items-center gap-2">
             Danh sách vòng đua nhỏ ({races.length})
           </h3>
-          <Button
-            onClick={loadDetails}
-            variant="ghost"
-            className="size-8 p-0 rounded-full hover:bg-white/5 text-muted-foreground hover:text-foreground"
-          >
-            <RefreshCw className="size-4" />
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button asChild className="rounded-full bg-primary hover:bg-primary/90 text-foreground font-bold uppercase tracking-wider text-xs h-9 px-4">
+              <Link href={`/admin/races/new?tournamentId=${tournamentId}`} className="flex items-center gap-1.5">
+                <Plus className="size-3.5" /> Tạo vòng đua mới
+              </Link>
+            </Button>
+            <Button
+              onClick={loadDetails}
+              variant="ghost"
+              className="size-8 p-0 rounded-full hover:bg-white/5 text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="size-4" />
+            </Button>
+          </div>
         </div>
 
         {races.length === 0 ? (
@@ -556,14 +563,21 @@ export default function AdminTournamentDetailPage() {
                   {selectedRace.distanceMeters} mét
                 </span>
               </div>
-              <div className="bg-white/[0.02] border border-border rounded-xl p-3">
-                <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
-                  Số vòng chạy
-                </span>
-                <span className="text-sm font-black text-foreground">
-                  {selectedRace.lapCount || 1} vòng
-                </span>
-              </div>
+              {selectedRace.imageUrl && (
+                <div className="bg-white/[0.02] border border-border rounded-xl p-3 flex flex-col justify-between">
+                  <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
+                    Hình ảnh trận đua
+                  </span>
+                  <div className="relative w-full h-24 rounded-lg overflow-hidden border border-border">
+                    <Image
+                      src={selectedRace.imageUrl}
+                      alt={selectedRace.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+              )}
               <div className="bg-white/[0.02] border border-border rounded-xl p-3">
                 <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
                   Mặt sân đua

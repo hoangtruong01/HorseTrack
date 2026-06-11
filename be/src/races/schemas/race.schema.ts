@@ -78,6 +78,9 @@ export class Race {
   createdBy!: Types.ObjectId;
 
   @Prop()
+  imageUrl?: string;
+
+  @Prop()
   deletedAt?: Date;
 }
 

@@ -63,7 +63,10 @@ export class JockeysService {
   }
 
   async findAll(page = 1, limit = 20) {
-    const filter = { status: { $ne: JockeyStatus.UNAVAILABLE } };
+    const filter = {
+      status: { $ne: JockeyStatus.UNAVAILABLE },
+      approvalStatus: JockeyApprovalStatus.APPROVED,
+    };
     const [docs, total] = await Promise.all([
       this.jockeyModel
         .find(filter)

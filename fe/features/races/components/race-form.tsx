@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarClock, Flag, Milestone, Trophy, Loader2, Users } from "lucide-react";
+import Image from "next/image";
+import { CalendarClock, Flag, Milestone, Trophy, Loader2, Users, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,10 +30,17 @@ export function RaceForm() {
   const [name, setName] = useState("");
   const [startTime, setStartTime] = useState("");
   const [distanceMeters, setDistanceMeters] = useState(1000);
-  const [lapCount, setLapCount] = useState(1);
+  const lapCount = 1;
   const [maxParticipants, setMaxParticipants] = useState(8);
   const [prize, setPrize] = useState(0);
   const [description, setDescription] = useState("");
+
+  const [imageUrl, setImageUrl] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const [existingRaces, setExistingRaces] = useState<any[]>([]);
+  const [loadingRaces, setLoadingRaces] = useState(false);
 
   useEffect(() => {
     async function loadTournaments() {
@@ -48,7 +56,66 @@ export function RaceForm() {
     void loadTournaments();
   }, []);
 
+  useEffect(() => {
+    if (!tournamentId) {
+      setExistingRaces([]);
+      return;
+    }
+    async function loadRaces() {
+      setLoadingRaces(true);
+      try {
+        const res = await racesApi.listByTournament(tournamentId, { limit: 100 });
+        setExistingRaces(res.data || []);
+      } catch (err) {
+        console.error("Failed to load existing races:", err);
+      } finally {
+        setLoadingRaces(false);
+      }
+    }
+    void loadRaces();
+  }, [tournamentId]);
+
   const selectedTournament = tournaments.find((t) => t._id === tournamentId);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Kích thước ảnh không được vượt quá 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || "Tải lên ảnh thất bại.");
+      }
+
+      setImageUrl(resData.url);
+      toast.success("Tải ảnh lên thành công!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Lỗi khi tải ảnh lên.");
+      setImagePreview("");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,17 +135,29 @@ export function RaceForm() {
 
     if (selectedTournament) {
       const raceStart = new Date(startTime);
-      const tStartPart = typeof selectedTournament.startDate === "string" ? selectedTournament.startDate.split("T")[0] : "";
-      const tEndPart = typeof selectedTournament.endDate === "string" ? selectedTournament.endDate.split("T")[0] : "";
-      const localStartLimit = tStartPart ? new Date(`${tStartPart}T00:00:00`) : null;
-      const localEndLimit = tEndPart ? new Date(`${tEndPart}T23:59:59.999`) : null;
+      const tStart = selectedTournament.startDate ? new Date(selectedTournament.startDate) : null;
+      const tEnd = selectedTournament.endDate ? new Date(selectedTournament.endDate) : null;
 
-      if (localStartLimit && raceStart < localStartLimit) {
-        toast.error("Thời gian xuất phát vòng đua nằm trước ngày bắt đầu giải đấu!");
-        return;
+      if (tStart && tEnd) {
+        const startLimit = new Date(tStart.getTime() - 12 * 60 * 60 * 1000);
+        const endLimit = new Date(tEnd.getTime() + 36 * 60 * 60 * 1000);
+
+        if (raceStart < startLimit) {
+          toast.error(`Thời gian xuất phát vòng đua nằm trước ngày bắt đầu giải đấu! (Cho phép tối đa từ ${startLimit.toLocaleString("vi-VN")})`);
+          return;
+        }
+        if (raceStart > endLimit) {
+          toast.error(`Thời gian xuất phát vòng đua nằm sau ngày kết thúc giải đấu! (Cho phép tối đa đến ${endLimit.toLocaleString("vi-VN")})`);
+          return;
+        }
       }
-      if (localEndLimit && raceStart > localEndLimit) {
-        toast.error("Thời gian xuất phát vòng đua nằm sau ngày kết thúc giải đấu!");
+
+      const totalPrizePool = selectedTournament.prizePool || selectedTournament.prize || 0;
+      const usedPrize = existingRaces.reduce((sum, r) => sum + (r.prize || 0), 0);
+      if (usedPrize + prize > totalPrizePool) {
+        toast.error(
+          `Tổng giải thưởng các vòng đua (${(usedPrize + prize).toLocaleString()} pts) vượt quá quỹ thưởng của giải đấu chính (${totalPrizePool.toLocaleString()} pts). Còn lại khả dụng: ${(totalPrizePool - usedPrize).toLocaleString()} pts.`,
+        );
         return;
       }
     }
@@ -94,6 +173,7 @@ export function RaceForm() {
         lapCount,
         maxParticipants,
         prize,
+        imageUrl: imageUrl || undefined,
       });
       toast.success(`Đã tạo trận đua "${name}" thành công!`);
       router.push(presetTournamentId ? `/admin/tournaments/${presetTournamentId}` : "/admin/races");
@@ -103,6 +183,10 @@ export function RaceForm() {
       setSubmitting(false);
     }
   };
+
+  const totalPrizePool = selectedTournament ? (selectedTournament.prizePool || selectedTournament.prize || 0) : 0;
+  const usedPrize = existingRaces.reduce((sum, r) => sum + (r.prize || 0), 0);
+  const remainingPrize = totalPrizePool - usedPrize;
 
   return (
     <form
@@ -163,9 +247,14 @@ export function RaceForm() {
             </Select>
           )}
           {selectedTournament && (
-            <span className="text-[10px] text-muted-foreground font-normal">
-              Thời gian: {selectedTournament.startDate ? new Date(selectedTournament.startDate).toLocaleDateString("vi-VN") : "?"} – {selectedTournament.endDate ? new Date(selectedTournament.endDate).toLocaleDateString("vi-VN") : "?"} · Quỹ thưởng: {selectedTournament.prize?.toLocaleString() || 0} pts
-            </span>
+            <div className="mt-1 flex flex-col gap-0.5 text-[10px] text-muted-foreground font-normal">
+              <span>
+                Thời gian giải đấu: <strong className="text-foreground">{selectedTournament.startDate ? new Date(selectedTournament.startDate).toLocaleDateString("vi-VN") : "?"}</strong> – <strong className="text-foreground">{selectedTournament.endDate ? new Date(selectedTournament.endDate).toLocaleDateString("vi-VN") : "?"}</strong>
+              </span>
+              <span>
+                Quỹ thưởng giải đấu: <strong className="text-foreground">{totalPrizePool.toLocaleString()} pts</strong> · Đã sử dụng: <strong className="text-foreground">{usedPrize.toLocaleString()} pts</strong> · Còn lại: <strong className="text-teal-400 font-bold">{remainingPrize.toLocaleString()} pts</strong>
+              </span>
+            </div>
           )}
         </div>
 
@@ -214,7 +303,7 @@ export function RaceForm() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         {/* Max Participants */}
         <div className="grid gap-2">
           <Label className="inline-flex items-center gap-2">
@@ -242,18 +331,6 @@ export function RaceForm() {
           />
         </div>
 
-        {/* Laps */}
-        <div className="grid gap-2">
-          <Label>Số vòng (Laps)</Label>
-          <Input
-            type="number"
-            min={1}
-            value={lapCount}
-            onChange={(e) => setLapCount(parseInt(e.target.value) || 1)}
-            className="font-mono"
-          />
-        </div>
-
         {/* Description */}
         <div className="grid gap-2">
           <Label>Mô tả ngắn</Label>
@@ -261,6 +338,54 @@ export function RaceForm() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Mô tả thêm về trận đua..."
+          />
+        </div>
+      </div>
+
+      {/* Image Upload Row */}
+      <div className="grid gap-2 text-sm font-bold text-foreground">
+        <Label className="inline-flex items-center gap-2">
+          <Upload className="size-4 text-primary" />
+          Hình ảnh trận đua
+        </Label>
+        <div
+          className={`relative border border-dashed border-border/25 hover:border-primary/50 bg-black/20 rounded-xl min-h-[160px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${uploading ? "pointer-events-none opacity-60" : ""}`}
+        >
+          {imagePreview ? (
+            <div className="relative w-full h-[140px] rounded-lg overflow-hidden">
+              <Image
+                src={imagePreview}
+                alt="Preview"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">
+                <span className="text-foreground text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">
+                  Thay đổi ảnh
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center space-y-2">
+              {uploading ? (
+                <Loader2 className="size-8 text-primary mx-auto animate-spin" />
+              ) : (
+                <Upload className="size-8 text-white/35 mx-auto group-hover:text-primary transition" />
+              )}
+              <p className="text-xs font-bold text-foreground">
+                {uploading ? "Đang tải lên..." : "Tải lên hình ảnh trận đua"}
+              </p>
+              <p className="text-[10px] text-white/45">
+                Cho phép định dạng PNG, JPG, WEBP tối đa 5MB
+              </p>
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            disabled={uploading}
+            className="absolute inset-0 opacity-0 cursor-pointer"
           />
         </div>
       </div>

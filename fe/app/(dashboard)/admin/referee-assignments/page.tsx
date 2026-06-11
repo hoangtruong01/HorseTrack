@@ -179,7 +179,11 @@ export default function AdminRefereeAssignmentsPage() {
   const getRefEmail = (r: AssignmentItem["refereeUserId"]) =>
     !r || typeof r !== "object" ? "" : r.email;
 
-  const filteredReferees = referees.filter(u => {
+  const filteredReferees = referees.filter((u, index, self) => {
+    // Check if it's the first occurrence of this _id
+    const isFirst = self.findIndex((x) => x._id === u._id) === index;
+    if (!isFirst) return false;
+
     if (!searchRef) return true;
     const q = searchRef.toLowerCase();
     return u.fullName.toLowerCase().includes(q) || (u.email && u.email.toLowerCase().includes(q));

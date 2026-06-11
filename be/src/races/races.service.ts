@@ -157,6 +157,25 @@ export class RacesService {
       );
     }
 
+    // Validate startTime within tournament dates
+    if (dto.startTime !== undefined) {
+      const tournament = await this.tournamentsService.findOne(
+        this.getTournamentIdString(race.tournamentId),
+      );
+      const startTime = new Date(dto.startTime);
+      const startLimit = new Date(
+        tournament.startDate.getTime() - 12 * 60 * 60 * 1000,
+      );
+      const endLimit = new Date(
+        tournament.endDate.getTime() + 36 * 60 * 60 * 1000,
+      );
+      if (startTime < startLimit || startTime > endLimit) {
+        throw new BadRequestException(
+          'Race startTime must be within tournament startDate and endDate',
+        );
+      }
+    }
+
     // Validate prize does not exceed tournament budget
     if (dto.prize !== undefined) {
       const tournament = await this.tournamentsService.findOne(

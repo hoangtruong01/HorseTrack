@@ -158,15 +158,20 @@ export class RefereeAssignmentsService {
       activeConflictingAssignments.map((a) => String(a.refereeUserId)),
     );
 
-    // 3. Filter out busy referees
-    const availableReferees = refereeUsers.filter((user) => {
-      if (!user) return false;
+    // 3. Filter out busy referees and deduplicate by userId
+    const seenUserIds = new Set<string>();
+    const availableReferees: any[] = [];
+    for (const user of refereeUsers) {
+      if (!user) continue;
       const userIdStr =
         typeof user === 'object' && '_id' in user
           ? String((user as { _id: Types.ObjectId })._id)
           : String(user);
-      return !busyRefereeUserIds.has(userIdStr);
-    });
+      if (!busyRefereeUserIds.has(userIdStr) && !seenUserIds.has(userIdStr)) {
+        seenUserIds.add(userIdStr);
+        availableReferees.push(user);
+      }
+    }
 
     return availableReferees;
   }
