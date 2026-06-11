@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   // Đợi component mount để tránh hydration mismatch
@@ -30,19 +30,19 @@ export default function SettingsPage() {
         <div className="mx-auto max-w-4xl">
           <div className="mb-8">
             <h1 className="text-5xl font-black uppercase tracking-wider text-primary mb-3">
-              Cài Đặt
+              {t("settings.title")}
             </h1>
             <p className="text-base text-foreground/60 font-medium">
-              Quản lý giao diện và ngôn ngữ cho HorseTrack.
+              {t("settings.subtitle")}
             </p>
           </div>
           <div className="space-y-6">
             <div className="rounded-3xl bg-card p-8 shadow-lg border border-border">
               <h2 className="text-lg font-black uppercase tracking-wider text-primary mb-2">
-                Giao Diện
+                {t("settings.themeTitle")}
               </h2>
               <p className="text-sm text-foreground/60 font-medium mb-6">
-                Chọn chế độ sáng hoặc tối.
+                {t("settings.themeHint")}
               </p>
               <div className="flex gap-4">
                 <div className="flex-1 rounded-xl px-6 py-3 bg-secondary/50 animate-pulse h-[42px]"></div>
@@ -51,10 +51,10 @@ export default function SettingsPage() {
             </div>
             <div className="rounded-3xl bg-card p-8 shadow-lg border border-border">
               <h2 className="text-lg font-black uppercase tracking-wider text-primary mb-2">
-                Ngôn Ngữ
+                {t("settings.languageTitle")}
               </h2>
               <p className="text-sm text-foreground/60 font-medium mb-6">
-                Chọn ngôn ngữ hiển thị.
+                {t("settings.languageHint")}
               </p>
               <div className="flex gap-4">
                 <div className="flex-1 rounded-xl px-6 py-3 bg-secondary/50 animate-pulse h-[42px]"></div>
@@ -73,10 +73,10 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-5xl font-black uppercase tracking-wider text-primary mb-3">
-            Cài Đặt
+            {t("settings.title")}
           </h1>
           <p className="text-base text-foreground/60 font-medium">
-            Quản lý giao diện và ngôn ngữ cho HorseTrack.
+            {t("settings.subtitle")}
           </p>
         </div>
 
@@ -85,10 +85,10 @@ export default function SettingsPage() {
           {/* Theme Card */}
           <div className="rounded-3xl bg-card p-8 shadow-lg border border-border">
             <h2 className="text-lg font-black uppercase tracking-wider text-primary mb-2">
-              Giao Diện
+              {t("settings.themeTitle")}
             </h2>
             <p className="text-sm text-foreground/60 font-medium mb-6">
-              Chọn chế độ sáng hoặc tối.
+              {t("settings.themeHint")}
             </p>
             <div className="flex gap-4">
               <button
@@ -100,7 +100,7 @@ export default function SettingsPage() {
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80"
                 )}
               >
-                Sáng
+                {t("settings.themeLight")}
               </button>
               <button
                 onClick={() => handleThemeChange("dark")}
@@ -111,7 +111,7 @@ export default function SettingsPage() {
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80"
                 )}
               >
-                Tối
+                {t("settings.themeDark")}
               </button>
             </div>
           </div>
@@ -119,10 +119,10 @@ export default function SettingsPage() {
           {/* Language Card */}
           <div className="rounded-3xl bg-card p-8 shadow-lg border border-border">
             <h2 className="text-lg font-black uppercase tracking-wider text-primary mb-2">
-              Ngôn Ngữ
+              {t("settings.languageTitle")}
             </h2>
             <p className="text-sm text-foreground/60 font-medium mb-6">
-              Chọn ngôn ngữ hiển thị.
+              {t("settings.languageHint")}
             </p>
             <div className="flex gap-4">
               <button
@@ -134,7 +134,7 @@ export default function SettingsPage() {
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80"
                 )}
               >
-                Tiếng Việt
+                {t("settings.languageVietnamese")}
               </button>
               <button
                 onClick={() => handleLanguageChange("en")}
@@ -145,7 +145,7 @@ export default function SettingsPage() {
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80"
                 )}
               >
-                Tiếng Anh
+                {t("settings.languageEnglish")}
               </button>
             </div>
           </div>

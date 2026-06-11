@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, X, LogOut, Wallet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { publicNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
@@ -17,12 +18,16 @@ export type AppHeaderProps = {
   ctaLabel?: string;
 };
 
-export function AppHeader({
-  className,
-}: AppHeaderProps) {
+export function AppHeader({ className }: AppHeaderProps) {
+  const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const [points, setPoints] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const getWalletHref = () => {
     if (!user) return "#";
@@ -98,13 +103,28 @@ export function AppHeader({
                 href={item.href}
                 className="relative rounded-full px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-foreground/60 transition-all duration-150 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                {item.title}
+                {!mounted
+                  ? item.title
+                  : item.itemKey
+                    ? t(`navigation.${item.itemKey}.title`)
+                    : item.title}
               </Link>
             ))}
           </nav>
         )}
 
         <div className="hidden items-center gap-3 lg:flex">
+          <button
+            onClick={() =>
+              i18n.changeLanguage(i18n.language === "vi" ? "en" : "vi")
+            }
+            className="flex items-center justify-center rounded-xl border border-border bg-card/40 hover:bg-card px-3.5 py-2 text-xs font-black uppercase tracking-wider text-foreground transition duration-150 cursor-pointer h-[38px] min-w-[42px]"
+            title="Switch Language / Đổi Ngôn Ngữ"
+          >
+            <span>
+              {!mounted ? "EN" : i18n.language === "vi" ? "EN" : "VI"}
+            </span>
+          </button>
           {user ? (
             <>
               <Link
@@ -113,7 +133,11 @@ export function AppHeader({
               >
                 <Wallet className="size-4 text-primary" />
                 <span>
-                  {points !== null ? `${points.toLocaleString("vi-VN")} Điểm` : "Lấy số dư..."}
+                  {points !== null
+                    ? `${points.toLocaleString("vi-VN")} ${!mounted ? "Điểm" : t("wallet.balance.pointsUnit", "Điểm")}`
+                    : !mounted
+                      ? "Làm mới số dư"
+                      : t("wallet.balance.refreshAria")}
                 </span>
               </Link>
               <NotificationsBell />
@@ -128,12 +152,23 @@ export function AppHeader({
               href="/login"
               className="rounded-xl border border-border bg-card/50 px-5 py-2 text-sm font-bold text-foreground/70 transition hover:bg-card hover:text-foreground"
             >
-              Login
+              {!mounted ? "Đăng nhập" : t("nav.login", "Login")}
             </Link>
           )}
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
+          <button
+            onClick={() =>
+              i18n.changeLanguage(i18n.language === "vi" ? "en" : "vi")
+            }
+            className="flex items-center justify-center rounded-xl border border-border bg-card/40 hover:bg-card px-2.5 py-1.5 text-xs font-black uppercase tracking-wider text-foreground transition duration-150 cursor-pointer h-10 min-w-[38px]"
+            title="Switch Language / Đổi Ngôn Ngữ"
+          >
+            <span>
+              {!mounted ? "EN" : i18n.language === "vi" ? "EN" : "VI"}
+            </span>
+          </button>
           {user && (
             <>
               <Link
@@ -181,7 +216,11 @@ export function AppHeader({
                   onClick={() => setMobileMenuOpen(false)}
                   className="rounded-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-foreground/60 hover:bg-secondary hover:text-foreground"
                 >
-                  {item.title}
+                  {!mounted
+                    ? item.title
+                    : item.itemKey
+                      ? t(`navigation.${item.itemKey}.title`)
+                      : item.title}
                 </Link>
               ))}
             </nav>
@@ -205,7 +244,12 @@ export function AppHeader({
                       className="flex items-center gap-1.5 rounded-xl border border-border bg-card/60 px-3 py-1.5 text-xs font-bold text-foreground transition"
                     >
                       <Wallet className="size-3.5 text-primary" />
-                      <span>{points.toLocaleString("vi-VN")} Điểm</span>
+                      <span>
+                        {points.toLocaleString("vi-VN")}{" "}
+                        {!mounted
+                          ? "Điểm"
+                          : t("wallet.balance.pointsUnit", "Điểm")}
+                      </span>
                     </Link>
                   )}
                 </div>
@@ -217,7 +261,7 @@ export function AppHeader({
                   className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground cursor-pointer hover:bg-primary/90 transition"
                 >
                   <LogOut className="size-4" />
-                  Đăng xuất
+                  {!mounted ? "Đăng xuất" : t("nav.logout", "Đăng xuất")}
                 </button>
               </div>
             ) : (
@@ -226,7 +270,7 @@ export function AppHeader({
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex h-11 w-full items-center justify-center rounded-xl border border-border text-sm font-bold text-foreground/70 hover:bg-secondary hover:text-foreground transition"
               >
-                Login
+                {!mounted ? "Đăng nhập" : t("nav.login", "Login")}
               </Link>
             )}
           </div>

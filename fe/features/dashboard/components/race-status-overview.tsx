@@ -1,4 +1,5 @@
 import { MapPin, RadioTower, Timer, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import type {
@@ -33,20 +34,21 @@ const statusMeta: Record<
 };
 
 export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="grid gap-4 xl:grid-cols-[0.9fr_1.4fr]">
       <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-card p-5 shadow-[0_18px_56px_rgba(0,0,0,0.32)] dark:shadow-[0_18px_56px_rgba(0,0,0,0.32)] sm:p-6">
         <div className="absolute -right-16 -top-16 size-48 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Race status radar
+            {t("admin.raceStatus.eyebrow", "Race status radar")}
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
-            Control tower
+            {t("admin.raceStatus.title", "Control tower")}
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            One-screen status summary for independent races. No rounds, no stage
-            progression.
+            {t("admin.raceStatus.description", "One-screen status summary for independent races. No rounds, no stage progression.")}
           </p>
 
           <div className="mt-6 grid grid-cols-3 gap-2">
@@ -62,7 +64,7 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
                     {count}
                   </p>
                   <p className="mt-2 text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                    {meta.label}
+                    {t(`admin.raceStatus.status.${status}`, meta.label)}
                   </p>
                 </div>
               );
@@ -72,11 +74,10 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
           <div className="mt-6 rounded-xl border border-border bg-muted p-4">
             <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-foreground">
               <RadioTower className="size-4 text-primary" />
-              Live priority
+              {t("admin.raceStatus.livePriorityTitle", "Live priority")}
             </div>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Live races stay visually dominant so admin can jump to monitoring,
-              registration impact, and result readiness.
+              {t("admin.raceStatus.livePriorityDesc", "Live races stay visually dominant so admin can jump to monitoring, registration impact, and result readiness.")}
             </p>
           </div>
         </div>
@@ -86,13 +87,15 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-              Upcoming / live / finished
+              {t("admin.raceStatus.listEyebrow", "Upcoming / live / finished")}
             </p>
             <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
-              Race summary
+              {t("admin.raceStatus.listTitle", "Race summary")}
             </h2>
           </div>
-          <p className="text-sm text-muted-foreground">Mock data only</p>
+          <p className="text-sm text-muted-foreground">
+            {t("admin.raceStatus.listSubtitle", "Mock data only")}
+          </p>
         </div>
 
         <div className="mt-5 space-y-3">
@@ -107,26 +110,28 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={meta.className}>{meta.label}</span>
+                      <span className={meta.className}>
+                        {t(`admin.raceStatus.status.${race.status}`, meta.label)}
+                      </span>
                       <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                        {race.tournament}
+                        {t(`admin.raceStatus.raceMock.${race.key}.tournament`, race.tournament)}
                       </span>
                     </div>
                     <h3 className="mt-3 text-lg font-black uppercase tracking-tight text-foreground">
-                      {race.name}
+                      {t(`admin.raceStatus.raceMock.${race.key}.name`, race.name)}
                     </h3>
                     <div className="mt-3 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
                       <span className="inline-flex items-center gap-2">
                         <Timer className="size-4 text-muted-foreground" />
-                        {race.startLabel}
+                        {t(`admin.raceStatus.raceMock.${race.key}.startLabel`, race.startLabel)}
                       </span>
                       <span className="inline-flex items-center gap-2">
                         <MapPin className="size-4 text-muted-foreground" />
-                        {race.track}
+                        {t(`admin.raceStatus.raceMock.${race.key}.track`, race.track)}
                       </span>
                       <span className="inline-flex items-center gap-2">
                         <Users className="size-4 text-muted-foreground" />
-                        {race.horses} horses
+                        {race.horses} {t("admin.raceStatus.horsesUnit", "horses")}
                       </span>
                     </div>
                   </div>
@@ -139,7 +144,7 @@ export function RaceStatusOverview({ races, counts }: RaceStatusOverviewProps) {
                       aria-hidden="true"
                     />
                     <p className="text-sm font-semibold leading-5 text-foreground/70">
-                      {race.adminNote}
+                      {t(`admin.raceStatus.raceMock.${race.key}.adminNote`, race.adminNote)}
                     </p>
                   </div>
                 </div>

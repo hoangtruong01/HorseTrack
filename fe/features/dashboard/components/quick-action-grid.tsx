@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,19 +18,21 @@ const toneClassName: Record<QuickAction["tone"], string> = {
 };
 
 export function QuickActionGrid({ actions }: QuickActionGridProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="rounded-2xl border border-border bg-card p-4 shadow-[0_18px_56px_rgba(0,0,0,0.28)] dark:shadow-[0_18px_56px_rgba(0,0,0,0.28)] sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            Admin command grid
+            {t("admin.quickActions.eyebrow", "Admin command grid")}
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
-            Quick actions
+            {t("admin.quickActions.title", "Quick actions")}
           </h2>
         </div>
         <p className="max-w-md text-sm leading-6 text-muted-foreground">
-          Entry points only. CRUD flows arrive in later phases.
+          {t("admin.quickActions.subtitle", "Entry points only. CRUD flows arrive in later phases.")}
         </p>
       </div>
 
@@ -56,10 +59,10 @@ export function QuickActionGrid({ actions }: QuickActionGridProps) {
                 <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
               </div>
               <h3 className="mt-4 text-lg font-black uppercase tracking-tight text-foreground">
-                {action.title}
+                {t(`admin.quickActionsItems.${action.key}.title`, action.title)}
               </h3>
               <p className="mt-2 min-h-12 text-sm leading-5 text-muted-foreground">
-                {action.description}
+                {t(`admin.quickActionsItems.${action.key}.description`, action.description)}
               </p>
               <Button
                 asChild
@@ -67,7 +70,7 @@ export function QuickActionGrid({ actions }: QuickActionGridProps) {
                 variant={action.tone === "primary" ? "default" : "outline"}
                 className="mt-4 pointer-events-none rounded-full"
               >
-                <span>{action.label}</span>
+                <span>{t(`admin.quickActionsItems.${action.key}.label`, action.label)}</span>
               </Button>
             </Link>
           );

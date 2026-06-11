@@ -14,4 +14,5 @@ export type NavigationItem = {
   description?: string;
   role?: NavigationRole;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  itemKey?: string;
 };

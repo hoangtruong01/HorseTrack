@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { User, Settings, ChevronDown, LogOut } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -19,6 +20,7 @@ export function UserDropdownMenu({
 }: UserDropdownMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useAuth();
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export function UserDropdownMenu({
             {userName}
           </span>
           <span className="text-[10px] font-bold uppercase tracking-wider text-primary/80">
-            {userRole}
+            {t(`roles.${userRole}`, userRole)}
           </span>
         </div>
         <div
@@ -82,7 +84,7 @@ export function UserDropdownMenu({
              className="flex items-center gap-3 border-b border-border px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
            >
              <User className="size-4.5" />
-             <span>Profile</span>
+             <span>{t("nav.profile", "Profile")}</span>
            </Link>
 
             {/* Settings Link */}
@@ -92,7 +94,7 @@ export function UserDropdownMenu({
               className="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
             >
               <Settings className="size-4.5" />
-              <span>Settings</span>
+              <span>{t("nav.settings", "Settings")}</span>
             </Link>
 
             {/* Logout Button */}
@@ -104,7 +106,7 @@ export function UserDropdownMenu({
               className="w-full flex items-center gap-3 border-t border-border px-5 py-3.5 text-sm font-semibold text-red-500 hover:text-red-600 transition hover:bg-secondary text-left cursor-pointer"
             >
               <LogOut className="size-4.5" />
-              <span>Logout</span>
+              <span>{t("nav.logout", "Logout")}</span>
             </button>
           </div>
        )}

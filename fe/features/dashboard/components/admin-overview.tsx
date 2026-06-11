@@ -74,9 +74,18 @@ export function AdminOverview() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {adminStats.map((stat) => (
-          <StatCard key={stat.label} {...stat} />
-        ))}
+        {adminStats.map((stat) => {
+          const { key, ...rest } = stat;
+          return (
+            <StatCard
+              key={key}
+              {...rest}
+              label={t(`admin.stats.${key}.label`)}
+              helper={t(`admin.stats.${key}.helper`)}
+              trend={t(`admin.stats.${key}.trend`)}
+            />
+          );
+        })}
       </section>
 
       <QuickActionGrid actions={quickActions} />
@@ -108,9 +117,11 @@ export function AdminOverview() {
                 {item.time}
               </time>
               <div>
-                <h3 className="font-bold text-foreground">{item.title}</h3>
+                <h3 className="font-bold text-foreground">
+                  {t(`admin.activity.items.${item.key}.title`)}
+                </h3>
                 <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                  {item.description}
+                  {t(`admin.activity.items.${item.key}.description`)}
                 </p>
               </div>
             </article>

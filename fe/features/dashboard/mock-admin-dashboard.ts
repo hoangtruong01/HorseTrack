@@ -15,6 +15,7 @@ export type AdminStat = {
   trend?: string;
   tone: "red" | "teal" | "yellow" | "neutral";
   icon: LucideIcon;
+  key: string;
 };
 
 export type QuickAction = {
@@ -24,6 +25,7 @@ export type QuickAction = {
   label: string;
   icon: LucideIcon;
   tone: "primary" | "teal" | "yellow" | "neutral";
+  key: string;
 };
 
 export type RaceStatus = "live" | "upcoming" | "finished";
@@ -37,6 +39,7 @@ export type RaceSummary = {
   track: string;
   horses: number;
   adminNote: string;
+  key: string;
 };
 
 export type AdminActivity = {
@@ -44,6 +47,7 @@ export type AdminActivity = {
   time: string;
   title: string;
   description: string;
+  key: string;
 };
 
 export const adminStats: AdminStat[] = [
@@ -54,6 +58,7 @@ export const adminStats: AdminStat[] = [
     trend: "+2 this month",
     tone: "neutral",
     icon: Trophy,
+    key: "tournaments",
   },
   {
     label: "Total races",
@@ -62,6 +67,7 @@ export const adminStats: AdminStat[] = [
     trend: "12 scheduled",
     tone: "red",
     icon: Flag,
+    key: "races",
   },
   {
     label: "Live races",
@@ -70,6 +76,7 @@ export const adminStats: AdminStat[] = [
     trend: "Monitor status",
     tone: "teal",
     icon: RadioTower,
+    key: "liveRaces",
   },
   {
     label: "Pending registrations",
@@ -78,6 +85,7 @@ export const adminStats: AdminStat[] = [
     trend: "Action needed",
     tone: "yellow",
     icon: ClipboardCheck,
+    key: "pendingRegistrations",
   },
   {
     label: "Upcoming races",
@@ -86,6 +94,7 @@ export const adminStats: AdminStat[] = [
     trend: "Next: 14:30",
     tone: "teal",
     icon: CalendarPlus,
+    key: "upcomingRaces",
   },
   {
     label: "Results waiting",
@@ -94,6 +103,7 @@ export const adminStats: AdminStat[] = [
     trend: "Per-race publishing",
     tone: "red",
     icon: ListChecks,
+    key: "resultsWaiting",
   },
 ];
 
@@ -105,6 +115,7 @@ export const quickActions: QuickAction[] = [
     label: "Plan container",
     icon: Trophy,
     tone: "neutral",
+    key: "createTournament",
   },
   {
     title: "Create Race",
@@ -113,6 +124,7 @@ export const quickActions: QuickAction[] = [
     label: "Add race",
     icon: Flag,
     tone: "primary",
+    key: "createRace",
   },
   {
     title: "Review Registrations",
@@ -121,6 +133,7 @@ export const quickActions: QuickAction[] = [
     label: "Review queue",
     icon: ClipboardCheck,
     tone: "yellow",
+    key: "reviewRegistrations",
   },
   {
     title: "Review Results",
@@ -129,6 +142,7 @@ export const quickActions: QuickAction[] = [
     label: "Publish queue",
     icon: ListChecks,
     tone: "teal",
+    key: "reviewResults",
   },
 ];
 
@@ -142,6 +156,7 @@ export const raceSummaries: RaceSummary[] = [
     track: "District 2 Track",
     horses: 10,
     adminNote: "Referee channel active",
+    key: "race-live-01",
   },
   {
     id: "race-live-02",
@@ -152,6 +167,7 @@ export const raceSummaries: RaceSummary[] = [
     track: "Long Thanh Arena",
     horses: 8,
     adminNote: "Result lock pending",
+    key: "race-live-02",
   },
   {
     id: "race-upcoming-01",
@@ -162,6 +178,7 @@ export const raceSummaries: RaceSummary[] = [
     track: "Phu Tho Course",
     horses: 12,
     adminNote: "3 registrations pending",
+    key: "race-upcoming-01",
   },
   {
     id: "race-upcoming-02",
@@ -172,6 +189,7 @@ export const raceSummaries: RaceSummary[] = [
     track: "Da Lat Highland Track",
     horses: 9,
     adminNote: "Referee assigned",
+    key: "race-upcoming-02",
   },
   {
     id: "race-finished-01",
@@ -182,6 +200,7 @@ export const raceSummaries: RaceSummary[] = [
     track: "Nha Trang Sand Track",
     horses: 7,
     adminNote: "Result waiting publish",
+    key: "race-finished-01",
   },
 ];
 
@@ -191,18 +210,21 @@ export const adminActivities: AdminActivity[] = [
     time: "09:42",
     title: "Registration queue updated",
     description: "4 new horses added to Morning Qualifier Run.",
+    key: "act01",
   },
   {
     id: "act-02",
     time: "09:18",
     title: "Race status changed",
     description: "Saigon Night Sprint moved to live monitoring.",
+    key: "act02",
   },
   {
     id: "act-03",
     time: "08:55",
     title: "Referee result confirmed",
     description: "Coastal Dash result ready for admin publish review.",
+    key: "act03",
   },
 ];
 

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { dashboardNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ export function AppSidebar({
   activeHref,
   role,
 }: AppSidebarProps) {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const [currentHref, setCurrentHref] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -109,11 +111,11 @@ export function AppSidebar({
                         )}
                       >
                         <span className="block font-bold uppercase tracking-[0.08em]">
-                          {item.title}
+                          {item.itemKey ? t(`navigation.${item.itemKey}.title`) : item.title}
                         </span>
                         {item.description ? (
                           <span className="mt-1 block text-xs leading-4 text-muted-foreground truncate">
-                            {item.description}
+                            {item.itemKey ? t(`navigation.${item.itemKey}.description`) : item.description}
                           </span>
                         ) : null}
                       </span>
@@ -128,11 +130,11 @@ export function AppSidebar({
                         className="z-50 rounded-md bg-card/95 backdrop-blur-sm border border-border px-3 py-1.5 text-foreground shadow-xl select-none max-w-xs flex flex-col gap-0.5"
                       >
                         <span className="text-xs font-bold uppercase tracking-wider">
-                          {item.title}
+                          {item.itemKey ? t(`navigation.${item.itemKey}.title`) : item.title}
                         </span>
                         {item.description && (
                           <span className="text-[10px] text-muted-foreground normal-case font-normal leading-snug">
-                            {item.description}
+                            {item.itemKey ? t(`navigation.${item.itemKey}.description`) : item.description}
                           </span>
                         )}
                       </Tooltip.Content>

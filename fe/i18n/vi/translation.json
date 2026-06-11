@@ -860,6 +860,30 @@
       "auditLogs": {
         "title": "Nhật ký hệ thống",
         "description": "Xem thao tác hệ thống và lịch sử giao dịch."
+      },
+      "aiPackages": {
+        "title": "Gói dự đoán AI",
+        "description": "Tạo và quản lý các gói dự đoán AI cho Spectator."
+      },
+      "aiPayments": {
+        "title": "Doanh thu AI",
+        "description": "Xem doanh thu từ các giao dịch đăng ký gói AI."
+      },
+      "aiPredictions": {
+        "title": "Dự đoán AI",
+        "description": "Sinh và xem dự đoán AI cho từng cuộc đua."
+      },
+      "aiArrangements": {
+        "title": "Sắp xếp AI",
+        "description": "Sinh và quản lý đề xuất sắp xếp cuộc đua tự động."
+      },
+      "bankTransactions": {
+        "title": "Giao dịch ngân hàng",
+        "description": "Xem danh sách giao dịch ngân hàng từ SEPAY webhook."
+      },
+      "referees": {
+        "title": "Quản lý trọng tài",
+        "description": "Quản lý trọng tài: duyệt hồ sơ, đổi trạng thái hoạt động."
       }
     },
     "owner": {
@@ -886,6 +910,14 @@
       "wallet": {
         "title": "Ví của tôi",
         "description": "Xem thưởng, chia lợi nhuận và yêu cầu rút tiền."
+      },
+      "results": {
+        "title": "Kết quả thi đấu",
+        "description": "Theo dõi kết quả các trận đua và xếp hạng cán đích chính thức."
+      },
+      "rankings": {
+        "title": "Bảng xếp hạng",
+        "description": "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch."
       }
     },
     "jockey": {
@@ -912,6 +944,14 @@
       "wallet": {
         "title": "Ví của tôi",
         "description": "Xem phần thưởng 30% và lịch sử rút tiền."
+      },
+      "rankings": {
+        "title": "Bảng xếp hạng",
+        "description": "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch."
+      },
+      "profile": {
+        "title": "Hồ sơ của tôi",
+        "description": "Tạo và cập nhật hồ sơ nài ngựa: chiều cao, cân nặng, kinh nghiệm."
       }
     },
     "referee": {
@@ -942,6 +982,14 @@
       "reports": {
         "title": "Biên bản thi đấu",
         "description": "Quản lý và lập biên bản chính thức."
+      },
+      "rankings": {
+        "title": "Bảng xếp hạng",
+        "description": "Theo dõi bảng tổng hợp hiệu suất thi đấu của toàn bộ nài ngựa và chiến mã."
+      },
+      "wallet": {
+        "title": "Ví của tôi",
+        "description": "Xem điểm lương tích lũy và thực hiện yêu cầu rút điểm."
       }
     },
     "spectator": {
@@ -972,6 +1020,14 @@
       "predictions": {
         "title": "Dự đoán kết quả",
         "description": "Dự đoán ngựa vô địch để nhận điểm thưởng."
+      },
+      "aiPackages": {
+        "title": "Gói dự đoán AI",
+        "description": "Xem và đăng ký gói dự đoán AI được hỗ trợ bởi machine learning."
+      },
+      "aiPredictions": {
+        "title": "Dự đoán AI",
+        "description": "Xem dự đoán kết quả cuộc đua từ AI (yêu cầu đăng ký gói)."
       }
     },
     "counterStaff": {
@@ -986,6 +1042,29 @@
       "deposit": {
         "title": "Nạp tiền vào ví",
         "description": "Nạp tiền/điểm trực tiếp vào ví người dùng tại quầy."
+      }
+    },
+    "public": {
+      "home": {
+        "title": "Trang chủ"
+      },
+      "tournaments": {
+        "title": "Giải đấu"
+      },
+      "races": {
+        "title": "Lịch đua"
+      },
+      "rankings": {
+        "title": "Bảng xếp hạng"
+      },
+      "predictions": {
+        "title": "Dự đoán"
+      },
+      "news": {
+        "title": "Tin tức"
+      },
+      "contact": {
+        "title": "Liên hệ"
       }
     }
   },

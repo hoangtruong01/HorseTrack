@@ -18,11 +18,18 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en', // default language
-    fallbackLng: 'en',
+    lng: 'vi',
+    fallbackLng: 'vi',
     interpolation: {
       escapeValue: false, // React already escapes values
     },
   });
+
+// Sync language change to localStorage
+if (typeof window !== 'undefined') {
+  i18n.on('languageChanged', (lng) => {
+    localStorage.setItem('language', lng);
+  });
+}
 
 export default i18n;
