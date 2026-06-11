@@ -104,7 +104,7 @@ export default function SpectatorDashboardPage() {
   const fetchPredictions = useCallback(async () => {
     setLoadingPredictions(true);
     try {
-      const res = await predictionsApi.listMyPredictions({ limit: 1000 });
+      const res = await predictionsApi.listMyPredictions({ limit: 100 });
       setPredictions(res.data || []);
     } catch (e) {
       console.error("Lỗi khi tải dự đoán:", e);

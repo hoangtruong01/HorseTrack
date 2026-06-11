@@ -22,13 +22,15 @@ async function run() {
 
   const email = "counter@horsetrack.local";
   const existing = await User.findOne({ email });
+  const passwordHash = await bcrypt.hash("password123", 10);
   if (existing) {
     console.log("User already exists!");
     existing.roles = ["counter_staff"];
+    existing.passwordHash = passwordHash;
+    existing.status = "active";
     await existing.save();
-    console.log("User updated to counter_staff!");
+    console.log("User updated to counter_staff and password reset to password123!");
   } else {
-    const passwordHash = await bcrypt.hash("password123", 10);
     await User.create({
       fullName: "Nhân viên quầy",
       email,
