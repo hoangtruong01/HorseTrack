@@ -20,6 +20,7 @@ export type Horse = {
   baseSpeed: number;
   staminaScore: number;
   image?: string;
+  images?: string[];
   description?: string;
   approvalStatus?: "PENDING" | "APPROVED" | "REJECTED";
   rejectionReason?: string;

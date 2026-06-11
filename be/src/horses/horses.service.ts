@@ -42,10 +42,29 @@ export class HorsesService {
     dto: CreateHorseDto,
     ownerId: string,
     imageUrl?: string,
+    imageUrls?: string[],
   ): Promise<HorseDocument> {
+    const { existingImages, ...rest } = dto;
+    
+    let finalImages = imageUrls || [];
+    if (existingImages) {
+      let parsed: string[] = [];
+      try {
+        parsed = typeof existingImages === 'string'
+          ? JSON.parse(existingImages)
+          : existingImages;
+      } catch {
+        parsed = Array.isArray(existingImages) ? existingImages : [existingImages];
+      }
+      finalImages = [...parsed, ...finalImages];
+    }
+
+    const primaryImage = imageUrl || (finalImages.length > 0 ? finalImages[0] : undefined);
+
     return this.horseModel.create({
-      ...dto,
-      ...(imageUrl && { image: imageUrl }),
+      ...rest,
+      ...(primaryImage && { image: primaryImage }),
+      ...(finalImages.length > 0 && { images: finalImages }),
       ownerId: new Types.ObjectId(ownerId),
     });
   }
@@ -205,6 +224,7 @@ export class HorsesService {
     requestingUserId: string,
     isAdmin: boolean,
     imageUrl?: string,
+    imageUrls?: string[],
   ): Promise<HorseJson> {
     const horse = await this.findDocument(id);
     const ownerId = String(
@@ -227,9 +247,29 @@ export class HorsesService {
       }
     }
 
+    const { existingImages, ...rest } = dto;
+    let finalImages: string[] | undefined = undefined;
+    let primaryImage: string | undefined = undefined;
+
+    if (imageUrl !== undefined || imageUrls !== undefined || existingImages !== undefined) {
+      finalImages = imageUrls || [];
+      if (existingImages) {
+        let parsed: string[] = [];
+        try {
+          parsed = typeof existingImages === 'string'
+            ? JSON.parse(existingImages)
+            : existingImages;
+        } catch {
+          parsed = Array.isArray(existingImages) ? existingImages : [existingImages];
+        }
+        finalImages = [...parsed, ...finalImages];
+      }
+      primaryImage = imageUrl || (finalImages.length > 0 ? finalImages[0] : undefined);
+    }
+
     // Nếu không phải là admin và ngựa đã được duyệt
     if (!isAdmin && horse.approvalStatus === HorseApprovalStatus.APPROVED) {
-      // Chỉ cho phép cập nhật: name, age, weightKg, heightCm, healthStatus, description
+      // Cho phép cập nhật các thuộc tính và cả baseSpeed, staminaScore
       const allowedKeys = [
         'name',
         'age',
@@ -237,28 +277,48 @@ export class HorsesService {
         'heightCm',
         'healthStatus',
         'description',
+        'baseSpeed',
+        'staminaScore',
       ] as const;
       const updateData: Record<string, unknown> = {};
 
+      let resetToPending = false;
       for (const key of allowedKeys) {
-        const val = dto[key];
+        const val = rest[key];
         if (val !== undefined) {
           updateData[key] = val;
+          if (key === 'baseSpeed' || key === 'staminaScore') {
+            resetToPending = true;
+          }
         }
       }
 
+      if (primaryImage || finalImages) {
+        resetToPending = true;
+      }
+
       Object.assign(horse, updateData);
-      // Giữ nguyên approvalStatus là APPROVED, không cần admin duyệt lại
+      if (primaryImage !== undefined) horse.image = primaryImage;
+      if (finalImages !== undefined) horse.images = finalImages;
+
+      if (resetToPending) {
+        horse.approvalStatus = HorseApprovalStatus.PENDING;
+        horse.rejectionReason = undefined;
+        horse.rejectedAt = undefined;
+        horse.approvedAt = undefined;
+      }
     } else {
       // Nếu chưa được duyệt hoặc là Admin
-      Object.assign(horse, dto);
-      if (imageUrl) horse.image = imageUrl;
+      Object.assign(horse, rest);
+      if (primaryImage !== undefined) horse.image = primaryImage;
+      if (finalImages !== undefined) horse.images = finalImages;
 
       // Nếu chủ ngựa sửa ngựa khi đang bị REJECTED, ta reset lại trạng thái duyệt về PENDING
       if (!isAdmin && horse.approvalStatus === HorseApprovalStatus.REJECTED) {
         horse.approvalStatus = HorseApprovalStatus.PENDING;
         horse.rejectionReason = undefined;
         horse.rejectedAt = undefined;
+        horse.approvedAt = undefined;
       }
     }
 

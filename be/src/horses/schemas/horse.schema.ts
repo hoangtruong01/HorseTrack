@@ -101,6 +101,9 @@ export class Horse {
   @Prop()
   image?: string;
 
+  @Prop({ type: [String], default: [] })
+  images?: string[];
+
   @Prop()
   description?: string;
 

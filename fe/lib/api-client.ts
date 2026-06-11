@@ -163,6 +163,7 @@ export interface HorseItem {
   ownerId?: { _id: string; fullName: string; email: string } | string;
   imageUrl?: string;
   image?: string;
+  images?: string[];
   createdAt?: string;
 }
 

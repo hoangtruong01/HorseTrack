@@ -35,26 +35,66 @@ export function HorseForm({
     initialData?.healthStatus || "HEALTHY"
   );
   const [description, setDescription] = useState(initialData?.description || "");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>(initialData?.image || "");
+  const [baseSpeed, setBaseSpeed] = useState(initialData?.baseSpeed?.toString() || "60");
+  const [staminaScore, setStaminaScore] = useState(initialData?.staminaScore?.toString() || "70");
+
+  // Support multiple images
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>(
+    initialData?.images || (initialData?.image ? [initialData.image] : [])
+  );
   const [errorMsg, setErrorMsg] = useState("");
 
   const isApproved = initialData?.approvalStatus === "APPROVED";
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg("Kích thước ảnh không vượt quá 5MB.");
-        return;
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const validFiles: File[] = [];
+      const newPreviews: string[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 5 * 1024 * 1024) {
+          setErrorMsg("Kích thước mỗi ảnh không được vượt quá 5MB.");
+          return;
+        }
+        validFiles.push(file);
       }
-      setImageFile(file);
+
       setErrorMsg("");
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      
+      let loadedCount = 0;
+      validFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newPreviews.push(reader.result as string);
+          loadedCount++;
+          if (loadedCount === validFiles.length) {
+            setImageFiles((prev) => [...prev, ...validFiles]);
+            setImagePreviews((prev) => [...prev, ...newPreviews]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const previewToRemove = imagePreviews[index];
+    
+    // Remove from previews
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+
+    // If it's a new file (data: URL), we need to remove it from imageFiles
+    if (previewToRemove.startsWith("data:")) {
+      let fileIndex = 0;
+      for (let i = 0; i < index; i++) {
+        if (imagePreviews[i].startsWith("data:")) {
+          fileIndex++;
+        }
+      }
+      setImageFiles((prev) => prev.filter((_, i) => i !== fileIndex));
     }
   };
 
@@ -64,6 +104,19 @@ export function HorseForm({
 
     if (!name.trim()) {
       setErrorMsg("Tên chiến mã không được để trống.");
+      return;
+    }
+
+    const speedNum = parseInt(baseSpeed);
+    const staminaNum = parseInt(staminaScore);
+
+    if (isNaN(speedNum) || speedNum < 30 || speedNum > 100) {
+      setErrorMsg("Tốc độ nền phải nằm trong khoảng 30 - 100.");
+      return;
+    }
+
+    if (isNaN(staminaNum) || staminaNum < 30 || staminaNum > 100) {
+      setErrorMsg("Thể lực phải nằm trong khoảng 30 - 100.");
       return;
     }
 
@@ -78,9 +131,17 @@ export function HorseForm({
       if (heightCm) data.append("heightCm", heightCm);
       data.append("healthStatus", healthStatus);
       data.append("description", description);
-      if (imageFile) {
-        data.append("image", imageFile);
-      }
+      data.append("baseSpeed", baseSpeed);
+      data.append("staminaScore", staminaScore);
+
+      // Append new files
+      imageFiles.forEach((file) => {
+        data.append("image", file);
+      });
+
+      // Filter existing images (URLs starting with http/https) and append them
+      const existingImages = imagePreviews.filter((p) => p.startsWith("http"));
+      data.append("existingImages", JSON.stringify(existingImages));
 
       await onSubmit(data);
     } catch (err) {
@@ -178,6 +239,35 @@ export function HorseForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
+              <label className={labelClass}>Tốc độ nền (30-100) *</label>
+              <input
+                type="number"
+                min="30"
+                max="100"
+                required
+                value={baseSpeed}
+                onChange={(e) => setBaseSpeed(e.target.value)}
+                className={fieldClass}
+                placeholder="60"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className={labelClass}>Thể lực (30-100) *</label>
+              <input
+                type="number"
+                min="30"
+                max="100"
+                required
+                value={staminaScore}
+                onChange={(e) => setStaminaScore(e.target.value)}
+                className={fieldClass}
+                placeholder="70"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <label className={labelClass}>Giới Tính</label>
               <select
                 value={gender}
@@ -209,37 +299,38 @@ export function HorseForm({
         {/* Right Column: Image and Description */}
         <div className="space-y-4 flex flex-col">
           <div className="space-y-2 flex-1 flex flex-col">
-            <label className={labelClass}>Hình ảnh chiến mã</label>
-            <div className={`relative flex min-h-[200px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 p-4 transition group cursor-pointer hover:border-primary/50 ${isApproved ? "pointer-events-none opacity-60" : ""}`}>
-              {imagePreview ? (
-                <div className="relative w-full h-full min-h-[180px] rounded-lg overflow-hidden">
+            <label className={labelClass}>Hình ảnh chiến mã (Có thể tải lên nhiều ảnh)</label>
+            <div className="grid grid-cols-3 gap-3 p-2 bg-muted/20 border border-border rounded-xl min-h-[120px]">
+              {imagePreviews.map((preview, idx) => (
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-muted border border-border group">
                   <Image
-                    src={imagePreview}
-                    alt="Preview"
+                    src={preview}
+                    alt={`Preview ${idx + 1}`}
                     fill
                     className="object-cover"
                   />
-                  {!isApproved && (
-                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">
-                      <span className="text-foreground text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">Thay đổi ảnh</span>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(idx)}
+                    className="absolute top-1 right-1 size-6 rounded-full bg-black/60 hover:bg-[#E10600] text-foreground text-xs flex items-center justify-center transition opacity-0 group-hover:opacity-100"
+                    title="Xóa ảnh này"
+                  >
+                    ✕
+                  </button>
                 </div>
-              ) : (
-                <div className="text-center space-y-2">
-                  <Upload className="mx-auto size-10 text-muted-foreground transition group-hover:text-primary" />
-                  <p className="text-sm font-bold text-foreground">Tải lên hình ảnh</p>
-                  <p className="text-xs text-muted-foreground">Cho phép định dạng PNG, JPG, WEBP tối đa 5MB</p>
-                </div>
-              )}
-              {!isApproved && (
+              ))}
+              
+              <div className="relative aspect-square flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 hover:border-primary/50 transition group cursor-pointer">
+                <Upload className="size-6 text-muted-foreground group-hover:text-primary transition" />
+                <span className="text-[10px] font-bold text-foreground mt-1 text-center">Thêm ảnh</span>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={handleImageChange}
+                  multiple
+                  onChange={handleImagesChange}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
-              )}
+              </div>
             </div>
           </div>
 
