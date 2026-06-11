@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, ShieldAlert, FileText, User, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldAlert, FileText, User, Eye, X } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { jockeysApi, type JockeyItem } from "@/lib/api-client";
@@ -38,6 +38,9 @@ export default function AdminJockeysPage() {
   // Rejection Modal State
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+
+  // Preview Image Modal State
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const fetchJockeys = useCallback(async (page = 1) => {
     setLoading(true);
@@ -180,7 +183,26 @@ export default function AdminJockeysPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-xs font-mono text-foreground/70">{j.licenseNumber ?? "—"}</td>
+                    <td className="px-5 py-4">
+                      {j.licenseImage ? (
+                        <button
+                          type="button"
+                          onClick={() => setPreviewImage(j.licenseImage ?? null)}
+                          className="block relative h-12 w-20 rounded-md overflow-hidden border border-border group/img focus:outline-none"
+                        >
+                          <img
+                            src={j.licenseImage}
+                            alt="Giấy phép"
+                            className="object-cover w-full h-full transition-transform group-hover/img:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                            <Eye className="size-4 text-white" />
+                          </div>
+                        </button>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground/50 italic">-</span>
+                      )}
+                    </td>
                     <td className="px-5 py-4 max-w-xs">
                       <div className="space-y-1">
                         <p className="text-xs text-foreground/70">
@@ -197,19 +219,7 @@ export default function AdminJockeysPage() {
                         ) : (
                           <p className="text-[11px] text-foreground/30 italic">Chưa điền tiểu sử</p>
                         )}
-                        {j.licenseImage && (
-                          <div className="pt-1">
-                            <a
-                              href={j.licenseImage}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] text-sky-400 font-bold hover:underline"
-                            >
-                              <Eye className="size-3" />
-                              Xem ảnh Giấy phép
-                            </a>
-                          </div>
-                        )}
+
                         {j.approvalStatus === "REJECTED" && j.rejectionReason && (
                           <p className="text-[10px] text-red-400 bg-red-400/5 p-1.5 rounded border border-red-500/10 mt-1">
                             Lý do loại: {j.rejectionReason}
@@ -320,6 +330,31 @@ export default function AdminJockeysPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] bg-card border border-border rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white transition"
+            >
+              <X className="size-5" />
+            </button>
+            <img
+              src={previewImage}
+              alt="Giấy phép Preview"
+              className="max-w-full max-h-[85vh] object-contain block"
+            />
           </div>
         </div>
       )}
