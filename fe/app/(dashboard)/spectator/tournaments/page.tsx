@@ -229,7 +229,7 @@ export default function SpectatorTournamentsPage() {
     void fetchBalance();
   }, [fetchTournaments, fetchAllRaces, fetchMyPredictions, fetchBalance]);
 
-  const handleSelectTournament = async (t: TournamentItem) => {
+  const handleSelectTournament = useCallback(async (t: TournamentItem) => {
     setSelectedTour(t);
     setSelectedRace(null);
     setLoadingTourRaces(true);
@@ -243,7 +243,22 @@ export default function SpectatorTournamentsPage() {
     } finally {
       setLoadingTourRaces(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && tournaments.length > 0 && !selectedTour) {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      if (id) {
+        const tour = tournaments.find((t) => t._id === id);
+        if (tour) {
+          void handleSelectTournament(tour);
+          // Xóa param khỏi URL để người dùng có thể quay lại danh sách
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+    }
+  }, [tournaments, selectedTour, handleSelectTournament]);
 
   const handleSelectRace = async (race: RaceItem) => {
     setSelectedRace(race);

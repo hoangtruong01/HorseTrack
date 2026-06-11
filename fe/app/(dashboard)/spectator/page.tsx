@@ -1,336 +1,391 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Trophy, Calendar, MapPin, Award, ArrowRight, Flag, Bell, Wallet, Activity, Loader2 } from "lucide-react";
+import { Trophy, MapPin, Award, Flag, Loader2, TrendingUp, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { walletApi } from "@/lib/api-client";
-
-// Mock Featured Tournaments Data
-const mockFeaturedTournaments = [
-  {
-    id: "tour-01",
-    name: "Spring Velocity Cup 2026",
-    description: "Giải đấu mùa xuân quy tụ những nài ngựa và chiến mã tốc độ hàng đầu cả nước tranh tài trên cự ly ngắn.",
-    status: "ONGOING",
-    statusLabel: "Đang diễn ra",
-    startDate: "2026-05-15",
-    endDate: "2026-06-10",
-    location: "Trường đua Phú Thọ, TPHCM",
-    prizePool: 50000,
-    maxHorses: 24,
-    enrolledHorses: 20,
-    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=600&auto=format&fit=crop",
-    color: "from-[#E10600]/20 to-[#E10600]/5",
-  },
-  {
-    id: "tour-02",
-    name: "Night Circuit Trophy",
-    description: "Thử thách đua đêm kịch tính dưới ánh đèn floodlight rực rỡ tại thành phố biển Đà Nẵng.",
-    status: "OPEN_REGISTRATION",
-    statusLabel: "Mở đăng ký",
-    startDate: "2026-06-15",
-    endDate: "2026-07-05",
-    location: "Trường đua Coastal, Đà Nẵng",
-    prizePool: 75000,
-    maxHorses: 16,
-    enrolledHorses: 12,
-    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop",
-    color: "from-teal-500/20 to-teal-500/5",
-  },
-  {
-    id: "tour-03",
-    name: "Mekong Masters Endurance",
-    description: "Giải đấu sức bền vượt chướng ngại vật dọc theo lưu vực sông Mekong đòi hỏi sức dẻo dai phi thường.",
-    status: "COMPLETED",
-    statusLabel: "Đã kết thúc",
-    startDate: "2026-04-01",
-    endDate: "2026-04-20",
-    location: "Sân vận động Cần Thơ",
-    prizePool: 30000,
-    maxHorses: 32,
-    enrolledHorses: 32,
-    image: "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?q=80&w=600&auto=format&fit=crop",
-    color: "from-yellow-500/20 to-yellow-500/5",
-  },
-];
-
-// Mock Upcoming Races
-const mockUpcomingRaces = [
-  {
-    id: "race-neon-900",
-    name: "Neon Dash 900",
-    tournament: "Night Circuit Trophy",
-    startTime: "19:30",
-    date: "25 May 2026",
-    distance: "900m",
-    surface: "Synthetic Track",
-    status: "SCHEDULED",
-  },
-  {
-    id: "race-aurora-1200",
-    name: "Aurora Sprint 1200",
-    tournament: "Spring Velocity Cup",
-    startTime: "10:00",
-    date: "Today",
-    distance: "1,200m",
-    surface: "Dry turf",
-    status: "LIVE",
-  },
-];
+import { 
+  tournamentsApi, racesApi, predictionsApi, 
+  rankingsApi, rewardPointLedgerApi, dashboardApi,
+  type TournamentItem, type RaceItem, type PredictionItem, 
+  type RankingEntry, type JockeyRankingEntry
+} from "@/lib/api-client";
+import { toast } from "sonner";
 
 export default function SpectatorDashboardPage() {
+  // Wallet & Balance
   const [balance, setBalance] = useState(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
+  
+  // Dashboard Stats
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  
+  // Tournaments & Races
+  const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
+  const [races, setRaces] = useState<RaceItem[]>([]);
+  const [loadingTournaments, setLoadingTournaments] = useState(true);
+  const [loadingRaces, setLoadingRaces] = useState(true);
+  
+  // Predictions for stats
+  const [predictions, setPredictions] = useState<PredictionItem[]>([]);
+  const [loadingPredictions, setLoadingPredictions] = useState(true);
+  
+  // Rankings
+  const [topHorses, setTopHorses] = useState<RankingEntry[]>([]);
+  const [topJockeys, setTopJockeys] = useState<JockeyRankingEntry[]>([]);
+  const [loadingRankings, setLoadingRankings] = useState(true);
 
   const fetchBalance = useCallback(async () => {
     setLoadingBalance(true);
     try {
-      const res = await walletApi.myHistory({ limit: 1 });
-      setBalance(res.points ?? 0);
+      const balanceRes = await rewardPointLedgerApi.myBalance();
+      setBalance(balanceRes.balance ?? 0);
     } catch (e) {
-      console.error("Lỗi khi lấy số dư điểm ví:", e);
+      console.error("Lỗi khi lấy số dư ví:", e);
     } finally {
       setLoadingBalance(false);
     }
   }, []);
 
+  const fetchStats = useCallback(async () => {
+    setLoadingStats(true);
+    try {
+      const statsRes = await dashboardApi.getSpectatorStats();
+      setDashboardStats(statsRes);
+    } catch (e) {
+      console.error("Lỗi khi lấy thống kê:", e);
+    } finally {
+      setLoadingStats(false);
+    }
+  }, []);
+
+  const fetchTournaments = useCallback(async () => {
+    setLoadingTournaments(true);
+    try {
+      const res = await tournamentsApi.list({ limit: 100 });
+      // Show tournaments that are not DRAFT or CANCELLED
+      const activeTournaments = (res.data || []).filter(
+        (t) => t.status !== "DRAFT" && t.status !== "CANCELLED"
+      );
+      // Sort by: ONGOING first, then OPEN_REGISTRATION, then others
+      const sorted = activeTournaments.sort((a, b) => {
+        const statusOrder = { ONGOING: 0, OPEN_REGISTRATION: 1 };
+        const aOrder = (statusOrder as any)[a.status] ?? 2;
+        const bOrder = (statusOrder as any)[b.status] ?? 2;
+        return aOrder - bOrder;
+      });
+      setTournaments(sorted.slice(0, 2));
+    } catch (e) {
+      console.error("Lỗi khi tải danh sách giải đấu:", e);
+      toast.error("Không thể tải danh sách giải đấu");
+    } finally {
+      setLoadingTournaments(false);
+    }
+  }, []);
+
+  const fetchRaces = useCallback(async () => {
+    setLoadingRaces(true);
+    try {
+      const res = await racesApi.list({ limit: 100 });
+      const activeRaces = (res.data || []).filter(
+        (r) => r.status === "LIVE" || r.status === "FINISHED" || r.status === "RESULT_PUBLISHED"
+      );
+      activeRaces.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+      setRaces(activeRaces.slice(0, 2));
+    } catch (e) {
+      console.error("Lỗi khi tải danh sách vòng đua:", e);
+      toast.error("Không thể tải danh sách vòng đua");
+    } finally {
+      setLoadingRaces(false);
+    }
+  }, []);
+
+  const fetchPredictions = useCallback(async () => {
+    setLoadingPredictions(true);
+    try {
+      const res = await predictionsApi.listMyPredictions({ limit: 1000 });
+      setPredictions(res.data || []);
+    } catch (e) {
+      console.error("Lỗi khi tải dự đoán:", e);
+    } finally {
+      setLoadingPredictions(false);
+    }
+  }, []);
+
+  const fetchRankings = useCallback(async () => {
+    setLoadingRankings(true);
+    try {
+      const [horsesRes, jokeysRes] = await Promise.all([
+        rankingsApi.getGlobalHorseRankings(),
+        rankingsApi.getGlobalJockeyRankings(),
+      ]);
+      setTopHorses((horsesRes || []).slice(0, 5));
+      setTopJockeys((jokeysRes || []).slice(0, 5));
+    } catch (e) {
+      console.error("Lỗi khi tải bảng xếp hạng:", e);
+    } finally {
+      setLoadingRankings(false);
+    }
+  }, []);
+
   useEffect(() => {
     void fetchBalance();
-  }, [fetchBalance]);
+    void fetchStats();
+    void fetchTournaments();
+    void fetchRaces();
+    void fetchPredictions();
+    void fetchRankings();
+  }, [fetchBalance, fetchStats, fetchTournaments, fetchRaces, fetchPredictions, fetchRankings]);
+
+  // Calculate stats - use dashboard stats if available
+  const ongoingTournamentsCount = dashboardStats?.tournaments?.ongoing ?? tournaments.filter((t) => t.status === "ONGOING").length;
+  const totalPredictions = dashboardStats?.predictions?.total ?? predictions.length;
+  const winRate = dashboardStats?.predictions?.winRate ?? (
+    predictions.length > 0 
+      ? ((predictions.filter((p) => p.status === "WON").length / predictions.length) * 100).toFixed(1)
+      : "0"
+  );
+
+  const formatTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return "—";
+    }
+  };
 
   return (
-    <main className="space-y-8 max-w-6xl mx-auto pb-12">
-      {/* Premium Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-lg sm:p-8">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(225,6,0,0.15),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(6,126,106,0.1),transparent_30rem)] animate-pulse duration-[8s]" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary">
-              <Activity className="size-3.5 animate-pulse" /> Spectator Control Center
-            </div>
-            <h1 className="text-3xl font-black uppercase tracking-tight text-foreground sm:text-4xl">
-              Đường Đua & <span className="text-primary">Dự Đoán</span>
+    <main className="space-y-6 max-w-6xl mx-auto pb-12">
+      {/* Simplified Header */}
+      <div className="rounded-2xl border border-border bg-card p-6 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Đường Đua & Dự Đoán
             </h1>
-            <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-              Duyệt qua các giải đua xe chiến mã đỉnh cao, tham gia thử tài dự đoán kết quả hoàn toàn miễn phí nhận điểm thưởng và đổi các phần quà vật lý hấp dẫn tại quầy.
+            <p className="text-sm text-muted-foreground max-w-lg">
+              Theo dõi các giải đấu và đặt dự đoán để nhận điểm thưởng
             </p>
           </div>
 
-          {/* Quick Balance Card */}
-          <div className="min-w-[240px] shrink-0 space-y-4 rounded-2xl border border-border bg-muted/50 p-5">
+          {/* Balance Card - Compact */}
+          <div className="flex-shrink-0 rounded-xl border border-primary/20 bg-primary/5 p-4 min-w-fit">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Số dư Điểm</p>
+                <div className="flex items-baseline gap-1">
+                  {loadingBalance ? (
+                    <Loader2 className="size-4 animate-spin text-primary" />
+                  ) : (
+                    <>
+                      <span className="text-2xl font-bold text-foreground">
+                        {balance.toLocaleString("vi-VN")}
+                      </span>
+                      <span className="text-xs text-muted-foreground">Pts</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <Button asChild size="sm" className="rounded-lg text-xs font-semibold">
+                <Link href="/spectator/wallet">Xem ví</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Stats - Simplified */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-start justify-between mb-3">
+            <Trophy className="size-5 text-primary" />
+          </div>
+          <p className="text-sm font-semibold text-muted-foreground mb-1">Giải Đang Diễn Ra</p>
+          {loadingTournaments ? (
+            <Loader2 className="size-4 animate-spin text-primary" />
+          ) : (
+            <p className="text-2xl font-bold text-foreground">{ongoingTournamentsCount}</p>
+          )}
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-start justify-between mb-3">
+            <Zap className="size-5 text-amber-500" />
+          </div>
+          <p className="text-sm font-semibold text-muted-foreground mb-1">Tổng Dự Đoán</p>
+          {loadingPredictions || loadingStats ? (
+            <Loader2 className="size-4 animate-spin text-amber-500" />
+          ) : (
+            <p className="text-2xl font-bold text-amber-500">{totalPredictions}</p>
+          )}
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-start justify-between mb-3">
+            <TrendingUp className="size-5 text-emerald-500" />
+          </div>
+          <p className="text-sm font-semibold text-muted-foreground mb-1">Tỷ Lệ Đúng</p>
+          {loadingPredictions ? (
+            <Loader2 className="size-4 animate-spin text-emerald-500" />
+          ) : (
+            <p className="text-2xl font-bold text-emerald-500">{winRate}%</p>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left: Featured Tournaments */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Tournaments Section */}
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Số dư Ví Điểm</span>
-              <Wallet className="size-4 text-primary" />
-            </div>
-            <div className="space-y-1">
-              {loadingBalance ? (
-                <div className="h-9 flex items-center">
-                  <Loader2 className="size-4 animate-spin text-primary" />
-                </div>
-              ) : (
-                <p className="text-3xl font-black tracking-tight text-foreground">
-                  {balance.toLocaleString("vi-VN")}{" "}
-                  <span className="text-lg font-bold text-muted-foreground">Pts</span>
-                </p>
-              )}
-              <p className="text-[10px] text-teal-400 font-bold uppercase tracking-wider">● Tài khoản hoạt động</p>
-            </div>
-            <Button asChild variant="outline" className="w-full rounded-xl text-xs font-bold uppercase tracking-wider">
-              <Link href="/spectator/wallet">Xem ví & Đổi thưởng</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid Quick Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-2 shadow-sm transition duration-300 hover:border-primary/20">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
-              <Trophy className="size-4.5" />
-            </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Giải Đang Diễn Ra</span>
-          </div>
-          <p className="text-3xl font-black text-foreground">2 Giải Đấu</p>
-          <p className="text-xs text-muted-foreground">Quy tụ hơn 30+ chiến mã đăng ký</p>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-2 shadow-sm transition duration-300 hover:border-primary/20">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-              <Activity className="size-4.5" />
-            </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Lịch Trình Hôm Nay</span>
-          </div>
-          <p className="text-3xl font-black text-teal-400">1 LIVE</p>
-          <p className="text-xs text-muted-foreground">Trực tiếp cập nhật kết quả tại trường đua</p>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-2 shadow-sm transition duration-300 hover:border-primary/20">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-              <Bell className="size-4.5" />
-            </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tỷ Lệ Dự Đoán Đúng</span>
-          </div>
-          <p className="text-3xl font-black text-yellow-400">68.4%</p>
-          <p className="text-xs text-muted-foreground">Dự đoán đúng nhận +1 điểm, sai -1 điểm</p>
-        </div>
-      </div>
-
-      {/* Main Grid: Featured Tournaments & Sidebar */}
-      <div className="grid gap-8 lg:grid-cols-12">
-        {/* Left Column: Featured Tournaments */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-border pb-4">
-            <div className="space-y-1">
-              <h2 className="flex items-center gap-2 text-xl font-black uppercase tracking-tight text-foreground">
-                <Trophy className="size-5 text-primary" /> Giải Đấu Nổi Bật (Featured)
+              <h2 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+                <Trophy className="size-5 text-primary" /> Giải Đấu Nổi Bật
               </h2>
-              <p className="text-xs text-muted-foreground">Khám phá các giải đua ngựa kịch tính sắp diễn ra hoặc đang khởi tranh</p>
+              <Button asChild variant="ghost" size="sm" className="text-xs font-semibold text-primary">
+                <Link href="/spectator/tournaments">Xem tất cả →</Link>
+              </Button>
             </div>
-            <Button asChild variant="ghost" className="text-xs font-bold uppercase tracking-wider text-primary hover:text-foreground group">
-              <Link href="/spectator/tournaments" className="flex items-center gap-1">
-                Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </Button>
+
+            {loadingTournaments ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="size-6 animate-spin text-primary" />
+              </div>
+            ) : tournaments.length === 0 ? (
+              <div className="rounded-xl border border-border bg-card/50 p-8 text-center">
+                <p className="text-sm text-muted-foreground">Không có giải đấu nào đang diễn ra</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {tournaments.map((tour) => (
+                  <div key={tour._id} className="rounded-xl border border-border bg-card p-4 flex flex-col">
+                    <h3 className="font-semibold text-sm text-foreground mb-2 line-clamp-2">{tour.name}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{tour.description}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 mt-auto">
+                      <MapPin className="size-3.5 text-primary flex-shrink-0" />
+                      <span className="truncate">{tour.location || "Chưa xác định"}</span>
+                    </div>
+                    <Button asChild className="w-full rounded-lg text-xs font-semibold" size="sm">
+                      <Link href={`/spectator/tournaments?id=${tour._id}`}>Chi tiết</Link>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            {mockFeaturedTournaments.slice(0, 2).map((tour) => (
-              <div
-                key={tour.id}
-                className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition duration-300 flex flex-col h-full"
-              >
-                {/* Image Banner */}
-                <div className="h-44 w-full overflow-hidden relative border-b border-border">
-                  <Image
-                    src={tour.image}
-                    alt={tour.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                  
-                  {/* Status Badge */}
-                  <span className={`absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white border backdrop-blur-md ${
-                    tour.status === "ONGOING"
-                      ? "bg-[#E10600]/80 border-[#E10600]"
-                      : "bg-teal-500/80 border-teal-500"
-                  }`}>
-                    <span className="size-1.5 rounded-full bg-white animate-ping" />
-                    {tour.statusLabel}
-                  </span>
-                </div>
+          {/* Recent Races Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+                <Flag className="size-5 text-primary" /> Vòng Đua Gần Đây
+              </h2>
+              <Button asChild variant="ghost" size="sm" className="text-xs font-semibold text-primary">
+                <Link href="/spectator/results">Xem tất cả →</Link>
+              </Button>
+            </div>
 
-                {/* Content */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+            {loadingRaces ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="size-6 animate-spin text-primary" />
+              </div>
+            ) : races.length === 0 ? (
+              <div className="rounded-xl border border-border bg-card/50 p-8 text-center">
+                <p className="text-sm text-muted-foreground">Không có vòng đua nào</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {races.map((race) => {
+                  const tournamentName = typeof race.tournamentId === "object" ? race.tournamentId?.name : "Giải đấu";
+                  const distanceKm = race.distanceMeters ? (race.distanceMeters / 1000).toFixed(1) : "?";
+                  const statusBg = race.status === "LIVE" ? "bg-teal-500/10 border-teal-500/30" : "bg-card";
+
+                  return (
+                    <div key={race._id} className={`rounded-xl border border-border ${statusBg} p-4`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="text-xs text-muted-foreground font-semibold uppercase">{tournamentName}</p>
+                          <h4 className="font-semibold text-sm text-foreground">{race.name}</h4>
+                        </div>
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                          race.status === "LIVE" ? "bg-teal-500/20 text-teal-400" : 
+                          race.status === "RESULT_PUBLISHED" ? "bg-emerald-500/20 text-emerald-400" :
+                          "bg-muted text-muted-foreground"
+                        }`}>
+                          {race.status === "LIVE" ? "LIVE" : race.status === "RESULT_PUBLISHED" ? "Kết quả" : "Hoàn thành"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{distanceKm}km</span>
+                        <span>{formatTime(race.startTime)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Rankings & Wallet */}
+        <div className="space-y-6">
+          {/* Top Rankings */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Trophy className="size-5 text-primary" /> Bảng Xếp Hạng
+            </h2>
+
+            {loadingRankings ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="size-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Top Horses */}
+                <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                  <h3 className="text-sm font-semibold text-foreground">🐎 Top Ngựa</h3>
                   <div className="space-y-2">
-                    <h3 className="text-lg font-black uppercase leading-tight tracking-tight text-foreground transition duration-300 group-hover:text-primary">
-                      {tour.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
-                      {tour.description}
-                    </p>
+                    {topHorses.slice(0, 3).map((horse, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-muted-foreground w-5">{idx + 1}</span>
+                          <span className="text-foreground font-semibold truncate">{horse.horseName || "—"}</span>
+                        </div>
+                        <span className="text-primary font-bold">{horse.totalPoints || 0} Pts</span>
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="space-y-3 pt-3 border-t border-border text-[11px] text-muted-foreground">
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5"><MapPin className="size-3 text-primary" /> {tour.location}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5"><Calendar className="size-3 text-primary" /> {tour.startDate} ~ {tour.endDate}</span>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-border pt-2 font-bold text-foreground">
-                      <span>Tổng Giải Thưởng:</span>
-                      <span className="text-primary text-xs font-black uppercase tracking-wider">{tour.prizePool.toLocaleString("vi-VN")} Pts</span>
-                    </div>
-                  </div>
+                  <Button asChild variant="outline" size="sm" className="w-full rounded-lg text-xs mt-2">
+                    <Link href="/spectator/rankings">Xem đầy đủ</Link>
+                  </Button>
                 </div>
 
-                <div className="px-5 pb-5 mt-auto">
-                  <Button asChild variant="outline" className="w-full rounded-xl text-xs font-black uppercase tracking-wider">
-                    <Link href={`/spectator/tournaments?id=${tour.id}`}>Chi tiết giải đấu</Link>
+                {/* Top Jockeys */}
+                <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                  <h3 className="text-sm font-semibold text-foreground">👤 Top Nài</h3>
+                  <div className="space-y-2">
+                    {topJockeys.slice(0, 3).map((jockey, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-muted-foreground w-5">{idx + 1}</span>
+                          <span className="text-foreground font-semibold truncate">{jockey.jockeyName || "—"}</span>
+                        </div>
+                        <span className="text-primary font-bold">{jockey.totalPoints || 0} Pts</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button asChild variant="outline" size="sm" className="w-full rounded-lg text-xs mt-2">
+                    <Link href="/spectator/rankings">Xem đầy đủ</Link>
                   </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right Column: Upcoming Races & Quick Bets */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="space-y-1 border-b border-border pb-4">
-            <h2 className="flex items-center gap-2 text-xl font-black uppercase tracking-tight text-foreground">
-              <Flag className="size-5 text-primary" /> Lịch Đua Hot
-            </h2>
-            <p className="text-xs text-muted-foreground">Theo dõi và đặt dự đoán sớm trước giờ xuất phát</p>
+            )}
           </div>
 
-          <div className="space-y-4">
-            {mockUpcomingRaces.map((race) => (
-              <div
-                key={race.id}
-                className="rounded-2xl border border-border bg-card p-5 space-y-4 hover:border-primary/20 transition duration-300 relative overflow-hidden shadow-sm"
-              >
-                {race.status === "LIVE" && (
-                  <div className="absolute top-0 right-0 w-2 h-full bg-teal-500" />
-                )}
 
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{race.tournament}</span>
-                    <h4 className="font-black text-foreground text-base leading-tight uppercase">{race.name}</h4>
-                  </div>
-                  {race.status === "LIVE" ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[9px] font-black text-teal-400 uppercase tracking-wider">
-                      ● LIVE NOW
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-muted border border-border px-2 py-0.5 text-[9px] font-black text-muted-foreground uppercase tracking-wider">
-                      {race.startTime}
-                    </span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground bg-muted/50 rounded-xl p-2.5 border border-border">
-                  <div>
-                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground font-black">Cự ly</span>
-                    <span className="font-bold text-foreground text-xs">{race.distance}</span>
-                  </div>
-                  <div>
-                    <span className="block text-[8px] uppercase tracking-wider text-muted-foreground font-black">Mặt sân</span>
-                    <span className="font-bold text-foreground text-xs truncate block">{race.surface}</span>
-                  </div>
-                </div>
-
-                <Button asChild className={`w-full rounded-xl text-xs font-black uppercase tracking-wider transition duration-300 ${
-                  race.status === "LIVE" 
-                    ? "bg-teal-500 hover:bg-teal-600 text-white"
-                    : "bg-primary hover:bg-[#B80500] text-white"
-                }`}>
-                  <Link href={race.status === "LIVE" ? "/spectator/results" : "/spectator/tournaments"}>
-                    {race.status === "LIVE" ? "Xem Trực Tiếp Kết Quả" : "Đặt Dự Đoán"}
-                  </Link>
-                </Button>
-              </div>
-            ))}
-
-            <div className="rounded-2xl border border-[#E10600]/10 bg-[#E10600]/5 p-5 space-y-3 relative overflow-hidden">
-              <div className="absolute top-0 right-0 size-24 bg-primary/10 rounded-full blur-xl pointer-events-none" />
-              <div className="flex items-center gap-2 text-[#E10600]">
-                <Award className="size-4 animate-bounce" />
-                <span className="text-xs font-black uppercase tracking-wider">Cơ cấu dự đoán (Reward Rule)</span>
-              </div>
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Mỗi trận đấu bạn có quyền chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="text-foreground">+1 điểm</strong>, dự đoán sai khấu trừ <strong className="text-foreground">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </main>

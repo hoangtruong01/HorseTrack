@@ -3,16 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
-  ClipboardList,
   FileText,
-  Flag,
-  Siren,
   User,
   Clock,
   ShieldAlert,
-  Upload,
-  Loader2,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -28,10 +24,38 @@ type UserInfo = {
   roles: string[];
 };
 
+type RefereeReport = {
+  _id: string;
+  raceId: {
+    _id: string;
+    name: string;
+  };
+  description: string;
+  createdAt: string;
+  type?: string;
+};
+
+type Violation = {
+  _id: string;
+  raceId: {
+    _id: string;
+    name: string;
+  };
+  horseId?: {
+    _id: string;
+    name: string;
+  };
+  description: string;
+  violation?: string;
+  createdAt: string;
+};
+
 export default function RefereeDashboardPage() {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [profile, setProfile] = useState<RefereeProfileItem | null>(null);
   const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
+  const [recentReports, setRecentReports] = useState<RefereeReport[]>([]);
+  const [recentViolations, setRecentViolations] = useState<Violation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   const [submittingActionId, setSubmittingActionId] = useState<string | null>(null);
@@ -73,6 +97,28 @@ export default function RefereeDashboardPage() {
 
       const assignmentsResult = await refereeAssignmentsApi.myAssignments({ limit: 50 });
       setAssignments(assignmentsResult.data || []);
+
+      // Fetch recent reports
+      try {
+        const reportsRes = await fetch("/api/referee/referee-reports?limit=5&sort=-createdAt");
+        if (reportsRes.ok) {
+          const reportsData = await reportsRes.json();
+          setRecentReports((reportsData.data || []).slice(0, 5));
+        }
+      } catch {
+        // Silently fail for reports
+      }
+
+      // Fetch recent violations
+      try {
+        const violationsRes = await fetch("/api/referee/violations?limit=5&sort=-createdAt");
+        if (violationsRes.ok) {
+          const violationsData = await violationsRes.json();
+          setRecentViolations((violationsData.data || []).slice(0, 5));
+        }
+      } catch {
+        // Silently fail for violations
+      }
     } catch (err) {
       console.error(err);
       toast.error((err as Error).message || "Không thể tải dữ liệu trọng tài.");
@@ -198,480 +244,408 @@ export default function RefereeDashboardPage() {
   ) || acceptedAssignments[0] || assignments[0];
 
   return (
-    <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
+    <main className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 pb-12">
       <PageHeader
         eyebrow="Trạm điều hành trọng tài"
         title="Hội Đồng Giám Sát"
-        description="Quản lý lịch phân công điều hành cuộc đua, kiểm tra ngựa trước trận, ghi nhận vi phạm và xác nhận biên bản kết quả thi đấu chính thức."
+        description="Quản lý phân công thi đấu và ghi nhận kết quả"
       />
 
       {/* Profile Check / Greeting / Approval Banners */}
       {(!profile || profile.approvalStatus === "REJECTED") ? (
-        <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card p-6 shadow-2xl">
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.1),transparent_35%)]" />
-          <div className="relative space-y-4 max-w-2xl">
+        <section className="relative overflow-hidden rounded-3xl border border-border bg-card/60 backdrop-blur-xl p-8 shadow-sm">
+          <div className="space-y-4 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] ${
+              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
                 profile?.approvalStatus === "REJECTED"
-                  ? "border-red-500/40 bg-red-500/10 text-red-400"
-                  : "border-primary/40 bg-primary/10 text-primary"
+                  ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                  : "bg-primary/10 text-primary border border-primary/20"
               }`}>
-                {profile?.approvalStatus === "REJECTED" ? "HỒ SƠ BỊ TỪ CHỐI" : "CẦN HOÀN THIỆN HỒ SƠ"}
+                {profile?.approvalStatus === "REJECTED" ? "Hồ sơ bị từ chối" : "Cần hoàn thiện hồ sơ"}
               </span>
             </div>
 
             {profile?.approvalStatus === "REJECTED" && (
-              <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-xs text-red-400 font-bold space-y-1">
-                <p className="uppercase tracking-wider text-[10px] text-red-500">Lý do từ chối từ Ban tổ chức:</p>
-                <p className="italic text-foreground">&quot;{profile.rejectionReason || "Không có lý do chi tiết"}&quot;</p>
+              <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-500 space-y-1">
+                <p className="font-semibold">Lý do từ chối:</p>
+                <p className="italic">&quot;{profile.rejectionReason || "Không có lý do chi tiết"}&quot;</p>
               </div>
             )}
 
-            <h2 className="text-xl font-black uppercase text-foreground sm:text-2xl">
-              {profile?.approvalStatus === "REJECTED" ? "Cập nhật lại hồ sơ Trọng tài của bạn" : "Khởi tạo hồ sơ Trọng tài của bạn"}
+            <h2 className="text-xl font-bold text-foreground">
+              {profile?.approvalStatus === "REJECTED" ? "Cập nhật lại hồ sơ" : "Khởi tạo hồ sơ"}
             </h2>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Xin chào **{user?.fullName}**, bạn cần gửi đầy đủ thông tin hồ sơ bằng cấp chuyên môn của mình để Admin kiểm duyệt trước khi có thể bắt đầu tác nghiệp và nhận phân công điều hành.
+            <p className="text-sm text-muted-foreground">
+              Xin chào <span className="font-medium text-foreground">{user?.fullName}</span>, vui lòng hoàn thiện hồ sơ để bắt đầu tác nghiệp.
             </p>
 
-            <form onSubmit={handleCreateProfile} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end bg-muted/50 p-4 rounded-xl border border-border">
+            <form onSubmit={handleCreateProfile} className="mt-4 grid gap-3 sm:grid-cols-2 bg-muted/30 p-4 rounded-lg border border-border">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Số giấy phép (License)</label>
+                <label className="text-xs font-semibold text-muted-foreground">Số giấy phép</label>
                 <input
                   type="text"
                   value={licenseNumber}
                   onChange={(e) => setLicenseNumber(e.target.value)}
-                  placeholder="Ví dụ: RF-7799"
-                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  placeholder="RF-7799"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   required
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Kinh nghiệm (Năm)</label>
+                <label className="text-xs font-semibold text-muted-foreground">Kinh nghiệm (năm)</label>
                 <input
                   type="number"
                   min={1}
                   max={50}
                   value={experienceYears}
                   onChange={(e) => setExperienceYears(Number(e.target.value))}
-                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   required
                 />
               </div>
-              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Thông tin bằng cấp & Chứng chỉ</label>
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-semibold text-muted-foreground">Bằng cấp & Chứng chỉ</label>
                 <textarea
                   value={certificates}
                   onChange={(e) => setCertificates(e.target.value)}
-                  placeholder="Ví dụ: Bằng Trọng tài Quốc gia môn Đua ngựa cổ điển, Chứng nhận giám sát kĩ thuật đường chạy..."
+                  placeholder="Bằng Trọng tài Quốc gia, Chứng nhận giám sát..."
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                   required
                 />
               </div>
-              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Tiểu sử ngắn / Bio (Tùy chọn)</label>
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-semibold text-muted-foreground">Tiểu sử (tùy chọn)</label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Ghi chú thêm về kinh nghiệm làm việc hoặc các giải đấu đã điều hành..."
+                  placeholder="Thêm thông tin về kinh nghiệm..."
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                 />
               </div>
-
-              {/* Image Upload Component */}
-              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Ảnh chụp bằng cấp / Giấy phép (Tùy chọn)</label>
-                <div className="relative border border-dashed border-border hover:border-primary/50 bg-muted/30 rounded-xl min-h-[120px] flex flex-col items-center justify-center p-4 transition group cursor-pointer">
-                  {imagePreview ? (
-                    <div className="relative w-full max-w-xs h-[100px] rounded-lg overflow-hidden">
-                      <img src={imagePreview} alt="License Preview" className="size-full object-cover" />
-                      <div className="absolute inset-0 bg-black/45 opacity-0 hover:opacity-100 flex items-center justify-center transition">
-                        <span className="text-white text-[10px] font-black uppercase bg-primary px-2.5 py-1 rounded"> Thay đổi </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center space-y-1.5">
-                      {uploading ? (
-                        <Loader2 className="size-6 text-primary mx-auto animate-spin" />
-                      ) : (
-                        <Upload className="size-6 text-muted-foreground group-hover:text-primary transition" />
-                      )}
-                      <p className="text-xs font-bold text-foreground">
-                        {uploading ? "Đang tải lên..." : "Tải ảnh giấy phép"}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground"> Hỗ trợ PNG, JPG, WEBP tối đa 5MB </p>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    disabled={uploading}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
+              <div className="sm:col-span-2 flex justify-end">
                 <Button
                   type="submit"
-                  disabled={isSubmittingProfile || uploading}
-                  className="rounded-full bg-primary hover:bg-primary-dark font-black uppercase text-xs h-10 px-6 text-white"
+                  disabled={isSubmittingProfile}
+                  className="rounded-lg bg-primary hover:bg-primary/90 font-semibold text-sm h-9 px-6 text-primary-foreground transition-all"
                 >
-                  {isSubmittingProfile ? "Đang xử lý..." : profile?.approvalStatus === "REJECTED" ? "Gửi lại hồ sơ kiểm duyệt" : "Khởi tạo hồ sơ ngay"}
+                  {isSubmittingProfile ? "Đang xử lý..." : "Gửi hồ sơ"}
                 </Button>
               </div>
             </form>
           </div>
         </section>
       ) : profile.approvalStatus === "PENDING" ? (
-        <section className="relative overflow-hidden rounded-3xl border border-yellow-500/30 bg-card p-6 shadow-2xl">
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(234,179,8,0.1),transparent_35%)]" />
-          <div className="relative space-y-4 max-w-2xl">
+        <section className="relative overflow-hidden rounded-lg border border-amber-500/20 bg-amber-500/5 p-5 shadow-sm">
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="inline-flex rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-yellow-400">
-                HỒ SƠ ĐANG CHỜ PHÊ DUYỆT
+              <span className="inline-flex rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-500">
+                Đang chờ phê duyệt
               </span>
             </div>
-            <h2 className="text-xl font-black uppercase text-foreground sm:text-2xl">
+            <h2 className="text-lg font-bold text-foreground">
               Hồ sơ của bạn đang được kiểm duyệt
             </h2>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Cảm ơn **{user?.fullName}**! Hồ sơ trọng tài của bạn đã được gửi thành công và đang nằm trong danh sách phê duyệt của Ban tổ chức. Khi hồ sơ của bạn được phê duyệt (`APPROVED`), các tính năng phân công điều hành thi đấu sẽ tự động được mở khóa.
+            <p className="text-sm text-muted-foreground">
+              Cảm ơn <span className="font-medium text-foreground">{user?.fullName}</span>, hồ sơ của bạn đã được gửi thành công. Khi được phê duyệt, các tính năng sẽ được mở khóa.
             </p>
-
-            <div className="mt-4 rounded-xl border border-border bg-muted/50 p-4 space-y-3">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Thông tin đã nộp:</p>
-              <div className="grid gap-2 sm:grid-cols-2 text-xs">
-                <div>
-                  <span className="text-muted-foreground">Số giấy phép:</span> <strong className="text-foreground">{profile.licenseNo}</strong>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Kinh nghiệm:</span> <strong className="text-foreground">{profile.experienceYears} năm</strong>
-                </div>
-                <div className="sm:col-span-2">
-                  <span className="text-muted-foreground block mb-1">Bằng cấp & Chứng chỉ:</span>
-                  <div className="p-2.5 rounded bg-muted border border-border text-foreground whitespace-pre-line font-mono text-[11px] leading-normal">
-                    {profile.certificates}
-                  </div>
-                </div>
-                {profile.bio && (
-                  <div className="sm:col-span-2">
-                    <span className="text-muted-foreground block mb-1">Tiểu sử (Bio):</span>
-                    <p className="text-muted-foreground italic">&quot;{profile.bio}&quot;</p>
-                  </div>
-                )}
-                {profile.licenseImage && (
-                  <div className="sm:col-span-2">
-                    <span className="text-muted-foreground block mb-1 font-bold text-foreground">Ảnh chụp bằng cấp / Giấy phép:</span>
-                    <div className="mt-1 relative max-w-md h-48 rounded-lg overflow-hidden border border-border bg-muted/30">
-                      <img src={profile.licenseImage} alt="License document" className="size-full object-contain" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </section>
       ) : (
-        <section className="relative overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-[0_24px_80px_rgba(0,0,0,0.36)] sm:p-7">
-          <div className="absolute inset-0 bg-[linear-gradient(125deg,rgba(225,6,0,0.22),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(6,126,106,0.15),transparent_25rem)]" />
-          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <span className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-                GIÁM SÁT TRỰC TUYẾN
-              </span>
-              <h2 className="mt-3 text-3xl font-black uppercase tracking-tight text-white leading-none">
-                BÀN LÀM VIỆC CỦA TRỌNG TÀI
-              </h2>
-              <p className="mt-2 text-xs text-white/50 leading-relaxed max-w-xl">
-                Quản lý các cuộc đua được ủy quyền. Thực hiện kiểm duyệt đầy đủ tình trạng thiết bị bảo hộ, sức khỏe ngựa, jockey điểm danh và xác lập thứ hạng chuẩn hóa sau khi trận đấu hoàn thành.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border bg-muted/50 p-4 shrink-0 min-w-[240px] space-y-3">
+        <div className="space-y-6">
+          {/* Welcome & Profile Summary */}
+          <section className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-lg border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+                <User className="size-5 text-primary" />
+              </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-white/45">Trọng tài được cấp phép</p>
-                <p className="mt-1 text-lg font-black uppercase text-white flex items-center gap-1.5">
-                  <User className="size-4 text-primary" />
-                  {user?.fullName}
-                </p>
-                <p className="mt-1 text-xs text-white/60">
-                  License: <strong className="text-teal-400">{profile.licenseNo}</strong> · {profile.experienceYears} năm kinh nghiệm
+                <h2 className="text-lg font-bold text-foreground">{user?.fullName}</h2>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
+                  License: <span className="text-primary font-semibold">{profile.licenseNo}</span>
+                  <span className="text-border">•</span>
+                  {profile.experienceYears} năm kinh nghiệm
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setIsEditingProfile((v) => !v)}
-                className="w-full h-8 rounded-xl border-border hover:bg-white/5 text-xs font-bold uppercase text-white hover:text-white"
-              >
-                {isEditingProfile ? "Hủy chỉnh sửa" : "Chỉnh sửa hồ sơ"}
-              </Button>
             </div>
-          </div>
+            
+            <Button
+              variant="outline"
+              onClick={() => setIsEditingProfile((v) => !v)}
+              className="rounded-lg border-border hover:bg-muted text-xs font-medium h-9 px-4 shrink-0"
+            >
+              {isEditingProfile ? "Hủy" : "Sửa"}
+            </Button>
+          </section>
 
           {isEditingProfile && (
-            <form onSubmit={handleCreateProfile} className="relative mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end bg-muted/50 p-4 rounded-xl border border-border">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Số giấy phép (License)</label>
-                <input
-                  type="text"
-                  value={licenseNumber}
-                  onChange={(e) => setLicenseNumber(e.target.value)}
-                  placeholder="Ví dụ: RF-7799"
-                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-                  required
-                />
+            <form onSubmit={handleCreateProfile} className="grid gap-3 bg-card p-4 rounded-lg border border-border shadow-sm">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Số giấy phép</label>
+                  <input
+                    type="text"
+                    value={licenseNumber}
+                    onChange={(e) => setLicenseNumber(e.target.value)}
+                    placeholder="RF-7799"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Kinh nghiệm (năm)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={experienceYears}
+                    onChange={(e) => setExperienceYears(Number(e.target.value))}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    required
+                  />
+                </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Kinh nghiệm (Năm)</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={experienceYears}
-                  onChange={(e) => setExperienceYears(Number(e.target.value))}
-                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
-                  required
-                />
-              </div>
-              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Thông tin bằng cấp & Chứng chỉ</label>
+                <label className="text-xs font-semibold text-muted-foreground">Bằng cấp & Chứng chỉ</label>
                 <textarea
                   value={certificates}
                   onChange={(e) => setCertificates(e.target.value)}
-                  placeholder="Ví dụ: Bằng Trọng tài Quốc gia môn Đua ngựa cổ điển..."
+                  placeholder="Bằng Trọng tài Quốc gia..."
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                   required
                 />
               </div>
-              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Tiểu sử ngắn / Bio (Tùy chọn)</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground">Tiểu sử (tùy chọn)</label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Ghi chú thêm về kinh nghiệm làm việc..."
+                  placeholder="Thêm thông tin..."
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                 />
               </div>
-              <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
+              <div className="flex justify-end gap-2 pt-2">
                 <Button
                   type="submit"
                   disabled={isSubmittingProfile}
-                  className="rounded-full bg-primary hover:bg-primary-dark font-black uppercase text-xs h-10 px-6 text-white"
+                  className="rounded-lg bg-primary hover:bg-primary/90 font-semibold text-xs h-8 px-4 text-primary-foreground transition-all"
                 >
-                  {isSubmittingProfile ? "Đang xử lý..." : "Gửi lại hồ sơ kiểm duyệt"}
+                  {isSubmittingProfile ? "Đang..." : "Lưu"}
                 </Button>
               </div>
             </form>
           )}
-        </section>
-      )}
 
-      {/* Alert Pending Assignments */}
-      {profile && profile.approvalStatus === "APPROVED" && pendingAssignments.length > 0 && (
-        <section className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <ShieldAlert className="size-5 text-yellow-500 shrink-0" />
-            <div>
-              <h4 className="text-xs font-black uppercase text-white">Yêu cầu phân công mới!</h4>
-              <p className="text-[10px] text-white/60 mt-0.5">Bạn đang có {pendingAssignments.length} cuộc đua mới được Ban tổ chức chỉ định cần phê duyệt.</p>
-            </div>
-          </div>
-          <Link href="/referee/assignments">
-            <Button className="h-9 px-4 rounded-full bg-yellow-500 hover:bg-yellow-600 text-black text-xs font-bold uppercase">
-              Phê duyệt ngay
-            </Button>
-          </Link>
-        </section>
-      )}
-
-      {/* Next required action center */}
-      {profile && profile.approvalStatus === "APPROVED" && activeAssignment && (() => {
-        const assignmentId = activeAssignment._id || (activeAssignment as { id?: string }).id || "";
-        const raceIdRaw = activeAssignment.raceId;
-        const raceId = typeof raceIdRaw === "string"
-          ? raceIdRaw
-          : raceIdRaw?._id || (raceIdRaw as unknown as { id?: string })?.id;
-        const raceObj = typeof raceIdRaw !== "string" ? raceIdRaw : null;
-        return (
-          <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-            <article className="rounded-2xl border border-primary/25 bg-[linear-gradient(135deg,rgba(225,6,0,0.12),rgba(21,21,30,0.95))] p-5 flex flex-col justify-between space-y-4">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
-                  NHIỆM VỤ TIẾP THEO
-                </p>
-                <h3 className="mt-2 text-2xl font-black uppercase text-white leading-tight">
-                  {raceObj?.name}
-                </h3>
-                <p className="mt-1 text-xs text-white/50 flex items-center gap-1.5">
-                  <Clock className="size-3.5" />
-                  {formatDateTime(raceObj?.startTime)}
-                </p>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-xs text-white/70">Vai trò: <strong>{activeAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}</strong></span>
-                  <span className="text-white/20">•</span>
-                  <span className="text-xs text-white/70">Trạng thái: 
-                    <span className="ml-1 text-teal-400 font-bold uppercase">{activeAssignment.status}</span>
-                  </span>
+          {/* Alert Pending Assignments */}
+          {pendingAssignments.length > 0 && (
+            <section className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="size-8 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30 shrink-0">
+                  <ShieldAlert className="size-4 text-amber-500" />
                 </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground">Yêu cầu phân công mới</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5"><strong className="text-foreground">{pendingAssignments.length}</strong> cuộc đua cần phê duyệt</p>
+                </div>
+              </div>
+              <Link href="/referee/assignments" className="shrink-0">
+                <Button className="h-8 px-4 rounded-lg bg-amber-500 hover:bg-amber-600 text-amber-950 font-semibold text-xs shadow-sm transition-all">
+                  Phê duyệt
+                </Button>
+              </Link>
+            </section>
+          )}
+
+          {/* Next required action center */}
+          {activeAssignment && (() => {
+            const assignmentId = activeAssignment._id || (activeAssignment as { id?: string }).id || "";
+            const raceIdRaw = activeAssignment.raceId;
+            const raceId = typeof raceIdRaw === "string"
+              ? raceIdRaw
+              : raceIdRaw?._id || (raceIdRaw as unknown as { id?: string })?.id;
+            const raceObj = typeof raceIdRaw !== "string" ? raceIdRaw : null;
+            
+            return (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-foreground">Nhiệm vụ tiếp theo</h3>
+                </div>
+                <article className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-base font-bold text-foreground">
+                        {raceObj?.name || "Đang tải..."}
+                      </h4>
+                      <StatusBadge 
+                        label={
+                          activeAssignment.status === "assigned" ? "Chờ duyệt" :
+                          activeAssignment.status === "accepted" ? "Đã nhận" :
+                          activeAssignment.status === "declined" ? "Đã từ chối" : "Đã hủy"
+                        }
+                        tone={
+                          activeAssignment.status === "accepted" ? "green" :
+                          activeAssignment.status === "assigned" ? "yellow" :
+                          activeAssignment.status === "declined" ? "red" : "slate"
+                        }
+                      />
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-md border border-border/50">
+                        <Clock className="size-3.5 text-primary" /> 
+                        {formatDateTime(raceObj?.startTime)}
+                      </span>
+                      <span className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-md border border-border/50">
+                        <ShieldAlert className="size-3.5 text-primary" /> 
+                        {activeAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}
+                      </span>
+                    </div>
+
+                    {activeAssignment.status === "assigned" ? (
+                      <div className="flex items-center gap-2 pt-2 border-t border-border">
+                        <Button
+                          onClick={() => handleRespond(assignmentId, "REJECTED")}
+                          disabled={submittingActionId !== null}
+                          variant="outline"
+                          className="flex-1 rounded-lg border-border hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 text-xs font-medium h-8 transition-all"
+                        >
+                          Từ chối
+                        </Button>
+                        <Button
+                          onClick={() => handleRespond(assignmentId, "ACCEPTED")}
+                          disabled={submittingActionId !== null}
+                          className="flex-1 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold h-8 shadow-sm transition-all"
+                        >
+                          Chấp nhận
+                        </Button>
+                      </div>
+                    ) : raceId ? (
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+                        <Button asChild className="h-8 rounded-lg bg-card border border-border hover:bg-muted text-foreground justify-center text-xs font-semibold transition-all">
+                          <Link href={`/referee/races/${raceId}`}>
+                            Kiểm tra
+                          </Link>
+                        </Button>
+                        <Button asChild className="h-8 rounded-lg bg-card border border-border hover:bg-muted text-foreground justify-center text-xs font-semibold transition-all">
+                          <Link href={`/referee/races/${raceId}/violations`}>
+                            Vi phạm
+                          </Link>
+                        </Button>
+                        <Button asChild className="h-8 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground justify-center text-xs font-semibold shadow-sm transition-all">
+                          <Link href={`/referee/races/${raceId}/result-entry`}>
+                            Kết quả
+                          </Link>
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                </article>
+              </section>
+            );
+          })()}
+
+          {/* Recent Reports & Violations */}
+          <section className="grid gap-4 md:grid-cols-2">
+            {/* Recent Reports */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <FileText className="size-4 text-blue-500" />
+                  Biên Bản Gần Đây
+                </h3>
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="h-8 px-2 text-xs font-medium hover:bg-primary/5"
+                >
+                  <Link href="/referee/reports">Xem tất cả</Link>
+                </Button>
               </div>
               
-              {activeAssignment.status === "assigned" ? (
-                <div className="flex items-center gap-3 pt-2">
-                  <Button
-                    onClick={() => handleRespond(assignmentId, "REJECTED")}
-                    disabled={submittingActionId !== null}
-                    variant="outline"
-                    className="rounded-full border-border hover:bg-white/5 text-xs h-10 px-6 uppercase font-bold text-white hover:text-white"
-                  >
-                    Từ chối
-                  </Button>
-                  <Button
-                    onClick={() => handleRespond(assignmentId, "ACCEPTED")}
-                    disabled={submittingActionId !== null}
-                    className="rounded-full bg-primary hover:bg-primary/95 text-xs h-10 px-6 uppercase font-bold text-white"
-                  >
-                    Chấp nhận phân công
-                  </Button>
+              {recentReports.length > 0 ? (
+                <div className="space-y-2">
+                  {recentReports.map((report) => (
+                    <article
+                      key={report._id}
+                      className="rounded-lg border border-border bg-card p-3 space-y-2 shadow-sm hover:shadow-md hover:border-blue-500/30 transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-bold text-foreground line-clamp-2">
+                            {report.raceId?.name || "N/A"}
+                          </h4>
+                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                            {report.description}
+                          </p>
+                        </div>
+                        <CheckCircle className="size-4 text-blue-500 shrink-0 mt-0.5" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(report.createdAt).toLocaleDateString("vi-VN")}
+                      </p>
+                    </article>
+                  ))}
                 </div>
-              ) : raceId ? (
-                <div className="grid gap-2.5 sm:grid-cols-3 pt-2">
-                  <Button asChild className="h-11 rounded-full bg-white/5 border border-border hover:bg-white/10 hover:border-white/20 text-white">
-                    <Link href={`/referee/races/${raceId}`}>
-                      <ClipboardList className="size-4 text-primary shrink-0" />
-                      <span className="ml-1.5 text-xs font-bold uppercase">Kiểm tra ngựa</span>
-                    </Link>
-                  </Button>
-                  <Button asChild className="h-11 rounded-full bg-white/5 border border-border hover:bg-white/10 hover:border-white/20 text-white">
-                    <Link href={`/referee/races/${raceId}/violations`}>
-                      <Siren className="size-4 text-primary shrink-0" />
-                      <span className="ml-1.5 text-xs font-bold uppercase">Lỗi vi phạm</span>
-                    </Link>
-                  </Button>
-                  <Button asChild className="h-11 rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
-                    <Link href={`/referee/races/${raceId}/result-entry`}>
-                      <Flag className="size-4 shrink-0" />
-                      <span className="ml-1.5 text-xs font-bold uppercase">Nhập kết quả</span>
-                    </Link>
-                  </Button>
+              ) : (
+                <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4 text-center space-y-2">
+                  <FileText className="size-5 text-muted-foreground/50 mx-auto" />
+                  <p className="text-xs text-muted-foreground">Chưa có biên bản nào</p>
                 </div>
-              ) : null}
-            </article>
+              )}
+            </div>
 
-            <article className="rounded-2xl border border-border bg-card/90 p-5 flex flex-col justify-between">
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
-                  BIÊN BẢN TRẬN ĐẤU
-                </p>
-                <h3 className="text-lg font-black uppercase text-white">
-                  Khóa sổ & Đồng bộ
+            {/* Recent Violations */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <AlertCircle className="size-4 text-amber-500" />
+                  Vi Phạm Gần Đây
                 </h3>
-                <p className="text-xs leading-relaxed text-white/50">
-                  Khi trọng tài chính thực hiện bấm **Xác nhận kết quả**, BE sẽ tự động áp các hình phạt cộng giây từ bảng vi phạm, thực hiện tính toán lại thứ hạng thực tế của ngựa và khóa sửa đổi.
-                </p>
-              </div>
-              <Button asChild variant="outline" className="mt-4 h-11 rounded-full border-border hover:bg-white/5 text-white hover:text-white w-full">
-                <Link href="/referee/reports" className="flex items-center justify-center gap-1">
-                  <FileText className="size-4 shrink-0" />
-                  <span className="text-xs font-bold uppercase">Xem toàn bộ biên bản</span>
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            </article>
-          </section>
-        );
-      })()}
-
-      {/* Grid of all assignments */}
-      {profile && profile.approvalStatus === "APPROVED" && assignments.length > 0 && (
-        <section className="space-y-4">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
-            Danh sách cuộc đua được phân công ({assignments.length})
-          </h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {assignments.map((assignment) => {
-              const assignmentId = assignment._id || (assignment as { id?: string }).id || "";
-              const raceIdRaw2 = assignment.raceId;
-              const raceId = typeof raceIdRaw2 === "string"
-                ? raceIdRaw2
-                : raceIdRaw2?._id || (raceIdRaw2 as unknown as { id?: string })?.id;
-              const raceObj2 = typeof raceIdRaw2 !== "string" ? raceIdRaw2 : null;
-              if (!assignment.raceId) return null;
-              return (
-                <article
-                  key={assignmentId}
-                  className="rounded-2xl border border-border bg-card/80 p-4 flex flex-col justify-between space-y-4 shadow hover:border-primary/20 transition"
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="h-8 px-2 text-xs font-medium hover:bg-primary/5"
                 >
-                  <div className="flex items-center justify-between">
-                    <StatusBadge
-                      label={
-                        assignment.status === "assigned" ? "Chờ duyệt" :
-                        assignment.status === "accepted" ? "Đã nhận" :
-                        assignment.status === "declined" ? "Đã từ chối" : "Đã hủy"
-                      }
-                      tone={
-                        assignment.status === "accepted" ? "green" :
-                        assignment.status === "assigned" ? "yellow" :
-                        assignment.status === "declined" ? "red" : "slate"
-                      }
-                      pulse={assignment.status === "assigned"}
-                    />
-                    <span className="text-[10px] text-white/40 uppercase font-black">
-                      {assignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black uppercase text-white leading-tight">
-                      {raceObj2?.name}
-                    </h4>
-                    <p className="text-[10px] text-white/50 mt-1 flex items-center gap-1">
-                      <Clock className="size-3 shrink-0" />
-                      {formatDateTime(raceObj2?.startTime)}
-                    </p>
-                    <p className="text-[10px] text-white/40 mt-1 uppercase font-bold">
-                      Trận đua: {
-                        raceObj2?.status === "SCHEDULED" ? "Đã lên lịch" :
-                        raceObj2?.status === "CHECKING" ? "Đang kiểm tra" :
-                        raceObj2?.status === "READY" ? "Sẵn sàng" :
-                        raceObj2?.status === "LIVE" ? "Đang đua" :
-                        raceObj2?.status === "FINISHED" ? "Hoàn thành" : "Đã công bố"
-                      }
-                    </p>
-                  </div>
-                  {raceId && (
-                    <div className="pt-2 border-t border-border flex justify-end">
-                      <Button
-                        asChild
-                        variant="outline"
-                        className="h-9 px-4 rounded-full text-xs font-bold uppercase border-border hover:bg-white/5 text-white hover:text-white"
-                      >
-                        <Link href={`/referee/races/${raceId}`}>
-                          Chi tiết <ArrowRight className="size-3.5 ml-1" />
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {profile && profile.approvalStatus === "APPROVED" && assignments.length === 0 && (
-        <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-border bg-card/50 max-w-lg mx-auto space-y-3">
-          <div className="size-12 rounded-full border border-border flex items-center justify-center text-white/30">
-            <Flag className="size-6" />
-          </div>
-          <h4 className="font-bold text-white uppercase text-sm">Chưa có phân công nào</h4>
-          <p className="text-xs text-white/40 leading-relaxed">
-            Danh sách trống. Khi Ban tổ chức chỉ định bạn vào tổ trọng tài giám sát một cuộc đua, thông tin cuộc đua và các API tác nghiệp sẽ hiển thị đầy đủ tại đây.
-          </p>
-        </section>
+                  <Link href="/referee/violations">Xem tất cả</Link>
+                </Button>
+              </div>
+              
+              {recentViolations.length > 0 ? (
+                <div className="space-y-2">
+                  {recentViolations.map((violation) => (
+                    <article
+                      key={violation._id}
+                      className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 space-y-2 shadow-sm hover:shadow-md hover:border-amber-500/40 transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-bold text-foreground line-clamp-1">
+                            {violation.horseId?.name || "N/A"}
+                          </h4>
+                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                            {violation.violation || violation.description}
+                          </p>
+                        </div>
+                        <AlertCircle className="size-4 text-amber-500 shrink-0 mt-0.5" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(violation.createdAt).toLocaleDateString("vi-VN")}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4 text-center space-y-2">
+                  <AlertCircle className="size-5 text-muted-foreground/50 mx-auto" />
+                  <p className="text-xs text-muted-foreground">Chưa có vi phạm nào</p>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
       )}
     </main>
   );
