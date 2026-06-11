@@ -73,7 +73,7 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
             className="object-cover transition duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center text-white/20">
+          <div className="flex flex-col items-center justify-center text-muted-foreground/20">
             <Award className="size-16 stroke-[1]" />
             <span className="text-xs uppercase tracking-widest mt-2">No Image Available</span>
           </div>
@@ -131,7 +131,7 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
                 <ShieldAlert className="size-3.5 shrink-0" />
                 Lý do không duyệt:
               </p>
-              <p className="text-white/80 italic">{horse.rejectionReason || "Không rõ lý do"}</p>
+              <p className="text-foreground/80 italic">{horse.rejectionReason || "Không rõ lý do"}</p>
               <p className="text-[10px] font-mono text-red-300 font-bold uppercase tracking-wider">
                 {getRemainingTimeText(horse.rejectedAt)}
               </p>
@@ -141,12 +141,12 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
 
         {/* Action buttons */}
         <div className="mt-5 flex gap-2 w-full pt-2 border-t border-border/5">
-          <Button asChild className="rounded-xl flex-1 text-xs py-2 h-9 bg-muted/5 hover:bg-muted/10 text-foreground border border-border/10">
+          <Button asChild className="rounded-xl flex-1 text-xs py-2 h-9 bg-muted/20 hover:bg-muted/30 text-foreground border border-border">
             <Link href={`/owner/horses/${horse.id}`}>
               Chi tiết
             </Link>
           </Button>
-          <Button asChild variant="outline" className="rounded-xl p-2 size-9 shrink-0 bg-muted/5 hover:bg-muted/10 hover:text-yellow-400 border border-border/10 text-white/70">
+          <Button asChild variant="outline" className="rounded-xl p-2 size-9 shrink-0 bg-muted/20 hover:bg-muted/30 hover:text-yellow-600 border border-border text-foreground/70">
             <Link href={`/owner/horses/${horse.id}?edit=true`}>
               <Edit2 className="size-4" />
             </Link>
@@ -155,7 +155,7 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
             <Button
               onClick={() => onDelete(horse.id)}
               variant="outline"
-              className="rounded-xl p-2 size-9 shrink-0 bg-muted/5 hover:bg-red-950/40 hover:text-[#E10600] border border-border/10 text-white/70 transition"
+              className="rounded-xl p-2 size-9 shrink-0 bg-muted/20 hover:bg-red-500/10 hover:text-[#E10600] border border-border text-foreground/70 transition"
             >
               <Trash2 className="size-4" />
             </Button>

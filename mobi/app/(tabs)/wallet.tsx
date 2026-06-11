@@ -2,12 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
 import { walletApi, type WalletTxItem } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function WalletScreen() {
+  const colorScheme = useColorScheme() ?? 'light';
+  const isDark = colorScheme === 'dark';
+
   const [balance, setBalance] = useState({ points: 0, cash: 0 });
   const [ledger, setLedger] = useState<WalletTxItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const themeContainer = { backgroundColor: isDark ? '#1C1C25' : '#F7F4F1' };
+  const themeCard = { backgroundColor: isDark ? '#15151E' : '#FFFFFF', borderColor: isDark ? '#303037' : '#EAEAEA' };
+  const themeText = { color: isDark ? '#FFFFFF' : '#1C1C25' };
+  const themeSubText = { color: isDark ? '#AAAAAA' : '#58585B' };
 
   const loadWalletData = async () => {
     try {
@@ -43,15 +52,15 @@ export default function WalletScreen() {
     const valueText = item.points !== 0 ? `${isPositive ? '+' : ''}${item.points} Pts` : `${isPositive ? '+' : ''}${item.amount.toLocaleString()} VNĐ`;
 
     return (
-      <View style={styles.listItemCard}>
+      <View style={[styles.listItemCard, themeCard]}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardMainTitle} numberOfLines={1}>{item.description || 'Giao dịch ví'}</Text>
+          <Text style={[styles.cardMainTitle, themeText]} numberOfLines={1}>{item.description || 'Giao dịch ví'}</Text>
           <Text style={[styles.ledgerValue, { color: isPositive ? '#067E6A' : '#E10600' }]}>{valueText}</Text>
         </View>
 
         <View style={styles.cardBody}>
-          <Text style={styles.cardSubText}>Loại giao dịch: <Text style={styles.whiteBoldText}>{item.type.toUpperCase()}</Text></Text>
-          <Text style={styles.cardSubText}>Trạng thái: <Text style={styles.whiteBoldText}>{item.status.toUpperCase()}</Text></Text>
+          <Text style={[styles.cardSubText, themeSubText]}>Loại giao dịch: <Text style={[styles.whiteBoldText, themeText]}>{item.type.toUpperCase()}</Text></Text>
+          <Text style={[styles.cardSubText, themeSubText]}>Trạng thái: <Text style={[styles.whiteBoldText, themeText]}>{item.status.toUpperCase()}</Text></Text>
           <Text style={styles.dateText}>{dateStr}</Text>
         </View>
       </View>
@@ -60,9 +69,9 @@ export default function WalletScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, themeContainer]}>
         <ActivityIndicator size="large" color="#E10600" />
-        <Text style={styles.loadingText}>Đang tải lịch sử giao dịch...</Text>
+        <Text style={[styles.loadingText, themeSubText]}>Đang tải lịch sử giao dịch...</Text>
       </View>
     );
   }
@@ -75,13 +84,13 @@ export default function WalletScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, themeContainer]}>
       {/* Wallet Summary Card */}
-      <View style={styles.walletHeaderCard}>
+      <View style={[styles.walletHeaderCard, themeCard]}>
         <View style={styles.walletBox}>
           <MaterialIcons name="stars" size={24} color="#E10600" />
           <Text style={styles.walletLabel}>ĐIỂM HIỆN TẠI</Text>
-          <Text style={styles.walletValue}>{balance.points} <Text style={styles.pointsUnit}>Pts</Text></Text>
+          <Text style={[styles.walletValue, themeText]}>{balance.points} <Text style={[styles.pointsUnit, themeSubText]}>Pts</Text></Text>
         </View>
       </View>
 
@@ -93,12 +102,12 @@ export default function WalletScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
         ListHeaderComponent={
-          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '900', letterSpacing: 0.5, marginBottom: 12 }}>LỊCH SỬ RÚT</Text>
+          <Text style={[themeText, { fontSize: 13, fontWeight: '900', letterSpacing: 0.5, marginBottom: 12 }]}>LỊCH SỬ RÚT</Text>
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <MaterialIcons name="history" size={40} color="#58585B" />
-            <Text style={styles.emptyText}>Bạn chưa thực hiện yêu cầu rút điểm nào.</Text>
+            <MaterialIcons name="history" size={40} color={isDark ? '#AAAAAA' : '#58585B'} />
+            <Text style={[styles.emptyText, themeSubText]}>Bạn chưa thực hiện yêu cầu rút điểm nào.</Text>
           </View>
         }
       />

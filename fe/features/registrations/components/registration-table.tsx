@@ -47,7 +47,7 @@ export function RegistrationTable({
   };
 
   return (
-    <section className="rounded-2xl border border-border/10 bg-[#15151E]/85 p-4 sm:p-6">
+    <section className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
@@ -61,7 +61,7 @@ export function RegistrationTable({
           Đang hiển thị {visibleRegistrations.length}/{registrations.length} đơn đăng ký
         </p>
       </div>
-      <div className="mt-5 overflow-x-auto rounded-xl border border-border/10">
+      <div className="mt-5 overflow-x-auto rounded-xl border border-border">
         <table className="min-w-[980px] w-full text-left text-sm">
           <thead className="bg-muted/[0.04] text-xs uppercase tracking-[0.18em] text-muted-foreground">
             <tr>
@@ -74,7 +74,7 @@ export function RegistrationTable({
               <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10 bg-black/10">
+          <tbody className="divide-y divide-border bg-muted/[0.02]">
             {visibleRegistrations.map((registration) => (
               <tr
                 key={registration.id}
@@ -89,7 +89,7 @@ export function RegistrationTable({
                   </p>
                 </td>
                 <td className="px-4 py-4">
-                  <p className="font-bold text-white/90">
+                  <p className="font-bold text-foreground/90">
                     {registration.owner}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -97,12 +97,12 @@ export function RegistrationTable({
                   </p>
                 </td>
                 <td className="px-4 py-4">
-                  <p className="font-bold text-white/90">{registration.race}</p>
+                  <p className="font-bold text-foreground/90">{registration.race}</p>
                   <p className="text-xs text-muted-foreground">
                     {registration.tournament}
                   </p>
                 </td>
-                <td className="px-4 py-4 font-mono text-white/80">
+                <td className="px-4 py-4 font-mono text-foreground/80">
                   {registration.submittedAt}
                 </td>
                 <td className="px-4 py-4">

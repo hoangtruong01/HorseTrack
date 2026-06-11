@@ -189,17 +189,24 @@
   }
 
   .f1-card {
-    @apply rounded-lg border border-border bg-card p-4 text-card-foreground shadow-[0_4px_16px_rgba(0,0,0,0.22)] transition-colors duration-150 hover:border-white/25 sm:p-6;
+    @apply rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm transition-colors duration-150 hover:border-primary/40 sm:p-6;
   }
 
   .f1-gradient {
+    background:
+      linear-gradient(135deg, rgba(225, 6, 0, 0.05), transparent 45%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.01), transparent), #F7F4F1;
+  }
+
+  :global(.dark) .f1-gradient,
+  .dark .f1-gradient {
     background:
       linear-gradient(135deg, rgba(225, 6, 0, 0.18), transparent 34%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent), #1c1c25;
   }
 
   .f1-title {
-    @apply text-3xl font-black uppercase leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl;
+    @apply text-3xl font-black uppercase leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl;
   }
 
   .f1-status-live,
@@ -213,7 +220,7 @@
   }
 
   .f1-status-finished {
-    @apply bg-[#303037] text-white;
+    @apply bg-muted text-muted-foreground border border-border;
   }
 
   .f1-status-upcoming {

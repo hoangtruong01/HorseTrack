@@ -1,14 +1,20 @@
 import React from 'react';
 import { Stack } from 'expo-router';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
 
 export default function OperationsLayout() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const t = Colors[colorScheme ?? 'dark'];
+
   return (
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#15151E',
+          backgroundColor: isDark ? '#15151E' : '#FFFFFF',
         },
-        headerTintColor: '#FFFFFF',
+        headerTintColor: t.text,
         headerTitleStyle: {
           fontWeight: '900',
         },

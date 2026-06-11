@@ -3,12 +3,14 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { tournamentsApi, type TournamentItem } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
+import { useThemeColors } from '@/components/ui/shared';
 
 export default function TournamentsScreen() {
   const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+  const theme = useThemeColors();
 
   const loadTournaments = async () => {
     try {
@@ -42,7 +44,7 @@ export default function TournamentsScreen() {
       case 'COMPLETED':
         return styles.statusCompleted;
       default:
-        return styles.statusScheduled;
+        return [styles.statusScheduled, { backgroundColor: theme.cardBorder }];
     }
   };
 
@@ -68,35 +70,35 @@ export default function TournamentsScreen() {
     const endDate = item.endDate ? new Date(item.endDate).toLocaleDateString('vi-VN') : '—';
 
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
         <View style={styles.cardHeader}>
-          <Text style={styles.tournamentName} numberOfLines={1}>{item.name.toUpperCase()}</Text>
+          <Text style={[styles.tournamentName, { color: theme.white }]} numberOfLines={1}>{item.name.toUpperCase()}</Text>
           <View style={[styles.statusBadge, getStatusStyle(item.status)]}>
             <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
           </View>
         </View>
 
-        <Text style={styles.description} numberOfLines={2}>
+        <Text style={[styles.description, { color: theme.textSecondary }]} numberOfLines={2}>
           {item.description || 'Không có mô tả chi tiết cho giải đấu này.'}
         </Text>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.cardBorder }]} />
 
         <View style={styles.cardFooter}>
           <View style={styles.infoRow}>
             <MaterialIcons name="location-on" size={14} color="#E10600" />
-            <Text style={styles.infoText}>{item.location || 'Trường đua Quốc tế'}</Text>
+            <Text style={[styles.infoText, { color: theme.white }]}>{item.location || 'Trường đua Quốc tế'}</Text>
           </View>
 
           <View style={styles.infoRow}>
-            <MaterialIcons name="date-range" size={14} color="#AAAAAA" />
-            <Text style={styles.infoText}>{startDate} - {endDate}</Text>
+            <MaterialIcons name="date-range" size={14} color={theme.textSecondary} />
+            <Text style={[styles.infoText, { color: theme.white }]}>{startDate} - {endDate}</Text>
           </View>
         </View>
 
         <View style={styles.prizeSection}>
           <Text style={styles.prizeLabel}>TỔNG GIẢI THƯỞNG</Text>
-          <Text style={styles.prizeValue}>{totalPrize}</Text>
+          <Text style={[styles.prizeValue, { color: theme.white }]}>{totalPrize}</Text>
         </View>
 
         <TouchableOpacity 
@@ -112,15 +114,15 @@ export default function TournamentsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.bg }]}>
         <ActivityIndicator size="large" color="#E10600" />
-        <Text style={styles.loadingText}>Đang tải danh sách giải đấu...</Text>
+        <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Đang tải danh sách giải đấu...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
       <FlatList
         data={tournaments}
         renderItem={renderItem}
@@ -130,8 +132,8 @@ export default function TournamentsScreen() {
         refreshing={refreshing}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <MaterialIcons name="sentiment-dissatisfied" size={48} color="#58585B" />
-            <Text style={styles.emptyText}>Hiện chưa có giải đấu nào được công bố.</Text>
+            <MaterialIcons name="sentiment-dissatisfied" size={48} color={theme.textMuted} />
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>Hiện chưa có giải đấu nào được công bố.</Text>
           </View>
         }
       />

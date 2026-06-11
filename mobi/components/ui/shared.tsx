@@ -1,44 +1,83 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Platform, Appearance } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 // ─── Shared Colors ──────────────────────────────────────────────────────────
 export const C = {
-  bg: '#1C1C25',
-  card: '#15151E',
-  cardBorder: '#303037',
+  get bg() {
+    return Appearance.getColorScheme() === 'light' ? '#F7F4F1' : '#1C1C25';
+  },
+  get card() {
+    return Appearance.getColorScheme() === 'light' ? '#FFFFFF' : '#15151E';
+  },
+  get cardBorder() {
+    return Appearance.getColorScheme() === 'light' ? '#EAEAEA' : '#303037';
+  },
   red: '#E10600',
   teal: '#067E6A',
   tealLight: '#34D399',
   yellow: '#F59E0B',
-  white: '#FFFFFF',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#AAAAAA',
-  textMuted: '#58585B',
-  inputBg: '#15151E',
+  get white() {
+    return Appearance.getColorScheme() === 'light' ? '#1C1C25' : '#FFFFFF';
+  },
+  get textPrimary() {
+    return Appearance.getColorScheme() === 'light' ? '#1C1C25' : '#FFFFFF';
+  },
+  get textSecondary() {
+    return Appearance.getColorScheme() === 'light' ? '#58585B' : '#AAAAAA';
+  },
+  get textMuted() {
+    return Appearance.getColorScheme() === 'light' ? '#8A8A8E' : '#58585B';
+  },
+  get inputBg() {
+    return Appearance.getColorScheme() === 'light' ? '#F2F2F7' : '#15151E';
+  },
 };
 
+export function useThemeColors() {
+  const colorScheme = useColorScheme() ?? 'light';
+  const isDark = colorScheme === 'dark';
+  return {
+    bg: isDark ? '#1C1C25' : '#F7F4F1',
+    card: isDark ? '#15151E' : '#FFFFFF',
+    cardBorder: isDark ? '#303037' : '#EAEAEA',
+    red: '#E10600',
+    teal: '#067E6A',
+    tealLight: '#34D399',
+    yellow: '#F59E0B',
+    white: isDark ? '#FFFFFF' : '#1C1C25',
+    textPrimary: isDark ? '#FFFFFF' : '#1C1C25',
+    textSecondary: isDark ? '#AAAAAA' : '#58585B',
+    textMuted: isDark ? '#58585B' : '#8A8A8E',
+    inputBg: isDark ? '#15151E' : '#F2F2F7',
+  };
+}
+
 // ─── Stat Card ──────────────────────────────────────────────────────────────
-export function StatCard({ label, value, icon, color = C.red }: { label: string; value: string; icon: string; color?: string }) {
+export function StatCard({ label, value, icon, color }: { label: string; value: string; icon: string; color?: string }) {
+  const theme = useThemeColors();
+  const activeColor = color || theme.red;
   return (
-    <View style={[styles.statCard, { borderLeftColor: color }]}>
+    <View style={[styles.statCard, { backgroundColor: theme.card, borderColor: theme.cardBorder, borderLeftColor: activeColor }]}>
       <View style={styles.statRow}>
-        <MaterialIcons name={icon as any} size={20} color={color} />
-        <Text style={styles.statLabel}>{label}</Text>
+        <MaterialIcons name={icon as any} size={20} color={activeColor} />
+        <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{label}</Text>
       </View>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={[styles.statValue, { color: activeColor }]}>{value}</Text>
     </View>
   );
 }
 
 // ─── Section Header ─────────────────────────────────────────────────────────
 export function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll?: () => void }) {
+  const theme = useThemeColors();
   return (
     <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={[styles.sectionTitle, { color: theme.white }]}>{title}</Text>
       {onSeeAll && (
         <TouchableOpacity onPress={onSeeAll}>
-          <Text style={styles.seeAllText}>Xem tất cả →</Text>
+          <Text style={[styles.seeAllText, { color: theme.red }]}>Xem tất cả →</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -47,20 +86,22 @@ export function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll?: (
 
 // ─── Empty State ────────────────────────────────────────────────────────────
 export function EmptyState({ icon, title, subtitle }: { icon: string; title: string; subtitle: string }) {
+  const theme = useThemeColors();
   return (
     <View style={styles.emptyState}>
-      <MaterialIcons name={icon as any} size={48} color={C.textMuted} />
-      <Text style={styles.emptyTitle}>{title}</Text>
-      <Text style={styles.emptySubtitle}>{subtitle}</Text>
+      <MaterialIcons name={icon as any} size={48} color={theme.textMuted} />
+      <Text style={[styles.emptyTitle, { color: theme.white }]}>{title}</Text>
+      <Text style={[styles.emptySubtitle, { color: theme.textMuted }]}>{subtitle}</Text>
     </View>
   );
 }
 
 // ─── Loading State ──────────────────────────────────────────────────────────
 export function LoadingState() {
+  const theme = useThemeColors();
   return (
-    <View style={styles.loadingState}>
-      <ActivityIndicator size="large" color={C.red} />
+    <View style={[styles.loadingState, { backgroundColor: theme.bg }]}>
+      <ActivityIndicator size="large" color={theme.red} />
     </View>
   );
 }
@@ -76,16 +117,19 @@ export function StatusBadge({ label, color }: { label: string; color: string }) 
 
 // ─── Card Container ─────────────────────────────────────────────────────────
 export function Card({ children, style }: { children: React.ReactNode; style?: any }) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  const theme = useThemeColors();
+  return <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }, style]}>{children}</View>;
 }
 
 // ─── Primary Button ─────────────────────────────────────────────────────────
-export function PrimaryButton({ title, onPress, loading, disabled, color = C.red }: {
+export function PrimaryButton({ title, onPress, loading, disabled, color }: {
   title: string; onPress: () => void; loading?: boolean; disabled?: boolean; color?: string;
 }) {
+  const theme = useThemeColors();
+  const activeColor = color || theme.red;
   return (
     <TouchableOpacity
-      style={[styles.primaryBtn, { backgroundColor: color }, (disabled || loading) && styles.disabledBtn]}
+      style={[styles.primaryBtn, { backgroundColor: activeColor }, (disabled || loading) && styles.disabledBtn]}
       onPress={onPress}
       disabled={disabled || loading}
     >
@@ -99,12 +143,14 @@ export function PrimaryButton({ title, onPress, loading, disabled, color = C.red
 }
 
 // ─── Outline Button ─────────────────────────────────────────────────────────
-export function OutlineButton({ title, onPress, color = C.textSecondary }: {
+export function OutlineButton({ title, onPress, color }: {
   title: string; onPress: () => void; color?: string;
 }) {
+  const theme = useThemeColors();
+  const activeColor = color || theme.textSecondary;
   return (
-    <TouchableOpacity style={[styles.outlineBtn, { borderColor: color + '60' }]} onPress={onPress}>
-      <Text style={[styles.outlineBtnText, { color }]}>{title}</Text>
+    <TouchableOpacity style={[styles.outlineBtn, { borderColor: activeColor + '60' }]} onPress={onPress}>
+      <Text style={[styles.outlineBtnText, { color: activeColor }]}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -113,21 +159,22 @@ export function OutlineButton({ title, onPress, color = C.textSecondary }: {
 export function ListItemCard({ title, subtitle, rightText, rightColor, onPress, icon }: {
   title: string; subtitle?: string; rightText?: string; rightColor?: string; onPress?: () => void; icon?: string;
 }) {
+  const theme = useThemeColors();
   const content = (
-    <View style={styles.listItem}>
+    <View style={[styles.listItem, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
       {icon && (
-        <View style={styles.listItemIcon}>
-          <MaterialIcons name={icon as any} size={20} color={C.red} />
+        <View style={[styles.listItemIcon, { backgroundColor: theme.red + '15' }]}>
+          <MaterialIcons name={icon as any} size={20} color={theme.red} />
         </View>
       )}
       <View style={{ flex: 1 }}>
-        <Text style={styles.listItemTitle} numberOfLines={1}>{title}</Text>
-        {subtitle && <Text style={styles.listItemSubtitle} numberOfLines={1}>{subtitle}</Text>}
+        <Text style={[styles.listItemTitle, { color: theme.white }]} numberOfLines={1}>{title}</Text>
+        {subtitle && <Text style={[styles.listItemSubtitle, { color: theme.textSecondary }]} numberOfLines={1}>{subtitle}</Text>}
       </View>
       {rightText && (
-        <StatusBadge label={rightText} color={rightColor || C.textMuted} />
+        <StatusBadge label={rightText} color={rightColor || theme.textMuted} />
       )}
-      {onPress && <MaterialIcons name="chevron-right" size={20} color={C.textMuted} />}
+      {onPress && <MaterialIcons name="chevron-right" size={20} color={theme.textMuted} />}
     </View>
   );
   if (onPress) {
@@ -181,27 +228,25 @@ export function statusLabel(status: string): { label: string; color: string } {
 
 const styles = StyleSheet.create({
   statCard: {
-    backgroundColor: C.card,
     borderWidth: 1,
-    borderColor: C.cardBorder,
     borderLeftWidth: 3,
     borderRadius: 12,
     padding: 16,
     marginBottom: 8,
   },
   statRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  statLabel: { color: C.textSecondary, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  statLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   statValue: { fontSize: 24, fontWeight: '900', marginTop: 8 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, marginBottom: 12 },
-  sectionTitle: { color: C.white, fontSize: 14, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.5 },
-  seeAllText: { color: C.red, fontSize: 11, fontWeight: '700' },
+  sectionTitle: { fontSize: 14, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.5 },
+  seeAllText: { fontSize: 11, fontWeight: '700' },
   emptyState: { alignItems: 'center', justifyContent: 'center', paddingVertical: 48, gap: 12 },
-  emptyTitle: { color: C.white, fontSize: 14, fontWeight: '700' },
-  emptySubtitle: { color: C.textMuted, fontSize: 12, textAlign: 'center', maxWidth: 260 },
+  emptyTitle: { fontSize: 14, fontWeight: '700' },
+  emptySubtitle: { fontSize: 12, textAlign: 'center', maxWidth: 260 },
   loadingState: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 200 },
   badge: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   badgeText: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  card: { backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 16, padding: 16, marginBottom: 12 },
+  card: { borderWidth: 1, borderRadius: 16, padding: 16, marginBottom: 12 },
   primaryBtn: { borderRadius: 24, height: 44, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   disabledBtn: { opacity: 0.5 },
   primaryBtnText: { color: '#FFF', fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },

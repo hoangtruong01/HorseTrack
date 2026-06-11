@@ -92,7 +92,7 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
               className={cn(
                 "rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition cursor-pointer outline-none sm:text-xs",
                 filterType === item.id
-                  ? "bg-primary text-foreground shadow-[0_2px_8px_rgba(225,6,0,0.25)]"
+                  ? "bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(225,6,0,0.25)]"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted",
               )}
             >

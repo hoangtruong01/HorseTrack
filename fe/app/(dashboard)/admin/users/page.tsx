@@ -20,19 +20,19 @@ const ROLES = ["admin", "owner", "jockey", "referee", "spectator", "counter_staf
 const STATUSES = ["active", "inactive", "banned", "deleted"];
 
 const statusColors: Record<string, string> = {
-  active: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  inactive: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  banned: "text-red-400 bg-red-400/10 border-red-400/20",
-  deleted: "text-gray-400 bg-gray-400/10 border-gray-400/20",
+  active: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  inactive: "text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
+  banned: "text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20",
+  deleted: "text-gray-600 dark:text-gray-400 bg-gray-500/10 border-gray-500/20",
 };
 
 const roleColors: Record<string, string> = {
-  admin: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  owner: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  jockey: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  referee: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-  spectator: "bg-gray-500/10 text-gray-400 border-gray-500/20",
-  counter_staff: "bg-pink-500/10 text-pink-400 border-pink-500/20",
+  admin: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+  owner: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+  jockey: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
+  referee: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
+  spectator: "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20",
+  counter_staff: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
 };
 
 export default function AdminUsersPage() {
@@ -251,7 +251,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => handleBan(u)}
                           disabled={actionLoading === u.id || u.status === "deleted"}
-                          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed ${u.status === "banned" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20"}`}
+                          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed ${u.status === "banned" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/20"}`}
                         >
                           <Ban className="size-3" />
                           {u.status === "banned" ? "Unban" : "Ban"}

@@ -96,7 +96,7 @@ export default function SettingsPage() {
                 className={cn(
                   "flex-1 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-wide transition-all",
                   theme === "light"
-                    ? "bg-primary text-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80"
                 )}
               >
@@ -107,7 +107,7 @@ export default function SettingsPage() {
                 className={cn(
                   "flex-1 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-wide transition-all",
                   theme === "dark"
-                    ? "bg-primary text-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80"
                 )}
               >
@@ -130,7 +130,7 @@ export default function SettingsPage() {
                 className={cn(
                   "flex-1 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-wide transition-all",
                   i18n.language === "vi"
-                    ? "bg-primary text-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80"
                 )}
               >
@@ -141,7 +141,7 @@ export default function SettingsPage() {
                 className={cn(
                   "flex-1 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-wide transition-all",
                   i18n.language === "en"
-                    ? "bg-primary text-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80"
                 )}
               >
