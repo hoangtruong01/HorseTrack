@@ -35,11 +35,11 @@ export function RaceRegistrationForm({
   const [errorMsg, setErrorMsg] = useState("");
 
   const eligibleHorses = horses.filter(
-    (h) => h.healthStatus === "HEALTHY"
+    (h) => h.healthStatus === "HEALTHY" && h.approvalStatus === "APPROVED"
   );
   
   const ineligibleHorses = horses.filter(
-    (h) => h.healthStatus !== "HEALTHY"
+    (h) => h.healthStatus !== "HEALTHY" || h.approvalStatus !== "APPROVED"
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,10 +137,15 @@ export function RaceRegistrationForm({
 
               {/* Ineligible Horses group */}
               {ineligibleHorses.length > 0 && (
-                <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHẤN THƯƠNG/GIẢI NGHỆ)" className="bg-[#15151E] text-red-500 font-bold" disabled>
+                <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHƯA DUYỆT/CHẤN THƯƠNG/GIẢI NGHỆ)" className="bg-[#15151E] text-red-500 font-bold" disabled>
                   {ineligibleHorses.map((h) => (
                     <option key={h.id} value={h.id} disabled className="text-muted-foreground/60">
-                      {h.name} - {h.healthStatus === "INJURED" ? "Chấn thương" : h.healthStatus === "RECOVERING" ? "Đang hồi phục" : "Giải nghệ"}
+                      {h.name} - {
+                        h.approvalStatus === "PENDING" ? "Đang chờ duyệt" :
+                        h.approvalStatus === "REJECTED" ? "Bị từ chối duyệt" :
+                        h.healthStatus === "INJURED" ? "Chấn thương" :
+                        h.healthStatus === "RECOVERING" ? "Đang hồi phục" : "Giải nghệ"
+                      }
                     </option>
                   ))}
                 </optgroup>

@@ -15,6 +15,7 @@ import {
   HorseDocument,
   HorseHealthStatus,
   HorseStatus,
+  HorseApprovalStatus,
 } from '../horses/schemas/horse.schema';
 import { TournamentStatus } from '../tournaments/schemas/tournament.schema';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
@@ -69,12 +70,15 @@ export class RegistrationsService {
       throw new ForbiddenException('You can only register your own horses');
     }
 
-    // 4. Horse must be HEALTHY and ACTIVE
+    // 4. Horse must be HEALTHY, ACTIVE and APPROVED
     if (horse.healthStatus !== HorseHealthStatus.HEALTHY) {
       throw new BadRequestException('Horse must be HEALTHY to register');
     }
     if (horse.status !== HorseStatus.ACTIVE) {
       throw new BadRequestException('Horse must be ACTIVE to register');
+    }
+    if (horse.approvalStatus !== HorseApprovalStatus.APPROVED) {
+      throw new BadRequestException('Horse must be APPROVED by admin to register');
     }
 
     // 5. No duplicate registration for the same race

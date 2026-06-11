@@ -51,7 +51,7 @@ export class PrizesService {
 
     if (totalPrize > 0) {
       const winnerResult = await this.resultModel.findOne({
-        raceId,
+        raceId: new Types.ObjectId(raceId),
         status: RaceResultStatus.PUBLISHED,
         rank: 1,
       });
@@ -62,7 +62,7 @@ export class PrizesService {
           // Read jockeySharePercent from registration (fallback to 30% if not set)
           let jockeySharePct = 30;
           const registration = await this.registrationModel.findOne({
-            raceId,
+            raceId: new Types.ObjectId(raceId),
             horseId: winnerResult.horseId,
           });
           if (registration?.jockeySharePercent) {
@@ -76,7 +76,7 @@ export class PrizesService {
           // 1. Process Horse Owner Prize
           if (ownerAmount > 0 && horse.ownerId) {
             const existingOwnerPrize = await this.prizeModel.findOne({
-              raceId,
+              raceId: new Types.ObjectId(raceId),
               horseId: winnerResult.horseId,
               ownerId: horse.ownerId,
             });
@@ -108,7 +108,7 @@ export class PrizesService {
           // 2. Process Jockey Prize
           if (jockeyAmount > 0 && winnerResult.jockeyUserId) {
             const existingJockeyPrize = await this.prizeModel.findOne({
-              raceId,
+              raceId: new Types.ObjectId(raceId),
               horseId: winnerResult.horseId,
               ownerId: winnerResult.jockeyUserId,
             });
@@ -148,6 +148,7 @@ export class PrizesService {
 
     for (const ass of refereeAssignments) {
       if (ass.salary > 0 && ass.refereeUserId) {
+        // Prevent duplicate referee salary payments
         const alreadyPaid = await this.ledgerService.exists(
           String(ass.refereeUserId),
           LedgerSourceType.REFEREE_SALARY,
