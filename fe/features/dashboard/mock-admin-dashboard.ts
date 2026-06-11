@@ -118,15 +118,6 @@ export const quickActions: QuickAction[] = [
     key: "createTournament",
   },
   {
-    title: "Create Race",
-    description: "Schedule an independent race with track, time, referee.",
-    href: "/admin/races/new",
-    label: "Add race",
-    icon: Flag,
-    tone: "primary",
-    key: "createRace",
-  },
-  {
     title: "Review Registrations",
     description: "Approve or reject horse entries for each race.",
     href: "/admin/registrations",

@@ -26,17 +26,9 @@ export function AdminOverview() {
         title={t("admin.overview.title")}
         description={t("admin.overview.subtitle")}
         actions={
-          <>
-            <Button asChild className="rounded-full">
-              <Link href="/admin/races/new">
-                {t("admin.actions.createRace")}
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="rounded-full">
-              <Link href="/admin/registrations">{t("admin.actions.reviewQueue")}</Link>
-            </Button>
-          </>
+          <Button asChild variant="outline" className="rounded-full">
+            <Link href="/admin/registrations">{t("admin.actions.reviewQueue")}</Link>
+          </Button>
         }
       />
 
