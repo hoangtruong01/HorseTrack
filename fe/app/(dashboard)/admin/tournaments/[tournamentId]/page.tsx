@@ -211,19 +211,6 @@ export default function AdminTournamentDetailPage() {
           eyebrow="Chi tiết giải đấu"
           title={tournament.name}
           description="Quản lý chi tiết hồ sơ giải đấu chính và lập lịch các vòng đua nhỏ tương ứng."
-          actions={
-            <Button
-              asChild
-              className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-foreground font-bold uppercase tracking-wider text-xs px-5 h-10"
-            >
-              <Link
-                href={`/admin/races/new?tournamentId=${tournamentId}`}
-                className="flex items-center gap-1.5"
-              >
-                <Plus className="size-4" /> Thêm Vòng Đua Mới
-              </Link>
-            </Button>
-          }
         />
       </div>
 
@@ -401,21 +388,9 @@ export default function AdminTournamentDetailPage() {
             <h4 className="text-base font-bold text-foreground uppercase tracking-wider mb-1">
               Chưa có vòng đua nào
             </h4>
-            <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
-              Giải đấu chính hiện chưa được phân bổ vòng đua nhỏ nào. Vui lòng
-              bấm vào nút thêm mới để lập lịch.
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              Giải đấu chính hiện chưa có vòng đua nhỏ nào.
             </p>
-            <Button
-              asChild
-              className="rounded-full bg-white/5 border border-border text-foreground text-xs hover:bg-[#E10600] transition"
-            >
-              <Link
-                href={`/admin/races/new?tournamentId=${tournamentId}`}
-                className="flex items-center"
-              >
-                <Plus className="size-3.5 mr-1" /> Thêm vòng đua
-              </Link>
-            </Button>
           </div>
         ) : (
           <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl">

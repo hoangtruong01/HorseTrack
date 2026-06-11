@@ -97,13 +97,6 @@ export default function AdminRacesPage() {
         eyebrow="Quản lý trận đua"
         title="Bảng Điều Khiển Trận Đua"
         description="Xem danh sách toàn bộ trận đua đã tạo trong hệ thống, thay đổi trạng thái và quản lý trực tiếp."
-        actions={
-          <Button asChild className="rounded-full bg-[#E10600] hover:bg-primary text-foreground font-bold uppercase tracking-wider text-xs px-5">
-            <Link href="/admin/races/new">
-              <Plus className="size-4 mr-1" /> Tạo trận đua
-            </Link>
-          </Button>
-        }
       />
 
       {/* Toolbar: Search + Status Filters */}
