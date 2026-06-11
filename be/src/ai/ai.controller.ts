@@ -92,7 +92,9 @@ export class AiController {
   @Get('my-subscription')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Lấy thông tin subscription đang hoạt động của user' })
+  @ApiOperation({
+    summary: 'Lấy thông tin subscription đang hoạt động của user',
+  })
   getMySubscription(@CurrentUser() user: JwtUser) {
     return this.aiService.getMySubscription(user.id);
   }

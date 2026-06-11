@@ -114,4 +114,3 @@ export class JockeysController {
     return this.jockeysService.changeStatus(id, status);
   }
 }
-
