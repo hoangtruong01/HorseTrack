@@ -352,7 +352,7 @@ export default function OwnerResultsPage() {
             <div className="rounded-2xl border border-border bg-[#13131A] overflow-hidden shadow-2xl">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-border bg-muted02] text-muted-foreground font-black uppercase tracking-wider">
+                  <tr className="border-b border-border bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
                     <th className="p-4 w-16 text-center">Hạng</th>
                     <th className="p-4">Chiến Mã</th>
                     <th className="p-4">Giống Ngựa</th>
@@ -372,7 +372,7 @@ export default function OwnerResultsPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {selectedRaceGroup.results.map((res) => (
-                    <tr key={res.id} className="hover:bg-muted01] transition duration-200">
+                    <tr key={res.id} className="hover:bg-muted/30 transition duration-200">
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${

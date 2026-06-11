@@ -243,8 +243,8 @@ export default function AdminResultDetailPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {results.map((res) => (
-                  <tr key={res._id} className="hover:bg-white/5 transition">
+                {results.map((res, index) => (
+                  <tr key={res.id || res._id || index} className="hover:bg-white/5 transition">
                     <td className="p-4 text-center">
                       <span
                         className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
