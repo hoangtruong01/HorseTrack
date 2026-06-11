@@ -2375,6 +2375,10 @@
       "registerSuccess": "Registration successful! Redirecting...",
       "registerFailed": "Registration failed."
     },
+    "loginSuccess": "Signed in successfully!",
+    "loginError": "Login failed. Please check your credentials.",
+    "googleError": "Google authentication failed.",
+    "logoutSuccess": "Logged out successfully!",
     "roleDescriptions": {
       "admin": {
         "eyebrow": "Control tower",

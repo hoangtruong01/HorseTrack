@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Loader2,
@@ -20,7 +21,13 @@ import {
 
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { sileo } from "sileo";
+
+const toast = {
+  success: (msg: string) => sileo.success({ title: msg, duration: 1200 }),
+  error: (msg: string) => sileo.error({ title: msg, duration: 1200 }),
+};
 
 const fieldClass =
   "h-11 w-full rounded-xl border border-border bg-input pl-10 pr-10 text-sm text-foreground placeholder:text-foreground/30 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-60";
@@ -29,6 +36,8 @@ const labelClass =
 
 export function LoginForm() {
   const { login, loginWithGoogle } = useAuth();
+  const router = useRouter();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState("owner@horsetrack.local");
   const [password, setPassword] = useState("password123");
@@ -46,10 +55,10 @@ export function LoginForm() {
       if (firstRole === "counter_staff") {
         firstRole = "counter-staff";
       }
-      toast.success(`Đăng nhập thành công! Chào mừng ${user.fullName} trở lại.`);
-      window.location.href = `/${firstRole}`;
+      toast.success(t("auth.loginSuccess"));
+      router.push(`/${firstRole}`);
     } catch (err) {
-      const errMsg = (err as Error).message || "Xác thực tài khoản Google thất bại.";
+      const errMsg = (err as Error).message || t("auth.googleError");
       setErrorMsg(errMsg);
       toast.error(errMsg);
       setIsSubmitting(false);
@@ -90,7 +99,7 @@ export function LoginForm() {
         document.body.removeChild(script);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -109,10 +118,10 @@ export function LoginForm() {
         targetRole = "counter-staff";
       }
 
-      toast.success(`Đăng nhập thành công! Chào mừng ${user.fullName} trở lại.`);
-      window.location.href = `/${targetRole}`;
+      toast.success(t("auth.loginSuccess"));
+      router.push(`/${targetRole}`);
     } catch (err) {
-      const errMsg = (err as Error).message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+      const errMsg = (err as Error).message || t("auth.loginError");
       setErrorMsg(errMsg);
       toast.error(errMsg);
       setIsSubmitting(false);
