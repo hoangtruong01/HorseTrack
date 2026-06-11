@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +17,11 @@ export function MobileBottomNav({
   className,
 }: MobileBottomNavProps) {
   const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <nav
@@ -42,7 +48,13 @@ export function MobileBottomNav({
               {Icon ? (
                 <Icon className="mb-1 size-4 text-primary" aria-hidden="true" />
               ) : null}
-              <span>{item.itemKey ? t(`navigation.${item.itemKey}.title`) : item.title}</span>
+              <span>
+                {!mounted
+                  ? item.title
+                  : item.itemKey
+                  ? t(`navigation.${item.itemKey}.title`)
+                  : item.title}
+              </span>
             </Link>
           );
         })}

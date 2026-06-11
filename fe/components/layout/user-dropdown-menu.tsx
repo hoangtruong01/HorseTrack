@@ -22,6 +22,11 @@ export function UserDropdownMenu({
   const { logout } = useAuth();
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -61,7 +66,7 @@ export function UserDropdownMenu({
             {userName}
           </span>
           <span className="text-[10px] font-bold uppercase tracking-wider text-primary/80">
-            {t(`roles.${userRole}`, userRole)}
+            {!mounted ? userRole : t(`roles.${userRole}`, userRole)}
           </span>
         </div>
         <div

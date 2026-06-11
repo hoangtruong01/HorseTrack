@@ -28,6 +28,11 @@ export function AppSidebar({
   const pathname = usePathname();
   const [currentHref, setCurrentHref] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -111,11 +116,19 @@ export function AppSidebar({
                         )}
                       >
                         <span className="block font-bold uppercase tracking-[0.08em]">
-                          {item.itemKey ? t(`navigation.${item.itemKey}.title`) : item.title}
+                          {!mounted
+                            ? item.title
+                            : item.itemKey
+                            ? t(`navigation.${item.itemKey}.title`)
+                            : item.title}
                         </span>
                         {item.description ? (
                           <span className="mt-1 block text-xs leading-4 text-muted-foreground truncate">
-                            {item.itemKey ? t(`navigation.${item.itemKey}.description`) : item.description}
+                            {!mounted
+                              ? item.description
+                              : item.itemKey
+                              ? t(`navigation.${item.itemKey}.description`)
+                              : item.description}
                           </span>
                         ) : null}
                       </span>
@@ -130,11 +143,19 @@ export function AppSidebar({
                         className="z-50 rounded-md bg-card/95 backdrop-blur-sm border border-border px-3 py-1.5 text-foreground shadow-xl select-none max-w-xs flex flex-col gap-0.5"
                       >
                         <span className="text-xs font-bold uppercase tracking-wider">
-                          {item.itemKey ? t(`navigation.${item.itemKey}.title`) : item.title}
+                          {!mounted
+                            ? item.title
+                            : item.itemKey
+                            ? t(`navigation.${item.itemKey}.title`)
+                            : item.title}
                         </span>
                         {item.description && (
                           <span className="text-[10px] text-muted-foreground normal-case font-normal leading-snug">
-                            {item.itemKey ? t(`navigation.${item.itemKey}.description`) : item.description}
+                            {!mounted
+                              ? item.description
+                              : item.itemKey
+                              ? t(`navigation.${item.itemKey}.description`)
+                              : item.description}
                           </span>
                         )}
                       </Tooltip.Content>
