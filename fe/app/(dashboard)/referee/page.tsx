@@ -11,6 +11,8 @@ import {
   User,
   Clock,
   ShieldAlert,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -40,6 +42,9 @@ export default function RefereeDashboardPage() {
   const [experienceYears, setExperienceYears] = useState(1);
   const [bio, setBio] = useState("");
   const [certificates, setCertificates] = useState("");
+  const [licenseImage, setLicenseImage] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -56,6 +61,8 @@ export default function RefereeDashboardPage() {
         setExperienceYears(profileData.experienceYears || 1);
         setBio(profileData.bio || "");
         setCertificates(profileData.certificates || "");
+        setLicenseImage(profileData.licenseImage || "");
+        setImagePreview(profileData.licenseImage || "");
       } catch (err) {
         if ((err as Error).message?.toLowerCase().includes("not found")) {
           setProfile(null);
@@ -78,6 +85,46 @@ export default function RefereeDashboardPage() {
     fetchData();
   }, []);
 
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Kích thước ảnh không được vượt quá 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || "Tải lên ảnh thất bại.");
+      }
+
+      setLicenseImage(resData.url);
+      toast.success("Tải ảnh giấy phép thành công!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Lỗi khi tải ảnh lên.");
+      setImagePreview("");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleCreateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!licenseNumber.trim()) {
@@ -96,6 +143,7 @@ export default function RefereeDashboardPage() {
         experienceYears: Number(experienceYears),
         bio,
         certificates,
+        licenseImage,
       };
       if (profile) {
         await refereeProfilesApi.updateProfile(profile._id, dto);
@@ -231,10 +279,45 @@ export default function RefereeDashboardPage() {
                   className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
                 />
               </div>
+
+              {/* Image Upload Component */}
+              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">Ảnh chụp bằng cấp / Giấy phép (Tùy chọn)</label>
+                <div className="relative border border-dashed border-border hover:border-primary/50 bg-muted/30 rounded-xl min-h-[120px] flex flex-col items-center justify-center p-4 transition group cursor-pointer">
+                  {imagePreview ? (
+                    <div className="relative w-full max-w-xs h-[100px] rounded-lg overflow-hidden">
+                      <img src={imagePreview} alt="License Preview" className="size-full object-cover" />
+                      <div className="absolute inset-0 bg-black/45 opacity-0 hover:opacity-100 flex items-center justify-center transition">
+                        <span className="text-white text-[10px] font-black uppercase bg-primary px-2.5 py-1 rounded"> Thay đổi </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center space-y-1.5">
+                      {uploading ? (
+                        <Loader2 className="size-6 text-primary mx-auto animate-spin" />
+                      ) : (
+                        <Upload className="size-6 text-muted-foreground group-hover:text-primary transition" />
+                      )}
+                      <p className="text-xs font-bold text-foreground">
+                        {uploading ? "Đang tải lên..." : "Tải ảnh giấy phép"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground"> Hỗ trợ PNG, JPG, WEBP tối đa 5MB </p>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    disabled={uploading}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+
               <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
                 <Button
                   type="submit"
-                  disabled={isSubmittingProfile}
+                  disabled={isSubmittingProfile || uploading}
                   className="rounded-full bg-primary hover:bg-primary-dark font-black uppercase text-xs h-10 px-6 text-white"
                 >
                   {isSubmittingProfile ? "Đang xử lý..." : profile?.approvalStatus === "REJECTED" ? "Gửi lại hồ sơ kiểm duyệt" : "Khởi tạo hồ sơ ngay"}
@@ -278,6 +361,14 @@ export default function RefereeDashboardPage() {
                   <div className="sm:col-span-2">
                     <span className="text-muted-foreground block mb-1">Tiểu sử (Bio):</span>
                     <p className="text-muted-foreground italic">&quot;{profile.bio}&quot;</p>
+                  </div>
+                )}
+                {profile.licenseImage && (
+                  <div className="sm:col-span-2">
+                    <span className="text-muted-foreground block mb-1 font-bold text-foreground">Ảnh chụp bằng cấp / Giấy phép:</span>
+                    <div className="mt-1 relative max-w-md h-48 rounded-lg overflow-hidden border border-border bg-muted/30">
+                      <img src={profile.licenseImage} alt="License document" className="size-full object-contain" />
+                    </div>
                   </div>
                 )}
               </div>

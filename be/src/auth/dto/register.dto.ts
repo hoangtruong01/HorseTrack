@@ -13,7 +13,12 @@ import { RoleName } from '../../users/schemas/user.schema';
 import { IsIn } from 'class-validator';
 
 /** Only these roles may be chosen during self-registration */
-const SELF_REGISTER_ROLES = [RoleName.SPECTATOR, RoleName.OWNER] as const;
+const SELF_REGISTER_ROLES = [
+  RoleName.SPECTATOR,
+  RoleName.OWNER,
+  RoleName.JOCKEY,
+  RoleName.REFEREE,
+] as const;
 
 export class RegisterDto {
   @ApiProperty()

@@ -20,7 +20,7 @@ import { JockeysService } from './jockeys.service';
 import { CreateJockeyProfileDto } from './dto/create-jockey.dto';
 import { UpdateJockeyProfileDto } from './dto/update-jockey.dto';
 import { ListJockeysDto } from './dto/list-jockeys.dto';
-import { JockeyStatus } from './schemas/jockey.schema';
+import { JockeyStatus, JockeyApprovalStatus } from './schemas/jockey.schema';
 
 @ApiTags('Jockeys')
 @Controller('jockeys')
@@ -55,6 +55,7 @@ export class JockeysController {
       query.page,
       query.limit,
       query.status,
+      query.approvalStatus,
     );
   }
 
@@ -87,6 +88,23 @@ export class JockeysController {
     return this.jockeysService.update(id, dto, user.id, isAdmin);
   }
 
+  @Patch(':id/approval')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Approve or Reject jockey profile (Admin)' })
+  changeApproval(
+    @Param('id') id: string,
+    @Body('approvalStatus') approvalStatus: JockeyApprovalStatus,
+    @Body('rejectionReason') rejectionReason?: string,
+  ) {
+    return this.jockeysService.changeApproval(
+      id,
+      approvalStatus,
+      rejectionReason,
+    );
+  }
+
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
@@ -96,3 +114,4 @@ export class JockeysController {
     return this.jockeysService.changeStatus(id, status);
   }
 }
+

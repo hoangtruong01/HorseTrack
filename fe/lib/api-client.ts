@@ -191,18 +191,23 @@ export interface JockeyItem {
   skillLevel?: string;
   bio?: string;
   specialty?: string;
+  certificates?: string;
+  licenseImage?: string;
   status: string;
+  approvalStatus?: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason?: string;
   totalRaces?: number;
   wins?: number;
   createdAt?: string;
 }
 
 export const jockeysApi = {
-  listAdmin: (params?: { page?: number; limit?: number; status?: string }) => {
+  listAdmin: (params?: { page?: number; limit?: number; status?: string; approvalStatus?: string }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
     if (params?.status) qs.set("status", params.status);
+    if (params?.approvalStatus) qs.set("approvalStatus", params.approvalStatus);
     return apiFetch<PaginatedResult<JockeyItem>>(`/jockeys/admin/all?${qs}`);
   },
   getMe: () => apiFetch<JockeyItem>("/jockeys/me"),
@@ -212,6 +217,9 @@ export const jockeysApi = {
     experienceYears?: number;
     skillLevel?: string;
     bio?: string;
+    licenseNumber?: string;
+    certificates?: string;
+    licenseImage?: string;
   }) => apiFetch<JockeyItem>("/jockeys/profile", { method: "POST", body: JSON.stringify(dto) }),
   updateProfile: (id: string, dto: {
     heightCm?: number;
@@ -219,9 +227,17 @@ export const jockeysApi = {
     experienceYears?: number;
     skillLevel?: string;
     bio?: string;
+    licenseNumber?: string;
+    certificates?: string;
+    licenseImage?: string;
   }) => apiFetch<JockeyItem>(`/jockeys/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
   changeStatus: (id: string, status: string) =>
     apiFetch(`/jockeys/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  changeApproval: (id: string, approvalStatus: "APPROVED" | "REJECTED", rejectionReason?: string) =>
+    apiFetch(`/jockeys/${id}/approval`, {
+      method: "PATCH",
+      body: JSON.stringify({ approvalStatus, rejectionReason }),
+    }),
 };
 
 // ─── Tournaments ─────────────────────────────────────────────────────────────
@@ -319,6 +335,7 @@ export interface RefereeProfileItem {
   rejectionReason?: string;
   certificates?: string;
   bio?: string;
+  licenseImage?: string;
   createdAt?: string;
 }
 
@@ -336,12 +353,14 @@ export const refereeProfilesApi = {
     experienceYears?: number;
     certificates?: string;
     bio?: string;
+    licenseImage?: string;
   }) => apiFetch<RefereeProfileItem>("/referee-profiles", { method: "POST", body: JSON.stringify(dto) }),
   updateProfile: (id: string, dto: {
     licenseNo?: string;
     experienceYears?: number;
     certificates?: string;
     bio?: string;
+    licenseImage?: string;
   }) => apiFetch<RefereeProfileItem>(`/referee-profiles/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
   changeApproval: (id: string, approvalStatus: "APPROVED" | "REJECTED", rejectionReason?: string) =>
     apiFetch(`/referee-profiles/${id}/approval`, {
