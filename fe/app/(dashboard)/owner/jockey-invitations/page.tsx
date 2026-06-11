@@ -233,7 +233,7 @@ export default function JockeyInvitationsPage() {
           { key: "history" as const, label: "Lịch Sử Lời Mời", icon: Send },
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all ${tab === t.key ? "bg-[#E10600] text-foreground shadow-lg shadow-red-500/20" : "bg-muted text-muted-foreground hover:bg-white/10 border border-border"}`}>
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all ${tab === t.key ? "bg-[#E10600] text-foreground shadow-lg shadow-red-500/20" : "bg-muted text-muted-foreground hover:bg-foreground/5 border border-border"}`}>
             <t.icon className="size-4" />{t.label}
           </button>
         ))}
@@ -253,7 +253,7 @@ export default function JockeyInvitationsPage() {
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm kiếm tên, sở trường, tính tình..."
-                  className="w-full h-10 rounded-xl border border-border bg-black/40 pl-10 pr-4 text-xs text-foreground outline-none focus:border-[#E10600] transition placeholder:text-foreground/25" />
+                  className="w-full h-10 rounded-xl border border-border bg-muted/40 pl-10 pr-4 text-xs text-foreground outline-none focus:border-[#E10600] transition placeholder:text-foreground/25" />
               </div>
               <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">{availableJockeys.length} Jockey đang sẵn sàng</p>
 
@@ -265,7 +265,7 @@ export default function JockeyInvitationsPage() {
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {availableJockeys.map(j => (
-                    <div key={j.id} className="group relative rounded-2xl border border-border bg-card p-5 hover:border-[#E10600]/30 hover:bg-[#1C1C25] transition shadow-xl flex flex-col justify-between">
+                    <div key={j.id} className="group relative rounded-2xl border border-border bg-card p-5 hover:border-[#E10600]/30 hover:bg-muted/50 dark:hover:bg-[#1C1C25] transition shadow-xl flex flex-col justify-between">
                       {/* Header */}
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ export default function JockeyInvitationsPage() {
                             { label: "Tổng trận", value: j.totalRaces.toString(), icon: Flag },
                             { label: "Chiến thắng", value: j.wins.toString(), icon: Award },
                           ].map((s, i) => (
-                            <div key={i} className="p-2 rounded-lg bg-black/30 border border-border">
+                            <div key={i} className="p-2 rounded-lg bg-muted/50 dark:bg-black/30 border border-border">
                               <s.icon className="size-3 text-[#E10600] mx-auto mb-1" />
                               <p className="text-xs font-black text-foreground">{s.value}</p>
                               <p className="text-[8px] text-foreground/35 uppercase tracking-wider">{s.label}</p>
@@ -336,7 +336,7 @@ export default function JockeyInvitationsPage() {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs sm:text-sm border-collapse">
-                    <thead className="bg-muted03] text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b border-border">
+                    <thead className="bg-muted/30 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground border-b border-border">
                       <tr>
                         <th className="px-4 py-3">Jockey</th>
                         <th className="px-4 py-3">Chiến mã & Giải đấu</th>
@@ -349,7 +349,7 @@ export default function JockeyInvitationsPage() {
                       {invitations.map(inv => {
                         const st = statusTone(inv.status);
                         return (
-                          <tr key={inv.id} className="transition hover:bg-muted015]">
+                          <tr key={inv.id} className="transition hover:bg-muted/15">
                             <td className="px-4 py-4">
                               <p className="font-black text-foreground">{inv.jockeyName}</p>
                               <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5">{inv.jockeyEmail}</p>
@@ -393,7 +393,7 @@ export default function JockeyInvitationsPage() {
       {showModal && selectedJockey && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5 animate-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 size-8 rounded-full bg-black/40 hover:bg-black/80 flex items-center justify-center text-foreground/70 hover:text-foreground transition">
+            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 size-8 rounded-full bg-muted/50 hover:bg-muted flex items-center justify-center text-foreground/70 hover:text-foreground transition">
               <X className="size-4" />
             </button>
             <div>
@@ -403,7 +403,7 @@ export default function JockeyInvitationsPage() {
             </div>
 
             {/* Jockey summary */}
-            <div className="p-3 rounded-xl bg-black/30 border border-border flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-muted/50 dark:bg-black/30 border border-border flex items-center gap-3">
               <div className="size-10 rounded-full border border-[#E10600]/40 bg-[#E10600]/10 flex items-center justify-center shrink-0">
                 {selectedJockey.avatar ? <Image src={selectedJockey.avatar} className="size-full object-cover rounded-full" alt="" width={40} height={40} /> : <User className="size-4 text-[#E10600]" />}
               </div>
@@ -418,7 +418,7 @@ export default function JockeyInvitationsPage() {
               <div className="space-y-1.5">
                 <label className="block text-xs font-black uppercase tracking-wider text-muted-foreground">Chọn Ngựa & Trận đấu</label>
                 <select value={selectedReg} onChange={e => setSelectedReg(e.target.value)} required
-                  className="h-11 w-full rounded-xl border border-border bg-black/40 px-3 text-xs text-foreground outline-none focus:border-primary transition">
+                  className="h-11 w-full rounded-xl border border-border bg-muted/40 px-3 text-xs text-foreground outline-none focus:border-primary transition">
                   <option value="" disabled className="bg-card">-- Chọn slot ghi danh --</option>
                   {registrations.map(r => (
                     <option key={r.id} value={r.id} className="bg-card">
@@ -452,7 +452,7 @@ export default function JockeyInvitationsPage() {
               <div className="space-y-1.5">
                 <label className="block text-xs font-black uppercase tracking-wider text-muted-foreground">Lời nhắn (Tùy chọn)</label>
                 <textarea value={invMessage} onChange={e => setInvMessage(e.target.value)} rows={3}
-                  className="w-full rounded-xl border border-border bg-black/40 p-3 text-xs text-foreground outline-none focus:border-primary transition placeholder:text-muted-foreground/40"
+                  className="w-full rounded-xl border border-border bg-muted/40 p-3 text-xs text-foreground outline-none focus:border-primary transition placeholder:text-muted-foreground/40"
                   placeholder="Ví dụ: Rất mong bạn đồng hành cùng chiến mã của tôi!" />
               </div>
 
@@ -473,7 +473,7 @@ export default function JockeyInvitationsPage() {
       {selectedJockeyForDetail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6 animate-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setSelectedJockeyForDetail(null)} className="absolute top-4 right-4 size-8 rounded-full bg-black/40 hover:bg-black/80 flex items-center justify-center text-foreground/70 hover:text-foreground transition">
+            <button onClick={() => setSelectedJockeyForDetail(null)} className="absolute top-4 right-4 size-8 rounded-full bg-muted/50 hover:bg-muted flex items-center justify-center text-foreground/70 hover:text-foreground transition">
               <X className="size-4" />
             </button>
 
@@ -483,7 +483,7 @@ export default function JockeyInvitationsPage() {
             </div>
 
             {/* Profile header */}
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-black/30 border border-border">
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 dark:bg-black/30 border border-border">
               <div className="size-16 rounded-full border-2 border-[#E10600]/40 bg-[#E10600]/10 flex items-center justify-center overflow-hidden shrink-0">
                 {selectedJockeyForDetail.avatar ? <Image src={selectedJockeyForDetail.avatar} className="size-full object-cover rounded-full" alt="" width={64} height={64} /> : <User className="size-8 text-[#E10600]" />}
               </div>
@@ -508,17 +508,17 @@ export default function JockeyInvitationsPage() {
             <div className="space-y-3">
               <label className="block text-xs font-black uppercase tracking-wider text-muted-foreground/60">Thống kê sự nghiệp</label>
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-3 rounded-xl bg-black/30 border border-border">
+                <div className="p-3 rounded-xl bg-muted/50 dark:bg-black/30 border border-border">
                   <Star className="size-4 text-[#E10600] mx-auto mb-1" />
                   <p className="text-sm font-black text-foreground">{selectedJockeyForDetail.experienceYears} năm</p>
                   <p className="text-[9px] text-foreground/35 uppercase tracking-wider mt-0.5">Kinh nghiệm</p>
                 </div>
-                <div className="p-3 rounded-xl bg-black/30 border border-border">
+                <div className="p-3 rounded-xl bg-muted/50 dark:bg-black/30 border border-border">
                   <Flag className="size-4 text-[#E10600] mx-auto mb-1" />
                   <p className="text-sm font-black text-foreground">{selectedJockeyForDetail.totalRaces}</p>
                   <p className="text-[9px] text-foreground/35 uppercase tracking-wider mt-0.5">Tổng trận</p>
                 </div>
-                <div className="p-3 rounded-xl bg-black/30 border border-border">
+                <div className="p-3 rounded-xl bg-muted/50 dark:bg-black/30 border border-border">
                   <Award className="size-4 text-[#E10600] mx-auto mb-1" />
                   <p className="text-sm font-black text-foreground">{selectedJockeyForDetail.wins}</p>
                   <p className="text-[9px] text-foreground/35 uppercase tracking-wider mt-0.5">Chiến thắng</p>
@@ -527,7 +527,7 @@ export default function JockeyInvitationsPage() {
             </div>
 
             {/* Parameters Grid */}
-            <div className="grid grid-cols-2 gap-3 p-4 rounded-xl border border-border bg-black/25 text-xs">
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-xl border border-border bg-muted/40 dark:bg-black/25 text-xs">
               <div className="space-y-2">
                 <div className="flex justify-between border-b border-border pb-1.5"><span className="text-muted-foreground/60">Chiều cao:</span><span className="font-bold text-foreground">{selectedJockeyForDetail.heightCm} cm</span></div>
                 <div className="flex justify-between border-b border-border pb-1.5"><span className="text-muted-foreground/60">Cân nặng:</span><span className="font-bold text-foreground">{selectedJockeyForDetail.weightKg} kg</span></div>
