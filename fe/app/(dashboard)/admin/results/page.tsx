@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Flag, Calendar, Award, User, ArrowLeft, Siren, Timer, Search, ChevronRight, Trophy } from "lucide-react";
+import { Calendar, ArrowLeft, Search, ChevronRight, Trophy } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -58,7 +58,6 @@ interface RaceGroup {
 export default function AdminResultsPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
-  const [results, setResults] = useState<RaceResultItem[]>([]);
   const [raceGroups, setRaceGroups] = useState<RaceGroup[]>([]);
   const [isLoadingTournaments, setIsLoadingTournaments] = useState(true);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
@@ -91,7 +90,6 @@ export default function AdminResultsPage() {
   // Load results when tournament is selected
   useEffect(() => {
     if (!selectedTournament) {
-      setResults([]);
       setRaceGroups([]);
       return;
     }
@@ -106,7 +104,6 @@ export default function AdminResultsPage() {
         const resData = await res.json();
         if (res.ok && resData.success) {
           const rawResults: RaceResultItem[] = resData.data || [];
-          setResults(rawResults);
 
           // Group by raceId
           const groups: Record<string, RaceGroup> = {};

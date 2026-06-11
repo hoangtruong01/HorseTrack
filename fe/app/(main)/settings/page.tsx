@@ -12,8 +12,6 @@ export default function SettingsPage() {
 
   // Đợi component mount để tránh hydration mismatch
   useEffect(() => {
-    // This is intentional for preventing hydration mismatch with next-themes
-    // eslint-disable-next-line
     setMounted(true);
   }, []);
 

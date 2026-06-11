@@ -58,7 +58,7 @@ export async function POST() {
       success: true,
       accessToken: payloadData.accessToken,
     });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json(
       { message: "Connection to server failed during token refresh." },
       { status: 500 }

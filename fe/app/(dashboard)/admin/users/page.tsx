@@ -1,8 +1,19 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Users, Shield, Ban, Trash2, Search, ChevronLeft, ChevronRight, UserCog, X } from "lucide-react";
+import { Users, Ban, Trash2, Search, ChevronLeft, ChevronRight, UserCog, X } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { usersApi, type UserItem } from "@/lib/api-client";
 
 const ROLES = ["admin", "owner", "jockey", "referee", "spectator", "counter_staff"];
@@ -32,14 +43,9 @@ export default function AdminUsersPage() {
   const [filterRole, setFilterRole] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UserItem | null>(null);
   const [selectedUserForRoles, setSelectedUserForRoles] = useState<UserItem | null>(null);
   const [rolesActionLoading, setRolesActionLoading] = useState<string | null>(null);
-
-  const showToast = (msg: string, type: "ok" | "err" = "ok") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const fetchUsers = useCallback(async (page = 1) => {
     setLoading(true);
@@ -53,8 +59,8 @@ export default function AdminUsersPage() {
       });
       setUsers(res.data);
       setMeta(res.meta);
-    } catch (e: any) {
-      showToast(e.message ?? "Không tải được danh sách users", "err");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Không tải được danh sách users");
     } finally {
       setLoading(false);
     }
@@ -67,30 +73,35 @@ export default function AdminUsersPage() {
     try {
       if (u.status === "banned") {
         await usersApi.unban(u.id);
-        showToast(`Đã unban ${u.fullName}`);
+        toast.success(`Đã unban ${u.fullName}`);
       } else {
         await usersApi.ban(u.id);
-        showToast(`Đã ban ${u.fullName}`);
+        toast.success(`Đã ban ${u.fullName}`);
       }
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      showToast(e.message, "err");
+    } catch (e) {
+      toast.error((e as Error).message);
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleDelete = async (u: UserItem) => {
-    if (!confirm(`Xóa user "${u.fullName}"? Hành động này không thể hoàn tác.`)) return;
-    setActionLoading(u.id);
+  const handleDelete = (u: UserItem) => {
+    setDeleteTarget(u);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setActionLoading(deleteTarget.id);
     try {
-      await usersApi.delete(u.id);
-      showToast(`Đã xóa ${u.fullName}`);
+      await usersApi.delete(deleteTarget.id);
+      toast.success(`Đã xóa ${deleteTarget.fullName}`);
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      showToast(e.message, "err");
+    } catch (e) {
+      toast.error((e as Error).message);
     } finally {
       setActionLoading(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -98,7 +109,7 @@ export default function AdminUsersPage() {
     setRolesActionLoading(`${role}-add`);
     try {
       await usersApi.assignRole(userId, role);
-      showToast(`Đã cấp quyền "${role}" thành công`);
+      toast.success(`Đã cấp quyền "${role}" thành công`);
       if (selectedUserForRoles && selectedUserForRoles.id === userId) {
         setSelectedUserForRoles({
           ...selectedUserForRoles,
@@ -106,8 +117,8 @@ export default function AdminUsersPage() {
         });
       }
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      showToast(e.message, "err");
+    } catch (e) {
+      toast.error((e as Error).message);
     } finally {
       setRolesActionLoading(null);
     }
@@ -115,13 +126,13 @@ export default function AdminUsersPage() {
 
   const handleRemoveRole = async (userId: string, role: string) => {
     if (selectedUserForRoles && selectedUserForRoles.roles.length <= 1) {
-      showToast("Không thể xóa vai trò cuối cùng của người dùng", "err");
+      toast.error("Không thể xóa vai trò cuối cùng của người dùng");
       return;
     }
     setRolesActionLoading(`${role}-rm`);
     try {
       await usersApi.removeRole(userId, role);
-      showToast(`Đã gỡ quyền "${role}" thành công`);
+      toast.success(`Đã gỡ quyền "${role}" thành công`);
       if (selectedUserForRoles && selectedUserForRoles.id === userId) {
         setSelectedUserForRoles({
           ...selectedUserForRoles,
@@ -129,8 +140,8 @@ export default function AdminUsersPage() {
         });
       }
       await fetchUsers(meta.page);
-    } catch (e: any) {
-      showToast(e.message, "err");
+    } catch (e) {
+      toast.error((e as Error).message);
     } finally {
       setRolesActionLoading(null);
     }
@@ -143,13 +154,6 @@ export default function AdminUsersPage() {
         title="Quản Lý & Phân Quyền"
         description="Xem thông tin, ban/unban, xóa tài khoản và phân quyền hệ thống cho từng người dùng."
       />
-
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl transition-all ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
-          {toast.msg}
-        </div>
-      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
@@ -290,6 +294,21 @@ export default function AdminUsersPage() {
           </button>
         </div>
       )}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa người dùng</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn sắp xóa tài khoản <strong className="text-foreground">&quot;{deleteTarget?.fullName}&quot;</strong>. Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Xóa tài khoản</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Modal Phân Quyền */}
       {selectedUserForRoles && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300">

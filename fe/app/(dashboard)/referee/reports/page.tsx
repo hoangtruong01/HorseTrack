@@ -4,24 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  ClipboardList,
-  FileText,
-  Flag,
-  Home,
   PlusCircle,
-  ShieldCheck,
-  Siren,
-  Sparkles,
-  User,
-  CheckCircle2,
-  Trash2,
-  Lock,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 
 // Types
@@ -35,6 +23,7 @@ type RaceInfo = {
 type Assignment = {
   _id: string;
   raceId: RaceInfo;
+  status: string;
 };
 
 type RefereeReport = {
@@ -94,14 +83,14 @@ export default function RefereeReportsPage() {
       const rawData = resData.data;
       const rawArray = Array.isArray(rawData) ? rawData : (rawData?.data || []);
       const myAssignments = rawArray.filter(
-        (a: any) => a.status === "accepted" && a.raceId
+        (a: Assignment) => a.status === "accepted" && a.raceId
       );
       setAssignments(myAssignments);
 
       // 2. Fetch reports for each race in parallel
       const reportsMap: Record<string, RefereeReport[]> = {};
       await Promise.all(
-        myAssignments.map(async (a: any) => {
+        myAssignments.map(async (a: Assignment) => {
           const rId = a.raceId._id;
           const repRes = await fetch(`/api/referee/referee-reports/race/${rId}`);
           if (repRes.ok) {
@@ -111,9 +100,9 @@ export default function RefereeReportsPage() {
         })
       );
       setReports(reportsMap);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi tải danh sách cuộc đua.");
+      toast.error((err as Error).message || "Lỗi tải danh sách cuộc đua.");
     } finally {
       setIsLoading(false);
     }
@@ -195,17 +184,11 @@ export default function RefereeReportsPage() {
 
       // Reload
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi gửi biên bản.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi gửi biên bản.");
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return "Chưa xác định";
-    const d = new Date(dateStr);
-    return `${d.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} ngày ${d.toLocaleDateString("vi-VN")}`;
   };
 
   if (isLoading) {
@@ -255,7 +238,7 @@ export default function RefereeReportsPage() {
                 <label className="text-[10px] font-bold uppercase text-muted-foreground">Phân loại biên bản</label>
                 <select
                   value={reportType}
-                  onChange={(e) => setReportType(e.target.value as any)}
+                  onChange={(e) => setReportType(e.target.value as "PRE_RACE" | "POST_RACE")}
                   className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                 >
                   <option value="POST_RACE" className="bg-card">Biên bản sau trận (POST_RACE)</option>

@@ -1,30 +1,21 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { raceChecksApi, racesApi, type RaceCheckItem } from "@/lib/api-client";
 import {
   ArrowLeft,
-  Calendar,
-  CheckCircle2,
-  Clock,
   Edit2,
-  Eye,
   Flag,
-  Info,
   Play,
-  RotateCcw,
   Save,
-  ShieldCheck,
-  Siren,
-  Sparkles,
-  User,
-  XCircle,
   ShieldAlert,
+  Siren,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/layout/page-header";
-import { StatusBadge } from "@/components/ui/status-badge";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // Types
@@ -32,72 +23,75 @@ type Race = {
   _id: string;
   name: string;
   startTime: string;
-  status: "SCHEDULED" | "CHECKING" | "READY" | "LIVE" | "FINISHED" | "RESULT_PUBLISHED" | "CANCELLED";
+  status:
+    | "SCHEDULED"
+    | "CHECKING"
+    | "READY"
+    | "LIVE"
+    | "FINISHED"
+    | "RESULT_PUBLISHED"
+    | "CANCELLED";
   tournamentId: string;
   description?: string;
   distanceMeter: number;
+  trackCondition?: string;
+  weatherSnapshot?: string;
 };
 
-type RaceCheck = {
-  _id: string;
-  raceId: string;
-  raceRegistrationId: {
-    _id: string;
-    status: string;
-  };
-  horseId: {
-    _id: string;
-    name: string;
-    breed: string;
-  };
-  checkedBy: {
-    _id: string;
-    fullName: string;
-  };
-  status: "pending" | "passed" | "failed";
-  healthNote?: string;
-  equipmentNote?: string;
-  jockeyCheckedIn: boolean;
-  jockeyNote?: string;
-  checkedAt?: string;
+type AuthUser = {
+  _id?: string;
+  id?: string;
 };
 
-export default function RefereeRaceDetailPage({
-  params,
-}: {
-  params: Promise<{ raceId: string }>;
-}) {
-  const { raceId } = use(params);
+type Assignment = {
+  refereeUserId: { _id?: string; id?: string } | string;
+  role: string;
+  salary?: number;
+  status: string;
+  assignedBy?: { fullName?: string };
+  createdAt?: string;
+};
+
+export default function RefereeRaceDetailPage() {
+  const params = useParams();
+  const raceId = params.raceId as string;
   const router = useRouter();
 
   const [race, setRace] = useState<Race | null>(null);
-  const [checks, setChecks] = useState<RaceCheck[]>([]);
+  const [checks, setChecks] = useState<RaceCheckItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [myAssignment, setMyAssignment] = useState<any>(null);
+  const currentUserRef = useRef<AuthUser | null>(null);
+  const [myAssignment, setMyAssignment] = useState<Assignment | null>(null);
+
+  // Conditions form state
+  const [trackCondition, setTrackCondition] = useState("");
+  const [weatherSnapshot, setWeatherSnapshot] = useState("");
+  const [isSubmittingConditions, setIsSubmittingConditions] = useState(false);
 
   // Editing state for checklist items
   const [editingCheckId, setEditingCheckId] = useState<string | null>(null);
-  const [editStatus, setEditStatus] = useState<"pending" | "passed" | "failed">("pending");
+  const [editStatus, setEditStatus] = useState<"pending" | "passed" | "failed">(
+    "pending",
+  );
   const [editHealthNote, setEditHealthNote] = useState("");
   const [editEquipmentNote, setEditEquipmentNote] = useState("");
   const [editJockeyCheckedIn, setEditJockeyCheckedIn] = useState(false);
   const [editJockeyNote, setEditJockeyNote] = useState("");
   const [isSavingCheck, setIsSavingCheck] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       // 1. Fetch user info
-      let activeUser = currentUser;
+      let activeUser = currentUserRef.current;
       if (!activeUser) {
         const userRes = await fetch("/api/auth/me");
         if (userRes.ok) {
           const userData = await userRes.json();
-          activeUser = userData.user;
-          setCurrentUser(activeUser);
+          activeUser = userData.user as AuthUser;
+          currentUserRef.current = activeUser;
         }
       }
 
@@ -105,57 +99,58 @@ export default function RefereeRaceDetailPage({
       const raceRes = await fetch(`/api/referee/races/${raceId}`);
       if (!raceRes.ok) throw new Error("Không thể tải thông tin cuộc đua");
       const raceData = await raceRes.json();
-      setRace(raceData.data);
+      const raceInfo = raceData.data;
+      setRace(raceInfo);
+      setTrackCondition(raceInfo?.trackCondition || "");
+      setWeatherSnapshot(raceInfo?.weatherSnapshot || "");
 
       // 3. Fetch pre-race checks
-      const checksRes = await fetch(`/api/referee/race-checks/race/${raceId}`);
-      if (checksRes.ok) {
-        const checksData = await checksRes.json();
-        setChecks(checksData.data || []);
-      }
+      const checksData = await raceChecksApi.listByRace(raceId);
+      setChecks(checksData || []);
 
       // 4. Fetch assignments for this race
       if (activeUser) {
-        const assRes = await fetch(`/api/referee/referee-assignments/race/${raceId}`);
+        const assRes = await fetch(
+          `/api/referee/referee-assignments/race/${raceId}`,
+        );
         if (assRes.ok) {
           const assData = await assRes.json();
           const rawData = assData.data;
-          const assignmentsList = Array.isArray(rawData) ? rawData : (rawData?.data || []);
-          const match = assignmentsList.find((a: any) => {
-            const refUserId = typeof a.refereeUserId === "object"
-              ? (a.refereeUserId._id || a.refereeUserId.id)
-              : a.refereeUserId;
-            return String(refUserId) === String(activeUser._id || activeUser.id);
+          const assignmentsList: Assignment[] = Array.isArray(rawData)
+            ? rawData
+            : rawData?.data || [];
+          const userId = activeUser._id || activeUser.id;
+          const match = assignmentsList.find((a) => {
+            const refUserId =
+              typeof a.refereeUserId === "object"
+                ? a.refereeUserId._id || a.refereeUserId.id
+                : a.refereeUserId;
+            return String(refUserId) === String(userId);
           });
           setMyAssignment(match || null);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || "Lỗi khi tải dữ liệu.");
+      toast.error(err instanceof Error ? err.message : "Lỗi khi tải dữ liệu.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [raceId]);
 
   useEffect(() => {
+    if (!raceId || raceId === "undefined") return;
     fetchData();
-  }, [raceId]);
+  }, [raceId, fetchData]);
 
   const handleInitializeChecks = async () => {
     setIsInitializing(true);
     try {
-      const res = await fetch(`/api/referee/race-checks/race/${raceId}/initialize`, {
-        method: "POST",
-      });
-      const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.message || "Không thể khởi tạo bản kiểm tra");
-      }
+      await raceChecksApi.initialize(raceId);
       toast.success("Khởi tạo danh sách kiểm tra ngựa thành công!");
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khởi tạo.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Lỗi khởi tạo.");
     } finally {
       setIsInitializing(false);
     }
@@ -172,19 +167,38 @@ export default function RefereeRaceDetailPage({
 
       const resData = await res.json();
       if (!res.ok) {
-        throw new Error(resData.message || "Không thể chuyển trạng thái trận đấu");
+        throw new Error(
+          resData.message || "Không thể chuyển trạng thái trận đấu",
+        );
       }
 
       toast.success(`Chuyển trạng thái trận đấu sang ${newStatus} thành công!`);
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi thay đổi trạng thái.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Lỗi thay đổi trạng thái.");
     } finally {
       setIsUpdatingStatus(false);
     }
   };
 
-  const startEdit = (check: RaceCheck) => {
+  const handleUpdateConditions = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingConditions(true);
+    try {
+      await racesApi.updateConditions(raceId, {
+        trackCondition,
+        weatherSnapshot,
+      });
+      toast.success("Cập nhật điều kiện đường đua thành công!");
+      await fetchData();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Lỗi cập nhật điều kiện.");
+    } finally {
+      setIsSubmittingConditions(false);
+    }
+  };
+
+  const startEdit = (check: RaceCheckItem) => {
     setEditingCheckId(check._id);
     setEditStatus(check.status);
     setEditHealthNote(check.healthNote || "");
@@ -200,28 +214,18 @@ export default function RefereeRaceDetailPage({
   const saveCheckEdit = async (checkId: string) => {
     setIsSavingCheck(true);
     try {
-      const res = await fetch(`/api/referee/race-checks/${checkId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: editStatus,
-          healthNote: editHealthNote,
-          equipmentNote: editEquipmentNote,
-          jockeyCheckedIn: editJockeyCheckedIn,
-          jockeyNote: editJockeyNote,
-        }),
+      await raceChecksApi.update(checkId, {
+        status: editStatus,
+        healthNote: editHealthNote,
+        equipmentNote: editEquipmentNote,
+        jockeyCheckedIn: editJockeyCheckedIn,
+        jockeyNote: editJockeyNote,
       });
-
-      const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.message || "Không thể cập nhật kết quả kiểm tra");
-      }
-
       toast.success("Cập nhật kết quả kiểm tra thành công!");
       setEditingCheckId(null);
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi lưu.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Lỗi khi lưu.");
     } finally {
       setIsSavingCheck(false);
     }
@@ -230,7 +234,7 @@ export default function RefereeRaceDetailPage({
   const formatDateTime = (dateStr?: string) => {
     if (!dateStr) return "Chưa xác định";
     const d = new Date(dateStr);
-    return `${d.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} ngày ${d.toLocaleDateString("vi-VN")}`;
+    return `${d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })} ngày ${d.toLocaleDateString("vi-VN")}`;
   };
 
   if (isLoading) {
@@ -244,19 +248,23 @@ export default function RefereeRaceDetailPage({
   if (!race) {
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
-        <h2 className="text-xl font-bold text-white">Không tìm thấy cuộc đua</h2>
+        <h2 className="text-xl font-bold text-white">
+          Không tìm thấy cuộc đua
+        </h2>
         <Button onClick={() => router.back()}>Quay lại</Button>
       </main>
     );
   }
 
-  const allPassed = checks.length > 0 && checks.every((c) => c.status === "passed");
-  const canStartRace = race.status === "READY";
-
+  const allPassed =
+    checks.length > 0 && checks.every((c) => c.status === "passed");
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Back link */}
-      <Link href="/referee" className="inline-flex items-center text-xs text-white/50 hover:text-white transition">
+      <Link
+        href="/referee"
+        className="inline-flex items-center text-xs text-white/50 hover:text-white transition"
+      >
         <ArrowLeft className="size-3.5 mr-1" /> Quay lại bàn làm việc
       </Link>
 
@@ -266,13 +274,20 @@ export default function RefereeRaceDetailPage({
         description={`Kiểm duyệt an toàn thiết bị bảo hộ, sức khỏe chiến mã và điểm danh nài ngựa trước khi xuất phát.`}
         actions={
           <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white">
-              <Link href={`/referee/races/${race._id}/violations`}>
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white"
+            >
+              <Link href={`/referee/races/${raceId}/violations`}>
                 <Siren className="size-4 mr-1 text-primary" /> Lỗi vi phạm
               </Link>
             </Button>
-            <Button asChild className="h-11 rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
-              <Link href={`/referee/races/${race._id}/result-entry`}>
+            <Button
+              asChild
+              className="h-11 rounded-full bg-[#E10600] hover:bg-[#B80500] text-white"
+            >
+              <Link href={`/referee/races/${raceId}/result-entry`}>
                 <Flag className="size-4 mr-1" /> Nhập kết quả
               </Link>
             </Button>
@@ -288,30 +303,61 @@ export default function RefereeRaceDetailPage({
               <ShieldAlert className="size-5" />
             </div>
             <div>
-              <span className="text-[9px] font-black tracking-widest text-teal-400 uppercase">Quyết định phân công nhiệm vụ</span>
+              <span className="text-[9px] font-black tracking-widest text-teal-400 uppercase">
+                Quyết định phân công nhiệm vụ
+              </span>
               <h4 className="text-sm font-black text-white mt-0.5">
-                Bạn đã được chỉ định làm: <span className="text-teal-400 uppercase">{myAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}</span>
+                Bạn đã được chỉ định làm:{" "}
+                <span className="text-teal-400 uppercase">
+                  {myAssignment.role === "main"
+                    ? "Trọng tài chính"
+                    : "Trọng tài phụ"}
+                </span>
               </h4>
               <p className="text-[11px] text-white/50 mt-1 leading-relaxed">
-                Mức lương giám sát vòng đua: <strong className="text-white font-mono">{myAssignment.salary?.toLocaleString("vi-VN") || 0} Điểm thưởng</strong>
+                Mức lương giám sát vòng đua:{" "}
+                <strong className="text-white font-mono">
+                  {myAssignment.salary?.toLocaleString("vi-VN") || 0} Điểm
+                  thưởng
+                </strong>
                 {myAssignment.assignedBy && (
-                  <> · Người phân công: <strong className="text-white">{myAssignment.assignedBy.fullName || "Ban tổ chức"}</strong></>
+                  <>
+                    {" "}
+                    · Người phân công:{" "}
+                    <strong className="text-white">
+                      {myAssignment.assignedBy.fullName || "Ban tổ chức"}
+                    </strong>
+                  </>
                 )}
                 {myAssignment.createdAt && (
-                  <> · Ngày phân công: <strong className="text-white/70">{new Date(myAssignment.createdAt).toLocaleDateString("vi-VN")}</strong></>
+                  <>
+                    {" "}
+                    · Ngày phân công:{" "}
+                    <strong className="text-white/70">
+                      {new Date(myAssignment.createdAt).toLocaleDateString(
+                        "vi-VN",
+                      )}
+                    </strong>
+                  </>
                 )}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
-              myAssignment.status === "accepted" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" :
-              myAssignment.status === "declined" ? "text-red-400 bg-red-400/10 border-red-400/20" :
-              "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
-            }`}>
-              {myAssignment.status === "accepted" ? "Đã nhận nhiệm vụ" :
-               myAssignment.status === "declined" ? "Đã từ chối" :
-               "Đang chờ phê duyệt"}
+            <span
+              className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
+                myAssignment.status === "accepted"
+                  ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20"
+                  : myAssignment.status === "declined"
+                    ? "text-red-400 bg-red-400/10 border-red-400/20"
+                    : "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
+              }`}
+            >
+              {myAssignment.status === "accepted"
+                ? "Đã nhận nhiệm vụ"
+                : myAssignment.status === "declined"
+                  ? "Đã từ chối"
+                  : "Đang chờ phê duyệt"}
             </span>
           </div>
         </section>
@@ -322,27 +368,42 @@ export default function RefereeRaceDetailPage({
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-500 to-transparent" />
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-teal-400">TRẠNG THÁI CUỘC ĐUA HIỆN TẠI</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-teal-400">
+              TRẠNG THÁI CUỘC ĐUA HIỆN TẠI
+            </span>
             <div className="mt-1 flex items-center gap-3">
               <StatusBadge
                 label={
-                  race.status === "SCHEDULED" ? "Đã lên lịch" :
-                  race.status === "CHECKING" ? "Đang kiểm duyệt" :
-                  race.status === "READY" ? "SẴN SÀNG" :
-                  race.status === "LIVE" ? "ĐANG CHẠY" :
-                  race.status === "FINISHED" ? "ĐÃ XONG" : "ĐÃ CÔNG BỐ"
+                  race.status === "SCHEDULED"
+                    ? "Đã lên lịch"
+                    : race.status === "CHECKING"
+                      ? "Đang kiểm duyệt"
+                      : race.status === "READY"
+                        ? "SẴN SÀNG"
+                        : race.status === "LIVE"
+                          ? "ĐANG CHẠY"
+                          : race.status === "FINISHED"
+                            ? "ĐÃ XONG"
+                            : "ĐÃ CÔNG BỐ"
                 }
                 tone={
-                  race.status === "LIVE" ? "red" :
-                  race.status === "READY" ? "green" :
-                  race.status === "CHECKING" ? "yellow" : "slate"
+                  race.status === "LIVE"
+                    ? "red"
+                    : race.status === "READY"
+                      ? "green"
+                      : race.status === "CHECKING"
+                        ? "yellow"
+                        : "slate"
                 }
                 pulse={race.status === "LIVE" || race.status === "CHECKING"}
               />
-              <span className="text-sm font-black text-white uppercase">{race.name}</span>
+              <span className="text-sm font-black text-white uppercase">
+                {race.name}
+              </span>
             </div>
             <p className="mt-1.5 text-xs text-white/50">
-              Giờ xuất phát dự kiến: {formatDateTime(race.startTime)} · Cự ly: {race.distanceMeter}m
+              Giờ xuất phát dự kiến: {formatDateTime(race.startTime)} · Cự ly:{" "}
+              {race.distanceMeter}m
             </p>
           </div>
 
@@ -367,7 +428,9 @@ export default function RefereeRaceDetailPage({
                     : "bg-white/5 border border-white/10 text-white/35 cursor-not-allowed"
                 }`}
               >
-                {!allPassed ? "Chờ duyệt tất cả ngựa qua" : "Thiết lập Sẵn sàng xuất phát"}
+                {!allPassed
+                  ? "Chờ duyệt tất cả ngựa qua"
+                  : "Thiết lập Sẵn sàng xuất phát"}
               </Button>
             )}
 
@@ -383,12 +446,76 @@ export default function RefereeRaceDetailPage({
 
             {race.status === "LIVE" && (
               <p className="text-xs text-primary font-bold animate-pulse uppercase">
-                Trận đấu đang diễn ra trực tiếp. Vui lòng chuyển sang tab Nhập kết quả khi ngựa hoàn thành!
+                Trận đấu đang diễn ra trực tiếp. Vui lòng chuyển sang tab Nhập
+                kết quả khi ngựa hoàn thành!
               </p>
             )}
           </div>
         </div>
       </section>
+
+      {/* Race Conditions */}
+      {race.status !== "LIVE" &&
+        race.status !== "FINISHED" &&
+        race.status !== "RESULT_PUBLISHED" &&
+        race.status !== "CANCELLED" && (
+          <section className="rounded-2xl border border-white/10 bg-[#15151E] p-5 space-y-4">
+            <div>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-teal-400">
+                ĐIỀU KIỆN ĐƯỜNG ĐUA
+              </span>
+              <p className="text-xs text-white/40 mt-0.5">
+                Ghi nhận tình trạng mặt đường và thời tiết trước khi xuất phát.
+              </p>
+            </div>
+            <form
+              onSubmit={handleUpdateConditions}
+              className="grid gap-4 sm:grid-cols-2"
+            >
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase text-white/50">
+                  Tình trạng mặt đường (Track Condition)
+                </label>
+                <select
+                  value={trackCondition}
+                  onChange={(e) => setTrackCondition(e.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-[#15151E] px-3 py-2 text-xs text-white focus:border-teal-500 focus:outline-none"
+                >
+                  <option value="">-- Chưa xác định --</option>
+                  <option value="Dry turf">Dry turf (Cỏ khô)</option>
+                  <option value="Wet turf">Wet turf (Cỏ ướt)</option>
+                  <option value="Muddy">Muddy (Bùn đất)</option>
+                  <option value="Synthetic">Synthetic (Nhân tạo)</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase text-white/50">
+                  Thời tiết (Weather Snapshot)
+                </label>
+                <select
+                  value={weatherSnapshot}
+                  onChange={(e) => setWeatherSnapshot(e.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-[#15151E] px-3 py-2 text-xs text-white focus:border-teal-500 focus:outline-none"
+                >
+                  <option value="">-- Chưa xác định --</option>
+                  <option value="Sunny">Sunny (Nắng)</option>
+                  <option value="Cloudy">Cloudy (Mây)</option>
+                  <option value="Rainy">Rainy (Mưa)</option>
+                  <option value="Windy">Windy (Gió)</option>
+                </select>
+              </div>
+              <div className="sm:col-span-2 flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={isSubmittingConditions}
+                  className="h-9 px-5 rounded-full bg-teal-500 hover:bg-teal-600 text-black text-xs font-black uppercase"
+                >
+                  {isSubmittingConditions ? "Đang lưu..." : "Lưu điều kiện"}
+                </Button>
+              </div>
+            </form>
+          </section>
+        )}
 
       {/* Pre-race checklist items */}
       <section className="space-y-4">
@@ -398,7 +525,8 @@ export default function RefereeRaceDetailPage({
               Báo cáo kiểm duyệt ngựa trước Race
             </h3>
             <p className="text-xs text-white/50 mt-0.5">
-              Đảm bảo tất cả ngựa đều đủ tiêu chuẩn sức khỏe (PASSED) và Jockey đã có mặt điểm danh.
+              Đảm bảo tất cả ngựa đều đủ tiêu chuẩn sức khỏe (PASSED) và Jockey
+              đã có mặt điểm danh.
             </p>
           </div>
 
@@ -408,7 +536,9 @@ export default function RefereeRaceDetailPage({
               disabled={isInitializing}
               className="h-10 px-5 rounded-full bg-primary hover:bg-primary/90 text-xs font-black uppercase"
             >
-              {isInitializing ? "Đang xử lý..." : "Khởi tạo danh sách kiểm duyệt"}
+              {isInitializing
+                ? "Đang xử lý..."
+                : "Khởi tạo danh sách kiểm duyệt"}
             </Button>
           )}
         </div>
@@ -422,6 +552,8 @@ export default function RefereeRaceDetailPage({
         ) : (
           <div className="grid gap-4">
             {checks.map((check) => {
+              const horse =
+                typeof check.horseId === "object" ? check.horseId : null;
               const isEditing = editingCheckId === check._id;
               return (
                 <article
@@ -441,27 +573,53 @@ export default function RefereeRaceDetailPage({
                       {/* Editing Header */}
                       <div className="flex justify-between items-center pb-3 border-b border-white/5">
                         <div>
-                          <h4 className="text-xs font-black uppercase text-primary">Cập nhật kiểm tra sức khỏe</h4>
-                          <h3 className="text-sm font-bold text-white uppercase mt-0.5">{check.horseId?.name}</h3>
+                          <h4 className="text-xs font-black uppercase text-primary">
+                            Cập nhật kiểm tra sức khỏe
+                          </h4>
+                          <h3 className="text-sm font-bold text-white uppercase mt-0.5">
+                            {horse?.name}
+                          </h3>
                         </div>
                         <StatusBadge
-                          label={editStatus === "passed" ? "ĐẠT" : editStatus === "failed" ? "K. ĐẠT" : "Chờ duyệt"}
-                          tone={editStatus === "passed" ? "green" : editStatus === "failed" ? "red" : "yellow"}
+                          label={
+                            editStatus === "passed"
+                              ? "ĐẠT"
+                              : editStatus === "failed"
+                                ? "K. ĐẠT"
+                                : "Chờ duyệt"
+                          }
+                          tone={
+                            editStatus === "passed"
+                              ? "green"
+                              : editStatus === "failed"
+                                ? "red"
+                                : "yellow"
+                          }
                         />
                       </div>
 
                       {/* Edit Fields */}
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase text-white/50">Trạng thái duyệt</label>
+                          <label className="text-[10px] font-bold uppercase text-white/50">
+                            Trạng thái duyệt
+                          </label>
                           <select
                             value={editStatus}
-                            onChange={(e) => setEditStatus(e.target.value as any)}
+                            onChange={(e) =>
+                              setEditStatus(e.target.value as "pending" | "passed" | "failed")
+                            }
                             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
                           >
-                            <option value="pending" className="bg-[#15151E]">Chờ duyệt (PENDING)</option>
-                            <option value="passed" className="bg-[#15151E]">Đạt chuẩn (PASSED)</option>
-                            <option value="failed" className="bg-[#15151E]">Không đạt (FAILED)</option>
+                            <option value="pending" className="bg-[#15151E]">
+                              Chờ duyệt (PENDING)
+                            </option>
+                            <option value="passed" className="bg-[#15151E]">
+                              Đạt chuẩn (PASSED)
+                            </option>
+                            <option value="failed" className="bg-[#15151E]">
+                              Không đạt (FAILED)
+                            </option>
                           </select>
                         </div>
 
@@ -470,16 +628,23 @@ export default function RefereeRaceDetailPage({
                             type="checkbox"
                             id="jockeyCheckedIn"
                             checked={editJockeyCheckedIn}
-                            onChange={(e) => setEditJockeyCheckedIn(e.target.checked)}
+                            onChange={(e) =>
+                              setEditJockeyCheckedIn(e.target.checked)
+                            }
                             className="size-4 rounded border-white/10 bg-white/5 text-primary focus:ring-0 focus:ring-offset-0"
                           />
-                          <label htmlFor="jockeyCheckedIn" className="text-xs font-bold text-white uppercase cursor-pointer selection:bg-transparent">
+                          <label
+                            htmlFor="jockeyCheckedIn"
+                            className="text-xs font-bold text-white uppercase cursor-pointer selection:bg-transparent"
+                          >
                             Jockey đã có mặt (Checked in)
                           </label>
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase text-white/50">Ghi chú sức khỏe ngựa</label>
+                          <label className="text-[10px] font-bold uppercase text-white/50">
+                            Ghi chú sức khỏe ngựa
+                          </label>
                           <input
                             type="text"
                             value={editHealthNote}
@@ -490,18 +655,24 @@ export default function RefereeRaceDetailPage({
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase text-white/50">Ghi chú thiết bị/giáp ngựa</label>
+                          <label className="text-[10px] font-bold uppercase text-white/50">
+                            Ghi chú thiết bị/giáp ngựa
+                          </label>
                           <input
                             type="text"
                             value={editEquipmentNote}
-                            onChange={(e) => setEditEquipmentNote(e.target.value)}
+                            onChange={(e) =>
+                              setEditEquipmentNote(e.target.value)
+                            }
                             placeholder="Yên ngựa chắc chắn, móng sắt đầy đủ..."
                             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/35 focus:border-primary focus:outline-none"
                           />
                         </div>
 
                         <div className="space-y-1.5 sm:col-span-2">
-                          <label className="text-[10px] font-bold uppercase text-white/50">Ghi chú nài ngựa (Jockey Note)</label>
+                          <label className="text-[10px] font-bold uppercase text-white/50">
+                            Ghi chú nài ngựa (Jockey Note)
+                          </label>
                           <input
                             type="text"
                             value={editJockeyNote}
@@ -537,31 +708,61 @@ export default function RefereeRaceDetailPage({
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <StatusBadge
-                            label={check.status === "passed" ? "ĐẠT" : check.status === "failed" ? "KHÔNG ĐẠT" : "Chờ kiểm"}
-                            tone={check.status === "passed" ? "green" : check.status === "failed" ? "red" : "yellow"}
+                            label={
+                              check.status === "passed"
+                                ? "ĐẠT"
+                                : check.status === "failed"
+                                  ? "KHÔNG ĐẠT"
+                                  : "Chờ kiểm"
+                            }
+                            tone={
+                              check.status === "passed"
+                                ? "green"
+                                : check.status === "failed"
+                                  ? "red"
+                                  : "yellow"
+                            }
                             pulse={check.status === "pending"}
                           />
-                          <h4 className="text-sm font-black uppercase text-white">{check.horseId?.name}</h4>
-                          <span className="text-[10px] text-white/40">({check.horseId?.breed})</span>
+                          <h4 className="text-sm font-black uppercase text-white">
+                            {horse?.name}
+                          </h4>
+                          <span className="text-[10px] text-white/40">
+                            ({horse?.breed})
+                          </span>
                         </div>
 
                         <div className="grid gap-2 sm:grid-cols-2 text-xs text-white/60">
                           <p>
-                            Sức khỏe ngựa: <strong className="text-white">{check.healthNote || "Chưa ghi nhận"}</strong>
+                            Sức khỏe ngựa:{" "}
+                            <strong className="text-white">
+                              {check.healthNote || "Chưa ghi nhận"}
+                            </strong>
                           </p>
                           <p>
-                            Giáp sắt/Yên: <strong className="text-white">{check.equipmentNote || "Chưa ghi nhận"}</strong>
+                            Giáp sắt/Yên:{" "}
+                            <strong className="text-white">
+                              {check.equipmentNote || "Chưa ghi nhận"}
+                            </strong>
                           </p>
                           <p className="sm:col-span-2 flex items-center gap-1.5">
-                            Nài ngựa (Jockey): 
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              check.jockeyCheckedIn 
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-                                : "bg-red-500/10 text-red-400 border border-red-500/20"
-                            }`}>
-                              {check.jockeyCheckedIn ? "Có mặt (Checked In)" : "Vắng mặt"}
+                            Nài ngựa (Jockey):
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                check.jockeyCheckedIn
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-red-500/10 text-red-400 border border-red-500/20"
+                              }`}
+                            >
+                              {check.jockeyCheckedIn
+                                ? "Có mặt (Checked In)"
+                                : "Vắng mặt"}
                             </span>
-                            {check.jockeyNote && <span className="text-white/40">({check.jockeyNote})</span>}
+                            {check.jockeyNote && (
+                              <span className="text-white/40">
+                                ({check.jockeyNote})
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>

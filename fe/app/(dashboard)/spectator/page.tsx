@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Trophy, Calendar, MapPin, Award, ArrowRight, Flag, Bell, Wallet, Activity, Loader2 } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { walletApi } from "@/lib/api-client";
 
@@ -89,7 +89,7 @@ export default function SpectatorDashboardPage() {
     try {
       const res = await walletApi.myHistory({ limit: 1 });
       setBalance(res.points ?? 0);
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi lấy số dư điểm ví:", e);
     } finally {
       setLoadingBalance(false);
@@ -208,10 +208,11 @@ export default function SpectatorDashboardPage() {
               >
                 {/* Image Banner */}
                 <div className="h-44 w-full overflow-hidden relative border-b border-border">
-                  <img
+                  <Image
                     src={tour.image}
                     alt={tour.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
                   

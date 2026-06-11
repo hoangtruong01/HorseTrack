@@ -142,6 +142,49 @@ export class TournamentsService {
       );
     }
 
+    const now = new Date();
+
+    if (newStatus === TournamentStatus.OPEN_REGISTRATION) {
+      const raceCount = await this.raceModel.countDocuments({
+        tournamentId: new Types.ObjectId(id),
+        status: { $ne: RaceStatus.CANCELLED },
+        deletedAt: { $exists: false },
+      });
+      if (raceCount === 0) {
+        throw new BadRequestException(
+          'Cannot open registration: tournament has no races',
+        );
+      }
+      if (
+        tournament.registrationStartDate &&
+        now < tournament.registrationStartDate
+      ) {
+        throw new BadRequestException(
+          'Cannot open registration: registration start date has not been reached yet',
+        );
+      }
+      if (
+        tournament.registrationEndDate &&
+        now >= tournament.registrationEndDate
+      ) {
+        throw new BadRequestException(
+          'Cannot open registration: registration period has already ended',
+        );
+      }
+    }
+
+    if (newStatus === TournamentStatus.ONGOING && now < tournament.startDate) {
+      throw new BadRequestException(
+        'Cannot start tournament: start date has not been reached yet',
+      );
+    }
+
+    if (newStatus === TournamentStatus.COMPLETED && now < tournament.endDate) {
+      throw new BadRequestException(
+        'Cannot complete tournament: end date has not been reached yet',
+      );
+    }
+
     if (newStatus === TournamentStatus.CANCELLED) {
       await this.cascadeCancel(id, tournament.name);
     }

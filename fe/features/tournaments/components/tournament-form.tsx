@@ -1,11 +1,24 @@
 "use client";
 
-import { CalendarDays, Flag, MapPin, Sparkles, Trophy, Users, ShieldAlert, Award, Upload, Loader2 } from "lucide-react";
+import Image from "next/image";
+import {
+  Award,
+  CalendarDays,
+  Flag,
+  Loader2,
+  MapPin,
+  ShieldAlert,
+  Sparkles,
+  Trophy,
+  Upload,
+  Users,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export function TournamentForm() {
   const router = useRouter();
@@ -57,8 +70,8 @@ export function TournamentForm() {
 
       setImageUrl(resData.url);
       toast.success("Tải ảnh lên thành công!");
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tải ảnh lên.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Lỗi khi tải ảnh lên.");
       setImagePreview("");
     } finally {
       setUploading(false);
@@ -97,7 +110,9 @@ export function TournamentForm() {
       }
 
       if (regEnd >= start) {
-        toast.error("Thời hạn đăng ký phải kết thúc trước khi giải đấu bắt đầu.");
+        toast.error(
+          "Thời hạn đăng ký phải kết thúc trước khi giải đấu bắt đầu.",
+        );
         return;
       }
     }
@@ -143,13 +158,16 @@ export function TournamentForm() {
       }
 
       toast.success(`Giải đấu "${name}" đã được tạo thành công!`);
-      
+
       // Redirect back to Admin dashboard
-      router.push("/admin");
+      router.push("/admin/tournaments");
       router.refresh();
     } catch (err) {
       console.error(err);
-      const errorMessage = err instanceof Error ? err.message : "Tạo giải đấu thất bại. Vui lòng thử lại.";
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Tạo giải đấu thất bại. Vui lòng thử lại.";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -169,32 +187,16 @@ export function TournamentForm() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/10 pb-6">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
-            <Trophy className="size-4 animate-pulse" /> Tournament Management Deck
+            <Trophy className="size-4 animate-pulse" /> Tournament Management
+            Deck
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground sm:text-3xl">
             Tạo giải đấu mới
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Thiết lập bình chứa giải đấu để tổ chức các trận đua ngựa kịch tính sắp tới.
+            Thiết lập bình chứa giải đấu để tổ chức các trận đua ngựa kịch tính
+            sắp tới.
           </p>
-        </div>
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push("/admin")}
-            disabled={isLoading}
-            className="rounded-full border-border/10 text-foreground bg-transparent hover:bg-muted/5"
-          >
-            Hủy bỏ
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="rounded-full font-black uppercase tracking-wider text-foreground bg-primary hover:bg-[#B80500] shadow-[0_4px_16px_rgba(225,6,0,0.35)]"
-          >
-            {isLoading ? "Đang xử lý..." : "Lưu giải đấu"}
-          </Button>
         </div>
       </div>
 
@@ -235,73 +237,72 @@ export function TournamentForm() {
 
         {/* Row 2: Thời gian giải đấu */}
         <div className="grid gap-6 md:grid-cols-2">
-          <label className="grid gap-2 text-sm font-bold text-foreground">
+          <div className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-primary" />
               Ngày bắt đầu giải đấu <span className="text-primary">*</span>
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
+              onChange={setStartDate}
+              placeholder="Chọn ngày bắt đầu"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              disablePast
             />
-          </label>
+          </div>
 
-          <label className="grid gap-2 text-sm font-bold text-foreground">
+          <div className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-primary" />
               Ngày kết thúc giải đấu <span className="text-primary">*</span>
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              required
+              onChange={setEndDate}
+              placeholder="Chọn ngày kết thúc"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              disablePast
             />
-          </label>
+          </div>
         </div>
 
         {/* Section divider */}
         <div className="border-t border-border/5 pt-6">
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-            <Sparkles className="size-3.5 text-primary" /> Thiết lập giai đoạn đăng ký & Thông số phụ
+            <Sparkles className="size-3.5 text-primary" /> Thiết lập giai đoạn
+            đăng ký & Thông số phụ
           </h3>
         </div>
 
         {/* Row 3: Thời gian mở/đóng đăng ký */}
         <div className="grid gap-6 md:grid-cols-2">
-          <label className="grid gap-2 text-sm font-bold text-foreground">
+          <div className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-teal-400" />
               Ngày bắt đầu nhận đăng ký
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={registrationStartDate}
-              onChange={(e) => setRegistrationStartDate(e.target.value)}
+              onChange={setRegistrationStartDate}
+              placeholder="Chọn ngày mở đăng ký"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              disablePast
             />
-          </label>
+          </div>
 
-          <label className="grid gap-2 text-sm font-bold text-foreground">
+          <div className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-teal-400" />
               Ngày đóng cổng đăng ký
             </span>
-            <input
-              type="date"
+            <DatePicker
               value={registrationEndDate}
-              onChange={(e) => setRegistrationEndDate(e.target.value)}
+              onChange={setRegistrationEndDate}
+              placeholder="Chọn ngày đóng đăng ký"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              disablePast
             />
-          </label>
+          </div>
         </div>
 
         {/* Row 4: Sức chứa & Giải thưởng */}
@@ -355,16 +356,21 @@ export function TournamentForm() {
 
           <div className="grid gap-2 text-sm font-bold text-foreground">
             <span>Hình ảnh giải đấu</span>
-            <div className={`relative border border-dashed border-border/10 hover:border-primary/50 bg-black/35 rounded-xl min-h-[192px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${uploading ? 'pointer-events-none opacity-60' : ''}`}>
+            <div
+              className={`relative border border-dashed border-border/10 hover:border-primary/50 bg-black/35 rounded-xl min-h-[192px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${uploading ? "pointer-events-none opacity-60" : ""}`}
+            >
               {imagePreview ? (
                 <div className="relative w-full h-[160px] rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">
-                    <span className="text-foreground text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">Thay đổi ảnh</span>
+                    <span className="text-foreground text-xs font-black uppercase bg-[#E10600] px-3 py-1.5 rounded-md">
+                      Thay đổi ảnh
+                    </span>
                   </div>
                 </div>
               ) : (
@@ -374,8 +380,12 @@ export function TournamentForm() {
                   ) : (
                     <Upload className="size-10 text-white/35 mx-auto group-hover:text-primary transition" />
                   )}
-                  <p className="text-sm font-bold text-foreground">{uploading ? "Đang tải lên..." : "Tải lên hình ảnh"}</p>
-                  <p className="text-xs text-white/45">Cho phép định dạng PNG, JPG, WEBP tối đa 5MB</p>
+                  <p className="text-sm font-bold text-foreground">
+                    {uploading ? "Đang tải lên..." : "Tải lên hình ảnh"}
+                  </p>
+                  <p className="text-xs text-white/45">
+                    Cho phép định dạng PNG, JPG, WEBP tối đa 5MB
+                  </p>
                 </div>
               )}
               <input
@@ -389,14 +399,38 @@ export function TournamentForm() {
           </div>
         </div>
 
+        <div className="flex justify-end gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/tournaments")}
+            disabled={isLoading}
+            className="rounded-full border-border/10 text-foreground bg-transparent hover:bg-muted/5"
+          >
+            Hủy bỏ
+          </Button>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="rounded-full font-black tracking-wider text-foreground bg-primary hover:bg-[#B80500] shadow-[0_4px_16px_rgba(225,6,0,0.35)]"
+          >
+            {isLoading ? "Đang xử lý..." : "Tạo giải đấu"}
+          </Button>
+        </div>
+
         {/* Information box */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-muted-foreground flex gap-3 items-start">
           <ShieldAlert className="size-5 text-primary shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-foreground uppercase tracking-wider text-xs">Ràng buộc hệ thống (Scope Guard)</p>
+            <p className="font-bold text-foreground uppercase tracking-wider text-xs">
+              Ràng buộc hệ thống (Scope Guard)
+            </p>
             <p className="mt-1 text-xs">
-              Mặc định khi giải đấu được tạo thành công, trạng thái ban đầu sẽ là <span className="font-bold text-foreground">DRAFT</span>. 
-              Bạn có thể cập nhật trạng thái sang <span className="font-bold text-teal-400">OPEN REGISTRATION</span> trong trang chi tiết để các chủ ngựa có thể đăng ký tham gia.
+              Mặc định khi giải đấu được tạo thành công, trạng thái ban đầu sẽ
+              là <span className="font-bold text-foreground">DRAFT</span>. Bạn
+              có thể cập nhật trạng thái sang{" "}
+              <span className="font-bold text-teal-400">OPEN REGISTRATION</span>{" "}
+              trong trang chi tiết để các chủ ngựa có thể đăng ký tham gia.
             </p>
           </div>
         </div>

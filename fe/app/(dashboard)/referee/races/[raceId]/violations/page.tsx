@@ -1,28 +1,18 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
   Flag,
-  Play,
-  RotateCcw,
-  Save,
-  ShieldCheck,
-  Siren,
-  Sparkles,
   AlertTriangle,
-  User,
   PlusCircle,
-  Calendar,
-  Clock,
-  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { racesApi, raceChecksApi, raceViolationsApi, type ViolationItem } from "@/lib/api-client";
 
 // Types
 type Race = {
@@ -45,38 +35,14 @@ type RaceCheck = {
   };
 };
 
-type Violation = {
-  _id: string;
-  type: string;
-  severity: string;
-  penalty: string;
-  horseId?: {
-    _id: string;
-    name: string;
-  };
-  jockeyUserId?: {
-    _id: string;
-    fullName: string;
-  };
-  description?: string;
-  reportedBy: {
-    _id: string;
-    fullName: string;
-  };
-  createdAt: string;
-};
-
-export default function RefereeViolationsPage({
-  params,
-}: {
-  params: Promise<{ raceId: string }>;
-}) {
-  const { raceId } = use(params);
+export default function RefereeViolationsPage() {
+  const params = useParams();
+  const raceId = params.raceId as string;
   const router = useRouter();
 
   const [race, setRace] = useState<Race | null>(null);
   const [horses, setHorses] = useState<RaceCheck[]>([]);
-  const [violations, setViolations] = useState<Violation[]>([]);
+  const [violations, setViolations] = useState<ViolationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,34 +57,28 @@ export default function RefereeViolationsPage({
     setIsLoading(true);
     try {
       // 1. Fetch race info
-      const raceRes = await fetch(`/api/referee/races/${raceId}`);
-      if (!raceRes.ok) throw new Error("Không thể tải thông tin cuộc đua");
-      const raceData = await raceRes.json();
-      setRace(raceData.data);
+      const raceData = await racesApi.get(raceId);
+      setRace(raceData as unknown as Race);
 
       // 2. Fetch approved horses (from pre-race checks list)
-      const checksRes = await fetch(`/api/referee/race-checks/race/${raceId}`);
-      if (checksRes.ok) {
-        const checksData = await checksRes.json();
-        setHorses(checksData.data || []);
-      }
+      const checksData = await raceChecksApi.listByRace(raceId);
+      setHorses((checksData || []) as unknown as RaceCheck[]);
 
       // 3. Fetch violations
-      const violationsRes = await fetch(`/api/referee/race-violations/race/${raceId}`);
-      if (violationsRes.ok) {
-        const violationsData = await violationsRes.json();
-        setViolations(violationsData.data || []);
-      }
-    } catch (err: any) {
+      const violationsData = await raceViolationsApi.listByRace(raceId);
+      setViolations(violationsData || []);
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi khi tải dữ liệu.");
+      toast.error((err as Error).message || "Lỗi khi tải dữ liệu.");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!raceId || raceId === "undefined") return;
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
   const handleSubmitViolation = async (e: React.FormEvent) => {
@@ -135,7 +95,7 @@ export default function RefereeViolationsPage({
       if (!selectedHorse) throw new Error("Không tìm thấy thông tin ngựa đã chọn");
 
       // Extract jockey ID
-      const reg = selectedHorse.raceRegistrationId as any;
+      const reg = selectedHorse.raceRegistrationId as { _id: string; jockeyUserId?: string | { _id: string } };
       const jockeyUserId = typeof reg?.jockeyUserId === "object" ? reg?.jockeyUserId?._id : reg?.jockeyUserId;
 
       const payload = {
@@ -170,17 +130,11 @@ export default function RefereeViolationsPage({
       
       // Reload violations
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi lưu vi phạm.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi lưu vi phạm.");
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return "Chưa xác định";
-    const d = new Date(dateStr);
-    return `${d.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} ngày ${d.toLocaleDateString("vi-VN")}`;
   };
 
   if (isLoading) {
@@ -214,7 +168,7 @@ export default function RefereeViolationsPage({
         actions={
           <div className="flex items-center gap-3">
             <Button asChild className="h-11 rounded-full bg-[#E10600] hover:bg-[#B80500] text-white">
-              <Link href={`/referee/races/${race._id}/result-entry`}>
+              <Link href={`/referee/races/${raceId}/result-entry`}>
                 <Flag className="size-4 mr-1" /> Nhập kết quả
               </Link>
             </Button>

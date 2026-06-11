@@ -15,18 +15,19 @@ async function getToken(): Promise<string | null> {
   return null;
 }
 
-function injectUnderscoreId(val: any): any {
+function injectUnderscoreId(val: unknown): unknown {
   if (val === null || val === undefined) return val;
   if (Array.isArray(val)) {
     return val.map(injectUnderscoreId);
   }
   if (typeof val === "object") {
-    if (typeof val.id === "string" && !("_id" in val)) {
-      val._id = val.id;
+    const obj = val as Record<string, unknown>;
+    if (typeof obj.id === "string" && !("_id" in obj)) {
+      obj._id = obj.id;
     }
-    for (const key in val) {
-      if (Object.prototype.hasOwnProperty.call(val, key)) {
-        val[key] = injectUnderscoreId(val[key]);
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        obj[key] = injectUnderscoreId(obj[key]);
       }
     }
   }
@@ -55,19 +56,21 @@ export async function apiFetch<T>(path: string, options: CustomRequestInit = {})
   }
 
   if (!res.ok) {
-    // Check if unauthorized and not already retried
     if (res.status === 401 && !options._retry) {
       try {
         const refreshRes = await fetch("/api/auth/refresh", { method: "POST" });
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json();
           if (refreshData.success) {
-            // Retry the original request with the new token
             return apiFetch<T>(path, { ...options, _retry: true });
           }
         }
       } catch (err) {
         console.error("Auto token refresh failed:", err);
+      }
+      // Refresh failed or token still invalid — session expired, redirect to login
+      if (typeof window !== "undefined") {
+        window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
       }
     }
 
@@ -80,8 +83,7 @@ export async function apiFetch<T>(path: string, options: CustomRequestInit = {})
 
   // ResponseInterceptor wraps payload as { success, message, data, meta? }
   // Unwrap if the wrapper is present
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let result: any = raw;
+  let result: unknown = raw;
   if (
     raw &&
     typeof raw === "object" &&
@@ -184,7 +186,11 @@ export interface JockeyItem {
   userId?: { _id: string; fullName: string; email: string } | string;
   licenseNumber?: string;
   experienceYears?: number;
-  weight?: number;
+  heightCm?: number;
+  weightKg?: number;
+  skillLevel?: string;
+  bio?: string;
+  specialty?: string;
   status: string;
   totalRaces?: number;
   wins?: number;
@@ -199,6 +205,21 @@ export const jockeysApi = {
     if (params?.status) qs.set("status", params.status);
     return apiFetch<PaginatedResult<JockeyItem>>(`/jockeys/admin/all?${qs}`);
   },
+  getMe: () => apiFetch<JockeyItem>("/jockeys/me"),
+  createProfile: (dto: {
+    heightCm: number;
+    weightKg: number;
+    experienceYears?: number;
+    skillLevel?: string;
+    bio?: string;
+  }) => apiFetch<JockeyItem>("/jockeys/profile", { method: "POST", body: JSON.stringify(dto) }),
+  updateProfile: (id: string, dto: {
+    heightCm?: number;
+    weightKg?: number;
+    experienceYears?: number;
+    skillLevel?: string;
+    bio?: string;
+  }) => apiFetch<JockeyItem>(`/jockeys/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
   changeStatus: (id: string, status: string) =>
     apiFetch(`/jockeys/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
 };
@@ -279,11 +300,11 @@ export const racesApi = {
     lapCount?: number;
     maxParticipants?: number;
     prize?: number;
-    trackCondition?: string;
-    weatherSnapshot?: string;
   }) => apiFetch<RaceItem>("/races", { method: "POST", body: JSON.stringify(dto) }),
   updateStatus: (id: string, status: string) =>
     apiFetch(`/races/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  updateConditions: (id: string, dto: { trackCondition?: string; weatherSnapshot?: string }) =>
+    apiFetch<RaceItem>(`/races/${id}/conditions`, { method: "PATCH", body: JSON.stringify(dto) }),
   delete: (id: string) => apiFetch(`/races/${id}`, { method: "DELETE" }),
 };
 
@@ -309,6 +330,19 @@ export const refereeProfilesApi = {
     if (params?.approvalStatus) qs.set("approvalStatus", params.approvalStatus);
     return apiFetch<PaginatedResult<RefereeProfileItem>>(`/referee-profiles?${qs}`);
   },
+  getMe: () => apiFetch<RefereeProfileItem>("/referee-profiles/me"),
+  createProfile: (dto: {
+    licenseNo?: string;
+    experienceYears?: number;
+    certificates?: string;
+    bio?: string;
+  }) => apiFetch<RefereeProfileItem>("/referee-profiles", { method: "POST", body: JSON.stringify(dto) }),
+  updateProfile: (id: string, dto: {
+    licenseNo?: string;
+    experienceYears?: number;
+    certificates?: string;
+    bio?: string;
+  }) => apiFetch<RefereeProfileItem>(`/referee-profiles/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
   changeApproval: (id: string, approvalStatus: "APPROVED" | "REJECTED", rejectionReason?: string) =>
     apiFetch(`/referee-profiles/${id}/approval`, {
       method: "PATCH",
@@ -345,6 +379,13 @@ export const refereeAssignmentsApi = {
   remove: (id: string) => apiFetch(`/referee-assignments/${id}`, { method: "DELETE" }),
   listAvailable: (raceId: string) =>
     apiFetch<Array<{ _id: string; fullName: string; email: string }>>(`/referee-assignments/available-referees?raceId=${raceId}`),
+  myAssignments: (params?: { limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<AssignmentItem>>(`/referee-assignments/my-assignments?${qs}`);
+  },
+  respond: (id: string, status: "accepted" | "declined") =>
+    apiFetch(`/referee-assignments/${id}/respond`, { method: "PATCH", body: JSON.stringify({ status }) }),
 };
 
 
@@ -526,11 +567,11 @@ export const rewardPointLedgerApi = {
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 export const dashboardApi = {
-  getAdminStats: () => apiFetch<Record<string, any>>("/dashboard/admin"),
-  getOwnerStats: () => apiFetch<Record<string, any>>("/dashboard/owner"),
-  getJockeyStats: () => apiFetch<Record<string, any>>("/dashboard/jockey"),
-  getRefereeStats: () => apiFetch<Record<string, any>>("/dashboard/referee"),
-  getSpectatorStats: () => apiFetch<Record<string, any>>("/dashboard/spectator"),
+  getAdminStats: () => apiFetch<Record<string, unknown>>("/dashboard/admin"),
+  getOwnerStats: () => apiFetch<Record<string, unknown>>("/dashboard/owner"),
+  getJockeyStats: () => apiFetch<Record<string, unknown>>("/dashboard/jockey"),
+  getRefereeStats: () => apiFetch<Record<string, unknown>>("/dashboard/referee"),
+  getSpectatorStats: () => apiFetch<Record<string, unknown>>("/dashboard/spectator"),
 };
 
 // ─── Registrations ───────────────────────────────────────────────────────────
@@ -566,4 +607,237 @@ export const registrationsApi = {
       method: "PATCH",
       body: JSON.stringify({ reason }),
     }),
+};
+
+// ─── Race Checks ─────────────────────────────────────────────────────────────
+export interface RaceCheckItem {
+  _id: string;
+  raceId: string;
+  raceRegistrationId: { _id: string; status: string } | string;
+  horseId: { _id: string; name: string; breed: string } | string;
+  checkedBy: { _id: string; fullName: string } | string;
+  status: "pending" | "passed" | "failed";
+  healthNote?: string;
+  equipmentNote?: string;
+  jockeyCheckedIn: boolean;
+  jockeyNote?: string;
+  checkedAt?: string;
+}
+
+export const raceChecksApi = {
+  listByRace: (raceId: string) =>
+    apiFetch<RaceCheckItem[]>(`/race-checks/race/${raceId}`),
+  initialize: (raceId: string) =>
+    apiFetch<RaceCheckItem[]>(`/race-checks/race/${raceId}/initialize`, { method: "POST" }),
+  update: (id: string, dto: {
+    status?: "pending" | "passed" | "failed";
+    healthNote?: string;
+    equipmentNote?: string;
+    jockeyCheckedIn?: boolean;
+    jockeyNote?: string;
+  }) => apiFetch<RaceCheckItem>(`/race-checks/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
+};
+
+// ─── Race Violations ────────────────────────────────────────────────────────
+export interface ViolationItem {
+  _id: string;
+  raceId: string;
+  type: string;
+  severity: string;
+  penalty: string;
+  horseId?: { _id: string; name: string };
+  jockeyUserId?: { _id: string; fullName: string };
+  raceRegistrationId?: string;
+  description?: string;
+  reportedBy: { _id: string; fullName: string };
+  createdAt: string;
+}
+
+export const raceViolationsApi = {
+  listByRace: (raceId: string) =>
+    apiFetch<ViolationItem[]>(`/race-violations/race/${raceId}`),
+};
+
+// ─── Race Results ────────────────────────────────────────────────────────────
+export interface RaceResultItem {
+  _id: string;
+  raceRegistrationId: string;
+  horseId: { _id: string; name: string; breed: string } | string;
+  rank?: number;
+  finishTimeMs?: number;
+  outcome: "finished" | "disqualified" | "did_not_start" | "did_not_finish";
+  incident: "none" | "minor_stumble" | "lane_drift" | "gate_delay" | "collision" | "injury";
+  points: number;
+  status: "DRAFT" | "CONFIRMED" | "PUBLISHED" | "CANCELLED";
+  note?: string;
+}
+
+export const raceResultsApi = {
+  listByRace: (raceId: string) =>
+    apiFetch<RaceResultItem[]>(`/race-results/race/${raceId}`),
+};
+
+// ─── AI Packages ─────────────────────────────────────────────────────────────
+export interface AiPackageItem {
+  _id: string;
+  name: string;
+  description?: string;
+  price: number;
+  durationDays: number;
+  accuracyRate?: number;
+  status: "ACTIVE" | "INACTIVE";
+  createdAt?: string;
+}
+
+// ─── AI Payments / Subscriptions ─────────────────────────────────────────────
+export interface AiPaymentItem {
+  _id: string;
+  userId: { _id: string; fullName: string; email: string } | string;
+  packageId: { _id: string; name: string } | string;
+  amount: number;
+  paymentMethod: string;
+  status: "PENDING" | "SUCCESS" | "FAILED";
+  payosOrderCode?: number;
+  createdAt?: string;
+}
+
+// ─── AI Predictions ───────────────────────────────────────────────────────────
+export interface AiHorseRanking {
+  horseId: { _id: string; name: string; breed?: string } | string;
+  predictedRank: number;
+  winProbability: number;
+  strengthScore: number;
+}
+
+export interface AiPredictionItem {
+  _id: string;
+  raceId: string;
+  rankings: AiHorseRanking[];
+  source: "MANUAL" | "RULE_BASED" | "LLM";
+  confidenceLevel: number;
+  reasoning?: string;
+  generatedAt: string;
+}
+
+// ─── AI Arrangements ─────────────────────────────────────────────────────────
+export interface AiRaceEntry {
+  horseId: { _id: string; name: string } | string;
+  strengthScore: number;
+  jockeyUserId?: { _id: string; fullName: string } | string;
+}
+
+export interface AiProposedRace {
+  entries: AiRaceEntry[];
+  raceType: string;
+  distanceMeters: number;
+  maxParticipants: number;
+  startTime: string;
+  trackCondition: string;
+  weather: string;
+  avgStrength: number;
+  strengthSpread: number;
+}
+
+export interface AiFairnessReport {
+  avgStrengthPerRace: number[];
+  strengthSpreadPerRace: number[];
+  violations: string[];
+}
+
+export interface AiArrangementItem {
+  _id: string;
+  tournamentId: { _id: string; name: string } | string;
+  proposedRaces: AiProposedRace[];
+  fairnessReport?: AiFairnessReport;
+  reasoning?: string;
+  status: "PENDING" | "APPLIED" | "REJECTED";
+  createdRaceIds?: string[];
+  createdAt?: string;
+}
+
+export const aiApi = {
+  listPackages: () =>
+    apiFetch<AiPackageItem[]>("/ai/packages"),
+
+  createPackage: (dto: {
+    name: string;
+    description?: string;
+    price: number;
+    durationDays: number;
+    accuracyRate?: number;
+  }) =>
+    apiFetch<AiPackageItem>("/ai/packages", {
+      method: "POST",
+      body: JSON.stringify(dto),
+    }),
+
+  subscribe: (packageId: string) =>
+    apiFetch<{ checkoutUrl: string; orderCode: number }>("/ai/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ packageId }),
+    }),
+
+  getMySubscription: () =>
+    apiFetch<{
+      _id: string;
+      packageId: AiPackageItem | string;
+      startDate: string;
+      endDate: string;
+      status: "ACTIVE" | "EXPIRED" | "CANCELLED";
+    } | null>("/ai/my-subscription"),
+
+  listRevenue: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return apiFetch<PaginatedResult<AiPaymentItem>>(`/ai/payments?${qs}`);
+  },
+
+  generatePrediction: (raceId: string) =>
+    apiFetch<AiPredictionItem>(`/ai/predictions/generate/${raceId}`, {
+      method: "POST",
+    }),
+
+  getPrediction: (raceId: string) =>
+    apiFetch<AiPredictionItem>(`/ai/predictions/${raceId}`),
+
+  generateArrangement: (tournamentId: string) =>
+    apiFetch<AiArrangementItem>(`/ai/arrangements/generate/${tournamentId}`, {
+      method: "POST",
+    }),
+
+  listArrangements: (tournamentId: string) =>
+    apiFetch<AiArrangementItem[]>(`/ai/arrangements/tournament/${tournamentId}`),
+
+  updateArrangementStatus: (id: string, status: "APPLIED" | "REJECTED") =>
+    apiFetch<AiArrangementItem>(`/ai/arrangements/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+};
+
+// ─── Bank Transactions ───────────────────────────────────────────────────────
+export interface BankTxItem {
+  _id: string;
+  provider: "sepay" | "manual" | "other";
+  providerTransactionId?: string;
+  direction: "in" | "out";
+  amount: number;
+  currency: string;
+  description?: string;
+  counterAccountNo?: string;
+  counterAccountName?: string;
+  transactionTime: string;
+  matchedType: "payment" | "payout" | "unknown";
+  createdAt?: string;
+}
+
+export const bankTransactionsApi = {
+  list: (params?: { page?: number; limit?: number; matchedType?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.matchedType) qs.set("matchedType", params.matchedType);
+    return apiFetch<PaginatedResult<BankTxItem>>(`/bank-transactions?${qs}`);
+  },
 };

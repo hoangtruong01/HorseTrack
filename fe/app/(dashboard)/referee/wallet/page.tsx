@@ -16,7 +16,7 @@ export default function RefereeWalletPage() {
   const { t } = useTranslation();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<WalletUiTransaction[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{ races?: { assignedCount?: number; acceptedCount?: number }; checks?: { total?: number } } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCashoutForm, setShowCashoutForm] = useState(false);
 
@@ -31,8 +31,8 @@ export default function RefereeWalletPage() {
       setBalance(balanceRes.balance ?? 0);
       setTransactions(mapLedgerTransactions(historyRes.data || []));
       setStats(statsRes);
-    } catch (err: any) {
-      toast.error(err.message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
+    } catch (err) {
+      toast.error((err as Error).message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
     } finally {
       setIsLoading(false);
     }
@@ -48,8 +48,8 @@ export default function RefereeWalletPage() {
       toast.success(t("wallet.cashoutForm.successMsg", { points: points.toLocaleString("vi-VN") }));
       setShowCashoutForm(false);
       await fetchWalletData();
-    } catch (err: any) {
-      toast.error(err.message || t("wallet.cashoutForm.errInvalid", "Đã xảy ra lỗi khi tạo yêu cầu rút điểm."));
+    } catch (err) {
+      toast.error((err as Error).message || t("wallet.cashoutForm.errInvalid", "Đã xảy ra lỗi khi tạo yêu cầu rút điểm."));
     }
   };
 

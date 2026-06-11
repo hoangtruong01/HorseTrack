@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       success: true,
       user: payloadData.user,
     });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json(
       { message: "Kết nối tới server thất bại." },
       { status: 500 }

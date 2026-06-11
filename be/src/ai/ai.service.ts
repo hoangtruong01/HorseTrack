@@ -83,6 +83,20 @@ export class AiService {
     return !!sub;
   }
 
+  async getMySubscription(
+    userId: string,
+  ): Promise<UserSubscriptionDocument | null> {
+    const now = new Date();
+    return this.subscriptionModel
+      .findOne({
+        userId: new Types.ObjectId(userId),
+        status: SubscriptionStatus.ACTIVE,
+        endDate: { $gt: now },
+      })
+      .populate('packageId', 'name description price durationDays accuracyRate')
+      .exec();
+  }
+
   // ─── Payments (admin revenue) ─────────────────────────────────────────────
 
   async findAllPayments(): Promise<PaymentDocument[]> {

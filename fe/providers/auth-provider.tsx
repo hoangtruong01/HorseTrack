@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(data.user);
           }
         }
-      } catch (err) {
+      } catch {
         console.error("Không tìm thấy phiên đăng nhập hoạt động.");
       } finally {
         setIsLoading(false);

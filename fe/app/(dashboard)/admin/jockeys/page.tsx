@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { jockeysApi, type JockeyItem } from "@/lib/api-client";
 
@@ -18,12 +19,6 @@ export default function AdminJockeysPage() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
-
-  const showToast = (msg: string, type: "ok" | "err" = "ok") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const fetchJockeys = useCallback(async (page = 1) => {
     setLoading(true);
@@ -31,8 +26,8 @@ export default function AdminJockeysPage() {
       const res = await jockeysApi.listAdmin({ page, limit: 15, status: filterStatus || undefined });
       setJockeys(res.data);
       setMeta(res.meta);
-    } catch (e: any) {
-      showToast(e.message ?? "Lỗi tải dữ liệu", "err");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Lỗi tải dữ liệu");
     } finally { setLoading(false); }
   }, [filterStatus]);
 
@@ -42,9 +37,9 @@ export default function AdminJockeysPage() {
     setActionLoading(id);
     try {
       await jockeysApi.changeStatus(id, status);
-      showToast(`Đã cập nhật status → ${status}`);
+      toast.success(`Đã cập nhật status → ${status}`);
       await fetchJockeys(meta.page);
-    } catch (e: any) { showToast(e.message, "err"); }
+    } catch (e) { toast.error((e as Error).message); }
     finally { setActionLoading(null); }
   };
 
@@ -65,12 +60,6 @@ export default function AdminJockeysPage() {
         title="Quản Lý Jockey"
         description="Xem toàn bộ jockey profiles bao gồm cả inactive/suspended. Thay đổi trạng thái ngay tại đây."
       />
-
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
-          {toast.msg}
-        </div>
-      )}
 
       <div className="flex gap-3">
         <select
@@ -112,7 +101,7 @@ export default function AdminJockeysPage() {
                       <p className="text-xs text-muted-foreground">{getUserEmail(j.userId)}</p>
                     </td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{j.licenseNumber ?? "—"}</td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">{j.experienceYears ?? "—"} năm · {j.weight ?? "?"}kg</td>
+                    <td className="px-5 py-4 text-sm text-muted-foreground">{j.experienceYears ?? "—"} năm · {j.weightKg ?? "?"}kg</td>
                     <td className="px-5 py-4 text-sm text-foreground">{j.totalRaces ?? 0} / {j.wins ?? 0}</td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${statusColors[j.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>

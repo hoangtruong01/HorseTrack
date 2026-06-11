@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import {
-  refereeAssignmentsApi, apiFetch, racesApi, tournamentsApi,
-  type AssignmentItem, type RaceItem, type TournamentItem, type UserItem, type PaginatedResult,
+  refereeAssignmentsApi, racesApi, tournamentsApi,
+  type AssignmentItem, type RaceItem, type TournamentItem,
 } from "@/lib/api-client";
 
 /* ── status colors ── */
@@ -100,7 +100,7 @@ export default function AdminRefereeAssignmentsPage() {
     try {
       const res = await refereeAssignmentsApi.listByRace(raceId, { limit: 100 });
       setAssignments(res.data);
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e) { toast.error((e as Error).message); }
     finally { setLoading(false); }
   }, []);
 
@@ -121,9 +121,9 @@ export default function AdminRefereeAssignmentsPage() {
       setFormReferee("");
       try {
         const data = await refereeAssignmentsApi.listAvailable(formRace);
-        setReferees(data as any ?? []);
-      } catch (e: any) {
-        toast.error(e.message ?? "Lỗi tải danh sách trọng tài khả dụng");
+        setReferees((data as Array<{ _id: string; fullName: string; email: string }>) ?? []);
+      } catch (e) {
+        toast.error((e as Error).message ?? "Lỗi tải danh sách trọng tài khả dụng");
       } finally {
         setRefereesLoading(false);
       }
@@ -159,7 +159,7 @@ export default function AdminRefereeAssignmentsPage() {
       if (selectedTournament !== formTournament) setSelectedTournament(formTournament);
       if (selectedRace === formRace) await fetchAssignments(selectedRace);
       else setSelectedRace(formRace);
-    } catch (e: any) { toast.error(e.message || "Phân công thất bại"); }
+    } catch (e) { toast.error((e as Error).message || "Phân công thất bại"); }
     finally { setSubmitting(false); }
   };
 
@@ -170,7 +170,7 @@ export default function AdminRefereeAssignmentsPage() {
       await refereeAssignmentsApi.remove(id);
       toast.success("Đã xóa phân công");
       if (selectedRace) await fetchAssignments(selectedRace);
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   /* ── helpers ── */

@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { 
   Trophy, Calendar, MapPin, Award, Users, Search, 
   ArrowLeft, Flag, Loader2, Compass, Layers, Activity, User, ShieldCheck, ChevronRight,
-  CheckCircle, AlertTriangle, Coins, HelpCircle
+  CheckCircle, Coins
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { 
-  tournamentsApi, 
-  racesApi, 
-  registrationsApi, 
+import Image from "next/image";
+import {
+  tournamentsApi,
+  racesApi,
+  registrationsApi,
   refereeAssignmentsApi,
   predictionsApi,
   walletApi,
-  type TournamentItem, 
+  type TournamentItem,
   type RaceItem,
   type RegistrationItem,
   type AssignmentItem,
@@ -109,7 +109,7 @@ export default function SpectatorTournamentsPage() {
   const [myPredictions, setMyPredictions] = useState<PredictionItem[]>([]);
   const [selectedHorseId, setSelectedHorseId] = useState("");
   const [submittingPrediction, setSubmittingPrediction] = useState(false);
-  const [loadingPredictions, setLoadingPredictions] = useState(false);
+  const [, setLoadingPredictions] = useState(false);
   const [balance, setBalance] = useState(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [betPointsInput, setBetPointsInput] = useState<string>("1");
@@ -132,7 +132,7 @@ export default function SpectatorTournamentsPage() {
       // Exclude DRAFT tournaments for spectators
       const publicTournaments = (res.data || []).filter(t => t.status !== "DRAFT");
       setTournaments(publicTournaments);
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi tải danh sách giải đấu:", e);
       toast.error("Không thể tải danh sách giải đấu");
     } finally {
@@ -147,7 +147,7 @@ export default function SpectatorTournamentsPage() {
       // Exclude DRAFT races for spectators
       const publicRaces = (res.data || []).filter(r => r.status !== "DRAFT");
       setAllRaces(publicRaces);
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi tải danh sách trận đua:", e);
       toast.error("Không thể tải danh sách trận đua toàn hệ thống");
     } finally {
@@ -160,7 +160,7 @@ export default function SpectatorTournamentsPage() {
     try {
       const res = await predictionsApi.listMyPredictions({ page: 1, limit: 100 });
       setMyPredictions(res.data || []);
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi tải dự đoán cá nhân:", e);
     } finally {
       setLoadingPredictions(false);
@@ -209,9 +209,9 @@ export default function SpectatorTournamentsPage() {
       setBetPointsInput("1");
       await fetchMyPredictions();
       await fetchBalance();
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi gửi dự đoán:", e);
-      const errMsg = e.message || "";
+      const errMsg = (e as Error).message || "";
       if (errMsg.includes("already have a prediction") || errMsg.includes("đã đặt dự đoán")) {
         toast.error("Bạn đã đặt dự đoán cho trận đấu này rồi!");
       } else {
@@ -237,7 +237,7 @@ export default function SpectatorTournamentsPage() {
       const res = await racesApi.listByTournament(t._id, { limit: 100 });
       const publicRaces = (res.data || []).filter(r => r.status !== "DRAFT");
       setSelectedTourRaces(publicRaces);
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi tải danh sách vòng đua:", e);
       setSelectedTourRaces([]);
     } finally {
@@ -264,7 +264,7 @@ export default function SpectatorTournamentsPage() {
       } else {
         setSelectedRaceReferee(null);
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi tải chi tiết trận đua:", e);
       toast.error("Không thể tải thông tin đội hình tham gia trận đấu");
       setSelectedRaceRegistrations([]);
@@ -453,10 +453,11 @@ export default function SpectatorTournamentsPage() {
                   >
                     <div className="h-40 w-full overflow-hidden relative bg-muted">
                       {tour.imageUrl ? (
-                        <img
+                        <Image
                           src={tour.imageUrl}
                           alt={tour.name}
-                          className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                          fill
+                          className="object-cover group-hover:scale-102 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-muted/50">
@@ -621,11 +622,12 @@ export default function SpectatorTournamentsPage() {
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px] pointer-events-none" />
                 
                 {selectedTour.imageUrl && (
-                  <div className="w-full h-48 overflow-hidden rounded-xl border border-border bg-muted mb-2">
-                    <img
+                  <div className="w-full h-48 overflow-hidden rounded-xl border border-border bg-muted mb-2 relative">
+                    <Image
                       src={selectedTour.imageUrl}
                       alt={selectedTour.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                 )}

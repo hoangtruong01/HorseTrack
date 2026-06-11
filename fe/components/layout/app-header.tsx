@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Menu, X, LogOut, Wallet } from "lucide-react";
 
@@ -18,8 +19,6 @@ export type AppHeaderProps = {
 
 export function AppHeader({
   className,
-  ctaHref = "/register",
-  ctaLabel = "Get Started",
 }: AppHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -76,9 +75,11 @@ export function AppHeader({
           className="group flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="HorseTrack home"
         >
-          <img
+          <Image
             src="/logo.png"
             alt="HorseTrack Logo"
+            width={44}
+            height={44}
             className="size-11 rounded-2xl border border-border object-cover shadow-[0_0_20px_rgba(225,6,0,0.25)] transition group-hover:scale-105"
           />
           <span className="text-xl font-black uppercase tracking-[0.16em] text-foreground">

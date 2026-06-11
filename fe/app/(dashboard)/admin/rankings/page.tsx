@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Medal, Trophy } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { rankingsApi, tournamentsApi, type RankingEntry, type JockeyRankingEntry, type TournamentItem } from "@/lib/api-client";
 
@@ -12,13 +12,6 @@ export default function AdminRankingsPage() {
   const [jockeyRankings, setJockeyRankings] = useState<JockeyRankingEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"horses" | "jockeys">("horses");
-  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
-
-  const showToast = (msg: string, type: "ok" | "err" = "ok") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
-
   useEffect(() => {
     async function loadTournaments() {
       try {
@@ -39,7 +32,7 @@ export default function AdminRankingsPage() {
     ]).then(([h, j]) => {
       setHorseRankings(h);
       setJockeyRankings(j);
-    }).catch((e) => showToast(e.message, "err"))
+    }).catch((e) => toast.error((e as Error).message))
       .finally(() => setLoading(false));
   }, [selectedTournament]);
 
@@ -57,12 +50,6 @@ export default function AdminRankingsPage() {
         title="Xem/Cập Nhật Ranking"
         description="Ranking được tính realtime từ race results đã PUBLISHED. Chọn giải đấu để xem bảng xếp hạng."
       />
-
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl border px-5 py-3 text-sm font-semibold shadow-2xl ${toast.type === "ok" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-red-500/40 bg-red-500/10 text-red-300"}`}>
-          {toast.msg}
-        </div>
-      )}
 
       <div className="flex flex-wrap gap-3 items-center">
         <select

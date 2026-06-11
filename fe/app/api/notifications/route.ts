@@ -1,23 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-function decodeJwtPayload(token: string): any {
-  try {
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  } catch (err) {
-    return null;
-  }
-}
-
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("access_token")?.value;
@@ -53,9 +37,9 @@ export async function GET(request: Request) {
       success: true,
       notifications: Notification,
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { message: err.message || "Lấy thông báo thất bại" },
+      { message: (err as Error).message || "Lấy thông báo thất bại" },
       { status: 500 }
     );
   }
@@ -104,9 +88,9 @@ export async function PATCH(request: Request) {
     }
 
     return NextResponse.json({ message: "Yêu cầu không hợp lệ" }, { status: 400 });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { message: err.message || "Thao tác thất bại" },
+      { message: (err as Error).message || "Thao tác thất bại" },
       { status: 500 }
     );
   }

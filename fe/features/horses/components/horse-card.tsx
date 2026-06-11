@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Edit2, ShieldAlert, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -65,10 +66,11 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
       {/* Horse Image background blur or thumbnail */}
       <div className="relative mb-4 flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/50">
         {horse.image ? (
-          <img
+          <Image
             src={horse.image}
             alt={horse.name}
-            className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-white/20">

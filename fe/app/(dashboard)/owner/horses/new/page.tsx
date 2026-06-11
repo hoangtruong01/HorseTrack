@@ -28,8 +28,8 @@ export default function NewHorsePage() {
 
       toast.success("Chiến mã đã được thêm vào chuồng thành công!");
       router.push("/owner/horses");
-    } catch (err: any) {
-      toast.error(err.message || "Đã xảy ra lỗi khi thêm chiến mã.");
+    } catch (err) {
+      toast.error((err as Error).message || "Đã xảy ra lỗi khi thêm chiến mã.");
       throw err;
     } finally {
       setIsSubmitting(false);

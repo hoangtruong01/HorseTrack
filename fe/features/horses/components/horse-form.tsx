@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Award, Upload } from "lucide-react";
+import Image from "next/image";
+import { Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Horse, HorseGender, HorseHealthStatus } from "./horse-card";
 
@@ -82,8 +83,8 @@ export function HorseForm({
       }
 
       await onSubmit(data);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Đã xảy ra lỗi khi lưu thông tin ngựa.");
+    } catch (err) {
+      setErrorMsg((err as Error).message || "Đã xảy ra lỗi khi lưu thông tin ngựa.");
     }
   };
 
@@ -212,10 +213,11 @@ export function HorseForm({
             <div className={`relative flex min-h-[200px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 p-4 transition group cursor-pointer hover:border-primary/50 ${isApproved ? "pointer-events-none opacity-60" : ""}`}>
               {imagePreview ? (
                 <div className="relative w-full h-full min-h-[180px] rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                   {!isApproved && (
                     <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition">

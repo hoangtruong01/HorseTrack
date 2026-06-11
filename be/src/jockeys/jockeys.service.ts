@@ -40,7 +40,9 @@ export class JockeysService {
     }
 
     // 2. Check if profile already exists
-    const existing = await this.jockeyModel.findOne({ userId });
+    const existing = await this.jockeyModel.findOne({
+      userId: new Types.ObjectId(userId),
+    });
     if (existing) {
       throw new ConflictException(
         'Jockey profile already exists for this user',
@@ -49,7 +51,7 @@ export class JockeysService {
 
     return this.jockeyModel.create({
       ...dto,
-      userId,
+      userId: new Types.ObjectId(userId),
     });
   }
 
@@ -150,7 +152,7 @@ export class JockeysService {
 
   async findByUserId(userId: string): Promise<JockeyJson> {
     const jockey = await this.jockeyModel
-      .findOne({ userId })
+      .findOne({ userId: new Types.ObjectId(userId) })
       .populate('userId', 'fullName email phone avatar')
       .exec();
     if (!jockey) {

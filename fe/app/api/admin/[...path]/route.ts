@@ -33,7 +33,7 @@ async function handleProxy(
     }
 
     // Read the body if it exists
-    let body: any = undefined;
+    let body: string | undefined = undefined;
     if (req.method !== "GET" && req.method !== "HEAD") {
       body = await req.text();
     }
@@ -57,10 +57,10 @@ async function handleProxy(
       success: true,
       data: data.data || data,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Lỗi proxy kết nối tới Backend:", err);
     return NextResponse.json(
-      { message: err.message || "Không thể kết nối đến server Backend." },
+      { message: (err as Error).message || "Không thể kết nối đến server Backend." },
       { status: 500 }
     );
   }

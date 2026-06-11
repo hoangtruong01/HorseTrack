@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -13,7 +13,6 @@ import { toast } from "sonner";
 
 export default function AdminRegistrationDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const registrationId = params?.registrationId as string;
   const [registration, setRegistration] = useState<RaceRegistration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +21,7 @@ export default function AdminRegistrationDetailPage() {
     if (!registrationId) return;
     setIsLoading(true);
     try {
-      const item = (await registrationsApi.get(registrationId)) as any;
+      const item = await registrationsApi.get(registrationId);
       
       const statusVal = item.status || "PENDING";
       const statusLower = statusVal.toLowerCase();
@@ -36,14 +35,14 @@ export default function AdminRegistrationDetailPage() {
       const formattedDate = createdDate.toLocaleDateString("vi-VN") + " · " + createdDate.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
 
       setRegistration({
-        id: item._id || item.id,
-        horse: item.horseId?.name || "Không rõ chiến mã",
-        horseCode: item.horseId?.breed || "HB-00",
-        owner: item.ownerId?.fullName || "Không rõ chủ ngựa",
-        ownerEmail: item.ownerId?.email || "",
-        raceId: item.raceId?._id || item.raceId || "",
-        race: item.raceId?.name || "Không rõ vòng đua",
-        tournament: item.tournamentId?.name || "Không rõ giải đấu",
+        id: item._id,
+        horse: (typeof item.horseId === "object" ? item.horseId?.name : null) || "Không rõ chiến mã",
+        horseCode: (typeof item.horseId === "object" ? item.horseId?.breed : null) || "HB-00",
+        owner: (typeof item.ownerId === "object" ? item.ownerId?.fullName : null) || "Không rõ chủ ngựa",
+        ownerEmail: (typeof item.ownerId === "object" ? item.ownerId?.email : null) || "",
+        raceId: (typeof item.raceId === "object" ? item.raceId?._id : item.raceId) || "",
+        race: (typeof item.raceId === "object" ? item.raceId?.name : null) || "Không rõ vòng đua",
+        tournament: (typeof item.tournamentId === "object" ? item.tournamentId?.name : null) || "Không rõ giải đấu",
         submittedAt: formattedDate,
         status: statusMapped,
         eligibility: `Trạng thái thực tế: ${statusVal}. ${item.note || ""}`,
@@ -53,9 +52,9 @@ export default function AdminRegistrationDetailPage() {
           item.approvedAt ? `Được duyệt vào ${new Date(item.approvedAt).toLocaleString("vi-VN")}` : "Chờ duyệt",
         ],
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi khi tải chi tiết hồ sơ đăng ký.");
+      toast.error((err as Error).message || "Lỗi khi tải chi tiết hồ sơ đăng ký.");
     } finally {
       setIsLoading(false);
     }

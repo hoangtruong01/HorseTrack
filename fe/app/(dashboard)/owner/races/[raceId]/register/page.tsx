@@ -69,6 +69,7 @@ export default function RaceRegisterPage() {
     if (raceId) {
       loadData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
   const handleSubmit = async (horseId: string) => {
@@ -92,8 +93,8 @@ export default function RaceRegisterPage() {
 
       toast.success("Hồ sơ đăng ký trận đua của bạn đã được gửi thành công!");
       router.push("/owner/registrations");
-    } catch (err: any) {
-      toast.error(err.message || "Có lỗi xảy ra khi nộp hồ sơ.");
+    } catch (err) {
+      toast.error((err as Error).message || "Có lỗi xảy ra khi nộp hồ sơ.");
       throw err;
     } finally {
       setIsSubmitting(false);

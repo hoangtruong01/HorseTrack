@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Siren, Timer, Trophy, RadioTower, Flag, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Siren, Timer, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -81,10 +81,10 @@ export default function AdminResultDetailPage({
         return rA - rB;
       });
       setResults(rawResults);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || "Lỗi tải dữ liệu.");
-      toast.error(err.message || "Lỗi tải dữ liệu.");
+      setError((err as Error).message || "Lỗi tải dữ liệu.");
+      toast.error((err as Error).message || "Lỗi tải dữ liệu.");
     } finally {
       setIsLoading(false);
     }
@@ -92,6 +92,7 @@ export default function AdminResultDetailPage({
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
   const handlePublish = async () => {
@@ -108,8 +109,8 @@ export default function AdminResultDetailPage({
 
       toast.success("Công bố kết quả thành công! Hệ thống đã chia thưởng và cập nhật bảng xếp hạng.");
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi công bố kết quả.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi công bố kết quả.");
     } finally {
       setIsPublishing(false);
     }

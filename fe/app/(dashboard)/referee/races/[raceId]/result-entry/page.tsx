@@ -1,26 +1,22 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
-  Flag,
-  Play,
-  RotateCcw,
   Save,
-  ShieldCheck,
   Siren,
   Sparkles,
   Award,
   CheckCircle2,
-  Trash2,
   Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
+import { racesApi, raceChecksApi, raceResultsApi, type RaceResultItem } from "@/lib/api-client";
 
 // Types
 type Race = {
@@ -43,34 +39,14 @@ type RaceCheck = {
   };
 };
 
-type RaceResult = {
-  _id: string;
-  raceRegistrationId: string;
-  horseId: {
-    _id: string;
-    name: string;
-    breed: string;
-  };
-  rank?: number;
-  finishTimeMs?: number;
-  outcome: "finished" | "disqualified" | "did_not_start" | "did_not_finish";
-  incident: "none" | "minor_stumble" | "lane_drift" | "gate_delay" | "collision" | "injury";
-  points: number;
-  status: "DRAFT" | "CONFIRMED" | "PUBLISHED" | "CANCELLED";
-  note?: string;
-};
 
-export default function RefereeResultEntryPage({
-  params,
-}: {
-  params: Promise<{ raceId: string }>;
-}) {
-  const { raceId } = use(params);
+export default function RefereeResultEntryPage() {
+  const params = useParams();
+  const raceId = params.raceId as string;
   const router = useRouter();
 
   const [race, setRace] = useState<Race | null>(null);
-  const [horses, setHorses] = useState<RaceCheck[]>([]);
-  const [results, setResults] = useState<RaceResult[]>([]);
+  const [results, setResults] = useState<RaceResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Operations loading
@@ -97,27 +73,20 @@ export default function RefereeResultEntryPage({
     setIsLoading(true);
     try {
       // 1. Fetch race info
-      const raceRes = await fetch(`/api/referee/races/${raceId}`);
-      if (!raceRes.ok) throw new Error("Không thể tải thông tin cuộc đua");
-      const raceData = await raceRes.json();
-      setRace(raceData.data);
+      const raceData = await racesApi.get(raceId);
+      setRace(raceData as unknown as Race);
 
       // 2. Fetch horses (pre-race checks list represents the approved horses list)
-      const checksRes = await fetch(`/api/referee/race-checks/race/${raceId}`);
       let horsesList: RaceCheck[] = [];
-      if (checksRes.ok) {
-        const checksData = await checksRes.json();
-        horsesList = checksData.data || [];
-        setHorses(horsesList);
-      }
-
+      const checksData = await raceChecksApi.listByRace(raceId);
+      horsesList = (checksData || []) as unknown as RaceCheck[];
       // 3. Fetch current race results
-      const resultsRes = await fetch(`/api/referee/race-results/race/${raceId}`);
-      let existingResults: RaceResult[] = [];
-      if (resultsRes.ok) {
-        const resultsData = await resultsRes.json();
-        existingResults = resultsData.data || [];
+      let existingResults: RaceResultItem[] = [];
+      try {
+        existingResults = await raceResultsApi.listByRace(raceId) || [];
         setResults(existingResults);
+      } catch {
+        existingResults = [];
       }
 
       // 4. Map existing results or initialize blank rows
@@ -140,16 +109,18 @@ export default function RefereeResultEntryPage({
         };
       });
       setEntryRows(rows);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Lỗi khi tải dữ liệu.");
+      toast.error((err as Error).message || "Lỗi khi tải dữ liệu.");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!raceId || raceId === "undefined") return;
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
   const handleSimulate = async () => {
@@ -166,14 +137,14 @@ export default function RefereeResultEntryPage({
 
       toast.success("Giả lập cuộc đua thành công! Ranks và chỉ số đã tự động kết xuất.");
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi chạy giả lập.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi chạy giả lập.");
     } finally {
       setIsSimulating(false);
     }
   };
 
-  const handleRowChange = (index: number, field: string, value: any) => {
+  const handleRowChange = (index: number, field: string, value: unknown) => {
     const updated = [...entryRows];
     updated[index] = {
       ...updated[index],
@@ -212,8 +183,8 @@ export default function RefereeResultEntryPage({
 
       toast.success("Lưu nháp kết quả và tự động xếp thứ hạng thành công!");
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi lưu kết quả.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi lưu kết quả.");
     } finally {
       setIsSaving(false);
     }
@@ -238,8 +209,8 @@ export default function RefereeResultEntryPage({
 
       toast.success("Khóa và xác nhận biên bản kết quả thi đấu thành công! Kết quả sẵn sàng cho Ban tổ chức công bố.");
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi khi xác nhận kết quả.");
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi xác nhận kết quả.");
     } finally {
       setIsConfirming(false);
     }
@@ -279,7 +250,7 @@ export default function RefereeResultEntryPage({
         actions={
           <div className="flex items-center gap-3">
             <Button asChild variant="outline" className="h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white">
-              <Link href={`/referee/races/${race._id}/violations`}>
+              <Link href={`/referee/races/${raceId}/violations`}>
                 <Siren className="size-4 mr-1 text-primary" /> Vi phạm
               </Link>
             </Button>

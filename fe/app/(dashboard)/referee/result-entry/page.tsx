@@ -7,39 +7,22 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-
-type RaceInfo = {
-  _id: string;
-  name: string;
-  startTime: string;
-  status: string;
-};
-
-type Assignment = {
-  _id: string;
-  status: string;
-  raceId: RaceInfo;
-};
+import { refereeAssignmentsApi, type AssignmentItem } from "@/lib/api-client";
 
 export default function RefereeResultEntryWorkspacePage() {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const res = await fetch("/api/referee/referee-assignments/my-assignments?limit=100");
-        if (!res.ok) throw new Error("Không thể tải danh sách cuộc đua");
-        const resData = await res.json();
-        const rawData = resData.data;
-        const rawArray = Array.isArray(rawData) ? rawData : (rawData?.data || []);
-        // Only accepted assignments
-        const list = rawArray.filter(
-          (a: any) => a.status === "accepted" && a.raceId
+        const result = await refereeAssignmentsApi.myAssignments({ limit: 100 });
+        const list = (result.data || []).filter(
+          (a) => a.status === "accepted" && typeof a.raceId === "object" && a.raceId !== null
         );
         setAssignments(list);
-      } catch (err: any) {
-        toast.error(err.message || "Lỗi tải danh sách cuộc đua.");
+      } catch (err) {
+        toast.error((err as Error).message || "Lỗi tải danh sách cuộc đua.");
       } finally {
         setIsLoading(false);
       }
@@ -82,11 +65,13 @@ export default function RefereeResultEntryWorkspacePage() {
       ) : (
         <section className="grid gap-4 sm:grid-cols-2">
           {assignments.map((a) => {
-            const isFinished = a.raceId.status === "FINISHED";
-            const isLive = a.raceId.status === "LIVE";
-            const isPublished = a.raceId.status === "RESULT_PUBLISHED";
+            const race = typeof a.raceId === "object" ? a.raceId : null;
+            if (!race) return null;
+            const isFinished = race.status === "FINISHED";
+            const isLive = race.status === "LIVE";
+            const isPublished = race.status === "RESULT_PUBLISHED";
             const isSelectable = isFinished || isLive || isPublished;
-            
+
             return (
               <article
                 key={a._id}
@@ -101,11 +86,11 @@ export default function RefereeResultEntryWorkspacePage() {
                 <div className="flex items-center justify-between">
                   <StatusBadge
                     label={
-                      a.raceId.status === "SCHEDULED" ? "Chưa mở" :
-                      a.raceId.status === "CHECKING" ? "Kiểm duyệt" :
-                      a.raceId.status === "READY" ? "Sẵn sàng" :
-                      a.raceId.status === "LIVE" ? "Đang trực tiếp" :
-                      a.raceId.status === "FINISHED" ? "ĐÃ XONG - CHỜ DUYỆT" : "ĐÃ CÔNG BỐ"
+                      race.status === "SCHEDULED" ? "Chưa mở" :
+                      race.status === "CHECKING" ? "Kiểm duyệt" :
+                      race.status === "READY" ? "Sẵn sàng" :
+                      race.status === "LIVE" ? "Đang trực tiếp" :
+                      race.status === "FINISHED" ? "ĐÃ XONG - CHỜ DUYỆT" : "ĐÃ CÔNG BỐ"
                     }
                     tone={
                       isFinished ? "teal" :
@@ -121,11 +106,11 @@ export default function RefereeResultEntryWorkspacePage() {
 
                 <div className="space-y-1">
                   <h3 className="text-sm font-black uppercase text-foreground leading-tight">
-                    {a.raceId.name}
+                    {race.name}
                   </h3>
                   <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                     <Clock className="size-3 text-primary shrink-0" />
-                    Ngày chạy: {formatDateTime(a.raceId.startTime)}
+                    Ngày chạy: {formatDateTime(race.startTime)}
                   </p>
                 </div>
 
@@ -135,7 +120,7 @@ export default function RefereeResultEntryWorkspacePage() {
                     variant={isSelectable ? "default" : "outline"}
                     className="h-9 px-4 rounded-full text-xs font-black uppercase"
                   >
-                    <Link href={`/referee/races/${a.raceId?._id || (a.raceId as any)?.id}/result-entry`}>
+                    <Link href={`/referee/races/${race._id}/result-entry`}>
                       {isFinished ? "Nhập kết quả ngay" : isPublished ? "Xem kết quả đã khóa" : "Nhập kết quả nháp"}
                       <ArrowRight className="size-3.5 ml-1" />
                     </Link>

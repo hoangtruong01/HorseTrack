@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -70,16 +71,16 @@ export default function HorseDetailPage() {
         const resData = await resultsRes.json();
         if (resData.success) {
           const raw = resData.data || [];
-          const mapped: RaceResultRecord[] = raw.map((item: any) => ({
-            id: item.id || item._id,
-            raceName: item.raceId?.name || "Giải đấu tự do",
-            raceStartTime: item.raceId?.startTime || new Date().toISOString(),
-            position: item.position,
-            finishTime: item.finishTime,
-            gateNumber: item.gateNumber,
-            speed: item.speed,
-            distanceCovered: item.distanceCovered,
-            injuryNotes: item.injuryNotes,
+          const mapped: RaceResultRecord[] = raw.map((item: Record<string, unknown>) => ({
+            id: (item.id || item._id) as string,
+            raceName: ((item.raceId as Record<string, unknown>)?.name as string) || "Giải đấu tự do",
+            raceStartTime: ((item.raceId as Record<string, unknown>)?.startTime as string) || new Date().toISOString(),
+            position: item.position as number,
+            finishTime: item.finishTime as number,
+            gateNumber: item.gateNumber as number,
+            speed: item.speed as number,
+            distanceCovered: item.distanceCovered as number,
+            injuryNotes: item.injuryNotes as string | undefined,
           }));
           setResults(mapped);
         }
@@ -96,6 +97,7 @@ export default function HorseDetailPage() {
     if (horseId) {
       fetchHorseAndResults();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [horseId]);
 
   const handleUpdate = async (formData: FormData) => {
@@ -117,8 +119,8 @@ export default function HorseDetailPage() {
       // Turn off edit mode
       router.push(`/owner/horses/${horseId}`);
       fetchHorseAndResults(); // Reload
-    } catch (err: any) {
-      toast.error(err.message || "Đã xảy ra lỗi khi lưu chiến mã.");
+    } catch (err) {
+      toast.error((err as Error).message || "Đã xảy ra lỗi khi lưu chiến mã.");
       throw err;
     } finally {
       setIsSubmitting(false);
@@ -209,10 +211,11 @@ export default function HorseDetailPage() {
         <div className="md:col-span-5 flex flex-col gap-4">
           <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/40 border border-border flex items-center justify-center">
             {horse.image ? (
-              <img
+              <Image
                 src={horse.image}
                 alt={horse.name}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               <div className="flex flex-col items-center justify-center text-muted-foreground/40">

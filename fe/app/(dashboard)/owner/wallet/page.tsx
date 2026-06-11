@@ -16,7 +16,7 @@ export default function OwnerWalletPage() {
   const { t } = useTranslation();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<WalletUiTransaction[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCashoutForm, setShowCashoutForm] = useState(false);
 
@@ -31,8 +31,8 @@ export default function OwnerWalletPage() {
       setBalance(balanceRes.balance ?? 0);
       setTransactions(mapLedgerTransactions(historyRes.data || []));
       setStats(statsRes);
-    } catch (err: any) {
-      toast.error(err.message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
+    } catch (err) {
+      toast.error((err as Error).message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
     } finally {
       setIsLoading(false);
     }
@@ -48,8 +48,8 @@ export default function OwnerWalletPage() {
       toast.success(t("wallet.cashoutForm.successMsg", { points: points.toLocaleString("vi-VN") }));
       setShowCashoutForm(false);
       await fetchWalletData();
-    } catch (err: any) {
-      toast.error(err.message || t("wallet.cashoutForm.errInvalid", "Đã xảy ra lỗi khi tạo yêu cầu rút điểm."));
+    } catch (err) {
+      toast.error((err as Error).message || t("wallet.cashoutForm.errInvalid", "Đã xảy ra lỗi khi tạo yêu cầu rút điểm."));
     }
   };
 
@@ -88,7 +88,7 @@ export default function OwnerWalletPage() {
             </div>
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Tổng thưởng thắng giải đua</p>
-              <p className="mt-1 font-mono text-xl font-black text-primary">{(stats?.winnings?.total ?? 0).toLocaleString("vi-VN")} PTS</p>
+              <p className="mt-1 font-mono text-xl font-black text-primary">{((stats?.winnings as Record<string, unknown>)?.total as number ?? 0).toLocaleString("vi-VN")} PTS</p>
             </div>
           </div>
 

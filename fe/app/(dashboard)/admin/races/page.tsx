@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
-  Flag, Loader2, RefreshCw, Plus, Trash2, Search, Trophy
+  Eye, Flag, Loader2, RefreshCw, Plus, Trash2, Search, Trophy
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -41,8 +41,8 @@ export default function AdminRacesPage() {
       const res = await racesApi.list({ page: p, limit: 20 });
       setRaces(res.data || []);
       setMeta({ total: res.meta?.total || 0, page: res.meta?.page || 1, totalPages: res.meta?.totalPages || 1 });
-    } catch (e: any) {
-      toast.error(e.message || "Không thể lấy danh sách trận đua");
+    } catch (e) {
+      toast.error((e as Error).message || "Không thể lấy danh sách trận đua");
     } finally {
       setLoading(false);
     }
@@ -58,8 +58,8 @@ export default function AdminRacesPage() {
       await racesApi.updateStatus(id, newStatus);
       toast.success(`Đã cập nhật trạng thái: ${newStatus}`);
       void fetchRaces(page);
-    } catch (e: any) {
-      toast.error(e.message || "Cập nhật trạng thái thất bại");
+    } catch (e) {
+      toast.error((e as Error).message || "Cập nhật trạng thái thất bại");
     } finally {
       setActionLoading(null);
     }
@@ -72,8 +72,8 @@ export default function AdminRacesPage() {
       await racesApi.delete(id);
       toast.success("Đã xóa trận đua thành công");
       void fetchRaces(page);
-    } catch (e: any) {
-      toast.error(e.message || "Không thể xóa trận đua");
+    } catch (e) {
+      toast.error((e as Error).message || "Không thể xóa trận đua");
     } finally {
       setActionLoading(null);
     }
@@ -222,10 +222,11 @@ export default function AdminRacesPage() {
                       </td>
                       <td className="p-4 text-right flex items-center justify-end gap-2">
                         <Link
-                          href={`/admin/races/${race._id}/participants`}
-                          className="rounded-lg border border-border bg-muted hover:bg-muted px-2.5 py-1.5 text-[10px] text-foreground transition font-bold"
+                          href={`/admin/races/${race._id}`}
+                          title="Xem chi tiết"
+                          className="rounded-lg border border-border bg-muted hover:bg-white/10 p-2 text-muted-foreground hover:text-foreground transition"
                         >
-                          Ngựa
+                          <Eye className="size-3.5" />
                         </Link>
                         <button
                           onClick={() => handleDelete(race._id, race.name)}

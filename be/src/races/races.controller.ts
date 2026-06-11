@@ -23,6 +23,7 @@ import { RacesService } from './races.service';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
 import { UpdateRaceStatusDto } from './dto/update-race-status.dto';
+import { UpdateRaceConditionsDto } from './dto/update-race-conditions.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
 @ApiTags('Races')
@@ -74,6 +75,20 @@ export class RacesController {
     @Body() dto: UpdateRaceDto,
   ) {
     return this.racesService.update(id, dto);
+  }
+
+  @Patch(':id/conditions')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN, RoleName.REFEREE)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update race conditions — track & weather (Admin, Referee)',
+  })
+  updateConditions(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() dto: UpdateRaceConditionsDto,
+  ) {
+    return this.racesService.updateConditions(id, dto);
   }
 
   @Patch(':id/status')

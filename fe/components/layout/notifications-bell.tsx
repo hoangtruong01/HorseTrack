@@ -25,7 +25,7 @@ function formatTime(dateStr: string) {
       hour: "2-digit",
       minute: "2-digit",
     });
-  } catch (e) {
+  } catch {
     return "";
   }
 }
@@ -33,7 +33,7 @@ function formatTime(dateStr: string) {
 export function NotificationsBell() {
   const { user } = useAuth();
   const [notificationCount, setNotificationCount] = useState(0);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<{ _id?: string; id?: string; isRead?: boolean; title?: string; body?: string; createdAt?: string }[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +65,7 @@ export function NotificationsBell() {
           const data = await res.json();
           if (data.success && Array.isArray(data.notifications)) {
             setNotifications(data.notifications);
-            const unreadCount = data.notifications.filter((n: any) => !n.isRead).length;
+            const unreadCount = data.notifications.filter((n: Record<string, unknown>) => !n.isRead).length;
             setNotificationCount(unreadCount);
           }
         }
@@ -162,7 +162,7 @@ export function NotificationsBell() {
                 return (
                   <button
                     key={notifId}
-                    onClick={() => handleMarkAsRead(notifId, notif.isRead)}
+                    onClick={() => handleMarkAsRead(notifId, notif.isRead ?? false)}
                     className={cn(
                       "w-full flex gap-3 p-4 text-left transition hover:bg-secondary/50 cursor-pointer relative items-start",
                       !notif.isRead && "bg-primary/5"
@@ -182,7 +182,7 @@ export function NotificationsBell() {
                         {notif.body}
                       </p>
                       <p className="mt-1.5 text-[9px] font-medium text-muted-foreground/60 uppercase tracking-wider">
-                        {formatTime(notif.createdAt)}
+                        {formatTime(notif.createdAt ?? "")}
                       </p>
                     </div>
                   </button>

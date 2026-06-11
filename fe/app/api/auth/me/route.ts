@@ -37,7 +37,7 @@ export async function GET() {
       success: true,
       user: data.data || data, // Thích ứng cấu hình ResponseInterceptor của NestJS (trả về { success: true, data: user } hoặc user thô)
     });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json(
       { message: "Kết nối tới server thất bại." },
       { status: 500 }

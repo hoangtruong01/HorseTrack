@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownLeft, ArrowUpRight, Award, Calendar, Clock, Coins, Copy, Search, Sparkles } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Award, Coins, Copy, Search, Sparkles } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";

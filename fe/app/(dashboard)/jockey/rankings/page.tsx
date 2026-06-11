@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Award, Trophy, Star, Flame, ShieldCheck, User } from "lucide-react";
+import { Trophy, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 
 interface HorseRanking {

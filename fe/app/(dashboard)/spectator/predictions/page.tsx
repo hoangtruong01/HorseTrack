@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Bell, Trophy, CheckCircle, HelpCircle, Activity, Award, Coins, Loader2, ArrowRight } from "lucide-react";
+import { Bell, Activity, Award, Coins, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ export default function SpectatorPredictionsPage() {
     try {
       const res = await walletApi.myHistory({ limit: 1 });
       setBalance(res.points ?? 0);
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi lấy số dư điểm ví:", e);
     } finally {
       setLoadingBalance(false);
@@ -32,7 +32,7 @@ export default function SpectatorPredictionsPage() {
     try {
       const res = await predictionsApi.listMyPredictions({ page: 1, limit: 100 });
       setMyPredictions(res.data || []);
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi tải lịch sử dự đoán:", e);
       toast.error("Không thể tải danh sách lịch sử dự đoán");
     } finally {
@@ -50,9 +50,9 @@ export default function SpectatorPredictionsPage() {
       toast.success("Hủy đặt cược và hoàn điểm thành công!");
       void fetchBalance();
       void fetchPredictions();
-    } catch (e: any) {
+    } catch (e) {
       console.error("Lỗi khi hủy đặt cược:", e);
-      toast.error(e.message || "Không thể hủy cược dự đoán lúc này");
+      toast.error((e as Error).message || "Không thể hủy cược dự đoán lúc này");
     } finally {
       setCancelingId(null);
     }
