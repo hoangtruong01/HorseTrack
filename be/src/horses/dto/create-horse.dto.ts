@@ -88,7 +88,10 @@ export class CreateHorseDto {
   @Max(100)
   staminaScore?: number;
 
-  @ApiPropertyOptional({ type: [String], description: 'List of existing image URLs to keep' })
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'List of existing image URLs to keep',
+  })
   @IsOptional()
   existingImages?: string[] | string;
 }

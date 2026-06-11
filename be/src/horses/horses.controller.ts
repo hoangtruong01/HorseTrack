@@ -10,12 +10,11 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor, AnyFilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import {
   ApiBearerAuth,
@@ -92,7 +91,8 @@ const CREATE_HORSE_SCHEMA = {
         type: 'string',
         format: 'binary',
       },
-      description: 'Additional horse images (jpg/jpeg/png/webp/gif, max 5MB each)',
+      description:
+        'Additional horse images (jpg/jpeg/png/webp/gif, max 5MB each)',
     },
   },
 };
@@ -132,7 +132,10 @@ export class HorsesController {
       for (const file of files) {
         const uploaded = await this.cloudinaryService.uploadFile(file.buffer);
         imageUrls.push(uploaded.secure_url);
-        if ((file.fieldname === 'image' || file.fieldname === 'imageFile') && !primaryImageUrl) {
+        if (
+          (file.fieldname === 'image' || file.fieldname === 'imageFile') &&
+          !primaryImageUrl
+        ) {
           primaryImageUrl = uploaded.secure_url;
         }
       }
@@ -213,7 +216,10 @@ export class HorsesController {
       for (const file of files) {
         const uploaded = await this.cloudinaryService.uploadFile(file.buffer);
         imageUrls.push(uploaded.secure_url);
-        if ((file.fieldname === 'image' || file.fieldname === 'imageFile') && !primaryImageUrl) {
+        if (
+          (file.fieldname === 'image' || file.fieldname === 'imageFile') &&
+          !primaryImageUrl
+        ) {
           primaryImageUrl = uploaded.secure_url;
         }
       }
@@ -222,7 +228,14 @@ export class HorsesController {
       }
     }
 
-    return this.horsesService.update(id, dto, user.id, isAdmin, primaryImageUrl, imageUrls.length > 0 ? imageUrls : undefined);
+    return this.horsesService.update(
+      id,
+      dto,
+      user.id,
+      isAdmin,
+      primaryImageUrl,
+      imageUrls.length > 0 ? imageUrls : undefined,
+    );
   }
 
   @Delete(':id')

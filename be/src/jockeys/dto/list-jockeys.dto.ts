@@ -14,4 +14,3 @@ export class ListJockeysDto extends PaginationDto {
   @IsEnum(JockeyApprovalStatus)
   approvalStatus?: JockeyApprovalStatus;
 }
-

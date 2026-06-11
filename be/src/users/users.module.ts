@@ -23,4 +23,3 @@ import {
   exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}
-

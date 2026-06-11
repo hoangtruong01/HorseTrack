@@ -45,21 +45,29 @@ export class HorsesService {
     imageUrls?: string[],
   ): Promise<HorseDocument> {
     const { existingImages, ...rest } = dto;
-    
+
     let finalImages = imageUrls || [];
     if (existingImages) {
       let parsed: string[] = [];
       try {
-        parsed = typeof existingImages === 'string'
-          ? JSON.parse(existingImages)
-          : existingImages;
+        if (typeof existingImages === 'string') {
+          const res = JSON.parse(existingImages) as unknown;
+          parsed = Array.isArray(res) ? (res as string[]) : [String(res)];
+        } else if (Array.isArray(existingImages)) {
+          parsed = existingImages;
+        } else {
+          parsed = [String(existingImages)];
+        }
       } catch {
-        parsed = Array.isArray(existingImages) ? existingImages : [existingImages];
+        parsed = Array.isArray(existingImages)
+          ? existingImages
+          : [String(existingImages)];
       }
       finalImages = [...parsed, ...finalImages];
     }
 
-    const primaryImage = imageUrl || (finalImages.length > 0 ? finalImages[0] : undefined);
+    const primaryImage =
+      imageUrl || (finalImages.length > 0 ? finalImages[0] : undefined);
 
     return this.horseModel.create({
       ...rest,
@@ -251,20 +259,32 @@ export class HorsesService {
     let finalImages: string[] | undefined = undefined;
     let primaryImage: string | undefined = undefined;
 
-    if (imageUrl !== undefined || imageUrls !== undefined || existingImages !== undefined) {
+    if (
+      imageUrl !== undefined ||
+      imageUrls !== undefined ||
+      existingImages !== undefined
+    ) {
       finalImages = imageUrls || [];
       if (existingImages) {
         let parsed: string[] = [];
         try {
-          parsed = typeof existingImages === 'string'
-            ? JSON.parse(existingImages)
-            : existingImages;
+          if (typeof existingImages === 'string') {
+            const res = JSON.parse(existingImages) as unknown;
+            parsed = Array.isArray(res) ? (res as string[]) : [String(res)];
+          } else if (Array.isArray(existingImages)) {
+            parsed = existingImages;
+          } else {
+            parsed = [String(existingImages)];
+          }
         } catch {
-          parsed = Array.isArray(existingImages) ? existingImages : [existingImages];
+          parsed = Array.isArray(existingImages)
+            ? existingImages
+            : [String(existingImages)];
         }
         finalImages = [...parsed, ...finalImages];
       }
-      primaryImage = imageUrl || (finalImages.length > 0 ? finalImages[0] : undefined);
+      primaryImage =
+        imageUrl || (finalImages.length > 0 ? finalImages[0] : undefined);
     }
 
     // Nếu không phải là admin và ngựa đã được duyệt

@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -262,4 +261,3 @@ export class JockeysService {
     return jockey.save();
   }
 }
-
