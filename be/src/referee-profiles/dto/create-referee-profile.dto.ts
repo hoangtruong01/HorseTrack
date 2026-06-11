@@ -22,4 +22,9 @@ export class CreateRefereeProfileDto {
   @IsOptional()
   @IsString()
   bio?: string;
+
+  @ApiPropertyOptional({ description: 'URL of uploaded license image' })
+  @IsOptional()
+  @IsString()
+  licenseImage?: string;
 }

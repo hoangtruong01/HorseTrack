@@ -33,6 +33,12 @@ export default function AdminHorsesPage() {
   const [selectedHorse, setSelectedHorse] = useState<HorseItem | null>(null);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionInput, setRejectionInput] = useState("");
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const handleSelectHorse = (h: HorseItem | null) => {
+    setSelectedHorse(h);
+    setActiveImageIndex(0);
+  };
 
   const fetchHorses = useCallback(async (page = 1, currentSearch = search) => {
     setLoading(true);
@@ -76,7 +82,7 @@ export default function AdminHorsesPage() {
     try {
       await horsesApi.approve(id);
       toast.success("Phê duyệt chiến mã thành công!");
-      setSelectedHorse(null);
+      handleSelectHorse(null);
       await fetchHorses(meta.page);
     } catch (e) {
       toast.error((e as Error).message ?? "Phê duyệt thất bại");
@@ -94,7 +100,7 @@ export default function AdminHorsesPage() {
     try {
       await horsesApi.reject(id, rejectionInput);
       toast.success("Đã từ chối kiểm duyệt chiến mã.");
-      setSelectedHorse(null);
+      handleSelectHorse(null);
       setShowRejectForm(false);
       setRejectionInput("");
       await fetchHorses(meta.page);
@@ -242,7 +248,7 @@ export default function AdminHorsesPage() {
                   {/* Phần Action (Nút bấm) */}
                   <div className="flex items-center gap-2 mt-5 pt-3 border-t border-border">
                     <button
-                      onClick={() => setSelectedHorse(h)}
+                      onClick={() => handleSelectHorse(h)}
                       className="flex-1 h-9 rounded-xl border border-border bg-muted text-foreground hover:bg-white/[0.08] text-xs font-bold transition flex items-center justify-center"
                     >
                       Xem chi tiết
@@ -321,7 +327,7 @@ export default function AdminHorsesPage() {
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0 sm:ml-4 w-full sm:w-auto mt-4 sm:mt-0">
                   <button
-                    onClick={() => setSelectedHorse(h)}
+                    onClick={() => handleSelectHorse(h)}
                     className="flex-1 sm:flex-none h-10 px-4 rounded-xl border border-border bg-muted text-foreground hover:bg-white/[0.08] text-xs font-bold transition flex items-center justify-center"
                   >
                     Xem chi tiết
@@ -377,7 +383,7 @@ export default function AdminHorsesPage() {
           <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card p-6 md:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.5)] overflow-y-auto max-h-[90vh] animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-200">
             <button
               onClick={() => {
-                setSelectedHorse(null);
+                handleSelectHorse(null);
                 setShowRejectForm(false);
                 setRejectionInput("");
               }}
@@ -393,18 +399,50 @@ export default function AdminHorsesPage() {
             <div className="grid gap-6 md:grid-cols-12">
               {/* Image & Stats */}
               <div className="md:col-span-5 space-y-4">
-                <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted/80 border border-border flex items-center justify-center">
-                  {selectedHorse.image || selectedHorse.imageUrl ? (
-                    <Image
-                      src={selectedHorse.image || selectedHorse.imageUrl || ""}
-                      alt={selectedHorse.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="text-5xl">🐎</div>
-                  )}
-                </div>
+                {(() => {
+                  const horseImages = selectedHorse.images && selectedHorse.images.length > 0
+                    ? selectedHorse.images
+                    : (selectedHorse.image || selectedHorse.imageUrl ? [selectedHorse.image || selectedHorse.imageUrl] : []);
+                  const activeImage = horseImages[activeImageIndex] || selectedHorse.image || selectedHorse.imageUrl || "";
+
+                  return (
+                    <>
+                      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted/80 border border-border flex items-center justify-center">
+                        {activeImage ? (
+                          <Image
+                            src={activeImage}
+                            alt={selectedHorse.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="text-5xl">🐎</div>
+                        )}
+                      </div>
+
+                      {horseImages.length > 1 && (
+                        <div className="grid grid-cols-4 gap-2 mt-2">
+                          {horseImages.map((img, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setActiveImageIndex(index)}
+                              className={`relative aspect-square rounded-lg overflow-hidden border-2 transition ${
+                                activeImageIndex === index ? "border-primary" : "border-transparent opacity-75 hover:opacity-100"
+                              }`}
+                            >
+                              <Image
+                                src={img || ""}
+                                alt={`${selectedHorse.name} thumb ${index + 1}`}
+                                fill
+                                className="object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
                 <div className="rounded-xl border border-border bg-muted p-3 space-y-2 text-xs">
                   <div className="flex justify-between">
@@ -545,7 +583,7 @@ export default function AdminHorsesPage() {
               {!showRejectForm && (
                 <button
                   onClick={() => {
-                    setSelectedHorse(null);
+                    handleSelectHorse(null);
                     setShowRejectForm(false);
                     setRejectionInput("");
                   }}

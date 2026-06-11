@@ -5,12 +5,17 @@ import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 import { Jockey, JockeySchema } from '../jockeys/schemas/jockey.schema';
+import {
+  RefereeProfile,
+  RefereeProfileSchema,
+} from '../referee-profiles/schemas/referee-profile.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Jockey.name, schema: JockeySchema },
+      { name: RefereeProfile.name, schema: RefereeProfileSchema },
     ]),
   ],
   controllers: [UsersController],

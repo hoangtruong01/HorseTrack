@@ -42,4 +42,19 @@ export class CreateJockeyProfileDto {
   @IsOptional()
   @IsString()
   bio?: string;
+
+  @ApiPropertyOptional({ example: 'JK-2024-001' })
+  @IsOptional()
+  @IsString()
+  licenseNumber?: string;
+
+  @ApiPropertyOptional({ example: 'Certified jockey license from VRA' })
+  @IsOptional()
+  @IsString()
+  certificates?: string;
+
+  @ApiPropertyOptional({ description: 'URL of uploaded license image' })
+  @IsOptional()
+  @IsString()
+  licenseImage?: string;
 }

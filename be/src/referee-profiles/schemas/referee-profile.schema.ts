@@ -58,6 +58,9 @@ export class RefereeProfile {
   bio?: string;
 
   @Prop()
+  licenseImage?: string;
+
+  @Prop()
   deletedAt?: Date;
 }
 

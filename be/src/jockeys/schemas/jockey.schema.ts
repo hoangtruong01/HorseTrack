@@ -16,6 +16,12 @@ export enum JockeySkillLevel {
   PROFESSIONAL = 'professional',
 }
 
+export enum JockeyApprovalStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class Jockey {
   @Prop({
@@ -39,8 +45,27 @@ export class Jockey {
   @Prop({ required: true, enum: JockeyStatus, default: JockeyStatus.AVAILABLE })
   status!: JockeyStatus;
 
+  @Prop({
+    required: true,
+    enum: JockeyApprovalStatus,
+    default: JockeyApprovalStatus.PENDING,
+  })
+  approvalStatus!: JockeyApprovalStatus;
+
+  @Prop()
+  rejectionReason?: string;
+
   @Prop({ enum: JockeySkillLevel })
   skillLevel?: JockeySkillLevel;
+
+  @Prop()
+  licenseNumber?: string;
+
+  @Prop()
+  certificates?: string;
+
+  @Prop()
+  licenseImage?: string;
 
   @Prop()
   bio?: string;
@@ -54,3 +79,4 @@ export class Jockey {
 
 export const JockeySchema = SchemaFactory.createForClass(Jockey);
 JockeySchema.index({ status: 1 });
+JockeySchema.index({ approvalStatus: 1 });

@@ -10,11 +10,11 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import {
   ApiBearerAuth,
@@ -78,10 +78,21 @@ const CREATE_HORSE_SCHEMA = {
     dateOfBirth: { type: 'string', example: '2020-03-15' },
     healthStatus: { type: 'string', enum: Object.values(HorseHealthStatus) },
     description: { type: 'string', example: 'Fast and strong horse' },
+    baseSpeed: { type: 'number', example: 60, minimum: 30, maximum: 100 },
+    staminaScore: { type: 'number', example: 70, minimum: 30, maximum: 100 },
     image: {
       type: 'string',
       format: 'binary',
-      description: 'Horse image (jpg/jpeg/png/webp/gif, max 5MB)',
+      description: 'Horse primary image (jpg/jpeg/png/webp/gif, max 5MB)',
+    },
+    images: {
+      type: 'array',
+      items: {
+        type: 'string',
+        format: 'binary',
+      },
+      description:
+        'Additional horse images (jpg/jpeg/png/webp/gif, max 5MB each)',
     },
   },
 };
@@ -104,20 +115,36 @@ export class HorsesController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(RoleName.OWNER, RoleName.ADMIN)
-  @UseInterceptors(FileInterceptor('image', imageUploadOptions))
+  @UseInterceptors(AnyFilesInterceptor(imageUploadOptions))
   @ApiConsumes('multipart/form-data')
   @ApiBody({ schema: CREATE_HORSE_SCHEMA })
   @ApiOperation({ summary: 'Create a new horse (Owner / Admin)' })
   @ApiResponse({ status: 201 })
   async create(
     @Body() dto: CreateHorseDto,
-    @UploadedFile() file: MulterFile | undefined,
+    @UploadedFiles() files: MulterFile[] | undefined,
     @CurrentUser() user: JwtUser,
   ) {
-    const imageUrl = file
-      ? (await this.cloudinaryService.uploadFile(file.buffer)).secure_url
-      : undefined;
-    return this.horsesService.create(dto, user.id, imageUrl);
+    const imageUrls: string[] = [];
+    let primaryImageUrl: string | undefined = undefined;
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const uploaded = await this.cloudinaryService.uploadFile(file.buffer);
+        imageUrls.push(uploaded.secure_url);
+        if (
+          (file.fieldname === 'image' || file.fieldname === 'imageFile') &&
+          !primaryImageUrl
+        ) {
+          primaryImageUrl = uploaded.secure_url;
+        }
+      }
+      if (!primaryImageUrl && imageUrls.length > 0) {
+        primaryImageUrl = imageUrls[0];
+      }
+    }
+
+    return this.horsesService.create(dto, user.id, primaryImageUrl, imageUrls);
   }
 
   @Get()
@@ -171,21 +198,44 @@ export class HorsesController {
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(RoleName.OWNER, RoleName.ADMIN)
-  @UseInterceptors(FileInterceptor('image', imageUploadOptions))
+  @UseInterceptors(AnyFilesInterceptor(imageUploadOptions))
   @ApiConsumes('multipart/form-data')
   @ApiBody({ schema: UPDATE_HORSE_SCHEMA })
   @ApiOperation({ summary: 'Update horse (Owner / Admin)' })
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdateHorseDto,
-    @UploadedFile() file: MulterFile | undefined,
+    @UploadedFiles() files: MulterFile[] | undefined,
     @CurrentUser() user: JwtUser,
   ) {
     const isAdmin = user.roles.includes(RoleName.ADMIN);
-    const imageUrl = file
-      ? (await this.cloudinaryService.uploadFile(file.buffer)).secure_url
-      : undefined;
-    return this.horsesService.update(id, dto, user.id, isAdmin, imageUrl);
+    const imageUrls: string[] = [];
+    let primaryImageUrl: string | undefined = undefined;
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const uploaded = await this.cloudinaryService.uploadFile(file.buffer);
+        imageUrls.push(uploaded.secure_url);
+        if (
+          (file.fieldname === 'image' || file.fieldname === 'imageFile') &&
+          !primaryImageUrl
+        ) {
+          primaryImageUrl = uploaded.secure_url;
+        }
+      }
+      if (!primaryImageUrl && imageUrls.length > 0) {
+        primaryImageUrl = imageUrls[0];
+      }
+    }
+
+    return this.horsesService.update(
+      id,
+      dto,
+      user.id,
+      isAdmin,
+      primaryImageUrl,
+      imageUrls.length > 0 ? imageUrls : undefined,
+    );
   }
 
   @Delete(':id')

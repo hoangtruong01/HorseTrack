@@ -66,6 +66,9 @@ export default function RefereeDashboardPage() {
   const [experienceYears, setExperienceYears] = useState(1);
   const [bio, setBio] = useState("");
   const [certificates, setCertificates] = useState("");
+  const [licenseImage, setLicenseImage] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -82,6 +85,8 @@ export default function RefereeDashboardPage() {
         setExperienceYears(profileData.experienceYears || 1);
         setBio(profileData.bio || "");
         setCertificates(profileData.certificates || "");
+        setLicenseImage(profileData.licenseImage || "");
+        setImagePreview(profileData.licenseImage || "");
       } catch (err) {
         if ((err as Error).message?.toLowerCase().includes("not found")) {
           setProfile(null);
@@ -126,6 +131,46 @@ export default function RefereeDashboardPage() {
     fetchData();
   }, []);
 
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Kích thước ảnh không được vượt quá 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || "Tải lên ảnh thất bại.");
+      }
+
+      setLicenseImage(resData.url);
+      toast.success("Tải ảnh giấy phép thành công!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Lỗi khi tải ảnh lên.");
+      setImagePreview("");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleCreateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!licenseNumber.trim()) {
@@ -144,6 +189,7 @@ export default function RefereeDashboardPage() {
         experienceYears: Number(experienceYears),
         bio,
         certificates,
+        licenseImage,
       };
       if (profile) {
         await refereeProfilesApi.updateProfile(profile._id, dto);

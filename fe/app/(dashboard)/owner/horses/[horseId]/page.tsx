@@ -46,6 +46,7 @@ export default function HorseDetailPage() {
   const [results, setResults] = useState<RaceResultRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const fetchHorseAndResults = async () => {
     setIsLoading(true);
@@ -60,6 +61,7 @@ export default function HorseDetailPage() {
         if (resData.success) {
           const raw = resData.data;
           setHorse({ ...raw, id: raw.id || raw._id });
+          setActiveImageIndex(0);
         }
       } else {
         toast.error("Không thể lấy thông tin chi tiết của ngựa.");
@@ -209,24 +211,56 @@ export default function HorseDetailPage() {
         
         {/* Left Column: Image (span 5) */}
         <div className="md:col-span-5 flex flex-col gap-4">
-          <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/40 border border-border flex items-center justify-center">
-            {horse.image ? (
-              <Image
-                src={horse.image}
-                alt={horse.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center text-muted-foreground/40">
-                <Award className="size-20 stroke-[1]" />
-                <span className="text-xs uppercase tracking-widest mt-3">No Image</span>
-              </div>
-            )}
-            <div className="absolute top-3 left-3">
-              <StatusBadge label={meta.label} tone={meta.tone} />
-            </div>
-          </div>
+          {(() => {
+            const horseImages = horse.images && horse.images.length > 0
+              ? horse.images
+              : (horse.image ? [horse.image] : []);
+            const activeImage = horseImages[activeImageIndex] || horse.image || "";
+
+            return (
+              <>
+                <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/40 border border-border flex items-center justify-center">
+                  {activeImage ? (
+                    <Image
+                      src={activeImage}
+                      alt={horse.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-muted-foreground/40">
+                      <Award className="size-20 stroke-[1]" />
+                      <span className="text-xs uppercase tracking-widest mt-3">No Image</span>
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3">
+                    <StatusBadge label={meta.label} tone={meta.tone} />
+                  </div>
+                </div>
+
+                {horseImages.length > 1 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {horseImages.map((img, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setActiveImageIndex(index)}
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition ${
+                          activeImageIndex === index ? "border-primary" : "border-transparent opacity-75 hover:opacity-100"
+                        }`}
+                      >
+                        <Image
+                          src={img || ""}
+                          alt={`${horse.name} thumb ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           {/* Core Speed & Stamina Indicators */}
           <div className="space-y-4 bg-muted02] border border-border rounded-xl p-4">
