@@ -19,10 +19,14 @@ import {
   Sparkles,
   User,
   X,
+  Upload,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import Image from "next/image";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useRouter } from "next/navigation";
+import { jockeysApi, type JockeyItem } from "@/lib/api-client";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -120,9 +124,23 @@ export function JockeyDashboard() {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingInvs, setIsLoadingInvs] = useState(true);
 
-  // Profile status
+  // User profile status
   const [profile, setProfile] = useState<{ fullName?: string; avatar?: string; email?: string; phone?: string } | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // Jockey profile and form states
+  const [jockeyProfile, setJockeyProfile] = useState<JockeyItem | null>(null);
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [experienceYears, setExperienceYears] = useState(1);
+  const [bio, setBio] = useState("");
+  const [certificates, setCertificates] = useState("");
+  const [licenseImage, setLicenseImage] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
+  const [heightCm, setHeightCm] = useState(165);
+  const [weightKg, setWeightKg] = useState(55);
+  const [skillLevel, setSkillLevel] = useState("beginner");
 
   // Selected horse detail for Modal
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
@@ -140,7 +158,37 @@ export function JockeyDashboard() {
     setIsLoadingProfile(true);
 
     try {
-      // 1. Fetch Stats
+      // Fetch User info
+      const profileRes = await fetch("/api/auth/me");
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
+        if (profileData.success) {
+          setProfile(profileData.user);
+        }
+      }
+
+      // Fetch Jockey profile details
+      try {
+        const jProfile = await jockeysApi.getMe();
+        setJockeyProfile(jProfile);
+        setLicenseNumber(jProfile.licenseNumber || "");
+        setExperienceYears(jProfile.experienceYears || 1);
+        setBio(jProfile.bio || "");
+        setCertificates(jProfile.certificates || "");
+        setLicenseImage(jProfile.licenseImage || "");
+        setImagePreview(jProfile.licenseImage || "");
+        setHeightCm(jProfile.heightCm || 165);
+        setWeightKg(jProfile.weightKg || 55);
+        setSkillLevel(jProfile.skillLevel || "beginner");
+      } catch (err) {
+        if ((err as Error).message?.toLowerCase().includes("not found")) {
+          setJockeyProfile(null);
+        } else {
+          console.error("Lỗi lấy jockey profile:", err);
+        }
+      }
+
+      // Fetch Stats
       const statsRes = await fetch("/api/jockey/dashboard");
       if (statsRes.ok) {
         const statsData = await statsRes.json();
@@ -149,21 +197,12 @@ export function JockeyDashboard() {
         }
       }
 
-      // 2. Fetch Invitations
+      // Fetch Invitations
       const invsRes = await fetch("/api/jockey/invitations");
       if (invsRes.ok) {
         const invsData = await invsRes.json();
         if (invsData.success) {
           setInvitations(invsData.data || []);
-        }
-      }
-
-      // 3. Fetch Profile
-      const profileRes = await fetch("/api/auth/me");
-      if (profileRes.ok) {
-        const profileData = await profileRes.json();
-        if (profileData.success) {
-          setProfile(profileData.user);
         }
       }
     } catch (err) {
@@ -179,6 +218,80 @@ export function JockeyDashboard() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Kích thước ảnh không được vượt quá 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || "Tải lên ảnh thất bại.");
+      }
+
+      setLicenseImage(resData.url);
+      toast.success("Tải ảnh giấy phép thành công!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Lỗi khi tải ảnh lên.");
+      setImagePreview("");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCreateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!licenseNumber.trim()) {
+      toast.error("Vui lòng nhập số giấy phép nài ngựa");
+      return;
+    }
+
+    setIsSubmittingProfile(true);
+    try {
+      const dto = {
+        heightCm: Number(heightCm),
+        weightKg: Number(weightKg),
+        experienceYears: Number(experienceYears),
+        skillLevel,
+        bio,
+        licenseNumber,
+        certificates,
+        licenseImage,
+      };
+      if (jockeyProfile) {
+        await jockeysApi.updateProfile(jockeyProfile._id, dto);
+        toast.success("Cập nhật hồ sơ thành công! Đang chờ Admin duyệt lại.");
+      } else {
+        await jockeysApi.createProfile(dto);
+        toast.success("Khởi tạo hồ sơ thành công! Đang chờ Admin duyệt.");
+      }
+      await fetchData();
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi lưu hồ sơ.");
+    } finally {
+      setIsSubmittingProfile(false);
+    }
+  };
 
   // Handle invitation response (ACCEPT / REJECT)
   const handleRespondInvitation = async (id: string, responseStatus: "ACCEPTED" | "REJECTED") => {
@@ -271,6 +384,244 @@ export function JockeyDashboard() {
       trend: "Tích lũy",
     },
   ];
+
+  if (isLoadingProfile || isLoadingStats || isLoadingInvs) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-muted-foreground space-y-3">
+        <Loader2 className="size-8 animate-spin text-[#E10600]" />
+        <p className="text-xs font-mono uppercase tracking-widest">Đang tải dữ liệu Jockey...</p>
+      </div>
+    );
+  }
+
+  // If Jockey profile is not approved, block standard dashboard and show approval / license entry page
+  if (!jockeyProfile || jockeyProfile.approvalStatus !== "APPROVED") {
+    const isPendingApproval = jockeyProfile?.approvalStatus === "PENDING" && jockeyProfile.licenseNumber && jockeyProfile.licenseImage;
+    const isRejected = jockeyProfile?.approvalStatus === "REJECTED";
+
+    return (
+      <main className="space-y-6 max-w-2xl mx-auto px-4 sm:px-6 py-12">
+        <PageHeader
+          eyebrow="Xác thực tài khoản"
+          title="Yêu cầu bổ sung Hồ sơ & Giấy phép"
+          description="Để bắt đầu hoạt động, vui lòng hoàn tất thông tin bằng cấp, giấy phép nài ngựa. Ban tổ chức sẽ duyệt hồ sơ của bạn."
+        />
+
+        {isRejected && (
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4 text-xs text-red-400 font-bold space-y-1.5 animate-pulse">
+            <div className="flex items-center gap-2 text-red-500 text-[10px] uppercase tracking-wider">
+              <ShieldAlert className="size-4" />
+              <span>Hồ sơ của bạn bị từ chối phê duyệt</span>
+            </div>
+            <p className="italic text-foreground">&quot;{jockeyProfile.rejectionReason || "Không có lý do chi tiết"}&quot;</p>
+            <p className="text-muted-foreground font-normal">Vui lòng điều chỉnh thông tin bên dưới và nộp lại hồ sơ.</p>
+          </div>
+        )}
+
+        {isPendingApproval ? (
+          <section className="relative overflow-hidden rounded-3xl border border-[#E10600]/30 bg-card p-6 shadow-2xl space-y-6">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-500 to-transparent" />
+            
+            <div className="flex items-center gap-3 text-amber-400">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+              </span>
+              <h3 className="text-sm font-black uppercase tracking-wider">Hồ sơ đang được kiểm duyệt</h3>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Cảm ơn bạn đã cung cấp thông tin. Ban tổ chức đang kiểm duyệt hồ sơ và giấy phép của bạn. 
+              Bạn sẽ nhận được thông báo ngay khi tài khoản được kích hoạt thành công.
+            </p>
+
+            <div className="p-4 rounded-2xl bg-muted/30 border border-border space-y-3 text-xs">
+              <div>
+                <span className="text-muted-foreground">Số giấy phép:</span>
+                <strong className="text-foreground ml-2 font-mono">{jockeyProfile?.licenseNumber}</strong>
+              </div>
+              {jockeyProfile?.experienceYears !== undefined && (
+                <div>
+                  <span className="text-muted-foreground">Năm kinh nghiệm:</span>
+                  <strong className="text-foreground ml-2">{jockeyProfile?.experienceYears} năm</strong>
+                </div>
+              )}
+              {jockeyProfile?.certificates && (
+                <div>
+                  <span className="text-muted-foreground">Bằng cấp:</span>
+                  <p className="text-muted-foreground bg-black/20 p-2 rounded border border-border/50 mt-1">{jockeyProfile?.certificates}</p>
+                </div>
+              )}
+              {jockeyProfile?.licenseImage && (
+                <div>
+                  <span className="text-muted-foreground">Ảnh giấy phép đã tải lên:</span>
+                  <div className="mt-2 relative max-w-xs h-32 rounded-lg overflow-hidden border border-border bg-muted">
+                    <img src={jockeyProfile.licenseImage} alt="Giấy phép nài ngựa" className="size-full object-contain" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-border flex justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // To let them edit if they want
+                  setJockeyProfile({
+                    ...jockeyProfile!,
+                    licenseNumber: "", // clear to force show form edit mode
+                  });
+                }}
+                className="rounded-full text-xs font-bold uppercase tracking-wider h-9 px-4 border-border"
+              >
+                Cập nhật lại thông tin
+              </Button>
+            </div>
+          </section>
+        ) : (
+          <section className="rounded-3xl border border-border bg-card p-6 shadow-2xl relative">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#E10600] to-transparent" />
+            <form onSubmit={handleCreateProfile} className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">Chiều cao (cm) <span className="text-red-500">*</span></label>
+                  <input
+                    type="number"
+                    required
+                    min={100}
+                    value={heightCm}
+                    onChange={(e) => setHeightCm(parseInt(e.target.value) || 0)}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">Cân nặng (kg) <span className="text-red-500">*</span></label>
+                  <input
+                    type="number"
+                    required
+                    min={30}
+                    value={weightKg}
+                    onChange={(e) => setWeightKg(parseInt(e.target.value) || 0)}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">Số năm kinh nghiệm</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={experienceYears}
+                    onChange={(e) => setExperienceYears(parseInt(e.target.value) || 0)}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">Cấp độ kỹ năng</label>
+                  <select
+                    value={skillLevel}
+                    onChange={(e) => setSkillLevel(e.target.value)}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                  >
+                    <option value="beginner">Mới bắt đầu (Beginner)</option>
+                    <option value="intermediate">Trung cấp (Intermediate)</option>
+                    <option value="advanced">Nâng cao (Advanced)</option>
+                    <option value="professional">Chuyên nghiệp (Professional)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground">Số giấy phép (License) <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ví dụ: JK-2026"
+                  value={licenseNumber}
+                  onChange={(e) => setLicenseNumber(e.target.value)}
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground">Bằng cấp & Chứng chỉ</label>
+                <textarea
+                  value={certificates}
+                  onChange={(e) => setCertificates(e.target.value)}
+                  rows={3}
+                  placeholder="Ví dụ: Chứng chỉ đào tạo nài ngựa, chứng nhận tham gia cúp đua quốc gia..."
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground">Giới thiệu bản thân</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={3}
+                  placeholder="Giới thiệu ngắn về quá trình thi đấu..."
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground">Ảnh chụp giấy phép / Chứng chỉ</label>
+                <div className="relative border border-dashed border-input hover:border-primary/50 bg-muted/20 rounded-xl min-h-[140px] flex flex-col items-center justify-center p-4 transition group cursor-pointer">
+                  {imagePreview ? (
+                    <div className="relative w-full max-w-sm h-[120px] rounded-lg overflow-hidden">
+                      <img src={imagePreview} alt="License Preview" className="size-full object-cover" />
+                      <div className="absolute inset-0 bg-black/45 opacity-0 hover:opacity-100 flex items-center justify-center transition">
+                        <span className="text-white text-xs font-black uppercase bg-primary px-3 py-1.5 rounded-md">
+                          Thay đổi ảnh
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center space-y-2">
+                      {uploading ? (
+                        <Loader2 className="size-8 text-[#E10600] mx-auto animate-spin" />
+                      ) : (
+                        <Upload className="size-8 text-muted-foreground group-hover:text-primary transition" />
+                      )}
+                      <p className="text-sm font-bold text-foreground">
+                        {uploading ? "Đang tải lên..." : "Tải ảnh giấy phép"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Cho phép PNG, JPG, WEBP tối đa 5MB
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    disabled={uploading}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-3">
+                <Button
+                  type="submit"
+                  disabled={isSubmittingProfile || uploading}
+                  className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-foreground font-black uppercase tracking-wider text-xs h-10 px-6"
+                >
+                  {isSubmittingProfile ? (
+                    <><Loader2 className="size-4 animate-spin mr-1.5" /> Đang lưu...</>
+                  ) : (
+                    <><CheckCircle2 className="size-4 mr-1.5" /> Gửi hồ sơ phê duyệt</>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </section>
+        )}
+      </main>
+    );
+  }
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">

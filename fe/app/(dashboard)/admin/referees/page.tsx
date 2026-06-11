@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, ShieldAlert, FileText, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldAlert, FileText, User, Eye } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { refereeProfilesApi, type RefereeProfileItem } from "@/lib/api-client";
 import { toast } from "sonner";
@@ -199,6 +199,19 @@ export default function AdminRefereesPage() {
                           <p className="text-[11px] text-muted-foreground line-clamp-2">{p.bio}</p>
                         ) : (
                           <p className="text-[11px] text-foreground/30 italic">Chưa điền tiểu sử</p>
+                        )}
+                        {p.licenseImage && (
+                          <div className="pt-1">
+                            <a
+                              href={p.licenseImage}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] text-sky-400 font-bold hover:underline"
+                            >
+                              <Eye className="size-3" />
+                              Xem ảnh Giấy phép
+                            </a>
+                          </div>
                         )}
                         {p.approvalStatus === "REJECTED" && p.rejectionReason && (
                           <p className="text-[10px] text-red-400 bg-red-400/5 p-1.5 rounded border border-red-500/10 mt-1">

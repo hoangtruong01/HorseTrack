@@ -17,7 +17,14 @@ import {
   JockeyDocument,
   JockeyStatus,
   JockeySkillLevel,
+  JockeyApprovalStatus,
 } from '../jockeys/schemas/jockey.schema';
+import {
+  RefereeProfile,
+  RefereeProfileDocument,
+  RefereeApprovalStatus,
+  RefereeProfileStatus,
+} from '../referee-profiles/schemas/referee-profile.schema';
 
 const SALT_ROUNDS = 10;
 
@@ -26,6 +33,8 @@ export class UsersService {
   constructor(
     private usersRepository: UsersRepository,
     @InjectModel(Jockey.name) private jockeyModel: Model<JockeyDocument>,
+    @InjectModel(RefereeProfile.name)
+    private refereeProfileModel: Model<RefereeProfileDocument>,
   ) {}
 
   async create(dto: CreateUserDto): Promise<UserDocument> {
@@ -46,6 +55,10 @@ export class UsersService {
 
     if (user.roles && user.roles.includes(RoleName.JOCKEY)) {
       await this.ensureJockeyProfile(String(user._id));
+    }
+
+    if (user.roles && user.roles.includes(RoleName.REFEREE)) {
+      await this.ensureRefereeProfile(String(user._id));
     }
 
     return user;
@@ -154,6 +167,9 @@ export class UsersService {
     if (role === RoleName.JOCKEY) {
       await this.ensureJockeyProfile(userId);
     }
+    if (role === RoleName.REFEREE) {
+      await this.ensureRefereeProfile(userId);
+    }
   }
 
   async removeRole(userId: string, role: RoleName): Promise<void> {
@@ -171,7 +187,21 @@ export class UsersService {
         experienceYears: 0,
         status: JockeyStatus.AVAILABLE,
         skillLevel: JockeySkillLevel.BEGINNER,
+        approvalStatus: JockeyApprovalStatus.PENDING,
+      });
+    }
+  }
+
+  private async ensureRefereeProfile(userId: string): Promise<void> {
+    const existing = await this.refereeProfileModel.findOne({ userId });
+    if (!existing) {
+      await this.refereeProfileModel.create({
+        userId,
+        experienceYears: 0,
+        status: RefereeProfileStatus.AVAILABLE,
+        approvalStatus: RefereeApprovalStatus.PENDING,
       });
     }
   }
 }
+

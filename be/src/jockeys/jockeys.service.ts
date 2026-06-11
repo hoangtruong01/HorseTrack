@@ -11,7 +11,12 @@ import { UsersService } from '../users/users.service';
 import { RoleName } from '../users/schemas/user.schema';
 import { CreateJockeyProfileDto } from './dto/create-jockey.dto';
 import { UpdateJockeyProfileDto } from './dto/update-jockey.dto';
-import { Jockey, JockeyDocument, JockeyStatus } from './schemas/jockey.schema';
+import {
+  Jockey,
+  JockeyDocument,
+  JockeyStatus,
+  JockeyApprovalStatus,
+} from './schemas/jockey.schema';
 import {
   RaceResult,
   RaceResultDocument,
@@ -39,19 +44,22 @@ export class JockeysService {
       throw new BadRequestException('User does not have JOCKEY role');
     }
 
-    // 2. Check if profile already exists
+    // 2. Check if placeholder profile exists (auto-created on registration)
     const existing = await this.jockeyModel.findOne({
       userId: new Types.ObjectId(userId),
     });
     if (existing) {
-      throw new ConflictException(
-        'Jockey profile already exists for this user',
-      );
+      // Update the placeholder profile with submitted license data
+      Object.assign(existing, dto);
+      existing.approvalStatus = JockeyApprovalStatus.PENDING;
+      existing.rejectionReason = undefined;
+      return existing.save();
     }
 
     return this.jockeyModel.create({
       ...dto,
       userId: new Types.ObjectId(userId),
+      approvalStatus: JockeyApprovalStatus.PENDING,
     });
   }
 
@@ -96,9 +104,15 @@ export class JockeysService {
     };
   }
 
-  async findAllAdmin(page = 1, limit = 20, status?: JockeyStatus) {
+  async findAllAdmin(
+    page = 1,
+    limit = 20,
+    status?: JockeyStatus,
+    approvalStatus?: JockeyApprovalStatus,
+  ) {
     const filter: Record<string, unknown> = {};
     if (status) filter.status = status;
+    if (approvalStatus) filter.approvalStatus = approvalStatus;
 
     const [docs, total] = await Promise.all([
       this.jockeyModel
@@ -214,6 +228,28 @@ export class JockeysService {
       throw new ForbiddenException('You can only update your own profile');
     }
     Object.assign(jockey, dto);
+
+    // If jockey updates their own profile, reset approvalStatus to PENDING
+    if (!isAdmin) {
+      jockey.approvalStatus = JockeyApprovalStatus.PENDING;
+      jockey.rejectionReason = undefined;
+    }
+
+    return jockey.save();
+  }
+
+  async changeApproval(
+    id: string,
+    approvalStatus: JockeyApprovalStatus,
+    rejectionReason?: string,
+  ): Promise<JockeyDocument> {
+    const jockey = await this.findDocument(id);
+    jockey.approvalStatus = approvalStatus;
+    if (approvalStatus === JockeyApprovalStatus.REJECTED) {
+      jockey.rejectionReason = rejectionReason;
+    } else {
+      jockey.rejectionReason = undefined;
+    }
     return jockey.save();
   }
 
@@ -226,3 +262,4 @@ export class JockeysService {
     return jockey.save();
   }
 }
+
