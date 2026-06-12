@@ -29,8 +29,8 @@ export function RegistrationReviewPanel({
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-2xl border border-border/10 bg-[#15151E] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.34)] sm:p-6 lg:p-8">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.18),transparent_26rem)]" />
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-lg sm:p-6 lg:p-8">
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.1),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.08),transparent_26rem)] dark:bg-[linear-gradient(120deg,rgba(225,6,0,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(6,126,106,0.2),transparent_26rem)]" />
         <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div>
             <StatusBadge
@@ -46,7 +46,7 @@ export function RegistrationReviewPanel({
               target, eligibility snapshot, notes placeholder, approval trail.
             </p>
           </div>
-          <div className="grid gap-3 rounded-2xl border border-border/10 bg-black/25 p-4">
+          <div className="grid gap-3 rounded-2xl border border-border bg-muted/50 p-4">
             <div className="flex items-center gap-3">
               <Trophy className="size-5 text-primary" />
               <div>
@@ -79,7 +79,7 @@ export function RegistrationReviewPanel({
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-2xl border border-border/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Registration detail
           </p>
@@ -123,7 +123,7 @@ export function RegistrationReviewPanel({
             </div>
           </dl>
         </div>
-        <div className="rounded-2xl border border-border/10 bg-[#15151E]/85 p-5">
+        <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Review notes
           </p>
@@ -135,7 +135,7 @@ export function RegistrationReviewPanel({
           </label>
           <textarea
             id="review-note"
-            className="mt-2 min-h-32 w-full rounded-xl border border-border/10 bg-black/35 p-3 text-sm text-foreground outline-none transition placeholder:text-white/35 focus:border-primary focus:ring-2 focus:ring-primary/30"
+            className="mt-2 min-h-32 w-full rounded-xl border border-border bg-muted/50 p-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
             placeholder="Add internal moderation note. Mock-only; not saved."
             defaultValue={registration.reviewNote}
           />
@@ -161,7 +161,7 @@ export function RegistrationReviewPanel({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border/10 bg-[#15151E]/85 p-5">
+      <section className="rounded-2xl border border-border bg-card p-5">
         <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
           Moderation trail
         </p>
@@ -169,7 +169,7 @@ export function RegistrationReviewPanel({
           {registration.adminTrail.map((item) => (
             <li
               key={item}
-              className="rounded-xl border border-border/10 bg-black/25 p-4 text-sm font-bold text-white/85"
+              className="rounded-xl border border-border bg-muted/50 p-4 text-sm font-bold text-foreground"
             >
               {item}
             </li>

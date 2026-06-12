@@ -55,10 +55,10 @@ export function LoginForm() {
       if (firstRole === "counter_staff") {
         firstRole = "counter-staff";
       }
-      toast.success(t("auth.loginSuccess"));
+      toast.success(t("auth.loginForm.loginSuccess"));
       router.push(`/${firstRole}`);
     } catch (err) {
-      const errMsg = (err as Error).message || t("auth.googleError");
+      const errMsg = (err as Error).message || t("auth.loginForm.googleError");
       setErrorMsg(errMsg);
       toast.error(errMsg);
       setIsSubmitting(false);
@@ -118,10 +118,10 @@ export function LoginForm() {
         targetRole = "counter-staff";
       }
 
-      toast.success(t("auth.loginSuccess"));
+      toast.success(t("auth.loginForm.loginSuccess"));
       router.push(`/${targetRole}`);
     } catch (err) {
-      const errMsg = (err as Error).message || t("auth.loginError");
+      const errMsg = (err as Error).message || t("auth.loginForm.loginError");
       setErrorMsg(errMsg);
       toast.error(errMsg);
       setIsSubmitting(false);
