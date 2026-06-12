@@ -2341,7 +2341,7 @@
       "tryDemoAccount": "Thử tài khoản demo",
       "newToHorseTrack": "Mới dùng HorseTrack?",
       "createAccount": "Tạo tài khoản",
-      "loginSuccess": "Đăng nhập thành công! Chào mừng {{name}} trở lại.",
+      "loginSuccess": "Đăng nhập thành công!",
       "googleAuthFailed": "Xác thực tài khoản Google thất bại.",
       "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.",
       "roles": {
@@ -2376,6 +2376,10 @@
       "registerSuccess": "Đăng ký tài khoản thành công! Đang chuyển hướng...",
       "registerFailed": "Đăng ký tài khoản thất bại."
     },
+    "loginSuccess": "Đăng nhập thành công!",
+    "loginError": "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.",
+    "googleError": "Xác thực tài khoản Google thất bại.",
+    "logoutSuccess": "Đăng xuất thành công!",
     "roleDescriptions": {
       "admin": {
         "eyebrow": "Tháp điều khiển",
