@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { apiFetch, setAuthToken, type UserItem } from '../lib/api-client';
+import { setAuthToken } from '../lib/api-client';
+import { BASE_URL } from '../lib/config';
 
 export type AuthUser = {
   id: string;
@@ -30,15 +31,75 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AUTH_STORAGE_KEY = 'horsetrack.auth';
+
+type StoredAuth = {
+  accessToken: string;
+  refreshToken?: string;
+  user: AuthUser;
+};
+
+function getStorage() {
+  try {
+    return (globalThis as { localStorage?: Storage }).localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function toAuthUser(raw: any): AuthUser {
+  return {
+    id: raw._id || raw.id,
+    fullName: raw.fullName,
+    email: raw.email,
+    avatar: raw.avatar,
+    roles: raw.roles || [],
+    status: raw.status,
+    phone: raw.phone,
+    address: raw.address,
+    dob: raw.dob,
+  };
+}
+
+function readStoredAuth(): StoredAuth | null {
+  const raw = getStorage()?.getItem(AUTH_STORAGE_KEY);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as StoredAuth;
+    if (!parsed.accessToken || !parsed.user) return null;
+    return parsed;
+  } catch {
+    getStorage()?.removeItem(AUTH_STORAGE_KEY);
+    return null;
+  }
+}
+
+function saveStoredAuth(auth: StoredAuth) {
+  getStorage()?.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+}
+
+function clearStoredAuth() {
+  getStorage()?.removeItem(AUTH_STORAGE_KEY);
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const storedAuth = readStoredAuth();
+    if (storedAuth) {
+      setAuthToken(storedAuth.accessToken);
+      setUser(storedAuth.user);
+    }
+    setIsLoading(false);
+  }, []);
 
   const login = async (email: string, password: string): Promise<AuthUser> => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${require('../lib/config').BASE_URL}/auth/login`, {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,20 +114,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const payload = data.data || data;
       setAuthToken(payload.accessToken);
       
-      // Parse user model
-      const userData: AuthUser = {
-        id: payload.user._id || payload.user.id,
-        fullName: payload.user.fullName,
-        email: payload.user.email,
-        avatar: payload.user.avatar,
-        roles: payload.user.roles || [],
-        status: payload.user.status,
-        phone: payload.user.phone,
-        address: payload.user.address,
-        dob: payload.user.dob,
-      };
+      const userData = toAuthUser(payload.user);
 
       setUser(userData);
+      saveStoredAuth({
+        accessToken: payload.accessToken,
+        refreshToken: payload.refreshToken,
+        user: userData,
+      });
       return userData;
     } finally {
       setIsLoading(false);
@@ -76,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     setUser(null);
     setAuthToken(null);
+    clearStoredAuth();
   };
 
   const register = async (payload: {
@@ -89,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }): Promise<AuthUser> => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${require('../lib/config').BASE_URL}/auth/register`, {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,19 +160,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const payloadData = data.data || data;
       setAuthToken(payloadData.accessToken);
 
-      const userData: AuthUser = {
-        id: payloadData.user._id || payloadData.user.id,
-        fullName: payloadData.user.fullName,
-        email: payloadData.user.email,
-        avatar: payloadData.user.avatar,
-        roles: payloadData.user.roles || [],
-        status: payloadData.user.status,
-        phone: payloadData.user.phone,
-        address: payloadData.user.address,
-        dob: payloadData.user.dob,
-      };
+      const userData = toAuthUser(payloadData.user);
 
       setUser(userData);
+      saveStoredAuth({
+        accessToken: payloadData.accessToken,
+        refreshToken: payloadData.refreshToken,
+        user: userData,
+      });
       return userData;
     } finally {
       setIsLoading(false);

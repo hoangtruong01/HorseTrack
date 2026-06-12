@@ -41,7 +41,7 @@ function RootLayoutContent() {
 
     const timer = setTimeout(() => {
       if (!user && !inAuthGroup) {
-        router.replace('/(auth)/login');
+        router.replace('/login');
       } else if (user && inAuthGroup) {
         const route = getRoleRoute(user.roles);
         router.replace(route as any);

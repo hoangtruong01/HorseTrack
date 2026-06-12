@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Platform, Alert, ScrollView } from 'react-native';
 import { useAuth } from '../../providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -7,16 +7,30 @@ import { useRouter } from 'expo-router';
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const performLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      router.replace('/login');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    if (Platform.OS === 'web') {
+      void performLogout();
+      return;
+    }
     Alert.alert('Đăng xuất', 'Bạn có chắc chắn muốn đăng xuất tài khoản?', [
       { text: 'Hủy', style: 'cancel' },
       {
         text: 'Đăng xuất',
         style: 'destructive',
-        onPress: async () => {
-          await logout();
-        },
+        onPress: performLogout,
       },
     ]);
   };
@@ -126,7 +140,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} disabled={isLoggingOut}>
           <MaterialIcons name="logout" size={20} color="#FFFFFF" />
           <Text style={styles.logoutButtonText}>ĐĂNG XUẤT TÀI KHOẢN</Text>
         </TouchableOpacity>
