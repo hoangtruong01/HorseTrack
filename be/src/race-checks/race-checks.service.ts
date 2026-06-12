@@ -141,7 +141,7 @@ export class RaceChecksService {
   async findByRace(raceId: string) {
     return this.checkModel
       .find({ raceId: new Types.ObjectId(raceId) })
-      .populate('raceRegistrationId', 'status')
+      .populate('raceRegistrationId', 'status jockeyUserId')
       .populate('horseId', 'name breed')
       .populate('checkedBy', 'fullName')
       .sort({ createdAt: -1 })

@@ -177,7 +177,7 @@ export default function SpectatorResultsPage() {
               placeholder="Tìm kiếm giải đấu..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-xl border border-border bg-black/25 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
+              className="h-10 w-full rounded-xl border border-border bg-muted/40 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
             />
           </div>
 
@@ -203,7 +203,7 @@ export default function SpectatorResultsPage() {
               {filteredTournaments.map((t) => (
                 <div
                   key={t.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44"
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-muted/30 dark:hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
                   <div>
@@ -284,7 +284,7 @@ export default function SpectatorResultsPage() {
                         <span className="text-[10px] text-primary font-black uppercase tracking-wider">
                           Trận #{group.raceNumber}
                         </span>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-black uppercase bg-teal-500/10 border border-teal-500/20 text-teal-400 rounded-full">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-black uppercase bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 rounded-full">
                           ● ĐÃ CÔNG BỐ
                         </span>
                       </div>
@@ -294,7 +294,7 @@ export default function SpectatorResultsPage() {
                     </div>
 
                     {/* Podium Preview */}
-                    <div className="grid grid-cols-2 gap-2 bg-black/25 rounded-xl p-3 border border-border text-xs">
+                    <div className="grid grid-cols-2 gap-2 bg-muted/40 rounded-xl p-3 border border-border text-xs">
                       <div>
                         <span className="block text-[8px] uppercase tracking-wider text-primary font-bold">🏆 Vô Địch</span>
                         <span className="font-bold text-foreground text-[11px] block truncate mt-0.5">
@@ -352,7 +352,7 @@ export default function SpectatorResultsPage() {
             </div>
 
             {/* Results Table */}
-            <div className="rounded-2xl border border-border bg-[#13131A] overflow-hidden shadow-2xl">
+            <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-border bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
@@ -373,7 +373,7 @@ export default function SpectatorResultsPage() {
                     <th className="p-4 text-right">Điểm Tích Lũy</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-border">
                   {selectedRaceGroup.results.map((res) => (
                     <tr key={res.id} className="hover:bg-muted/30 transition duration-200">
                       <td className="p-4 text-center">
@@ -400,7 +400,7 @@ export default function SpectatorResultsPage() {
                       <td className={`p-4 ${res.incident !== "NONE" ? "text-primary font-bold" : "text-muted-foreground"}`}>
                         {res.note || (res.incident !== "NONE" ? res.incident : "Không")}
                       </td>
-                      <td className="p-4 text-right font-black text-teal-400 text-sm">
+                      <td className="p-4 text-right font-black text-teal-600 dark:text-teal-400 text-sm">
                         +{res.points || 0} Pts
                       </td>
                     </tr>

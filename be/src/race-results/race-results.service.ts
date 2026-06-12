@@ -508,6 +508,12 @@ export class RaceResultsService {
       },
     );
 
+    // Cập nhật trạng thái cuộc đua sang FINISHED nếu cuộc đua đang ở trạng thái LIVE
+    const race = await this.racesService.findOne(raceId);
+    if (race.status === RaceStatus.LIVE) {
+      await this.racesService.updateStatus(raceId, RaceStatus.FINISHED);
+    }
+
     return { message: 'Results confirmed by referee' };
   }
 

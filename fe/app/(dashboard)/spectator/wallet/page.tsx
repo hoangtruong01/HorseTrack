@@ -72,11 +72,11 @@ export default function SpectatorWalletPage() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Điểm khả dụng</p>
-              <p className="mt-1 font-mono text-xl font-black text-amber-500">{balance.toLocaleString("vi-VN")} PTS</p>
+              <p className="mt-1 font-mono text-xl font-black text-amber-600 dark:text-amber-500">{balance.toLocaleString("vi-VN")} PTS</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Tỷ lệ dự đoán đúng</p>
-              <p className="mt-1 font-mono text-xl font-black text-emerald-400">{stats?.predictions?.winRate ?? 0}%</p>
+              <p className="mt-1 font-mono text-xl font-black text-emerald-600 dark:text-emerald-400">{stats?.predictions?.winRate ?? 0}%</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Tổng số dự đoán</p>
