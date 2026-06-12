@@ -42,7 +42,7 @@
       "note": {
         "owner": "Chủ ngựa (70%) và nài ngựa (30%) nhận điểm tự động sau khi kết quả được công bố. Đổi thưởng qua mã xác nhận tại quầy.",
         "jockey": "Chủ ngựa (70%) và nài ngựa (30%) nhận điểm tự động sau khi kết quả được công bố. Đổi thưởng qua mã xác nhận tại quầy.",
-        "spectator": "Dự đoán đúng +1 điểm, sai -1 điểm (nếu còn dư). Tích lũy điểm để đổi quà tại quầy.",
+        "spectator": "Người chưa có điểm được dự đoán miễn phí (đúng +1 điểm, sai không trừ). Người có điểm cược từ 2 Pts trở lên (thắng x2, thua mất cược).",
         "referee": "Trọng tài nhận điểm lương sau khi hoàn thành nhiệm vụ điều hành cuộc đua và có thể đổi thưởng tại quầy."
       }
     },
@@ -724,7 +724,7 @@
       "accuracy": {
         "label": "Tỷ Lệ Dự Đoán Đúng",
         "value": "68.4%",
-        "desc": "Dự đoán đúng nhận +1 điểm, sai -1 điểm"
+        "desc": "Người chưa có điểm: Miễn phí (đúng +1, sai không trừ). Người có điểm: Cược từ 2 Pts trở lên (thắng x2, thua mất cược)."
       }
     },
     "tournaments": {
@@ -745,7 +745,7 @@
     },
     "rules": {
       "title": "Cơ cấu dự đoán (Reward Rule)",
-      "desc": "Mỗi trận đấu bạn có quyền chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng +1 điểm, dự đoán sai khấu trừ -1 điểm. Số dư ví không thể bị âm dưới 0 điểm."
+      "desc": "Người chưa có điểm được dự đoán miễn phí (1 Pts): Đúng được +1 điểm, sai không bị trừ điểm. Người đã có điểm phải cược từ 2 Pts trở lên: Thắng nhận lại cược x2, thua mất toàn bộ điểm cược."
     }
   },
   "referee": {

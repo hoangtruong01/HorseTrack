@@ -81,13 +81,20 @@ export class PredictionsService {
     }
 
     const betAmount = dto.betPoints || 0;
-    if (betAmount === 1) {
-      throw new BadRequestException(
-        'Điểm cược không hợp lệ. Chỉ chấp nhận cược miễn phí (0 Pts) hoặc cược từ 2 Pts trở lên.',
-      );
-    }
-    if (betAmount >= 2) {
-      const balance = await this.ledgerService.getBalance(userId);
+    const balance = await this.ledgerService.getBalance(userId);
+
+    if (balance === 0) {
+      if (betAmount !== 1) {
+        throw new BadRequestException(
+          'Tài khoản chưa có điểm, chỉ chấp nhận cược miễn phí (1 Pts).',
+        );
+      }
+    } else {
+      if (betAmount < 2) {
+        throw new BadRequestException(
+          'Điểm cược không hợp lệ. Bạn đang có điểm thưởng, vui lòng cược từ 2 Pts trở lên.',
+        );
+      }
       if (balance < betAmount) {
         throw new BadRequestException(
           `Số dư ví không đủ để đặt dự đoán (${betAmount} Pts)`,
@@ -291,7 +298,7 @@ export class PredictionsService {
           : 1
         : prediction.betPoints >= 2
           ? -prediction.betPoints
-          : -1;
+          : 0;
 
       const targetStatus = won ? PredictionStatus.WON : PredictionStatus.LOST;
 
@@ -353,42 +360,21 @@ export class PredictionsService {
             NotificationType.PREDICTION,
           );
         } else {
-          // Free prediction: deduct 1 point if possible
-          const currentPoints = await this.ledgerService.getBalance(
+          // Free prediction: No penalty of 1 point! They bet 0, they lose 0.
+          await this.ledgerService.credit({
+            userId: String(prediction.userId),
+            points: 0,
+            sourceType: LedgerSourceType.PREDICTION_REWARD,
+            sourceId: String(prediction._id),
+            note: `Dự đoán sai trận đấu ${raceId} (Đặt cược miễn phí 0 Pts)`,
+          });
+
+          await this.notificationsService.send(
             String(prediction.userId),
+            'Dự đoán không chính xác',
+            `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất. Bạn không bị trừ điểm do đã đặt cược miễn phí.`,
+            NotificationType.PREDICTION,
           );
-          if (currentPoints >= 1) {
-            await this.ledgerService.debit({
-              userId: String(prediction.userId),
-              points: 1,
-              sourceType: LedgerSourceType.PREDICTION_REWARD,
-              sourceId: String(prediction._id),
-              note: `Phạt dự đoán sai miễn phí (-1 điểm) cho trận đấu ${raceId}`,
-            });
-
-            await this.notificationsService.send(
-              String(prediction.userId),
-              'Dự đoán không chính xác',
-              `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất. Bạn bị trừ 1 điểm.`,
-              NotificationType.PREDICTION,
-            );
-          } else {
-            // Balance is already 0, record a 0 points transaction
-            await this.ledgerService.credit({
-              userId: String(prediction.userId),
-              points: 0,
-              sourceType: LedgerSourceType.PREDICTION_REWARD,
-              sourceId: String(prediction._id),
-              note: `Không trừ điểm dự đoán sai do số dư ví đã ở mức 0 (trận đấu ${raceId})`,
-            });
-
-            await this.notificationsService.send(
-              String(prediction.userId),
-              'Dự đoán không chính xác',
-              `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất.`,
-              NotificationType.PREDICTION,
-            );
-          }
         }
       }
     }

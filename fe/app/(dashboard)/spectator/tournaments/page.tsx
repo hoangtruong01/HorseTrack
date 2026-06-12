@@ -186,15 +186,26 @@ export default function SpectatorTournamentsPage() {
       return;
     }
 
-    const betPoints = parseInt(betPointsInput) || 1;
-    if (betPoints < 1) {
-      toast.error("Số điểm đặt cược phải lớn hơn hoặc bằng 1!");
+    const betPoints = parseInt(betPointsInput);
+    if (isNaN(betPoints) || betPoints < 0) {
+      toast.error("Số điểm đặt cược không hợp lệ!");
       return;
     }
 
-    if (betPoints >= 2 && betPoints > balance) {
-      toast.error(`Số dư điểm không đủ (cần ${betPoints} Pts, hiện có ${balance} Pts)!`);
-      return;
+    if (balance === 0) {
+      if (betPoints !== 1) {
+        toast.error("Bạn chưa có điểm, chỉ có thể đặt cược miễn phí (1 Pts)!");
+        return;
+      }
+    } else {
+      if (betPoints < 2) {
+        toast.error("Điểm cược không hợp lệ. Bạn đang có điểm, vui lòng cược từ 2 Pts trở lên!");
+        return;
+      }
+      if (betPoints > balance) {
+        toast.error(`Số dư điểm không đủ (cần ${betPoints} Pts, hiện có ${balance} Pts)!`);
+        return;
+      }
     }
 
     setSubmittingPrediction(true);
@@ -228,6 +239,16 @@ export default function SpectatorTournamentsPage() {
     void fetchMyPredictions();
     void fetchBalance();
   }, [fetchTournaments, fetchAllRaces, fetchMyPredictions, fetchBalance]);
+
+  useEffect(() => {
+    if (!loadingBalance) {
+      if (balance === 0) {
+        setBetPointsInput("1");
+      } else {
+        setBetPointsInput("2");
+      }
+    }
+  }, [balance, loadingBalance]);
 
   const handleSelectTournament = useCallback(async (t: TournamentItem) => {
     setSelectedTour(t);
@@ -922,24 +943,32 @@ export default function SpectatorTournamentsPage() {
                               <div className="relative">
                                 <input
                                   type="number"
-                                  min="1"
+                                  min={balance === 0 ? "1" : "2"}
                                   value={betPointsInput}
                                   onChange={(e) => {
                                     const val = e.target.value;
                                     if (val === "") {
                                       setBetPointsInput("");
                                     } else {
-                                      const parsed = parseInt(val) || 1;
-                                      setBetPointsInput(String(Math.max(1, parsed)));
+                                      const parsed = parseInt(val);
+                                      if (isNaN(parsed)) {
+                                        setBetPointsInput("");
+                                      } else {
+                                        const minVal = balance === 0 ? 1 : 2;
+                                        setBetPointsInput(String(Math.max(minVal, parsed)));
+                                      }
                                     }
                                   }}
                                   onBlur={() => {
-                                    if (!betPointsInput || parseInt(betPointsInput) < 1) {
-                                      setBetPointsInput("1");
+                                    const parsed = parseInt(betPointsInput);
+                                    const minVal = balance === 0 ? 1 : 2;
+                                    if (isNaN(parsed) || parsed < minVal) {
+                                      setBetPointsInput(String(minVal));
                                     }
                                   }}
-                                  className="w-full h-11 rounded-xl border border-border bg-muted pl-3 pr-12 text-xs text-foreground outline-none focus:border-primary font-mono font-bold"
-                                  placeholder="Nhập số điểm (1 để đoán miễn phí)"
+                                  className="w-full h-11 rounded-xl border border-border bg-muted pl-3 pr-12 text-xs text-foreground outline-none focus:border-primary font-mono font-bold disabled:opacity-75"
+                                  placeholder={balance === 0 ? "Đặt cược miễn phí (1 Pts)" : "Nhập số điểm cược (tối thiểu 2 Pts)"}
+                                  disabled={balance === 0}
                                 />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-muted-foreground font-mono">Pts</span>
                               </div>
@@ -949,35 +978,40 @@ export default function SpectatorTournamentsPage() {
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("1")}
-                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition uppercase"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition uppercase disabled:opacity-50"
+                                  disabled={balance > 0}
                                 >
                                   Free
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("10")}
-                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono disabled:opacity-50"
+                                  disabled={balance < 10}
                                 >
                                   10
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("50")}
-                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono disabled:opacity-50"
+                                  disabled={balance < 50}
                                 >
                                   50
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("100")}
-                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono disabled:opacity-50"
+                                  disabled={balance < 100}
                                 >
                                   100
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput(String(balance))}
-                                  className="py-1.5 rounded-lg border border-primary/20 bg-primary/10 text-[9px] font-black text-primary hover:bg-primary hover:text-white transition uppercase"
+                                  className="py-1.5 rounded-lg border border-primary/20 bg-primary/10 text-[9px] font-black text-primary hover:bg-primary hover:text-white transition uppercase disabled:opacity-50"
+                                  disabled={balance < 2}
                                 >
                                   All In
                                 </button>
@@ -992,8 +1026,6 @@ export default function SpectatorTournamentsPage() {
                                 </div>
                               )}
                             </div>
-
-
 
                             <Button
                               onClick={handlePredictSubmit}
@@ -1023,7 +1055,7 @@ export default function SpectatorTournamentsPage() {
                       <span className="text-[9px] font-black uppercase tracking-wider">Cơ cấu điểm thưởng</span>
                     </div>
                     <p className="text-[9px] leading-relaxed text-muted-foreground">
-                      Chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="text-foreground">+1 điểm</strong>, sai khấu trừ <strong className="text-foreground">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
+                      Người chưa có điểm được dự đoán miễn phí (1 Pts): Đúng được <strong className="text-foreground">+1 điểm</strong>, sai không bị trừ điểm. Người đã có điểm phải cược từ <strong className="text-foreground">2 Pts trở lên</strong>: Thắng nhận lại cược x2, thua mất toàn bộ điểm cược.
                     </p>
                   </div>
                 </div>

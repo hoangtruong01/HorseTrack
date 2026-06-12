@@ -42,7 +42,7 @@
       "note": {
         "owner": "Owners (70%) and jockeys (30%) receive points automatically after official results. Redeem via confirmation code at the counter.",
         "jockey": "Owners (70%) and jockeys (30%) receive points automatically after official results. Redeem via confirmation code at the counter.",
-        "spectator": "Correct predictions earn +1 point; wrong predictions lose 1 point when balance allows. Redeem accumulated points at the counter.",
+        "spectator": "Users without points can place free predictions (correct +1, incorrect no penalty). Users with points must bet 2 Pts or more (win x2, lose entire bet).",
         "referee": "Referees receive salary points after completing officiating assignments and can redeem rewards at the counter."
       }
     },
@@ -724,7 +724,7 @@
       "accuracy": {
         "label": "Prediction Accuracy",
         "value": "68.4%",
-        "desc": "+1 pt for correct, -1 pt for wrong prediction"
+        "desc": "Users without points: Free (correct +1, wrong no penalty). Users with points: Bet 2 Pts or more (win x2, lose entire bet)."
       }
     },
     "tournaments": {
@@ -745,7 +745,7 @@
     },
     "rules": {
       "title": "Reward Rule",
-      "desc": "For each race, you can select 1 horse you expect to finish first. Correct prediction adds +1 point, incorrect deduction is -1 point. Wallet balance cannot drop below 0."
+      "desc": "Users without points can place free predictions (1 Pts): Correct gets +1 point, incorrect gets no penalty. Users with points must bet 2 Pts or more: Win gets double payout (x2), lose loses the entire bet amount."
     }
   },
   "referee": {

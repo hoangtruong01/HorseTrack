@@ -91,7 +91,7 @@ export default function RefereeReportsPage() {
       const reportsMap: Record<string, RefereeReport[]> = {};
       await Promise.all(
         myAssignments.map(async (a: Assignment) => {
-          const rId = a.raceId._id;
+          const rId = a.raceId._id || (a.raceId as any).id;
           const repRes = await fetch(`/api/referee/referee-reports/race/${rId}`);
           if (repRes.ok) {
             const repData = await repRes.json();
@@ -226,11 +226,15 @@ export default function RefereeReportsPage() {
                   required
                 >
                   <option value="" className="bg-card">-- Chọn cuộc đua giám sát --</option>
-                  {assignments.map((a) => (
-                    <option key={a.raceId?._id} value={a.raceId?._id} className="bg-card">
-                      {a.raceId?.name} ({a.raceId?.status})
-                    </option>
-                  ))}
+                  {assignments.map((a) => {
+                    const rId = a.raceId?._id || (a.raceId as any)?.id;
+                    const aId = a._id || (a as any).id || rId;
+                    return (
+                      <option key={aId} value={rId || ""} className="bg-card">
+                        {a.raceId?.name} ({a.raceId?.status})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -255,11 +259,15 @@ export default function RefereeReportsPage() {
                   disabled={!selectedRaceId}
                 >
                   <option value="" className="bg-card">-- Tất cả / Không chọn --</option>
-                  {horsesForSelectedRace.map((h) => (
-                    <option key={h.horseId?._id} value={h.horseId?._id} className="bg-card">
-                      {h.horseId?.name}
-                    </option>
-                  ))}
+                  {horsesForSelectedRace.map((h) => {
+                    const horseId = h.horseId?._id || (h.horseId as any)?.id;
+                    const hId = h._id || (h as any).id || horseId;
+                    return (
+                      <option key={hId} value={horseId || ""} className="bg-card">
+                        {h.horseId?.name}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -324,13 +332,14 @@ export default function RefereeReportsPage() {
             <div className="space-y-3">
               {assignments.map((assignment) => {
                 if (!assignment.raceId) return null;
-                const raceId = assignment.raceId._id;
+                const raceId = assignment.raceId._id || (assignment.raceId as any).id;
                 const raceReports = reports[raceId] || [];
                 const isExpanded = expandedRaces[raceId] || false;
+                const assignmentId = assignment._id || (assignment as any).id || raceId;
 
                 return (
                   <article
-                    key={raceId}
+                    key={assignmentId}
                     className="rounded-xl border border-border bg-card/95 shadow overflow-hidden"
                   >
                     {/* Header bar click to toggle expansion */}
@@ -419,7 +428,7 @@ export default function RefereeReportsPage() {
                         )}
                         <div className="pt-2 flex justify-end">
                           <Button asChild variant="outline" className="h-9 px-4 rounded-full text-xs font-bold uppercase">
-                            <Link href={`/referee/races/${assignment.raceId._id}`}>
+                            <Link href={`/referee/races/${assignment.raceId._id || (assignment.raceId as any).id}`}>
                               Đi tới Cuộc Đua <ArrowRight className="size-3.5 ml-1" />
                             </Link>
                           </Button>
