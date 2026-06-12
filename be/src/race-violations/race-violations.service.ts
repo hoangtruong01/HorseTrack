@@ -71,7 +71,7 @@ export class RaceViolationsService {
 
   async findByRace(raceId: string) {
     return this.violationModel
-      .find({ raceId })
+      .find({ raceId: new Types.ObjectId(raceId) })
       .populate('horseId', 'name breed')
       .populate('jockeyUserId', 'fullName')
       .populate('reportedBy', 'fullName')
