@@ -352,7 +352,7 @@ export default function RefereeReportsPage() {
                           {assignment.raceId.name}
                         </h4>
                         <p className="text-[10px] text-muted-foreground font-bold uppercase">
-                          Biên bản lưu vết: <strong className="text-teal-400">{raceReports.length} bản</strong>
+                          Biên bản lưu vết: <strong className="text-teal-600 dark:text-teal-400">{raceReports.length} bản</strong>
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -382,10 +382,10 @@ export default function RefereeReportsPage() {
                                 className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
                               >
                                 <div className="flex justify-between items-center gap-2">
-                                  <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${
+                                  <span className={`px-2 py-0.5 rounded text-[8px] font-bold border ${
                                     rep.type === "PRE_RACE" 
-                                      ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20" 
-                                      : "bg-teal-500/10 text-teal-400 border border-teal-500/20"
+                                      ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" 
+                                      : "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
                                   }`}>
                                     {rep.type === "PRE_RACE" ? "TRƯỚC TRẬN" : "SAU TRẬN"}
                                   </span>
@@ -396,7 +396,7 @@ export default function RefereeReportsPage() {
 
                                 {rep.horseId && (
                                   <p className="text-[10px] font-bold text-foreground">
-                                    Chiến mã liên quan: <span className="text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
+                                    Chiến mã liên quan: <span className="text-teal-600 dark:text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
                                   </p>
                                 )}
 
@@ -408,12 +408,12 @@ export default function RefereeReportsPage() {
                                   <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-muted/50 text-[10px]">
                                     {rep.violation && (
                                       <p className="text-muted-foreground">
-                                        Lỗi vi phạm: <strong className="text-yellow-400 font-bold">{rep.violation}</strong>
+                                        Lỗi vi phạm: <strong className="text-amber-600 dark:text-yellow-400 font-bold">{rep.violation}</strong>
                                       </p>
                                     )}
                                     {rep.penalty && (
                                       <p className="text-muted-foreground">
-                                        Hình phạt: <strong className="text-red-400 font-bold">{rep.penalty}</strong>
+                                        Hình phạt: <strong className="text-red-600 dark:text-red-400 font-bold">{rep.penalty}</strong>
                                       </p>
                                     )}
                                   </div>

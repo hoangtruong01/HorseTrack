@@ -62,7 +62,7 @@ export default function RefereeWalletPage() {
       />
 
       {isLoading && transactions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-white/55">
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <Loader2 className="size-8 animate-spin text-[#E10600]" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">{t("counterStaff.recentRedemptions.loading", "Đang tải lịch sử tài chính...")}</p>
         </div>
@@ -76,7 +76,7 @@ export default function RefereeWalletPage() {
             </div>
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Trận được phân công</p>
-              <p className="mt-1 font-mono text-xl font-black text-emerald-400">{stats?.races?.assignedCount ?? 0}</p>
+              <p className="mt-1 font-mono text-xl font-black text-emerald-600 dark:text-emerald-400">{stats?.races?.assignedCount ?? 0}</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Trận đã xác nhận</p>

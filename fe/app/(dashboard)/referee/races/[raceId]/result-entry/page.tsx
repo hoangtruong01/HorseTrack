@@ -239,7 +239,7 @@ export default function RefereeResultEntryPage() {
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Back link */}
-      <Link href={`/referee/races/${raceId}`} className="inline-flex items-center text-xs text-white/50 hover:text-white transition">
+      <Link href={`/referee/races/${raceId}`} className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground transition">
         <ArrowLeft className="size-3.5 mr-1" /> Quay lại kiểm duyệt ngựa
       </Link>
 
@@ -249,7 +249,7 @@ export default function RefereeResultEntryPage() {
         description="Nhập thời gian về đích thủ công hoặc kích hoạt thuật toán giả lập thời gian chạy dựa trên các chỉ số ngựa và biến cố trên sân."
         actions={
           <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white">
+            <Button asChild variant="outline" className="h-11 rounded-full">
               <Link href={`/referee/races/${raceId}/violations`}>
                 <Siren className="size-4 mr-1 text-primary" /> Vi phạm
               </Link>
@@ -259,11 +259,11 @@ export default function RefereeResultEntryPage() {
       />
 
       {/* Control Actions / Banner */}
-      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-lg">
+      <section className="relative overflow-hidden rounded-2xl border border-border dark:border-white/10 bg-card p-5 shadow-md">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(225,6,0,0.1),transparent_25rem)]" />
         <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="space-y-1">
-            <span className="text-[9px] font-black uppercase tracking-wider text-teal-400">TRẠNG THÁI BIÊN BẢN KẾT QUẢ</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-teal-600 dark:text-teal-400">TRẠNG THÁI BIÊN BẢN KẾT QUẢ</span>
             <div className="flex items-center gap-2 mt-1">
               <StatusBadge
                 label={
@@ -276,9 +276,9 @@ export default function RefereeResultEntryPage() {
                 }
                 pulse={resultsStatus === "DRAFT" && results.length > 0}
               />
-              <span className="text-sm font-bold text-white uppercase">{race.name}</span>
+              <span className="text-sm font-bold text-foreground uppercase">{race.name}</span>
             </div>
-            <p className="text-xs text-white/40 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               *Sau khi Xác nhận, dữ liệu kết quả sẽ được khóa cứng, tự động tính điểm xếp hạng để chia thưởng.*
             </p>
           </div>
@@ -314,7 +314,7 @@ export default function RefereeResultEntryPage() {
       {/* Manual Entry Form */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
+          <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
             Bảng kê chi tiết kết quả về đích
           </h3>
 
@@ -330,14 +330,14 @@ export default function RefereeResultEntryPage() {
         </div>
 
         {entryRows.length === 0 ? (
-          <div className="text-center py-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E]/40 text-white/40 text-xs">
+          <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/40 text-muted-foreground text-xs">
             Chưa có ngựa nào được duyệt kiểm tra trước cuộc đua này.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#15151E] shadow-xl">
+          <div className="overflow-x-auto rounded-2xl border border-border dark:border-white/10 bg-card shadow-md">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-black/40 text-[10px] font-black uppercase tracking-widest text-white/50">
+                <tr className="border-b border-border bg-muted/50 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   <th className="p-4">Xếp hạng</th>
                   <th className="p-4">Chiến mã (Horse)</th>
                   <th className="p-4">Kết quả (Outcome)</th>
@@ -346,7 +346,7 @@ export default function RefereeResultEntryPage() {
                   <th className="p-4">Ghi chú / Note</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {entryRows.map((row, i) => {
                   const existingResult = results.find((r) => {
                     const rHorseId = typeof r.horseId === "object" ? r.horseId?._id : r.horseId;
@@ -354,42 +354,42 @@ export default function RefereeResultEntryPage() {
                   });
 
                   return (
-                    <tr key={row.horseId} className="hover:bg-white/5 transition">
-                      <td className="p-4 font-black text-sm text-white">
+                    <tr key={row.horseId} className="hover:bg-muted/30 transition">
+                      <td className="p-4 font-black text-sm text-foreground">
                         {isLocked && existingResult ? (
                           <div className="flex items-center gap-1.5">
                             <Award className={`size-4 ${existingResult.rank === 1 ? "text-yellow-400" : existingResult.rank === 2 ? "text-slate-300" : "text-amber-600"}`} />
                             {existingResult.rank || "—"}
                           </div>
                         ) : existingResult?.rank ? (
-                          <span className="text-teal-400 font-bold">{existingResult.rank}</span>
+                          <span className="text-teal-600 dark:text-teal-400 font-bold">{existingResult.rank}</span>
                         ) : (
-                          <span className="text-white/30">—</span>
+                          <span className="text-muted-foreground/30">—</span>
                         )}
                       </td>
                       <td className="p-4">
-                        <p className="font-bold text-white uppercase">{row.horseName}</p>
-                        <p className="text-[10px] text-white/40 mt-0.5">{row.horseBreed}</p>
+                        <p className="font-bold text-foreground uppercase">{row.horseName}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{row.horseBreed}</p>
                       </td>
                       <td className="p-4">
                         {isLocked ? (
-                          <span className="text-white font-bold uppercase">{row.outcome}</span>
+                          <span className="text-foreground font-bold uppercase">{row.outcome}</span>
                         ) : (
                           <select
                             value={row.outcome}
                             onChange={(e) => handleRowChange(i, "outcome", e.target.value)}
-                            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                            className="rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground focus:outline-none"
                           >
-                            <option value="finished" className="bg-[#15151E]">FINISHED (Hoàn thành)</option>
-                            <option value="disqualified" className="bg-[#15151E]">DISQUALIFIED (Truất quyền)</option>
-                            <option value="did_not_start" className="bg-[#15151E]">DID_NOT_START (Không xuất phát)</option>
-                            <option value="did_not_finish" className="bg-[#15151E]">DID_NOT_FINISH (Không về đích)</option>
+                            <option value="finished" className="bg-card">FINISHED (Hoàn thành)</option>
+                            <option value="disqualified" className="bg-card">DISQUALIFIED (Truất quyền)</option>
+                            <option value="did_not_start" className="bg-card">DID_NOT_START (Không xuất phát)</option>
+                            <option value="did_not_finish" className="bg-card">DID_NOT_FINISH (Không về đích)</option>
                           </select>
                         )}
                       </td>
                       <td className="p-4">
                         {isLocked ? (
-                          <span className="text-white font-black">{row.finishTimeSecs ? `${row.finishTimeSecs}s` : "—"}</span>
+                          <span className="text-foreground font-black">{row.finishTimeSecs ? `${row.finishTimeSecs}s` : "—"}</span>
                         ) : (
                           <div className="flex items-center gap-1.5 max-w-[120px]">
                             <input
@@ -400,41 +400,41 @@ export default function RefereeResultEntryPage() {
                               value={row.finishTimeSecs}
                               onChange={(e) => handleRowChange(i, "finishTimeSecs", e.target.value)}
                               disabled={row.outcome !== "finished"}
-                              className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white focus:border-primary focus:outline-none placeholder-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                              className="w-full rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                             />
-                            <span className="text-white/40">s</span>
+                            <span className="text-muted-foreground">s</span>
                           </div>
                         )}
                       </td>
                       <td className="p-4">
                         {isLocked ? (
-                          <span className="text-white/60 font-bold uppercase">{row.incident}</span>
+                          <span className="text-muted-foreground font-bold uppercase">{row.incident}</span>
                         ) : (
                           <select
                             value={row.incident}
                             onChange={(e) => handleRowChange(i, "incident", e.target.value)}
                             disabled={row.outcome !== "finished"}
-                            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                            className="rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                           >
-                            <option value="none" className="bg-[#15151E]">NONE (Không có)</option>
-                            <option value="minor_stumble" className="bg-[#15151E]">MINOR_STUMBLE (Vấp nhẹ)</option>
-                            <option value="lane_drift" className="bg-[#15151E]">LANE_DRIFT (Chệch làn)</option>
-                            <option value="gate_delay" className="bg-[#15151E]">GATE_DELAY (Kẹt cổng)</option>
-                            <option value="collision" className="bg-[#15151E]">COLLISION (Va chạm)</option>
-                            <option value="injury" className="bg-[#15151E]">INJURY (Chấn thương)</option>
+                            <option value="none" className="bg-card">NONE (Không có)</option>
+                            <option value="minor_stumble" className="bg-card">MINOR_STUMBLE (Vấp nhẹ)</option>
+                            <option value="lane_drift" className="bg-card">LANE_DRIFT (Chệch làn)</option>
+                            <option value="gate_delay" className="bg-card">GATE_DELAY (Kẹt cổng)</option>
+                            <option value="collision" className="bg-card">COLLISION (Va chạm)</option>
+                            <option value="injury" className="bg-card">INJURY (Chấn thương)</option>
                           </select>
                         )}
                       </td>
                       <td className="p-4">
                         {isLocked ? (
-                          <p className="text-white/50">{row.note || "—"}</p>
+                          <p className="text-muted-foreground">{row.note || "—"}</p>
                         ) : (
                           <input
                             type="text"
                             placeholder="Ghi chú thêm..."
                             value={row.note}
                             onChange={(e) => handleRowChange(i, "note", e.target.value)}
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white focus:border-primary focus:outline-none placeholder-white/25"
+                            className="w-full rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none placeholder:text-muted-foreground/50"
                           />
                         )}
                       </td>
