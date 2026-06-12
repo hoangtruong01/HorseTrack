@@ -2340,7 +2340,10 @@
       "tryDemoAccount": "Try demo account",
       "newToHorseTrack": "New to HorseTrack?",
       "createAccount": "Create an account",
-      "loginSuccess": "Signed in successfully! Welcome back, {{name}}.",
+      "loginSuccess": "Signed in successfully!",
+      "loginError": "Sign in failed. Please check your credentials.",
+      "googleError": "Google authentication failed.",
+      "logoutSuccess": "Logged out successfully!",
       "googleAuthFailed": "Google account verification failed.",
       "loginFailed": "Sign in failed. Please check your credentials.",
       "roles": {
@@ -2375,10 +2378,6 @@
       "registerSuccess": "Registration successful! Redirecting...",
       "registerFailed": "Registration failed."
     },
-    "loginSuccess": "Signed in successfully!",
-    "loginError": "Login failed. Please check your credentials.",
-    "googleError": "Google authentication failed.",
-    "logoutSuccess": "Logged out successfully!",
     "roleDescriptions": {
       "admin": {
         "eyebrow": "Control tower",

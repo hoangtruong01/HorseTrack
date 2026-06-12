@@ -55,8 +55,8 @@ export function ApprovalDialog({
       aria-modal="true"
       aria-labelledby="approval-dialog-title"
     >
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-border/10 bg-[#15151E] shadow-[0_24px_90px_rgba(0,0,0,0.6)]">
-        <div className="flex items-start justify-between border-b border-border/10 p-5">
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+        <div className="flex items-start justify-between border-b border-border p-5">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
               {isReject ? "Reject registration" : "Approve registration"}
@@ -72,14 +72,14 @@ export function ApprovalDialog({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="grid size-10 place-items-center rounded-full border border-border/10 text-white/70 transition hover:bg-muted/10 hover:text-foreground disabled:opacity-50"
+            className="grid size-10 place-items-center rounded-full border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-50"
             aria-label="Close approval dialog"
           >
             <X className="size-4" />
           </button>
         </div>
         <div className="space-y-4 p-5">
-          <div className="rounded-xl border border-border/10 bg-black/25 p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
             <p>
               <span className="font-bold text-foreground">Race:</span>{" "}
               {registration.race}
@@ -101,7 +101,7 @@ export function ApprovalDialog({
               Lý do từ chối
               <textarea
                 id="reject-reason"
-                className="mt-2 min-h-28 w-full rounded-xl border border-border/10 bg-black/35 p-3 text-sm font-normal text-foreground outline-none transition placeholder:text-white/35 focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="mt-2 min-h-28 w-full rounded-xl border border-border bg-muted/50 p-3 text-sm font-normal text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
                 placeholder="Nhập lý do từ chối đăng ký..."
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
@@ -109,12 +109,12 @@ export function ApprovalDialog({
               />
             </label>
           ) : (
-            <div className="rounded-xl border border-emerald-400/25 bg-emerald-400/10 p-4 text-sm text-emerald-100">
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-400/25 dark:bg-emerald-400/10 p-4 text-sm text-emerald-800 dark:text-emerald-100">
               Bạn có chắc chắn muốn phê duyệt đơn đăng ký của chiến mã này vào trận đấu không? Hành động này sẽ được ghi nhận và nài ngựa (nếu có) sẽ có thể được mời tham gia.
             </div>
           )}
         </div>
-        <div className="flex flex-col-reverse gap-3 border-t border-border/10 p-5 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 border-t border-border p-5 sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="outline"
