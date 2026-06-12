@@ -98,7 +98,9 @@ export class JockeyInvitationsService {
       approvalStatus: JockeyApprovalStatus.APPROVED,
     });
     if (!jockeyProfile) {
-      throw new BadRequestException('Jockey profile not found or has not been approved by Admin');
+      throw new BadRequestException(
+        'Jockey profile not found or has not been approved by Admin',
+      );
     }
     if (jockeyProfile.status !== JockeyStatus.AVAILABLE) {
       throw new BadRequestException(
@@ -113,9 +115,7 @@ export class JockeyInvitationsService {
       status: InvitationStatus.PENDING,
     });
     if (existing) {
-      throw new BadRequestException(
-        'Bạn đã gửi lời mời cho Jockey này rồi.',
-      );
+      throw new BadRequestException('Bạn đã gửi lời mời cho Jockey này rồi.');
     }
 
     // 7. Validate jockeySharePercent
@@ -237,14 +237,16 @@ export class JockeyInvitationsService {
       }
 
       // Bind jockey to registration + save jockeySharePercent
-      const updatedReg = await this.registrationModel.findByIdAndUpdate(
-        invitation.registrationId,
-        {
-          jockeyUserId: invitation.jockeyUserId,
-          jockeySharePercent: invitation.jockeySharePercent,
-        },
-        { new: true }
-      ).populate('horseId');
+      const updatedReg = await this.registrationModel
+        .findByIdAndUpdate(
+          invitation.registrationId,
+          {
+            jockeyUserId: invitation.jockeyUserId,
+            jockeySharePercent: invitation.jockeySharePercent,
+          },
+          { new: true },
+        )
+        .populate('horseId');
 
       // Find other pending invitations to auto-cancel and notify other jockeys
       const otherPending = await this.invitationModel.find({
@@ -265,7 +267,8 @@ export class JockeyInvitationsService {
 
         // Notify other jockeys
         for (const otherInv of otherPending) {
-          const horseName = (updatedReg?.horseId as any)?.name || 'ngựa';
+          const horseObj = updatedReg?.horseId as unknown as { name?: string };
+          const horseName = horseObj?.name || 'ngựa';
           const raceName = race?.name || 'Trận đấu';
           await this.notificationsService.send(
             String(otherInv.jockeyUserId),
