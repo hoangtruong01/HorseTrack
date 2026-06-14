@@ -97,7 +97,12 @@ export class PayosService {
   }
 
   async handleWebhook(body: unknown): Promise<void> {
-    if (!this.payos) return;
+    if (!this.payos) {
+      this.logger.error(
+        'PayOS webhook nhận được nhưng PAYOS credentials chưa cấu hình — payment sẽ kẹt PENDING. Kiểm tra biến môi trường PAYOS_*.',
+      );
+      return;
+    }
 
     let webhookData: Awaited<
       ReturnType<InstanceType<typeof PayOS>['webhooks']['verify']>
@@ -105,7 +110,7 @@ export class PayosService {
     try {
       webhookData = await this.payos.webhooks.verify(body as Webhook);
     } catch (err: unknown) {
-      this.logger.warn(`PayOS webhook verification failed: ${String(err)}`);
+      this.logger.error(`PayOS webhook verification failed: ${String(err)}`);
       return;
     }
 
