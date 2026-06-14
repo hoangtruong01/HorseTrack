@@ -38,6 +38,7 @@ describe('WalletService', () => {
     status: CashoutStatus;
     approvedBy?: Types.ObjectId;
     paidBy?: Types.ObjectId;
+    rejectedBy?: Types.ObjectId;
     paidAt?: Date;
     save: jest.Mock;
   }
@@ -149,6 +150,8 @@ describe('WalletService', () => {
       { status: TransactionStatus.FAILED },
     );
     expect(request.status).toBe(CashoutStatus.REJECTED);
+    expect(request.rejectedBy).toEqual(new Types.ObjectId(handlerId));
+    expect(request.approvedBy).toBeUndefined();
   });
 
   it('blocks already processed requests', async () => {

@@ -138,7 +138,7 @@ export class WalletService {
         { status: TransactionStatus.SUCCESS },
       );
     } else if (status === CashoutStatus.REJECTED) {
-      request.approvedBy = new Types.ObjectId(handlerId);
+      request.rejectedBy = new Types.ObjectId(handlerId);
       await this.transactionModel.findOneAndUpdate(
         { cashoutRequestId: request._id },
         { status: TransactionStatus.FAILED },
@@ -193,6 +193,7 @@ export class WalletService {
         .populate('userId', 'fullName email phone roles')
         .populate('approvedBy', 'fullName')
         .populate('paidBy', 'fullName')
+        .populate('rejectedBy', 'fullName')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -211,6 +212,7 @@ export class WalletService {
       .populate('userId', 'fullName email phone roles')
       .populate('approvedBy', 'fullName')
       .populate('paidBy', 'fullName')
+      .populate('rejectedBy', 'fullName')
       .exec();
 
     if (!request) {
