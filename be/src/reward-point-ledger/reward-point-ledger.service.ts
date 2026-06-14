@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import {
   LedgerSourceType,
   RewardPointLedger,
@@ -24,6 +24,7 @@ export class RewardPointLedgerService {
     private ledgerModel: Model<RewardPointLedgerDocument>,
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
+    @InjectConnection() private connection: Connection,
   ) {}
 
   private buildUserIdFilter(userId: string) {
@@ -49,28 +50,44 @@ export class RewardPointLedgerService {
   }
 
   async credit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
-    // Atomic increment on User — prevents race conditions
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(
-        params.userId,
-        { $inc: { points: params.points } },
-        { new: true },
-      )
-      .exec();
+    const session = await this.connection.startSession();
+    try {
+      session.startTransaction();
 
-    const balanceAfter = updatedUser?.points ?? params.points;
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(
+          params.userId,
+          { $inc: { points: params.points } },
+          { new: true },
+        )
+        .session(session)
+        .exec();
 
-    const entry = await this.ledgerModel.create({
-      userId: new Types.ObjectId(params.userId),
-      sourceType: params.sourceType,
-      sourceId: params.sourceId,
-      pointsDelta: params.points,
-      balanceAfter,
-      note: params.note,
-      createdBy: params.createdBy,
-    });
+      const balanceAfter = updatedUser?.points ?? params.points;
 
-    return entry;
+      const [entry] = await this.ledgerModel.create(
+        [
+          {
+            userId: new Types.ObjectId(params.userId),
+            sourceType: params.sourceType,
+            sourceId: params.sourceId,
+            pointsDelta: params.points,
+            balanceAfter,
+            note: params.note,
+            createdBy: params.createdBy,
+          },
+        ],
+        { session },
+      );
+
+      await session.commitTransaction();
+      return entry;
+    } catch (err) {
+      if (session.inTransaction()) await session.abortTransaction();
+      throw err;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async updateNote(
@@ -84,39 +101,55 @@ export class RewardPointLedgerService {
   }
 
   async debit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
-    // Atomic: decrement ONLY if balance is sufficient — prevents race conditions
-    const updatedUser = await this.userModel
-      .findOneAndUpdate(
-        {
-          _id: new Types.ObjectId(params.userId),
-          points: { $gte: params.points },
-        },
-        { $inc: { points: -params.points } },
-        { new: true },
-      )
-      .exec();
+    const session = await this.connection.startSession();
+    try {
+      session.startTransaction();
 
-    if (!updatedUser) {
-      // Either user not found or insufficient balance
-      const currentBalance = await this.getBalance(params.userId);
-      throw new BadRequestException(
-        `Insufficient points. Current balance: ${currentBalance}, required: ${params.points}`,
+      // Atomic: decrement ONLY if balance is sufficient — prevents race conditions
+      const updatedUser = await this.userModel
+        .findOneAndUpdate(
+          {
+            _id: new Types.ObjectId(params.userId),
+            points: { $gte: params.points },
+          },
+          { $inc: { points: -params.points } },
+          { new: true },
+        )
+        .session(session)
+        .exec();
+
+      if (!updatedUser) {
+        await session.abortTransaction();
+        // Either user not found or insufficient balance
+        const currentBalance = await this.getBalance(params.userId);
+        throw new BadRequestException(
+          `Insufficient points. Current balance: ${currentBalance}, required: ${params.points}`,
+        );
+      }
+
+      const [entry] = await this.ledgerModel.create(
+        [
+          {
+            userId: new Types.ObjectId(params.userId),
+            sourceType: params.sourceType,
+            sourceId: params.sourceId,
+            pointsDelta: -params.points,
+            balanceAfter: updatedUser.points,
+            note: params.note,
+            createdBy: params.createdBy,
+          },
+        ],
+        { session },
       );
+
+      await session.commitTransaction();
+      return entry;
+    } catch (err) {
+      if (session.inTransaction()) await session.abortTransaction();
+      throw err;
+    } finally {
+      await session.endSession();
     }
-
-    const balanceAfter = updatedUser.points;
-
-    const entry = await this.ledgerModel.create({
-      userId: new Types.ObjectId(params.userId),
-      sourceType: params.sourceType,
-      sourceId: params.sourceId,
-      pointsDelta: -params.points,
-      balanceAfter,
-      note: params.note,
-      createdBy: params.createdBy,
-    });
-
-    return entry;
   }
 
   async findByUser(userId: string, page = 1, limit = 20) {

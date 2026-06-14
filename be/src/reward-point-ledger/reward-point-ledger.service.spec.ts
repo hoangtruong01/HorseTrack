@@ -49,3 +49,70 @@ describe('RewardPointLedgerService.getBalance', () => {
     expect(await service.getBalance(userId)).toBe(0);
   });
 });
+
+describe('RewardPointLedgerService.credit (atomic)', () => {
+  let service: RewardPointLedgerService;
+  let userModel: { findByIdAndUpdate: jest.Mock };
+  let ledgerModel: { create: jest.Mock };
+  let session: {
+    startTransaction: jest.Mock;
+    commitTransaction: jest.Mock;
+    abortTransaction: jest.Mock;
+    endSession: jest.Mock;
+    inTransaction: jest.Mock;
+  };
+  let connection: { startSession: jest.Mock };
+
+  const userId = new Types.ObjectId().toHexString();
+
+  beforeEach(async () => {
+    session = {
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn().mockResolvedValue(undefined),
+      abortTransaction: jest.fn().mockResolvedValue(undefined),
+      endSession: jest.fn().mockResolvedValue(undefined),
+      inTransaction: jest.fn().mockReturnValue(true),
+    };
+    connection = { startSession: jest.fn().mockResolvedValue(session) };
+    userModel = {
+      findByIdAndUpdate: jest.fn().mockReturnValue({
+        session: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue({ points: 300 }),
+        }),
+      }),
+    };
+    ledgerModel = {
+      create: jest.fn().mockResolvedValue([{ _id: new Types.ObjectId() }]),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        RewardPointLedgerService,
+        { provide: getModelToken(RewardPointLedger.name), useValue: ledgerModel },
+        { provide: getModelToken(User.name), useValue: userModel },
+        { provide: getConnectionToken(), useValue: connection },
+      ],
+    }).compile();
+
+    service = module.get(RewardPointLedgerService);
+  });
+
+  it('commits the $inc and the ledger row in one transaction', async () => {
+    await service.credit({
+      userId,
+      points: 100,
+      sourceType: 'race_win_reward' as never,
+    });
+
+    expect(connection.startSession).toHaveBeenCalled();
+    expect(session.startTransaction).toHaveBeenCalled();
+    expect(ledgerModel.create).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ pointsDelta: 100, balanceAfter: 300 }),
+      ]),
+      { session },
+    );
+    expect(session.commitTransaction).toHaveBeenCalled();
+    expect(session.endSession).toHaveBeenCalled();
+  });
+});
