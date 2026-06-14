@@ -48,6 +48,7 @@ describe('PrizesService', () => {
 
   const mockLedgerService = {
     credit: jest.fn(),
+    exists: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -269,6 +270,48 @@ describe('PrizesService', () => {
         sourceId: raceId,
         note: expect.any(String),
       });
+    });
+
+    it('does not re-credit the owner when a RACE_WIN_REWARD ledger entry already exists (republish safety)', async () => {
+      const prizeAmount = 1000;
+
+      mockRaceModel.findById.mockResolvedValue({
+        _id: raceId,
+        tournamentId,
+        prize: prizeAmount,
+        name: 'Super Race',
+      });
+
+      mockResultModel.findOne.mockResolvedValue({
+        raceId,
+        horseId,
+        jockeyUserId: null,
+        rank: 1,
+        status: RaceResultStatus.PUBLISHED,
+      });
+
+      mockHorseModel.findById.mockResolvedValue({
+        _id: horseId,
+        ownerId,
+        name: 'Lightning Bolt',
+      });
+
+      // No registration -> default 30% jockey share, but jockeyUserId is null so jockey branch skipped
+      mockRegistrationModel.findOne.mockResolvedValue(null);
+
+      // No existing Prize doc — simulates crash-before-Prize scenario
+      mockPrizeModel.findOne.mockResolvedValue(null);
+
+      // Ledger entry already exists for owner (credit already happened before crash)
+      mockLedgerService.exists.mockResolvedValue(true);
+
+      await service.createPrizesForRace(raceId);
+
+      expect(ledgerService.credit).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          sourceType: LedgerSourceType.RACE_WIN_REWARD,
+        }),
+      );
     });
   });
 });

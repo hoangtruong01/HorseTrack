@@ -75,14 +75,12 @@ export class PrizesService {
 
           // 1. Process Horse Owner Prize
           if (ownerAmount > 0 && horse.ownerId) {
-            const existingOwnerPrize = await this.prizeModel.findOne({
-              raceId: new Types.ObjectId(raceId),
-              horseId: winnerResult.horseId,
-              ownerId: horse.ownerId,
-            });
-
-            if (!existingOwnerPrize) {
-              // Credit owner's ledger directly
+            const ownerAlreadyCredited = await this.ledgerService.exists(
+              String(horse.ownerId),
+              LedgerSourceType.RACE_WIN_REWARD,
+              raceId,
+            );
+            if (!ownerAlreadyCredited) {
               await this.ledgerService.credit({
                 userId: String(horse.ownerId),
                 points: ownerAmount,
@@ -90,7 +88,14 @@ export class PrizesService {
                 sourceId: raceId,
                 note: `Received ${ownerSharePct}% winner reward for race "${race.name}" (Horse: ${horse.name})`,
               });
+            }
 
+            const existingOwnerPrize = await this.prizeModel.findOne({
+              raceId: new Types.ObjectId(raceId),
+              horseId: winnerResult.horseId,
+              ownerId: horse.ownerId,
+            });
+            if (!existingOwnerPrize) {
               const ownerPrize = await this.prizeModel.create({
                 tournamentId: race.tournamentId,
                 raceId: new Types.ObjectId(raceId),
@@ -107,14 +112,12 @@ export class PrizesService {
 
           // 2. Process Jockey Prize
           if (jockeyAmount > 0 && winnerResult.jockeyUserId) {
-            const existingJockeyPrize = await this.prizeModel.findOne({
-              raceId: new Types.ObjectId(raceId),
-              horseId: winnerResult.horseId,
-              ownerId: winnerResult.jockeyUserId,
-            });
-
-            if (!existingJockeyPrize) {
-              // Credit jockey's ledger directly
+            const jockeyAlreadyCredited = await this.ledgerService.exists(
+              String(winnerResult.jockeyUserId),
+              LedgerSourceType.RACE_WIN_REWARD,
+              raceId,
+            );
+            if (!jockeyAlreadyCredited) {
               await this.ledgerService.credit({
                 userId: String(winnerResult.jockeyUserId),
                 points: jockeyAmount,
@@ -122,7 +125,14 @@ export class PrizesService {
                 sourceId: raceId,
                 note: `Received ${jockeySharePct}% winner reward for race "${race.name}" (Jockey share)`,
               });
+            }
 
+            const existingJockeyPrize = await this.prizeModel.findOne({
+              raceId: new Types.ObjectId(raceId),
+              horseId: winnerResult.horseId,
+              ownerId: winnerResult.jockeyUserId,
+            });
+            if (!existingJockeyPrize) {
               const jockeyPrize = await this.prizeModel.create({
                 tournamentId: race.tournamentId,
                 raceId: new Types.ObjectId(raceId),
