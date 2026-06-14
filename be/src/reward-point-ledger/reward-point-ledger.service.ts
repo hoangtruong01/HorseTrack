@@ -31,11 +31,8 @@ export class RewardPointLedgerService {
   }
 
   async getBalance(userId: string): Promise<number> {
-    const latest = await this.ledgerModel
-      .findOne({ userId: this.buildUserIdFilter(userId) })
-      .sort({ createdAt: -1 })
-      .exec();
-    return latest?.balanceAfter ?? 0;
+    const user = await this.userModel.findById(userId).select('points').exec();
+    return user?.points ?? 0;
   }
 
   async exists(
