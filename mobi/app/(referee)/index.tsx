@@ -16,7 +16,7 @@ export default function RefereeHome() {
 
   if (loading) return <LoadingState />;
 
-  const pendingCount = assignments.filter(a => a.status === 'pending').length;
+  const pendingCount = assignments.filter(a => a.status === 'assigned').length;
   const acceptedCount = assignments.filter(a => a.status === 'accepted').length;
 
   return (

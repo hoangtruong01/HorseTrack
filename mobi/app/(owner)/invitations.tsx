@@ -29,7 +29,7 @@ export default function OwnerInvitations() {
       const [jRes, invRes, regRes] = await Promise.all([
         jockeysApi.list({ limit: 100 }).catch(() => ({ data: [] })),
         jockeyInvitationsApi.listSent({ limit: 100 }).catch(() => ({ data: [] })),
-        registrationsApi.list({ limit: 100, status: 'APPROVED' }).catch(() => ({ data: [] })),
+        registrationsApi.listMine({ limit: 100 }).catch(() => ({ data: [] })),
       ]);
       setJockeys((jRes as any).data || []);
       const invData = (invRes as any).data || invRes || [];

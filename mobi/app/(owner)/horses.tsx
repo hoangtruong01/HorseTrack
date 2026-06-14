@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, TextInput, RefreshControl, Modal, Image, Platform } from 'react-native';
-import { C, ListItemCard, LoadingState, EmptyState, SectionHeader, PrimaryButton, OutlineButton, Card, statusLabel } from '@/components/ui/shared';
+import { C, ListItemCard, LoadingState, EmptyState, ErrorState, SectionHeader, PrimaryButton, OutlineButton, Card, statusLabel } from '@/components/ui/shared';
 import { horsesApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,6 +11,7 @@ export default function OwnerHorses() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>('approved');
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -18,10 +19,13 @@ export default function OwnerHorses() {
   const [imageUri, setImageUri] = useState<string | null>(null);
 
   const fetchHorses = useCallback(async () => {
+    setError(null);
     try {
       const res = await horsesApi.listMine({ limit: 100 });
       setData((res as any).data || []);
-    } catch {} finally { setLoading(false); }
+    } catch (err: any) {
+      setError(err.message || 'Khong the tai danh sach chien ma.');
+    } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchHorses(); }, [fetchHorses]);
@@ -129,7 +133,9 @@ export default function OwnerHorses() {
         <PrimaryButton title="＋ Thêm chiến mã mới" onPress={() => { setShowCreate(true); setImageUri(null); }} />
         <View style={{ height: 12 }} />
 
-        {currentHorses.length === 0 ? (
+        {error ? (
+          <ErrorState message={error} onRetry={fetchHorses} />
+        ) : currentHorses.length === 0 ? (
           <EmptyState
             icon="pets"
             title={activeTab === 'approved' ? 'Chưa có ngựa được duyệt' : 'Không có hồ sơ chờ duyệt'}

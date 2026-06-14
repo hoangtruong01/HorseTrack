@@ -1,58 +1,82 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, StyleSheet } from 'react-native';
-import { C, Card, ListItemCard, LoadingState, SectionHeader, formatDateTime } from '@/components/ui/shared';
+import React, { useCallback, useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text } from 'react-native';
+import { C, Card, EmptyState, ErrorState, ListItemCard, LoadingState, SectionHeader, formatDateTime } from '@/components/ui/shared';
 import { rewardPointLedgerApi } from '@/lib/api-client';
 
 export default function SpectatorWallet() {
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      try {
-        const [b, h] = await Promise.all([
-          rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
-          rewardPointLedgerApi.myHistory({ limit: 20 }).catch(() => ({ data: [] })),
-        ]);
-        setBalance((b as any).balance || 0);
-        setHistory((h as any).data || []);
-      } catch {} finally { setLoading(false); }
-    })();
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    setError(null);
+    try {
+      const [balanceRes, historyRes] = await Promise.all([
+        rewardPointLedgerApi.myBalance(),
+        rewardPointLedgerApi.myHistory({ limit: 50 }),
+      ]);
+      setBalance(balanceRes.balance ?? 0);
+      setHistory(historyRes.data || []);
+    } catch (err: any) {
+      setError(err.message || 'Khong the tai vi diem. Vui long thu lai.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
-  const withdrawals = history.filter(
-    h => h.sourceType === 'redemption' ||
-         h.note?.toLowerCase().includes('quy đổi') ||
-         h.note?.toLowerCase().includes('rút') ||
-         h.note?.toLowerCase().includes('redemption')
-  );
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadData();
+  }, [loadData]);
 
   if (loading) return <LoadingState />;
+
   return (
-    <ScrollView style={s.c} contentContainerStyle={s.p}>
+    <ScrollView
+      style={s.c}
+      contentContainerStyle={s.p}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
+    >
       <Card>
-        <Text style={s.label}>ĐIỂM HIỆN TẠI</Text>
+        <Text style={s.label}>DIEM HIEN TAI</Text>
         <Text style={s.balance}>{balance.toLocaleString()} <Text style={s.unit}>Pts</Text></Text>
-        <Text style={s.hint}>Dự đoán đúng +1đ · Sai -1đ · Không thể âm</Text>
+        <Text style={s.hint}>Du doan dung + diem, sai tru diem theo cau hinh he thong.</Text>
       </Card>
-      <SectionHeader title="Lịch sử rút" />
-      {withdrawals.length === 0 ? <Text style={s.empty}>Chưa có lịch sử rút điểm nào.</Text> :
-        withdrawals.map(h => (
-          <ListItemCard key={h._id}
-            title={h.note || 'Rút điểm thưởng'}
-            subtitle={formatDateTime(h.createdAt)}
-            rightText={`${h.pointsDelta > 0 ? '+' : ''}${h.pointsDelta}`}
-            rightColor={h.pointsDelta > 0 ? '#34D399' : '#EF4444'}
-            icon="swap-vert"
-          />
-        ))}
+
+      <SectionHeader title={`Lich su giao dich (${history.length})`} />
+      {error ? (
+        <ErrorState message={error} onRetry={loadData} />
+      ) : history.length === 0 ? (
+        <EmptyState icon="history" title="Chua co giao dich" subtitle="Lich su diem thuong se hien thi tai day." />
+      ) : (
+        history.map((item) => {
+          const delta = item.pointsDelta ?? 0;
+          return (
+            <ListItemCard
+              key={item._id}
+              title={item.note || 'Giao dich diem thuong'}
+              subtitle={`${formatDateTime(item.createdAt)} · So du sau: ${(item.balanceAfter ?? 0).toLocaleString()} Pts`}
+              rightText={`${delta > 0 ? '+' : ''}${delta.toLocaleString()} Pts`}
+              rightColor={delta >= 0 ? C.tealLight : '#EF4444'}
+              icon="swap-vert"
+            />
+          );
+        })
+      )}
     </ScrollView>
   );
 }
+
 const s = StyleSheet.create({
-  c: { flex: 1, backgroundColor: C.bg }, p: { padding: 16, paddingBottom: 32 },
+  c: { flex: 1, backgroundColor: C.bg },
+  p: { padding: 16, paddingBottom: 32 },
   label: { color: C.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
   balance: { color: C.white, fontSize: 36, fontWeight: '900', marginTop: 8 },
   unit: { fontSize: 18, color: C.textSecondary },
   hint: { color: C.textMuted, fontSize: 11, marginTop: 8 },
-  empty: { color: C.textMuted, textAlign: 'center', marginTop: 24, fontSize: 12 },
 });

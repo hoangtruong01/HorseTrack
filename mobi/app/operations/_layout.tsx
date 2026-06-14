@@ -48,15 +48,6 @@ export default function OperationsLayout() {
         }}
       />
 
-      {/* Counter Operations */}
-      <Stack.Screen
-        name="counter/scan"
-        options={{
-          title: 'QUÉT MÃ QUY ĐỔI',
-          headerBackTitle: 'Trở lại',
-        }}
-      />
-
     </Stack>
   );
 }

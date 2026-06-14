@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
-import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, statusLabel } from '@/components/ui/shared';
+import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { jockeyInvitationsApi, rewardPointLedgerApi } from '@/lib/api-client';
 
 export default function JockeyHome() {
@@ -8,21 +8,25 @@ export default function JockeyHome() {
   const [invitesCount, setInvitesCount] = useState(0);
   const [invitations, setInvitations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const [invRes, balRes] = await Promise.all([
-          jockeyInvitationsApi.list({ limit: 10 }).catch(() => ({ data: [] })),
-          rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
-        ]);
-        const list = (invRes as any).data || [];
-        setInvitations(list);
-        setInvitesCount(list.filter((i: any) => i.status === 'PENDING').length);
-        setBalance((balRes as any).balance || 0);
-      } catch {} finally { setLoading(false); }
-    })();
+  const loadData = useCallback(async () => {
+    setError(null);
+    try {
+      const [invRes, balRes] = await Promise.all([
+        jockeyInvitationsApi.listReceived({ limit: 10 }),
+        rewardPointLedgerApi.myBalance(),
+      ]);
+      const list = (invRes as any).data || [];
+      setInvitations(list);
+      setInvitesCount(list.filter((i: any) => i.status === 'PENDING').length);
+      setBalance((balRes as any).balance || 0);
+    } catch (err: any) {
+      setError(err.message || 'Khong the tai du lieu dashboard.');
+    } finally { setLoading(false); }
   }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   if (loading) return <LoadingState />;
 
@@ -40,7 +44,9 @@ export default function JockeyHome() {
       </View>
 
       <SectionHeader title="Lời mời gần đây" />
-      {invitations.length === 0 ? (
+      {error ? (
+        <ErrorState message={error} onRetry={loadData} />
+      ) : invitations.length === 0 ? (
         <Text style={styles.empty}>Chưa có lời mời nào gần đây.</Text>
       ) : (
         invitations.slice(0, 3).map(i => {

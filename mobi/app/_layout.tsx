@@ -10,18 +10,18 @@ import { AuthProvider, useAuth } from '../providers/auth-provider';
 function getRoleRoute(roles: string[]): string {
   const role = (roles[0] || 'spectator').toLowerCase();
   switch (role) {
-    case 'admin': return '/(admin)';
+    case 'admin':
+    case 'counter_staff':
+      return '/(spectator)';
     case 'owner':
     case 'horse_owner':
       return '/(owner)';
     case 'jockey': return '/(jockey)';
     case 'referee': return '/(referee)';
-    case 'counter_staff': return '/(counter)';
     case 'spectator':
     default: return '/(spectator)';
   }
 }
-
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
@@ -38,18 +38,48 @@ function RootLayoutContent() {
     if (!isMounted || isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const topSegment = segments[0];
 
     const timer = setTimeout(() => {
       if (!user && !inAuthGroup) {
         router.replace('/login');
-      } else if (user && inAuthGroup) {
-        const route = getRoleRoute(user.roles);
-        router.replace(route as any);
+      } else if (user) {
+        if (inAuthGroup) {
+          const route = getRoleRoute(user.roles);
+          router.replace(route as any);
+        } else if (topSegment && topSegment.startsWith('(') && topSegment.endsWith(')')) {
+          const requiredRole = topSegment.slice(1, -1);
+          const userRoles = user.roles.map(r => r.toLowerCase());
+          
+          let hasAccess = false;
+          if (requiredRole === 'referee') {
+            hasAccess = userRoles.includes('referee');
+          } else if (requiredRole === 'jockey') {
+            hasAccess = userRoles.includes('jockey');
+          } else if (requiredRole === 'owner') {
+            hasAccess = userRoles.includes('owner') || userRoles.includes('horse_owner');
+          } else if (requiredRole === 'spectator' || requiredRole === 'tabs') {
+            const isProfileRoute = segments.length > 1 && segments[1] === 'profile';
+            if (isProfileRoute) {
+              hasAccess = true;
+            } else {
+              const isSpecialRole = userRoles.includes('referee') || userRoles.includes('jockey') || userRoles.includes('owner') || userRoles.includes('horse_owner');
+              hasAccess = !isSpecialRole;
+            }
+          } else {
+            hasAccess = true;
+          }
+
+          if (!hasAccess && requiredRole !== 'auth') {
+             const route = getRoleRoute(user.roles);
+             router.replace(route as any);
+          }
+        }
       }
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [user, isLoading, segments, isMounted]);
+  }, [user, isLoading, segments, isMounted, router]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -59,8 +89,6 @@ function RootLayoutContent() {
         <Stack.Screen name="(owner)" options={{ headerShown: false }} />
         <Stack.Screen name="(jockey)" options={{ headerShown: false }} />
         <Stack.Screen name="(referee)" options={{ headerShown: false }} />
-        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
-        <Stack.Screen name="(counter)" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

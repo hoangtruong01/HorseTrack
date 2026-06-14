@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { setAuthToken } from '../lib/api-client';
+import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { setAuthToken, setUnauthorizedHandler } from '../lib/api-client';
 import { BASE_URL } from '../lib/config';
 
 export type AuthUser = {
@@ -39,14 +41,6 @@ type StoredAuth = {
   user: AuthUser;
 };
 
-function getStorage() {
-  try {
-    return (globalThis as { localStorage?: Storage }).localStorage ?? null;
-  } catch {
-    return null;
-  }
-}
-
 function toAuthUser(raw: any): AuthUser {
   return {
     id: raw._id || raw.id,
@@ -61,8 +55,17 @@ function toAuthUser(raw: any): AuthUser {
   };
 }
 
-function readStoredAuth(): StoredAuth | null {
-  const raw = getStorage()?.getItem(AUTH_STORAGE_KEY);
+async function readStoredAuth(): Promise<StoredAuth | null> {
+  let raw: string | null = null;
+  if (Platform.OS === 'web') {
+    raw = localStorage.getItem(AUTH_STORAGE_KEY);
+  } else {
+    try {
+      raw = await SecureStore.getItemAsync(AUTH_STORAGE_KEY);
+    } catch {
+      raw = null;
+    }
+  }
   if (!raw) return null;
 
   try {
@@ -70,17 +73,30 @@ function readStoredAuth(): StoredAuth | null {
     if (!parsed.accessToken || !parsed.user) return null;
     return parsed;
   } catch {
-    getStorage()?.removeItem(AUTH_STORAGE_KEY);
+    await clearStoredAuth();
     return null;
   }
 }
 
-function saveStoredAuth(auth: StoredAuth) {
-  getStorage()?.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+async function saveStoredAuth(auth: StoredAuth) {
+  const value = JSON.stringify(auth);
+  if (Platform.OS === 'web') {
+    localStorage.setItem(AUTH_STORAGE_KEY, value);
+  } else {
+    await SecureStore.setItemAsync(AUTH_STORAGE_KEY, value);
+  }
 }
 
-function clearStoredAuth() {
-  getStorage()?.removeItem(AUTH_STORAGE_KEY);
+async function clearStoredAuth() {
+  if (Platform.OS === 'web') {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+  } else {
+    try {
+      await SecureStore.deleteItemAsync(AUTH_STORAGE_KEY);
+    } catch {
+      // Fail silently on native if delete fails
+    }
+  }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -88,12 +104,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedAuth = readStoredAuth();
-    if (storedAuth) {
-      setAuthToken(storedAuth.accessToken);
-      setUser(storedAuth.user);
-    }
-    setIsLoading(false);
+    let active = true;
+
+    const clearSession = async () => {
+      setUser(null);
+      setAuthToken(null);
+      await clearStoredAuth();
+    };
+
+    setUnauthorizedHandler(() => {
+      clearSession();
+    });
+
+    const restore = async () => {
+      try {
+        const storedAuth = await readStoredAuth();
+        if (!storedAuth || !active) return;
+        setAuthToken(storedAuth.accessToken);
+        const response = await fetch(`${BASE_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${storedAuth.accessToken}` },
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || 'Unauthorized');
+        const userData = toAuthUser(data.data || data);
+        if (active) {
+          setUser(userData);
+          await saveStoredAuth({ ...storedAuth, user: userData });
+        }
+      } catch {
+        await clearSession();
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+
+    restore();
+
+    return () => {
+      active = false;
+      setUnauthorizedHandler(null);
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<AuthUser> => {
@@ -117,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = toAuthUser(payload.user);
 
       setUser(userData);
-      saveStoredAuth({
+      await saveStoredAuth({
         accessToken: payload.accessToken,
         refreshToken: payload.refreshToken,
         user: userData,
@@ -131,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     setUser(null);
     setAuthToken(null);
-    clearStoredAuth();
+    await clearStoredAuth();
   };
 
   const register = async (payload: {
@@ -163,7 +213,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = toAuthUser(payloadData.user);
 
       setUser(userData);
-      saveStoredAuth({
+      await saveStoredAuth({
         accessToken: payloadData.accessToken,
         refreshToken: payloadData.refreshToken,
         user: userData,
