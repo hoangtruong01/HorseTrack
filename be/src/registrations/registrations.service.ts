@@ -78,7 +78,9 @@ export class RegistrationsService {
       throw new BadRequestException('Horse must be ACTIVE to register');
     }
     if (horse.approvalStatus !== HorseApprovalStatus.APPROVED) {
-      throw new BadRequestException('Horse must be APPROVED by admin to register');
+      throw new BadRequestException(
+        'Horse must be APPROVED by admin to register',
+      );
     }
 
     // 5. No duplicate registration for the same race

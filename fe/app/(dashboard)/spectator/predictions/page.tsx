@@ -189,7 +189,7 @@ export default function SpectatorPredictionsPage() {
                   <div
                     key={p._id}
                     translate="no"
-                    className="group rounded-2xl border border-white/5 bg-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-white/10 transition duration-300 relative overflow-hidden notranslate"
+                    className="group rounded-2xl border border-border bg-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-primary/20 transition duration-300 relative overflow-hidden notranslate"
                   >
                     {p.status === "PENDING" && (
                       <div className="absolute top-0 left-0 w-full h-[2px] bg-yellow-400" />
@@ -206,32 +206,32 @@ export default function SpectatorPredictionsPage() {
                         <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-mono">{dateString}</span>
                         <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${
                           p.status === "WON"
-                            ? "bg-teal-500/10 border border-teal-500/20 text-teal-400"
+                            ? "bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400"
                             : p.status === "LOST"
                             ? "bg-primary/10 border border-primary/20 text-primary"
                             : p.status === "PENDING"
-                            ? "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"
-                            : "bg-white/5 border border-white/10 text-muted-foreground"
+                            ? "bg-yellow-500/10 border border-yellow-500/20 text-amber-600 dark:text-yellow-400"
+                            : "bg-muted border border-border text-muted-foreground"
                         }`}>
                           {statusLabel}
                         </span>
                       </div>
 
-                      <h4 className="font-black text-white text-sm uppercase tracking-tight">{raceName}</h4>
+                      <h4 className="font-black text-foreground text-sm uppercase tracking-tight">{raceName}</h4>
                       <p className="text-[10px] text-muted-foreground">
-                        Chiến mã chọn: <strong className="text-white">{horseName}</strong> {breedName && `(${breedName})`}
+                        Chiến mã chọn: <strong className="text-foreground">{horseName}</strong> {breedName && `(${breedName})`}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-border pt-2 sm:pt-0">
                       <div className="text-right">
                         <span className={`text-xs font-black block ${
                           p.status === "WON" 
-                            ? "text-teal-400" 
+                            ? "text-teal-600 dark:text-teal-400" 
                             : p.status === "LOST" 
                             ? "text-primary" 
                             : p.status === "PENDING" 
-                            ? "text-yellow-400" 
+                            ? "text-amber-600 dark:text-yellow-400" 
                             : "text-muted-foreground"
                         }`}>
                           {p.status === "WON" 

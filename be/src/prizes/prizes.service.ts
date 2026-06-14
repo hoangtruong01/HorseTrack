@@ -162,7 +162,9 @@ export class PrizesService {
             sourceType: LedgerSourceType.REFEREE_SALARY,
             sourceId: raceId,
             note: `Lương điều hành cuộc đua "${race.name}" với vai trò ${
-              ass.role === RefereeRole.MAIN ? 'Trọng tài chính' : 'Trọng tài phụ'
+              ass.role === RefereeRole.MAIN
+                ? 'Trọng tài chính'
+                : 'Trọng tài phụ'
             }`,
           });
         }

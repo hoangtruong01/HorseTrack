@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { RacesService } from '../races/races.service';
 import {
   RefereeAssignment,
@@ -45,7 +45,7 @@ export class RefereeReportsService {
 
   async findByRace(raceId: string) {
     return this.reportModel
-      .find({ raceId })
+      .find({ raceId: new Types.ObjectId(raceId) })
       .populate('refereeId', 'fullName email')
       .populate('horseId', 'name breed')
       .sort({ createdAt: -1 })

@@ -40,30 +40,30 @@ const getStatusLabel = (status: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "ONGOING":
-      return "bg-[#E10600]/80 border-[#E10600]";
+      return "bg-[#E10600]/80 border-[#E10600] text-white";
     case "OPEN_REGISTRATION":
-      return "bg-teal-500/80 border-teal-500";
+      return "bg-teal-500/80 border-teal-500 text-white";
     case "UPCOMING":
-      return "bg-blue-500/80 border-blue-500";
+      return "bg-blue-500/80 border-blue-500 text-white";
     case "COMPLETED":
-      return "bg-purple-500/80 border-purple-500";
+      return "bg-purple-500/80 border-purple-500 text-white";
     default:
-      return "bg-white/10 border-white/20";
+      return "bg-muted border border-border text-foreground";
   }
 };
 
 const getRaceStatusColor = (status: string) => {
   switch (status) {
     case "LIVE":
-      return "bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse";
+      return "bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 animate-pulse";
     case "FINISHED":
     case "RESULT_PUBLISHED":
-      return "bg-white/5 border border-border text-muted-foreground";
+      return "bg-muted border border-border text-muted-foreground";
     case "SCHEDULED":
-      return "bg-blue-500/10 border border-blue-500/20 text-blue-400";
+      return "bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400";
     case "CHECKING":
     case "READY":
-      return "bg-amber-500/10 border border-amber-500/20 text-amber-400";
+      return "bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400";
     default:
       return "bg-primary/10 border border-primary/20 text-primary";
   }
@@ -186,15 +186,26 @@ export default function SpectatorTournamentsPage() {
       return;
     }
 
-    const betPoints = parseInt(betPointsInput) || 1;
-    if (betPoints < 1) {
-      toast.error("Số điểm đặt cược phải lớn hơn hoặc bằng 1!");
+    const betPoints = parseInt(betPointsInput);
+    if (isNaN(betPoints) || betPoints < 0) {
+      toast.error("Số điểm đặt cược không hợp lệ!");
       return;
     }
 
-    if (betPoints >= 2 && betPoints > balance) {
-      toast.error(`Số dư điểm không đủ (cần ${betPoints} Pts, hiện có ${balance} Pts)!`);
-      return;
+    if (balance === 0) {
+      if (betPoints !== 1) {
+        toast.error("Bạn chưa có điểm, chỉ có thể đặt cược miễn phí (1 Pts)!");
+        return;
+      }
+    } else {
+      if (betPoints < 2) {
+        toast.error("Điểm cược không hợp lệ. Bạn đang có điểm, vui lòng cược từ 2 Pts trở lên!");
+        return;
+      }
+      if (betPoints > balance) {
+        toast.error(`Số dư điểm không đủ (cần ${betPoints} Pts, hiện có ${balance} Pts)!`);
+        return;
+      }
     }
 
     setSubmittingPrediction(true);
@@ -228,6 +239,16 @@ export default function SpectatorTournamentsPage() {
     void fetchMyPredictions();
     void fetchBalance();
   }, [fetchTournaments, fetchAllRaces, fetchMyPredictions, fetchBalance]);
+
+  useEffect(() => {
+    if (!loadingBalance) {
+      if (balance === 0) {
+        setBetPointsInput("1");
+      } else {
+        setBetPointsInput("2");
+      }
+    }
+  }, [balance, loadingBalance]);
 
   const handleSelectTournament = useCallback(async (t: TournamentItem) => {
     setSelectedTour(t);
@@ -381,7 +402,7 @@ export default function SpectatorTournamentsPage() {
               onClick={() => { setActiveTab("tournaments"); setSearchTerm(""); }}
               className={`pb-3 px-6 text-sm font-black uppercase tracking-wider transition-colors duration-200 border-b-2 -mb-[2px] flex items-center gap-2 ${
                 activeTab === "tournaments"
-                  ? "border-[#E10600] text-white"
+                  ? "border-[#E10600] text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -391,7 +412,7 @@ export default function SpectatorTournamentsPage() {
               onClick={() => { setActiveTab("races"); setSearchTerm(""); }}
               className={`pb-3 px-6 text-sm font-black uppercase tracking-wider transition-colors duration-200 border-b-2 -mb-[2px] flex items-center gap-2 ${
                 activeTab === "races"
-                  ? "border-[#E10600] text-white"
+                  ? "border-[#E10600] text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -857,12 +878,12 @@ export default function SpectatorTournamentsPage() {
                         <div className="text-right flex flex-col items-end">
                           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
                             currentRacePrediction.status === "WON"
-                              ? "bg-teal-500/10 border border-teal-500/20 text-teal-400"
+                              ? "bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400"
                               : currentRacePrediction.status === "LOST"
                               ? "bg-primary/10 border border-primary/20 text-primary"
                               : currentRacePrediction.status === "PENDING"
-                              ? "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"
-                              : "bg-white/5 border border-border text-muted-foreground"
+                              ? "bg-yellow-500/10 border border-yellow-500/20 text-amber-600 dark:text-yellow-400"
+                              : "bg-muted border border-border text-muted-foreground"
                           }`}>
                             {currentRacePrediction.status === "WON" 
                               ? `+${currentRacePrediction.rewardPoints || 1} Pts` 
@@ -915,31 +936,39 @@ export default function SpectatorTournamentsPage() {
                             <div className="space-y-1.5">
                               <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-wider text-muted-foreground">
                                 <span>Số điểm cược</span>
-                                <span className="text-teal-400 font-mono">
+                                <span className="text-teal-600 dark:text-teal-400 font-mono">
                                   Số dư: {loadingBalance ? "..." : `${balance.toLocaleString("vi-VN")} Pts`}
                                 </span>
                               </div>
                               <div className="relative">
                                 <input
                                   type="number"
-                                  min="1"
+                                  min={balance === 0 ? "1" : "2"}
                                   value={betPointsInput}
                                   onChange={(e) => {
                                     const val = e.target.value;
                                     if (val === "") {
                                       setBetPointsInput("");
                                     } else {
-                                      const parsed = parseInt(val) || 1;
-                                      setBetPointsInput(String(Math.max(1, parsed)));
+                                      const parsed = parseInt(val);
+                                      if (isNaN(parsed)) {
+                                        setBetPointsInput("");
+                                      } else {
+                                        const minVal = balance === 0 ? 1 : 2;
+                                        setBetPointsInput(String(Math.max(minVal, parsed)));
+                                      }
                                     }
                                   }}
                                   onBlur={() => {
-                                    if (!betPointsInput || parseInt(betPointsInput) < 1) {
-                                      setBetPointsInput("1");
+                                    const parsed = parseInt(betPointsInput);
+                                    const minVal = balance === 0 ? 1 : 2;
+                                    if (isNaN(parsed) || parsed < minVal) {
+                                      setBetPointsInput(String(minVal));
                                     }
                                   }}
-                                  className="w-full h-11 rounded-xl border border-border bg-muted pl-3 pr-12 text-xs text-foreground outline-none focus:border-primary font-mono font-bold"
-                                  placeholder="Nhập số điểm (1 để đoán miễn phí)"
+                                  className="w-full h-11 rounded-xl border border-border bg-muted pl-3 pr-12 text-xs text-foreground outline-none focus:border-primary font-mono font-bold disabled:opacity-75"
+                                  placeholder={balance === 0 ? "Đặt cược miễn phí (1 Pts)" : "Nhập số điểm cược (tối thiểu 2 Pts)"}
+                                  disabled={balance === 0}
                                 />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-muted-foreground font-mono">Pts</span>
                               </div>
@@ -949,35 +978,40 @@ export default function SpectatorTournamentsPage() {
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("1")}
-                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition uppercase"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition uppercase disabled:opacity-50"
+                                  disabled={balance > 0}
                                 >
                                   Free
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("10")}
-                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono disabled:opacity-50"
+                                  disabled={balance < 10}
                                 >
                                   10
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("50")}
-                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono disabled:opacity-50"
+                                  disabled={balance < 50}
                                 >
                                   50
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput("100")}
-                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono"
+                                  className="py-1.5 rounded-lg border border-border bg-muted text-[9px] font-bold text-foreground hover:bg-muted/80 transition font-mono disabled:opacity-50"
+                                  disabled={balance < 100}
                                 >
                                   100
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setBetPointsInput(String(balance))}
-                                  className="py-1.5 rounded-lg border border-primary/20 bg-primary/10 text-[9px] font-black text-primary hover:bg-primary hover:text-white transition uppercase"
+                                  className="py-1.5 rounded-lg border border-primary/20 bg-primary/10 text-[9px] font-black text-primary hover:bg-primary hover:text-white transition uppercase disabled:opacity-50"
+                                  disabled={balance < 2}
                                 >
                                   All In
                                 </button>
@@ -992,8 +1026,6 @@ export default function SpectatorTournamentsPage() {
                                 </div>
                               )}
                             </div>
-
-
 
                             <Button
                               onClick={handlePredictSubmit}
@@ -1023,7 +1055,7 @@ export default function SpectatorTournamentsPage() {
                       <span className="text-[9px] font-black uppercase tracking-wider">Cơ cấu điểm thưởng</span>
                     </div>
                     <p className="text-[9px] leading-relaxed text-muted-foreground">
-                      Chọn 1 chiến mã dự kiến về nhất. Kết quả chính xác cộng <strong className="text-foreground">+1 điểm</strong>, sai khấu trừ <strong className="text-foreground">-1 điểm</strong>. Số dư ví không thể bị âm dưới 0 điểm.
+                      Người chưa có điểm được dự đoán miễn phí (1 Pts): Đúng được <strong className="text-foreground">+1 điểm</strong>, sai không bị trừ điểm. Người đã có điểm phải cược từ <strong className="text-foreground">2 Pts trở lên</strong>: Thắng nhận lại cược x2, thua mất toàn bộ điểm cược.
                     </p>
                   </div>
                 </div>
@@ -1039,7 +1071,7 @@ export default function SpectatorTournamentsPage() {
                   {getTimeline(selectedRace.status).map((step, idx, arr) => (
                     <div key={idx} className="flex gap-3 items-start relative">
                       {idx !== arr.length - 1 && (
-                        <div className="absolute left-[7px] top-[18px] w-[2px] h-[calc(100%+8px)] bg-white/10" />
+                        <div className="absolute left-[7px] top-[18px] w-[2px] h-[calc(100%+8px)] bg-border" />
                       )}
                       <div className={`size-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
                         step.status === "complete" 
@@ -1048,10 +1080,10 @@ export default function SpectatorTournamentsPage() {
                           ? "bg-teal-400 border-teal-400 text-black animate-pulse" 
                           : step.status === "cancelled"
                           ? "bg-red-500 border-red-500 text-white"
-                          : "bg-transparent border-white/20 text-transparent"
+                          : "bg-transparent border-border text-transparent"
                       }`} />
                       <div className="space-y-0.5">
-                        <p className={`text-xs font-black uppercase tracking-wider ${step.status === "current" ? "text-teal-400" : "text-muted-foreground"}`}>{step.step}</p>
+                        <p className={`text-xs font-black uppercase tracking-wider ${step.status === "current" ? "text-teal-600 dark:text-teal-400" : "text-muted-foreground"}`}>{step.step}</p>
                         <p className="text-[10px] text-muted-foreground">{step.desc}</p>
                       </div>
                     </div>
@@ -1091,14 +1123,14 @@ export default function SpectatorTournamentsPage() {
                           <th className="p-4 text-right">Trạng thái</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5">
+                      <tbody className="divide-y divide-border">
                         {selectedRaceRegistrations.map((p, idx) => {
                           const horseName = typeof p.horseId === "object" ? p.horseId?.name : "Chiến mã";
                           const horseBreed = typeof p.horseId === "object" ? p.horseId?.breed : "Thuần chủng";
                           const jockeyName = typeof p.jockeyUserId === "object" ? p.jockeyUserId?.fullName : "Chưa đăng ký";
                           const ownerName = typeof p.ownerId === "object" ? p.ownerId?.fullName : "Chủ ngựa";
                           return (
-                            <tr key={p._id} className="hover:bg-white/[0.01] transition duration-200">
+                            <tr key={p._id} className="hover:bg-muted/50 transition duration-200">
                               <td className="p-4 font-mono font-black text-[#E10600] text-sm">{idx + 1}</td>
                               <td className="p-4 font-bold text-foreground">
                                 <span className="block">{horseName}</span>
@@ -1107,7 +1139,7 @@ export default function SpectatorTournamentsPage() {
                               <td className="p-4 font-bold text-foreground">{jockeyName}</td>
                               <td className="p-4 text-muted-foreground">{ownerName}</td>
                               <td className="p-4 text-right">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[9px] font-black text-teal-400 uppercase tracking-wider">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[9px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-wider">
                                   ● ĐÃ DUYỆT
                                 </span>
                               </td>

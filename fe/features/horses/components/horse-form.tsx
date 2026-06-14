@@ -63,7 +63,7 @@ export function HorseForm({
       }
 
       setErrorMsg("");
-      
+
       let loadedCount = 0;
       validFiles.forEach((file) => {
         const reader = new FileReader();
@@ -82,7 +82,7 @@ export function HorseForm({
 
   const handleRemoveImage = (index: number) => {
     const previewToRemove = imagePreviews[index];
-    
+
     // Remove from previews
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
 
@@ -319,7 +319,7 @@ export function HorseForm({
                   </button>
                 </div>
               ))}
-              
+
               <div className="relative aspect-square flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 hover:border-primary/50 transition group cursor-pointer">
                 <Upload className="size-6 text-muted-foreground group-hover:text-primary transition" />
                 <span className="text-[10px] font-bold text-foreground mt-1 text-center">Thêm ảnh</span>

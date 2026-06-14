@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Race, RaceDocument } from '../races/schemas/race.schema';
 import { Horse, HorseDocument } from '../horses/schemas/horse.schema';
 import { RaceRecord, RaceRecordDocument } from './schemas/race-record.schema';
@@ -43,7 +43,7 @@ export class RaceRecordsService {
     }
 
     return this.recordModel
-      .find({ raceId })
+      .find({ raceId: new Types.ObjectId(raceId) })
       .populate('horseId', 'name breed gender')
       .sort({ position: 1 })
       .exec();
@@ -56,7 +56,7 @@ export class RaceRecordsService {
     }
 
     return this.recordModel
-      .find({ horseId })
+      .find({ horseId: new Types.ObjectId(horseId) })
       .populate('raceId', 'name startTime trackCondition')
       .sort({ createdAt: -1 })
       .exec();

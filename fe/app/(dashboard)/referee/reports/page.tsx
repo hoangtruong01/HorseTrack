@@ -91,7 +91,7 @@ export default function RefereeReportsPage() {
       const reportsMap: Record<string, RefereeReport[]> = {};
       await Promise.all(
         myAssignments.map(async (a: Assignment) => {
-          const rId = a.raceId._id;
+          const rId = a.raceId._id || (a.raceId as any).id;
           const repRes = await fetch(`/api/referee/referee-reports/race/${rId}`);
           if (repRes.ok) {
             const repData = await repRes.json();
@@ -226,11 +226,15 @@ export default function RefereeReportsPage() {
                   required
                 >
                   <option value="" className="bg-card">-- Chọn cuộc đua giám sát --</option>
-                  {assignments.map((a) => (
-                    <option key={a.raceId?._id} value={a.raceId?._id} className="bg-card">
-                      {a.raceId?.name} ({a.raceId?.status})
-                    </option>
-                  ))}
+                  {assignments.map((a) => {
+                    const rId = a.raceId?._id || (a.raceId as any)?.id;
+                    const aId = a._id || (a as any).id || rId;
+                    return (
+                      <option key={aId} value={rId || ""} className="bg-card">
+                        {a.raceId?.name} ({a.raceId?.status})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -255,11 +259,15 @@ export default function RefereeReportsPage() {
                   disabled={!selectedRaceId}
                 >
                   <option value="" className="bg-card">-- Tất cả / Không chọn --</option>
-                  {horsesForSelectedRace.map((h) => (
-                    <option key={h.horseId?._id} value={h.horseId?._id} className="bg-card">
-                      {h.horseId?.name}
-                    </option>
-                  ))}
+                  {horsesForSelectedRace.map((h) => {
+                    const horseId = h.horseId?._id || (h.horseId as any)?.id;
+                    const hId = h._id || (h as any).id || horseId;
+                    return (
+                      <option key={hId} value={horseId || ""} className="bg-card">
+                        {h.horseId?.name}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -324,13 +332,14 @@ export default function RefereeReportsPage() {
             <div className="space-y-3">
               {assignments.map((assignment) => {
                 if (!assignment.raceId) return null;
-                const raceId = assignment.raceId._id;
+                const raceId = assignment.raceId._id || (assignment.raceId as any).id;
                 const raceReports = reports[raceId] || [];
                 const isExpanded = expandedRaces[raceId] || false;
+                const assignmentId = assignment._id || (assignment as any).id || raceId;
 
                 return (
                   <article
-                    key={raceId}
+                    key={assignmentId}
                     className="rounded-xl border border-border bg-card/95 shadow overflow-hidden"
                   >
                     {/* Header bar click to toggle expansion */}
@@ -343,7 +352,7 @@ export default function RefereeReportsPage() {
                           {assignment.raceId.name}
                         </h4>
                         <p className="text-[10px] text-muted-foreground font-bold uppercase">
-                          Biên bản lưu vết: <strong className="text-teal-400">{raceReports.length} bản</strong>
+                          Biên bản lưu vết: <strong className="text-teal-600 dark:text-teal-400">{raceReports.length} bản</strong>
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -373,10 +382,10 @@ export default function RefereeReportsPage() {
                                 className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
                               >
                                 <div className="flex justify-between items-center gap-2">
-                                  <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${
+                                  <span className={`px-2 py-0.5 rounded text-[8px] font-bold border ${
                                     rep.type === "PRE_RACE" 
-                                      ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20" 
-                                      : "bg-teal-500/10 text-teal-400 border border-teal-500/20"
+                                      ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" 
+                                      : "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
                                   }`}>
                                     {rep.type === "PRE_RACE" ? "TRƯỚC TRẬN" : "SAU TRẬN"}
                                   </span>
@@ -387,7 +396,7 @@ export default function RefereeReportsPage() {
 
                                 {rep.horseId && (
                                   <p className="text-[10px] font-bold text-foreground">
-                                    Chiến mã liên quan: <span className="text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
+                                    Chiến mã liên quan: <span className="text-teal-600 dark:text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
                                   </p>
                                 )}
 
@@ -399,12 +408,12 @@ export default function RefereeReportsPage() {
                                   <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-muted/50 text-[10px]">
                                     {rep.violation && (
                                       <p className="text-muted-foreground">
-                                        Lỗi vi phạm: <strong className="text-yellow-400 font-bold">{rep.violation}</strong>
+                                        Lỗi vi phạm: <strong className="text-amber-600 dark:text-yellow-400 font-bold">{rep.violation}</strong>
                                       </p>
                                     )}
                                     {rep.penalty && (
                                       <p className="text-muted-foreground">
-                                        Hình phạt: <strong className="text-red-400 font-bold">{rep.penalty}</strong>
+                                        Hình phạt: <strong className="text-red-600 dark:text-red-400 font-bold">{rep.penalty}</strong>
                                       </p>
                                     )}
                                   </div>
@@ -419,7 +428,7 @@ export default function RefereeReportsPage() {
                         )}
                         <div className="pt-2 flex justify-end">
                           <Button asChild variant="outline" className="h-9 px-4 rounded-full text-xs font-bold uppercase">
-                            <Link href={`/referee/races/${assignment.raceId._id}`}>
+                            <Link href={`/referee/races/${assignment.raceId._id || (assignment.raceId as any).id}`}>
                               Đi tới Cuộc Đua <ArrowRight className="size-3.5 ml-1" />
                             </Link>
                           </Button>

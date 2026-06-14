@@ -11,6 +11,12 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { NotificationsBell } from "@/components/layout/notifications-bell";
 import { UserDropdownMenu } from "@/components/layout/user-dropdown-menu";
+import { sileo } from "sileo";
+
+const toast = {
+  success: (msg: string) => sileo.success({ title: msg, duration: 1200 }),
+  error: (msg: string) => sileo.error({ title: msg, duration: 1200 }),
+};
 
 export type AppHeaderProps = {
   className?: string;
@@ -256,6 +262,7 @@ export function AppHeader({ className }: AppHeaderProps) {
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
+                    toast.success(t("auth.logoutSuccess"));
                     logout();
                   }}
                   className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground cursor-pointer hover:bg-primary/90 transition"

@@ -6,6 +6,12 @@ import { User, Settings, ChevronDown, LogOut, LayoutDashboard } from "lucide-rea
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { sileo } from "sileo";
+
+const toast = {
+  success: (msg: string) => sileo.success({ title: msg, duration: 1200 }),
+  error: (msg: string) => sileo.error({ title: msg, duration: 1200 }),
+};
 
 export type UserDropdownMenuProps = {
   userName?: string;
@@ -124,6 +130,7 @@ export function UserDropdownMenu({
             <button
               onClick={() => {
                 closeMenu();
+                toast.success(t("auth.logoutSuccess"));
                 logout();
               }}
               className="w-full flex items-center gap-3 border-t border-border px-5 py-3.5 text-sm font-semibold text-red-500 hover:text-red-600 transition hover:bg-secondary text-left cursor-pointer"

@@ -134,12 +134,12 @@ export default function RefereeAssignmentsPage() {
             className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition whitespace-nowrap ${
               activeTab === tab.key
                 ? "bg-primary/15 text-primary border border-primary/30"
-                : "text-white/40 hover:text-white/70 border border-transparent hover:border-border"
+                : "text-muted-foreground hover:text-foreground border border-transparent hover:border-border"
             }`}
           >
             {tab.label}
             <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${
-              activeTab === tab.key ? "bg-primary/20 text-primary" : "bg-white/5 text-white/30"
+              activeTab === tab.key ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
             }`}>
               {counts[tab.key]}
             </span>
@@ -149,7 +149,7 @@ export default function RefereeAssignmentsPage() {
 
       {filtered.length === 0 ? (
         <section className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-border bg-card max-w-lg mx-auto space-y-3">
-          <div className="size-12 rounded-full border border-border flex items-center justify-center text-white/30">
+          <div className="size-12 rounded-full border border-border flex items-center justify-center text-muted-foreground/30">
             <Calendar className="size-6" />
           </div>
           <h4 className="text-sm font-bold uppercase text-foreground">
@@ -170,7 +170,7 @@ export default function RefereeAssignmentsPage() {
             return (
               <article
                 key={assignmentId}
-                className="rounded-2xl border border-border bg-card/85 p-5 flex flex-col justify-between space-y-4 hover:border-primary/25 transition shadow-lg"
+                className="rounded-2xl border border-border bg-card p-5 flex flex-col justify-between space-y-4 hover:border-primary/25 transition shadow-lg"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
@@ -187,12 +187,16 @@ export default function RefereeAssignmentsPage() {
                       }
                       pulse={assignment.status === "assigned"}
                     />
-                    <span className="text-[10px] text-white/45 bg-white/5 border border-border px-2.5 py-0.5 rounded uppercase font-black tracking-wider">
+                    <span className={`text-[10px] px-2.5 py-0.5 rounded uppercase font-black tracking-wider border ${
+                      assignment.role === "main"
+                        ? "bg-primary/10 text-primary border-primary/20"
+                        : "bg-muted text-muted-foreground border-border"
+                    }`}>
                       {assignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}
                     </span>
                   </div>
                   {assignment.status === "accepted" && (
-                    <Button asChild variant="outline" className="h-10 rounded-full border-white/15 hover:bg-white/5 text-white hover:text-white">
+                    <Button asChild variant="outline" className="h-10 rounded-full">
                       <Link href={`/referee/races/${raceId}`} className="flex items-center gap-1.5 text-xs">
                         Tác nghiệp <ArrowRight className="size-4" />
                       </Link>
@@ -201,36 +205,36 @@ export default function RefereeAssignmentsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-lg font-black uppercase text-white leading-tight">
+                  <h3 className="text-lg font-black uppercase text-foreground leading-tight">
                     {assignment.raceId.name}
                   </h3>
-                  <div className="p-3 rounded-xl bg-black/25 border border-white/5 space-y-2">
+                  <div className="p-3 rounded-xl bg-muted/40 dark:bg-black/25 border border-border dark:border-white/5 space-y-2">
                     <div className="grid grid-cols-3 gap-2 text-xs">
                       <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Giờ bắt đầu</p>
-                        <p className="text-white font-bold mt-0.5 flex items-center gap-1">
-                          <Clock className="size-3 text-teal-400 shrink-0" />
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Giờ bắt đầu</p>
+                        <p className="text-foreground font-bold mt-0.5 flex items-center gap-1">
+                          <Clock className="size-3 text-teal-500 dark:text-teal-400 shrink-0" />
                           {formatDateTime(assignment.raceId.startTime)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Người phân công</p>
-                        <p className="text-white font-bold mt-0.5 flex items-center gap-1 text-ellipsis overflow-hidden whitespace-nowrap">
-                          <User className="size-3 text-teal-400 shrink-0" />
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Người phân công</p>
+                        <p className="text-foreground font-bold mt-0.5 flex items-center gap-1 text-ellipsis overflow-hidden whitespace-nowrap">
+                          <User className="size-3 text-teal-500 dark:text-teal-400 shrink-0" />
                           {assignment.assignedBy?.fullName}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Mức lương</p>
-                        <p className="text-emerald-400 font-bold mt-0.5">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Mức lương</p>
+                        <p className="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
                           {assignment.salary ? assignment.salary.toLocaleString("vi-VN") : "0"} Điểm
                         </p>
                       </div>
                     </div>
-                    <div className="h-px bg-white/5" />
+                    <div className="h-px bg-border dark:bg-white/5" />
                     <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">Trạng thái cuộc đua</p>
-                      <p className="text-white font-bold text-xs mt-0.5">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Trạng thái cuộc đua</p>
+                      <p className="text-foreground font-bold text-xs mt-0.5">
                         {raceStatusMap[assignment.raceId.status] || assignment.raceId.status}
                       </p>
                     </div>
@@ -241,20 +245,21 @@ export default function RefereeAssignmentsPage() {
                   <div className="pt-2">
                     {confirmDeclineId === assignmentId ? (
                       <div className="flex items-center justify-between p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-xs w-full animate-in fade-in slide-in-from-top-1 duration-200">
-                        <span className="text-red-400 font-bold">Xác nhận từ chối?</span>
+                        <span className="text-red-600 dark:text-red-400 font-bold">Xác nhận từ chối?</span>
                         <div className="flex gap-2">
                           <Button
                             onClick={() => setConfirmDeclineId(null)}
                             disabled={submittingActionId !== null}
                             variant="outline"
-                            className="rounded-full border-border hover:bg-white/5 text-[10px] h-7 px-3 uppercase font-bold text-white hover:text-white"
+                            className="rounded-full text-[10px] h-7 px-3 uppercase font-bold"
                           >
                             Hủy
                           </Button>
                           <Button
                             onClick={() => handleRespond(assignmentId, "declined")}
                             disabled={submittingActionId !== null}
-                            className="rounded-full bg-red-600 hover:bg-red-700 text-[10px] h-7 px-3 uppercase font-bold text-white border-0"
+                            variant="destructive"
+                            className="rounded-full text-[10px] h-7 px-3 uppercase font-bold"
                           >
                             Đồng ý
                           </Button>
@@ -266,14 +271,14 @@ export default function RefereeAssignmentsPage() {
                           onClick={() => setConfirmDeclineId(assignmentId)}
                           disabled={submittingActionId !== null}
                           variant="outline"
-                          className="rounded-full border-border hover:bg-white/5 text-xs h-9 uppercase font-bold text-white hover:text-white"
+                          className="rounded-full text-xs h-9 uppercase font-bold"
                         >
                           Từ chối
                         </Button>
                         <Button
                           onClick={() => handleRespond(assignmentId, "accepted")}
                           disabled={submittingActionId !== null}
-                          className="rounded-full bg-primary hover:bg-primary/90 text-xs h-9 uppercase font-bold text-white"
+                          className="rounded-full bg-primary hover:bg-primary/90 text-xs h-9 uppercase font-bold text-primary-foreground"
                         >
                           Nhận nhiệm vụ
                         </Button>
