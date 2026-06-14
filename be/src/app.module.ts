@@ -8,7 +8,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { AuthModule } from './auth/auth.module';
-import { BankTransactionsModule } from './bank-transactions/bank-transactions.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { HorsesModule } from './horses/horses.module';
 import { JockeyInvitationsModule } from './jockey-invitations/jockey-invitations.module';
@@ -70,7 +69,6 @@ import { RefereeReportsModule } from './referee-reports/referee-reports.module';
     RaceChecksModule,
     RaceViolationsModule,
     RewardPointLedgerModule,
-    BankTransactionsModule,
     RefereeReportsModule,
   ],
   controllers: [AppController],
