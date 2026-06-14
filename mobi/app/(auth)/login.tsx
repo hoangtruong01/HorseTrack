@@ -119,11 +119,6 @@ export default function LoginScreen() {
                 <Text style={styles.quickCardTitle}>TRỌNG TÀI</Text>
                 <Text style={styles.quickCardEmail}>referee@horsetrack.local</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity style={[styles.quickCard, { width: '100%' }]} onPress={() => loginAsRole('counter@horsetrack.local')}>
-                <Text style={styles.quickCardTitle}>NHÂN VIÊN QUẦY (COUNTER)</Text>
-                <Text style={styles.quickCardEmail}>counter@horsetrack.local</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>

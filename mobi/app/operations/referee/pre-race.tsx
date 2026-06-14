@@ -11,13 +11,15 @@ export default function PreRaceChecksScreen() {
   const [checks, setChecks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Failure note state per check item ID
   const [failNotes, setFailNotes] = useState<Record<string, string>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const loadData = async () => {
+  const loadData = React.useCallback(async () => {
     if (!raceId) return;
+    setError(null);
     try {
       // 1. Load race detail
       const raceRes = await racesApi.get(raceId);
@@ -26,19 +28,20 @@ export default function PreRaceChecksScreen() {
       // 2. Load pre-race check items
       const checksRes = await raceChecksApi.listByRace(raceId);
       if (checksRes) {
-        setChecks(checksRes.data || checksRes);
+        setChecks((checksRes as any).data || checksRes);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Lỗi tải kiểm duyệt trước đua:', err);
+      setError(err.message || 'Không thể tải kiểm duyệt trước đua.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [raceId]);
 
   useEffect(() => {
     loadData();
-  }, [raceId]);
+  }, [loadData]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -50,7 +53,7 @@ export default function PreRaceChecksScreen() {
     
     setUpdatingId(checkId);
     try {
-      await raceChecksApi.update(checkId, status, notes);
+      await raceChecksApi.update(checkId, { status, healthNote: notes, jockeyCheckedIn: true });
       Alert.alert('Thành công', `Đã cập nhật trạng thái kiểm tra thành ${status === 'passed' ? 'ĐẠT' : 'KHÔNG ĐẠT'}.`);
       loadData();
     } catch (err: any) {
@@ -164,10 +167,17 @@ export default function PreRaceChecksScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <MaterialIcons name="pets" size={40} color="#58585B" />
-            <Text style={styles.emptyText}>Chưa chốt danh sách chiến mã cho cuộc đua này.</Text>
-          </View>
+          error ? (
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="error-outline" size={48} color="#E10600" />
+              <Text style={[styles.emptyText, { color: '#E10600' }]}>{error}</Text>
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="pets" size={40} color="#58585B" />
+              <Text style={styles.emptyText}>Chưa chốt danh sách chiến mã cho cuộc đua này.</Text>
+            </View>
+          )
         }
       />
     </SafeAreaView>

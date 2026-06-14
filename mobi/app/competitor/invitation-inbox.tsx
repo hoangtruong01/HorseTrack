@@ -7,15 +7,18 @@ export default function InvitationInboxScreen() {
   const [invitations, setInvitations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadInvitations = async () => {
+    setError(null);
     try {
-      const res = await jockeyInvitationsApi.list({ page: 1, limit: 100 });
+      const res = await jockeyInvitationsApi.listReceived({ page: 1, limit: 100 });
       if (res) {
-        setInvitations(res.data || res);
+        setInvitations((res as any).data || res);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Lỗi lấy danh sách lời mời:', err);
+      setError(err.message || 'Không thể tải danh sách lời mời.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -31,8 +34,8 @@ export default function InvitationInboxScreen() {
     loadInvitations();
   };
 
-  const handleRespond = async (invitationId: string, response: 'accepted' | 'rejected') => {
-    const actionLabel = response === 'accepted' ? 'chấp nhận' : 'từ chối';
+  const handleRespond = async (invitationId: string, response: 'ACCEPTED' | 'REJECTED') => {
+    const actionLabel = response === 'ACCEPTED' ? 'chấp nhận' : 'từ chối';
     Alert.alert('Xác nhận', `Bạn có chắc muốn ${actionLabel} lời mời này?`, [
       { text: 'Hủy', style: 'cancel' },
       {
@@ -52,17 +55,17 @@ export default function InvitationInboxScreen() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending': return 'ĐANG CHỜ';
-      case 'accepted': return 'ĐÃ CHẤP NHẬN';
-      case 'rejected': return 'ĐÃ TỪ CHỐI';
+      case 'PENDING': return 'ĐANG CHỜ';
+      case 'ACCEPTED': return 'ĐÃ CHẤP NHẬN';
+      case 'REJECTED': return 'ĐÃ TỪ CHỐI';
       default: return status.toUpperCase();
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'accepted': return '#067E6A';
-      case 'rejected': return '#E10600';
+      case 'ACCEPTED': return '#067E6A';
+      case 'REJECTED': return '#E10600';
       default: return '#E1A200';
     }
   };
@@ -72,7 +75,7 @@ export default function InvitationInboxScreen() {
     const tourName = item.tournamentId?.name || 'Giải đua';
     const horseName = item.horseId?.name || 'Chiến mã';
     const ownerName = item.ownerId?.fullName || 'Chủ trại';
-    const isPending = item.status === 'pending';
+    const isPending = item.status === 'PENDING';
 
     return (
       <View style={styles.card}>
@@ -101,14 +104,14 @@ export default function InvitationInboxScreen() {
           <View style={styles.actionsContainer}>
             <TouchableOpacity 
               style={[styles.actionButton, styles.rejectButton]}
-              onPress={() => handleRespond(item._id, 'rejected')}
+              onPress={() => handleRespond(item._id, 'REJECTED')}
             >
               <Text style={styles.actionButtonText}>TỪ CHỐI</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.actionButton, styles.acceptButton]}
-              onPress={() => handleRespond(item._id, 'accepted')}
+              onPress={() => handleRespond(item._id, 'ACCEPTED')}
             >
               <Text style={styles.actionButtonText}>CHẤP NHẬN</Text>
             </TouchableOpacity>
@@ -137,10 +140,17 @@ export default function InvitationInboxScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <MaterialIcons name="mail-outline" size={48} color="#58585B" />
-            <Text style={styles.emptyText}>Hòm thư lời mời của bạn đang trống.</Text>
-          </View>
+          error ? (
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="error-outline" size={48} color="#E10600" />
+              <Text style={[styles.emptyText, { color: '#E10600' }]}>{error}</Text>
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="mail-outline" size={48} color="#58585B" />
+              <Text style={styles.emptyText}>Hòm thư lời mời của bạn đang trống.</Text>
+            </View>
+          )
         }
       />
     </SafeAreaView>

@@ -8,32 +8,35 @@ export default function AssignedRacesScreen() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const loadAssignments = async () => {
+  const loadAssignments = React.useCallback(async () => {
+    setError(null);
     try {
       const res = await refereeAssignmentsApi.myAssignments({ limit: 50 });
       if (res) {
-        setAssignments(res.data || res);
+        setAssignments((res as any).data || res);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Lỗi lấy phân công trọng tài:', err);
+      setError(err.message || 'Không thể tải danh sách phân công.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadAssignments();
-  }, []);
+  }, [loadAssignments]);
 
   const onRefresh = () => {
     setRefreshing(true);
     loadAssignments();
   };
 
-  const handleRespond = async (assignmentId: string, response: 'accepted' | 'rejected') => {
+  const handleRespond = async (assignmentId: string, response: 'accepted' | 'declined') => {
     const actionLabel = response === 'accepted' ? 'nhận phân công' : 'từ chối phân công';
     Alert.alert('Xác nhận', `Bạn có chắc muốn ${actionLabel} này?`, [
       { text: 'Hủy', style: 'cancel' },
@@ -54,9 +57,9 @@ export default function AssignedRacesScreen() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending': return 'ĐANG CHỜ NHẬN';
+      case 'assigned': return 'ĐANG CHỜ NHẬN';
       case 'accepted': return 'ĐÃ NHẬN NHIỆM VỤ';
-      case 'rejected': return 'ĐÃ TỪ CHỐI';
+      case 'declined': return 'ĐÃ TỪ CHỐI';
       default: return status.toUpperCase();
     }
   };
@@ -64,7 +67,7 @@ export default function AssignedRacesScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'accepted': return '#067E6A';
-      case 'rejected': return '#E10600';
+      case 'declined': return '#E10600';
       default: return '#E1A200';
     }
   };
@@ -73,7 +76,7 @@ export default function AssignedRacesScreen() {
     const race = item.raceId;
     if (!race) return null;
 
-    const isPending = item.status === 'pending';
+    const isPending = item.status === 'assigned';
     const isAccepted = item.status === 'accepted';
     
     const startTimeStr = new Date(race.startTime).toLocaleString('vi-VN', {
@@ -104,7 +107,7 @@ export default function AssignedRacesScreen() {
           <View style={styles.actionsContainer}>
             <TouchableOpacity 
               style={[styles.actionButton, styles.rejectButton]}
-              onPress={() => handleRespond(item._id, 'rejected')}
+              onPress={() => handleRespond(item._id, 'declined')}
             >
               <Text style={styles.actionButtonText}>TỪ CHỐI</Text>
             </TouchableOpacity>
@@ -168,19 +171,26 @@ export default function AssignedRacesScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <MaterialIcons name="assignment-late" size={48} color="#58585B" />
-            <Text style={styles.emptyText}>Bạn chưa nhận được phân công nào gần đây.</Text>
-          </View>
+          error ? (
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="error-outline" size={48} color="#E10600" />
+              <Text style={[styles.emptyText, { color: '#E10600' }]}>{error}</Text>
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="assignment-late" size={48} color="#58585B" />
+              <Text style={styles.emptyText}>Bạn chưa nhận được phân công nào gần đây.</Text>
+            </View>
+          )
         }
       />
 
       <TouchableOpacity 
         style={styles.backHomeButton}
-        onPress={() => router.replace('/(tabs)')}
+        onPress={() => router.replace('/(referee)')}
       >
         <MaterialIcons name="arrow-back" size={18} color="#AAAAAA" />
-        <Text style={styles.backHomeButtonText}>QUAY LẠI CỔNG KHÁN GIẢ</Text>
+        <Text style={styles.backHomeButtonText}>QUAY LẠI TRANG CHỦ</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

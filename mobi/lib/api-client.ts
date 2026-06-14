@@ -1,6 +1,7 @@
 import { BASE_URL } from './config';
 
 let authToken: string | null = null;
+let unauthorizedHandler: (() => void) | null = null;
 
 export function setAuthToken(token: string | null) {
   authToken = token;
@@ -8,6 +9,10 @@ export function setAuthToken(token: string | null) {
 
 export function getAuthToken(): string | null {
   return authToken;
+}
+
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  unauthorizedHandler = handler;
 }
 
 function injectUnderscoreId(val: any): any {
@@ -30,10 +35,13 @@ function injectUnderscoreId(val: any): any {
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
+  const isFormData = options.body instanceof FormData;
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
+  if (!isFormData) {
+    headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+  }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -48,6 +56,10 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   }
   
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      setAuthToken(null);
+      unauthorizedHandler?.();
+    }
     const errMsg =
       (raw as { message?: string })?.message ??
       (raw as { error?: string })?.error ??
@@ -280,10 +292,10 @@ export const refereeAssignmentsApi = {
     if (params?.limit) qs.set('limit', String(params.limit));
     return apiFetch<any>(`/referee-assignments/my-assignments?${qs}`);
   },
-  respond: (id: string, response: 'accepted' | 'rejected') =>
+  respond: (id: string, status: 'accepted' | 'declined') =>
     apiFetch<any>(`/referee-assignments/${id}/respond`, {
       method: 'PATCH',
-      body: JSON.stringify({ response }),
+      body: JSON.stringify({ status }),
     }),
 };
 
@@ -345,6 +357,12 @@ export const registrationsApi = {
     if (params?.status) qs.set('status', params.status);
     return apiFetch<PaginatedResult<RegistrationItem>>(`/registrations?${qs}`);
   },
+  listMine: (params?: { page?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    return apiFetch<PaginatedResult<RegistrationItem>>(`/registrations/my-registrations?${qs}`);
+  },
   create: (dto: { tournamentId: string; raceId: string; horseId: string; jockeyUserId?: string; note?: string }) =>
     apiFetch<RegistrationItem>('/registrations', { method: 'POST', body: JSON.stringify(dto) }),
   cancel: (id: string) =>
@@ -362,8 +380,16 @@ export const raceResultsApi = {
 
 export const raceChecksApi = {
   listByRace: (raceId: string) => apiFetch<any>(`/race-checks/race/${raceId}`),
-  update: (checkId: string, status: string, notes?: string) =>
-    apiFetch(`/race-checks/${checkId}`, { method: 'PATCH', body: JSON.stringify({ status, notes }) }),
+  update: (
+    checkId: string,
+    dto: {
+      status: 'pending' | 'passed' | 'failed';
+      healthNote?: string;
+      equipmentNote?: string;
+      jockeyCheckedIn?: boolean;
+      jockeyNote?: string;
+    },
+  ) => apiFetch(`/race-checks/${checkId}`, { method: 'PATCH', body: JSON.stringify(dto) }),
 };
 
 export const jockeyInvitationsApi = {
@@ -373,20 +399,20 @@ export const jockeyInvitationsApi = {
     if (params?.limit) qs.set('limit', String(params.limit));
     return apiFetch<any>(`/jockey-invitations/sent?${qs}`);
   },
-  list: (params?: { page?: number; limit?: number }) => {
+  listReceived: (params?: { page?: number; limit?: number }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
-    return apiFetch<any>(`/jockey-invitations?${qs}`);
+    return apiFetch<any>(`/jockey-invitations/received?${qs}`);
   },
   create: (dto: { registrationId: string; jockeyId: string; message?: string; jockeySharePercent: number }) =>
     apiFetch<any>('/jockey-invitations', { method: 'POST', body: JSON.stringify(dto) }),
   cancel: (id: string) =>
     apiFetch<any>(`/jockey-invitations/${id}/cancel`, { method: 'PATCH' }),
-  respond: (invitationId: string, response: 'accepted' | 'rejected') =>
+  respond: (invitationId: string, status: 'ACCEPTED' | 'REJECTED') =>
     apiFetch<any>(`/jockey-invitations/${invitationId}/respond`, {
       method: 'PATCH',
-      body: JSON.stringify({ response }),
+      body: JSON.stringify({ status }),
     }),
 };
 

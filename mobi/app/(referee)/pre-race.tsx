@@ -45,7 +45,7 @@ export default function RefereePreRace() {
     const notes = status === 'failed' ? failNotes[checkId] || 'Không đạt chuẩn sức khỏe' : undefined;
     setUpdatingId(checkId);
     try {
-      await raceChecksApi.update(checkId, status, notes);
+      await raceChecksApi.update(checkId, { status, healthNote: notes, jockeyCheckedIn: true });
       Alert.alert('Thành công', 'Đã cập nhật trạng thái kiểm tra.');
       // Refresh checks
       if (selectedRaceId) {

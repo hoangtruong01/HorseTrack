@@ -1,5 +1,5 @@
-import React from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { C, Card, useThemeColors } from '@/components/ui/shared';
 import { useAuth } from '@/providers/auth-provider';
@@ -9,14 +9,27 @@ export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const theme = useThemeColors();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const performLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      router.replace('/login');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const handleLogout = () => {
+    if (isLoggingOut) return;
+    if (Platform.OS === 'web') {
+      void performLogout();
+      return;
+    }
     Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
       { text: 'Hủy', style: 'cancel' },
-      { text: 'Đăng xuất', style: 'destructive', onPress: async () => {
-        await logout();
-        router.replace('/(auth)/login');
-      }},
+      { text: 'Đăng xuất', style: 'destructive', onPress: performLogout },
     ]);
   };
 
@@ -52,7 +65,7 @@ export default function ProfileScreen() {
         <InfoRow icon="cake" label="Ngày sinh" value={user?.dob || 'Chưa cập nhật'} theme={theme} />
       </Card>
 
-      <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
+      <TouchableOpacity style={s.logoutBtn} onPress={handleLogout} disabled={isLoggingOut}>
         <MaterialIcons name="logout" size={20} color="#EF4444" />
         <Text style={s.logoutText}>Đăng xuất</Text>
       </TouchableOpacity>

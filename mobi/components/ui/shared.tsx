@@ -97,6 +97,18 @@ export function EmptyState({ icon, title, subtitle }: { icon: string; title: str
 }
 
 // ─── Loading State ──────────────────────────────────────────────────────────
+export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const theme = useThemeColors();
+  return (
+    <View style={styles.emptyState}>
+      <MaterialIcons name="error-outline" size={48} color={theme.red} />
+      <Text style={[styles.emptyTitle, { color: theme.white }]}>Khong tai duoc du lieu</Text>
+      <Text selectable style={[styles.emptySubtitle, { color: theme.textMuted }]}>{message}</Text>
+      <OutlineButton title="Thu lai" onPress={onRetry} color={theme.red} />
+    </View>
+  );
+}
+
 export function LoadingState() {
   const theme = useThemeColors();
   return (
