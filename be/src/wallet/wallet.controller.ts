@@ -18,7 +18,6 @@ import type { JwtUser } from '../common/interfaces/jwt-user.interface';
 import { RoleName } from '../users/schemas/user.schema';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { WalletService } from './wallet.service';
-import { DepositDto } from './dto/deposit.dto';
 import { CreateCashoutDto } from './dto/create-cashout.dto';
 import { ProcessCashoutDto } from './dto/process-cashout.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
@@ -29,22 +28,6 @@ import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 @Controller('wallet')
 export class WalletController {
   constructor(private readonly walletService: WalletService) {}
-
-  @Post('deposit/for-user/:userId')
-  @Roles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'Admin deposits money to a specific user wallet' })
-  depositForUser(
-    @Param('userId', ParseObjectIdPipe) userId: string,
-    @Body() dto: DepositDto,
-    @CurrentUser() adminUser: JwtUser,
-  ) {
-    if (userId === adminUser.id) {
-      throw new BadRequestException(
-        'Admins cannot deposit money into their own wallets',
-      );
-    }
-    return this.walletService.deposit(userId, dto.amount);
-  }
 
   @Post('cashout')
   @Roles(RoleName.SPECTATOR, RoleName.OWNER, RoleName.JOCKEY, RoleName.REFEREE)

@@ -32,27 +32,6 @@ export class WalletService {
     private ledgerService: RewardPointLedgerService,
   ) {}
 
-  async deposit(
-    userId: string,
-    amount: number,
-  ): Promise<WalletTransactionDocument> {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('User not found');
-
-    await this.userModel.findByIdAndUpdate(userId, {
-      $inc: { balance: amount },
-    });
-
-    return this.transactionModel.create({
-      userId,
-      type: TransactionType.DEPOSIT,
-      amount,
-      points: 0,
-      description: `Deposited ${amount} into wallet.`,
-      status: TransactionStatus.SUCCESS,
-    });
-  }
-
   async requestCashout(
     dto: CreateCashoutDto,
     userId: string,
