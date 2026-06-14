@@ -4,7 +4,6 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
-import { User } from '../users/schemas/user.schema';
 import {
   CashoutRequest,
   CashoutStatus,
@@ -67,7 +66,6 @@ describe('WalletService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WalletService,
-        { provide: getModelToken(User.name), useValue: {} },
         {
           provide: getModelToken(WalletTransaction.name),
           useValue: transactionModel,
