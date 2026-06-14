@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken, getConnectionToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
@@ -88,7 +89,10 @@ describe('RewardPointLedgerService.credit (atomic)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RewardPointLedgerService,
-        { provide: getModelToken(RewardPointLedger.name), useValue: ledgerModel },
+        {
+          provide: getModelToken(RewardPointLedger.name),
+          useValue: ledgerModel,
+        },
         { provide: getModelToken(User.name), useValue: userModel },
         { provide: getConnectionToken(), useValue: connection },
       ],
@@ -113,6 +117,78 @@ describe('RewardPointLedgerService.credit (atomic)', () => {
       { session },
     );
     expect(session.commitTransaction).toHaveBeenCalled();
+    expect(session.endSession).toHaveBeenCalled();
+  });
+});
+
+describe('RewardPointLedgerService.debit (insufficient balance)', () => {
+  let service: RewardPointLedgerService;
+  let userModel: { findOneAndUpdate: jest.Mock; findById: jest.Mock };
+  let ledgerModel: { create: jest.Mock };
+  let session: {
+    startTransaction: jest.Mock;
+    commitTransaction: jest.Mock;
+    abortTransaction: jest.Mock;
+    endSession: jest.Mock;
+    inTransaction: jest.Mock;
+  };
+  let connection: { startSession: jest.Mock };
+
+  const userId = new Types.ObjectId().toHexString();
+
+  beforeEach(async () => {
+    session = {
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn().mockResolvedValue(undefined),
+      abortTransaction: jest.fn().mockResolvedValue(undefined),
+      endSession: jest.fn().mockResolvedValue(undefined),
+      // false after abortTransaction is called in the insufficient-balance path
+      inTransaction: jest.fn().mockReturnValue(false),
+    };
+    connection = { startSession: jest.fn().mockResolvedValue(session) };
+    userModel = {
+      // atomic conditional update returns null when balance is insufficient
+      findOneAndUpdate: jest.fn().mockReturnValue({
+        session: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue(null),
+        }),
+      }),
+      // getBalance fallback (reads User.points outside the aborted txn)
+      findById: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue({ points: 5 }),
+        }),
+      }),
+    };
+    ledgerModel = { create: jest.fn() };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        RewardPointLedgerService,
+        {
+          provide: getModelToken(RewardPointLedger.name),
+          useValue: ledgerModel,
+        },
+        { provide: getModelToken(User.name), useValue: userModel },
+        { provide: getConnectionToken(), useValue: connection },
+      ],
+    }).compile();
+
+    service = module.get(RewardPointLedgerService);
+  });
+
+  it('aborts the transaction, writes no ledger row, and throws when balance is insufficient', async () => {
+    await expect(
+      service.debit({
+        userId,
+        points: 100,
+        sourceType: 'redemption' as never,
+      }),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(session.abortTransaction).toHaveBeenCalled();
+    expect(ledgerModel.create).not.toHaveBeenCalled();
+    expect(session.commitTransaction).not.toHaveBeenCalled();
     expect(session.endSession).toHaveBeenCalled();
   });
 });
