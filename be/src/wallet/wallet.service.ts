@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { User, UserDocument } from '../users/schemas/user.schema';
 import {
   WalletTransaction,
   WalletTransactionDocument,
@@ -24,7 +23,6 @@ import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-le
 @Injectable()
 export class WalletService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(WalletTransaction.name)
     private transactionModel: Model<WalletTransactionDocument>,
     @InjectModel(CashoutRequest.name)
@@ -162,11 +160,9 @@ export class WalletService {
       this.transactionModel.countDocuments(filter),
     ]);
 
-    const user = await this.userModel.findById(userId, 'balance');
     const pointBalance = await this.ledgerService.getBalance(userId);
 
     return {
-      balance: user?.balance ?? 0,
       points: pointBalance,
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
