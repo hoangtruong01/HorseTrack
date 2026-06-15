@@ -107,6 +107,15 @@ const fallbackJockeyRankings: JockeyRankingEntry[] = [
   { jockeyUserId: "5", jockeyName: "Vũ Tiến Đạt", experienceYears: 3, totalPoints: 680, totalRaces: 10, wins: 3 },
 ];
 
+const GLOBE_MARKERS = [
+  { name: "Việt Nam", location: [10.77, 106.65] },
+  { name: "UAE (Dubai)", location: [25.15, 55.30] },
+  { name: "Mỹ (Kentucky)", location: [38.20, -85.77] },
+  { name: "Anh (London)", location: [51.41, -0.68] },
+  { name: "Úc (Melbourne)", location: [-37.78, 144.90] },
+  { name: "Nhật Bản (Tokyo)", location: [35.66, 139.48] }
+];
+
 export default function Home() {
   const { t } = useTranslation();
   const { resolvedTheme } = useTheme();
@@ -118,6 +127,7 @@ export default function Home() {
   const [jockeyRankings, setJockeyRankings] = useState<JockeyRankingEntry[]>([]);
   
   const globeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const markerRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Set mounted state
   useEffect(() => {
@@ -146,33 +156,58 @@ export default function Home() {
       dark: isDark ? 1 : 0,
       diffuse: 1.2,
       mapSamples: 16000,
-      mapBrightness: isDark ? 6 : 1.2,
-      baseColor: isDark ? [1, 1, 1] : [0.25, 0.25, 0.3],
+      mapBrightness: 6,
+      baseColor: [1, 1, 1],
       markerColor: [225 / 255, 6 / 255, 0],
-      glowColor: isDark ? [0.15, 0.15, 0.22] : [0.9, 0.9, 0.9],
-      markers: [
-        { location: [10.77, 106.65], size: 0.07 },
-        { location: [25.15, 55.30], size: 0.05 },
-        { location: [38.20, -85.77], size: 0.05 },
-        { location: [51.41, -0.68], size: 0.05 },
-        { location: [-37.78, 144.90], size: 0.05 },
-        { location: [35.66, 139.48], size: 0.05 },
-      ],
-      arcs: [
-        { from: [10.77, 106.65], to: [25.15, 55.30] },
-        { from: [10.77, 106.65], to: [38.20, -85.77] },
-        { from: [10.77, 106.65], to: [51.41, -0.68] },
-        { from: [10.77, 106.65], to: [-37.78, 144.90] },
-        { from: [10.77, 106.65], to: [35.66, 139.48] },
-      ],
-      arcColor: [248 / 255, 205 / 255, 70 / 255],
-      arcWidth: 0.6,
-      arcHeight: 0.4,
+      glowColor: isDark ? [0.15, 0.15, 0.22] : [1, 1, 1],
+      markers: GLOBE_MARKERS.map(m => ({ location: m.location as [number, number], size: 0.05 })),
     });
+
+    const theta = 0.25; // Góc nghiêng của cobe
+    const r = 225; // Bán kính hiển thị (width / 2)
+    const center = 225; // Tâm của container (width / 2)
 
     function animate() {
       phi += 0.005;
       globe?.update({ phi });
+
+      // Cập nhật vị trí nhãn quốc gia 2D đè lên canvas WebGL
+      GLOBE_MARKERS.forEach((m, idx) => {
+        const el = markerRefs.current[idx];
+        if (!el) return;
+
+        // Chuyển Lat/Lon sang Radian
+        const latRad = (m.location[0] * Math.PI) / 180;
+        // Cộng phi vào kinh độ để quay theo quả cầu
+        const lonRad = (m.location[1] * Math.PI) / 180 + phi;
+
+        // Tọa độ 3D trên quả cầu đơn vị
+        const x = Math.cos(latRad) * Math.sin(lonRad);
+        const y = Math.sin(latRad);
+        const z = Math.cos(latRad) * Math.cos(lonRad);
+
+        // Quay quanh trục X một góc nghiêng theta
+        const yRot = y * Math.cos(theta) - z * Math.sin(theta);
+        const zRot = y * Math.sin(theta) + z * Math.cos(theta);
+
+        // zRot > 0.05 nghĩa là điểm nằm ở mặt trước quả địa cầu
+        if (zRot > 0.05) {
+          // Tính toán vị trí screenX, screenY trong container 450x450
+          const screenX = center + x * r * 0.95;
+          const screenY = center - yRot * r * 0.95;
+
+          el.style.left = `${screenX}px`;
+          el.style.top = `${screenY}px`;
+          el.style.opacity = "1";
+          
+          // Tạo hiệu ứng scale nhỏ lại khi điểm xoay về phía rìa
+          const scale = 0.7 + zRot * 0.3;
+          el.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        } else {
+          el.style.opacity = "0";
+        }
+      });
+
       animationId = requestAnimationFrame(animate);
     }
     animationId = requestAnimationFrame(animate);
@@ -974,14 +1009,8 @@ export default function Home() {
             <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
               <div className="absolute inset-0 bg-radial-gradient from-primary/10 via-transparent to-transparent blur-3xl pointer-events-none scale-150" />
               
-              {/* Vòng sáng neon tròn làm viền quả địa cầu */}
+              {/* Quả địa cầu cobe 3D và các nhãn quốc gia */}
               <div className="relative flex items-center justify-center w-[300px] h-[300px] sm:w-[450px] sm:h-[450px]">
-                <div className={cn(
-                  "absolute inset-0 rounded-full border pointer-events-none animate-pulse transition-all duration-300",
-                  mounted && resolvedTheme === "dark" 
-                    ? "border-primary/10 bg-primary/[0.01] shadow-[0_0_50px_rgba(225,6,0,0.05)]" 
-                    : "border-primary/20 bg-primary/[0.02] shadow-[0_0_40px_rgba(225,6,0,0.02)]"
-                )} />
                 <canvas
                   ref={globeCanvasRef}
                   style={{
@@ -992,10 +1021,26 @@ export default function Home() {
                   }}
                   className="relative z-10 cursor-grab active:cursor-grabbing"
                 />
-              </div>
-              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider bg-secondary/40 px-3.5 py-1.5 rounded-full border border-border/50">
-                <Compass className="size-3.5 text-primary animate-spin-slow" />
-                Mô Phỏng Trực Quan Thời Gian Thực
+
+                {/* Các nhãn tên quốc gia 3D bay xung quanh quả cầu */}
+                {mounted && GLOBE_MARKERS.map((marker, idx) => (
+                  <div
+                    key={idx}
+                    ref={(el) => {
+                      markerRefs.current[idx] = el;
+                    }}
+                    className="absolute z-20 pointer-events-none px-2 py-0.5 rounded-md bg-background/80 dark:bg-background/90 border border-border/40 text-[9px] sm:text-[10px] font-black shadow-md text-foreground transition-all duration-200 select-none backdrop-blur-[2px]"
+                    style={{
+                      opacity: 0,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  >
+                    <span className="flex items-center gap-1.5 whitespace-nowrap">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E10600] animate-pulse" />
+                      {marker.name}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
