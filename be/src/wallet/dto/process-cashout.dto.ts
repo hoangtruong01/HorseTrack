@@ -1,10 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { CashoutStatus } from '../schemas/cashout-request.schema';
- 
+
 export class ProcessCashoutDto {
   @ApiProperty({
-    enum: [CashoutStatus.APPROVED, CashoutStatus.REJECTED, CashoutStatus.PAID, CashoutStatus.FAILED],
+    enum: [
+      CashoutStatus.APPROVED,
+      CashoutStatus.REJECTED,
+      CashoutStatus.PAID,
+      CashoutStatus.FAILED,
+    ],
     example: CashoutStatus.APPROVED,
   })
   @IsNotEmpty()
