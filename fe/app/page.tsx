@@ -37,56 +37,84 @@ const coreFeatures = [
     title: "Quản lý giải đấu",
     desc: "Thiết lập quy mô, thời gian đăng ký và phân bổ cơ cấu giải thưởng tự động.",
     icon: Trophy,
-    color: "group-hover:text-[#E10600]"
+    step: "01",
+    glowClass: "hover:shadow-[0_0_35px_rgba(225,6,0,0.14)] hover:border-red-500/40",
+    iconClass: "text-red-500 bg-red-500/10 border-red-500/20 group-hover:bg-red-500 group-hover:text-white group-hover:border-red-500 group-hover:shadow-[0_0_15px_rgba(225,6,0,0.35)]",
+    textColor: "group-hover:text-red-500",
+    gradient: "from-red-500/0 via-red-500/[0.015] to-red-500/[0.06]",
+    gridClass: "lg:col-span-2 lg:row-span-2 min-h-[320px]"
   },
   {
     key: "feat2",
     title: "Đăng ký ngựa đua",
     desc: "Hồ sơ sức khỏe, giống loài và chỉ số sức mạnh được cập nhật minh bạch.",
     icon: Compass,
-    color: "group-hover:text-[#F8CD46]"
+    step: "02",
+    glowClass: "hover:shadow-[0_0_35px_rgba(248,205,70,0.14)] hover:border-[#F8CD46]/40",
+    iconClass: "text-[#F8CD46] bg-[#F8CD46]/10 border-[#F8CD46]/20 group-hover:bg-[#F8CD46] group-hover:text-black group-hover:border-[#F8CD46] group-hover:shadow-[0_0_15px_rgba(248,205,70,0.35)]",
+    textColor: "group-hover:text-[#F8CD46]",
+    gradient: "from-[#F8CD46]/0 via-[#F8CD46]/[0.015] to-[#F8CD46]/0.05",
+    gridClass: "lg:col-span-1 lg:row-span-1 min-h-[155px]"
   },
   {
     key: "feat3",
     title: "Tuyển chọn nài ngựa",
     desc: "Hệ thống ký hợp đồng và kết nối nài ngựa phù hợp với từng chiến mã.",
     icon: UserCheck,
-    color: "group-hover:text-[#067E6A]"
+    step: "03",
+    glowClass: "hover:shadow-[0_0_35px_rgba(6,126,106,0.14)] hover:border-[#067E6A]/40",
+    iconClass: "text-[#067E6A] bg-[#067E6A]/10 border-[#067E6A]/20 group-hover:bg-[#067E6A] group-hover:text-white group-hover:border-[#067E6A] group-hover:shadow-[0_0_15px_rgba(6,126,106,0.35)]",
+    textColor: "group-hover:text-[#067E6A]",
+    gradient: "from-[#067E6A]/0 via-[#067E6A]/[0.01] to-[#067E6A]/0.05",
+    gridClass: "lg:col-span-1 lg:row-span-1 min-h-[155px]"
   },
   {
     key: "feat4",
     title: "Lịch trình thông minh",
     desc: "Tự động sắp xếp các lượt chạy dựa trên điều kiện thời tiết và mặt sân.",
     icon: CalendarClock,
-    color: "group-hover:text-[#3B82F6]"
+    step: "04",
+    glowClass: "hover:shadow-[0_0_35px_rgba(59,130,246,0.14)] hover:border-blue-500/40",
+    iconClass: "text-blue-500 bg-blue-500/10 border-blue-500/20 group-hover:bg-blue-500 group-hover:text-white group-hover:border-blue-500 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.35)]",
+    textColor: "group-hover:text-blue-500",
+    gradient: "from-blue-500/0 via-blue-500/[0.015] to-blue-500/0.05",
+    gridClass: "lg:col-span-2 lg:row-span-1 min-h-[155px]"
   },
   {
     key: "feat5",
     title: "Báo cáo của trọng tài",
     desc: "Ghi nhận lỗi vi phạm trực tiếp bằng hình ảnh và video thời gian thực.",
     icon: Sparkles,
-    color: "group-hover:text-purple-500"
+    step: "05",
+    glowClass: "hover:shadow-[0_0_35px_rgba(168,85,247,0.14)] hover:border-purple-500/40",
+    iconClass: "text-purple-500 bg-purple-500/10 border-purple-500/20 group-hover:bg-purple-500 group-hover:text-white group-hover:border-purple-500 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.35)]",
+    textColor: "group-hover:text-purple-500",
+    gradient: "from-purple-500/0 via-purple-500/[0.015] to-purple-500/0.05",
+    gridClass: "lg:col-span-1 lg:row-span-1 min-h-[155px]"
   },
   {
     key: "feat6",
     title: "Kết quả tức thời",
     desc: "Cập nhật chính xác thứ hạng chung cuộc ngay khi ngựa đua cán đích.",
     icon: Flag,
-    color: "group-hover:text-pink-500"
-  },
-  {
-    key: "feat7",
-    title: "Bảng xếp hạng toàn cầu",
-    desc: "Vinh danh những chú ngựa xuất sắc nhất và nài ngựa tài ba nhất mùa giải.",
-    icon: Target,
-    color: "group-hover:text-amber-500"
+    step: "06",
+    glowClass: "hover:shadow-[0_0_35px_rgba(236,72,153,0.14)] hover:border-pink-500/40",
+    iconClass: "text-pink-500 bg-pink-500/10 border-pink-500/20 group-hover:bg-pink-500 group-hover:text-white group-hover:border-pink-500 group-hover:shadow-[0_0_15px_rgba(236,72,153,0.35)]",
+    textColor: "group-hover:text-pink-500",
+    gradient: "from-pink-500/0 via-pink-500/[0.015] to-pink-500/0.05",
+    gridClass: "lg:col-span-1 lg:row-span-1 min-h-[155px]"
   },
   {
     key: "feat8",
     title: "Dự đoán & Phần thưởng",
     desc: "Hệ thống điểm thưởng kích thích tương tác, dự đoán thông minh với phân tích AI.",
     icon: Tv,
-    color: "group-hover:text-cyan-500"
+    step: "07",
+    glowClass: "hover:shadow-[0_0_35px_rgba(6,182,212,0.14)] hover:border-cyan-500/40",
+    iconClass: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20 group-hover:bg-cyan-500 group-hover:text-black group-hover:border-cyan-500 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.35)]",
+    textColor: "group-hover:text-cyan-500",
+    gradient: "from-cyan-500/0 via-cyan-500/[0.015] to-cyan-500/0.06",
+    gridClass: "lg:col-span-2 lg:row-span-1 min-h-[155px]"
   },
 ];
 
@@ -1132,37 +1160,138 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Core Features Section (Tính năng cốt lõi) */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
+      {/* 6. Core Features Section (Tính năng cốt lõi - Thiết kế hiện đại & Hiệu ứng tương tác) */}
+      <section className="py-24 relative overflow-hidden bg-background">
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes featureCardFadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(30px) scale(0.97);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+          .animate-feature-card {
+            animation: featureCardFadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+        `}} />
+
+        {/* Nền mờ ảo */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
+        {/* Dot pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-[0.02] pointer-events-none" />
+
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-16 relative z-10">
           
-          <div className="space-y-2 text-center">
-            <span className="text-xs font-black uppercase tracking-[0.24em] text-primary">
+          <div className="space-y-3 text-center max-w-3xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">
+              <span className="size-1.5 rounded-full bg-primary animate-pulse" />
               QUY TRÌNH HỆ THỐNG
             </span>
-            <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
+            <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-5xl bg-gradient-to-r from-foreground via-foreground/90 to-foreground/75 bg-clip-text text-transparent">
               Tính Năng Cốt Lõi
             </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-semibold max-w-2xl mx-auto">
+              Hệ thống vận hành tối ưu với các module khép kín từ đăng ký, tổ chức cho đến trực tiếp và trả thưởng tự động.
+            </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {coreFeatures.map((feat) => {
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:grid-flow-row-dense">
+            {coreFeatures.map((feat, index) => {
               const Icon = feat.icon;
+              const isLarge = feat.key === "feat1";
+              const isWide = feat.key === "feat4" || feat.key === "feat8";
+              
               return (
                 <div
                   key={feat.key}
-                  className="group flex items-start gap-4 rounded-3xl border border-border bg-secondary/20 p-6 hover:border-primary/20 hover:bg-card hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                  className={cn(
+                    "animate-feature-card group relative flex flex-col justify-between rounded-[2rem] border border-border/60 bg-card/20 p-7 backdrop-blur-md transition-all duration-500 hover:-translate-y-2 hover:bg-card/70 overflow-hidden",
+                    feat.glowClass,
+                    feat.gridClass
+                  )}
                 >
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary border border-primary/10 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                    <Icon className="size-5.5" />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-xs uppercase text-foreground tracking-wide leading-none transition-colors duration-300 group-hover:text-primary">
-                      {feat.title}
-                    </h3>
-                    <p className="mt-2 text-xs text-muted-foreground leading-relaxed font-medium">
-                      {feat.desc}
-                    </p>
+                  {/* Hover gradient background layer */}
+                  <div className={cn(
+                    "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none",
+                    feat.gradient
+                  )} />
+
+                  {/* Step number on background */}
+                  <span className="absolute top-4 right-6 text-7xl font-black text-foreground/[0.02] group-hover:text-foreground/[0.06] transition-colors duration-500 select-none pointer-events-none font-mono">
+                    {feat.step}
+                  </span>
+
+                  {/* Nội dung bên trong thẻ */}
+                  <div className={cn("h-full flex flex-col justify-between relative z-10", isWide ? "lg:flex-row lg:items-center lg:gap-8" : "")}>
+                    <div className="space-y-6 flex-1">
+                      <div className={cn(
+                        "flex size-12 items-center justify-center rounded-2xl border transition-all duration-500 group-hover:scale-110 group-hover:rotate-6",
+                        feat.iconClass
+                      )}>
+                        <Icon className="size-6 transition-transform duration-500" />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h3 className={cn(
+                          "font-extrabold text-sm uppercase tracking-wider text-foreground transition-colors duration-300 relative inline-block",
+                          feat.textColor
+                        )}>
+                          {feat.title}
+                          <span className="absolute -bottom-1 left-0 h-[2px] w-0 bg-current transition-all duration-300 group-hover:w-full" />
+                        </h3>
+                        <p className="text-[11px] text-muted-foreground leading-relaxed font-semibold group-hover:text-foreground/85 transition-colors duration-300">
+                          {feat.desc}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Phần visual thêm cho Card Lớn (2x2) */}
+                    {isLarge && feat.key === "feat1" && (
+                      <div className="mt-6 p-4 rounded-2xl border border-border/40 bg-background/30 backdrop-blur-sm space-y-2.5 text-[10px] font-semibold text-muted-foreground transition-colors duration-500 group-hover:bg-background/50 group-hover:border-red-500/20">
+                        <div className="flex items-center justify-between border-b border-border/30 pb-2">
+                          <span className="font-extrabold text-foreground tracking-wider uppercase">Grand Prix Championship</span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[8px] font-black text-red-500 uppercase">
+                            <span className="size-1 rounded-full bg-red-500 animate-ping" />
+                            Đang chạy
+                          </span>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-[9px] uppercase tracking-wider font-black">
+                            <span>Tiến độ đăng ký</span>
+                            <span className="text-red-500">80% (64/80)</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-muted/40 rounded-full overflow-hidden">
+                            <div className="h-full bg-red-500 rounded-full w-[80%] shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Phần visual thêm cho Card Rộng (2x1) - Dự đoán */}
+                    {isWide && feat.key === "feat8" && (
+                      <div className="mt-4 lg:mt-0 p-4 rounded-2xl border border-border/40 bg-background/30 backdrop-blur-sm space-y-3 text-[10px] font-semibold text-muted-foreground transition-colors duration-500 group-hover:bg-background/50 group-hover:border-cyan-500/20 min-w-[210px] lg:max-w-[240px]">
+                        <div className="flex items-center justify-between border-b border-border/30 pb-2">
+                          <span className="font-extrabold text-foreground tracking-wider uppercase">Dự Đoán AI</span>
+                          <span className="text-cyan-500 font-bold flex items-center gap-0.5">
+                            <Sparkles className="size-3 text-cyan-500 animate-pulse" /> 87.4%
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="rounded-lg bg-cyan-500/5 hover:bg-cyan-500/15 border border-cyan-500/10 p-2 text-center transition-all duration-300 cursor-pointer">
+                            <span className="block text-[8px] uppercase tracking-wider text-muted-foreground font-black">Ngựa A</span>
+                            <span className="font-mono text-[10px] font-black text-cyan-400">1.85</span>
+                          </div>
+                          <div className="rounded-lg bg-secondary/35 hover:bg-secondary/60 border border-border/40 p-2 text-center transition-all duration-300 cursor-pointer">
+                            <span className="block text-[8px] uppercase tracking-wider text-muted-foreground font-black">Ngựa B</span>
+                            <span className="font-mono text-[10px] font-black text-foreground/80">2.10</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
