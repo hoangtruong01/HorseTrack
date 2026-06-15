@@ -597,7 +597,7 @@ export default function Home() {
       </section>
 
       {/* 3. Quick Stats Section (Thống kê thời gian thực) */}
-      <section className="py-14 border-y border-border/60 bg-secondary/15 backdrop-blur-sm relative">
+      <section className="py-14 bg-secondary/15 backdrop-blur-sm relative">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.01] to-transparent" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -799,7 +799,7 @@ export default function Home() {
       </section>
 
       {/* 5. Rankings Section (Bảng xếp hạng toàn cầu - Thiết kế hiện đại & Animated) */}
-      <section className="py-20 border-t border-border/60 bg-secondary/10 relative overflow-hidden">
+      <section className="py-20 bg-secondary/10 relative overflow-hidden">
         {/* Style injection for smooth staggered animations */}
         <style dangerouslySetInnerHTML={{__html: `
           @keyframes rankRowSlideUp {
@@ -997,7 +997,7 @@ export default function Home() {
       </section>
 
       {/* 5.5. Global Globe Tournaments Section */}
-      <section className="py-24 border-t border-border/60 relative overflow-hidden bg-background">
+      <section className="py-24 relative overflow-hidden bg-background">
         {/* Glow Effects */}
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute bottom-1/4 left-10 w-96 h-96 bg-yellow-500/5 rounded-full blur-[140px] pointer-events-none" />
@@ -1133,7 +1133,7 @@ export default function Home() {
       </section>
 
       {/* 6. Core Features Section (Tính năng cốt lõi) */}
-      <section className="py-20 border-t border-border/60">
+      <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           
           <div className="space-y-2 text-center">
@@ -1224,7 +1224,7 @@ export default function Home() {
       </section>
 
       {/* 8. Footer Section */}
-      <footer className="bg-background border-t border-border/60 py-16 text-xs sm:text-sm text-muted-foreground font-semibold tracking-wide">
+      <footer className="bg-background py-16 text-xs sm:text-sm text-muted-foreground font-semibold tracking-wide">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 pb-12 border-b border-border/50">
           
           {/* Logo & Description */}
