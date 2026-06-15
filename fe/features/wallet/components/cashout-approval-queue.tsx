@@ -276,20 +276,13 @@ export function CashoutApprovalQueue({
         {/* CỘT PHẢI (col-span-7): Danh sách lịch sử giao dịch & KPI ca trực */}
         <div className="lg:col-span-7 space-y-6">
           {/* Thẻ KPI phụ dành cho Counter Staff */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Đã xử lý hôm nay</p>
                 <p className="mt-1 font-mono text-2xl font-black text-emerald-400">{processedTodayCount}</p>
               </div>
               <CheckCircle2 className="size-8 text-emerald-500/20" />
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Đang chờ tại quầy</p>
-                <p className="mt-1 font-mono text-2xl font-black text-amber-500">{pendingQueueCount}</p>
-              </div>
-              <AlertCircle className="size-8 text-amber-500/20" />
             </div>
           </div>
 

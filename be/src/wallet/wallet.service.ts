@@ -211,10 +211,19 @@ export class WalletService {
     };
   }
 
-  async findAllCashouts(page = 1, limit = 20) {
+  async findAllCashouts(page = 1, limit = 20, status?: string) {
+    const filter: any = {};
+    if (status) {
+      if (status.includes(',')) {
+        filter.status = { $in: status.split(',') };
+      } else {
+        filter.status = status;
+      }
+    }
+
     const [data, total] = await Promise.all([
       this.cashoutModel
-        .find()
+        .find(filter)
         .populate('userId', 'fullName email phone roles')
         .populate('approvedBy', 'fullName')
         .populate('paidBy', 'fullName')
@@ -222,7 +231,7 @@ export class WalletService {
         .limit(limit)
         .sort({ createdAt: -1 })
         .exec(),
-      this.cashoutModel.countDocuments(),
+      this.cashoutModel.countDocuments(filter),
     ]);
     return {
       data,

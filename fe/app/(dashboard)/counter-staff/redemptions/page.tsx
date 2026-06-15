@@ -27,7 +27,7 @@ export default function RedemptionsQueuePage() {
   const fetchCashouts = useCallback(async (currentPage: number) => {
     setLoading(true);
     try {
-      const res = await walletApi.allCashouts({ page: currentPage, limit: 10 });
+      const res = await walletApi.allCashouts({ page: currentPage, limit: 10, status: "PAID,REJECTED" });
       if (res && res.data) {
         setCashouts(res.data);
         setPage(res.meta?.page ?? currentPage);

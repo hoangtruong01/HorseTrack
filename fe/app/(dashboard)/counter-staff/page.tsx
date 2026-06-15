@@ -20,7 +20,7 @@ export default function CounterStaffDashboard() {
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await walletApi.allCashouts({ page: 1, limit: 100 });
+        const res = await walletApi.allCashouts({ page: 1, limit: 100, status: "PAID,REJECTED" });
         if (res && res.data) {
           const list = res.data;
           const totalCount = res.meta?.total ?? list.length;
@@ -58,22 +58,7 @@ export default function CounterStaffDashboard() {
         description="Chào mừng bạn đến với bàn làm việc của Nhân viên quầy. Tại đây bạn có thể phê duyệt mã quà tặng vật lý và hỗ trợ trao thưởng trực tiếp tại quầy."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="relative overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm transition duration-300 hover:border-amber-300 dark:border-yellow-500/10 dark:bg-gradient-to-br dark:from-[#1A1813]/90 dark:to-[#12110D]/90">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-widest text-amber-800 dark:text-yellow-500/80">
-              Chờ Phê Duyệt
-            </p>
-            <Clock className="size-5 text-amber-600 dark:text-yellow-500" />
-          </div>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-foreground">
-              {loading ? "—" : stats.pendingCount}
-            </span>
-            <span className="text-xs text-muted-foreground">mã đang đợi</span>
-          </div>
-        </div>
-
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <div className="relative overflow-hidden rounded-2xl border border-red-200 bg-red-50 p-5 shadow-sm transition duration-300 hover:border-red-300 dark:border-red-500/10 dark:bg-gradient-to-br dark:from-[#1A1212]/90 dark:to-[#120A0A]/90">
           <div className="flex items-center justify-between">
             <p className="text-xs font-black uppercase tracking-widest text-red-800 dark:text-red-400/80">
@@ -157,6 +142,7 @@ function HistoryTable({ loading, recentCashouts }: { loading: boolean; recentCas
   const limit = 10;
 
   const filtered = recentCashouts.filter((item) => {
+    if (item.status !== "PAID" && item.status !== "REJECTED") return false;
     let matchSearch = true;
     if (search) {
       matchSearch = item.redemptionCode.toLowerCase().includes(search.toLowerCase());
