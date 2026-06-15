@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -66,7 +67,7 @@ export default function OwnerRegistrationsPage() {
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
-          <Loader2 className="size-8 animate-spin text-[#E10600]" />
+          <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải lịch sử ghi danh...</p>
         </div>
       ) : (

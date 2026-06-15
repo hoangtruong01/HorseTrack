@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
@@ -252,7 +253,7 @@ export default function SpectatorDashboardPage() {
 
             {loadingTournaments ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="size-6 animate-spin text-primary" />
+                <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
               </div>
             ) : tournaments.length === 0 ? (
               <div className="rounded-xl border border-border bg-card/50 p-8 text-center">
@@ -290,7 +291,7 @@ export default function SpectatorDashboardPage() {
 
             {loadingRaces ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="size-6 animate-spin text-primary" />
+                <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
               </div>
             ) : races.length === 0 ? (
               <div className="rounded-xl border border-border bg-card/50 p-8 text-center">
@@ -340,7 +341,7 @@ export default function SpectatorDashboardPage() {
 
             {loadingRankings ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="size-6 animate-spin text-primary" />
+                <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
               </div>
             ) : (
               <div className="space-y-6">

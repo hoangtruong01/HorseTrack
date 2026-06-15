@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, ShieldAlert, FileText, User, Eye } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -130,11 +131,10 @@ export default function AdminRefereesPage() {
             <button
               key={tab.value}
               onClick={() => setFilterApproval(tab.value)}
-              className={`rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
-                filterApproval === tab.value
+              className={`rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${filterApproval === tab.value
                   ? "bg-primary text-foreground shadow-lg"
                   : "bg-muted text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -148,7 +148,7 @@ export default function AdminRefereesPage() {
       <div className="rounded-2xl border border-border bg-card/90 overflow-hidden shadow-2xl backdrop-blur-md">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-3">
-            <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
             <p className="text-xs font-mono uppercase tracking-widest">Đang tải hồ sơ trọng tài...</p>
           </div>
         ) : profiles.length === 0 ? (

@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -50,7 +51,7 @@ export default function AdminRaceAssignmentsPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <Loader2 className="size-8 animate-spin text-[#E10600]" />
+        <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải thông tin phân công...</p>
       </div>
     );

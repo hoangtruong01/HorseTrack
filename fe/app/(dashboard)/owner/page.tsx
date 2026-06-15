@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { StatCard } from "@/components/data-display/stat-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -430,7 +431,7 @@ export default function OwnerDashboardPage() {
     <Suspense
       fallback={
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <div className="size-8 animate-spin border-4 border-primary border-t-transparent rounded-full" />
+          <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">
             Đang tải trạm điều hành...
           </p>

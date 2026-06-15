@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Flag, Loader2, ArrowRight, Timer, MapPin, Users, Award, Trophy,
@@ -165,8 +166,8 @@ export default function OwnerRacesBrowserPage() {
         <button
           onClick={() => setActiveTab("browse")}
           className={`pb-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === "browse"
-              ? "border-[#E10600] text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground/80"
+            ? "border-[#E10600] text-primary"
+            : "border-transparent text-muted-foreground hover:text-foreground/80"
             }`}
         >
           Duyệt Giải Đấu & Đăng Ký
@@ -174,8 +175,8 @@ export default function OwnerRacesBrowserPage() {
         <button
           onClick={() => setActiveTab("requests")}
           className={`pb-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === "requests"
-              ? "border-[#E10600] text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground/80"
+            ? "border-[#E10600] text-primary"
+            : "border-transparent text-muted-foreground hover:text-foreground/80"
             }`}
         >
           Danh Sách Gửi Yêu Cầu
@@ -208,7 +209,7 @@ export default function OwnerRacesBrowserPage() {
 
             {loadingTournaments ? (
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                <Loader2 className="size-6 animate-spin text-[#E10600]" />
+                <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
                 <p className="mt-3 text-[10px] font-mono uppercase tracking-widest">Đang tải giải đấu...</p>
               </div>
             ) : filteredTournaments.length === 0 ? (
@@ -228,8 +229,8 @@ export default function OwnerRacesBrowserPage() {
                       key={tid}
                       onClick={() => setSelectedTournamentId(isSelected ? null : tid)}
                       className={`w-full text-left rounded-xl border p-4 transition duration-200 group ${isSelected
-                          ? "border-primary/40 bg-primary/5 shadow-sm"
-                          : "border-border bg-card hover:border-primary/25 hover:bg-muted/50"
+                        ? "border-primary/40 bg-primary/5 shadow-sm"
+                        : "border-border bg-card hover:border-primary/25 hover:bg-muted/50"
                         }`}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
@@ -311,7 +312,7 @@ export default function OwnerRacesBrowserPage() {
                 {/* Races Cards */}
                 {loadingRaces ? (
                   <div className="flex flex-col items-center justify-center py-16 text-foreground/55">
-                    <Loader2 className="size-6 animate-spin text-[#E10600]" />
+                    <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
                     <p className="mt-3 text-[10px] font-mono uppercase tracking-widest">Đang tải danh sách vòng đua...</p>
                   </div>
                 ) : races.length === 0 ? (
@@ -344,9 +345,9 @@ export default function OwnerRacesBrowserPage() {
                                 <StatusBadge label="Đóng đăng ký" tone="slate" />
                               )}
                               <span className={`inline-flex rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${race.status === "SCHEDULED" ? "text-blue-400 bg-blue-400/10 border-blue-400/20" :
-                                  race.status === "LIVE" ? "text-rose-400 bg-rose-400/10 border-rose-400/20 animate-pulse" :
-                                    race.status === "FINISHED" ? "text-purple-400 bg-purple-400/10 border-purple-400/20" :
-                                      "text-muted-foreground/60 bg-muted border-border"
+                                race.status === "LIVE" ? "text-rose-400 bg-rose-400/10 border-rose-400/20 animate-pulse" :
+                                  race.status === "FINISHED" ? "text-purple-400 bg-purple-400/10 border-purple-400/20" :
+                                    "text-muted-foreground/60 bg-muted border-border"
                                 }`}>
                                 {race.status}
                               </span>
@@ -437,7 +438,7 @@ export default function OwnerRacesBrowserPage() {
 
           {loadingRegistrations ? (
             <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
-              <Loader2 className="size-8 animate-spin text-[#E10600]" />
+              <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
               <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách gửi yêu cầu...</p>
             </div>
           ) : (

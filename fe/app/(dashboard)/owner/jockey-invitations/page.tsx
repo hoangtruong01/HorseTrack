@@ -241,7 +241,7 @@ export default function JockeyInvitationsPage() {
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
-          <Loader2 className="size-8 animate-spin text-[#E10600]" />
+          <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
         </div>
       ) : (

@@ -1,7 +1,7 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
@@ -63,7 +63,7 @@ export default function OwnerWalletPage() {
 
       {isLoading && transactions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
-          <Loader2 className="size-8 animate-spin text-[#E10600]" />
+          <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">{t("counterStaff.recentRedemptions.loading", "Đang tải lịch sử tài chính...")}</p>
         </div>
       ) : (

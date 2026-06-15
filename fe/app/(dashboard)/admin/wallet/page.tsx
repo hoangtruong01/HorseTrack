@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -117,6 +118,8 @@ export default function AdminWalletPage() {
     return "—";
   };
 
+  const currentList = activeTab === "cashouts" ? cashouts : failedCashouts;
+
   return (
     <main className="space-y-6">
       <PageHeader
@@ -149,9 +152,12 @@ export default function AdminWalletPage() {
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-3">
+            <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
+            <p className="text-xs font-mono uppercase tracking-widest">Đang tải giao dịch...</p>
+          </div>
         ) : activeTab === "cashouts" || activeTab === "failed_cashouts" ? (
-          (activeTab === "cashouts" ? cashouts : failedCashouts).length === 0 ? (
+          currentList.length === 0 ? (
             <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">
               {activeTab === "cashouts" ? "Không có cashout requests." : "Không có giao dịch lỗi nào."}
             </div>
@@ -171,7 +177,7 @@ export default function AdminWalletPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {(activeTab === "cashouts" ? cashouts : failedCashouts).map((c) => (
+                  {currentList.map((c) => (
                     <tr key={c._id} className="hover:bg-muted transition-colors">
                       <td className="px-5 py-4">
                         <p className="text-sm font-semibold text-foreground">{getUserName(c.userId)}</p>
@@ -181,9 +187,7 @@ export default function AdminWalletPage() {
                         <code className="rounded bg-muted px-2 py-1 text-xs font-mono text-primary border border-primary/20">{c.redemptionCode}</code>
                       </td>
                       <td className="px-5 py-4 text-center font-mono font-black text-primary">{c.pointsRedeemed.toLocaleString()}</td>
-                      <td className="px-5 py-4 text-sm text-foreground/70">
-                        {getHandlerName(c)}
-                      </td>
+                      <td className="px-5 py-4 text-sm text-foreground/70">{getHandlerName(c)}</td>
                       <td className="px-5 py-4 text-xs text-muted-foreground">
                         {c.createdAt ? new Date(c.createdAt).toLocaleString("vi-VN") : "—"}
                       </td>
@@ -265,6 +269,7 @@ export default function AdminWalletPage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 text-center font-mono font-semibold text-primary">{t.points}</td>
+                      {/* Đã sửa khoảng trắng lỗi py- 4 tại đây */}
                       <td className="px-5 py-4 text-xs text-muted-foreground max-w-xs truncate">{t.description}</td>
                       <td className="px-5 py-4 text-xs text-muted-foreground">
                         {t.createdAt ? new Date(t.createdAt).toLocaleDateString("vi-VN") : "—"}
@@ -321,5 +326,3 @@ export default function AdminWalletPage() {
     </main>
   );
 }
-
-
