@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -191,7 +192,7 @@ export default function JockeyProfilePage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <Loader2 className="size-8 animate-spin text-[#E10600]" />
+        <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải profile...</p>
       </div>
     );
@@ -540,7 +541,7 @@ function ProfileFormFields({
           ) : (
             <div className="text-center space-y-2">
               {uploading ? (
-                <Loader2 className="size-8 text-[#E10600] mx-auto animate-spin" />
+                <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
               ) : (
                 <Upload className="size-8 text-muted-foreground group-hover:text-primary transition" />
               )}

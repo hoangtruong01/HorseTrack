@@ -30,9 +30,13 @@ export default function AdminCashoutsPage() {
     void fetchCashouts();
   }, [fetchCashouts]);
 
-  const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED") => {
+  const handleAction = async (
+    id: string,
+    action: "APPROVED" | "PAID" | "REJECTED" | "FAILED",
+    reason?: string
+  ) => {
     try {
-      await walletApi.processCashout(id, action);
+      await walletApi.processCashout(id, action, reason);
       toast.success(
         t("wallet.redemption.showing")
           ? `Cập nhật giao dịch thành công sang trạng thái ${action}`

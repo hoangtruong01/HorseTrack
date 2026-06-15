@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -104,7 +105,7 @@ export default function RaceRegisterPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
-        <Loader2 className="size-8 animate-spin text-[#E10600]" />
+        <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang khởi tạo thủ tục đăng ký...</p>
       </div>
     );

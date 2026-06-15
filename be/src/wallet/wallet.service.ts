@@ -5,20 +5,20 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import {
-  WalletTransaction,
-  WalletTransactionDocument,
-  TransactionType,
-  TransactionStatus,
-} from './schemas/wallet-transaction.schema';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
+import { CreateCashoutDto } from './dto/create-cashout.dto';
 import {
   CashoutRequest,
   CashoutRequestDocument,
   CashoutStatus,
 } from './schemas/cashout-request.schema';
-import { CreateCashoutDto } from './dto/create-cashout.dto';
-import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
-import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
+import {
+  TransactionStatus,
+  TransactionType,
+  WalletTransaction,
+  WalletTransactionDocument,
+} from './schemas/wallet-transaction.schema';
 
 @Injectable()
 export class WalletService {
@@ -90,13 +90,15 @@ export class WalletService {
     id: string,
     status: CashoutStatus,
     handlerId: string,
+    rejectReason?: string,
   ): Promise<CashoutRequestDocument> {
     const request = await this.cashoutModel.findById(id);
     if (!request) throw new NotFoundException('Cashout request not found');
 
     if (
       request.status === CashoutStatus.PAID ||
-      request.status === CashoutStatus.REJECTED
+      request.status === CashoutStatus.REJECTED ||
+      request.status === CashoutStatus.FAILED
     ) {
       throw new BadRequestException('Request has already been processed');
     }
@@ -121,12 +123,31 @@ export class WalletService {
         points: request.pointsRedeemed,
         sourceType: LedgerSourceType.REDEMPTION,
         sourceId: String(request._id),
-        note: `Hoàn điểm do yêu cầu quy đổi bị từ chối (Mã: ${request.redemptionCode})`,
+        note: `Hoàn điểm do yêu cầu quy đổi bị từ chối (Mã: ${request.redemptionCode})${rejectReason ? `: ${rejectReason}` : ''}`,
+        createdBy: handlerId,
+      });
+    } else if (status === CashoutStatus.FAILED) {
+      // Update original deduction note to show it failed
+      await this.ledgerService.updateNote(
+        String(request._id),
+        LedgerSourceType.REDEMPTION,
+        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Thất bại/Lỗi.`,
+      );
+      // Refund points if cashout is failed
+      await this.ledgerService.credit({
+        userId: String(request.userId),
+        points: request.pointsRedeemed,
+        sourceType: LedgerSourceType.REDEMPTION,
+        sourceId: String(request._id),
+        note: `Hoàn điểm do yêu cầu quy đổi gặp lỗi (Mã: ${request.redemptionCode})${rejectReason ? `: ${rejectReason}` : ''}`,
         createdBy: handlerId,
       });
     }
 
     request.status = status;
+    if (rejectReason) {
+      request.rejectReason = rejectReason;
+    }
 
     if (status === CashoutStatus.APPROVED) {
       request.approvedBy = new Types.ObjectId(handlerId);
@@ -137,8 +158,11 @@ export class WalletService {
         { cashoutRequestId: request._id },
         { status: TransactionStatus.SUCCESS },
       );
-    } else if (status === CashoutStatus.REJECTED) {
-      request.rejectedBy = new Types.ObjectId(handlerId);
+    } else if (
+      status === CashoutStatus.REJECTED ||
+      status === CashoutStatus.FAILED
+    ) {
+      request.approvedBy = new Types.ObjectId(handlerId);
       await this.transactionModel.findOneAndUpdate(
         { cashoutRequestId: request._id },
         { status: TransactionStatus.FAILED },
@@ -186,10 +210,19 @@ export class WalletService {
     };
   }
 
-  async findAllCashouts(page = 1, limit = 20) {
+  async findAllCashouts(page = 1, limit = 20, status?: string) {
+    const filter: Record<string, unknown> = {};
+    if (status) {
+      if (status.includes(',')) {
+        filter.status = { $in: status.split(',') };
+      } else {
+        filter.status = status;
+      }
+    }
+
     const [data, total] = await Promise.all([
       this.cashoutModel
-        .find()
+        .find(filter)
         .populate('userId', 'fullName email phone roles')
         .populate('approvedBy', 'fullName')
         .populate('paidBy', 'fullName')
@@ -198,7 +231,7 @@ export class WalletService {
         .limit(limit)
         .sort({ createdAt: -1 })
         .exec(),
-      this.cashoutModel.countDocuments(),
+      this.cashoutModel.countDocuments(filter),
     ]);
     return {
       data,

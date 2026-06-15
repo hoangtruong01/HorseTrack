@@ -471,7 +471,7 @@ export default function SpectatorTournamentsPage() {
           {activeTab === "tournaments" && (
             loadingTours ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                <Loader2 className="size-8 animate-spin text-[#E10600]" />
+                <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
                 <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách giải đấu...</p>
               </div>
             ) : filteredTournaments.length === 0 ? (
@@ -558,7 +558,7 @@ export default function SpectatorTournamentsPage() {
           {activeTab === "races" && (
             loadingAllRaces ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                <Loader2 className="size-8 animate-spin text-[#E10600]" />
+                <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
                 <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách lịch đua...</p>
               </div>
             ) : filteredFlatRaces.length === 0 ? (
@@ -723,7 +723,7 @@ export default function SpectatorTournamentsPage() {
 
               {loadingTourRaces ? (
                 <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                  <Loader2 className="size-6 animate-spin text-[#E10600]" />
+                  <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
                   <p className="mt-3 text-xs font-mono uppercase tracking-widest">Đang tải lịch trình vòng đua...</p>
                 </div>
               ) : selectedTourRaces.length === 0 ? (
@@ -1102,7 +1102,7 @@ export default function SpectatorTournamentsPage() {
 
               {loadingRaceDetails ? (
                 <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                  <Loader2 className="size-6 animate-spin text-[#E10600]" />
+                  <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
                   <p className="mt-3 text-xs font-mono uppercase tracking-widest">Đang tải danh sách đội hình...</p>
                 </div>
               ) : selectedRaceRegistrations.length === 0 ? (

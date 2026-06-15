@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, Text, StyleSheet, Alert, RefreshControl, TouchableOpacity } from 'react-native';
-import { C, ListItemCard, LoadingState, EmptyState, SectionHeader, statusLabel, formatDateTime } from '@/components/ui/shared';
+import { C, ListItemCard, LoadingState, EmptyState, ErrorState, SectionHeader, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { registrationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -9,12 +9,16 @@ export default function OwnerRegistrations() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
+    setError(null);
     try {
-      const res = await registrationsApi.list({ limit: 100 });
+      const res = await registrationsApi.listMine({ limit: 100 });
       setData((res as any).data || []);
-    } catch {} finally { setLoading(false); }
+    } catch (err: any) {
+      setError(err.message || 'Khong the tai danh sach dang ky.');
+    } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -62,7 +66,9 @@ export default function OwnerRegistrations() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
     >
       <SectionHeader title={`Hồ sơ đăng ký (${data.length})`} />
-      {data.length === 0 ? (
+      {error ? (
+        <ErrorState message={error} onRetry={fetchData} />
+      ) : data.length === 0 ? (
         <EmptyState icon="assignment" title="Chưa có đăng ký" subtitle="Đăng ký chiến mã vào cuộc đua thông qua trang Giải đấu." />
       ) : (
         data.map(r => {

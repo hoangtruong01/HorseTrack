@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Platform, Alert, ScrollView } from 'react-native';
 import { useAuth } from '../../providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -7,34 +7,48 @@ import { useRouter } from 'expo-router';
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const performLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      router.replace('/login');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    if (Platform.OS === 'web') {
+      void performLogout();
+      return;
+    }
     Alert.alert('Đăng xuất', 'Bạn có chắc chắn muốn đăng xuất tài khoản?', [
       { text: 'Hủy', style: 'cancel' },
       {
         text: 'Đăng xuất',
         style: 'destructive',
-        onPress: async () => {
-          await logout();
-        },
+        onPress: performLogout,
       },
     ]);
   };
 
   if (!user) return null;
 
-  // Check role to render workspace switchers
-  const isCompetitor = user.roles.includes('JOCKEY') || user.roles.includes('HORSE_OWNER');
-  const isOpsStaff = user.roles.includes('REFEREE') || user.roles.includes('COUNTER_STAFF') || user.roles.includes('ADMIN');
+  const normalizedRoles = user.roles.map((role) => role.toLowerCase());
+  const isSpectator = normalizedRoles.includes('spectator');
+  const isOwner = normalizedRoles.includes('owner');
+  const isJockey = normalizedRoles.includes('jockey');
+  const isReferee = normalizedRoles.includes('referee');
 
   const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'SPECTATOR': return 'KHÁN GIẢ';
-      case 'HORSE_OWNER': return 'CHỦ NGỰA';
-      case 'JOCKEY': return 'NÀI NGỰA (JOCKEY)';
-      case 'REFEREE': return 'TRỌNG TÀI';
-      case 'COUNTER_STAFF': return 'NHÂN VIÊN QUẦY';
-      case 'ADMIN': return 'ADMINISTRATOR';
+    switch (role.toLowerCase()) {
+      case 'spectator': return 'KHÁN GIẢ';
+      case 'owner': return 'CHỦ NGỰA';
+      case 'jockey': return 'NÀI NGỰA (JOCKEY)';
+      case 'referee': return 'TRỌNG TÀI';
       default: return role;
     }
   };
@@ -58,45 +72,69 @@ export default function ProfileScreen() {
             ))}
           </View>
         </View>
-
         {/* Specialized Workspaces Switcher Section */}
-        {(isCompetitor || isOpsStaff) && (
+        {(isSpectator || isOwner || isJockey || isReferee) && (
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>PHÂN HỆ CHUYÊN BIỆT</Text>
-            
-            {isCompetitor && (
-              <TouchableOpacity 
+            <Text style={styles.sectionTitle}>PHAN HE CHUYEN BIET</Text>
+
+            {isSpectator && (
+              <TouchableOpacity
                 style={styles.workspaceButton}
-                onPress={() => router.push('/competitor/dashboard')}
+                onPress={() => router.push('/(spectator)' as any)}
               >
                 <View style={styles.workspaceButtonLeft}>
-                  <MaterialIcons name="sports" size={24} color="#E10600" />
+                  <MaterialIcons name="emoji-events" size={24} color="#E10600" />
                   <View style={styles.workspaceButtonInfo}>
-                    <Text style={styles.workspaceTitle}>HỘI ĐUA CHUYÊN NGHIỆP</Text>
-                    <Text style={styles.workspaceDesc}>Dành cho Chủ Ngựa & Nài Ngựa (Jockey)</Text>
+                    <Text style={styles.workspaceTitle}>KHAN GIA</Text>
+                    <Text style={styles.workspaceDesc}>Tournament, race, result, wallet va prediction</Text>
                   </View>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color="#58585B" />
               </TouchableOpacity>
             )}
 
-            {isOpsStaff && (
-              <TouchableOpacity 
+            {isOwner && (
+              <TouchableOpacity
                 style={styles.workspaceButton}
-                onPress={() => {
-                  // Direct to correct operations landing page based on exact role
-                  if (user.roles.includes('REFEREE')) {
-                    router.push('/operations/referee/assigned-races');
-                  } else {
-                    router.push('/operations/counter/scan');
-                  }
-                }}
+                onPress={() => router.push('/(owner)' as any)}
               >
                 <View style={styles.workspaceButtonLeft}>
-                  <MaterialIcons name="settings" size={24} color="#E1A200" />
+                  <MaterialIcons name="pets" size={24} color="#E10600" />
                   <View style={styles.workspaceButtonInfo}>
-                    <Text style={styles.workspaceTitle}>TRẠM VẬN HÀNH</Text>
-                    <Text style={styles.workspaceDesc}>Dành cho Trọng Tài & Nhân Viên Quầy</Text>
+                    <Text style={styles.workspaceTitle}>CHU NGUA</Text>
+                    <Text style={styles.workspaceDesc}>Ho so, ngua, ghi danh va loi moi jockey</Text>
+                  </View>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color="#58585B" />
+              </TouchableOpacity>
+            )}
+
+            {isJockey && (
+              <TouchableOpacity
+                style={styles.workspaceButton}
+                onPress={() => router.push('/(jockey)' as any)}
+              >
+                <View style={styles.workspaceButtonLeft}>
+                  <MaterialIcons name="sports" size={24} color="#E10600" />
+                  <View style={styles.workspaceButtonInfo}>
+                    <Text style={styles.workspaceTitle}>JOCKEY</Text>
+                    <Text style={styles.workspaceDesc}>Invitation, schedule va performance</Text>
+                  </View>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color="#58585B" />
+              </TouchableOpacity>
+            )}
+
+            {isReferee && (
+              <TouchableOpacity
+                style={styles.workspaceButton}
+                onPress={() => router.push('/(referee)' as any)}
+              >
+                <View style={styles.workspaceButtonLeft}>
+                  <MaterialIcons name="fact-check" size={24} color="#E1A200" />
+                  <View style={styles.workspaceButtonInfo}>
+                    <Text style={styles.workspaceTitle}>TRONG TAI</Text>
+                    <Text style={styles.workspaceDesc}>Assignment, pre-race check va result entry</Text>
                   </View>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color="#58585B" />
@@ -104,7 +142,6 @@ export default function ProfileScreen() {
             )}
           </View>
         )}
-
         {/* Account Details */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>THÔNG TIN TÀI KHOẢN</Text>
@@ -126,7 +163,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} disabled={isLoggingOut}>
           <MaterialIcons name="logout" size={20} color="#FFFFFF" />
           <Text style={styles.logoutButtonText}>ĐĂNG XUẤT TÀI KHOẢN</Text>
         </TouchableOpacity>

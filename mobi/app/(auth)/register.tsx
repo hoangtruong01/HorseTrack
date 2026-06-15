@@ -10,7 +10,7 @@ export default function RegisterScreen() {
   const [address, setAddress] = useState('');
   const [dob, setDob] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState('SPECTATOR');
+  const [selectedRole, setSelectedRole] = useState('spectator');
   const [loading, setLoading] = useState(false);
   
   const { register } = useAuth();
@@ -23,7 +23,6 @@ export default function RegisterScreen() {
     }
     setLoading(true);
     try {
-      // Mapping role to standard backend roles
       const backendRoles = [selectedRole];
       await register({
         fullName,
@@ -43,11 +42,10 @@ export default function RegisterScreen() {
   };
 
   const rolesList = [
-    { label: 'KHÁN GIẢ (SPECTATOR)', value: 'SPECTATOR' },
-    { label: 'CHỦ NGỰA (HORSE OWNER)', value: 'HORSE_OWNER' },
-    { label: 'NÀI NGỰA (JOCKEY)', value: 'JOCKEY' },
-    { label: 'TRỌNG TÀI (REFEREE)', value: 'REFEREE' },
-    { label: 'NHÂN VIÊN QUẦY (COUNTER STAFF)', value: 'COUNTER_STAFF' },
+    { label: 'KHÁN GIẢ (SPECTATOR)', value: 'spectator' },
+    { label: 'CHỦ NGỰA (OWNER)', value: 'owner' },
+    { label: 'NÀI NGỰA (JOCKEY)', value: 'jockey' },
+    { label: 'TRỌNG TÀI (REFEREE)', value: 'referee' },
   ];
 
   return (

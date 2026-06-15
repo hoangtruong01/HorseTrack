@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";
 import { Award, Loader2, Plus, Search, Trash2, Trophy, UserCheck, Users, X } from "lucide-react";
@@ -252,7 +253,7 @@ export default function AdminRefereeAssignmentsPage() {
           <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary to-transparent" />
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="size-6 animate-spin text-primary" />
+              <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
             </div>
           ) : assignments.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">

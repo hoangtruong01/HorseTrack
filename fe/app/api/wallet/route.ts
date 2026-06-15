@@ -43,7 +43,7 @@ export async function GET() {
     const email = (payload?.email as string) || "";
 
     try {
-      const response = await fetch("http://localhost:3000/api/v1/wallet/history?page=1&limit=1", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/wallet/history?page=1&limit=1`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

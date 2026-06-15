@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -67,7 +68,7 @@ export default function AdminRegistrationDetailPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-muted-foreground">
-        <Loader2 className="size-8 animate-spin text-[#E10600]" />
+        <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest font-bold">Đang tải chi tiết hồ sơ...</p>
       </div>
     );

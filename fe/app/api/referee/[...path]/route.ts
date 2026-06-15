@@ -18,10 +18,10 @@ async function handleProxy(
 
     const { path } = await context.params;
     const backendPath = path.join("/");
-    
+
     // Construct the backend URL with query params
     const url = new URL(req.url);
-    const backendUrl = `http://localhost:3000/api/v1/${backendPath}${url.search}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL}/${backendPath}${url.search}`;
 
     const headers: Record<string, string> = {
       Authorization: `Bearer ${token}`,

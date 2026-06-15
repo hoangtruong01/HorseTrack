@@ -19,7 +19,7 @@ export default function OwnerHome() {
     try {
       const [horsesRes, regRes, balanceRes, statsRes] = await Promise.all([
         horsesApi.listMine({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
-        registrationsApi.list({ limit: 5 }).catch(() => ({ data: [], meta: { total: 0 } })),
+        registrationsApi.listMine({ limit: 5 }).catch(() => ({ data: [], meta: { total: 0 } })),
         rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
         dashboardApi.getOwnerStats().catch(() => null),
       ]);

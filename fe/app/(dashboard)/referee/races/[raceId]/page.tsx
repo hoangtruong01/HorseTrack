@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -240,7 +241,7 @@ export default function RefereeRaceDetailPage() {
   if (isLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
       </div>
     );
   }

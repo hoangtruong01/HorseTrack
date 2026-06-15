@@ -9,10 +9,10 @@ export default function JockeyPerformance() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    jockeyInvitationsApi.list({ limit: 50 })
+    jockeyInvitationsApi.listReceived({ limit: 50 })
       .then(r => {
         const list = (r as any).data || [];
-        const completed = list.filter((i: any) => i.status === 'accepted'); // Mock or simplify based on accepted races
+        const completed = list.filter((i: any) => i.status === 'ACCEPTED'); // Mock or simplify based on accepted races
         setData(completed);
         const total = completed.length;
         const wins = completed.filter((i: any, idx: number) => idx % 3 === 0).length; // Simulated wins for UI richness

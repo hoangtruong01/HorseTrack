@@ -1,29 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { C, ListItemCard, LoadingState, EmptyState, SectionHeader, statusLabel, formatDateTime } from '@/components/ui/shared';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import { C, ListItemCard, LoadingState, EmptyState, ErrorState, SectionHeader, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { jockeyInvitationsApi } from '@/lib/api-client';
 
 export default function JockeySchedule() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    jockeyInvitationsApi.list({ limit: 50 })
-      .then(r => {
-        const list = (r as any).data || [];
-        // Show only accepted invitations (which represent scheduled runs)
-        setData(list.filter((i: any) => i.status === 'accepted'));
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const loadData = useCallback(async () => {
+    setError(null);
+    try {
+      const r = await jockeyInvitationsApi.listReceived({ limit: 50 });
+      const list = (r as any).data || [];
+      setData(list.filter((i: any) => i.status === 'ACCEPTED'));
+    } catch (err: any) {
+      setError(err.message || 'Khong the tai lich trinh.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadData();
+  }, [loadData]);
 
   if (loading) return <LoadingState />;
 
   return (
-    <ScrollView style={s.c} contentContainerStyle={s.p}>
+    <ScrollView 
+      style={s.c} 
+      contentContainerStyle={s.p}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
+    >
       <SectionHeader title={`Lịch thi đấu đã xác nhận (${data.length})`} />
-      {data.length === 0 ? (
+      {error ? (
+        <ErrorState message={error} onRetry={loadData} />
+      ) : data.length === 0 ? (
         <EmptyState icon="event" title="Chưa có lịch thi đấu" subtitle="Nhận lời mời từ chủ ngựa trong tab Hòm thư để điền tên vào lịch trình." />
       ) : (
         data.map(i => {

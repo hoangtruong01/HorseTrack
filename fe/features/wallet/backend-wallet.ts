@@ -27,7 +27,7 @@ export type CashoutQueueRequest = {
   userRole: "Owner" | "Jockey" | "Spectator";
   points: number;
   redemptionCode: string;
-  status: "PENDING" | "APPROVED" | "PAID" | "REJECTED";
+  status: "PENDING" | "APPROVED" | "PAID" | "REJECTED" | "FAILED";
   rejectReason?: string;
   createdAt: string;
   paidBy?: string;
@@ -141,5 +141,6 @@ export function mapCashoutToQueueRequest(cashout: CashoutItem): CashoutQueueRequ
               ? cashout.approvedBy
               : undefined,
     paidAt: cashout.paidAt,
+    rejectReason: cashout.rejectReason,
   };
 }

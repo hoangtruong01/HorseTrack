@@ -8,6 +8,7 @@ export enum CashoutStatus {
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
   PAID = 'PAID',
+  FAILED = 'FAILED',
 }
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
@@ -42,6 +43,9 @@ export class CashoutRequest {
 
   @Prop()
   paidAt?: Date;
+
+  @Prop()
+  rejectReason?: string;
 }
 
 export const CashoutRequestSchema =
