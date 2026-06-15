@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { QuickAction } from "@/features/dashboard/mock-admin-dashboard";
 
@@ -10,68 +9,73 @@ export type QuickActionGridProps = {
   actions: QuickAction[];
 };
 
-const toneClassName: Record<QuickAction["tone"], string> = {
-  primary: "border-primary/50 bg-primary/12 text-primary",
-  teal: "border-[#067E6A]/50 bg-[#067E6A]/12 text-[#49D6BE]",
-  yellow: "border-[#F8CD46]/50 bg-[#F8CD46]/12 text-[#F8CD46]",
-  neutral: "border-border bg-muted text-foreground",
+const toneConfig: Record<
+  QuickAction["tone"],
+  { icon: string; hover: string }
+> = {
+  primary: {
+    icon: "border-border bg-muted/50 text-muted-foreground",
+    hover: "hover:border-primary/40 hover:bg-primary/5",
+  },
+  teal: {
+    icon: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    hover: "hover:border-emerald-500/30 hover:bg-emerald-500/5",
+  },
+  yellow: {
+    icon: "border-yellow-400/30 bg-yellow-400/10 text-yellow-300",
+    hover: "hover:border-yellow-400/30 hover:bg-yellow-400/5",
+  },
+  neutral: {
+    icon: "border-border bg-muted/50 text-muted-foreground",
+    hover: "hover:border-primary/30 hover:bg-primary/5",
+  },
 };
 
 export function QuickActionGrid({ actions }: QuickActionGridProps) {
   const { t } = useTranslation();
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-[0_18px_56px_rgba(0,0,0,0.28)] dark:shadow-[0_18px_56px_rgba(0,0,0,0.28)] sm:p-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            {t("admin.quickActions.eyebrow", "Admin command grid")}
-          </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
-            {t("admin.quickActions.title", "Quick actions")}
-          </h2>
-        </div>
-        <p className="max-w-md text-sm leading-6 text-muted-foreground">
-          {t("admin.quickActions.subtitle", "Entry points only. CRUD flows arrive in later phases.")}
-        </p>
+    <section className="rounded-lg border border-border bg-card">
+      {/* Header */}
+      <div className="border-b border-border px-4 py-3">
+        <h2 className="text-sm font-semibold text-foreground">Thao tác nhanh</h2>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Grid 2x2 */}
+      <div className="grid grid-cols-2 divide-x divide-y divide-border">
         {actions.map((action) => {
           const Icon = action.icon;
+          const cfg = toneConfig[action.tone];
 
           return (
             <Link
-              key={action.title}
+              key={action.key}
               href={action.href}
-              className="group rounded-xl border border-border bg-muted p-4 transition duration-200 hover:-translate-y-0.5 hover:border-primary/45 hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={cn(
+                "group flex flex-col gap-3 p-4 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                cfg.hover,
+              )}
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-2">
                 <div
                   className={cn(
-                    "rounded-lg border p-2.5 shadow-[0_10px_28px_rgba(0,0,0,0.18)]",
-                    toneClassName[action.tone],
+                    "rounded-md border p-2 transition-transform duration-150 group-hover:scale-105",
+                    cfg.icon,
                   )}
                   aria-hidden="true"
                 >
-                  <Icon className="size-5" />
+                  <Icon className="size-4" />
                 </div>
-                <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
+                <ArrowUpRight className="size-4 text-muted-foreground/40 transition-all duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-muted-foreground" />
               </div>
-              <h3 className="mt-4 text-lg font-black uppercase tracking-tight text-foreground">
-                {t(`admin.quickActionsItems.${action.key}.title`, action.title)}
-              </h3>
-              <p className="mt-2 min-h-12 text-sm leading-5 text-muted-foreground">
-                {t(`admin.quickActionsItems.${action.key}.description`, action.description)}
-              </p>
-              <Button
-                asChild
-                size="sm"
-                variant={action.tone === "primary" ? "default" : "outline"}
-                className="mt-4 pointer-events-none rounded-full"
-              >
-                <span>{t(`admin.quickActionsItems.${action.key}.label`, action.label)}</span>
-              </Button>
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  {t(`admin.quickActionsItems.${action.key}.title`, action.title)}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+                  {t(`admin.quickActionsItems.${action.key}.description`, action.description)}
+                </p>
+              </div>
             </Link>
           );
         })}
