@@ -162,7 +162,11 @@
       "statusFinished": "Hoàn tất",
       "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} kết quả",
       "btnPrev": "Trang trước",
-      "btnNext": "Trang sau"
+      "btnNext": "Trang sau",
+      "statusPaid": "Thành công",
+      "statusRejected": "Từ chối",
+      "statusFailed": "Thất bại",
+      "statusPending": "Đang chờ"
     }
   },
   "settings": {

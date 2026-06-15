@@ -21,6 +21,7 @@ import { WalletService } from './wallet.service';
 import { DepositDto } from './dto/deposit.dto';
 import { CreateCashoutDto } from './dto/create-cashout.dto';
 import { ProcessCashoutDto } from './dto/process-cashout.dto';
+import { ListCashoutsDto } from './dto/list-cashouts.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
 
 @ApiTags('Wallet & Transactions')
@@ -67,7 +68,7 @@ export class WalletController {
     @Body() dto: ProcessCashoutDto,
     @CurrentUser() user: JwtUser,
   ) {
-    return this.walletService.processCashout(id, dto.status, user.id);
+    return this.walletService.processCashout(id, dto.status, user.id, dto.rejectReason);
   }
 
   @Get('all-transactions')
@@ -145,10 +146,11 @@ export class WalletController {
   @ApiOperation({
     summary: 'List all cashout requests (Admin / Counter Staff only)',
   })
-  findAllCashouts(@Query() pagination: PaginationDto) {
+  findAllCashouts(@Query() query: ListCashoutsDto) {
     return this.walletService.findAllCashouts(
-      pagination.page,
-      pagination.limit,
+      query.page,
+      query.limit,
+      query.status,
     );
   }
 }

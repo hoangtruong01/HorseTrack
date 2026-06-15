@@ -18,14 +18,17 @@ const cashoutStatusColors: Record<string, string> = {
   APPROVED: "text-blue-400 bg-blue-400/10 border-blue-400/20",
   PAID: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   REJECTED: "text-red-400 bg-red-400/10 border-red-400/20",
+  FAILED: "text-red-500 bg-red-500/10 border-red-500/20",
 };
 
 export default function AdminWalletPage() {
-  const [activeTab, setActiveTab] = useState<"transactions" | "cashouts">("cashouts");
+  const [activeTab, setActiveTab] = useState<"transactions" | "cashouts" | "failed_cashouts">("cashouts");
   const [transactions, setTransactions] = useState<WalletTxItem[]>([]);
   const [cashouts, setCashouts] = useState<CashoutItem[]>([]);
+  const [failedCashouts, setFailedCashouts] = useState<CashoutItem[]>([]);
   const [txMeta, setTxMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
   const [cashoutMeta, setCashoutMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
+  const [failedMeta, setFailedMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -42,24 +45,57 @@ export default function AdminWalletPage() {
   const fetchCashouts = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const res = await walletApi.allCashouts({ page, limit: 20 });
+      const res = await walletApi.allCashouts({ page, limit: 20, status: "PENDING,APPROVED,PAID,REJECTED" });
       setCashouts(res.data);
       setCashoutMeta(res.meta);
     } catch (e) { toast.error((e as Error).message); }
     finally { setLoading(false); }
   }, []);
 
+  const fetchFailedCashouts = useCallback(async (page = 1) => {
+    setLoading(true);
+    try {
+      const res = await walletApi.allCashouts({ page, limit: 20, status: "FAILED" });
+      setFailedCashouts(res.data);
+      setFailedMeta(res.meta);
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setLoading(false); }
+  }, []);
+
+  const fetchCounts = useCallback(async () => {
+    try {
+      const [cashoutsRes, failedRes, txsRes] = await Promise.all([
+        walletApi.allCashouts({ page: 1, limit: 1, status: "PENDING,APPROVED,PAID,REJECTED" }),
+        walletApi.allCashouts({ page: 1, limit: 1, status: "FAILED" }),
+        walletApi.allTransactions({ page: 1, limit: 1 }),
+      ]);
+      setCashoutMeta(prev => ({ ...prev, total: cashoutsRes.meta.total }));
+      setFailedMeta(prev => ({ ...prev, total: failedRes.meta.total }));
+      setTxMeta(prev => ({ ...prev, total: txsRes.meta.total }));
+    } catch (e) { console.error(e); }
+  }, []);
+
+  useEffect(() => {
+    void fetchCounts();
+  }, [fetchCounts]);
+
   useEffect(() => {
     if (activeTab === "transactions") fetchTransactions(1);
+    else if (activeTab === "failed_cashouts") fetchFailedCashouts(1);
     else fetchCashouts(1);
-  }, [activeTab, fetchTransactions, fetchCashouts]);
+  }, [activeTab, fetchTransactions, fetchCashouts, fetchFailedCashouts]);
 
   const handleCashoutProcess = async (id: string, status: string) => {
     setActionLoading(id);
     try {
       await walletApi.processCashout(id, status);
       toast.success(`Đã cập nhật → ${status}`);
-      await fetchCashouts(cashoutMeta.page);
+      void fetchCounts();
+      if (activeTab === "failed_cashouts") {
+        await fetchFailedCashouts(failedMeta.page);
+      } else {
+        await fetchCashouts(cashoutMeta.page);
+      }
     } catch (e) { toast.error((e as Error).message); }
     finally { setActionLoading(null); }
   };
@@ -82,6 +118,8 @@ export default function AdminWalletPage() {
     return "—";
   };
 
+  const currentList = activeTab === "cashouts" ? cashouts : failedCashouts;
+
   return (
     <main className="space-y-6">
       <PageHeader
@@ -96,25 +134,33 @@ export default function AdminWalletPage() {
           onClick={() => setActiveTab("cashouts")}
           className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${activeTab === "cashouts" ? "bg-primary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
         >
-          🎫 Cashout Queue ({cashoutMeta.total})
+          🎫 Yêu cầu đổi thưởng ({cashoutMeta.total})
+        </button>
+        <button
+          onClick={() => setActiveTab("failed_cashouts")}
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${activeTab === "failed_cashouts" ? "bg-destructive text-white" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          🚨 Giao dịch lỗi ({failedMeta.total})
         </button>
         <button
           onClick={() => setActiveTab("transactions")}
           className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${activeTab === "transactions" ? "bg-primary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
         >
-          📋 Tất cả Giao Dịch ({txMeta.total})
+          📋 Lịch sử ví ({txMeta.total})
         </button>
       </div>
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16 text-foreground/55">
-  <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
-  <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
-</div>
-        ) : activeTab === "cashouts" ? (
-          cashouts.length === 0 ? (
-            <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Không có cashout requests.</div>
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-3">
+            <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
+            <p className="text-xs font-mono uppercase tracking-widest">Đang tải giao dịch...</p>
+          </div>
+        ) : activeTab === "cashouts" || activeTab === "failed_cashouts" ? (
+          currentList.length === 0 ? (
+            <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">
+              {activeTab === "cashouts" ? "Không có cashout requests." : "Không có giao dịch lỗi nào."}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1000px]">
@@ -131,7 +177,7 @@ export default function AdminWalletPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {cashouts.map((c) => (
+                  {currentList.map((c) => (
                     <tr key={c._id} className="hover:bg-muted transition-colors">
                       <td className="px-5 py-4">
                         <p className="text-sm font-semibold text-foreground">{getUserName(c.userId)}</p>
@@ -141,9 +187,7 @@ export default function AdminWalletPage() {
                         <code className="rounded bg-muted px-2 py-1 text-xs font-mono text-primary border border-primary/20">{c.redemptionCode}</code>
                       </td>
                       <td className="px-5 py-4 text-center font-mono font-black text-primary">{c.pointsRedeemed.toLocaleString()}</td>
-                      <td className="px-5 py-4 text-sm text-foreground/70">
-                        {getHandlerName(c)}
-                      </td>
+                      <td className="px-5 py-4 text-sm text-foreground/70">{getHandlerName(c)}</td>
                       <td className="px-5 py-4 text-xs text-muted-foreground">
                         {c.createdAt ? new Date(c.createdAt).toLocaleString("vi-VN") : "—"}
                       </td>
@@ -152,8 +196,13 @@ export default function AdminWalletPage() {
                       </td>
                       <td className="px-5 py-4">
                         <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${cashoutStatusColors[c.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
-                          {c.status}
+                          {c.status === "PAID" ? "Thành công" : c.status === "REJECTED" ? "Từ chối" : c.status === "FAILED" ? "Thất bại" : c.status === "PENDING" ? "Đang chờ" : c.status}
                         </span>
+                        {c.rejectReason && (
+                          <p className="text-xs text-red-400 mt-1 max-w-[200px] break-words">
+                            Lý do: {c.rejectReason}
+                          </p>
+                        )}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-2">
@@ -184,7 +233,7 @@ export default function AdminWalletPage() {
                               ✓ Đã chi tiền
                             </button>
                           )}
-                          {(c.status === "PAID" || c.status === "REJECTED") && (
+                          {(c.status === "PAID" || c.status === "REJECTED" || c.status === "FAILED") && (
                             <span className="text-xs text-muted-foreground">Hoàn tất</span>
                           )}
                         </div>
@@ -220,6 +269,7 @@ export default function AdminWalletPage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 text-center font-mono font-semibold text-primary">{t.points}</td>
+                      {/* Đã sửa khoảng trắng lỗi py- 4 tại đây */}
                       <td className="px-5 py-4 text-xs text-muted-foreground max-w-xs truncate">{t.description}</td>
                       <td className="px-5 py-4 text-xs text-muted-foreground">
                         {t.createdAt ? new Date(t.createdAt).toLocaleDateString("vi-VN") : "—"}
@@ -247,6 +297,19 @@ export default function AdminWalletPage() {
           </button>
         </div>
       )}
+      {activeTab === "failed_cashouts" && failedMeta.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3">
+          <button onClick={() => fetchFailedCashouts(failedMeta.page - 1)} disabled={failedMeta.page <= 1}
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
+            <ChevronLeft className="size-4" /> Trước
+          </button>
+          <span className="text-sm text-muted-foreground">Trang {failedMeta.page} / {failedMeta.totalPages}</span>
+          <button onClick={() => fetchFailedCashouts(failedMeta.page + 1)} disabled={failedMeta.page >= failedMeta.totalPages}
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
+            Sau <ChevronRight className="size-4" />
+          </button>
+        </div>
+      )}
       {activeTab === "transactions" && txMeta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => fetchTransactions(txMeta.page - 1)} disabled={txMeta.page <= 1}
@@ -263,5 +326,3 @@ export default function AdminWalletPage() {
     </main>
   );
 }
-
-

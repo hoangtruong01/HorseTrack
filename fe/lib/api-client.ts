@@ -534,6 +534,7 @@ export interface CashoutItem {
   approvedBy?: { _id: string; fullName: string } | string;
   paidBy?: { _id: string; fullName: string } | string;
   paidAt?: string;
+  rejectReason?: string;
   createdAt?: string;
 }
 
@@ -555,16 +556,17 @@ export const walletApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<WalletTxItem>>(`/wallet/all-transactions?${qs}`);
   },
-  allCashouts: (params?: { page?: number; limit?: number }) => {
+  allCashouts: (params?: { page?: number; limit?: number; status?: string }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.status) qs.set("status", params.status);
     return apiFetch<PaginatedResult<CashoutItem>>(`/wallet/cashout/all?${qs}`);
   },
   lookupCashout: (code: string) =>
     apiFetch<CashoutItem>(`/wallet/cashout/lookup?code=${code}`),
-  processCashout: (id: string, status: string) =>
-    apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  processCashout: (id: string, status: string, rejectReason?: string) =>
+    apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status, rejectReason }) }),
   depositForUser: (userId: string, amount: number) =>
     apiFetch(`/wallet/deposit/for-user/${userId}`, { method: "POST", body: JSON.stringify({ amount }) }),
 };
@@ -843,28 +845,3 @@ export const aiApi = {
     }),
 };
 
-// ─── Bank Transactions ───────────────────────────────────────────────────────
-export interface BankTxItem {
-  _id: string;
-  provider: "sepay" | "manual" | "other";
-  providerTransactionId?: string;
-  direction: "in" | "out";
-  amount: number;
-  currency: string;
-  description?: string;
-  counterAccountNo?: string;
-  counterAccountName?: string;
-  transactionTime: string;
-  matchedType: "payment" | "payout" | "unknown";
-  createdAt?: string;
-}
-
-export const bankTransactionsApi = {
-  list: (params?: { page?: number; limit?: number; matchedType?: string }) => {
-    const qs = new URLSearchParams();
-    if (params?.page) qs.set("page", String(params.page));
-    if (params?.limit) qs.set("limit", String(params.limit));
-    if (params?.matchedType) qs.set("matchedType", params.matchedType);
-    return apiFetch<PaginatedResult<BankTxItem>>(`/bank-transactions?${qs}`);
-  },
-};

@@ -27,7 +27,7 @@ export default function RedemptionsQueuePage() {
   const fetchCashouts = useCallback(async (currentPage: number) => {
     setLoading(true);
     try {
-      const res = await walletApi.allCashouts({ page: currentPage, limit: 10 });
+      const res = await walletApi.allCashouts({ page: currentPage, limit: 10, status: "PAID,REJECTED,FAILED" });
       if (res && res.data) {
         setCashouts(res.data);
         setPage(res.meta?.page ?? currentPage);
@@ -69,18 +69,20 @@ export default function RedemptionsQueuePage() {
     setSearchError(null);
   };
 
-  const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED") => {
+  const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED" | "FAILED", reason?: string) => {
     try {
-      await walletApi.processCashout(id, action);
+      await walletApi.processCashout(id, action, reason);
       toast.success(
-        t("wallet.redemption.showing")
-          ? `Cập nhật giao dịch thành công sang trạng thái ${action}`
-          : `Successfully updated transaction to ${action}`
+        action === "FAILED"
+          ? "Đã báo lỗi giao dịch thành công"
+          : t("wallet.redemption.showing")
+            ? `Cập nhật giao dịch thành công sang trạng thái ${action}`
+            : `Successfully updated transaction to ${action}`
       );
       
       // Refresh history list
       await fetchCashouts(page);
-
+ 
       // Refresh lookup result if active
       if (lookupResult && lookupResult.id === id) {
         try {
