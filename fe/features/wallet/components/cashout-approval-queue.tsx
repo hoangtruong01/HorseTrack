@@ -16,7 +16,7 @@ export type CashoutApprovalQueueProps = {
   searchError: string | null;
   onLookup: (code: string) => void;
   onClearLookup: () => void;
-  onAction: (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => void | Promise<void>;
+  onAction: (id: string, action: "APPROVED" | "PAID" | "REJECTED" | "FAILED", reason?: string) => void | Promise<void>;
   pagination?: {
     page: number;
     totalPages: number;
@@ -39,6 +39,8 @@ export function CashoutApprovalQueue({
   const [selectedRequest, setSelectedRequest] = useState<CashoutQueueRequest | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorReason, setErrorReason] = useState("");
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [searchCode, setSearchCode] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -55,14 +57,16 @@ export function CashoutApprovalQueue({
     onClearLookup();
   };
 
-  const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED", reason?: string) => {
+  const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED" | "FAILED", reason?: string) => {
     setIsProcessing(`${id}-${action}`);
     try {
       await onAction(id, action, reason);
     } finally {
       setIsProcessing(null);
       setShowRejectDialog(false);
+      setShowErrorDialog(false);
       setRejectReason("");
+      setErrorReason("");
       setSelectedRequest(null);
     }
   };
@@ -80,22 +84,24 @@ export function CashoutApprovalQueue({
   };
 
   const getStatusText = (status: string) => {
-    if (status === "PAID") return t("wallet.redemption.statusPaid");
-    if (status === "REJECTED") return t("wallet.redemption.statusRejected");
-    if (status === "APPROVED") return t("wallet.redemption.btnApprove");
-    return t("wallet.redemption.colStatus") ? t("wallet.redemption.statusPending") : "PENDING";
+    if (status === "PAID") return t("wallet.redemption.statusPaid") || "Thành công";
+    if (status === "REJECTED") return t("wallet.redemption.statusRejected") || "Từ chối";
+    if (status === "FAILED") return t("wallet.redemption.statusFailed") || "Thất bại";
+    if (status === "APPROVED") return t("wallet.redemption.btnApprove") || "Đã duyệt";
+    return t("wallet.redemption.statusPending") || "Đang chờ";
   };
 
   const getStatusTone = (status: string): "red" | "yellow" | "green" | "slate" | "teal" => {
-    if (status === "PAID") return "teal";
-    if (status === "REJECTED") return "red";
-    if (status === "APPROVED") return "green";
+    if (status === "PAID") return "green";
+    if (status === "REJECTED") return "yellow";
+    if (status === "FAILED") return "red";
+    if (status === "APPROVED") return "teal";
     return "slate";
   };
 
   // Tính toán các chỉ số KPI tại quầy giao dịch (Processed Today & Pending Queue)
   const processedTodayCount = historyItems.filter(
-    (item) => item.status === "PAID" || item.status === "REJECTED"
+    (item) => item.status === "PAID" || item.status === "REJECTED" || item.status === "FAILED"
   ).length;
 
   const pendingQueueCount = historyItems.filter(
@@ -232,8 +238,19 @@ export function CashoutApprovalQueue({
                     </div>
                   </div>
 
-                  {(lookupResult.status === "PENDING" || lookupResult.status === "APPROVED") && (
+                   {(lookupResult.status === "PENDING" || lookupResult.status === "APPROVED") && (
                     <div className="bg-muted/20 px-4 py-2.5 border-t border-border flex justify-end gap-2">
+                      <Button
+                        onClick={() => {
+                          setSelectedRequest(lookupResult);
+                          setShowErrorDialog(true);
+                        }}
+                        disabled={isProcessing !== null}
+                        variant="destructive"
+                        className="h-9 rounded-full px-4 text-xs font-bold transition-colors"
+                      >
+                        Báo lỗi
+                      </Button>
                       <Button
                         onClick={() => {
                           setSelectedRequest(lookupResult);
@@ -264,6 +281,14 @@ export function CashoutApprovalQueue({
                     <div className="bg-red-500/10 px-4 py-2.5 border-t border-red-500/20">
                       <p className="text-xs font-bold text-red-500">
                         {t("wallet.redemption.btnReject")}: {lookupResult.rejectReason}
+                      </p>
+                    </div>
+                  )}
+
+                  {lookupResult.status === "FAILED" && lookupResult.rejectReason && (
+                    <div className="bg-red-500/10 px-4 py-2.5 border-t border-red-500/20">
+                      <p className="text-xs font-bold text-red-500">
+                        Lỗi: {lookupResult.rejectReason}
                       </p>
                     </div>
                   )}
@@ -367,6 +392,29 @@ export function CashoutApprovalQueue({
                                           <p className="text-[11px] leading-relaxed text-red-400 font-medium bg-red-500/10 p-2 rounded-lg border border-red-500/20">
                                             {item.rejectReason}
                                           </p>
+                                        </div>
+                                      )}
+                                      {item.status === "FAILED" && item.rejectReason && (
+                                        <div>
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-red-500/70 mb-1">Chi tiết lỗi giao dịch</p>
+                                          <p className="text-[11px] leading-relaxed text-red-400 font-medium bg-red-500/10 p-2 rounded-lg border border-red-500/20">
+                                            {item.rejectReason}
+                                          </p>
+                                        </div>
+                                      )}
+                                      {item.status !== "FAILED" && item.status !== "REJECTED" && (
+                                        <div className="pt-2">
+                                          <Button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setSelectedRequest(item);
+                                              setShowErrorDialog(true);
+                                            }}
+                                            variant="destructive"
+                                            className="h-8 rounded-full px-3 text-[10px] font-bold"
+                                          >
+                                            Báo lỗi giao dịch
+                                          </Button>
                                         </div>
                                       )}
                                     </div>
@@ -478,6 +526,54 @@ export function CashoutApprovalQueue({
                 className="h-11 rounded-full px-6 font-black uppercase tracking-wide"
               >
                 {t("wallet.redemption.btnRejectSubmit")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Dialog báo lỗi */}
+      {showErrorDialog && selectedRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="flex items-center gap-2 text-xl font-black uppercase text-destructive">
+              <AlertCircle className="size-5 text-destructive" /> Báo lỗi giao dịch
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed font-medium">
+              Bạn đang thực hiện báo lỗi cho giao dịch {selectedRequest.redemptionCode} của {selectedRequest.userFullName} ({selectedRequest.points.toLocaleString("vi-VN")} điểm).
+            </p>
+            <div className="mt-4 space-y-2">
+              <label htmlFor="error-reason" className="block text-xs font-black uppercase tracking-wider text-muted-foreground">
+                Chi tiết lỗi giao dịch (bắt buộc)
+              </label>
+              <textarea
+                id="error-reason"
+                required
+                rows={3}
+                placeholder="Nhập mô tả chi tiết lỗi phát sinh..."
+                value={errorReason}
+                onChange={(e) => setErrorReason(e.target.value)}
+                className="w-full rounded-xl border border-border bg-muted p-3 text-sm text-foreground outline-none focus:border-destructive"
+              />
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowErrorDialog(false);
+                  setSelectedRequest(null);
+                  setErrorReason("");
+                }}
+                className="h-11 rounded-full border-border text-foreground font-bold"
+              >
+                Hủy bỏ
+              </Button>
+              <Button
+                disabled={!errorReason.trim() || isProcessing !== null}
+                onClick={() => handleAction(selectedRequest.id, "FAILED", errorReason)}
+                variant="destructive"
+                className="h-11 rounded-full px-6 font-black uppercase tracking-wide"
+              >
+                Gửi báo lỗi
               </Button>
             </div>
           </div>

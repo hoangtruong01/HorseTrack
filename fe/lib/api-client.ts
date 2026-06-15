@@ -534,6 +534,7 @@ export interface CashoutItem {
   approvedBy?: { _id: string; fullName: string } | string;
   paidBy?: { _id: string; fullName: string } | string;
   paidAt?: string;
+  rejectReason?: string;
   createdAt?: string;
 }
 
@@ -564,8 +565,8 @@ export const walletApi = {
   },
   lookupCashout: (code: string) =>
     apiFetch<CashoutItem>(`/wallet/cashout/lookup?code=${code}`),
-  processCashout: (id: string, status: string) =>
-    apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  processCashout: (id: string, status: string, rejectReason?: string) =>
+    apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status, rejectReason }) }),
   depositForUser: (userId: string, amount: number) =>
     apiFetch(`/wallet/deposit/for-user/${userId}`, { method: "POST", body: JSON.stringify({ amount }) }),
 };

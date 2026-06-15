@@ -68,7 +68,7 @@ export class WalletController {
     @Body() dto: ProcessCashoutDto,
     @CurrentUser() user: JwtUser,
   ) {
-    return this.walletService.processCashout(id, dto.status, user.id);
+    return this.walletService.processCashout(id, dto.status, user.id, dto.rejectReason);
   }
 
   @Get('all-transactions')
