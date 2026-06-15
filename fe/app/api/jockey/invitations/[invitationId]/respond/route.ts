@@ -19,7 +19,7 @@ export async function PATCH(
     const { invitationId } = await params;
     const body = await request.json();
 
-    const response = await fetch(`http://localhost:3000/api/v1/jockey-invitations/${invitationId}/respond`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jockey-invitations/${invitationId}/respond`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

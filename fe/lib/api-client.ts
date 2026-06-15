@@ -2,7 +2,12 @@
  * Thin API client — reads cookie from Next.js API route /api/auth/token
  * All calls go through the BE directly with Bearer token.
  */
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000") + "/api/v1";
+const getBaseUrl = () => {
+  const url = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+  if (url.endsWith("/api/v1")) return url;
+  return url.replace(/\/$/, "") + "/api/v1";
+};
+const BASE_URL = getBaseUrl();
 
 async function getToken(): Promise<string | null> {
   try {
@@ -11,7 +16,7 @@ async function getToken(): Promise<string | null> {
       const { token } = await res.json();
       return token as string;
     }
-  } catch {}
+  } catch { }
   return null;
 }
 

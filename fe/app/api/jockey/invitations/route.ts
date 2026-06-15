@@ -13,7 +13,7 @@ export async function GET() {
       );
     }
 
-    const response = await fetch("http://localhost:3000/api/v1/jockey-invitations/received?limit=100", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jockey-invitations/received?limit=100`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
