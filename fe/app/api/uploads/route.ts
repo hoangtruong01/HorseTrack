@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
 
-    const response = await fetch("http://localhost:3000/api/v1/uploads", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/uploads`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

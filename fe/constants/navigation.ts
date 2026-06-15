@@ -329,22 +329,6 @@ export const dashboardNavigation: NavigationItem[] = [
     itemKey: "referee.assignments",
   },
   {
-    title: "Bảng Xếp Hạng",
-    href: "/referee/rankings",
-    role: "Referee",
-    icon: Medal,
-    description: "Theo dõi bảng tổng hợp hiệu suất thi đấu của toàn bộ nài ngựa và chiến mã.",
-    itemKey: "referee.rankings",
-  },
-  {
-    title: "Ví Của Tôi",
-    href: "/referee/wallet",
-    role: "Referee",
-    icon: Wallet,
-    description: "Xem điểm lương tích lũy và thực hiện yêu cầu rút điểm.",
-    itemKey: "referee.wallet",
-  },
-  {
     title: "Pre-race Check",
     href: "/referee/pre-race",
     role: "Referee",
@@ -383,6 +367,22 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: FileText,
     description: "Quản lý và lập biên bản thi đấu chính thức cho các cuộc đua.",
     itemKey: "referee.reports",
+  },
+  {
+    title: "Bảng Xếp Hạng",
+    href: "/referee/rankings",
+    role: "Referee",
+    icon: Medal,
+    description: "Theo dõi bảng tổng hợp hiệu suất thi đấu của toàn bộ nài ngựa và chiến mã.",
+    itemKey: "referee.rankings",
+  },
+  {
+    title: "Ví Của Tôi",
+    href: "/referee/wallet",
+    role: "Referee",
+    icon: Wallet,
+    description: "Xem điểm lương tích lũy và thực hiện yêu cầu rút điểm.",
+    itemKey: "referee.wallet",
   },
   // ─── SPECTATOR ──────────────────────────────────────────────────────────
   {

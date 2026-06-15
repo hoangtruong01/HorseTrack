@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const tournamentId = searchParams.get("tournamentId");
 
     if (tournamentId) {
-      const response = await fetch(`http://localhost:3000/api/v1/race-results/tournament/${tournamentId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/race-results/tournament/${tournamentId}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       }
       return NextResponse.json({ success: true, data: data.data || data });
     } else {
-      const response = await fetch(`http://localhost:3000/api/v1/tournaments?limit=100`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments?limit=100`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

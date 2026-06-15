@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const page = searchParams.get("page") || "1";
     const limit = searchParams.get("limit") || "10";
 
-    const response = await fetch(`http://localhost:3000/api/v1/registrations/my-registrations?page=${page}&limit=${limit}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/registrations/my-registrations?page=${page}&limit=${limit}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     const payload = await request.json();
 
-    const response = await fetch("http://localhost:3000/api/v1/registrations", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/registrations`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
