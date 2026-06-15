@@ -845,28 +845,3 @@ export const aiApi = {
     }),
 };
 
-// ─── Bank Transactions ───────────────────────────────────────────────────────
-export interface BankTxItem {
-  _id: string;
-  provider: "sepay" | "manual" | "other";
-  providerTransactionId?: string;
-  direction: "in" | "out";
-  amount: number;
-  currency: string;
-  description?: string;
-  counterAccountNo?: string;
-  counterAccountName?: string;
-  transactionTime: string;
-  matchedType: "payment" | "payout" | "unknown";
-  createdAt?: string;
-}
-
-export const bankTransactionsApi = {
-  list: (params?: { page?: number; limit?: number; matchedType?: string }) => {
-    const qs = new URLSearchParams();
-    if (params?.page) qs.set("page", String(params.page));
-    if (params?.limit) qs.set("limit", String(params.limit));
-    if (params?.matchedType) qs.set("matchedType", params.matchedType);
-    return apiFetch<PaginatedResult<BankTxItem>>(`/bank-transactions?${qs}`);
-  },
-};

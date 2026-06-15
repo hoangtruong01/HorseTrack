@@ -10,7 +10,6 @@ import {
   Gauge,
   Gift,
   Home,
-  Landmark,
   ListChecks,
   Medal,
   ShieldCheck,
@@ -150,14 +149,6 @@ export const dashboardNavigation: NavigationItem[] = [
     itemKey: "admin.results",
   },
   {
-    title: "Audit Logs",
-    href: "/admin/audit-logs",
-    role: "Admin",
-    icon: FileText,
-    description: "View system operations and secure transaction trails.",
-    itemKey: "admin.auditLogs",
-  },
-  {
     title: "AI Packages",
     href: "/admin/ai/packages",
     role: "Admin",
@@ -188,14 +179,6 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: ListChecks,
     description: "Sinh và quản lý đề xuất sắp xếp cuộc đua tự động.",
     itemKey: "admin.aiArrangements",
-  },
-  {
-    title: "Bank Transactions",
-    href: "/admin/bank-transactions",
-    role: "Admin",
-    icon: Landmark,
-    description: "Xem danh sách giao dịch ngân hàng từ SEPAY webhook.",
-    itemKey: "admin.bankTransactions",
   },
   // ─── OWNER ──────────────────────────────────────────────────────────
   {
