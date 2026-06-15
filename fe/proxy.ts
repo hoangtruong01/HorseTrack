@@ -5,7 +5,7 @@ import { jwtVerify } from "jose";
 const JWT_SECRET = process.env.JWT_SECRET || "horsetrack_jwt_secret_key_2026";
 const secretKey = new TextEncoder().encode(JWT_SECRET);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value;
   const { pathname } = request.nextUrl;
 
