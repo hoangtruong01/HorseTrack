@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, ShieldAlert, FileText, User, Eye, X } from "lucide-react";
@@ -146,7 +147,7 @@ export default function AdminJockeysPage() {
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-3">
-            <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
             <p className="text-xs font-mono uppercase tracking-widest">Đang tải hồ sơ Jockey...</p>
           </div>
         ) : jockeys.length === 0 ? (

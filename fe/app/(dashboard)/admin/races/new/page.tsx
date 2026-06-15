@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import Link from "next/link";
 import { Suspense } from "react";
@@ -22,7 +23,7 @@ export default function NewAdminRacePage() {
       />
       <Suspense fallback={
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="size-6 animate-spin text-primary" />
+          <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
         </div>
       }>
         <RaceForm />

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   AlertDialog,
@@ -101,23 +102,23 @@ export default function HorsesStablePage() {
     color: string;
     activeColor: string;
   }[] = [
-    {
-      key: "approved",
-      label: "Chuồng đua chính thức",
-      count: approvedHorses.length,
-      icon: <ShieldCheck className="size-4" />,
-      color: "text-muted-foreground",
-      activeColor: "text-emerald-400 border-emerald-500 bg-emerald-500/5",
-    },
-    {
-      key: "pending",
-      label: "Chờ phê duyệt",
-      count: pendingOrRejectedHorses.length,
-      icon: <Clock className="size-4" />,
-      color: "text-muted-foreground",
-      activeColor: "text-yellow-400 border-yellow-500 bg-yellow-500/5",
-    },
-  ];
+      {
+        key: "approved",
+        label: "Chuồng đua chính thức",
+        count: approvedHorses.length,
+        icon: <ShieldCheck className="size-4" />,
+        color: "text-muted-foreground",
+        activeColor: "text-emerald-400 border-emerald-500 bg-emerald-500/5",
+      },
+      {
+        key: "pending",
+        label: "Chờ phê duyệt",
+        count: pendingOrRejectedHorses.length,
+        icon: <Clock className="size-4" />,
+        color: "text-muted-foreground",
+        activeColor: "text-yellow-400 border-yellow-500 bg-yellow-500/5",
+      },
+    ];
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto">
@@ -149,10 +150,9 @@ export default function HorsesStablePage() {
               className={`
                 relative flex items-center gap-2 px-5 py-3 text-sm font-bold uppercase tracking-wider
                 transition-all duration-200 border-b-2 -mb-[1px] rounded-t-xl
-                ${
-                  isActive
-                    ? tab.activeColor
-                    : `${tab.color} border-transparent hover:text-foreground/80 hover:bg-muted02]`
+                ${isActive
+                  ? tab.activeColor
+                  : `${tab.color} border-transparent hover:text-foreground/80 hover:bg-muted02]`
                 }
               `}
             >
@@ -162,13 +162,12 @@ export default function HorsesStablePage() {
                 className={`
                 inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-full px-1.5
                 text-[11px] font-black tabular-nums
-                ${
-                  isActive
+                ${isActive
                     ? tab.key === "approved"
                       ? "bg-emerald-500/20 text-emerald-300"
                       : "bg-yellow-500/20 text-yellow-300"
                     : "bg-muted06] text-muted-foreground/60"
-                }
+                  }
               `}
               >
                 {tab.count}
@@ -181,7 +180,7 @@ export default function HorsesStablePage() {
       {/* ── Tab Content ── */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 text-foreground/55">
-          <Loader2 className="size-8 animate-spin text-[#E10600]" />
+          <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">
             Đang tải dữ liệu chuồng ngựa...
           </p>
