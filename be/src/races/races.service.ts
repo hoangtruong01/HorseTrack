@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { PredictionsService } from '../predictions/predictions.service';
 import { TournamentStatus } from '../tournaments/schemas/tournament.schema';
@@ -203,7 +203,12 @@ export class RacesService {
     return race.save();
   }
 
-  async updateStatus(id: string, status: RaceStatus): Promise<RaceDocument> {
+  /** Ghi status thuần (validate transition + guard); KHÔNG cascade tournament. */
+  async setStatus(
+    id: string,
+    status: RaceStatus,
+    session?: ClientSession,
+  ): Promise<RaceDocument> {
     const race = await this.findOne(id);
 
     const allowedTransitions = RACE_STATUS_FLOW[race.status] || [];
@@ -228,9 +233,18 @@ export class RacesService {
     }
 
     race.status = status;
-    const savedRace = await race.save();
+    return session ? race.save({ session }) : race.save();
+  }
 
-    // Automate Tournament Status Transitions:
+  /**
+   * Cascade auto-transition tournament theo trạng thái race hiện tại. Chạy NGOÀI transaction.
+   * Re-query findOne(id) là CỐ Ý: hàm được gọi standalone sau khi transaction commit
+   * (Task 5 publishByRace gọi sau commit), đảm bảo đọc trạng thái đã persist.
+   * Trong updateStatus tuần tự, race.status === status vừa set nên kết quả không đổi.
+   */
+  async syncTournamentStatus(id: string): Promise<void> {
+    const race = await this.findOne(id);
+    const status = race.status;
     try {
       if (status === RaceStatus.LIVE) {
         const tournament = await this.tournamentsService.findOne(
@@ -282,11 +296,15 @@ export class RacesService {
         }
       }
     } catch (err) {
-      // Log errors but don't block the main race status update
       console.error('Failed to automate tournament status transition:', err);
     }
+  }
 
-    return savedRace;
+  /** Giữ chữ ký cũ: ghi status + cascade (cho mọi caller hiện tại). */
+  async updateStatus(id: string, status: RaceStatus): Promise<RaceDocument> {
+    const saved = await this.setStatus(id, status);
+    await this.syncTournamentStatus(id);
+    return saved;
   }
 
   /** Enforce pre-race conditions before READY transition */
