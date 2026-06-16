@@ -17,6 +17,12 @@ import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-le
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 import { Types } from 'mongoose';
 
+/** Helper: tạo mock query object hỗ trợ .session() chainable */
+function makeQuery<T>(value: T) {
+  const sessionFn = jest.fn().mockResolvedValue(value);
+  return { session: sessionFn };
+}
+
 describe('PrizesService', () => {
   let service: PrizesService;
   let ledgerService: RewardPointLedgerService;
@@ -92,7 +98,7 @@ describe('PrizesService', () => {
     );
 
     jest.clearAllMocks();
-    mockAssignmentModel.find.mockResolvedValue([]);
+    mockAssignmentModel.find.mockReturnValue(makeQuery([]));
   });
 
   it('should be defined', () => {
@@ -107,7 +113,7 @@ describe('PrizesService', () => {
     const jockeyUserId = new Types.ObjectId();
 
     it('should throw NotFoundException if race is not found', async () => {
-      mockRaceModel.findById.mockResolvedValue(null);
+      mockRaceModel.findById.mockReturnValue(makeQuery(null));
 
       await expect(service.createPrizesForRace(raceId)).rejects.toThrow(
         NotFoundException,
@@ -115,10 +121,9 @@ describe('PrizesService', () => {
     });
 
     it('should return [] if race prize is 0', async () => {
-      mockRaceModel.findById.mockResolvedValue({
-        _id: raceId,
-        prize: 0,
-      });
+      mockRaceModel.findById.mockReturnValue(
+        makeQuery({ _id: raceId, prize: 0 }),
+      );
 
       const result = await service.createPrizesForRace(raceId);
       expect(result).toEqual([]);
@@ -130,39 +135,47 @@ describe('PrizesService', () => {
       const expectedOwnerPoints = 700;
       const expectedJockeyPoints = 300;
 
-      mockRaceModel.findById.mockResolvedValue({
-        _id: raceId,
-        tournamentId,
-        prize: prizeAmount,
-        name: 'Super Race',
-      });
+      mockRaceModel.findById.mockReturnValue(
+        makeQuery({
+          _id: raceId,
+          tournamentId,
+          prize: prizeAmount,
+          name: 'Super Race',
+        }),
+      );
 
-      mockResultModel.findOne.mockResolvedValue({
-        raceId,
-        horseId,
-        jockeyUserId,
-        rank: 1,
-        status: RaceResultStatus.PUBLISHED,
-      });
+      mockResultModel.findOne.mockReturnValue(
+        makeQuery({
+          raceId,
+          horseId,
+          jockeyUserId,
+          rank: 1,
+          status: RaceResultStatus.PUBLISHED,
+        }),
+      );
 
-      mockHorseModel.findById.mockResolvedValue({
-        _id: horseId,
-        ownerId,
-        name: 'Lightning Bolt',
-      });
+      mockHorseModel.findById.mockReturnValue(
+        makeQuery({
+          _id: horseId,
+          ownerId,
+          name: 'Lightning Bolt',
+        }),
+      );
+
+      mockRegistrationModel.findOne.mockReturnValue(makeQuery(null));
 
       // No existing prizes
-      mockPrizeModel.findOne.mockResolvedValue(null);
+      mockPrizeModel.findOne.mockReturnValue(makeQuery(null));
 
-      // Mock Prize creation
+      // Mock Prize creation — dạng mảng vì service dùng create([{...}], { session })
       const mockOwnerPrizeDoc = { ownerId, amount: expectedOwnerPoints };
       const mockJockeyPrizeDoc = {
         ownerId: jockeyUserId,
         amount: expectedJockeyPoints,
       };
       mockPrizeModel.create
-        .mockResolvedValueOnce(mockOwnerPrizeDoc)
-        .mockResolvedValueOnce(mockJockeyPrizeDoc);
+        .mockResolvedValueOnce([mockOwnerPrizeDoc])
+        .mockResolvedValueOnce([mockJockeyPrizeDoc]);
 
       const result = await service.createPrizesForRace(raceId);
 
@@ -170,46 +183,64 @@ describe('PrizesService', () => {
       expect(ledgerService.credit).toHaveBeenCalledTimes(2);
 
       // Check Owner credit call
-      expect(ledgerService.credit).toHaveBeenNthCalledWith(1, {
-        userId: String(ownerId),
-        points: expectedOwnerPoints,
-        sourceType: LedgerSourceType.RACE_WIN_REWARD,
-        sourceId: raceId,
-        note: `Received 70% winner reward for race "Super Race" (Horse: Lightning Bolt)`,
-      });
+      expect(ledgerService.credit).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          userId: String(ownerId),
+          points: expectedOwnerPoints,
+          sourceType: LedgerSourceType.RACE_WIN_REWARD,
+          sourceId: raceId,
+          note: `Received 70% winner reward for race "Super Race" (Horse: Lightning Bolt)`,
+        }),
+      );
 
       // Check Jockey credit call
-      expect(ledgerService.credit).toHaveBeenNthCalledWith(2, {
-        userId: String(jockeyUserId),
-        points: expectedJockeyPoints,
-        sourceType: LedgerSourceType.RACE_WIN_REWARD,
-        sourceId: raceId,
-        note: `Received 30% winner reward for race "Super Race" (Jockey share)`,
-      });
+      expect(ledgerService.credit).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          userId: String(jockeyUserId),
+          points: expectedJockeyPoints,
+          sourceType: LedgerSourceType.RACE_WIN_REWARD,
+          sourceId: raceId,
+          note: `Received 30% winner reward for race "Super Race" (Jockey share)`,
+        }),
+      );
 
-      // Check Prize collection records created
+      // Check Prize collection records created — dạng mảng + options
       expect(mockPrizeModel.create).toHaveBeenCalledTimes(2);
-      expect(mockPrizeModel.create).toHaveBeenNthCalledWith(1, {
-        tournamentId,
-        raceId: expect.any(Types.ObjectId),
-        horseId,
-        ownerId,
-        rank: 1,
-        amount: expectedOwnerPoints,
-        status: PrizePaymentStatus.PAID,
-        paidAt: expect.any(Date),
-      });
+      expect(mockPrizeModel.create).toHaveBeenNthCalledWith(
+        1,
+        [
+          {
+            tournamentId,
+            raceId: expect.any(Types.ObjectId),
+            horseId,
+            ownerId,
+            rank: 1,
+            amount: expectedOwnerPoints,
+            status: PrizePaymentStatus.PAID,
+            paidAt: expect.any(Date),
+          },
+        ],
+        expect.anything(),
+      );
 
-      expect(mockPrizeModel.create).toHaveBeenNthCalledWith(2, {
-        tournamentId,
-        raceId: expect.any(Types.ObjectId),
-        horseId,
-        ownerId: jockeyUserId,
-        rank: 1,
-        amount: expectedJockeyPoints,
-        status: PrizePaymentStatus.PAID,
-        paidAt: expect.any(Date),
-      });
+      expect(mockPrizeModel.create).toHaveBeenNthCalledWith(
+        2,
+        [
+          {
+            tournamentId,
+            raceId: expect.any(Types.ObjectId),
+            horseId,
+            ownerId: jockeyUserId,
+            rank: 1,
+            amount: expectedJockeyPoints,
+            status: PrizePaymentStatus.PAID,
+            paidAt: expect.any(Date),
+          },
+        ],
+        expect.anything(),
+      );
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual(mockOwnerPrizeDoc);
@@ -221,96 +252,167 @@ describe('PrizesService', () => {
       const expectedOwnerPoints = 11;
       const expectedJockeyPoints = 4;
 
-      mockRaceModel.findById.mockResolvedValue({
-        _id: raceId,
-        tournamentId,
-        prize: prizeAmount,
-        name: 'Super Race',
-      });
+      mockRaceModel.findById.mockReturnValue(
+        makeQuery({
+          _id: raceId,
+          tournamentId,
+          prize: prizeAmount,
+          name: 'Super Race',
+        }),
+      );
 
-      mockResultModel.findOne.mockResolvedValue({
-        raceId,
-        horseId,
-        jockeyUserId,
-        rank: 1,
-        status: RaceResultStatus.PUBLISHED,
-      });
+      mockResultModel.findOne.mockReturnValue(
+        makeQuery({
+          raceId,
+          horseId,
+          jockeyUserId,
+          rank: 1,
+          status: RaceResultStatus.PUBLISHED,
+        }),
+      );
 
-      mockHorseModel.findById.mockResolvedValue({
-        _id: horseId,
-        ownerId,
-        name: 'Lightning Bolt',
-      });
+      mockHorseModel.findById.mockReturnValue(
+        makeQuery({
+          _id: horseId,
+          ownerId,
+          name: 'Lightning Bolt',
+        }),
+      );
 
-      mockPrizeModel.findOne.mockResolvedValue(null);
+      mockRegistrationModel.findOne.mockReturnValue(makeQuery(null));
+      mockPrizeModel.findOne.mockReturnValue(makeQuery(null));
       mockPrizeModel.create
-        .mockResolvedValueOnce({ ownerId, amount: expectedOwnerPoints })
-        .mockResolvedValueOnce({
-          ownerId: jockeyUserId,
-          amount: expectedJockeyPoints,
-        });
+        .mockResolvedValueOnce([{ ownerId, amount: expectedOwnerPoints }])
+        .mockResolvedValueOnce([
+          { ownerId: jockeyUserId, amount: expectedJockeyPoints },
+        ]);
 
       await service.createPrizesForRace(raceId);
 
       // Verify exact sum holds
       expect(expectedOwnerPoints + expectedJockeyPoints).toBe(prizeAmount);
 
-      expect(ledgerService.credit).toHaveBeenNthCalledWith(1, {
-        userId: String(ownerId),
-        points: expectedOwnerPoints,
-        sourceType: LedgerSourceType.RACE_WIN_REWARD,
-        sourceId: raceId,
-        note: expect.any(String),
-      });
+      expect(ledgerService.credit).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          userId: String(ownerId),
+          points: expectedOwnerPoints,
+          sourceType: LedgerSourceType.RACE_WIN_REWARD,
+          sourceId: raceId,
+          note: expect.any(String),
+        }),
+      );
 
-      expect(ledgerService.credit).toHaveBeenNthCalledWith(2, {
-        userId: String(jockeyUserId),
-        points: expectedJockeyPoints,
-        sourceType: LedgerSourceType.RACE_WIN_REWARD,
-        sourceId: raceId,
-        note: expect.any(String),
-      });
+      expect(ledgerService.credit).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          userId: String(jockeyUserId),
+          points: expectedJockeyPoints,
+          sourceType: LedgerSourceType.RACE_WIN_REWARD,
+          sourceId: raceId,
+          note: expect.any(String),
+        }),
+      );
     });
 
     it('does not re-credit the owner when a RACE_WIN_REWARD ledger entry already exists (republish safety)', async () => {
       const prizeAmount = 1000;
 
-      mockRaceModel.findById.mockResolvedValue({
-        _id: raceId,
-        tournamentId,
-        prize: prizeAmount,
-        name: 'Super Race',
-      });
+      mockRaceModel.findById.mockReturnValue(
+        makeQuery({
+          _id: raceId,
+          tournamentId,
+          prize: prizeAmount,
+          name: 'Super Race',
+        }),
+      );
 
-      mockResultModel.findOne.mockResolvedValue({
-        raceId,
-        horseId,
-        jockeyUserId: null,
-        rank: 1,
-        status: RaceResultStatus.PUBLISHED,
-      });
+      mockResultModel.findOne.mockReturnValue(
+        makeQuery({
+          raceId,
+          horseId,
+          jockeyUserId: null,
+          rank: 1,
+          status: RaceResultStatus.PUBLISHED,
+        }),
+      );
 
-      mockHorseModel.findById.mockResolvedValue({
-        _id: horseId,
-        ownerId,
-        name: 'Lightning Bolt',
-      });
+      mockHorseModel.findById.mockReturnValue(
+        makeQuery({
+          _id: horseId,
+          ownerId,
+          name: 'Lightning Bolt',
+        }),
+      );
 
       // No registration -> default 30% jockey share, but jockeyUserId is null so jockey branch skipped
-      mockRegistrationModel.findOne.mockResolvedValue(null);
+      mockRegistrationModel.findOne.mockReturnValue(makeQuery(null));
 
       // No existing Prize doc — simulates crash-before-Prize scenario
-      mockPrizeModel.findOne.mockResolvedValue(null);
+      mockPrizeModel.findOne.mockReturnValue(makeQuery(null));
 
       // Ledger entry already exists for owner (credit already happened before crash)
       mockLedgerService.exists.mockResolvedValue(true);
 
+      // create vẫn có thể được gọi (Prize doc chưa tồn tại), phải trả về mảng
+      mockPrizeModel.create.mockResolvedValue([{ ownerId, amount: 1000 }]);
+
       await service.createPrizesForRace(raceId);
 
-      expect(ledgerService.credit).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          sourceType: LedgerSourceType.RACE_WIN_REWARD,
+      expect(ledgerService.credit).not.toHaveBeenCalled();
+    });
+
+    it('createPrizesForRace: truyền session xuống resultModel.findOne và ledger.credit', async () => {
+      const session = {} as unknown as import('mongoose').ClientSession;
+      const prizeAmount = 1000;
+
+      const raceQuerySpy = makeQuery({
+        _id: raceId,
+        tournamentId,
+        prize: prizeAmount,
+        name: 'Session Race',
+      });
+      mockRaceModel.findById.mockReturnValue(raceQuerySpy);
+
+      const resultQuerySpy = makeQuery({
+        raceId,
+        horseId,
+        jockeyUserId,
+        rank: 1,
+        status: RaceResultStatus.PUBLISHED,
+      });
+      mockResultModel.findOne.mockReturnValue(resultQuerySpy);
+
+      mockHorseModel.findById.mockReturnValue(
+        makeQuery({
+          _id: horseId,
+          ownerId,
+          name: 'Session Horse',
         }),
+      );
+
+      mockRegistrationModel.findOne.mockReturnValue(makeQuery(null));
+      const prizeQuerySpy = makeQuery(null);
+      mockPrizeModel.findOne.mockReturnValue(prizeQuerySpy);
+      mockLedgerService.exists.mockResolvedValue(false);
+      mockPrizeModel.create
+        .mockResolvedValueOnce([{ ownerId, amount: 700 }])
+        .mockResolvedValueOnce([{ ownerId: jockeyUserId, amount: 300 }]);
+
+      await service.createPrizesForRace(raceId, session);
+
+      // raceModel.findById phải được gọi với .session(session)
+      expect(raceQuerySpy.session).toHaveBeenCalledWith(session);
+
+      // resultModel.findOne phải được gọi với .session(session)
+      expect(resultQuerySpy.session).toHaveBeenCalledWith(session);
+
+      // prizeModel.findOne phải được gọi với .session(session)
+      expect(prizeQuerySpy.session).toHaveBeenCalledWith(session);
+
+      // ledger.credit phải được gọi với session
+      expect(ledgerService.credit).toHaveBeenCalledWith(
+        expect.objectContaining({ session }),
       );
     });
   });
