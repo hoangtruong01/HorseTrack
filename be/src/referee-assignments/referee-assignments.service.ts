@@ -62,6 +62,16 @@ export class RefereeAssignmentsService {
       );
     }
 
+    // 2b. Validate referee profile is APPROVED
+    const profile = await this.refereeProfilesService.findByUserId(
+      dto.refereeUserId,
+    );
+    if (profile.approvalStatus !== RefereeApprovalStatus.APPROVED) {
+      throw new BadRequestException(
+        'Referee profile must be APPROVED before assignment',
+      );
+    }
+
     // 3. Validate race exists
     const race = await this.racesService.findOne(dto.raceId);
 
