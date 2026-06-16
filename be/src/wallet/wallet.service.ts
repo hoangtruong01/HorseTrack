@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 import { CreateCashoutDto } from './dto/create-cashout.dto';
@@ -28,6 +28,7 @@ export class WalletService {
     @InjectModel(CashoutRequest.name)
     private cashoutModel: Model<CashoutRequestDocument>,
     private ledgerService: RewardPointLedgerService,
+    @InjectConnection() private connection: Connection,
   ) {}
 
   async requestCashout(
@@ -103,73 +104,83 @@ export class WalletService {
       throw new BadRequestException('Request has already been processed');
     }
 
-    if (status === CashoutStatus.PAID) {
-      // Update note to mark it as paid, avoiding double point deduction
-      await this.ledgerService.updateNote(
-        String(request._id),
-        LedgerSourceType.REDEMPTION,
-        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã thanh toán thành công.`,
-      );
-    } else if (status === CashoutStatus.REJECTED) {
-      // Update original deduction note to show it was rejected
-      await this.ledgerService.updateNote(
-        String(request._id),
-        LedgerSourceType.REDEMPTION,
-        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Bị từ chối.`,
-      );
-      // Refund points if cashout is rejected
-      await this.ledgerService.credit({
-        userId: String(request.userId),
-        points: request.pointsRedeemed,
-        sourceType: LedgerSourceType.REDEMPTION,
-        sourceId: String(request._id),
-        note: `Hoàn điểm do yêu cầu quy đổi bị từ chối (Mã: ${request.redemptionCode})${rejectReason ? `: ${rejectReason}` : ''}`,
-        createdBy: handlerId,
+    const session = await this.connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        if (status === CashoutStatus.PAID) {
+          // updateNote chỉ cập nhật nhãn mô tả của bút toán ledger (idempotent),
+          // không nhận session: tính toàn vẹn điểm do credit (trong session) bảo đảm.
+          await this.ledgerService.updateNote(
+            String(request._id),
+            LedgerSourceType.REDEMPTION,
+            `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã thanh toán thành công.`,
+          );
+        } else if (status === CashoutStatus.REJECTED) {
+          await this.ledgerService.updateNote(
+            String(request._id),
+            LedgerSourceType.REDEMPTION,
+            `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Bị từ chối.`,
+          );
+          await this.ledgerService.credit({
+            userId: String(request.userId),
+            points: request.pointsRedeemed,
+            sourceType: LedgerSourceType.REDEMPTION,
+            sourceId: String(request._id),
+            note: `Hoàn điểm do yêu cầu quy đổi bị từ chối (Mã: ${request.redemptionCode})${rejectReason ? `: ${rejectReason}` : ''}`,
+            createdBy: handlerId,
+            session,
+          });
+        } else if (status === CashoutStatus.FAILED) {
+          await this.ledgerService.updateNote(
+            String(request._id),
+            LedgerSourceType.REDEMPTION,
+            `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Thất bại/Lỗi.`,
+          );
+          await this.ledgerService.credit({
+            userId: String(request.userId),
+            points: request.pointsRedeemed,
+            sourceType: LedgerSourceType.REDEMPTION,
+            sourceId: String(request._id),
+            note: `Hoàn điểm do yêu cầu quy đổi gặp lỗi (Mã: ${request.redemptionCode})${rejectReason ? `: ${rejectReason}` : ''}`,
+            createdBy: handlerId,
+            session,
+          });
+        }
+
+        request.status = status;
+        if (rejectReason) {
+          request.rejectReason = rejectReason;
+        }
+
+        if (status === CashoutStatus.APPROVED) {
+          request.approvedBy = new Types.ObjectId(handlerId);
+        } else if (status === CashoutStatus.PAID) {
+          request.paidBy = new Types.ObjectId(handlerId);
+          request.paidAt = new Date();
+          await this.transactionModel.findOneAndUpdate(
+            { cashoutRequestId: request._id },
+            { status: TransactionStatus.SUCCESS },
+            { session },
+          );
+        } else if (
+          status === CashoutStatus.REJECTED ||
+          status === CashoutStatus.FAILED
+        ) {
+          request.rejectedBy = new Types.ObjectId(handlerId);
+          await this.transactionModel.findOneAndUpdate(
+            { cashoutRequestId: request._id },
+            { status: TransactionStatus.FAILED },
+            { session },
+          );
+        }
+
+        await request.save({ session });
       });
-    } else if (status === CashoutStatus.FAILED) {
-      // Update original deduction note to show it failed
-      await this.ledgerService.updateNote(
-        String(request._id),
-        LedgerSourceType.REDEMPTION,
-        `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Thất bại/Lỗi.`,
-      );
-      // Refund points if cashout is failed
-      await this.ledgerService.credit({
-        userId: String(request.userId),
-        points: request.pointsRedeemed,
-        sourceType: LedgerSourceType.REDEMPTION,
-        sourceId: String(request._id),
-        note: `Hoàn điểm do yêu cầu quy đổi gặp lỗi (Mã: ${request.redemptionCode})${rejectReason ? `: ${rejectReason}` : ''}`,
-        createdBy: handlerId,
-      });
+    } finally {
+      await session.endSession();
     }
 
-    request.status = status;
-    if (rejectReason) {
-      request.rejectReason = rejectReason;
-    }
-
-    if (status === CashoutStatus.APPROVED) {
-      request.approvedBy = new Types.ObjectId(handlerId);
-    } else if (status === CashoutStatus.PAID) {
-      request.paidBy = new Types.ObjectId(handlerId);
-      request.paidAt = new Date();
-      await this.transactionModel.findOneAndUpdate(
-        { cashoutRequestId: request._id },
-        { status: TransactionStatus.SUCCESS },
-      );
-    } else if (
-      status === CashoutStatus.REJECTED ||
-      status === CashoutStatus.FAILED
-    ) {
-      request.rejectedBy = new Types.ObjectId(handlerId);
-      await this.transactionModel.findOneAndUpdate(
-        { cashoutRequestId: request._id },
-        { status: TransactionStatus.FAILED },
-      );
-    }
-
-    return request.save();
+    return request;
   }
 
   async findMyWalletHistory(userId: string, page = 1, limit = 20) {

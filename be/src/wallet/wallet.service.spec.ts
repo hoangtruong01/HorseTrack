@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
+import { getConnectionToken, getModelToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
@@ -24,6 +24,17 @@ describe('WalletService', () => {
     credit: jest.Mock;
     updateNote: jest.Mock;
   };
+  let mockConnection: { startSession: jest.Mock };
+
+  function makeSession() {
+    const endSession = jest.fn().mockResolvedValue(undefined);
+    const withTransaction = jest
+      .fn()
+      .mockImplementation(async (fn: () => Promise<void>) => {
+        await fn();
+      });
+    return { withTransaction, endSession };
+  }
 
   const userId = new Types.ObjectId();
   const handlerId = new Types.ObjectId().toHexString();
@@ -62,6 +73,8 @@ describe('WalletService', () => {
       credit: jest.fn(),
       updateNote: jest.fn(),
     };
+    mockConnection = { startSession: jest.fn() };
+    mockConnection.startSession.mockResolvedValue(makeSession());
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -72,6 +85,7 @@ describe('WalletService', () => {
         },
         { provide: getModelToken(CashoutRequest.name), useValue: cashoutModel },
         { provide: RewardPointLedgerService, useValue: ledgerService },
+        { provide: getConnectionToken(), useValue: mockConnection },
       ],
     }).compile();
 
@@ -79,6 +93,8 @@ describe('WalletService', () => {
   });
 
   it('approves pending cashout without debiting points', async () => {
+    const session = makeSession();
+    mockConnection.startSession.mockResolvedValue(session);
     const request = makeRequest();
     cashoutModel.findById.mockResolvedValue(request);
 
@@ -93,10 +109,12 @@ describe('WalletService', () => {
     expect(transactionModel.findOneAndUpdate).not.toHaveBeenCalled();
     expect(request.status).toBe(CashoutStatus.APPROVED);
     expect(request.approvedBy).toEqual(new Types.ObjectId(handlerId));
-    expect(request.save).toHaveBeenCalled();
+    expect(request.save).toHaveBeenCalledWith({ session });
   });
 
   it('updates ledger note when cashout is paid', async () => {
+    const session = makeSession();
+    mockConnection.startSession.mockResolvedValue(session);
     const request = makeRequest(CashoutStatus.APPROVED);
     cashoutModel.findById.mockResolvedValue(request);
 
@@ -114,13 +132,17 @@ describe('WalletService', () => {
     expect(transactionModel.findOneAndUpdate).toHaveBeenCalledWith(
       { cashoutRequestId: cashoutId },
       { status: TransactionStatus.SUCCESS },
+      { session },
     );
     expect(request.status).toBe(CashoutStatus.PAID);
     expect(request.paidBy).toEqual(new Types.ObjectId(handlerId));
     expect(request.paidAt).toBeInstanceOf(Date);
+    expect(request.save).toHaveBeenCalledWith({ session });
   });
 
   it('refunds points and updates ledger note when cashout is rejected', async () => {
+    const session = makeSession();
+    mockConnection.startSession.mockResolvedValue(session);
     const request = makeRequest(CashoutStatus.APPROVED);
     cashoutModel.findById.mockResolvedValue(request);
 
@@ -142,14 +164,17 @@ describe('WalletService', () => {
       sourceId: cashoutId.toHexString(),
       note: `Hoàn điểm do yêu cầu quy đổi bị từ chối (Mã: ${request.redemptionCode})`,
       createdBy: handlerId,
+      session,
     });
     expect(transactionModel.findOneAndUpdate).toHaveBeenCalledWith(
       { cashoutRequestId: cashoutId },
       { status: TransactionStatus.FAILED },
+      { session },
     );
     expect(request.status).toBe(CashoutStatus.REJECTED);
     expect(request.rejectedBy).toEqual(new Types.ObjectId(handlerId));
     expect(request.approvedBy).toBeUndefined();
+    expect(request.save).toHaveBeenCalledWith({ session });
   });
 
   it('blocks already processed requests', async () => {
@@ -174,5 +199,22 @@ describe('WalletService', () => {
         handlerId,
       ),
     ).rejects.toThrow(NotFoundException);
+  });
+
+  it('propagates error and ends session when refund credit fails', async () => {
+    const request = makeRequest(CashoutStatus.APPROVED);
+    cashoutModel.findById.mockResolvedValue(request);
+    const session = makeSession();
+    mockConnection.startSession.mockResolvedValue(session);
+    ledgerService.credit.mockRejectedValue(new Error('DB fail'));
+
+    await expect(
+      service.processCashout(
+        cashoutId.toHexString(),
+        CashoutStatus.REJECTED,
+        handlerId,
+      ),
+    ).rejects.toThrow('DB fail');
+    expect(session.endSession).toHaveBeenCalled();
   });
 });
