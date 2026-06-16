@@ -71,8 +71,11 @@ export default function OwnerHome() {
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
     >
-      <Card>
-        <Text style={styles.welcomeLabel}>CHỦ SỞ HỮU CHIẾN MÃ</Text>
+      <Card style={styles.heroCard}>
+        <View style={styles.heroHeader}>
+          <MaterialIcons name="stars" size={20} color={C.red} />
+          <Text style={styles.welcomeLabel}>CHỦ SỞ HỮU CHIẾN MÃ</Text>
+        </View>
         <Text style={styles.welcomeTitle}>Bảng Quản Trị Owner</Text>
         <Text style={styles.welcomeSub}>Chào mừng trở lại! Quản lý các chiến mã vô địch, theo dõi các giải đấu đang diễn ra và quản lý tài chính chuồng đua của bạn.</Text>
       </Card>
@@ -133,11 +136,13 @@ export default function OwnerHome() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   content: { padding: 16, paddingBottom: 48 },
-  statsRow: { flexDirection: 'row', gap: 8 },
-  welcomeLabel: { color: C.red, fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 8 },
-  welcomeTitle: { color: C.white, fontSize: 22, fontWeight: '900' },
-  welcomeSub: { color: C.textSecondary, fontSize: 12, marginTop: 6, lineHeight: 18 },
-  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
+  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  heroCard: { backgroundColor: C.card, padding: 20, marginBottom: 16, borderRadius: 16, borderWidth: 1, borderColor: C.cardBorder },
+  heroHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  welcomeLabel: { color: C.red, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
+  welcomeTitle: { color: C.white, fontSize: 24, fontWeight: '900', marginBottom: 6 },
+  welcomeSub: { color: C.textSecondary, fontSize: 13, lineHeight: 20 },
+  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
   actionBtn: { width: '22%', aspectRatio: 1, backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 16, alignItems: 'center', justifyContent: 'center', padding: 4 },
   actionIconWrap: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   actionText: { color: C.white, fontSize: 9, fontWeight: '800', textAlign: 'center' },
