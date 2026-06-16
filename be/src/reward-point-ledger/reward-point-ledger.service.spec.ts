@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken, getConnectionToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { RewardPointLedger } from './schemas/reward-point-ledger.schema';
+import { LedgerSourceType, RewardPointLedger } from './schemas/reward-point-ledger.schema';
 import { User } from '../users/schemas/user.schema';
 import { RewardPointLedgerService } from './reward-point-ledger.service';
 
@@ -119,6 +119,24 @@ describe('RewardPointLedgerService.credit (atomic)', () => {
     expect(session.commitTransaction).toHaveBeenCalled();
     expect(session.endSession).toHaveBeenCalled();
   });
+
+  it('credit: khi nhận session ngoài thì không tự startSession/startTransaction', async () => {
+    const externalSession = {} as unknown as import('mongoose').ClientSession;
+    const startSessionSpy = jest.spyOn(connection, 'startSession');
+    await service.credit({
+      userId: new Types.ObjectId().toString(),
+      points: 100,
+      sourceType: LedgerSourceType.RACE_WIN_REWARD,
+      sourceId: new Types.ObjectId().toString(),
+      session: externalSession,
+    });
+    expect(startSessionSpy).not.toHaveBeenCalled();
+    expect(session.startTransaction).not.toHaveBeenCalled();
+    expect(ledgerModel.create).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ pointsDelta: 100 })]),
+      { session: externalSession },
+    );
+  });
 });
 
 describe('RewardPointLedgerService.debit (insufficient balance)', () => {
@@ -142,8 +160,8 @@ describe('RewardPointLedgerService.debit (insufficient balance)', () => {
       commitTransaction: jest.fn().mockResolvedValue(undefined),
       abortTransaction: jest.fn().mockResolvedValue(undefined),
       endSession: jest.fn().mockResolvedValue(undefined),
-      // false after abortTransaction is called in the insufficient-balance path
-      inTransaction: jest.fn().mockReturnValue(false),
+      // true: transaction is still active when the error is thrown from debitCore
+      inTransaction: jest.fn().mockReturnValue(true),
     };
     connection = { startSession: jest.fn().mockResolvedValue(session) };
     userModel = {
