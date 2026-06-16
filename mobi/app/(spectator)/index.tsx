@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
-import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, statusLabel, formatDateTime } from '@/components/ui/shared';
+import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { tournamentsApi, racesApi, rewardPointLedgerApi } from '@/lib/api-client';
 
 export default function SpectatorHome() {
@@ -8,23 +8,36 @@ export default function SpectatorHome() {
   const [tournaments, setTournaments] = useState<any[]>([]);
   const [races, setRaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const [balRes, tRes, rRes] = await Promise.all([
-          rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
-          tournamentsApi.list({ limit: 5 }).catch(() => ({ data: [] })),
-          racesApi.list({ limit: 5 }).catch(() => ({ data: [] })),
-        ]);
-        setBalance((balRes as any).balance || 0);
-        setTournaments((tRes as any).data || []);
-        setRaces((rRes as any).data || []);
-      } catch {} finally { setLoading(false); }
-    })();
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [balRes, tRes, rRes] = await Promise.all([
+        rewardPointLedgerApi.myBalance(),
+        tournamentsApi.list({ limit: 5 }),
+        racesApi.list({ limit: 5 }),
+      ]);
+      setBalance((balRes as any).balance || 0);
+      setTournaments((tRes as any).data || []);
+      setRaces((rRes as any).data || []);
+    } catch (err: any) {
+      setError(err.message || 'Lỗi tải dữ liệu');
+    } finally { setLoading(false); }
   }, []);
 
+  useEffect(() => { loadData(); }, [loadData]);
+
   if (loading) return <LoadingState />;
+
+  if (error) {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <ErrorState message={error} onRetry={loadData} />
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>

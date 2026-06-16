@@ -1,20 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
-import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, statusLabel } from '@/components/ui/shared';
+import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { refereeAssignmentsApi } from '@/lib/api-client';
 
 export default function RefereeHome() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
+    setLoading(true);
+    setError(null);
     refereeAssignmentsApi.myAssignments({ limit: 10 })
       .then(r => setAssignments((r as any).data || r || []))
-      .catch(() => {})
+      .catch((err: any) => setError(err.message || 'Lỗi tải phân công'))
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => { loadData(); }, [loadData]);
+
   if (loading) return <LoadingState />;
+
+  if (error) {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <ErrorState message={error} onRetry={loadData} />
+      </ScrollView>
+    );
+  }
 
   const pendingCount = assignments.filter(a => a.status === 'assigned').length;
   const acceptedCount = assignments.filter(a => a.status === 'accepted').length;

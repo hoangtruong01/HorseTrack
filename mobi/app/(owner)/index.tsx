@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
-import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, statusLabel } from '@/components/ui/shared';
+import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { horsesApi, registrationsApi, rewardPointLedgerApi, dashboardApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -14,14 +14,16 @@ export default function OwnerHome() {
   const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
+    setError(null);
     try {
       const [horsesRes, regRes, balanceRes, statsRes] = await Promise.all([
-        horsesApi.listMine({ limit: 1 }).catch(() => ({ meta: { total: 0 } })),
-        registrationsApi.listMine({ limit: 5 }).catch(() => ({ data: [], meta: { total: 0 } })),
-        rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
-        dashboardApi.getOwnerStats().catch(() => null),
+        horsesApi.listMine({ limit: 1 }),
+        registrationsApi.listMine({ limit: 5 }),
+        rewardPointLedgerApi.myBalance(),
+        dashboardApi.getOwnerStats(),
       ]);
       
       setHorsesCount((horsesRes as any).meta?.total || 0);
@@ -29,7 +31,9 @@ export default function OwnerHome() {
       setRegCount((regRes as any).meta?.total || 0);
       setBalance((balanceRes as any).balance || 0);
       setWinnings(statsRes?.winnings?.total || 0);
-    } catch {} finally { setLoading(false); }
+    } catch (err: any) {
+      setError(err.message || 'Lỗi tải dữ liệu');
+    } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
@@ -40,7 +44,7 @@ export default function OwnerHome() {
     setRefreshing(false);
   }, [loadData]);
 
-  if (loading) return <LoadingState />;
+  if (loading && !refreshing) return <LoadingState />;
 
   const quickActions = [
     { title: 'Chuồng Ngựa', icon: 'pets', path: '/horses', color: C.red },
@@ -52,6 +56,14 @@ export default function OwnerHome() {
     { title: 'Bảng Xếp Hạng', icon: 'leaderboard', path: '/rankings', color: '#E10600' },
     { title: 'Cá Nhân', icon: 'person', path: '/profile', color: C.textSecondary },
   ];
+
+  if (error) {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}>
+        <ErrorState message={error} onRetry={loadData} />
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView

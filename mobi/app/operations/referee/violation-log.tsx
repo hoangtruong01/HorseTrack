@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, SafeAreaView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { raceChecksApi, raceViolationsApi, racesApi, type RaceItem } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { ErrorState } from '../../../components/ui/shared';
 
 export default function ViolationLogScreen() {
   const { raceId } = useLocalSearchParams<{ raceId: string }>();
+  const router = useRouter();
 
   const [horses, setHorses] = useState<any[]>([]);
   const [violations, setViolations] = useState<any[]>([]);
@@ -44,6 +46,10 @@ export default function ViolationLogScreen() {
   useEffect(() => {
     loadData();
   }, [raceId]);
+
+  if (!raceId) {
+    return <ErrorState message="Thiếu thông tin cuộc đua.\n\nVui lòng quay lại danh sách phân công và chọn một cuộc đua." onRetry={() => router.back()} />;
+  }
 
   const handleSubmit = async () => {
     if (!selectedHorseId) {

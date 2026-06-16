@@ -23,6 +23,7 @@ export default function SpectatorLayout() {
       <Tabs.Screen name="predictions" options={{ title: 'Dự đoán', headerTitle: 'DỰ ĐOÁN', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="psychology" color={color} /> }} />
       <Tabs.Screen name="wallet" options={{ title: 'Ví điểm', headerTitle: 'VÍ ĐIỂM', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person" color={color} /> }} />
+      <Tabs.Screen name="race/[id]" options={{ href: null, headerTitle: 'CHI TIẾT TRẬN ĐUA' }} />
     </Tabs>
   );
 }
