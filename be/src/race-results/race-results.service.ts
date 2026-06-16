@@ -5,8 +5,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { RacesService } from '../races/races.service';
 import { RaceStatus } from '../races/schemas/race.schema';
 import {
@@ -29,7 +29,10 @@ import {
   RaceResultStatus,
   RaceIncident,
 } from './schemas/race-result.schema';
-import { PredictionsService } from '../predictions/predictions.service';
+import {
+  PayoutNotifyIntent,
+  PredictionsService,
+} from '../predictions/predictions.service';
 import { PrizesService } from '../prizes/prizes.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { Jockey } from '../jockeys/schemas/jockey.schema';
@@ -67,6 +70,7 @@ export class RaceResultsService {
     private predictionsService: PredictionsService,
     private auditLogsService: AuditLogsService,
     private notificationsService: NotificationsService,
+    @InjectConnection() private connection: Connection,
   ) {}
 
   private async validateRefereeAssigned(
@@ -533,7 +537,6 @@ export class RaceResultsService {
       throw new BadRequestException('No results to publish for this race');
     }
 
-    // All results must be CONFIRMED
     const unconfirmed = results.some(
       (r) => r.status !== RaceResultStatus.CONFIRMED,
     );
@@ -543,39 +546,56 @@ export class RaceResultsService {
       );
     }
 
-    // Only the winner receives the prize
-    const prizeByRank: Record<number, number> = {
-      1: race.prize ?? 0,
-    };
-
+    const prizeByRank: Record<number, number> = { 1: race.prize ?? 0 };
     const now = new Date();
-    await Promise.all(
-      results.map((result) => {
-        const prizeAmount =
-          result.outcome === RaceResultOutcome.FINISHED && result.rank
-            ? (prizeByRank[result.rank] ?? 0)
-            : 0;
-        return this.resultModel.findByIdAndUpdate(result._id, {
-          $set: {
-            status: RaceResultStatus.PUBLISHED,
-            prizeAmount,
-            publishedBy,
-            publishedAt: now,
-          },
-        });
-      }),
-    );
 
-    // Update race status to RESULT_PUBLISHED
-    await this.racesService.updateStatus(raceId, RaceStatus.RESULT_PUBLISHED);
+    const session = await this.connection.startSession();
+    let notifyIntents: PayoutNotifyIntent[] = [];
+    try {
+      await session.withTransaction(async () => {
+        notifyIntents = [];
 
-    // Auto-create prizes (legacy prize records)
-    await this.prizesService.createPrizesForRace(raceId);
+        await Promise.all(
+          results.map((result) => {
+            const prizeAmount =
+              result.outcome === RaceResultOutcome.FINISHED && result.rank
+                ? (prizeByRank[result.rank] ?? 0)
+                : 0;
+            return this.resultModel.findByIdAndUpdate(
+              result._id,
+              {
+                $set: {
+                  status: RaceResultStatus.PUBLISHED,
+                  prizeAmount,
+                  publishedBy,
+                  publishedAt: now,
+                },
+              },
+              { session },
+            );
+          }),
+        );
 
-    // Resolve predictions
-    await this.predictionsService.payoutBetsForRace(raceId);
+        await this.racesService.setStatus(
+          raceId,
+          RaceStatus.RESULT_PUBLISHED,
+          session,
+        );
 
-    // Send notifications to the winning horse owner
+        await this.prizesService.createPrizesForRace(raceId, session);
+
+        notifyIntents = await this.predictionsService.payoutBetsForRace(
+          raceId,
+          session,
+        );
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    // ── Sau commit: side-effect best-effort (không rollback tiền) ──
+    await this.racesService.syncTournamentStatus(raceId);
+
     const winnerResult = results.find((r) => r.rank === 1);
     if (winnerResult) {
       await this.notificationsService.send(
@@ -583,6 +603,15 @@ export class RaceResultsService {
         'Chiến thắng vang dội!',
         `Chúc mừng! Chú ngựa của bạn đã giành chiến thắng vị trí thứ nhất trong cuộc đua ${race.name}.`,
         NotificationType.REWARD,
+      );
+    }
+
+    for (const intent of notifyIntents) {
+      await this.notificationsService.send(
+        intent.userId,
+        intent.title,
+        intent.body,
+        intent.type,
       );
     }
 
