@@ -47,7 +47,9 @@ export class RefereeAssignmentsController {
   }
 
   @Get('race/:raceId')
-  @ApiOperation({ summary: 'List assignments for a race' })
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @ApiOperation({ summary: 'List assignments for a race (Admin)' })
   findByRace(
     @Param('raceId') raceId: string,
     @Query() pagination: PaginationDto,
