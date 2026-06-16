@@ -162,7 +162,7 @@ export class WalletService {
       status === CashoutStatus.REJECTED ||
       status === CashoutStatus.FAILED
     ) {
-      request.approvedBy = new Types.ObjectId(handlerId);
+      request.rejectedBy = new Types.ObjectId(handlerId);
       await this.transactionModel.findOneAndUpdate(
         { cashoutRequestId: request._id },
         { status: TransactionStatus.FAILED },
