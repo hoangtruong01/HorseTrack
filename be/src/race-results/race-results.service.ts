@@ -630,6 +630,16 @@ export class RaceResultsService {
   }
 
   async applyViolationsToResults(raceId: string): Promise<void> {
+    const publishedExists = await this.resultModel.exists({
+      raceId: new Types.ObjectId(raceId),
+      status: RaceResultStatus.PUBLISHED,
+    });
+    if (publishedExists) {
+      throw new BadRequestException(
+        'Không thể áp dụng vi phạm cho kết quả đã công bố',
+      );
+    }
+
     const results = await this.resultModel.find({
       raceId: new Types.ObjectId(raceId),
     });

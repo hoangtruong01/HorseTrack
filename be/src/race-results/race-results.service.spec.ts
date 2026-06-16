@@ -24,6 +24,7 @@ describe('RaceResultsService', () => {
   let resultModel: {
     find: jest.Mock;
     findByIdAndUpdate: jest.Mock;
+    exists: jest.Mock;
   };
   let racesService: {
     findOne: jest.Mock;
@@ -67,6 +68,7 @@ describe('RaceResultsService', () => {
     resultModel = {
       find: jest.fn(),
       findByIdAndUpdate: jest.fn().mockResolvedValue({}),
+      exists: jest.fn().mockResolvedValue(null),
     };
     racesService = {
       findOne: jest.fn(),
@@ -266,6 +268,20 @@ describe('RaceResultsService', () => {
       const payoutSendCalls = sendCalls.filter((call) => call[0] === 'user1');
       expect(payoutSendCalls).toHaveLength(1);
       expect(notificationsService.send).toHaveBeenCalledTimes(2); // winner + 1 intent
+    });
+  });
+
+  describe('applyViolationsToResults', () => {
+    it('throws when results are already PUBLISHED', async () => {
+      resultModel.exists.mockResolvedValue({ _id: new Types.ObjectId() });
+
+      const svc = service as unknown as {
+        applyViolationsToResults: (id: string) => Promise<void>;
+      };
+      await expect(svc.applyViolationsToResults(raceId)).rejects.toThrow(
+        'Không thể áp dụng vi phạm cho kết quả đã công bố',
+      );
+      expect(resultModel.find).not.toHaveBeenCalled();
     });
   });
 });
