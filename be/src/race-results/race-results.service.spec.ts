@@ -259,10 +259,11 @@ describe('RaceResultsService', () => {
 
       // notificationsService.send được gọi cho winner (1 lần) + 1 intent (1 lần) = 2 lần tổng
       // KHÔNG phải 3 lần (winner + intent lần 1 + intent lần 2)
-      const sendCalls = notificationsService.send.mock.calls;
-      const payoutSendCalls = sendCalls.filter(
-        (call) => call[0] === 'user1',
-      );
+      const sendCalls = notificationsService.send.mock.calls as [
+        string,
+        ...unknown[],
+      ][];
+      const payoutSendCalls = sendCalls.filter((call) => call[0] === 'user1');
       expect(payoutSendCalls).toHaveLength(1);
       expect(notificationsService.send).toHaveBeenCalledTimes(2); // winner + 1 intent
     });

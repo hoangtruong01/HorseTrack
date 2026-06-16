@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 import { RacesService } from './races.service';
 import { Race, RaceStatus } from './schemas/race.schema';
 import { Registration } from '../registrations/schemas/registration.schema';
@@ -93,9 +93,9 @@ describe('RacesService', () => {
     service = module.get(RacesService);
 
     // Delegate service.findOne sang raceModel.findOne để mỗi test chỉ cần set raceModel.findOne.mockReturnValue
-    jest.spyOn(service, 'findOne').mockImplementation(() =>
-      Promise.resolve(raceModel.findOne()),
-    );
+    jest
+      .spyOn(service, 'findOne')
+      .mockImplementation(() => Promise.resolve(raceModel.findOne()));
   });
 
   describe('setStatus', () => {
@@ -132,7 +132,7 @@ describe('RacesService', () => {
     it('nhận session và truyền vào race.save({ session })', async () => {
       const race = makeRace(RaceStatus.FINISHED);
       raceModel.findOne.mockReturnValue(race);
-      const fakeSession = {} as any;
+      const fakeSession = {} as unknown as ClientSession;
 
       await service.setStatus(raceId, RaceStatus.RESULT_PUBLISHED, fakeSession);
 
