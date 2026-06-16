@@ -257,3 +257,179 @@ Checklist dùng để review screenshot:
 - [ ] Bottom tab có bị cắt không?
 - [ ] Có giữ API/logic/navigation không?
 - [ ] Validation pass không?
+
+---
+
+## 11. Implementation Rules
+
+- **Mỗi phase chỉ migrate UI**, không đổi API/logic/navigation.
+- **Không thêm fake data** để làm đẹp UI.
+- **Không dùng remote image URL** từ Stitch hoặc nguồn ngoài.
+- Nếu data không có ảnh, dùng premium placeholder/icon block.
+- Nếu component premium hiện có chưa đủ, ưu tiên local style trong screen.
+- Nếu cần thay đổi `premium.tsx` hoặc `premium-tokens.ts`, phải dừng và báo “Component Gap”.
+- Không sửa `shared.tsx` nếu không được approve.
+- Không migrate nhiều màn cùng lúc nếu chưa screenshot-review.
+- Không dùng crypto/casino wording.
+- Không dùng hơn 4 quick actions trên dashboard nếu làm rối.
+- Không đổi route strings khi làm UI.
+
+---
+
+## 12. Reusable Dashboard Template
+
+### 1. Header
+- Screen title sentence case.
+- Không có fake avatar/menu.
+
+### 2. Hero
+- Eyebrow ngắn.
+- Title rõ.
+- Subtitle nghiệp vụ.
+- Red accent line.
+- Compact height.
+
+### 3. Operational intelligence
+- 1 dòng insight từ data thật.
+- Red left line.
+- Surface nhẹ.
+- Không fake insight.
+
+### 4. Telemetry metrics
+- 2 columns.
+- Labels nhỏ.
+- Values rõ.
+- Separators nhẹ.
+- Không card boxy.
+
+### 5. Quick actions
+- Tối đa 4 action chính.
+- 2-column grid.
+- Subtitle ngắn.
+- Route thật.
+
+### 6. Recent/activity list
+- Compact rows.
+- Status badge subtle.
+- Image thật nếu có.
+- Placeholder nếu không có ảnh.
+- Không fake image.
+
+### 7. Empty/error/loading
+- Dùng component chuẩn.
+- Copy tự nhiên.
+- CTA rõ nếu cần.
+
+---
+
+## 13. Role Dashboard Mapping
+
+### Owner Dashboard
+- **Hero:**
+  - Racing Owner
+  - Quản lý chuồng đua
+  - Theo dõi chiến mã, ghi danh và ví thưởng.
+- **Insight:**
+  - `{horsesCount} chiến mã đang quản lý • {regCount} ghi danh hoạt động`
+- **Metrics:**
+  - Chiến mã
+  - Ghi danh
+  - Ví thưởng
+  - Tiền thắng
+- **Actions:**
+  - Chuồng ngựa
+  - Đăng ký đua
+  - Lời mời
+  - Ví thưởng
+- **Recent:**
+  - Ghi danh gần đây
+
+### Spectator Dashboard
+- **Hero:**
+  - Race Viewer
+  - Đường đua hôm nay
+  - Theo dõi lịch đua, dự đoán và điểm thưởng.
+- **Insight:**
+  - `{activeRaces} trận đua đang mở • {predictionCount} dự đoán của bạn`
+- **Metrics:**
+  - Trận đua
+  - Dự đoán
+  - Ví điểm
+  - Giải đấu
+- **Actions:**
+  - Lịch đua
+  - Dự đoán
+  - Ví điểm
+  - Giải đấu
+- **Recent:**
+  - Trận đua sắp tới hoặc Dự đoán gần đây
+- **Important:**
+  - Không dùng wording cá cược.
+  - Không casino/betting vibe.
+
+### Jockey Dashboard
+- **Hero:**
+  - Race Athlete
+  - Sẵn sàng vào đường đua
+  - Theo dõi lịch thi đấu, lời mời và hiệu suất.
+- **Insight:**
+  - `{invitationCount} lời mời mới • {upcomingRaceCount} lịch thi đấu sắp tới`
+- **Metrics:**
+  - Lời mời
+  - Lịch đua
+  - Ví thưởng
+  - Hiệu suất
+- **Actions:**
+  - Lịch thi đấu
+  - Lời mời
+  - Hiệu suất
+  - Ví thưởng
+- **Recent:**
+  - Lời mời gần đây hoặc Lịch thi đấu sắp tới
+- **Important:**
+  - Không fake performance.
+  - Nếu không có data hiệu suất thật, hiển thị empty/placeholder trung thực.
+
+### Referee Dashboard
+- **Hero:**
+  - Race Control
+  - Điều phối trận đua
+  - Quản lý phân công, kiểm tra và kết quả.
+- **Insight:**
+  - `{pendingCount} nhiệm vụ chờ xử lý • {assignedCount} phân công đã nhận`
+- **Metrics:**
+  - Chờ xử lý
+  - Phân công
+  - Kết quả
+  - Vi phạm
+- **Actions:**
+  - Phân công
+  - Điểm danh
+  - Vi phạm
+  - Kết quả
+- **Recent:**
+  - Phân công gần đây
+- **Important:**
+  - Không push trực tiếp vào operation route cần raceId nếu chưa có race context.
+  - Quick action phải đi tới list screen an toàn.
+
+---
+
+## 14. Screenshot Quality Bar
+
+### Screenshot Review Score
+- **0–6.9/10:** Reject. Không nhân rộng pattern.
+- **7–7.9/10:** Patch required. Có thể giữ nhưng chưa được replicate.
+- **8–8.9/10:** Acceptable. Có thể dùng làm cơ sở migrate tiếp.
+- **9–10/10:** Approved visual direction. Có thể replicate sang role khác.
+
+### Checklist đánh giá:
+- [ ] Nhìn như production mobile app chưa?
+- [ ] Có còn student/admin dashboard không?
+- [ ] Có đúng HorseTrack/racing identity không?
+- [ ] Có hierarchy rõ không?
+- [ ] Có quá xám/phẳng không?
+- [ ] Có quá nhiều màu không?
+- [ ] Có fake data/image không?
+- [ ] Có giữ logic/API/navigation không?
+- [ ] Có pass validation không?
