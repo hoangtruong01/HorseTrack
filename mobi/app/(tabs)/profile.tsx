@@ -102,7 +102,7 @@ export default function ProfileScreen() {
                   <MaterialIcons name="pets" size={24} color="#E10600" />
                   <View style={styles.workspaceButtonInfo}>
                     <Text style={styles.workspaceTitle}>CHU NGUA</Text>
-                    <Text style={styles.workspaceDesc}>Ho so, ngua, ghi danh va loi moi jockey</Text>
+                    <Text style={styles.workspaceDesc}>Hồ sơ, ngựa, ghi danh và lời mời jockey</Text>
                   </View>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color="#58585B" />

@@ -22,7 +22,7 @@ export default function JockeyHome() {
       setInvitesCount(list.filter((i: any) => i.status === 'PENDING').length);
       setBalance((balRes as any).balance || 0);
     } catch (err: any) {
-      setError(err.message || 'Khong the tai du lieu dashboard.');
+      setError(err.message || 'Không thể tải dữ liệu dashboard.');
     } finally { setLoading(false); }
   }, []);
 

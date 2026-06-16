@@ -16,7 +16,7 @@ export default function JockeySchedule() {
       const list = (r as any).data || [];
       setData(list.filter((i: any) => i.status === 'ACCEPTED'));
     } catch (err: any) {
-      setError(err.message || 'Khong the tai lich trinh.');
+      setError(err.message || 'Không thể tải lịch trình.');
     } finally {
       setLoading(false);
       setRefreshing(false);

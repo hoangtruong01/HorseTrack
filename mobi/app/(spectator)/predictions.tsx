@@ -17,7 +17,7 @@ export default function SpectatorPredictions() {
       const res = await predictionsApi.listMyPredictions({ limit: 50 });
       setData((res as any).data || []);
     } catch (err: any) {
-      setError(err.message || 'Khong the tai du lieu du doan. Vui long thu lai.');
+      setError(err.message || 'Không thể tải dữ liệu dự đoán. Vui lòng thử lại.');
     } finally {
       setLoading(false);
       setRefreshing(false);

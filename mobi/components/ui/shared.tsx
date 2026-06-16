@@ -97,14 +97,14 @@ export function EmptyState({ icon, title, subtitle }: { icon: string; title: str
 }
 
 // ─── Loading State ──────────────────────────────────────────────────────────
-export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+export function ErrorState({ title, message, onRetry }: { title?: string; message: string; onRetry: () => void }) {
   const theme = useThemeColors();
   return (
     <View style={styles.emptyState}>
       <MaterialIcons name="error-outline" size={48} color={theme.red} />
-      <Text style={[styles.emptyTitle, { color: theme.white }]}>Khong tai duoc du lieu</Text>
+      <Text style={[styles.emptyTitle, { color: theme.white }]}>{title || 'Không tải được dữ liệu'}</Text>
       <Text selectable style={[styles.emptySubtitle, { color: theme.textMuted }]}>{message}</Text>
-      <OutlineButton title="Thu lai" onPress={onRetry} color={theme.red} />
+      <OutlineButton title="Thử lại" onPress={onRetry} color={theme.red} />
     </View>
   );
 }
@@ -234,6 +234,8 @@ export function statusLabel(status: string): { label: string; color: string } {
     assigned: { label: 'Chờ duyệt', color: C.yellow },
     accepted: { label: 'Đã nhận', color: C.tealLight },
     declined: { label: 'Từ chối', color: '#EF4444' },
+    FAILED: { label: 'Thất bại', color: '#EF4444' },
+    SUCCESS: { label: 'Thành công', color: C.tealLight },
   };
   return map[status] || { label: status, color: C.textMuted };
 }

@@ -22,7 +22,7 @@ export default function OwnerWallet() {
       setBalance(balanceRes.balance ?? 0);
       setHistory(historyRes.data || []);
     } catch (err: any) {
-      setError(err.message || 'Khong the tai vi thuong. Vui long thu lai.');
+      setError(err.message || 'Không thể tải ví thưởng. Vui lòng thử lại.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -39,22 +39,22 @@ export default function OwnerWallet() {
   const handleRedeem = async () => {
     const pts = parseInt(redeemAmount, 10);
     if (!pts || pts <= 0) {
-      Alert.alert('Loi', 'Vui long nhap so diem hop le.');
+      Alert.alert('Lỗi', 'Vui lòng nhập số điểm hợp lệ.');
       return;
     }
     if (pts > balance) {
-      Alert.alert('Loi', 'Khong du diem de quy doi.');
+      Alert.alert('Lỗi', 'Không đủ điểm để quy đổi.');
       return;
     }
 
     setSubmitting(true);
     try {
       await walletApi.requestCashout({ pointsToRedeem: pts });
-      Alert.alert('Thanh cong', `Yeu cau rut ${pts.toLocaleString()} diem da duoc gui.`);
+      Alert.alert('Thành công', `Yêu cầu rút ${pts.toLocaleString()} điểm đã được gửi.`);
       setRedeemAmount('');
       loadData();
     } catch (err: any) {
-      Alert.alert('Loi', err.message || 'Khong the tao yeu cau rut diem.');
+      Alert.alert('Lỗi', err.message || 'Không thể tạo yêu cầu rút điểm.');
     } finally {
       setSubmitting(false);
     }
