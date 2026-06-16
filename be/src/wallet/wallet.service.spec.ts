@@ -12,12 +12,17 @@ import {
   TransactionStatus,
   WalletTransaction,
 } from './schemas/wallet-transaction.schema';
+import { CreateCashoutDto } from './dto/create-cashout.dto';
 import { WalletService } from './wallet.service';
 
 describe('WalletService', () => {
   let service: WalletService;
-  let cashoutModel: { findById: jest.Mock };
-  let transactionModel: { findOneAndUpdate: jest.Mock };
+  let cashoutModel: {
+    findById: jest.Mock;
+    findOne: jest.Mock;
+    create: jest.Mock;
+  };
+  let transactionModel: { findOneAndUpdate: jest.Mock; create: jest.Mock };
   let ledgerService: {
     getBalance: jest.Mock;
     debit: jest.Mock;
@@ -65,8 +70,15 @@ describe('WalletService', () => {
   }
 
   beforeEach(async () => {
-    cashoutModel = { findById: jest.fn() };
-    transactionModel = { findOneAndUpdate: jest.fn() };
+    cashoutModel = {
+      findById: jest.fn(),
+      findOne: jest.fn().mockResolvedValue(null),
+      create: jest.fn(),
+    };
+    transactionModel = {
+      findOneAndUpdate: jest.fn(),
+      create: jest.fn().mockResolvedValue([{}]),
+    };
     ledgerService = {
       getBalance: jest.fn(),
       debit: jest.fn(),
@@ -199,6 +211,62 @@ describe('WalletService', () => {
         handlerId,
       ),
     ).rejects.toThrow(NotFoundException);
+  });
+
+  describe('requestCashout', () => {
+    const dto: CreateCashoutDto = { pointsToRedeem: 1000 };
+    const requesterId = userId.toHexString();
+
+    it('debits via ledger before creating wallet transaction, all within a session', async () => {
+      const session = makeSession();
+      mockConnection.startSession.mockResolvedValue(session);
+      ledgerService.getBalance.mockResolvedValue(5000);
+      const createdDoc = { _id: cashoutId };
+      cashoutModel.create.mockResolvedValue([createdDoc]);
+
+      const result = await service.requestCashout(dto, requesterId);
+
+      expect(cashoutModel.create).toHaveBeenCalledWith(
+        [expect.objectContaining({ pointsRedeemed: 1000 })],
+        { session },
+      );
+      expect(ledgerService.debit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: requesterId,
+          points: 1000,
+          sourceId: String(cashoutId),
+          session,
+        }),
+      );
+      expect(transactionModel.create).toHaveBeenCalledWith(
+        [expect.objectContaining({ cashoutRequestId: cashoutId })],
+        { session },
+      );
+      expect(result).toBe(createdDoc);
+    });
+
+    it('throws BadRequest when balance is insufficient (no doc, no debit)', async () => {
+      ledgerService.getBalance.mockResolvedValue(100);
+
+      await expect(service.requestCashout(dto, requesterId)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(cashoutModel.create).not.toHaveBeenCalled();
+      expect(ledgerService.debit).not.toHaveBeenCalled();
+    });
+
+    it('does not create wallet transaction if debit fails', async () => {
+      const session = makeSession();
+      mockConnection.startSession.mockResolvedValue(session);
+      ledgerService.getBalance.mockResolvedValue(5000);
+      cashoutModel.create.mockResolvedValue([{ _id: cashoutId }]);
+      ledgerService.debit.mockRejectedValue(new Error('debit failed'));
+
+      await expect(service.requestCashout(dto, requesterId)).rejects.toThrow(
+        'debit failed',
+      );
+      expect(transactionModel.create).not.toHaveBeenCalled();
+    });
   });
 
   it('propagates error and ends session when refund credit fails', async () => {

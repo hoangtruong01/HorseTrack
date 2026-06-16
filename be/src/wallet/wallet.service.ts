@@ -55,34 +55,53 @@ export class WalletService {
       }
     }
 
-    // Create cashout request
-    const request = await this.cashoutModel.create({
-      userId,
-      requestedAmount: 0,
-      redemptionCode,
-      pointsRedeemed: dto.pointsToRedeem,
-      status: CashoutStatus.PENDING,
-    });
+    let request!: CashoutRequestDocument;
+    const session = await this.connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        const [created] = await this.cashoutModel.create(
+          [
+            {
+              userId,
+              requestedAmount: 0,
+              redemptionCode,
+              pointsRedeemed: dto.pointsToRedeem,
+              status: CashoutStatus.PENDING,
+            },
+          ],
+          { session },
+        );
+        request = created;
 
-    // Debit points via ledger immediately
-    await this.ledgerService.debit({
-      userId,
-      points: dto.pointsToRedeem,
-      sourceType: LedgerSourceType.REDEMPTION,
-      sourceId: String(request._id),
-      note: `Yêu cầu quy đổi ${dto.pointsToRedeem} điểm thưởng (Mã: ${redemptionCode}). mang mã này ra quầy để nhận thưởng.`,
-    });
+        // Debit points via ledger immediately (same session)
+        await this.ledgerService.debit({
+          userId,
+          points: dto.pointsToRedeem,
+          sourceType: LedgerSourceType.REDEMPTION,
+          sourceId: String(created._id),
+          note: `Yêu cầu quy đổi ${dto.pointsToRedeem} điểm thưởng (Mã: ${redemptionCode}). mang mã này ra quầy để nhận thưởng.`,
+          session,
+        });
 
-    // Record pending wallet transaction
-    await this.transactionModel.create({
-      userId,
-      type: TransactionType.REWARD_CASHOUT,
-      amount: 0,
-      points: dto.pointsToRedeem,
-      description: `Cashout requested for ${dto.pointsToRedeem} reward points (Code: ${redemptionCode}). Bring this code to the counter to receive the reward.`,
-      status: TransactionStatus.PENDING,
-      cashoutRequestId: request._id,
-    });
+        // Record pending wallet transaction (same session)
+        await this.transactionModel.create(
+          [
+            {
+              userId,
+              type: TransactionType.REWARD_CASHOUT,
+              amount: 0,
+              points: dto.pointsToRedeem,
+              description: `Cashout requested for ${dto.pointsToRedeem} reward points (Code: ${redemptionCode}). Bring this code to the counter to receive the reward.`,
+              status: TransactionStatus.PENDING,
+              cashoutRequestId: created._id,
+            },
+          ],
+          { session },
+        );
+      });
+    } finally {
+      await session.endSession();
+    }
 
     return request;
   }
