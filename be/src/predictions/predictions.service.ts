@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
 import {
   RaceResult,
@@ -27,6 +27,13 @@ import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-le
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
+
+export interface PayoutNotifyIntent {
+  userId: string;
+  title: string;
+  body: string;
+  type: NotificationType;
+}
 
 @Injectable()
 export class PredictionsService {
@@ -270,19 +277,28 @@ export class PredictionsService {
     );
   }
 
-  async payoutBetsForRace(raceId: string): Promise<void> {
-    const winners = await this.resultModel.find({
-      raceId: new Types.ObjectId(raceId),
-      status: RaceResultStatus.PUBLISHED,
-      rank: 1,
-    });
+  async payoutBetsForRace(
+    raceId: string,
+    session?: ClientSession,
+  ): Promise<PayoutNotifyIntent[]> {
+    const intents: PayoutNotifyIntent[] = [];
+
+    const winners = await this.resultModel
+      .find({
+        raceId: new Types.ObjectId(raceId),
+        status: RaceResultStatus.PUBLISHED,
+        rank: 1,
+      })
+      .session(session ?? null);
     const winnerHorseIds = winners.map((w) => String(w.horseId));
 
-    const predictions = await this.predictionModel.find({
-      raceId: new Types.ObjectId(raceId),
-      status: PredictionStatus.PENDING,
-    });
-    if (predictions.length === 0) return;
+    const predictions = await this.predictionModel
+      .find({
+        raceId: new Types.ObjectId(raceId),
+        status: PredictionStatus.PENDING,
+      })
+      .session(session ?? null);
+    if (predictions.length === 0) return intents;
 
     const now = new Date();
 
@@ -316,7 +332,9 @@ export class PredictionsService {
               evaluatedAt: now,
             },
           },
-          { new: true },
+          // `session` được truyền trực tiếp vào options: Mongoose tự bỏ qua khi undefined,
+          // khác với `.session()` trên query cần truyền null tường minh (`.session(session ?? null)`).
+          { new: true, session },
         )
         .exec();
 
@@ -339,26 +357,27 @@ export class PredictionsService {
             betAmount >= 2
               ? `Thắng dự đoán (Nhận lại cược x2: +${reward} điểm) cho trận đấu ${raceId}`
               : `Thắng dự đoán miễn phí (+1 điểm) cho trận đấu ${raceId}`,
+          session,
         });
 
-        // Send realtime notification
-        await this.notificationsService.send(
-          String(prediction.userId),
-          'Dự đoán chính xác!',
-          betAmount > 0
-            ? `Chúc mừng! Bạn đã dự đoán chính xác chiến mã vô địch trong cuộc đua và nhận được ${reward} điểm (nhận lại cược x2).`
-            : `Chúc mừng! Bạn đã dự đoán chính xác chiến mã vô địch trong cuộc đua và nhận được 1 điểm thưởng.`,
-          NotificationType.PREDICTION,
-        );
+        intents.push({
+          userId: String(prediction.userId),
+          title: 'Dự đoán chính xác!',
+          body:
+            betAmount > 0
+              ? `Chúc mừng! Bạn đã dự đoán chính xác chiến mã vô địch trong cuộc đua và nhận được ${reward} điểm (nhận lại cược x2).`
+              : `Chúc mừng! Bạn đã dự đoán chính xác chiến mã vô địch trong cuộc đua và nhận được 1 điểm thưởng.`,
+          type: NotificationType.PREDICTION,
+        });
       } else {
         if (betAmount >= 2) {
-          // Points were already debited at creation. Just send notification.
-          await this.notificationsService.send(
-            String(prediction.userId),
-            'Dự đoán không chính xác',
-            `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất. Bạn đã mất ${betAmount} điểm đặt cược.`,
-            NotificationType.PREDICTION,
-          );
+          // Points were already debited at creation. Just push intent.
+          intents.push({
+            userId: String(prediction.userId),
+            title: 'Dự đoán không chính xác',
+            body: `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất. Bạn đã mất ${betAmount} điểm đặt cược.`,
+            type: NotificationType.PREDICTION,
+          });
         } else {
           // Free prediction: No penalty of 1 point! They bet 0, they lose 0.
           await this.ledgerService.credit({
@@ -367,16 +386,19 @@ export class PredictionsService {
             sourceType: LedgerSourceType.PREDICTION_REWARD,
             sourceId: String(prediction._id),
             note: `Dự đoán sai trận đấu ${raceId} (Đặt cược miễn phí 0 Pts)`,
+            session,
           });
 
-          await this.notificationsService.send(
-            String(prediction.userId),
-            'Dự đoán không chính xác',
-            `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất. Bạn không bị trừ điểm do đã đặt cược miễn phí.`,
-            NotificationType.PREDICTION,
-          );
+          intents.push({
+            userId: String(prediction.userId),
+            title: 'Dự đoán không chính xác',
+            body: `Rất tiếc, chiến mã bạn dự đoán đã không thể về nhất. Bạn không bị trừ điểm do đã đặt cược miễn phí.`,
+            type: NotificationType.PREDICTION,
+          });
         }
       }
     }
+
+    return intents;
   }
 }
