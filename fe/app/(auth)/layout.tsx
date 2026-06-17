@@ -1,12 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  CalendarDays,
-  Compass,
-  UserCheck,
-  Trophy,
-  Target,
-} from "lucide-react";
 
 export default function AuthLayout({
   children,
@@ -15,6 +8,11 @@ export default function AuthLayout({
 }) {
   return (
     <main className="min-h-screen overflow-x-hidden bg-background text-foreground">
+      {/* Background Horse Racing Image with opacity and blur */}
+      <div
+        className="pointer-events-none fixed inset-0 bg-cover bg-center bg-no-repeat opacity-[0.06] mix-blend-lighten blur-[4px]"
+        style={{ backgroundImage: "url('/hero_horse_racing.png')" }}
+      />
       {/* Background gradients and grid lines to build F1 cockpit depth */}
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_16%_8%,rgba(225,6,0,0.18),transparent_28rem),radial-gradient(circle_at_86%_28%,rgba(6,126,106,0.08),transparent_26rem),linear-gradient(135deg,rgba(128,128,128,0.03)_0_1px,transparent_1px_48px)] opacity-60" />
       <div className="pointer-events-none fixed inset-x-0 top-0 h-48 bg-gradient-to-b from-primary/8 to-transparent" />
@@ -61,86 +59,6 @@ export default function AuthLayout({
               <p className="max-w-xl text-sm sm:text-base leading-7 text-foreground/55">
                 Manage tournaments, horse registrations, jockey assignments, race schedules, referee reports, results, rankings and prediction rewards in one platform.
               </p>
-            </div>
-
-            {/* Bento Grid layout matching the mockup */}
-            <div className="grid gap-4 sm:grid-cols-2 max-w-2xl">
-              
-              {/* Card 1: Tournament Scheduling */}
-              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-border bg-card/50 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-primary/20 hover:bg-card transition-all duration-300">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/15 group-hover:scale-105 transition-transform">
-                  <CalendarDays className="size-5.5" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm uppercase text-foreground tracking-wide">
-                    Tournament Scheduling
-                  </h3>
-                  <p className="mt-2 text-xs text-foreground/50 leading-relaxed font-medium">
-                    Create and manage race tournaments, rounds and race schedules.
-                  </p>
-                </div>
-              </div>
-
-              {/* Card 2: Horse Registration */}
-              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-border bg-card/50 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-primary/20 hover:bg-card transition-all duration-300">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/15 group-hover:scale-105 transition-transform">
-                  <Compass className="size-5.5" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm uppercase text-foreground tracking-wide">
-                    Horse Registration
-                  </h3>
-                  <p className="mt-2 text-xs text-foreground/50 leading-relaxed font-medium">
-                    Register horses, manage profiles, history and performance.
-                  </p>
-                </div>
-              </div>
-
-              {/* Card 3: Jockey Assignment */}
-              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-border bg-card/50 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-primary/20 hover:bg-card transition-all duration-300">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/15 group-hover:scale-105 transition-transform">
-                  <UserCheck className="size-5.5" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm uppercase text-foreground tracking-wide">
-                    Jockey Assignment
-                  </h3>
-                  <p className="mt-2 text-xs text-foreground/50 leading-relaxed font-medium">
-                    Invite jockeys, assign rides and manage participation.
-                  </p>
-                </div>
-              </div>
-
-              {/* Card 4: Race Results */}
-              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-border bg-card/50 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-primary/20 hover:bg-card transition-all duration-300">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/15 group-hover:scale-105 transition-transform">
-                  <Trophy className="size-5.5" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm uppercase text-foreground tracking-wide">
-                    Race Results
-                  </h3>
-                  <p className="mt-2 text-xs text-foreground/50 leading-relaxed font-medium">
-                    Record results, calculate rankings and manage prize money.
-                  </p>
-                </div>
-              </div>
-
-              {/* Card 5: Full Width Prediction Management */}
-              <div className="group flex items-start gap-4 rounded-[1.25rem] border border-border bg-card/50 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-primary/20 hover:bg-card transition-all duration-300 sm:col-span-2">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/15 group-hover:scale-105 transition-transform">
-                  <Target className="size-5.5" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm uppercase text-foreground tracking-wide">
-                    Prediction Management
-                  </h3>
-                  <p className="mt-2 text-xs text-foreground/50 leading-relaxed font-medium">
-                    Allow spectators to make predictions and reward accurate predictors.
-                  </p>
-                </div>
-              </div>
-
             </div>
           </aside>
 

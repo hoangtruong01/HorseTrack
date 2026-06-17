@@ -621,6 +621,25 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            {/* Stat 4: Completed Races */}
+            <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-blue-500/10 bg-blue-500/5 text-blue-500 group-hover:scale-110 transition-transform duration-300">
+                <Flag className="size-7" />
+              </div>
+              <div>
+                <span className="block text-3xl font-extrabold text-foreground leading-none">
+                  {loading ? "..." : stats.races}
+                </span>
+                <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
+                  Trận đua đã kết thúc
+                </span>
+                <span className="block text-[10px] font-bold text-blue-500 mt-1.5 flex items-center gap-0.5">
+                  Thành tích ghi nhận
+                </span>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

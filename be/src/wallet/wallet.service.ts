@@ -181,7 +181,10 @@ export class WalletService {
         { cashoutRequestId: request._id },
         { status: TransactionStatus.SUCCESS },
       );
-    } else if (status === CashoutStatus.REJECTED || status === CashoutStatus.FAILED) {
+    } else if (
+      status === CashoutStatus.REJECTED ||
+      status === CashoutStatus.FAILED
+    ) {
       request.approvedBy = new Types.ObjectId(handlerId);
       await this.transactionModel.findOneAndUpdate(
         { cashoutRequestId: request._id },
@@ -233,7 +236,7 @@ export class WalletService {
   }
 
   async findAllCashouts(page = 1, limit = 20, status?: string) {
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
     if (status) {
       if (status.includes(',')) {
         filter.status = { $in: status.split(',') };

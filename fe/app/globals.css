@@ -195,7 +195,7 @@
   .f1-gradient {
     background:
       linear-gradient(135deg, rgba(225, 6, 0, 0.05), transparent 45%),
-      linear-gradient(180deg, rgba(0, 0, 0, 0.01), transparent), #F7F4F1;
+      linear-gradient(180deg, rgba(0, 0, 0, 0.01), transparent), #f7f4f1;
   }
 
   .dark .f1-gradient {
