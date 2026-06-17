@@ -25,6 +25,7 @@ import {
   Award
 } from "lucide-react";
 import { AppHeader } from "@/components/layout/app-header";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { tournamentsApi, racesApi, rankingsApi, TournamentItem, RaceItem, RankingEntry, JockeyRankingEntry } from "@/lib/api-client";
@@ -851,26 +852,29 @@ export default function Home() {
         
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
           
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div className="space-y-2">
-              <span className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
-                <Sparkles className="size-4 text-primary animate-pulse" />
-                BẢNG XẾP HẠNG TOÀN CẦU
-              </span>
-              <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
-                Chiến Mã & Nài Ngựa Xuất Sắc Nhất
-              </h2>
+          <ScrollReveal direction="up">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="space-y-2">
+                <span className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
+                  <Sparkles className="size-4 text-primary animate-pulse" />
+                  BẢNG XẾP HẠNG TOÀN CẦU
+                </span>
+                <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
+                  Chiến Mã & Nài Ngựa Xuất Sắc Nhất
+                </h2>
+              </div>
+              <Link
+                href="/rankings"
+                className="group flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-all"
+              >
+                Xem chi tiết bảng xếp hạng
+                <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
             </div>
-            <Link
-              href="/rankings"
-              className="group flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-all"
-            >
-              Xem chi tiết bảng xếp hạng
-              <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </div>
+          </ScrollReveal>
 
-          <div className="grid gap-8 lg:grid-cols-2">
+          <ScrollReveal direction="up" delay={100}>
+            <div className="grid gap-8 lg:grid-cols-2">
             
             {/* Cột 1: Xếp hạng ngựa */}
             <div className="rounded-[2.5rem] border border-border/80 bg-card/60 p-6 sm:p-8 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group/board">
@@ -896,6 +900,83 @@ export default function Home() {
                   horseRankings.map((item, index) => {
                     const rank = index + 1;
                     const initial = item.horseName ? item.horseName.charAt(0) : "H";
+                    // Rank #1 — Card vàng đặc biệt, nổi bật nhất
+                    if (rank === 1) return (
+                      <div
+                        key={item.horseId}
+                        style={{ animationDelay: "0ms" }}
+                        className="animate-rank-row group relative overflow-hidden rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-yellow-400/5 to-orange-500/8 p-4 shadow-[0_0_25px_rgba(245,158,11,0.12)] hover:shadow-[0_0_35px_rgba(245,158,11,0.25)] hover:-translate-y-1 hover:border-amber-400/70 transition-all duration-300"
+                      >
+                        {/* Crown shimmer background */}
+                        <div className="absolute -right-4 -top-4 text-[80px] opacity-[0.06] select-none pointer-events-none">👑</div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {/* Rank badge #1 */}
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-black font-black text-base shadow-[0_0_18px_rgba(245,158,11,0.5)]">
+                              1
+                            </div>
+                            {/* Avatar */}
+                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 text-amber-500 border border-amber-400/30 font-black text-lg uppercase">
+                              {initial}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <h4 className="font-black text-sm text-foreground group-hover:text-amber-500 transition-colors">{item.horseName || "Chiến mã ẩn danh"}</h4>
+                                <span className="text-[9px] font-black text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">🏆 #1</span>
+                              </div>
+                              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.breed || "Chưa rõ giống"}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-right">
+                            <div className="hidden sm:block">
+                              <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
+                              <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
+                            </div>
+                            <div className="bg-gradient-to-br from-amber-400/15 to-orange-500/10 border border-amber-400/30 text-amber-500 px-4 py-2 rounded-xl text-center min-w-[84px]">
+                              <span className="block text-[8px] text-amber-500/70 uppercase font-black tracking-wider">Điểm số</span>
+                              <span className="font-mono font-black text-base">{item.totalPoints}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+
+                    // Rank #2 — Card bạc nổi bật
+                    if (rank === 2) return (
+                      <div
+                        key={item.horseId}
+                        style={{ animationDelay: "80ms" }}
+                        className="animate-rank-row group relative overflow-hidden rounded-2xl border border-slate-400/30 bg-gradient-to-br from-slate-300/8 via-slate-200/4 to-slate-400/5 p-4 hover:shadow-[0_0_28px_rgba(148,163,184,0.18)] hover:-translate-y-0.5 hover:border-slate-400/50 transition-all duration-300"
+                      >
+                        <div className="absolute -right-3 -top-3 text-[65px] opacity-[0.05] select-none pointer-events-none">🥈</div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-200 to-slate-400 text-black font-black text-sm shadow-[0_0_12px_rgba(203,213,225,0.35)]">
+                              2
+                            </div>
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-200/10 text-slate-400 border border-slate-400/20 font-bold uppercase">
+                              {initial}
+                            </div>
+                            <div>
+                              <h4 className="font-extrabold text-sm text-foreground group-hover:text-slate-400 transition-colors">{item.horseName || "Chiến mã ẩn danh"}</h4>
+                              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.breed || "Chưa rõ giống"}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-right">
+                            <div className="hidden sm:block">
+                              <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
+                              <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
+                            </div>
+                            <div className="bg-slate-200/10 border border-slate-400/20 text-slate-400 px-3.5 py-1.5 rounded-xl text-center min-w-[80px]">
+                              <span className="block text-[8px] text-slate-400/70 uppercase font-black tracking-wider">Điểm số</span>
+                              <span className="font-mono font-black text-sm">{item.totalPoints}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+
+                    // Rank 3–5
                     return (
                       <div
                         key={item.horseId}
@@ -903,36 +984,27 @@ export default function Home() {
                         className="animate-rank-row group flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/40 hover:border-primary/30 hover:bg-primary/[0.03] hover:scale-[1.015] hover:-translate-y-0.5 transition-all duration-300 ease-out shadow-sm"
                       >
                         <div className="flex items-center gap-4">
-                          {/* Rank Badge với hiệu ứng 3D neon */}
                           <div className={cn(
-                            "flex size-9 shrink-0 items-center justify-center rounded-xl font-black text-sm transition-transform duration-300 group-hover:scale-105",
-                            rank === 1 ? "bg-gradient-to-br from-yellow-400 to-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]" :
-                            rank === 2 ? "bg-gradient-to-br from-slate-200 to-slate-400 text-black shadow-[0_0_12px_rgba(203,213,225,0.3)]" :
-                            rank === 3 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_12px_rgba(180,83,9,0.3)]" :
-                            "bg-secondary/80 text-muted-foreground border border-border"
+                            "flex size-9 shrink-0 items-center justify-center rounded-xl font-black text-sm",
+                            rank === 3 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_10px_rgba(180,83,9,0.3)]" :
+                              "bg-secondary/80 text-muted-foreground border border-border"
                           )}>
                             {rank}
                           </div>
-
-                          {/* Avatar Chiến Mã */}
-                          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-orange-500/10 text-primary border border-primary/10 font-bold uppercase transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-orange-500/10 text-primary border border-primary/10 font-bold uppercase">
                             {initial}
                           </div>
-
                           <div>
-                            <h4 className="font-extrabold text-sm text-foreground transition-colors group-hover:text-primary">
-                              {item.horseName || "Chiến mã ẩn danh"}
-                            </h4>
+                            <h4 className="font-extrabold text-sm text-foreground group-hover:text-primary transition-colors">{item.horseName || "Chiến mã ẩn danh"}</h4>
                             <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.breed || "Chưa rõ giống"}</span>
                           </div>
                         </div>
-
-                        <div className="flex items-center gap-6 text-right">
+                        <div className="flex items-center gap-4 text-right">
                           <div className="hidden sm:block">
-                            <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Số trận (Thắng)</span>
+                            <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
                             <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
                           </div>
-                          <div className="bg-primary/5 border border-primary/20 text-primary px-3.5 py-1.5 rounded-xl text-center min-w-[80px] transition-transform duration-300 group-hover:scale-105">
+                          <div className="bg-primary/5 border border-primary/20 text-primary px-3.5 py-1.5 rounded-xl text-center min-w-[80px]">
                             <span className="block text-[8px] text-primary/70 uppercase font-black tracking-wider">Điểm số</span>
                             <span className="font-mono font-black text-sm">{item.totalPoints}</span>
                           </div>
@@ -970,6 +1042,77 @@ export default function Home() {
                   jockeyRankings.map((item, index) => {
                     const rank = index + 1;
                     const initial = item.jockeyName ? item.jockeyName.split(" ").pop()?.charAt(0) : "N";
+                    if (rank === 1) return (
+                      <div
+                        key={item.jockeyUserId}
+                        style={{ animationDelay: "0ms" }}
+                        className="animate-rank-row group relative overflow-hidden rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-yellow-400/5 to-orange-500/8 p-4 shadow-[0_0_25px_rgba(245,158,11,0.12)] hover:shadow-[0_0_35px_rgba(245,158,11,0.25)] hover:-translate-y-1 hover:border-amber-400/70 transition-all duration-300"
+                      >
+                        <div className="absolute -right-4 -top-4 text-[80px] opacity-[0.06] select-none pointer-events-none">👑</div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-black font-black text-base shadow-[0_0_18px_rgba(245,158,11,0.5)]">
+                              1
+                            </div>
+                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 text-amber-500 border border-amber-400/30 font-black text-lg uppercase">
+                              {initial}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <h4 className="font-black text-sm text-foreground group-hover:text-amber-500 transition-colors">{item.jockeyName || "Nài ngựa ẩn danh"}</h4>
+                                <span className="text-[9px] font-black text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">🏆 #1</span>
+                              </div>
+                              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Kinh nghiệm: {item.experienceYears || 0} năm</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-right">
+                            <div className="hidden sm:block">
+                              <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
+                              <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
+                            </div>
+                            <div className="bg-gradient-to-br from-amber-400/15 to-orange-500/10 border border-amber-400/30 text-amber-500 px-4 py-2 rounded-xl text-center min-w-[84px]">
+                              <span className="block text-[8px] text-amber-500/70 uppercase font-black tracking-wider">Điểm số</span>
+                              <span className="font-mono font-black text-base">{item.totalPoints}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+
+                    if (rank === 2) return (
+                      <div
+                        key={item.jockeyUserId}
+                        style={{ animationDelay: "80ms" }}
+                        className="animate-rank-row group relative overflow-hidden rounded-2xl border border-slate-400/30 bg-gradient-to-br from-slate-300/8 via-slate-200/4 to-slate-400/5 p-4 hover:shadow-[0_0_28px_rgba(148,163,184,0.18)] hover:-translate-y-0.5 hover:border-slate-400/50 transition-all duration-300"
+                      >
+                        <div className="absolute -right-3 -top-3 text-[65px] opacity-[0.05] select-none pointer-events-none">🥈</div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-200 to-slate-400 text-black font-black text-sm shadow-[0_0_12px_rgba(203,213,225,0.35)]">
+                              2
+                            </div>
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-200/10 text-slate-400 border border-slate-400/20 font-bold uppercase">
+                              {initial}
+                            </div>
+                            <div>
+                              <h4 className="font-extrabold text-sm text-foreground group-hover:text-slate-400 transition-colors">{item.jockeyName || "Nài ngựa ẩn danh"}</h4>
+                              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Kinh nghiệm: {item.experienceYears || 0} năm</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-right">
+                            <div className="hidden sm:block">
+                              <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
+                              <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
+                            </div>
+                            <div className="bg-slate-200/10 border border-slate-400/20 text-slate-400 px-3.5 py-1.5 rounded-xl text-center min-w-[80px]">
+                              <span className="block text-[8px] text-slate-400/70 uppercase font-black tracking-wider">Điểm số</span>
+                              <span className="font-mono font-black text-sm">{item.totalPoints}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+
                     return (
                       <div
                         key={item.jockeyUserId}
@@ -977,36 +1120,27 @@ export default function Home() {
                         className="animate-rank-row group flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/40 hover:border-[#067E6A]/30 hover:bg-[#067E6A]/[0.03] hover:scale-[1.015] hover:-translate-y-0.5 transition-all duration-300 ease-out shadow-sm"
                       >
                         <div className="flex items-center gap-4">
-                          {/* Rank Badge với hiệu ứng 3D neon */}
                           <div className={cn(
-                            "flex size-9 shrink-0 items-center justify-center rounded-xl font-black text-sm transition-transform duration-300 group-hover:scale-105",
-                            rank === 1 ? "bg-gradient-to-br from-yellow-400 to-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]" :
-                            rank === 2 ? "bg-gradient-to-br from-slate-200 to-slate-400 text-black shadow-[0_0_12px_rgba(203,213,225,0.3)]" :
-                            rank === 3 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_12px_rgba(180,83,9,0.3)]" :
-                            "bg-secondary/80 text-muted-foreground border border-border"
+                            "flex size-9 shrink-0 items-center justify-center rounded-xl font-black text-sm",
+                            rank === 3 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_10px_rgba(180,83,9,0.3)]" :
+                              "bg-secondary/80 text-muted-foreground border border-border"
                           )}>
                             {rank}
                           </div>
-
-                          {/* Avatar Nài ngựa */}
-                          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#067E6A]/10 to-emerald-500/10 text-[#067E6A] border border-[#067E6A]/10 font-bold uppercase transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#067E6A]/10 to-emerald-500/10 text-[#067E6A] border border-[#067E6A]/10 font-bold uppercase">
                             {initial}
                           </div>
-
                           <div>
-                            <h4 className="font-bold text-sm text-foreground transition-colors group-hover:text-[#067E6A]">
-                              {item.jockeyName || "Nài ngựa ẩn danh"}
-                            </h4>
+                            <h4 className="font-bold text-sm text-foreground group-hover:text-[#067E6A] transition-colors">{item.jockeyName || "Nài ngựa ẩn danh"}</h4>
                             <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Kinh nghiệm: {item.experienceYears || 0} năm</span>
                           </div>
                         </div>
-
-                        <div className="flex items-center gap-6 text-right">
+                        <div className="flex items-center gap-4 text-right">
                           <div className="hidden sm:block">
-                            <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Số trận (Thắng)</span>
+                            <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
                             <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
                           </div>
-                          <div className="bg-[#067E6A]/5 border border-[#067E6A]/20 text-[#067E6A] px-3.5 py-1.5 rounded-xl text-center min-w-[80px] transition-transform duration-300 group-hover:scale-105">
+                          <div className="bg-[#067E6A]/5 border border-[#067E6A]/20 text-[#067E6A] px-3.5 py-1.5 rounded-xl text-center min-w-[80px]">
                             <span className="block text-[8px] text-[#067E6A]/70 uppercase font-black tracking-wider">Điểm số</span>
                             <span className="font-mono font-black text-sm">{item.totalPoints}</span>
                           </div>
@@ -1019,8 +1153,8 @@ export default function Home() {
                 )}
               </div>
             </div>
-
           </div>
+          </ScrollReveal>
         </div>
       </section>
 
