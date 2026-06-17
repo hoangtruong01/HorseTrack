@@ -72,16 +72,21 @@ describe('TournamentsService', () => {
 
   describe('cascadeCancel', () => {
     it('does NOT cancel RESULT_PUBLISHED or CANCELLED races', async () => {
-      raceModel.find.mockResolvedValue([]);
+      const raceOid = new Types.ObjectId();
+      raceModel.find.mockResolvedValue([{ _id: raceOid }]);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       await (service as any).cascadeCancel(tournamentId, 'Test Tournament');
 
-      expect(raceModel.updateMany).toHaveBeenCalledWith(
+      // Filtering happens at find level — updateMany is scoped to exact raceIds
+      expect(raceModel.find).toHaveBeenCalledWith(
         expect.objectContaining({
           status: { $nin: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED] },
         }),
-        expect.anything(),
+      );
+      expect(raceModel.updateMany).toHaveBeenCalledWith(
+        { _id: { $in: [raceOid] } },
+        { $set: { status: RaceStatus.CANCELLED } },
       );
     });
 

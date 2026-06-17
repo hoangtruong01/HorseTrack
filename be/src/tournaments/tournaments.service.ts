@@ -237,14 +237,13 @@ export class TournamentsService {
     }
 
     await Promise.all([
-      // Cancel non-terminal races (skip RESULT_PUBLISHED and already CANCELLED)
-      this.raceModel.updateMany(
-        {
-          tournamentId,
-          status: { $nin: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED] },
-        },
-        { $set: { status: RaceStatus.CANCELLED } },
-      ),
+      // Cancel exactly the races captured in raceIds (consistent scope with find above)
+      raceIds.length > 0
+        ? this.raceModel.updateMany(
+            { _id: { $in: raceIds } },
+            { $set: { status: RaceStatus.CANCELLED } },
+          )
+        : Promise.resolve(),
       // Cancel pending predictions for cancelled races
       raceIds.length > 0
         ? this.predictionModel.updateMany(
@@ -254,7 +253,8 @@ export class TournamentsService {
         : Promise.resolve(),
     ]);
 
-    // PENDING registrations → CANCELLED; APPROVED registrations → WITHDRAWN
+    // PENDING → CANCELLED; APPROVED → WITHDRAWN
+    // REJECTED registrations are intentionally skipped — rejection is terminal.
     if (raceIds.length > 0) {
       await this.registrationModel.updateMany(
         { raceId: { $in: raceIds }, status: RegistrationStatus.PENDING },
