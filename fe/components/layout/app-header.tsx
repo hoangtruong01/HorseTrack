@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X, LogOut, Wallet } from "lucide-react";
+import { Menu, X, LogOut, Wallet, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { publicNavigation } from "@/constants/navigation";
@@ -235,13 +235,26 @@ export function AppHeader({ className }: AppHeaderProps) {
             {user ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between px-2">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-black uppercase tracking-wider text-foreground">
-                      {user.fullName}
-                    </span>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-primary">
-                      {user.roles[0] || "spectator"}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.fullName}
+                        className="size-10 rounded-lg object-cover border border-border bg-card/50"
+                      />
+                    ) : (
+                      <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-card/50 text-foreground/60">
+                        <User className="size-5" />
+                      </div>
+                    )}
+                    <div className="flex flex-col">
+                      <span className="text-xs font-black uppercase tracking-wider text-foreground">
+                        {user.fullName}
+                      </span>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-primary">
+                        {user.roles[0] || "spectator"}
+                      </span>
+                    </div>
                   </div>
                   {points !== null && (
                     <Link

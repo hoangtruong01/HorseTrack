@@ -20,7 +20,7 @@ export default function SpectatorWallet() {
       setBalance(balanceRes.balance ?? 0);
       setHistory(historyRes.data || []);
     } catch (err: any) {
-      setError(err.message || 'Khong the tai vi diem. Vui long thu lai.');
+      setError(err.message || 'Không thể tải ví điểm. Vui lòng thử lại.');
     } finally {
       setLoading(false);
       setRefreshing(false);
