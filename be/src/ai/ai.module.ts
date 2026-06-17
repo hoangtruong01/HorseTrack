@@ -34,16 +34,11 @@ import {
   AIPredictionSuggestion,
   AIPredictionSuggestionSchema,
 } from './schemas/ai-prediction-suggestion.schema';
-import {
-  AIRaceArrangementSuggestion,
-  AIRaceArrangementSuggestionSchema,
-} from './schemas/ai-race-arrangement-suggestion.schema';
 import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { LlmService } from './services/llm.service';
 import { StrengthScoreService } from './services/strength-score.service';
 import { PredictionEngineService } from './services/prediction-engine.service';
-import { ArrangementEngineService } from './services/arrangement-engine.service';
 import { PayosService } from './services/payos.service';
 
 @Module({
@@ -65,10 +60,6 @@ import { PayosService } from './services/payos.service';
         name: AIPredictionSuggestion.name,
         schema: AIPredictionSuggestionSchema,
       },
-      {
-        name: AIRaceArrangementSuggestion.name,
-        schema: AIRaceArrangementSuggestionSchema,
-      },
     ]),
   ],
   controllers: [AiController],
@@ -77,7 +68,6 @@ import { PayosService } from './services/payos.service';
     LlmService,
     StrengthScoreService,
     PredictionEngineService,
-    ArrangementEngineService,
     PayosService,
   ],
   exports: [AiService],

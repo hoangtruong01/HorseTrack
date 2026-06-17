@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
   Post,
   Req,
   UseGuards,
@@ -24,7 +23,6 @@ import { RoleName } from '../users/schemas/user.schema';
 import { AiService } from './ai.service';
 import { CreateAiPackageDto } from './dto/create-package.dto';
 import { SubscribePackageDto } from './dto/subscribe-package.dto';
-import { UpdateArrangementStatusDto } from './dto/update-arrangement-status.dto';
 
 @ApiTags('AI Features')
 @Controller('ai')
@@ -135,51 +133,5 @@ export class AiController {
       user.id,
       user.roles,
     );
-  }
-
-  // ─── Arrangements ─────────────────────────────────────────────────────────────
-
-  @Post('arrangements/generate/:tournamentId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiBearerAuth()
-  @Roles(RoleName.ADMIN)
-  @ApiOperation({
-    summary: 'Tự động sinh đề xuất sắp xếp race cho tournament (Admin)',
-    description:
-      'Hệ thống phân bổ ngựa vào các race đề xuất theo thuật toán snake draft dựa trên điểm sức mạnh.',
-  })
-  @ApiParam({ name: 'tournamentId', description: 'ID của tournament' })
-  generateArrangement(@Param('tournamentId') tournamentId: string) {
-    return this.aiService.generateArrangement(tournamentId);
-  }
-
-  @Get('arrangements/tournament/:tournamentId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiBearerAuth()
-  @Roles(RoleName.ADMIN)
-  @ApiOperation({
-    summary: 'Danh sách đề xuất sắp xếp của một tournament (Admin)',
-  })
-  @ApiParam({ name: 'tournamentId', description: 'ID của tournament' })
-  getArrangementSuggestions(@Param('tournamentId') tournamentId: string) {
-    return this.aiService.getArrangementSuggestions(tournamentId);
-  }
-
-  @Patch('arrangements/:id/status')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiBearerAuth()
-  @Roles(RoleName.ADMIN)
-  @ApiOperation({
-    summary: 'Áp dụng hoặc từ chối đề xuất sắp xếp (Admin)',
-    description:
-      'APPLIED: tạo Race mới trong tournament. REJECTED: huỷ đề xuất.',
-  })
-  @ApiParam({ name: 'id', description: 'ID của arrangement suggestion' })
-  updateArrangementStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateArrangementStatusDto,
-    @CurrentUser() user: JwtUser,
-  ) {
-    return this.aiService.updateArrangementStatus(id, dto.status, user.id);
   }
 }

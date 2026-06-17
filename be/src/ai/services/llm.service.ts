@@ -1,7 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { ProposedRaceInfo } from '../schemas/ai-race-arrangement-suggestion.schema';
 
 export interface HorsePredictionMeta {
   name: string;
@@ -24,12 +23,6 @@ export interface RacePredictionContext {
   raceType?: string;
   trackCondition?: string;
   weather?: string;
-}
-
-export interface ArrangementHorseMeta {
-  name: string;
-  strengthScore: number;
-  jockeySkill?: string;
 }
 
 @Injectable()
@@ -102,30 +95,6 @@ Kết quả dự đoán (từ hạng 1 đến cuối):
 ${horseLines}`;
 
     return this.callModel(prompt, 'prediction');
-  }
-
-  async generateArrangementReasoning(
-    tournamentName: string,
-    proposedRaces: ProposedRaceInfo[],
-    horsesByRace: ArrangementHorseMeta[][],
-  ): Promise<string | null> {
-    if (!this.ai) return null;
-
-    const raceLines = proposedRaces
-      .map((r, i) => {
-        const names = (horsesByRace[i] ?? []).map((h) => h.name).join(', ');
-        return `  Race ${i + 1} (${r.raceType}, ${r.distanceMeters}m): ${names} — sức mạnh TB ${r.avgStrength.toFixed(1)}, độ chênh lệch ${r.strengthSpread.toFixed(1)}`;
-      })
-      .join('\n');
-
-    const prompt = `Bạn là chuyên gia tổ chức giải đua ngựa. Dựa trên dữ liệu phân bổ race bên dưới, hãy viết nhận xét ngắn (3-4 câu, tiếng Việt tự nhiên) đánh giá tính công bằng và hợp lý của kế hoạch sắp xếp. Chỉ trả về JSON có đúng một trường "reasoning".
-
-Giải đấu: ${tournamentName}
-
-Kế hoạch sắp xếp:
-${raceLines}`;
-
-    return this.callModel(prompt, 'arrangement');
   }
 
   private async callModel(prompt: string, tag: string): Promise<string | null> {

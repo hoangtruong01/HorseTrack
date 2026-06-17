@@ -21,14 +21,8 @@ import {
   AIPredictionSuggestion,
   type AIPredictionSuggestionDocument,
 } from './schemas/ai-prediction-suggestion.schema';
-import {
-  AIRaceArrangementSuggestion,
-  type AIRaceArrangementSuggestionDocument,
-  ArrangementStatus,
-} from './schemas/ai-race-arrangement-suggestion.schema';
 import { CreateAiPackageDto } from './dto/create-package.dto';
 import { PredictionEngineService } from './services/prediction-engine.service';
-import { ArrangementEngineService } from './services/arrangement-engine.service';
 import { PayosService } from './services/payos.service';
 
 @Injectable()
@@ -41,10 +35,7 @@ export class AiService {
     @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
     @InjectModel(AIPredictionSuggestion.name)
     private predictionModel: Model<AIPredictionSuggestionDocument>,
-    @InjectModel(AIRaceArrangementSuggestion.name)
-    private arrangementModel: Model<AIRaceArrangementSuggestionDocument>,
     private readonly predictionEngine: PredictionEngineService,
-    private readonly arrangementEngine: ArrangementEngineService,
     private readonly payosService: PayosService,
   ) {}
 
@@ -149,44 +140,5 @@ export class AiService {
       throw new NotFoundException('Chưa có gợi ý AI cho race này');
     }
     return suggestion;
-  }
-
-  // ─── Arrangements ─────────────────────────────────────────────────────────
-
-  async generateArrangement(
-    tournamentId: string,
-  ): Promise<AIRaceArrangementSuggestionDocument> {
-    return this.arrangementEngine.generateForTournament(tournamentId);
-  }
-
-  async getArrangementSuggestions(
-    tournamentId: string,
-  ): Promise<AIRaceArrangementSuggestionDocument[]> {
-    return this.arrangementModel
-      .find({ tournamentId: new Types.ObjectId(tournamentId) })
-      .sort({ createdAt: -1 })
-      .exec();
-  }
-
-  async updateArrangementStatus(
-    id: string,
-    status: ArrangementStatus.APPLIED | ArrangementStatus.REJECTED,
-    adminId: string,
-  ): Promise<AIRaceArrangementSuggestionDocument> {
-    if (status === ArrangementStatus.APPLIED) {
-      return this.arrangementEngine.applyArrangement(id, adminId);
-    }
-
-    const suggestion = await this.arrangementModel.findById(id);
-    if (!suggestion) {
-      throw new NotFoundException('Arrangement suggestion không tồn tại');
-    }
-    if (suggestion.status !== ArrangementStatus.PENDING) {
-      throw new Error(
-        `Chỉ có thể từ chối đề xuất đang ở trạng thái PENDING (hiện tại: ${suggestion.status})`,
-      );
-    }
-    suggestion.status = ArrangementStatus.REJECTED;
-    return suggestion.save();
   }
 }
