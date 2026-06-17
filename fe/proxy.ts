@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET || "horsetrack_jwt_secret_key_2026";
-const secretKey = new TextEncoder().encode(JWT_SECRET);
+const JWT_SECRET = process.env.JWT_SECRET;
+const secretKey = JWT_SECRET ? new TextEncoder().encode(JWT_SECRET) : null;
 
 export async function proxy(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value;
@@ -13,13 +13,20 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/owner") ||
     pathname.startsWith("/jockey") ||
-    pathname.startsWith("/referee");
+    pathname.startsWith("/referee") ||
+    pathname.startsWith("/counter-staff") ||
+    pathname.startsWith("/spectator");
 
   if (isDashboardRoute) {
     if (!token) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
+    }
+
+    if (!secretKey) {
+      console.error("proxy: JWT_SECRET chưa được cấu hình — từ chối truy cập");
+      return NextResponse.redirect(new URL("/login", request.url));
     }
 
     try {
@@ -45,6 +52,12 @@ export async function proxy(request: NextRequest) {
       if (pathname.startsWith("/referee") && !userRoles.includes("referee")) {
         return NextResponse.redirect(new URL("/forbidden", request.url));
       }
+      if (pathname.startsWith("/counter-staff") && !userRoles.includes("counter_staff")) {
+        return NextResponse.redirect(new URL("/forbidden", request.url));
+      }
+      if (pathname.startsWith("/spectator") && !userRoles.includes("spectator")) {
+        return NextResponse.redirect(new URL("/forbidden", request.url));
+      }
     } catch {
       // Token expired, signature mismatch, or invalid
       const res = NextResponse.redirect(new URL("/login", request.url));
@@ -55,7 +68,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // 3. If logged in with valid token, prevent access to login/register pages
-  if ((pathname === "/login" || pathname === "/register") && token) {
+  if ((pathname === "/login" || pathname === "/register") && token && secretKey) {
     try {
       await jwtVerify(token, secretKey);
       return NextResponse.redirect(new URL("/", request.url));
@@ -77,6 +90,8 @@ export const config = {
     "/owner/:path*",
     "/jockey/:path*",
     "/referee/:path*",
+    "/counter-staff/:path*",
+    "/spectator/:path*",
     "/login",
     "/register",
   ],
