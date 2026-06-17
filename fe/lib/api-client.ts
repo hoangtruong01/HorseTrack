@@ -1,24 +1,9 @@
 /**
- * Thin API client — reads cookie from Next.js API route /api/auth/token
- * All calls go through the BE directly with Bearer token.
+ * Thin API client — mọi call đi qua BFF proxy server-side /api/be (cùng origin).
+ * Cookie HttpOnly access_token được trình duyệt tự gửi; proxy đính Bearer cho BE.
+ * KHÔNG còn đọc token ra JS (đã bỏ /api/auth/token).
  */
-const getBaseUrl = () => {
-  const url = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
-  if (url.endsWith("/api/v1")) return url;
-  return url.replace(/\/$/, "") + "/api/v1";
-};
-const BASE_URL = getBaseUrl();
-
-async function getToken(): Promise<string | null> {
-  try {
-    const res = await fetch("/api/auth/token", { cache: "no-store" });
-    if (res.ok) {
-      const { token } = await res.json();
-      return token as string;
-    }
-  } catch { }
-  return null;
-}
+const BASE_URL = "/api/be";
 
 function injectUnderscoreId(val: unknown): unknown {
   if (val === null || val === undefined) return val;
@@ -44,12 +29,10 @@ interface CustomRequestInit extends RequestInit {
 }
 
 export async function apiFetch<T>(path: string, options: CustomRequestInit = {}): Promise<T> {
-  const token = await getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
   const text = await res.text();
@@ -748,41 +731,6 @@ export interface AiPredictionItem {
   generatedAt: string;
 }
 
-// ─── AI Arrangements ─────────────────────────────────────────────────────────
-export interface AiRaceEntry {
-  horseId: { _id: string; name: string } | string;
-  strengthScore: number;
-  jockeyUserId?: { _id: string; fullName: string } | string;
-}
-
-export interface AiProposedRace {
-  entries: AiRaceEntry[];
-  raceType: string;
-  distanceMeters: number;
-  maxParticipants: number;
-  startTime: string;
-  trackCondition: string;
-  weather: string;
-  avgStrength: number;
-  strengthSpread: number;
-}
-
-export interface AiFairnessReport {
-  avgStrengthPerRace: number[];
-  strengthSpreadPerRace: number[];
-  violations: string[];
-}
-
-export interface AiArrangementItem {
-  _id: string;
-  tournamentId: { _id: string; name: string } | string;
-  proposedRaces: AiProposedRace[];
-  fairnessReport?: AiFairnessReport;
-  reasoning?: string;
-  status: "PENDING" | "APPLIED" | "REJECTED";
-  createdRaceIds?: string[];
-  createdAt?: string;
-}
 
 export const aiApi = {
   listPackages: () =>
@@ -830,18 +778,5 @@ export const aiApi = {
   getPrediction: (raceId: string) =>
     apiFetch<AiPredictionItem>(`/ai/predictions/${raceId}`),
 
-  generateArrangement: (tournamentId: string) =>
-    apiFetch<AiArrangementItem>(`/ai/arrangements/generate/${tournamentId}`, {
-      method: "POST",
-    }),
-
-  listArrangements: (tournamentId: string) =>
-    apiFetch<AiArrangementItem[]>(`/ai/arrangements/tournament/${tournamentId}`),
-
-  updateArrangementStatus: (id: string, status: "APPLIED" | "REJECTED") =>
-    apiFetch<AiArrangementItem>(`/ai/arrangements/${id}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ status }),
-    }),
 };
 
