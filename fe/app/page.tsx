@@ -22,128 +22,15 @@ import {
   Calendar,
   DollarSign,
   Activity,
-  Award,
+  Award
 } from "lucide-react";
 import { AppHeader } from "@/components/layout/app-header";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { tournamentsApi, racesApi, rankingsApi, TournamentItem, RaceItem, RankingEntry, JockeyRankingEntry } from "@/lib/api-client";
 import createGlobe from "cobe";
 
-// Fallback rankings
-const fallbackHorseRankings: RankingEntry[] = [
-  { horseId: "1", horseName: "Sấm Sét (Thunder Bolt)", breed: "Thoroughbred", totalPoints: 1200, totalRaces: 15, wins: 8 },
-  { horseId: "2", horseName: "Bão Cát (Desert Storm)", breed: "Arabian", totalPoints: 950, totalRaces: 12, wins: 5 },
-  { horseId: "3", horseName: "Tia Chớp (Flash)", breed: "Quarter Horse", totalPoints: 880, totalRaces: 14, wins: 4 },
-  { horseId: "4", horseName: "Huyền Thoại (Legacy)", breed: "Appaloosa", totalPoints: 720, totalRaces: 10, wins: 3 },
-  { horseId: "5", horseName: "Kỵ Sĩ Bóng Đêm", breed: "Mustang", totalPoints: 650, totalRaces: 9, wins: 2 },
-];
-
-const fallbackJockeyRankings: JockeyRankingEntry[] = [
-  { jockeyUserId: "1", jockeyName: "Trần Văn An", experienceYears: 8, totalPoints: 1400, totalRaces: 18, wins: 9 },
-  { jockeyUserId: "2", jockeyName: "Nguyễn Minh Hải", experienceYears: 6, totalPoints: 1100, totalRaces: 15, wins: 7 },
-  { jockeyUserId: "3", jockeyName: "Lê Hoàng Đức", experienceYears: 5, totalPoints: 920, totalRaces: 13, wins: 5 },
-  { jockeyUserId: "4", jockeyName: "Phạm Quốc Bảo", experienceYears: 4, totalPoints: 800, totalRaces: 12, wins: 4 },
-  { jockeyUserId: "5", jockeyName: "Vũ Tiến Đạt", experienceYears: 3, totalPoints: 680, totalRaces: 10, wins: 3 },
-];
-
-const GLOBE_MARKERS = [
-  { name: "Việt Nam", location: [10.77, 106.65] },
-  { name: "UAE (Dubai)", location: [25.15, 55.30] },
-  { name: "Mỹ (Kentucky)", location: [38.20, -85.77] },
-  { name: "Anh (London)", location: [51.41, -0.68] },
-  { name: "Úc (Melbourne)", location: [-37.78, 144.90] },
-  { name: "Nhật Bản (Tokyo)", location: [35.66, 139.48] }
-];
-
-// Định nghĩa thông số dữ liệu cho Giao diện
-const quickStats = [
-  {
-    key: "tournaments",
-    value: "12",
-    label: "Active Tournaments",
-    desc: "Running this season",
-    icon: Trophy,
-    color: "text-[#E10600]",
-    bg: "bg-[#E10600]/8",
-    border: "border-[#E10600]/10",
-  },
-  {
-    key: "horses",
-    value: "256",
-    label: "Registered Horses",
-    desc: "Across all tournaments",
-    icon: Compass,
-    color: "text-[#F8CD46]",
-    bg: "bg-[#F8CD46]/8",
-    border: "border-[#F8CD46]/10",
-  },
-  {
-    key: "jockeys",
-    value: "98",
-    label: "Assigned Jockeys",
-    desc: "Ready to compete",
-    icon: UserCheck,
-    color: "text-[#067E6A]",
-    bg: "bg-[#067E6A]/8",
-    border: "border-[#067E6A]/10",
-  },
-  {
-    key: "races",
-    value: "48",
-    label: "Completed Races",
-    desc: "This season",
-    icon: Flag,
-    color: "text-[#3B82F6]",
-    bg: "bg-[#3B82F6]/8",
-    border: "border-[#3B82F6]/10",
-  },
-];
-
-const roles = [
-  {
-    key: "admin",
-    name: "Admin",
-    desc: "Manage users, tournaments, races, schedules, results and system settings.",
-    icon: Trophy,
-    color: "text-[#E10600] border-[#E10600]/20 bg-[#E10600]/5",
-    btnClass: "bg-[#E10600]/10 hover:bg-[#E10600]/20 text-[#E10600]",
-  },
-  {
-    key: "owner",
-    name: "Horse Owner",
-    desc: "Register horses, choose jockeys, track races and view prizes.",
-    icon: Compass,
-    color: "text-[#F8CD46] border-[#F8CD46]/20 bg-[#F8CD46]/5",
-    btnClass: "bg-[#F8CD46]/10 hover:bg-[#F8CD46]/20 text-[#F8CD46]",
-  },
-  {
-    key: "jockey",
-    name: "Jockey",
-    desc: "Accept race invitations, view assigned races and track performance.",
-    icon: UserCheck,
-    color: "text-[#067E6A] border-[#067E6A]/20 bg-[#067E6A]/5",
-    btnClass: "bg-[#067E6A]/10 hover:bg-[#067E6A]/20 text-[#067E6A]",
-  },
-  {
-    key: "referee",
-    name: "Race Referee",
-    desc: "Inspect horses, record violations, confirm results and create reports.",
-    icon: Sparkles,
-    color: "text-[#3B82F6] border-[#3B82F6]/20 bg-[#3B82F6]/5",
-    btnClass: "bg-[#3B82F6]/10 hover:bg-[#3B82F6]/20 text-[#3B82F6]",
-  },
-  {
-    key: "spectator",
-    name: "Spectator",
-    desc: "View races, rankings and make predictions to win exciting rewards.",
-    icon: Users,
-    color: "text-[#A855F7] border-[#A855F7]/20 bg-[#A855F7]/5",
-    btnClass: "bg-[#A855F7]/10 hover:bg-[#A855F7]/20 text-[#A855F7]",
-  },
-];
-
+// Chức năng cốt lõi
 const coreFeatures = [
   {
     key: "feat1",
@@ -231,6 +118,32 @@ const coreFeatures = [
   },
 ];
 
+// Fallback rankings
+const fallbackHorseRankings: RankingEntry[] = [
+  { horseId: "1", horseName: "Sấm Sét (Thunder Bolt)", breed: "Thoroughbred", totalPoints: 1200, totalRaces: 15, wins: 8 },
+  { horseId: "2", horseName: "Bão Cát (Desert Storm)", breed: "Arabian", totalPoints: 950, totalRaces: 12, wins: 5 },
+  { horseId: "3", horseName: "Tia Chớp (Flash)", breed: "Quarter Horse", totalPoints: 880, totalRaces: 14, wins: 4 },
+  { horseId: "4", horseName: "Huyền Thoại (Legacy)", breed: "Appaloosa", totalPoints: 720, totalRaces: 10, wins: 3 },
+  { horseId: "5", horseName: "Kỵ Sĩ Bóng Đêm", breed: "Mustang", totalPoints: 650, totalRaces: 9, wins: 2 },
+];
+
+const fallbackJockeyRankings: JockeyRankingEntry[] = [
+  { jockeyUserId: "1", jockeyName: "Trần Văn An", experienceYears: 8, totalPoints: 1400, totalRaces: 18, wins: 9 },
+  { jockeyUserId: "2", jockeyName: "Nguyễn Minh Hải", experienceYears: 6, totalPoints: 1100, totalRaces: 15, wins: 7 },
+  { jockeyUserId: "3", jockeyName: "Lê Hoàng Đức", experienceYears: 5, totalPoints: 920, totalRaces: 13, wins: 5 },
+  { jockeyUserId: "4", jockeyName: "Phạm Quốc Bảo", experienceYears: 4, totalPoints: 800, totalRaces: 12, wins: 4 },
+  { jockeyUserId: "5", jockeyName: "Vũ Tiến Đạt", experienceYears: 3, totalPoints: 680, totalRaces: 10, wins: 3 },
+];
+
+const GLOBE_MARKERS = [
+  { name: "Việt Nam", location: [10.77, 106.65] },
+  { name: "UAE (Dubai)", location: [25.15, 55.30] },
+  { name: "Mỹ (Kentucky)", location: [38.20, -85.77] },
+  { name: "Anh (London)", location: [51.41, -0.68] },
+  { name: "Úc (Melbourne)", location: [-37.78, 144.90] },
+  { name: "Nhật Bản (Tokyo)", location: [35.66, 139.48] }
+];
+
 export default function Home() {
   const { t } = useTranslation();
   const { resolvedTheme } = useTheme();
@@ -240,7 +153,7 @@ export default function Home() {
   const [races, setRaces] = useState<RaceItem[]>([]);
   const [horseRankings, setHorseRankings] = useState<RankingEntry[]>([]);
   const [jockeyRankings, setJockeyRankings] = useState<JockeyRankingEntry[]>([]);
-
+  
   const globeCanvasRef = useRef<HTMLCanvasElement>(null);
   const markerRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -314,7 +227,7 @@ export default function Home() {
           el.style.left = `${screenX}px`;
           el.style.top = `${screenY}px`;
           el.style.opacity = "1";
-
+          
           // Tạo hiệu ứng scale nhỏ lại khi điểm xoay về phía rìa
           const scale = 0.7 + zRot * 0.3;
           el.style.transform = `translate(-50%, -50%) scale(${scale})`;
@@ -333,7 +246,7 @@ export default function Home() {
       globe = null;
     };
   }, [mounted, resolvedTheme]);
-
+  
   // Stats thực tế + fallback
   const [stats, setStats] = useState({
     tournaments: 0,
@@ -353,7 +266,7 @@ export default function Home() {
     async function initData() {
       try {
         setLoading(true);
-
+        
         // 1. Tải danh sách giải đấu
         const tourRes = await tournamentsApi.list({ page: 1, limit: 100 });
         const tourList = tourRes?.data || [];
@@ -480,8 +393,9 @@ export default function Home() {
         );
       }
     }, 1000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [upcomingRace]);
 
   // Format hiển thị tiền thưởng
   const formatPrize = (val?: number) => {
@@ -509,53 +423,55 @@ export default function Home() {
       <AppHeader />
 
       {/* 2. Hero Section */}
-      <section className="relative min-h-[580px] lg:min-h-[660px] border-b border-border flex items-center py-16">
-        {/* Generated Action Jockey image masked in background */}
+      <section className="relative min-h-[640px] lg:min-h-[720px] flex items-center py-16 overflow-hidden">
+        {/* Background Overlay */}
         <div
-          className="absolute inset-0 bg-cover bg-right lg:bg-center bg-no-repeat opacity-[0.16] pointer-events-none mix-blend-lighten"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.12] pointer-events-none mix-blend-lighten"
           style={{ backgroundImage: "url('/hero_horse_racing.png')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-background via-background/90 to-primary/5 pointer-events-none" />
-
+        
         {/* Decorative Neon Blurs */}
         <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-[#067E6A]/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-
+          
           {/* Left Block: Hero Intro */}
           <div className="space-y-8 animate-fade-in duration-700">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary">
               <span className="size-2 rounded-full bg-primary animate-ping" />
-              {t("homepage.badge", "Live Tournament Platform")}
+              {t("homepage.badge", "NỀN TẢNG GIẢI ĐẤU TRỰC TUYẾN")}
             </span>
 
-            <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-foreground sm:text-5xl lg:text-6xl uppercase">
-              {t("homepage.heroTitle1", "Manage Horse Racing")} <br />
-              {t("homepage.heroTitle2", "Tournaments")}{" "}
-              <span className="text-primary drop-shadow-[0_0_15px_rgba(225,6,0,0.3)]">
-                {t("homepage.heroTitleHighlight", "Smarter")}
+            <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl uppercase">
+              {t("homepage.heroTitle1", "Quản Lý Giải Đua Ngựa")} <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-500 to-amber-400 drop-shadow-[0_2px_15px_rgba(225,6,0,0.15)]">
+                {t("homepage.heroTitleHighlight", "Thông Minh & Toàn Diện")}
               </span>
             </h1>
 
-            <p className="max-w-xl text-base sm:text-lg leading-7 text-foreground/55 font-medium">
-              {t("homepage.heroSubtitle", "Register horses, assign jockeys, schedule races, record results, track rankings and create predictions – all in one platform.")}
+            <p className="max-w-xl text-base sm:text-lg leading-relaxed text-muted-foreground font-medium">
+              {t(
+                "homepage.heroSubtitle",
+                "Đăng ký chiến mã, kết nối nài ngựa chuyên nghiệp, xếp lịch đua tự động, cập nhật kết quả thời gian thực và tham gia dự đoán kịch tính.",
+              )}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Link
                 href="/register"
-                className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-8 text-sm font-black uppercase tracking-widest text-primary-foreground hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition shadow-[0_4px_25px_rgba(225,6,0,0.3)]"
+                className="group relative flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary px-8 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/95 transition-all duration-300 shadow-[0_8px_30px_rgb(225,6,0,0.3)] hover:shadow-[0_8px_35px_rgb(225,6,0,0.5)] hover:-translate-y-0.5 active:translate-y-0"
               >
-                {t("homepage.getStarted", "Get Started")}
-                <ArrowRight className="size-4.5" />
+                {t("homepage.getStarted", "Bắt Đầu Ngay")}
+                <ArrowRight className="size-4.5 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/races"
-                className="flex h-12 items-center justify-center gap-2.5 rounded-xl border border-border bg-secondary/50 hover:bg-secondary px-8 text-sm font-black uppercase tracking-widest text-foreground transition"
+                className="flex h-14 items-center justify-center gap-2.5 rounded-2xl border border-border bg-card/50 hover:bg-card px-8 text-sm font-bold uppercase tracking-wider text-foreground transition-all duration-300 hover:border-primary/30 hover:-translate-y-0.5"
               >
                 <CalendarClock className="size-4.5 text-primary" />
-                {t("homepage.viewRaces", "View Races")}
+                {t("homepage.viewRaces", "Lịch Đua Đang Chạy")}
               </Link>
             </div>
           </div>
@@ -564,7 +480,7 @@ export default function Home() {
           <div className="rounded-[2.5rem] border border-border/80 bg-card/60 p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.25)] backdrop-blur-xl space-y-6 relative overflow-hidden animate-fade-in duration-1000">
             {/* Top glass reflection */}
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
-
+            
             <div className="flex items-center justify-between border-b border-border/50 pb-4 relative z-10">
               <div className="flex items-center gap-2">
                 <Activity className="size-5 text-primary animate-pulse" />
@@ -574,66 +490,135 @@ export default function Home() {
               </div>
               <Link
                 href="/races"
-                className="flex items-center gap-1 text-xs font-black uppercase tracking-wider text-primary hover:underline"
+                className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors"
               >
-                {t("homepage.viewAllRaces", "View All Races")}
+                {t("homepage.viewAllRaces", "Xem Tất Cả")}
                 <ChevronRight className="size-3.5" />
               </Link>
             </div>
 
-            <div className="space-y-3.5">
-              {/* Card 1: LIVE */}
-              <div className="group relative rounded-2xl border border-border bg-card/90 p-4 hover:border-primary/30 transition-all duration-300">
-                <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
-                  <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-                  {t("homepage.racingNow", "Racing now")}
+            <div className="space-y-4 relative z-10">
+              {/* Card 1: LIVE RACE */}
+              {loading ? (
+                <div className="h-24 rounded-2xl bg-muted/40 animate-pulse" />
+              ) : liveRace ? (
+                <div className="group relative rounded-2xl border border-primary/30 bg-primary/5 p-4.5 hover:border-primary/60 transition-all duration-300">
+                  <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-primary/20 border border-primary/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
+                    <span className="size-1.5 rounded-full bg-primary animate-ping" />
+                    Đang Đua
+                  </div>
+                  <span className="inline-block rounded-md bg-primary px-2.5 py-0.5 text-[9px] font-black tracking-wider text-primary-foreground">
+                    LIVE
+                  </span>
+                  <h3 className="mt-2 font-bold uppercase text-base text-foreground group-hover:text-primary transition-colors">
+                    {liveRace.name}
+                  </h3>
+                  <div className="mt-2.5 flex items-center justify-between text-xs text-muted-foreground font-semibold">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="size-3.5" /> {liveRace.location || "Sân vận động"}
+                    </span>
+                    <span className="font-mono text-primary font-bold flex items-center gap-1">
+                      <Tv className="size-3.5" /> Trực tiếp
+                    </span>
+                  </div>
+                  <Link
+                    href={`/races/${liveRace._id}`}
+                    className="mt-3.5 flex h-9 items-center justify-center gap-1.5 rounded-xl bg-primary text-white text-[10px] font-bold uppercase tracking-widest transition hover:bg-primary/90"
+                  >
+                    Xem Trực Tiếp
+                    <ArrowRight className="size-3" />
+                  </Link>
                 </div>
-                <span className="inline-block rounded-md bg-primary px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-primary-foreground">
-                  {t("homepage.live", "LIVE")}
-                </span>
-                <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-primary transition-colors">
-                  Saigon Sprint Race 05
-                </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-foreground/40 font-semibold">
-                  <span>📍 Ho Chi Minh City Arena</span>
-                  <span className="font-mono text-foreground/60">14:30</span>
+              ) : (
+                <div className="group relative rounded-2xl border border-border/60 bg-muted/10 p-4.5 text-center">
+                  <span className="inline-block rounded-md bg-muted text-muted-foreground px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">
+                    LIVE
+                  </span>
+                  <p className="mt-2 text-xs text-muted-foreground font-medium">Hiện không có cuộc đua nào đang diễn ra trực tiếp.</p>
+                  <Link
+                    href="/races"
+                    className="mt-3 inline-flex text-xs font-bold text-primary hover:underline"
+                  >
+                    Xem lịch trình đua &rarr;
+                  </Link>
                 </div>
-              </div>
+              )}
 
-              {/* Card 2: UPCOMING */}
-              <div className="group relative rounded-2xl border border-border bg-card/90 p-4 hover:border-chart-3/30 transition-all duration-300">
-                <div className="absolute right-4 top-4 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-chart-3">
-                  <Clock className="size-3.5" />
-                  {t("homepage.startsIn", "Starts in")} {countdown}
+              {/* Card 2: UPCOMING RACE */}
+              {loading ? (
+                <div className="h-28 rounded-2xl bg-muted/40 animate-pulse" />
+              ) : upcomingRace ? (
+                <div className="group relative rounded-2xl border border-border/80 bg-card/40 p-4.5 hover:border-chart-3/45 transition-all duration-300">
+                  <div className="absolute right-4 top-4 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#F8CD46]">
+                    <Clock className="size-3.5 animate-spin-slow" />
+                    Khởi tranh: {countdown}
+                  </div>
+                  <span className="inline-block rounded-md border border-[#F8CD46]/30 bg-[#F8CD46]/10 px-2.5 py-0.5 text-[9px] font-black tracking-wider text-[#F8CD46]">
+                    SẮP DIỄN RA
+                  </span>
+                  <h3 className="mt-2 font-bold uppercase text-base text-foreground group-hover:text-[#F8CD46] transition-colors">
+                    {upcomingRace.name}
+                  </h3>
+                  <div className="mt-2.5 flex flex-col gap-1 text-xs text-muted-foreground font-semibold">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="size-3.5" /> {upcomingRace.location || "Trường đua"}
+                    </span>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="flex items-center gap-1 text-[#F8CD46]">
+                        <Trophy className="size-3.5" /> Thưởng: {formatPrize(upcomingRace.prize)}
+                      </span>
+                      <span className="font-mono text-muted-foreground">{formatDate(upcomingRace.startTime)}</span>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/races/${upcomingRace._id}`}
+                    className="mt-3.5 flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#F8CD46]/30 bg-[#F8CD46]/5 hover:bg-[#F8CD46]/10 text-[#F8CD46] text-[10px] font-bold uppercase tracking-widest transition-all"
+                  >
+                    Đặt Cược Dự Đoán
+                    <ArrowRight className="size-3" />
+                  </Link>
                 </div>
-                <span className="inline-block rounded-md border border-chart-3/30 bg-chart-3/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-chart-3">
-                  {t("homepage.upcoming", "UPCOMING")}
-                </span>
-                <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-chart-3 transition-colors">
-                  Delta Derby Race 07
-                </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-foreground/40 font-semibold">
-                  <span>📍 Can Tho Racecourse</span>
-                  <span className="font-mono text-foreground/60">17:00</span>
+              ) : (
+                <div className="group relative rounded-2xl border border-border/60 bg-muted/10 p-4.5 text-center">
+                  <span className="inline-block rounded-md bg-[#F8CD46]/10 text-[#F8CD46] border border-[#F8CD46]/20 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">
+                    SẮP DIỄN RA
+                  </span>
+                  <p className="mt-2 text-xs text-muted-foreground font-medium">Hiện không có cuộc đua nào sắp diễn ra.</p>
                 </div>
-              </div>
+              )}
 
-              {/* Card 3: FINISHED */}
-              <div className="group relative rounded-2xl border border-border bg-card/90 p-4 hover:border-chart-2/30 transition-all duration-300">
-                <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-chart-2/10 border border-chart-2/20 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-chart-2">
-                  {t("homepage.winner", "Winner")}: Thunder Bolt
+              {/* Card 3: FINISHED RACE */}
+              {loading ? (
+                <div className="h-24 rounded-2xl bg-muted/40 animate-pulse" />
+              ) : finishedRace ? (
+                <div className="group relative rounded-2xl border border-border/80 bg-card/40 p-4.5 hover:border-[#067E6A]/45 transition-all duration-300">
+                  <span className="inline-block rounded-md border border-[#067E6A]/30 bg-[#067E6A]/10 px-2.5 py-0.5 text-[9px] font-black tracking-wider text-[#067E6A]">
+                    ĐÃ KẾT THÚC
+                  </span>
+                  <h3 className="mt-2 font-bold uppercase text-base text-foreground group-hover:text-[#067E6A] transition-colors">
+                    {finishedRace.name}
+                  </h3>
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground font-semibold">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="size-3.5" /> {finishedRace.location || "Đại lộ"}
+                    </span>
+                    <span className="text-[#067E6A] font-bold">Hoàn thành</span>
+                  </div>
+                  <Link
+                    href={`/races/${finishedRace._id}`}
+                    className="mt-3 flex h-8 items-center justify-center gap-1 rounded-lg bg-[#067E6A]/10 hover:bg-[#067E6A]/20 text-[#067E6A] text-[9.5px] font-bold uppercase tracking-wider transition"
+                  >
+                    Xem Kết Quả Chi Tiết
+                  </Link>
                 </div>
-                <span className="inline-block rounded-md border border-chart-2/30 bg-chart-2/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-chart-2">
-                  {t("homepage.finished", "FINISHED")}
-                </span>
-                <h3 className="mt-2.5 font-black uppercase text-base text-foreground group-hover:text-chart-2 transition-colors">
-                  Hanoi Grand Sprint 02
-                </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-foreground/40 font-semibold">
-                  <span>📍 My Dinh Racecourse</span>
-                  <span className="font-mono text-foreground/60">Completed</span>
+              ) : (
+                <div className="group relative rounded-2xl border border-border/60 bg-muted/10 p-4.5 text-center">
+                  <span className="inline-block rounded-md bg-[#067E6A]/10 text-[#067E6A] border border-[#067E6A]/20 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">
+                    ĐÃ KẾT THÚC
+                  </span>
+                  <p className="mt-2 text-xs text-muted-foreground font-medium">Chưa có kết quả cuộc đua nào trước đây.</p>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -643,109 +628,105 @@ export default function Home() {
       <section className="py-14 bg-secondary/15 backdrop-blur-sm relative">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.01] to-transparent" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          <ScrollReveal direction="up">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-
-              {/* Stat 1: Tournaments */}
-              <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
-                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-primary/10 bg-primary/5 text-primary group-hover:scale-110 transition-transform duration-300">
-                  <Trophy className="size-7" />
-                </div>
-                <div>
-                  <span className="block text-3xl font-extrabold text-foreground leading-none">
-                    {loading ? "..." : stats.tournaments}
-                  </span>
-                  <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
-                    Giải đấu
-                  </span>
-                  <span className="block text-[10px] font-bold text-[#067E6A] mt-1.5 flex items-center gap-0.5">
-                    <span className="size-1 bg-[#067E6A] rounded-full inline-block" /> Đang cập nhật
-                  </span>
-                </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            
+            {/* Stat 1: Tournaments */}
+            <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-primary/10 bg-primary/5 text-primary group-hover:scale-110 transition-transform duration-300">
+                <Trophy className="size-7" />
               </div>
-
-              {/* Stat 2: Registered Horses */}
-              <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
-                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#F8CD46]/10 bg-[#F8CD46]/5 text-[#F8CD46] group-hover:scale-110 transition-transform duration-300">
-                  <Compass className="size-7" />
-                </div>
-                <div>
-                  <span className="block text-3xl font-extrabold text-foreground leading-none">
-                    {loading ? "..." : stats.horses}+
-                  </span>
-                  <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
-                    Ngựa đua đăng ký
-                  </span>
-                  <span className="block text-[10px] font-bold text-[#F8CD46] mt-1.5 flex items-center gap-0.5">
-                    Đã kiểm định sức khỏe
-                  </span>
-                </div>
+              <div>
+                <span className="block text-3xl font-extrabold text-foreground leading-none">
+                  {loading ? "..." : stats.tournaments}
+                </span>
+                <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
+                  Giải đấu
+                </span>
+                <span className="block text-[10px] font-bold text-[#067E6A] mt-1.5 flex items-center gap-0.5">
+                  <span className="size-1 bg-[#067E6A] rounded-full inline-block" /> Đang cập nhật
+                </span>
               </div>
-
-              {/* Stat 3: Assigned Jockeys */}
-              <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
-                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#067E6A]/10 bg-[#067E6A]/5 text-[#067E6A] group-hover:scale-110 transition-transform duration-300">
-                  <UserCheck className="size-7" />
-                </div>
-                <div>
-                  <span className="block text-3xl font-extrabold text-foreground leading-none">
-                    {loading ? "..." : stats.jockeys}+
-                  </span>
-                  <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
-                    Nài ngựa chuyên nghiệp
-                  </span>
-                  <span className="block text-[10px] font-bold text-[#067E6A] mt-1.5 flex items-center gap-0.5">
-                    Chứng chỉ quốc tế
-                  </span>
-                </div>
-              </div>
-
-              {/* Stat 4: Completed Races */}
-              <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
-                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-blue-500/10 bg-blue-500/5 text-blue-500 group-hover:scale-110 transition-transform duration-300">
-                  <Flag className="size-7" />
-                </div>
-                <div>
-                  <span className="block text-3xl font-extrabold text-foreground leading-none">
-                    {loading ? "..." : stats.races}
-                  </span>
-                  <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
-                    Trận đua đã kết thúc
-                  </span>
-                  <span className="block text-[10px] font-bold text-blue-500 mt-1.5 flex items-center gap-0.5">
-                    Thành tích ghi nhận
-                  </span>
-                </div>
-              </div>
-
             </div>
-          </ScrollReveal>
+
+            {/* Stat 2: Registered Horses */}
+            <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#F8CD46]/10 bg-[#F8CD46]/5 text-[#F8CD46] group-hover:scale-110 transition-transform duration-300">
+                <Compass className="size-7" />
+              </div>
+              <div>
+                <span className="block text-3xl font-extrabold text-foreground leading-none">
+                  {loading ? "..." : stats.horses}+
+                </span>
+                <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
+                  Ngựa đua đăng ký
+                </span>
+                <span className="block text-[10px] font-bold text-[#F8CD46] mt-1.5 flex items-center gap-0.5">
+                  Đã kiểm định sức khỏe
+                </span>
+              </div>
+            </div>
+
+            {/* Stat 3: Assigned Jockeys */}
+            <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#067E6A]/10 bg-[#067E6A]/5 text-[#067E6A] group-hover:scale-110 transition-transform duration-300">
+                <UserCheck className="size-7" />
+              </div>
+              <div>
+                <span className="block text-3xl font-extrabold text-foreground leading-none">
+                  {loading ? "..." : stats.jockeys}+
+                </span>
+                <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
+                  Nài ngựa chuyên nghiệp
+                </span>
+                <span className="block text-[10px] font-bold text-[#067E6A] mt-1.5 flex items-center gap-0.5">
+                  Chứng chỉ quốc tế
+                </span>
+              </div>
+            </div>
+
+            {/* Stat 4: Completed Races */}
+            <div className="group flex items-center gap-5 rounded-2xl border border-border bg-card/50 p-6 transition-all duration-300 hover:bg-card hover:-translate-y-1 hover:shadow-lg">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-blue-500/10 bg-blue-500/5 text-blue-500 group-hover:scale-110 transition-transform duration-300">
+                <Flag className="size-7" />
+              </div>
+              <div>
+                <span className="block text-3xl font-extrabold text-foreground leading-none">
+                  {loading ? "..." : stats.races}
+                </span>
+                <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
+                  Trận đua đã kết thúc
+                </span>
+                <span className="block text-[10px] font-bold text-blue-500 mt-1.5 flex items-center gap-0.5">
+                  Thành tích ghi nhận
+                </span>
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
 
       {/* 4. Featured Tournaments Section (Giải đấu nổi bật - Dữ liệu thực tế) */}
       <section className="py-20 relative overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
-
-          <ScrollReveal direction="up">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.24em] text-primary">
-                  GIẢI ĐẤU CÔNG KHAI
-                </span>
-                <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
-                  Giải Đấu Đang Hoạt Động
-                </h2>
-              </div>
-              <Link
-                href="/tournaments"
-                className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition"
-              >
-                {t("homepage.roles.learnMore", "Learn more about roles")}
-                <ChevronRight className="size-3.5" />
-              </Link>
+          
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="space-y-2">
+              <span className="text-xs font-black uppercase tracking-[0.24em] text-primary">
+                GIẢI ĐẤU CÔNG KHAI
+              </span>
+              <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
+                Giải Đấu Đang Hoạt Động
+              </h2>
             </div>
-          </ScrollReveal>
+            <Link
+              href="/tournaments"
+              className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition"
+            >
+              Xem tất cả giải đấu
+              <ChevronRight className="size-3.5" />
+            </Link>
+          </div>
 
           {loading ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -758,7 +739,7 @@ export default function Home() {
               {tournaments.slice(0, 3).map((tour) => {
                 const isOngoing = tour.status === "ONGOING";
                 const isOpenReg = tour.status === "OPEN_REGISTRATION";
-
+                
                 return (
                   <div
                     key={tour._id}
@@ -766,7 +747,7 @@ export default function Home() {
                   >
                     {/* Glow lines */}
                     <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+                    
                     <div>
                       {/* Status Badge */}
                       <div className="flex items-center justify-between mb-5">
@@ -784,7 +765,7 @@ export default function Home() {
                             {tour.status}
                           </span>
                         )}
-
+                        
                         <div className="text-right">
                           <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">QUỸ GIẢI THƯỞNG</span>
                           <span className="block text-sm font-extrabold text-[#F8CD46] flex items-center justify-end gap-0.5">
@@ -798,7 +779,7 @@ export default function Home() {
                       <h3 className="font-extrabold text-lg uppercase text-foreground leading-snug group-hover:text-primary transition-colors duration-300">
                         {tour.name}
                       </h3>
-
+                      
                       <p className="mt-3 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                         {tour.description || "Chưa có mô tả chi tiết cho giải đấu này."}
                       </p>
@@ -848,8 +829,7 @@ export default function Home() {
       {/* 5. Rankings Section (Bảng xếp hạng toàn cầu - Thiết kế hiện đại & Animated) */}
       <section className="py-20 bg-secondary/10 relative overflow-hidden">
         {/* Style injection for smooth staggered animations */}
-        <style dangerouslySetInnerHTML={{
-          __html: `
+        <style dangerouslySetInnerHTML={{__html: `
           @keyframes rankRowSlideUp {
             from {
               opacity: 0;
@@ -868,315 +848,179 @@ export default function Home() {
         {/* Neon blur background */}
         <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#067E6A]/5 rounded-full blur-[120px] pointer-events-none" />
-
+        
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
+          
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="space-y-2">
+              <span className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
+                <Sparkles className="size-4 text-primary animate-pulse" />
+                BẢNG XẾP HẠNG TOÀN CẦU
+              </span>
+              <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
+                Chiến Mã & Nài Ngựa Xuất Sắc Nhất
+              </h2>
+            </div>
+            <Link
+              href="/rankings"
+              className="group flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-all"
+            >
+              Xem chi tiết bảng xếp hạng
+              <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
 
-          <ScrollReveal direction="up">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.24em] text-primary flex items-center gap-1.5">
-                  <Sparkles className="size-4 text-primary animate-pulse" />
-                  BẢNG XẾP HẠNG TOÀN CẦU
+          <div className="grid gap-8 lg:grid-cols-2">
+            
+            {/* Cột 1: Xếp hạng ngựa */}
+            <div className="rounded-[2.5rem] border border-border/80 bg-card/60 p-6 sm:p-8 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group/board">
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none" />
+              <div className="flex items-center justify-between mb-8 border-b border-border/50 pb-4 relative z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Trophy className="size-5" />
+                  </div>
+                  <h3 className="text-lg font-black uppercase tracking-wider text-foreground">Top 5 Chiến Mã Hàng Đầu</h3>
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary/80 px-2.5 py-1 rounded-lg">
+                  Global Horses
                 </span>
-                <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
-                  Chiến Mã &amp; Nài Ngựa Xuất Sắc Nhất
-                </h2>
               </div>
-              <Link
-                href="/rankings"
-                className="group flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-all"
-              >
-                Xem chi tiết bảng xếp hạng
-                <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+
+              <div className="space-y-3.5 relative z-10">
+                {loading ? (
+                  [1, 2, 3, 4, 5].map((n) => (
+                    <div key={n} className="h-16 rounded-2xl bg-muted/40 animate-pulse" />
+                  ))
+                ) : horseRankings.length > 0 ? (
+                  horseRankings.map((item, index) => {
+                    const rank = index + 1;
+                    const initial = item.horseName ? item.horseName.charAt(0) : "H";
+                    return (
+                      <div
+                        key={item.horseId}
+                        style={{ animationDelay: `${index * 80}ms` }}
+                        className="animate-rank-row group flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/40 hover:border-primary/30 hover:bg-primary/[0.03] hover:scale-[1.015] hover:-translate-y-0.5 transition-all duration-300 ease-out shadow-sm"
+                      >
+                        <div className="flex items-center gap-4">
+                          {/* Rank Badge với hiệu ứng 3D neon */}
+                          <div className={cn(
+                            "flex size-9 shrink-0 items-center justify-center rounded-xl font-black text-sm transition-transform duration-300 group-hover:scale-105",
+                            rank === 1 ? "bg-gradient-to-br from-yellow-400 to-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]" :
+                            rank === 2 ? "bg-gradient-to-br from-slate-200 to-slate-400 text-black shadow-[0_0_12px_rgba(203,213,225,0.3)]" :
+                            rank === 3 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_12px_rgba(180,83,9,0.3)]" :
+                            "bg-secondary/80 text-muted-foreground border border-border"
+                          )}>
+                            {rank}
+                          </div>
+
+                          {/* Avatar Chiến Mã */}
+                          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-orange-500/10 text-primary border border-primary/10 font-bold uppercase transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
+                            {initial}
+                          </div>
+
+                          <div>
+                            <h4 className="font-extrabold text-sm text-foreground transition-colors group-hover:text-primary">
+                              {item.horseName || "Chiến mã ẩn danh"}
+                            </h4>
+                            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.breed || "Chưa rõ giống"}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-6 text-right">
+                          <div className="hidden sm:block">
+                            <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Số trận (Thắng)</span>
+                            <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
+                          </div>
+                          <div className="bg-primary/5 border border-primary/20 text-primary px-3.5 py-1.5 rounded-xl text-center min-w-[80px] transition-transform duration-300 group-hover:scale-105">
+                            <span className="block text-[8px] text-primary/70 uppercase font-black tracking-wider">Điểm số</span>
+                            <span className="font-mono font-black text-sm">{item.totalPoints}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-center text-xs text-muted-foreground py-6">Chưa có dữ liệu xếp hạng ngựa.</p>
+                )}
+              </div>
             </div>
-          </ScrollReveal>
 
-          <ScrollReveal direction="up" delay={100}>
-            <div className="grid gap-8 lg:grid-cols-2">
-
-              {/* Cột 1: Xếp hạng ngựa */}
-              <div className="rounded-[2.5rem] border border-border/80 bg-card/60 p-6 sm:p-8 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group/board">
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none" />
-                <div className="flex items-center justify-between mb-8 border-b border-border/50 pb-4 relative z-10">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Trophy className="size-5" />
-                    </div>
-                    <h3 className="text-lg font-black uppercase tracking-wider text-foreground">Top 5 Chiến Mã Hàng Đầu</h3>
+            {/* Cột 2: Xếp hạng nài ngựa */}
+            <div className="rounded-[2.5rem] border border-border/80 bg-card/60 p-6 sm:p-8 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group/board">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#067E6A]/[0.01] to-transparent pointer-events-none" />
+              <div className="flex items-center justify-between mb-8 border-b border-border/50 pb-4 relative z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-[#067E6A]/10 text-[#067E6A]">
+                    <Users className="size-5" />
                   </div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary/80 px-2.5 py-1 rounded-lg">
-                    Global Horses
-                  </span>
+                  <h3 className="text-lg font-black uppercase tracking-wider text-foreground">Top 5 Nài Ngựa Xuất Sắc</h3>
                 </div>
-
-                <div className="space-y-3.5 relative z-10">
-                  {loading ? (
-                    [1, 2, 3, 4, 5].map((n) => (
-                      <div key={n} className="h-16 rounded-2xl bg-muted/40 animate-pulse" />
-                    ))
-                  ) : horseRankings.length > 0 ? (
-                    horseRankings.map((item, index) => {
-                      const rank = index + 1;
-                      const initial = item.horseName ? item.horseName.charAt(0) : "H";
-
-                      // Rank #1 — Card vàng đặc biệt, nổi bật nhất
-                      if (rank === 1) return (
-                        <div
-                          key={item.horseId}
-                          style={{ animationDelay: "0ms" }}
-                          className="animate-rank-row group relative overflow-hidden rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-yellow-400/5 to-orange-500/8 p-4 shadow-[0_0_25px_rgba(245,158,11,0.12)] hover:shadow-[0_0_35px_rgba(245,158,11,0.25)] hover:-translate-y-1 hover:border-amber-400/70 transition-all duration-300"
-                        >
-                          {/* Crown shimmer background */}
-                          <div className="absolute -right-4 -top-4 text-[80px] opacity-[0.06] select-none pointer-events-none">👑</div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              {/* Rank badge #1 */}
-                              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-black font-black text-base shadow-[0_0_18px_rgba(245,158,11,0.5)]">
-                                1
-                              </div>
-                              {/* Avatar */}
-                              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 text-amber-500 border border-amber-400/30 font-black text-lg uppercase">
-                                {initial}
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h4 className="font-black text-sm text-foreground group-hover:text-amber-500 transition-colors">{item.horseName || "Chiến mã ẩn danh"}</h4>
-                                  <span className="text-[9px] font-black text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">🏆 #1</span>
-                                </div>
-                                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.breed || "Chưa rõ giống"}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-right">
-                              <div className="hidden sm:block">
-                                <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
-                                <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
-                              </div>
-                              <div className="bg-gradient-to-br from-amber-400/15 to-orange-500/10 border border-amber-400/30 text-amber-500 px-4 py-2 rounded-xl text-center min-w-[84px]">
-                                <span className="block text-[8px] text-amber-500/70 uppercase font-black tracking-wider">Điểm số</span>
-                                <span className="font-mono font-black text-base">{item.totalPoints}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-
-                      // Rank #2 — Card bạc nổi bật
-                      if (rank === 2) return (
-                        <div
-                          key={item.horseId}
-                          style={{ animationDelay: "80ms" }}
-                          className="animate-rank-row group relative overflow-hidden rounded-2xl border border-slate-400/30 bg-gradient-to-br from-slate-300/8 via-slate-200/4 to-slate-400/5 p-4 hover:shadow-[0_0_28px_rgba(148,163,184,0.18)] hover:-translate-y-0.5 hover:border-slate-400/50 transition-all duration-300"
-                        >
-                          <div className="absolute -right-3 -top-3 text-[65px] opacity-[0.05] select-none pointer-events-none">🥈</div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-200 to-slate-400 text-black font-black text-sm shadow-[0_0_12px_rgba(203,213,225,0.35)]">
-                                2
-                              </div>
-                              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-200/10 text-slate-400 border border-slate-400/20 font-bold uppercase">
-                                {initial}
-                              </div>
-                              <div>
-                                <h4 className="font-extrabold text-sm text-foreground group-hover:text-slate-400 transition-colors">{item.horseName || "Chiến mã ẩn danh"}</h4>
-                                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.breed || "Chưa rõ giống"}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-right">
-                              <div className="hidden sm:block">
-                                <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
-                                <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
-                              </div>
-                              <div className="bg-slate-200/10 border border-slate-400/20 text-slate-400 px-3.5 py-1.5 rounded-xl text-center min-w-[80px]">
-                                <span className="block text-[8px] text-slate-400/70 uppercase font-black tracking-wider">Điểm số</span>
-                                <span className="font-mono font-black text-sm">{item.totalPoints}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-
-                      // Rank 3–5
-                      return (
-                        <div
-                          key={item.horseId}
-                          style={{ animationDelay: `${index * 80}ms` }}
-                          className="animate-rank-row group flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/40 hover:border-primary/30 hover:bg-primary/[0.03] hover:scale-[1.015] hover:-translate-y-0.5 transition-all duration-300 ease-out shadow-sm"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className={cn(
-                              "flex size-9 shrink-0 items-center justify-center rounded-xl font-black text-sm",
-                              rank === 3 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_10px_rgba(180,83,9,0.3)]" :
-                                "bg-secondary/80 text-muted-foreground border border-border"
-                            )}>
-                              {rank}
-                            </div>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-orange-500/10 text-primary border border-primary/10 font-bold uppercase">
-                              {initial}
-                            </div>
-                            <div>
-                              <h4 className="font-extrabold text-sm text-foreground group-hover:text-primary transition-colors">{item.horseName || "Chiến mã ẩn danh"}</h4>
-                              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.breed || "Chưa rõ giống"}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 text-right">
-                            <div className="hidden sm:block">
-                              <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
-                              <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
-                            </div>
-                            <div className="bg-primary/5 border border-primary/20 text-primary px-3.5 py-1.5 rounded-xl text-center min-w-[80px]">
-                              <span className="block text-[8px] text-primary/70 uppercase font-black tracking-wider">Điểm số</span>
-                              <span className="font-mono font-black text-sm">{item.totalPoints}</span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-center text-xs text-muted-foreground py-6">Chưa có dữ liệu xếp hạng ngựa.</p>
-                  )}
-                </div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary/80 px-2.5 py-1 rounded-lg">
+                  Global Jockeys
+                </span>
               </div>
 
-              {/* Cột 2: Xếp hạng nài ngựa */}
-              <div className="rounded-[2.5rem] border border-border/80 bg-card/60 p-6 sm:p-8 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group/board">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#067E6A]/[0.01] to-transparent pointer-events-none" />
-                <div className="flex items-center justify-between mb-8 border-b border-border/50 pb-4 relative z-10">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex size-9 items-center justify-center rounded-xl bg-[#067E6A]/10 text-[#067E6A]">
-                      <Users className="size-5" />
-                    </div>
-                    <h3 className="text-lg font-black uppercase tracking-wider text-foreground">Top 5 Nài Ngựa Xuất Sắc</h3>
-                  </div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary/80 px-2.5 py-1 rounded-lg">
-                    Global Jockeys
-                  </span>
-                </div>
+              <div className="space-y-3.5 relative z-10">
+                {loading ? (
+                  [1, 2, 3, 4, 5].map((n) => (
+                    <div key={n} className="h-16 rounded-2xl bg-muted/40 animate-pulse" />
+                  ))
+                ) : jockeyRankings.length > 0 ? (
+                  jockeyRankings.map((item, index) => {
+                    const rank = index + 1;
+                    const initial = item.jockeyName ? item.jockeyName.split(" ").pop()?.charAt(0) : "N";
+                    return (
+                      <div
+                        key={item.jockeyUserId}
+                        style={{ animationDelay: `${index * 80}ms` }}
+                        className="animate-rank-row group flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/40 hover:border-[#067E6A]/30 hover:bg-[#067E6A]/[0.03] hover:scale-[1.015] hover:-translate-y-0.5 transition-all duration-300 ease-out shadow-sm"
+                      >
+                        <div className="flex items-center gap-4">
+                          {/* Rank Badge với hiệu ứng 3D neon */}
+                          <div className={cn(
+                            "flex size-9 shrink-0 items-center justify-center rounded-xl font-black text-sm transition-transform duration-300 group-hover:scale-105",
+                            rank === 1 ? "bg-gradient-to-br from-yellow-400 to-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]" :
+                            rank === 2 ? "bg-gradient-to-br from-slate-200 to-slate-400 text-black shadow-[0_0_12px_rgba(203,213,225,0.3)]" :
+                            rank === 3 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_12px_rgba(180,83,9,0.3)]" :
+                            "bg-secondary/80 text-muted-foreground border border-border"
+                          )}>
+                            {rank}
+                          </div>
 
-                <div className="space-y-3.5 relative z-10">
-                  {loading ? (
-                    [1, 2, 3, 4, 5].map((n) => (
-                      <div key={n} className="h-16 rounded-2xl bg-muted/40 animate-pulse" />
-                    ))
-                  ) : jockeyRankings.length > 0 ? (
-                    jockeyRankings.map((item, index) => {
-                      const rank = index + 1;
-                      const initial = item.jockeyName ? item.jockeyName.split(" ").pop()?.charAt(0) : "N";
+                          {/* Avatar Nài ngựa */}
+                          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#067E6A]/10 to-emerald-500/10 text-[#067E6A] border border-[#067E6A]/10 font-bold uppercase transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
+                            {initial}
+                          </div>
 
-                      if (rank === 1) return (
-                        <div
-                          key={item.jockeyUserId}
-                          style={{ animationDelay: "0ms" }}
-                          className="animate-rank-row group relative overflow-hidden rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-yellow-400/5 to-orange-500/8 p-4 shadow-[0_0_25px_rgba(245,158,11,0.12)] hover:shadow-[0_0_35px_rgba(245,158,11,0.25)] hover:-translate-y-1 hover:border-amber-400/70 transition-all duration-300"
-                        >
-                          <div className="absolute -right-4 -top-4 text-[80px] opacity-[0.06] select-none pointer-events-none">👑</div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-black font-black text-base shadow-[0_0_18px_rgba(245,158,11,0.5)]">
-                                1
-                              </div>
-                              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 text-amber-500 border border-amber-400/30 font-black text-lg uppercase">
-                                {initial}
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h4 className="font-black text-sm text-foreground group-hover:text-amber-500 transition-colors">{item.jockeyName || "Nài ngựa ẩn danh"}</h4>
-                                  <span className="text-[9px] font-black text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">🏆 #1</span>
-                                </div>
-                                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Kinh nghiệm: {item.experienceYears || 0} năm</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-right">
-                              <div className="hidden sm:block">
-                                <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
-                                <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
-                              </div>
-                              <div className="bg-gradient-to-br from-amber-400/15 to-orange-500/10 border border-amber-400/30 text-amber-500 px-4 py-2 rounded-xl text-center min-w-[84px]">
-                                <span className="block text-[8px] text-amber-500/70 uppercase font-black tracking-wider">Điểm số</span>
-                                <span className="font-mono font-black text-base">{item.totalPoints}</span>
-                              </div>
-                            </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-foreground transition-colors group-hover:text-[#067E6A]">
+                              {item.jockeyName || "Nài ngựa ẩn danh"}
+                            </h4>
+                            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Kinh nghiệm: {item.experienceYears || 0} năm</span>
                           </div>
                         </div>
-                      );
 
-                      if (rank === 2) return (
-                        <div
-                          key={item.jockeyUserId}
-                          style={{ animationDelay: "80ms" }}
-                          className="animate-rank-row group relative overflow-hidden rounded-2xl border border-slate-400/30 bg-gradient-to-br from-slate-300/8 via-slate-200/4 to-slate-400/5 p-4 hover:shadow-[0_0_28px_rgba(148,163,184,0.18)] hover:-translate-y-0.5 hover:border-slate-400/50 transition-all duration-300"
-                        >
-                          <div className="absolute -right-3 -top-3 text-[65px] opacity-[0.05] select-none pointer-events-none">🥈</div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-200 to-slate-400 text-black font-black text-sm shadow-[0_0_12px_rgba(203,213,225,0.35)]">
-                                2
-                              </div>
-                              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-200/10 text-slate-400 border border-slate-400/20 font-bold uppercase">
-                                {initial}
-                              </div>
-                              <div>
-                                <h4 className="font-extrabold text-sm text-foreground group-hover:text-slate-400 transition-colors">{item.jockeyName || "Nài ngựa ẩn danh"}</h4>
-                                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Kinh nghiệm: {item.experienceYears || 0} năm</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-right">
-                              <div className="hidden sm:block">
-                                <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
-                                <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
-                              </div>
-                              <div className="bg-slate-200/10 border border-slate-400/20 text-slate-400 px-3.5 py-1.5 rounded-xl text-center min-w-[80px]">
-                                <span className="block text-[8px] text-slate-400/70 uppercase font-black tracking-wider">Điểm số</span>
-                                <span className="font-mono font-black text-sm">{item.totalPoints}</span>
-                              </div>
-                            </div>
+                        <div className="flex items-center gap-6 text-right">
+                          <div className="hidden sm:block">
+                            <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Số trận (Thắng)</span>
+                            <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
+                          </div>
+                          <div className="bg-[#067E6A]/5 border border-[#067E6A]/20 text-[#067E6A] px-3.5 py-1.5 rounded-xl text-center min-w-[80px] transition-transform duration-300 group-hover:scale-105">
+                            <span className="block text-[8px] text-[#067E6A]/70 uppercase font-black tracking-wider">Điểm số</span>
+                            <span className="font-mono font-black text-sm">{item.totalPoints}</span>
                           </div>
                         </div>
-                      );
-
-                      return (
-                        <div
-                          key={item.jockeyUserId}
-                          style={{ animationDelay: `${index * 80}ms` }}
-                          className="animate-rank-row group flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/40 hover:border-[#067E6A]/30 hover:bg-[#067E6A]/[0.03] hover:scale-[1.015] hover:-translate-y-0.5 transition-all duration-300 ease-out shadow-sm"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className={cn(
-                              "flex size-9 shrink-0 items-center justify-center rounded-xl font-black text-sm",
-                              rank === 3 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_10px_rgba(180,83,9,0.3)]" :
-                                "bg-secondary/80 text-muted-foreground border border-border"
-                            )}>
-                              {rank}
-                            </div>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#067E6A]/10 to-emerald-500/10 text-[#067E6A] border border-[#067E6A]/10 font-bold uppercase">
-                              {initial}
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-sm text-foreground group-hover:text-[#067E6A] transition-colors">{item.jockeyName || "Nài ngựa ẩn danh"}</h4>
-                              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Kinh nghiệm: {item.experienceYears || 0} năm</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 text-right">
-                            <div className="hidden sm:block">
-                              <span className="block text-[8px] text-muted-foreground uppercase font-black tracking-wider">Trận (Thắng)</span>
-                              <span className="font-mono text-xs font-bold text-foreground/80">{item.totalRaces} ({item.wins})</span>
-                            </div>
-                            <div className="bg-[#067E6A]/5 border border-[#067E6A]/20 text-[#067E6A] px-3.5 py-1.5 rounded-xl text-center min-w-[80px]">
-                              <span className="block text-[8px] text-[#067E6A]/70 uppercase font-black tracking-wider">Điểm số</span>
-                              <span className="font-mono font-black text-sm">{item.totalPoints}</span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-center text-xs text-muted-foreground py-6">Chưa có dữ liệu xếp hạng nài ngựa.</p>
-                  )}
-                </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-center text-xs text-muted-foreground py-6">Chưa có dữ liệu xếp hạng nài ngựa.</p>
+                )}
               </div>
-
             </div>
-          </ScrollReveal>
+
+          </div>
         </div>
       </section>
 
@@ -1185,14 +1029,14 @@ export default function Home() {
         {/* Glow Effects */}
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute bottom-1/4 left-10 w-96 h-96 bg-yellow-500/5 rounded-full blur-[140px] pointer-events-none" />
-
+        
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid gap-12 lg:grid-cols-12 items-center">
-
+            
             {/* Cột trái: Quả địa cầu cobe 3D */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
               <div className="absolute inset-0 bg-radial-gradient from-primary/10 via-transparent to-transparent blur-3xl pointer-events-none scale-150" />
-
+              
               {/* Quả địa cầu cobe 3D và các nhãn quốc gia */}
               <div className="relative flex items-center justify-center w-[300px] h-[300px] sm:w-[450px] sm:h-[450px]">
                 <canvas
@@ -1302,7 +1146,7 @@ export default function Home() {
                         {league.desc}
                       </p>
                     </div>
-
+                    
                     <div className="pt-2 border-t border-border/40 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
                       <span>Xem thông tin giải</span>
                       <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
@@ -1318,8 +1162,7 @@ export default function Home() {
 
       {/* 6. Core Features Section (Tính năng cốt lõi - Thiết kế hiện đại & Hiệu ứng tương tác) */}
       <section className="py-24 relative overflow-hidden bg-background">
-        <style dangerouslySetInnerHTML={{
-          __html: `
+        <style dangerouslySetInnerHTML={{__html: `
           @keyframes featureCardFadeInUp {
             from {
               opacity: 0;
@@ -1341,7 +1184,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-[0.02] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-16 relative z-10">
-
+          
           <div className="space-y-3 text-center max-w-3xl mx-auto">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">
               <span className="size-1.5 rounded-full bg-primary animate-pulse" />
@@ -1360,7 +1203,7 @@ export default function Home() {
               const Icon = feat.icon;
               const isLarge = feat.key === "feat1";
               const isWide = feat.key === "feat4" || feat.key === "feat8";
-
+              
               return (
                 <div
                   key={feat.key}
@@ -1391,7 +1234,7 @@ export default function Home() {
                       )}>
                         <Icon className="size-6 transition-transform duration-500" />
                       </div>
-
+                      
                       <div className="space-y-2">
                         <h3 className={cn(
                           "font-extrabold text-sm uppercase tracking-wider text-foreground transition-colors duration-300 relative inline-block",
@@ -1465,39 +1308,45 @@ export default function Home() {
             <div className="absolute inset-y-12 left-0 w-[2px] bg-gradient-to-b from-transparent via-[#F8CD46] to-transparent shadow-[0_0_12px_rgba(248,205,70,0.9)] opacity-70" />
 
             <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center relative z-10">
-
+              
               {/* Left Side Info */}
               <div className="flex items-center gap-6">
                 <div
                   className="size-24 sm:size-28 shrink-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_0_20px_rgba(248,205,70,0.35)]"
                   style={{ backgroundImage: "url('/subscription_trophy.png')" }}
                 />
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-black uppercase tracking-[0.24em] text-chart-3">
-                    {t("homepage.newsletter.eyebrow", "Champion Gold Rewards")}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.24em] text-[#F8CD46] flex items-center gap-1">
+                    <Award className="size-3.5" /> Đăng Ký Tin Tức & Quà Tặng
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wide text-foreground leading-tight">
-                    {t("homepage.newsletter.title", "Stay Updated")} <br /> {t("homepage.newsletter.titleBreak", "With Horse Racing")}
+                    Cập Nhật Lịch Đua <br />
+                    Và Dự Đoán Nhanh
                   </h3>
                 </div>
               </div>
 
-              {/* Right side: Input and Subscribe CTA */}
+              {/* Right Side Input */}
               <div className="flex flex-col sm:flex-row gap-3 w-full lg:pl-8">
                 <div className="relative flex-1">
-                  <Mail className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-foreground/30" />
+                  <Mail className="absolute left-4 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="email"
                     required
-                    placeholder={t("homepage.newsletter.placeholder", "Enter your email")}
-                    className="h-12 w-full rounded-xl border border-border bg-background pl-10.5 pr-4 text-sm text-foreground placeholder:text-foreground/30 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
+                    placeholder="Nhập địa chỉ email của bạn..."
+                    className="h-13 w-full rounded-2xl border border-border bg-background/80 pl-11.5 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
                   />
                 </div>
                 <button
                   type="button"
-                  className="h-12 rounded-xl bg-primary hover:bg-primary/90 px-8 text-sm font-black uppercase tracking-widest text-primary-foreground transition hover:scale-[1.01] active:scale-[0.99]"
-                >{t("homepage.newsletter.subscribe", "Subscribe")}</button>
+                  className="group relative h-13 rounded-2xl bg-primary hover:bg-primary/95 px-8 text-sm font-bold uppercase tracking-wider text-primary-foreground transition-all duration-300 shadow-[0_4px_15px_rgba(225,6,0,0.25)] hover:scale-[1.01] active:scale-[0.99] overflow-hidden"
+                >
+                  <span className="relative z-10">Đăng Ký Ngay</span>
+                  {/* shine effect */}
+                  <span className="absolute inset-0 w-1/2 bg-white/10 skew-x-[-25deg] translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
+                </button>
               </div>
+
             </div>
           </div>
         </div>
@@ -1506,7 +1355,7 @@ export default function Home() {
       {/* 8. Footer Section */}
       <footer className="bg-background py-16 text-xs sm:text-sm text-muted-foreground font-semibold tracking-wide">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 pb-12 border-b border-border/50">
-
+          
           {/* Logo & Description */}
           <div className="space-y-5">
             <Link
@@ -1530,73 +1379,79 @@ export default function Home() {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">{t("homepage.footer.quickLinks", "Quick Links")}</h4>
-            <div className="flex flex-col gap-2 text-xs">
-              {["Tournaments", "Races", "Rankings", "Predictions"].map(
-                (link) => (
-                  <Link
-                    key={link}
-                    href={`/${link.toLowerCase()}`}
-                    className="text-foreground/40 hover:text-foreground transition"
-                  >
-                    {link}
-                  </Link>
-                ),
-              )}
+          <div className="space-y-4">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
+              Đường Dẫn Nhanh
+            </h4>
+            <div className="flex flex-col gap-2.5 text-xs font-medium">
+              {[
+                { name: "Danh sách giải đấu", href: "/tournaments" },
+                { name: "Lịch thi đấu đua ngựa", href: "/races" },
+                { name: "Bảng xếp hạng", href: "/rankings" },
+                { name: "Dự đoán kết quả", href: "/predictions" }
+              ].map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* Support */}
-          <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">{t("homepage.footer.support", "Support")}</h4>
-            <div className="flex flex-col gap-2 text-xs">
-              {["Help Center", "Guides", "FAQ", "Contact Us"].map((link) => (
+          <div className="space-y-4">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
+              Hỗ Trợ Người Dùng
+            </h4>
+            <div className="flex flex-col gap-2.5 text-xs font-medium">
+              {[
+                { name: "Trung tâm hỗ trợ", href: "/support" },
+                { name: "Hướng dẫn sử dụng", href: "/support" },
+                { name: "Câu hỏi thường gặp", href: "/support" },
+                { name: "Liên hệ chúng tôi", href: "/support" }
+              ].map((link) => (
                 <Link
-                  key={link}
-                  href={`/support`}
-                  className="text-foreground/40 hover:text-foreground transition"
+                  key={link.name}
+                  href={link.href}
+                  className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  {link}
+                  {link.name}
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Follow Us */}
-          <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">{t("homepage.footer.followUs", "Follow Us")}</h4>
+          <div className="space-y-4">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
+              Mạng Xã Hội
+            </h4>
             <div className="flex items-center gap-3">
               <Link
                 href="https://facebook.com"
-                className="flex size-9 items-center justify-center rounded-xl bg-secondary border border-border text-foreground/40 hover:text-primary hover:border-primary/30 transition"
+                className="flex size-10 items-center justify-center rounded-xl bg-secondary/50 border border-border text-muted-foreground hover:text-primary hover:border-primary/30 transition-all duration-300"
               >
-                <svg
-                  className="size-4.5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z" />
                 </svg>
               </Link>
               <Link
                 href="https://twitter.com"
-                className="flex size-9 items-center justify-center rounded-xl bg-secondary border border-border text-foreground/40 hover:text-primary hover:border-primary/30 transition"
+                className="flex size-10 items-center justify-center rounded-xl bg-secondary/50 border border-border text-muted-foreground hover:text-primary hover:border-primary/30 transition-all duration-300"
               >
-                <svg
-                  className="size-4.5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
               </Link>
               <Link
                 href="https://instagram.com"
-                className="flex size-9 items-center justify-center rounded-xl bg-secondary border border-border text-foreground/40 hover:text-primary hover:border-primary/30 transition"
+                className="flex size-10 items-center justify-center rounded-xl bg-secondary/50 border border-border text-muted-foreground hover:text-primary hover:border-primary/30 transition-all duration-300"
               >
                 <svg
-                  className="size-4.5"
+                  className="size-5"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -1611,13 +1466,9 @@ export default function Home() {
               </Link>
               <Link
                 href="https://youtube.com"
-                className="flex size-9 items-center justify-center rounded-xl bg-secondary border border-border text-foreground/40 hover:text-primary hover:border-primary/30 transition"
+                className="flex size-10 items-center justify-center rounded-xl bg-secondary/50 border border-border text-muted-foreground hover:text-primary hover:border-primary/30 transition-all duration-300"
               >
-                <svg
-                  className="size-4.5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.507 9.388.507 9.388.507s7.518 0 9.388-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                 </svg>
               </Link>
@@ -1626,13 +1477,17 @@ export default function Home() {
         </div>
 
         {/* Bottom copyright row */}
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold">
           <span>
-            {t("homepage.footer.copyright", "© 2026 Horse Racing Tournament Management System. All rights reserved.")}
+            © 2026 Hệ thống Quản lý Giải đấu Đua ngựa. Bảo lưu mọi quyền.
           </span>
           <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-foreground transition">{t("homepage.footer.privacy", "Privacy Policy")}</Link>
-            <Link href="/terms" className="hover:text-foreground transition">{t("homepage.footer.terms", "Terms of Service")}</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">
+              Chính sách bảo mật
+            </Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">
+              Điều khoản dịch vụ
+            </Link>
           </div>
         </div>
       </footer>
