@@ -47,6 +47,8 @@ import {
   ViolationPenalty,
   ViolationSeverity,
 } from '../race-violations/schemas/race-violation.schema';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
 /** Points by finishing rank */
 const POINTS_MAP: Record<number, number> = { 1: 10, 2: 7, 3: 5, 4: 3 };
@@ -71,6 +73,7 @@ export class RaceResultsService {
     private auditLogsService: AuditLogsService,
     private notificationsService: NotificationsService,
     @InjectConnection() private connection: Connection,
+    private ledgerService: RewardPointLedgerService,
   ) {}
 
   private async validateRefereeAssigned(
@@ -588,6 +591,28 @@ export class RaceResultsService {
           raceId,
           session,
         );
+
+        for (const result of results) {
+          const pts = result.points ?? 0;
+          if (result.outcome === RaceResultOutcome.FINISHED && pts > 0) {
+            const alreadyCredited = await this.ledgerService.exists(
+              String(result.ownerId),
+              LedgerSourceType.RACE_WIN_REWARD,
+              String(result._id),
+              session,
+            );
+            if (!alreadyCredited) {
+              await this.ledgerService.credit({
+                userId: String(result.ownerId),
+                points: pts,
+                sourceType: LedgerSourceType.RACE_WIN_REWARD,
+                sourceId: String(result._id),
+                note: `Điểm thưởng hạng ${result.rank} giải đua`,
+                session,
+              });
+            }
+          }
+        }
       });
     } finally {
       await session.endSession();

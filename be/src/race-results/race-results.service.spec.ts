@@ -18,6 +18,8 @@ import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RaceStatus } from '../races/schemas/race.schema';
 import { NotificationType } from '../notifications/schemas/notification.schema';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
 describe('RaceResultsService', () => {
   let service: RaceResultsService;
@@ -36,6 +38,7 @@ describe('RaceResultsService', () => {
   let predictionsService: { payoutBetsForRace: jest.Mock };
   let auditLogsService: { log: jest.Mock };
   let notificationsService: { send: jest.Mock };
+  let ledgerService: { credit: jest.Mock; exists: jest.Mock };
   let mockConnection: {
     startSession: jest.Mock;
   };
@@ -84,6 +87,10 @@ describe('RaceResultsService', () => {
     };
     auditLogsService = { log: jest.fn().mockResolvedValue(undefined) };
     notificationsService = { send: jest.fn().mockResolvedValue(undefined) };
+    ledgerService = {
+      credit: jest.fn().mockResolvedValue(undefined),
+      exists: jest.fn().mockResolvedValue(false),
+    };
     mockConnection = { startSession: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -111,6 +118,7 @@ describe('RaceResultsService', () => {
         { provide: PredictionsService, useValue: predictionsService },
         { provide: AuditLogsService, useValue: auditLogsService },
         { provide: NotificationsService, useValue: notificationsService },
+        { provide: RewardPointLedgerService, useValue: ledgerService },
         { provide: getConnectionToken(), useValue: mockConnection },
       ],
     }).compile();
@@ -268,6 +276,100 @@ describe('RaceResultsService', () => {
       const payoutSendCalls = sendCalls.filter((call) => call[0] === 'user1');
       expect(payoutSendCalls).toHaveLength(1);
       expect(notificationsService.send).toHaveBeenCalledTimes(2); // winner + 1 intent
+    });
+
+    describe('RACE_WIN_REWARD credit', () => {
+      const resultId1 = new Types.ObjectId();
+      const owner1 = new Types.ObjectId();
+      const resultId2 = new Types.ObjectId();
+      const owner2 = new Types.ObjectId();
+
+      const finishedResults = [
+        {
+          _id: resultId1,
+          raceId: new Types.ObjectId(),
+          ownerId: owner1,
+          rank: 1,
+          points: 10,
+          outcome: RaceResultOutcome.FINISHED,
+          status: RaceResultStatus.CONFIRMED,
+        },
+        {
+          _id: resultId2,
+          raceId: new Types.ObjectId(),
+          ownerId: owner2,
+          rank: 2,
+          points: 7,
+          outcome: RaceResultOutcome.FINISHED,
+          status: RaceResultStatus.CONFIRMED,
+        },
+      ];
+
+      it('credits ledger for each FINISHED result with points > 0', async () => {
+        const session = makeSession();
+        mockConnection.startSession.mockResolvedValue(session);
+        racesService.findOne.mockResolvedValue({
+          status: RaceStatus.FINISHED,
+          prize: 1000,
+          name: 'Race',
+        });
+        resultModel.find.mockResolvedValue(finishedResults);
+        ledgerService.exists.mockResolvedValue(false);
+
+        await service.publishByRace(raceId, publisherId);
+
+        expect(ledgerService.credit).toHaveBeenCalledTimes(2);
+        expect(ledgerService.credit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            userId: String(owner1),
+            points: 10,
+            sourceType: LedgerSourceType.RACE_WIN_REWARD,
+            sourceId: String(resultId1),
+            session,
+          }),
+        );
+      });
+
+      it('skips credit when already credited (idempotency)', async () => {
+        const session = makeSession();
+        mockConnection.startSession.mockResolvedValue(session);
+        racesService.findOne.mockResolvedValue({
+          status: RaceStatus.FINISHED,
+          prize: 1000,
+          name: 'Race',
+        });
+        resultModel.find.mockResolvedValue(finishedResults);
+        ledgerService.exists.mockResolvedValue(true);
+
+        await service.publishByRace(raceId, publisherId);
+
+        expect(ledgerService.credit).not.toHaveBeenCalled();
+      });
+
+      it('does not credit DID_NOT_FINISH results', async () => {
+        const dnfResult = {
+          _id: new Types.ObjectId(),
+          raceId: new Types.ObjectId(),
+          ownerId: new Types.ObjectId(),
+          rank: undefined,
+          points: 0,
+          outcome: RaceResultOutcome.DID_NOT_FINISH,
+          status: RaceResultStatus.CONFIRMED,
+        };
+        const session = makeSession();
+        mockConnection.startSession.mockResolvedValue(session);
+        racesService.findOne.mockResolvedValue({
+          status: RaceStatus.FINISHED,
+          prize: 1000,
+          name: 'Race',
+        });
+        resultModel.find.mockResolvedValue([dnfResult]);
+        ledgerService.exists.mockResolvedValue(false);
+
+        await service.publishByRace(raceId, publisherId);
+
+        expect(ledgerService.credit).not.toHaveBeenCalled();
+      });
     });
   });
 
