@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
+
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -9,14 +11,43 @@ import {
   Phone,
   Shield,
   User,
+  Camera,
+  Loader2,
+  X,
+  Moon,
+  Sun,
+  Globe,
 } from "lucide-react";
+
+import { useTranslation } from "react-i18next";
+import { useTheme } from "next-themes";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
+import { sileo } from "sileo";
+import { cn } from "@/lib/utils";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+  const [isUploading, setIsUploading] = useState(false);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [localTheme, setLocalTheme] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setMounted(true);
+    setLocalTheme(theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = localTheme === "dark" ? "light" : "dark";
+    setLocalTheme(nextTheme);
+    setTheme(nextTheme);
+  };
 
   if (!user) {
     return (
@@ -39,6 +70,61 @@ export default function ProfilePage() {
         day: "numeric",
       })
     : "Chưa cập nhật";
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.match(/\/(jpg|jpeg|png|webp|gif)$/)) {
+      sileo.error({ title: "Vui lòng chọn file hình ảnh (jpg, png, webp, gif)" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      sileo.error({ title: "Kích thước file tối đa là 5MB" });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Upload image
+      const uploadRes = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+
+      if (!uploadRes.ok) {
+        throw new Error(uploadData.message || "Lỗi khi tải ảnh lên");
+      }
+
+      const imageUrl = uploadData.url;
+
+      // Update user
+      const updateRes = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar: imageUrl }),
+      });
+      const updateData = await updateRes.json();
+
+      if (!updateRes.ok) {
+        throw new Error(updateData.message || "Lỗi khi cập nhật hồ sơ");
+      }
+
+      updateUser({ avatar: imageUrl });
+      sileo.success({ title: "Cập nhật ảnh đại diện thành công" });
+    } catch (error: any) {
+      sileo.error({ title: error.message || "Đã xảy ra lỗi" });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   return (
     <main className="space-y-8 max-w-4xl mx-auto">
@@ -63,8 +149,39 @@ export default function ProfilePage() {
         <div className="relative z-10 space-y-8">
           {/* Avatar and main header */}
           <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-white/5">
-            <div className="flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#E10600] to-[#B80500] text-white shadow-[0_8px_30px_rgba(225,6,0,0.3)]">
-              <User className="size-10" />
+            <div className="relative group">
+              <div 
+                onClick={() => setIsAvatarModalOpen(true)}
+                className="cursor-pointer"
+              >
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.fullName}
+                    className="size-20 rounded-full object-cover shadow-[0_8px_30px_rgba(225,6,0,0.3)] border-2 border-[#E10600]/30 transition hover:border-[#E10600]"
+                  />
+                ) : (
+                  <div className="flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-[#E10600] to-[#B80500] text-white shadow-[0_8px_30px_rgba(225,6,0,0.3)] transition hover:opacity-90">
+                    <User className="size-10" />
+                  </div>
+                )}
+              </div>
+              
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-[#1a1a1a] border border-[#333] shadow-lg transition-transform hover:scale-110 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                title="Thay đổi ảnh đại diện"
+              >
+                {isUploading ? <Loader2 className="size-3.5 text-white animate-spin" /> : <Camera className="size-3.5 text-white" />}
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleAvatarChange}
+              />
             </div>
             <div className="text-center sm:text-left space-y-2">
               <h2 className="text-2xl font-black uppercase text-foreground tracking-wide">
@@ -141,8 +258,117 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
+
+          {/* Settings Section */}
+          <div className="pt-8 border-t border-white/5 space-y-6">
+            <h3 className="text-lg font-black uppercase tracking-wider text-foreground">
+              Cài đặt hệ thống
+            </h3>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {/* Language toggle */}
+              <div className="group rounded-2xl border border-border bg-card p-5 hover:border-primary/30 transition flex items-center justify-between">
+                <div className="flex items-center gap-3 text-muted-foreground group-hover:text-[#E10600] transition">
+                  <Globe className="size-4.5" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">
+                    Ngôn ngữ
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2.5">
+                  <span className={cn("text-xs font-bold transition-colors", mounted && i18n.language === "vi" ? "text-foreground" : "text-muted-foreground")}>
+                    VI
+                  </span>
+                  <button
+                    role="switch"
+                    aria-checked={mounted ? i18n.language === "en" : false}
+                    onClick={() => i18n.changeLanguage(i18n.language === "vi" ? "en" : "vi")}
+                    className={cn(
+                      "w-11 h-6 rounded-full p-1 transition-colors duration-200 focus:outline-none cursor-pointer relative",
+                      mounted && i18n.language === "en" ? "bg-[#E10600]" : "bg-muted-foreground/30"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+                        mounted && i18n.language === "en" ? "translate-x-5" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                  <span className={cn("text-xs font-bold transition-colors", mounted && i18n.language === "en" ? "text-foreground" : "text-muted-foreground")}>
+                    EN
+                  </span>
+                </div>
+              </div>
+
+              {/* Theme toggle */}
+              <div className="group rounded-2xl border border-border bg-card p-5 hover:border-primary/30 transition flex items-center justify-between">
+                <div className="flex items-center gap-3 text-muted-foreground group-hover:text-[#E10600] transition">
+                  {mounted && localTheme === "dark" ? <Moon className="size-4.5" /> : <Sun className="size-4.5" />}
+                  <span className="text-[10px] font-black uppercase tracking-wider">
+                    Giao diện
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <span className={cn("text-xs font-bold transition-colors", mounted && localTheme === "light" ? "text-foreground" : "text-muted-foreground")}>
+                    Sáng
+                  </span>
+                  <button
+                    role="switch"
+                    aria-checked={mounted ? localTheme === "dark" : false}
+                    onClick={toggleTheme}
+                    className={cn(
+                      "w-11 h-6 rounded-full p-1 transition-colors duration-200 focus:outline-none cursor-pointer relative",
+                      mounted && localTheme === "dark" ? "bg-[#E10600]" : "bg-muted-foreground/30"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+                        mounted && localTheme === "dark" ? "translate-x-5" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                  <span className={cn("text-xs font-bold transition-colors", mounted && localTheme === "dark" ? "text-foreground" : "text-muted-foreground")}>
+                    Tối
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Avatar Preview Modal */}
+      {isAvatarModalOpen && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={() => setIsAvatarModalOpen(false)}
+        >
+          <button 
+            className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
+            onClick={() => setIsAvatarModalOpen(false)}
+          >
+            <X className="size-6" />
+          </button>
+          <div 
+            className="relative max-w-2xl max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {user.avatar ? (
+              <img 
+                src={user.avatar} 
+                alt={user.fullName} 
+                className="w-auto h-auto max-w-full max-h-[90vh] object-contain"
+              />
+            ) : (
+              <div className="flex size-64 sm:size-96 items-center justify-center bg-gradient-to-br from-[#E10600] to-[#B80500] text-white">
+                <User className="size-32" />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

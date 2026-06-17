@@ -116,15 +116,6 @@ export function UserDropdownMenu({
             <span>{t("nav.dashboard", "Dashboard")}</span>
           </Link>
 
-          {/* Settings Link */}
-          <Link
-            href="/settings"
-            onClick={closeMenu}
-            className="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
-          >
-            <Settings className="size-4.5" />
-            <span>{t("nav.settings", "Settings")}</span>
-          </Link>
 
           {/* Logout Button */}
           <button

@@ -49,11 +49,11 @@
 }
 
 :root {
-  --background: #ffffff;
+  --background: #fcf2f2;
   --foreground: #0a0a0a;
-  --card: #ffffff;
+  --card: #fdf7f7;
   --card-foreground: #0a0a0a;
-  --popover: #ffffff;
+  --popover: #fcf2f2;
   --popover-foreground: #0a0a0a;
   --primary: #e10600;
   --primary-foreground: #ffffff;
@@ -73,7 +73,7 @@
   --chart-4: #52525b;
   --chart-5: #71717a;
   --radius: 0.5rem;
-  --sidebar: #ffffff;
+  --sidebar: #fdf7f7;
   --sidebar-foreground: #0a0a0a;
   --sidebar-primary: #e10600;
   --sidebar-primary-foreground: #ffffff;
@@ -165,7 +165,7 @@
         rgba(6, 126, 106, 0.06),
         transparent 24rem
       ),
-      linear-gradient(135deg, #ffffff 0%, #fafafa 42%, #f5f5f5 100%);
+      linear-gradient(135deg, #fcf2f2 0%, #fdf7f7 42%, #f9eded 100%);
   }
 
   ::selection {
