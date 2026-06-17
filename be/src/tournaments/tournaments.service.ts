@@ -30,13 +30,6 @@ import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
-const TERMINAL_RACE_STATUSES = [
-  RaceStatus.LIVE,
-  RaceStatus.FINISHED,
-  RaceStatus.RESULT_PUBLISHED,
-  RaceStatus.CANCELLED,
-];
-
 @Injectable()
 export class TournamentsService {
   constructor(
@@ -213,7 +206,7 @@ export class TournamentsService {
     // Get all race IDs before cancelling
     const races = await this.raceModel.find({
       tournamentId,
-      status: { $nin: TERMINAL_RACE_STATUSES },
+      status: { $nin: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED] },
     });
     const raceIds = races.map((r) => r._id);
 
@@ -244,17 +237,15 @@ export class TournamentsService {
     }
 
     await Promise.all([
-      // Cancel non-terminal races
+      // Cancel non-terminal races (skip RESULT_PUBLISHED and already CANCELLED)
       this.raceModel.updateMany(
-        { tournamentId, status: { $nin: TERMINAL_RACE_STATUSES } },
+        {
+          tournamentId,
+          status: { $nin: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED] },
+        },
         { $set: { status: RaceStatus.CANCELLED } },
       ),
-      // Cancel all non-cancelled registrations
-      this.registrationModel.updateMany(
-        { tournamentId, status: { $ne: RegistrationStatus.CANCELLED } },
-        { $set: { status: RegistrationStatus.CANCELLED } },
-      ),
-      // Cancel pending predictions for all races in tournament
+      // Cancel pending predictions for cancelled races
       raceIds.length > 0
         ? this.predictionModel.updateMany(
             { raceId: { $in: raceIds }, status: PredictionStatus.PENDING },
@@ -262,6 +253,18 @@ export class TournamentsService {
           )
         : Promise.resolve(),
     ]);
+
+    // PENDING registrations → CANCELLED; APPROVED registrations → WITHDRAWN
+    if (raceIds.length > 0) {
+      await this.registrationModel.updateMany(
+        { raceId: { $in: raceIds }, status: RegistrationStatus.PENDING },
+        { $set: { status: RegistrationStatus.CANCELLED } },
+      );
+      await this.registrationModel.updateMany(
+        { raceId: { $in: raceIds }, status: RegistrationStatus.APPROVED },
+        { $set: { status: RegistrationStatus.WITHDRAWN } },
+      );
+    }
 
     // Notify all affected owners
     const ownerIds = await this.registrationModel.distinct('ownerId', {
