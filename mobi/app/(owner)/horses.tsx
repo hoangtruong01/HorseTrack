@@ -24,7 +24,7 @@ export default function OwnerHorses() {
       const res = await horsesApi.listMine({ limit: 100 });
       setData((res as any).data || []);
     } catch (err: any) {
-      setError(err.message || 'Khong the tai danh sach chien ma.');
+      setError(err.message || 'Không thể tải danh sách chiến mã.');
     } finally { setLoading(false); }
   }, []);
 

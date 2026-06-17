@@ -17,7 +17,7 @@ export default function OwnerRegistrations() {
       const res = await registrationsApi.listMine({ limit: 100 });
       setData((res as any).data || []);
     } catch (err: any) {
-      setError(err.message || 'Khong the tai danh sach dang ky.');
+      setError(err.message || 'Không thể tải danh sách đăng ký.');
     } finally { setLoading(false); }
   }, []);
 
