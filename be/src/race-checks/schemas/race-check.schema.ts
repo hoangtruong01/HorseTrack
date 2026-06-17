@@ -9,6 +9,15 @@ export enum RaceCheckStatus {
   FAILED = 'failed',
 }
 
+export const RACE_CHECK_STATUS_FLOW: Record<
+  RaceCheckStatus,
+  RaceCheckStatus[]
+> = {
+  [RaceCheckStatus.PENDING]: [RaceCheckStatus.PASSED, RaceCheckStatus.FAILED],
+  [RaceCheckStatus.PASSED]: [],
+  [RaceCheckStatus.FAILED]: [RaceCheckStatus.PENDING],
+};
+
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class RaceCheck {
   @Prop({ type: Types.ObjectId, ref: 'Race', required: true })

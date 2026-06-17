@@ -25,6 +25,7 @@ import {
   RaceCheck,
   RaceCheckDocument,
   RaceCheckStatus,
+  RACE_CHECK_STATUS_FLOW,
 } from './schemas/race-check.schema';
 
 @Injectable()
@@ -122,6 +123,13 @@ export class RaceChecksService {
 
     if (String(check.checkedBy) !== checkedBy) {
       throw new ForbiddenException('You can only update checks you submitted');
+    }
+
+    const allowed = RACE_CHECK_STATUS_FLOW[check.status];
+    if (!allowed.includes(dto.status)) {
+      throw new BadRequestException(
+        `Invalid status transition: ${check.status} → ${dto.status}`,
+      );
     }
 
     check.status = dto.status;
