@@ -370,6 +370,32 @@ describe('RaceResultsService', () => {
 
         expect(ledgerService.credit).not.toHaveBeenCalled();
       });
+
+      it('retry-safety: credit called once per result even when withTransaction runs twice', async () => {
+        // Simulate Mongo driver retrying the transaction callback
+        const session = makeSession(async (fn) => {
+          await fn(); // run 1
+          await fn(); // run 2
+        });
+        mockConnection.startSession.mockResolvedValue(session);
+        racesService.findOne.mockResolvedValue({
+          status: RaceStatus.FINISHED,
+          prize: 1000,
+          name: 'Race',
+        });
+        resultModel.find.mockResolvedValue(finishedResults);
+
+        // Run 1: exists returns false → credit runs; Run 2: exists returns true → credit skipped
+        ledgerService.exists
+          .mockResolvedValueOnce(false) // result1, run1
+          .mockResolvedValueOnce(false) // result2, run1
+          .mockResolvedValueOnce(true) // result1, run2 (already credited)
+          .mockResolvedValueOnce(true); // result2, run2 (already credited)
+
+        await service.publishByRace(raceId, publisherId);
+
+        expect(ledgerService.credit).toHaveBeenCalledTimes(2);
+      });
     });
   });
 
