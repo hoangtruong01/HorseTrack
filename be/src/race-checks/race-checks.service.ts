@@ -143,7 +143,19 @@ export class RaceChecksService {
       check.checkedAt = new Date();
     }
 
-    return check.save();
+    const saved = await check.save();
+
+    if (dto.status === RaceCheckStatus.FAILED) {
+      const race = await this.racesService.findOne(String(check.raceId));
+      if (race.status === RaceStatus.READY) {
+        await this.racesService.setStatus(
+          String(check.raceId),
+          RaceStatus.CHECKING,
+        );
+      }
+    }
+
+    return saved;
   }
 
   async findByRace(raceId: string) {
