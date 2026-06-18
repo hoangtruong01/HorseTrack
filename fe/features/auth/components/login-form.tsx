@@ -25,8 +25,8 @@ import { useTranslation } from "react-i18next";
 import { sileo } from "sileo";
 
 const toast = {
-  success: (msg: string) => sileo.success({ title: msg, duration: 1200 }),
-  error: (msg: string) => sileo.error({ title: msg, duration: 1200 }),
+  success: (msg: string, description?: string) => sileo.success({ title: msg, description, duration: 1500 }),
+  error: (msg: string, description?: string) => sileo.error({ title: msg, description, duration: 1500 }),
 };
 
 const fieldClass =
@@ -118,12 +118,13 @@ export function LoginForm() {
         targetRole = "counter-staff";
       }
 
-      toast.success(t("auth.loginForm.loginSuccess"));
+      toast.success(t("auth.loginForm.loginSuccess"), t("auth.loginForm.loginSuccessDescription", { userName: user.fullName }));
       router.push(`/${targetRole}`);
     } catch (err) {
-      const errMsg = (err as Error).message || t("auth.loginForm.loginError");
+      const defaultErr = t("auth.loginForm.loginError");
+      const errMsg = (err as Error).message || defaultErr;
       setErrorMsg(errMsg);
-      toast.error(errMsg);
+      toast.error(defaultErr, errMsg !== defaultErr ? errMsg : undefined);
       setIsSubmitting(false);
     }
   }

@@ -16,6 +16,7 @@ export const C = {
     return Appearance.getColorScheme() === 'light' ? '#EAEAEA' : premiumColors.border;
   },
   red: '#E10600',
+  blue: '#3B82F6',
   teal: '#067E6A',
   tealLight: '#34D399',
   yellow: '#F59E0B',
