@@ -1,6 +1,6 @@
 # Academic Search Keywords Matrix
 
-Bảng dưới đây liệt kê các từ khóa tìm kiếm học thuật (Search Queries) và mô-đun ứng dụng tương ứng (Target Module) được rút ra từ 10 bài báo nghiên cứu nền tảng để phát triển dự án **AI Study Hub**:
+Bảng dưới đây liệt kê các từ khóa tìm kiếm học thuật (Search Queries) và mô-đun ứng dụng tương ứng (Target Module) được rút ra từ 10 bài báo nghiên cứu nền tảng để phát triển dự án **Horse Racing Tournament Management System**:
 
 | STT | Từ khóa tìm kiếm học thuật (Search Queries) | Mô-đun ứng dụng tương ứng (Target Module) |
 |---|---|---|
