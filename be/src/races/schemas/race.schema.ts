@@ -17,7 +17,11 @@ export enum RaceStatus {
 export const RACE_STATUS_FLOW: Record<RaceStatus, RaceStatus[]> = {
   [RaceStatus.SCHEDULED]: [RaceStatus.CHECKING, RaceStatus.CANCELLED],
   [RaceStatus.CHECKING]: [RaceStatus.READY, RaceStatus.CANCELLED],
-  [RaceStatus.READY]: [RaceStatus.LIVE, RaceStatus.CANCELLED],
+  [RaceStatus.READY]: [
+    RaceStatus.LIVE,
+    RaceStatus.CHECKING,
+    RaceStatus.CANCELLED,
+  ],
   [RaceStatus.LIVE]: [RaceStatus.FINISHED, RaceStatus.CANCELLED],
   [RaceStatus.FINISHED]: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED],
   [RaceStatus.RESULT_PUBLISHED]: [],
