@@ -24,6 +24,11 @@ import {
   RegistrationDocument,
   RegistrationStatus,
 } from './schemas/registration.schema';
+import {
+  RaceResult,
+  RaceResultDocument,
+  RaceResultStatus,
+} from '../race-results/schemas/race-result.schema';
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
@@ -35,6 +40,8 @@ export class RegistrationsService {
   constructor(
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
+    @InjectModel(RaceResult.name)
+    private raceResultModel: Model<RaceResultDocument>,
     private horsesService: HorsesService,
     private tournamentsService: TournamentsService,
     private racesService: RacesService,
@@ -323,6 +330,17 @@ export class RegistrationsService {
     } catch (err) {
       console.error(
         'Failed to cancel predictions after registration withdrawn:',
+        err,
+      );
+    }
+    try {
+      await this.raceResultModel.deleteMany({
+        raceRegistrationId: reg._id,
+        status: RaceResultStatus.DRAFT,
+      });
+    } catch (err) {
+      console.error(
+        'Failed to clean up draft race results after registration withdrawn:',
         err,
       );
     }

@@ -7,6 +7,10 @@ import {
   Registration,
   RegistrationSchema,
 } from './schemas/registration.schema';
+import {
+  RaceResult,
+  RaceResultSchema,
+} from '../race-results/schemas/race-result.schema';
 import { RegistrationsController } from './registrations.controller';
 import { RegistrationsService } from './registrations.service';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -17,6 +21,7 @@ import { PredictionsModule } from '../predictions/predictions.module';
   imports: [
     MongooseModule.forFeature([
       { name: Registration.name, schema: RegistrationSchema },
+      { name: RaceResult.name, schema: RaceResultSchema },
     ]),
     HorsesModule,
     TournamentsModule,
