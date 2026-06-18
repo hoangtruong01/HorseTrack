@@ -253,6 +253,18 @@ export class RacesService {
       await this.validateReadyConditions(id);
     }
 
+    if (status === RaceStatus.LIVE) {
+      const acceptedReferee = await this.refereeAssignmentModel.findOne({
+        raceId: new Types.ObjectId(id),
+        status: RefereeAssignmentStatus.ACCEPTED,
+      });
+      if (!acceptedReferee) {
+        throw new BadRequestException(
+          'Race cannot go LIVE: no referee has accepted the assignment',
+        );
+      }
+    }
+
     if (status === RaceStatus.CANCELLED) {
       await this.predictionsService.cancelPredictionsForRace(id);
     }
