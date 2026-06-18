@@ -421,7 +421,7 @@ export function JockeyDashboard() {
         {isPendingApproval ? (
           <section className="relative overflow-hidden rounded-3xl border border-[#E10600]/30 bg-card p-6 shadow-2xl space-y-6">
             <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-500 to-transparent" />
-            
+
             <div className="flex items-center gap-3 text-amber-400">
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -430,7 +430,7 @@ export function JockeyDashboard() {
               <h3 className="text-sm font-black uppercase tracking-wider">Hồ sơ đang được kiểm duyệt</h3>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Cảm ơn bạn đã cung cấp thông tin. Ban tổ chức đang kiểm duyệt hồ sơ và giấy phép của bạn. 
+              Cảm ơn bạn đã cung cấp thông tin. Ban tổ chức đang kiểm duyệt hồ sơ và giấy phép của bạn.
               Bạn sẽ nhận được thông báo ngay khi tài khoản được kích hoạt thành công.
             </p>
 
@@ -632,41 +632,40 @@ export function JockeyDashboard() {
       />
 
       {/* Main Content */}
-      <section className="min-h-[400px]">
-        <div className="space-y-6">
+      <section className="space-y-6">
 
-          {/* Top Area: Profile & Alerts */}
-          <div className="flex flex-col md:flex-row gap-6">
+        {/* Top Area: Profile & Alerts */}
+        <div className="flex flex-col md:flex-row gap-6">
 
-            {/* User Profile Block */}
-            <div className="flex-1 rounded-2xl border border-border bg-card p-5 shadow-sm relative overflow-hidden">
-              {isLoadingProfile ? (
-                <div className="flex items-center gap-4 animate-pulse">
-                  <div className="size-16 rounded-full bg-muted/50" />
-                  <div className="space-y-2">
-                    <div className="h-5 w-32 bg-muted/50 rounded" />
-                    <div className="h-4 w-48 bg-muted/50 rounded" />
-                  </div>
+          {/* User Profile Block */}
+          <div className="flex-1 rounded-2xl border border-border bg-card p-5 shadow-sm relative overflow-hidden">
+            {isLoadingProfile ? (
+              <div className="flex items-center gap-4 animate-pulse">
+                <div className="size-16 rounded-full bg-muted/50" />
+                <div className="space-y-2">
+                  <div className="h-5 w-32 bg-muted/50 rounded" />
+                  <div className="h-4 w-48 bg-muted/50 rounded" />
                 </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className="size-16 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
-                    {profile?.avatar ? (
-                      <img src={profile.avatar} alt={profile.fullName} className="size-full object-cover" />
-                    ) : (
-                      <User className="size-8 text-primary" />
-                    )}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-black uppercase text-foreground">{profile?.fullName}</h2>
-                    <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-                      <span>{profile?.email}</span>
-                      {profile?.phone && <span>• {profile.phone}</span>}
-                    </p>
-                  </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <div className="size-16 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
+                  {profile?.avatar ? (
+                    <img src={profile.avatar} alt={profile.fullName} className="size-full object-cover" />
+                  ) : (
+                    <User className="size-8 text-primary" />
+                  )}
                 </div>
-              )}
-            </div>
+                <div>
+                  <h2 className="text-xl font-black uppercase text-foreground">{profile?.fullName}</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                    <span>{profile?.email}</span>
+                    {profile?.phone && <span>• {profile.phone}</span>}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {pendingInvs.length > 0 && (
             <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3 text-foreground max-w-sm self-start md:self-auto animate-bounce">
@@ -677,7 +676,6 @@ export function JockeyDashboard() {
               </div>
             </div>
           )}
-        </div>
         </div>
       </section>
 
@@ -695,71 +693,71 @@ export function JockeyDashboard() {
               ))}
             </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Box 1: Upcoming Schedule */}
-            <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
-                  <Calendar className="size-4 text-teal-400" />
-                  Lịch thi đấu gần nhất
-                </h3>
-                <button
-                  onClick={() => router.push("/jockey/assign")}
-                  className="text-xs text-primary font-bold hover:underline flex items-center transition"
-                >
-                  Xem tất cả <ChevronRight className="size-3.5" />
-                </button>
-              </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Box 1: Upcoming Schedule */}
+              <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
+                    <Calendar className="size-4 text-teal-400" />
+                    Lịch thi đấu gần nhất
+                  </h3>
+                  <button
+                    onClick={() => router.push("/jockey/assign")}
+                    className="text-xs text-primary font-bold hover:underline flex items-center transition"
+                  >
+                    Xem tất cả <ChevronRight className="size-3.5" />
+                  </button>
+                </div>
 
-              {isLoadingInvs ? (
-                <div className="space-y-3">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="h-16 rounded-xl bg-muted/50 animate-pulse" />
-                  ))}
-                </div>
-              ) : acceptedInvs.length === 0 ? (
-                <div className="text-center py-8 rounded-xl border border-dashed border-border text-muted-foreground text-xs">
-                  Chưa có cuộc đua nào sắp diễn ra.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {acceptedInvs.slice(0, 3).map((inv) => (
-                    <div key={inv.id || inv._id} className="group p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition flex justify-between items-center">
-                      <div className="flex flex-col gap-1">
-                        <h4 className="text-xs font-bold text-foreground uppercase truncate max-w-[180px]">{inv.raceId?.name}</h4>
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1.5" title="Thời gian thi đấu">
-                          <Clock className="size-3" />
-                          {formatDateTime(inv.raceId?.startTime)}
-                        </span>
+                {isLoadingInvs ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="h-16 rounded-xl bg-muted/50 animate-pulse" />
+                    ))}
+                  </div>
+                ) : acceptedInvs.length === 0 ? (
+                  <div className="text-center py-8 rounded-xl border border-dashed border-border text-muted-foreground text-xs">
+                    Chưa có cuộc đua nào sắp diễn ra.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {acceptedInvs.slice(0, 3).map((inv) => (
+                      <div key={inv.id || inv._id} className="group p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition flex justify-between items-center">
+                        <div className="flex flex-col gap-1">
+                          <h4 className="text-xs font-bold text-foreground uppercase truncate max-w-[180px]">{inv.raceId?.name}</h4>
+                          <span className="text-[10px] text-muted-foreground flex items-center gap-1.5" title="Thời gian thi đấu">
+                            <Clock className="size-3" />
+                            {formatDateTime(inv.raceId?.startTime)}
+                          </span>
+                        </div>
+                        <button
+                          title="Xem chi tiết ngựa"
+                          onClick={() => handleViewHorseDetail(inv.horseId.id)}
+                          className="flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-bold uppercase transition"
+                        >
+                          <Eye className="size-3" />
+                          {inv.horseId?.name}
+                        </button>
                       </div>
-                      <button
-                        title="Xem chi tiết ngựa"
-                        onClick={() => handleViewHorseDetail(inv.horseId.id)}
-                        className="flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-bold uppercase transition"
-                      >
-                        <Eye className="size-3" />
-                        {inv.horseId?.name}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Box 2: Pending Invitations */}
-            <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
-                  <Mail className="size-4 text-primary" />
-                  Lời mời gần đây
-                </h3>
-                <button
-                  onClick={() => router.push("/jockey/invite")}
-                  className="text-xs text-primary font-bold hover:underline flex items-center transition"
-                >
-                  Xem tất cả <ChevronRight className="size-3.5" />
-                </button>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* Box 2: Pending Invitations */}
+              <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
+                    <Mail className="size-4 text-primary" />
+                    Lời mời gần đây
+                  </h3>
+                  <button
+                    onClick={() => router.push("/jockey/invite")}
+                    className="text-xs text-primary font-bold hover:underline flex items-center transition"
+                  >
+                    Xem tất cả <ChevronRight className="size-3.5" />
+                  </button>
+                </div>
 
                 {isLoadingInvs ? (
                   <div className="space-y-3">
@@ -947,16 +945,16 @@ export function JockeyDashboard() {
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 font-black text-[10px] border border-teal-500/20">{inv.jockeySharePercent}%</span>
                           <StatusBadge
                             label={
-                              inv.raceId?.status === "PENDING" ? "Chờ chạy" : 
-                              inv.raceId?.status === "READY" ? "Sẵn sàng" : 
-                              inv.raceId?.status === "LIVE" ? "ĐANG CHẠY" : 
-                              inv.raceId?.status === "FINISHED" ? "Đã xong" : 
-                              inv.raceId?.status === "RESULT_PUBLISHED" ? "Đã có kết quả" : inv.raceId?.status
+                              inv.raceId?.status === "PENDING" ? "Chờ chạy" :
+                                inv.raceId?.status === "READY" ? "Sẵn sàng" :
+                                  inv.raceId?.status === "LIVE" ? "ĐANG CHẠY" :
+                                    inv.raceId?.status === "FINISHED" ? "Đã xong" :
+                                      inv.raceId?.status === "RESULT_PUBLISHED" ? "Đã có kết quả" : inv.raceId?.status
                             }
                             tone={
                               inv.raceId?.status === "LIVE" ? "red" :
-                              inv.raceId?.status === "READY" ? "green" :
-                              inv.raceId?.status === "PENDING" ? "yellow" : "slate"
+                                inv.raceId?.status === "READY" ? "green" :
+                                  inv.raceId?.status === "PENDING" ? "yellow" : "slate"
                             }
                             pulse={inv.raceId?.status === "LIVE"}
                           />
@@ -1075,7 +1073,7 @@ export function JockeyDashboard() {
               {/* Jockey Profile card */}
               <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
                 <h3 className="text-sm font-black uppercase tracking-wider text-foreground border-b border-border pb-2">Hồ sơ nài ngựa</h3>
-                
+
                 {isLoadingProfile ? (
                   <div className="space-y-4 animate-pulse">
                     <div className="size-16 rounded-full bg-muted/50 mx-auto" />
@@ -1371,7 +1369,7 @@ export function JockeyDashboard() {
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <h4 className="text-sm font-black uppercase text-white truncate">{detailInv.horseId?.name}</h4>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{detailInv.horseId?.breed} • {detailInv.horseId?.age} tuổi • {detailInv.horseId?.gender === "male" ? "Đực" : "Cái"}</p>
-                  
+
                   {/* Horse stats compact */}
                   <div className="grid grid-cols-2 gap-2 text-[10px]">
                     <div className="flex justify-between border-b border-border pb-0.5"><span className="text-muted-foreground">Tốc độ:</span><span className="font-bold text-primary">{detailInv.horseId?.baseSpeed || 60}/100</span></div>
