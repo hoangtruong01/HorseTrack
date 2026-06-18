@@ -146,12 +146,16 @@ export class RaceChecksService {
     const saved = await check.save();
 
     if (dto.status === RaceCheckStatus.FAILED) {
-      const race = await this.racesService.findOne(String(check.raceId));
-      if (race.status === RaceStatus.READY) {
-        await this.racesService.setStatus(
-          String(check.raceId),
-          RaceStatus.CHECKING,
-        );
+      try {
+        const race = await this.racesService.findOne(String(check.raceId));
+        if (race.status === RaceStatus.READY) {
+          await this.racesService.setStatus(
+            String(check.raceId),
+            RaceStatus.CHECKING,
+          );
+        }
+      } catch (err) {
+        console.error('Failed to revert race status after check failed:', err);
       }
     }
 

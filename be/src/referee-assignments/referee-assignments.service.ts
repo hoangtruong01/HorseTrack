@@ -267,15 +267,19 @@ export class RefereeAssignmentsService {
   }
 
   private async revertRaceIfNoAcceptedReferee(raceId: string): Promise<void> {
-    const acceptedCount = await this.assignmentModel.countDocuments({
-      raceId: new Types.ObjectId(raceId),
-      status: RefereeAssignmentStatus.ACCEPTED,
-    });
-    if (acceptedCount === 0) {
-      const race = await this.racesService.findOne(raceId);
-      if (race.status === RaceStatus.READY) {
-        await this.racesService.setStatus(raceId, RaceStatus.CHECKING);
+    try {
+      const acceptedCount = await this.assignmentModel.countDocuments({
+        raceId: new Types.ObjectId(raceId),
+        status: RefereeAssignmentStatus.ACCEPTED,
+      });
+      if (acceptedCount === 0) {
+        const race = await this.racesService.findOne(raceId);
+        if (race.status === RaceStatus.READY) {
+          await this.racesService.setStatus(raceId, RaceStatus.CHECKING);
+        }
       }
+    } catch (err) {
+      console.error('Failed to revert race status after referee change:', err);
     }
   }
 
