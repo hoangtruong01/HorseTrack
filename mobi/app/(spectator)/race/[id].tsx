@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, SafeAreaView, ScrollView, TextInput, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, TextInput, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { racesApi, registrationsApi, predictionsApi, walletApi, type RaceItem, type RegistrationItem } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { C, ErrorState } from '../../../components/ui/shared';
+import { ErrorState } from '../../../components/ui/shared';
+import { AppScreen } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 
 export default function SpectatorRaceDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -59,6 +61,7 @@ export default function SpectatorRaceDetail() {
       return;
     }
 
+    // EXACT VALIDATION PRESERVATION
     if (walletBalance === 0) {
       if (points !== 1) {
         Alert.alert('Lỗi', 'Tài khoản 0 Pts chỉ được cược đúng 1 điểm (miễn phí).');
@@ -92,18 +95,19 @@ export default function SpectatorRaceDetail() {
     }
   };
 
+  // PRESERVE Exact error / fail behavior
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={C.red} />
-        <Text style={styles.loadingText}>Đang tải chi tiết cuộc đua...</Text>
+      <View style={styles.failContainer}>
+        <ActivityIndicator size="large" color={premiumColors.brand} />
+        <Text style={styles.failText}>Đang tải chi tiết cuộc đua...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.failContainer}>
         <ErrorState message={error} onRetry={loadData} />
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={[styles.backButtonText, { marginTop: 20 }]}>QUAY LẠI</Text>
@@ -114,9 +118,9 @@ export default function SpectatorRaceDetail() {
 
   if (!race) {
     return (
-      <View style={styles.loadingContainer}>
-        <MaterialIcons name="error-outline" size={48} color={C.red} />
-        <Text style={styles.loadingText}>Không tìm thấy thông tin cuộc đua.</Text>
+      <View style={styles.failContainer}>
+        <MaterialIcons name="error-outline" size={48} color={premiumColors.brand} />
+        <Text style={styles.failText}>Không tìm thấy thông tin cuộc đua.</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={[styles.backButtonText, { marginTop: 20 }]}>QUAY LẠI</Text>
         </TouchableOpacity>
@@ -129,37 +133,43 @@ export default function SpectatorRaceDetail() {
   const startTimeStr = new Date(race.startTime).toLocaleString('vi-VN');
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialIcons name="arrow-back" size={20} color={C.white} />
-          <Text style={styles.backButtonText}>QUAY LẠI LỊCH ĐUA</Text>
+    <AppScreen scroll>
+      <View style={styles.content}>
+        
+        <TouchableOpacity style={styles.navBack} onPress={() => router.back()}>
+          <MaterialIcons name="arrow-back" size={20} color={premiumColors.textMuted} />
+          <Text style={styles.navBackText}>QUAY LẠI LỊCH ĐUA</Text>
         </TouchableOpacity>
 
-        <View style={styles.detailHeaderCard}>
-          <Text style={styles.detailTourName}>{tourName?.toUpperCase()}</Text>
-          <Text style={styles.detailRaceName}>{race.name.toUpperCase()}</Text>
-          <Text style={styles.startTimeText}>Khởi tranh lúc: {startTimeStr}</Text>
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>{tourName?.toUpperCase()}</Text>
+          <Text style={styles.title}>{race.name.toUpperCase()}</Text>
+          <View style={styles.accentLine} />
+          <Text style={styles.subtitle}>Khởi tranh lúc: {startTimeStr}</Text>
         </View>
 
-        <View style={styles.sectionContainer}>
+        <View style={styles.cardContainer}>
           <View style={styles.walletHeader}>
-            <Text style={styles.sectionTitle}>DỰ ĐOÁN CHIẾN MÃ CHIẾN THẮNG</Text>
-            <Text style={styles.walletBalanceText}>Ví: <Text style={styles.redText}>{walletBalance} Pts</Text></Text>
+            <Text style={styles.walletTitle}>DỰ ĐOÁN KẾT QUẢ</Text>
+            <View style={styles.walletBadge}>
+              <Text style={styles.walletBadgeText}>Ví: {walletBalance} Pts</Text>
+            </View>
           </View>
 
           {!isScheduled ? (
-            <View style={{ paddingVertical: 20, alignItems: 'center' }}>
-               <MaterialIcons name="lock-clock" size={32} color={C.textMuted} />
-               <Text style={[styles.emptyTextSmall, { marginTop: 8 }]}>Đã đóng dự đoán.</Text>
+            <View style={styles.emptyStateContainer}>
+               <MaterialIcons name="lock-clock" size={32} color={premiumColors.textMuted} />
+               <Text style={styles.emptyStateText}>Đã đóng dự đoán.</Text>
             </View>
           ) : participants.length === 0 ? (
-            <Text style={styles.emptyTextSmall}>Không có chiến mã nào đăng ký tham gia trận này.</Text>
+            <View style={styles.emptyStateContainer}>
+               <Text style={styles.emptyStateText}>Không có chiến mã nào đăng ký tham gia trận này.</Text>
+            </View>
           ) : (
-            <>
-              <Text style={styles.predictionInstructions}>Chọn một chiến mã và nhập điểm cược:</Text>
+            <View style={styles.formContent}>
+              <Text style={styles.instruction}>Chọn một chiến mã và nhập điểm dự đoán:</Text>
               
-              <View style={styles.horseListContainer}>
+              <View style={styles.optionsList}>
                 {participants.map((p) => {
                   const horse = p.horseId as any;
                   if (!horse) return null;
@@ -168,82 +178,263 @@ export default function SpectatorRaceDetail() {
                   return (
                     <TouchableOpacity 
                       key={horse._id} 
-                      style={[styles.horseSelectCard, isSelected && styles.horseSelectCardActive]}
+                      style={[styles.radioCard, isSelected && styles.radioCardSelected]}
                       onPress={() => setSelectedHorseId(horse._id)}
+                      activeOpacity={0.7}
                     >
                       <MaterialIcons 
                         name={isSelected ? "radio-button-checked" : "radio-button-unchecked"} 
-                        size={18} 
-                        color={isSelected ? C.red : C.textMuted} 
+                        size={20} 
+                        color={isSelected ? premiumColors.brand : premiumColors.textMuted} 
                       />
-                      <View style={styles.horseSelectCardInfo}>
-                        <Text style={[styles.horseSelectName, isSelected && styles.redText]}>{horse.name.toUpperCase()}</Text>
-                        <Text style={styles.horseSelectBreed}>{horse.breed || 'Thuần chủng'}</Text>
+                      <View style={styles.radioInfo}>
+                        <Text style={[styles.radioName, isSelected && styles.radioNameSelected]}>{horse.name.toUpperCase()}</Text>
+                        <Text style={styles.radioBreed}>{horse.breed || 'Thuần chủng'}</Text>
                       </View>
                     </TouchableOpacity>
                   );
                 })}
               </View>
 
-              <View style={styles.betInputRow}>
-                <Text style={styles.betLabel}>SỐ ĐIỂM DỰ ĐOÁN:</Text>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>SỐ ĐIỂM DỰ ĐOÁN:</Text>
                 <TextInput
-                  style={styles.betInput}
+                  style={styles.input}
                   value={betPoints}
                   onChangeText={setBetPoints}
                   keyboardType="number-pad"
                   placeholder="nhập điểm"
-                  placeholderTextColor={C.textMuted}
+                  placeholderTextColor={premiumColors.textMuted}
                 />
               </View>
 
               <TouchableOpacity 
-                style={[styles.predictSubmitButton, placingPrediction && styles.disabledButton]}
+                style={[styles.primaryBtn, placingPrediction && styles.primaryBtnDisabled]} 
                 onPress={handlePlacePrediction}
                 disabled={placingPrediction}
+                activeOpacity={0.8}
               >
                 {placingPrediction ? (
-                  <ActivityIndicator color={C.white} size="small" />
+                  <ActivityIndicator color="#FFFFFF" size="small" />
                 ) : (
-                  <Text style={styles.predictSubmitButtonText}>XÁC NHẬN ĐẶT DỰ ĐOÁN</Text>
+                  <Text style={styles.primaryBtnText}>GỬI DỰ ĐOÁN</Text>
                 )}
               </TouchableOpacity>
-            </>
+            </View>
           )}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+
+      </View>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
-  scrollContainer: { padding: 16 },
-  loadingContainer: { flex: 1, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { color: C.textSecondary, fontSize: 14, marginTop: 12 },
-  backButton: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16, marginTop: 10 },
-  backButtonText: { color: C.white, fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
-  detailHeaderCard: { backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' },
-  detailTourName: { color: C.red, fontSize: 11, fontWeight: '800', marginBottom: 4 },
-  detailRaceName: { color: C.white, fontSize: 18, fontWeight: '900', marginBottom: 10, textAlign: 'center' },
-  startTimeText: { color: C.textSecondary, fontSize: 11, marginTop: 4 },
-  sectionContainer: { backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 12, padding: 16, marginBottom: 16 },
-  sectionTitle: { color: C.white, fontSize: 12, fontWeight: '900', letterSpacing: 1, marginBottom: 12, borderLeftWidth: 2, borderLeftColor: C.red, paddingLeft: 8 },
-  walletHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  walletBalanceText: { color: C.white, fontSize: 12, fontWeight: '800' },
-  redText: { color: C.red },
-  emptyTextSmall: { color: C.textSecondary, fontSize: 12, textAlign: 'center', paddingVertical: 12 },
-  predictionInstructions: { color: C.textSecondary, fontSize: 12, marginBottom: 12 },
-  horseListContainer: { gap: 8, marginBottom: 16 },
-  horseSelectCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.inputBg, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 8, padding: 12, gap: 10 },
-  horseSelectCardActive: { borderColor: C.red, backgroundColor: 'rgba(225, 6, 0, 0.05)' },
-  horseSelectCardInfo: { flex: 1 },
-  horseSelectName: { color: C.white, fontSize: 13, fontWeight: '800' },
-  horseSelectBreed: { color: C.textSecondary, fontSize: 11, marginTop: 2 },
-  betInputRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, backgroundColor: C.inputBg, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: C.cardBorder },
-  betLabel: { color: C.white, fontSize: 11, fontWeight: '800' },
-  betInput: { backgroundColor: C.bg, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 6, color: C.white, fontSize: 14, fontWeight: '700', width: 100, height: 36, textAlign: 'right', paddingHorizontal: 10 },
-  predictSubmitButton: { backgroundColor: C.red, borderRadius: 24, height: 44, alignItems: 'center', justifyContent: 'center' },
-  disabledButton: { opacity: 0.5 },
-  predictSubmitButtonText: { color: C.white, fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
+  content: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[24],
+    paddingBottom: premiumSpacing[48],
+  },
+  
+  // ── Error & Fallbacks ──
+  failContainer: {
+    flex: 1,
+    backgroundColor: premiumColors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: premiumSpacing[24],
+  },
+  failText: {
+    color: premiumColors.text,
+    fontSize: 14,
+    marginTop: premiumSpacing[16],
+  },
+  backButton: {
+    marginTop: premiumSpacing[16],
+  },
+  backButtonText: {
+    color: premiumColors.brand,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+
+  // ── Navigation ──
+  navBack: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: premiumSpacing[24],
+  },
+  navBackText: {
+    color: premiumColors.textMuted,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+
+  // ── Header ──
+  header: {
+    marginBottom: premiumSpacing[32],
+  },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: premiumColors.brand,
+    letterSpacing: 1,
+    marginBottom: premiumSpacing[8],
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: premiumColors.text,
+    marginBottom: premiumSpacing[8],
+  },
+  accentLine: {
+    width: 36,
+    height: 3,
+    backgroundColor: premiumColors.brand,
+    borderRadius: 2,
+    marginBottom: premiumSpacing[12],
+  },
+  subtitle: {
+    fontSize: 14,
+    color: premiumColors.textSecondary,
+    lineHeight: 20,
+  },
+
+  // ── Form Card ──
+  cardContainer: {
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    overflow: 'hidden',
+    paddingBottom: premiumSpacing[24],
+  },
+  walletHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: premiumSpacing[16],
+    borderBottomWidth: 1,
+    borderBottomColor: premiumColors.border,
+    backgroundColor: premiumColors.surface2,
+  },
+  walletTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: premiumColors.text,
+    letterSpacing: 0.5,
+  },
+  walletBadge: {
+    backgroundColor: premiumColors.brand + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: premiumColors.brand + '50',
+  },
+  walletBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: premiumColors.brand,
+  },
+
+  // ── Empty / Blocked state ──
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: premiumSpacing[32],
+    gap: premiumSpacing[12],
+  },
+  emptyStateText: {
+    fontSize: 13,
+    color: premiumColors.textMuted,
+    textAlign: 'center',
+  },
+
+  // ── Form content ──
+  formContent: {
+    padding: premiumSpacing[16],
+  },
+  instruction: {
+    fontSize: 13,
+    color: premiumColors.textSecondary,
+    marginBottom: premiumSpacing[16],
+  },
+  optionsList: {
+    gap: premiumSpacing[12],
+    marginBottom: premiumSpacing[24],
+  },
+  radioCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: premiumSpacing[16],
+    borderRadius: premiumRadius[8],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    backgroundColor: premiumColors.surface2,
+    gap: premiumSpacing[12],
+  },
+  radioCardSelected: {
+    borderColor: premiumColors.brand,
+    backgroundColor: premiumColors.brand + '10',
+  },
+  radioInfo: {
+    flex: 1,
+  },
+  radioName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: premiumColors.text,
+    marginBottom: 4,
+  },
+  radioNameSelected: {
+    color: premiumColors.brand,
+  },
+  radioBreed: {
+    fontSize: 12,
+    color: premiumColors.textMuted,
+  },
+  
+  // ── Input ──
+  inputGroup: {
+    marginBottom: premiumSpacing[24],
+  },
+  inputLabel: {
+    color: premiumColors.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    marginBottom: premiumSpacing[8],
+    letterSpacing: 1,
+  },
+  input: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    paddingHorizontal: premiumSpacing[16],
+    height: 52,
+    fontSize: 14,
+    color: premiumColors.text,
+  },
+
+  // ── CTA ──
+  primaryBtn: {
+    backgroundColor: premiumColors.brand,
+    borderRadius: premiumRadius[8],
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryBtnDisabled: {
+    backgroundColor: premiumColors.surface2,
+  },
+  primaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
 });
