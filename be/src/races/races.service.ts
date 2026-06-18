@@ -269,10 +269,6 @@ export class RacesService {
       await this.predictionsService.cancelPredictionsForRace(id);
     }
 
-    if (status === RaceStatus.RESULT_PUBLISHED) {
-      await this.predictionsService.payoutBetsForRace(id, session);
-    }
-
     race.status = status;
     return session ? race.save({ session }) : race.save();
   }
@@ -343,6 +339,11 @@ export class RacesService {
 
   /** Giữ chữ ký cũ: ghi status + cascade (cho mọi caller hiện tại). */
   async updateStatus(id: string, status: RaceStatus): Promise<RaceDocument> {
+    if (status === RaceStatus.RESULT_PUBLISHED) {
+      throw new BadRequestException(
+        'Không thể chuyển trực tiếp sang RESULT_PUBLISHED. Dùng endpoint publish result.',
+      );
+    }
     const saved = await this.setStatus(id, status);
     await this.syncTournamentStatus(id);
     return saved;
