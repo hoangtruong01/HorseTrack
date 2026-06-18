@@ -1518,7 +1518,7 @@ export default function Home() {
       </section>
 
       {/* 8. Footer Section */}
-      <footer className="bg-background py-16 text-xs sm:text-sm text-muted-foreground font-semibold tracking-wide overflow-hidden">
+      <footer id="contact" className="bg-background py-16 text-xs sm:text-sm text-muted-foreground font-semibold tracking-wide overflow-hidden">
         <ScrollReveal>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 pb-12 border-b border-border/50">
 
