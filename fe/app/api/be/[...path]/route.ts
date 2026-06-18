@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 const getBackendBase = () => {
   const raw = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
-  return raw.endsWith("/api/v1") ? raw : raw.replace(/\/$/, "") + "/api/v1";
+  return raw.replace(/\/api\/v1\/?$/, "").replace(/\/$/, "") + "/api/v1";
 };
 
 async function handleProxy(
