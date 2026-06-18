@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TextInput } from 'react-native';
-import { C, Card, EmptyState, ErrorState, ListItemCard, LoadingState, PrimaryButton, SectionHeader, StatCard, formatDateTime } from '@/components/ui/shared';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppScreen, Section } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { EmptyState, ErrorState, LoadingState, formatDateTime } from '@/components/ui/shared';
 import { rewardPointLedgerApi, walletApi } from '@/lib/api-client';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function OwnerWallet() {
   const [balance, setBalance] = useState(0);
@@ -60,56 +63,212 @@ export default function OwnerWallet() {
     }
   };
 
-  if (loading) return <LoadingState />;
+  if (loading && !refreshing) return <LoadingState />;
 
   return (
-    <ScrollView
-      style={s.c}
-      contentContainerStyle={s.p}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
-    >
-      <StatCard label="Diem hien tai" value={`${balance.toLocaleString()} PTS`} icon="stars" color="#F59E0B" />
+    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+      <View style={styles.content}>
+        
+        {/* ── Balance Card ── */}
+        <View style={styles.balanceCard}>
+          <Text style={styles.balanceEyebrow}>ĐIỂM HIỆN TẠI</Text>
+          <View style={styles.balanceRow}>
+            <Text style={styles.balanceValue}>{balance.toLocaleString()}</Text>
+            <Text style={styles.balanceUnit}> Pts</Text>
+          </View>
+        </View>
 
-      <Card style={{ gap: 12, marginTop: 12 }}>
-        <Text style={s.sectionSubTitle}>Yeu cau rut diem / quy doi</Text>
-        <TextInput
-          style={s.input}
-          placeholder="Nhap so diem can rut..."
-          placeholderTextColor={C.textMuted}
-          keyboardType="numeric"
-          value={redeemAmount}
-          onChangeText={setRedeemAmount}
-        />
-        <PrimaryButton title="Yeu cau rut diem" onPress={handleRedeem} loading={submitting} disabled={balance <= 0} />
-      </Card>
+        {/* ── Redeem Card ── */}
+        <View style={styles.redeemCard}>
+          <Text style={styles.redeemTitle}>Yêu cầu rút điểm / quy đổi</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nhập số điểm cần rút..."
+            placeholderTextColor={premiumColors.textMuted}
+            keyboardType="numeric"
+            value={redeemAmount}
+            onChangeText={setRedeemAmount}
+          />
+          <TouchableOpacity
+            style={[styles.btn, (balance <= 0 || submitting) && styles.btnDisabled]}
+            onPress={handleRedeem}
+            disabled={balance <= 0 || submitting}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.btnText}>{submitting ? 'Đang xử lý...' : 'Yêu cầu rút điểm'}</Text>
+          </TouchableOpacity>
+        </View>
 
-      <SectionHeader title={`Lich su giao dich (${history.length})`} />
-      {error ? (
-        <ErrorState message={error} onRetry={loadData} />
-      ) : history.length === 0 ? (
-        <EmptyState icon="history" title="Chua co giao dich" subtitle="Lich su diem thuong se hien thi tai day." />
-      ) : (
-        history.map((item) => {
-          const delta = item.pointsDelta ?? 0;
-          return (
-            <ListItemCard
-              key={item._id}
-              title={item.note || 'Giao dich diem thuong'}
-              subtitle={`${formatDateTime(item.createdAt)} · So du sau: ${(item.balanceAfter ?? 0).toLocaleString()} PTS`}
-              rightText={`${delta > 0 ? '+' : ''}${delta.toLocaleString()} PTS`}
-              rightColor={delta >= 0 ? '#34D399' : '#EF4444'}
-              icon="payment"
-            />
-          );
-        })
-      )}
-    </ScrollView>
+        {/* ── Transaction History ── */}
+        <Section title={`Lịch sử giao dịch (${history.length})`}>
+          {error ? (
+            <ErrorState message={error} onRetry={loadData} />
+          ) : history.length === 0 ? (
+            <EmptyState icon="history" title="Chưa có giao dịch" subtitle="Lịch sử điểm thưởng sẽ hiển thị tại đây." />
+          ) : (
+            <View style={styles.listContainer}>
+              {history.map((item) => {
+                const delta = item.pointsDelta ?? 0;
+                const isPositive = delta >= 0;
+                
+                return (
+                  <View key={item._id || item.id} style={styles.rowItem}>
+                    <View style={styles.rowAvatar}>
+                      <MaterialIcons name="payment" size={20} color={premiumColors.textSecondary} />
+                    </View>
+                    <View style={styles.rowInfo}>
+                      <Text style={styles.rowTitle} numberOfLines={1}>{item.note || 'Giao dịch điểm thưởng'}</Text>
+                      <Text style={styles.rowSubtitle} numberOfLines={1}>
+                        {`${formatDateTime(item.createdAt)} · Số dư sau: ${(item.balanceAfter ?? 0).toLocaleString()} Pts`}
+                      </Text>
+                    </View>
+                    <View style={styles.rowRight}>
+                      <Text style={[styles.deltaText, { color: isPositive ? premiumColors.success : premiumColors.danger }]}>
+                        {isPositive ? '+' : ''}{delta.toLocaleString()} Pts
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </Section>
+      </View>
+    </AppScreen>
   );
 }
 
-const s = StyleSheet.create({
-  c: { flex: 1, backgroundColor: C.bg },
-  p: { padding: 16, paddingBottom: 32 },
-  sectionSubTitle: { color: C.white, fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { backgroundColor: C.inputBg, borderWidth: 1, borderColor: C.cardBorder, color: C.white, borderRadius: 12, height: 44, paddingHorizontal: 16, fontSize: 13 },
+const styles = StyleSheet.create({
+  content: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[24],
+    paddingBottom: premiumSpacing[48],
+  },
+  
+  // ── Balance Card ──
+  balanceCard: {
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    padding: premiumSpacing[20],
+    marginBottom: premiumSpacing[24],
+    alignItems: 'center',
+  },
+  balanceEyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: premiumColors.brand,
+    letterSpacing: 1.5,
+    marginBottom: premiumSpacing[12],
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  balanceValue: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: premiumColors.text,
+  },
+  balanceUnit: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: premiumColors.textSecondary,
+    marginLeft: 4,
+  },
+
+  // ── Redeem Card ──
+  redeemCard: {
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    padding: premiumSpacing[16],
+    marginBottom: premiumSpacing[32],
+  },
+  redeemTitle: {
+    color: premiumColors.text,
+    fontSize: 13,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: premiumSpacing[12],
+  },
+  input: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.borderSoft,
+    color: premiumColors.text,
+    borderRadius: premiumRadius[8],
+    height: 48,
+    paddingHorizontal: premiumSpacing[16],
+    fontSize: 14,
+    marginBottom: premiumSpacing[16],
+  },
+  btn: {
+    backgroundColor: premiumColors.brand,
+    height: 48,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnDisabled: {
+    opacity: 0.5,
+  },
+  btnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+
+  // ── Transaction List ──
+  listContainer: {
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    overflow: 'hidden',
+  },
+  rowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: premiumSpacing[16],
+    borderBottomWidth: 1,
+    borderBottomColor: premiumColors.border,
+    gap: premiumSpacing[12],
+  },
+  rowAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: premiumRadius[8],
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  rowInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  rowTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: premiumColors.text,
+    marginBottom: 4,
+  },
+  rowSubtitle: {
+    fontSize: 12,
+    color: premiumColors.textMuted,
+  },
+  rowRight: {
+    flexShrink: 0,
+    marginLeft: premiumSpacing[8],
+  },
+  deltaText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
 });

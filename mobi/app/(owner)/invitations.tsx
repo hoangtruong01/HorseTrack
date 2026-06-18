@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { ScrollView, View, Text, StyleSheet, Alert, RefreshControl, TouchableOpacity, Modal, TextInput, FlatList } from 'react-native';
-import { C, LoadingState, EmptyState, SectionHeader, PrimaryButton, OutlineButton, Card, statusLabel, formatDateTime } from '@/components/ui/shared';
+import { ScrollView, View, Text, StyleSheet, Alert, RefreshControl, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { AppScreen, Section } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { jockeyInvitationsApi, jockeysApi, registrationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -102,7 +104,7 @@ export default function OwnerInvitations() {
     setShowInviteModal(true);
   };
 
-  if (loading) return <LoadingState />;
+  if (loading && !refreshing) return <LoadingState />;
 
   const filteredJockeys = jockeys.filter(j => {
     if (!search) return true;
@@ -115,32 +117,35 @@ export default function OwnerInvitations() {
   const availableJockeys = filteredJockeys.filter(j => j.status === 'available');
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.bg }}>
-      {/* Tab Bar */}
-      <View style={s.tabBar}>
-        <TouchableOpacity style={[s.tab, tab === 'marketplace' && s.tabActive]} onPress={() => setTab('marketplace')}>
-          <MaterialIcons name="groups" size={16} color={tab === 'marketplace' ? C.red : C.textMuted} />
-          <Text style={[s.tabText, tab === 'marketplace' && { color: C.red }]}>Thị trường</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[s.tab, tab === 'history' && s.tabActive]} onPress={() => setTab('history')}>
-          <MaterialIcons name="send" size={16} color={tab === 'history' ? C.red : C.textMuted} />
-          <Text style={[s.tabText, tab === 'history' && { color: C.red }]}>Đã gửi ({invitations.length})</Text>
-        </TouchableOpacity>
-      </View>
+    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+      <View style={s.content}>
+        
+        {/* Segment Tabs */}
+        <View style={s.segmentContainer}>
+          <TouchableOpacity
+            style={[s.segmentBtn, tab === 'marketplace' && s.segmentBtnActive]}
+            onPress={() => setTab('marketplace')}
+            activeOpacity={0.8}
+          >
+            <Text style={[s.segmentText, tab === 'marketplace' && s.segmentTextActive]}>Thị trường</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[s.segmentBtn, tab === 'history' && s.segmentBtnActive]}
+            onPress={() => setTab('history')}
+            activeOpacity={0.8}
+          >
+            <Text style={[s.segmentText, tab === 'history' && s.segmentTextActive]}>Đã gửi ({invitations.length})</Text>
+          </TouchableOpacity>
+        </View>
 
-      <ScrollView
-        contentContainerStyle={s.p}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
-      >
         {tab === 'marketplace' ? (
           <>
-            {/* Search */}
             <View style={s.searchWrap}>
-              <MaterialIcons name="search" size={18} color={C.textMuted} />
+              <MaterialIcons name="search" size={20} color={premiumColors.textMuted} />
               <TextInput
                 style={s.searchInput}
                 placeholder="Tìm Jockey theo tên, sở trường..."
-                placeholderTextColor={C.textMuted}
+                placeholderTextColor={premiumColors.textMuted}
                 value={search}
                 onChangeText={setSearch}
               />
@@ -158,7 +163,7 @@ export default function OwnerInvitations() {
                   <View key={j._id} style={s.jockeyCard}>
                     <View style={s.jockeyHeader}>
                       <View style={s.jockeyAvatar}>
-                        <MaterialIcons name="person" size={24} color={C.red} />
+                        <MaterialIcons name="person" size={24} color={premiumColors.brand} />
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={s.jockeyName} numberOfLines={1}>{name}</Text>
@@ -181,7 +186,7 @@ export default function OwnerInvitations() {
                         <Text style={s.statLbl}>Thắng</Text>
                       </View>
                       <View style={s.statItem}>
-                        <Text style={[s.statVal, { color: C.tealLight }]}>{winRate}%</Text>
+                        <Text style={[s.statVal, { color: premiumColors.success }]}>{winRate}%</Text>
                         <Text style={s.statLbl}>Tỷ lệ</Text>
                       </View>
                     </View>
@@ -195,20 +200,21 @@ export default function OwnerInvitations() {
 
                     {j.bio && <Text style={s.bioText} numberOfLines={2}>&quot;{j.bio}&quot;</Text>}
 
-                    <PrimaryButton
-                      title={approvedRegs.length > 0 ? '＋ Gửi lời mời' : 'Chưa có slot trống'}
+                    <TouchableOpacity
+                      style={[s.btnPrimary, approvedRegs.length === 0 && s.btnDisabled]}
                       onPress={() => openInviteModal(j)}
                       disabled={approvedRegs.length === 0}
-                    />
+                      activeOpacity={0.8}
+                    >
+                      <Text style={s.btnPrimaryText}>{approvedRegs.length > 0 ? '＋ Gửi lời mời' : 'Chưa có slot trống'}</Text>
+                    </TouchableOpacity>
                   </View>
                 );
               })
             )}
           </>
         ) : (
-          // History tab
-          <>
-            <SectionHeader title="Lời mời đã gửi" />
+          <Section title="Lời mời đã gửi">
             {invitations.length === 0 ? (
               <EmptyState icon="send" title="Chưa gửi lời mời" subtitle="Vào Thị trường Jockey để tìm và gửi lời mời." />
             ) : (
@@ -239,9 +245,10 @@ export default function OwnerInvitations() {
                           style={s.cancelBtn}
                           onPress={() => handleCancelInvite(id)}
                           disabled={cancelling === id}
+                          activeOpacity={0.8}
                         >
-                          <MaterialIcons name="cancel" size={14} color="#EF4444" />
-                          <Text style={s.cancelBtnText}>{cancelling === id ? '...' : 'Hủy'}</Text>
+                          <MaterialIcons name="cancel" size={14} color={premiumColors.danger} />
+                          <Text style={s.cancelBtnText}>{cancelling === id ? '...' : 'Hủy lời mời'}</Text>
                         </TouchableOpacity>
                       )}
                     </View>
@@ -249,152 +256,485 @@ export default function OwnerInvitations() {
                 );
               })
             )}
-          </>
+          </Section>
         )}
-      </ScrollView>
 
-      {/* Send Invitation Modal */}
-      <Modal visible={showInviteModal} animationType="slide" transparent>
-        <View style={s.modalOverlay}>
-          <View style={s.modalContent}>
-            <View style={s.modalHeader}>
-              <Text style={s.modalTitle}>Gửi Lời Mời</Text>
-              <TouchableOpacity onPress={() => setShowInviteModal(false)}>
-                <MaterialIcons name="close" size={24} color={C.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            {selectedJockey && (
-              <View style={s.jockeySummary}>
-                <MaterialIcons name="person" size={20} color={C.red} />
-                <View>
-                  <Text style={s.summaryName}>{selectedJockey.userId?.fullName || 'Jockey'}</Text>
-                  <Text style={s.summaryStats}>{selectedJockey.experienceYears || 0} năm KN · {selectedJockey.totalRaces || 0} trận · {selectedJockey.wins || 0} thắng</Text>
-                </View>
+        {/* Send Invitation Modal */}
+        <Modal visible={showInviteModal} animationType="slide" transparent>
+          <View style={s.modalOverlay}>
+            <View style={s.modalContent}>
+              <View style={s.modalHeader}>
+                <Text style={s.modalTitle}>Gửi Lời Mời</Text>
+                <TouchableOpacity onPress={() => setShowInviteModal(false)}>
+                  <MaterialIcons name="close" size={24} color={premiumColors.textSecondary} />
+                </TouchableOpacity>
               </View>
-            )}
 
-            <ScrollView style={{ maxHeight: 350 }} showsVerticalScrollIndicator={false}>
-              <Text style={s.fieldLabel}>Chọn ngựa & trận đua *</Text>
-              {approvedRegs.map(r => {
-                const horse = typeof r.horseId === 'object' ? r.horseId?.name : 'Ngựa';
-                const race = typeof r.raceId === 'object' ? r.raceId?.name : 'Trận đua';
-                const id = r._id || r.id;
-                const selected = selectedRegId === id;
-                return (
-                  <TouchableOpacity
-                    key={id}
-                    style={[s.regOption, selected && s.regOptionSelected]}
-                    onPress={() => setSelectedRegId(id)}
-                  >
-                    <MaterialIcons name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} size={18} color={selected ? C.red : C.textMuted} />
-                    <Text style={s.regOptionText}>🐴 {horse} — 🏁 {race}</Text>
+              {selectedJockey && (
+                <View style={s.jockeySummary}>
+                  <MaterialIcons name="person" size={20} color={premiumColors.brand} />
+                  <View>
+                    <Text style={s.summaryName}>{selectedJockey.userId?.fullName || 'Jockey'}</Text>
+                    <Text style={s.summaryStats}>{selectedJockey.experienceYears || 0} năm KN · {selectedJockey.totalRaces || 0} trận · {selectedJockey.wins || 0} thắng</Text>
+                  </View>
+                </View>
+              )}
+
+              <ScrollView style={{ maxHeight: 350 }} showsVerticalScrollIndicator={false}>
+                <Text style={s.fieldLabel}>Chọn ngựa & trận đua *</Text>
+                {approvedRegs.map(r => {
+                  const horse = typeof r.horseId === 'object' ? r.horseId?.name : 'Ngựa';
+                  const race = typeof r.raceId === 'object' ? r.raceId?.name : 'Trận đua';
+                  const id = r._id || r.id;
+                  const selected = selectedRegId === id;
+                  return (
+                    <TouchableOpacity
+                      key={id}
+                      style={[s.regOption, selected && s.regOptionSelected]}
+                      onPress={() => setSelectedRegId(id)}
+                      activeOpacity={0.8}
+                    >
+                      <MaterialIcons name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} size={18} color={selected ? premiumColors.brand : premiumColors.textMuted} />
+                      <Text style={s.regOptionText}>🐴 {horse} — 🏁 {race}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+
+                <Text style={[s.fieldLabel, { marginTop: 16 }]}>% Chia thưởng cho Jockey (5-50%): {sharePercent}%</Text>
+                <View style={s.sliderRow}>
+                  <TouchableOpacity style={s.stepBtn} onPress={() => setSharePercent(Math.max(5, sharePercent - 5))} activeOpacity={0.8}>
+                    <Text style={s.stepBtnText}>- 5%</Text>
                   </TouchableOpacity>
-                );
-              })}
-
-              <Text style={[s.fieldLabel, { marginTop: 16 }]}>% Chia thưởng cho Jockey (5-50%): {sharePercent}%</Text>
-              <View style={s.sliderRow}>
-                <TouchableOpacity
-                  style={s.stepBtn}
-                  onPress={() => setSharePercent(Math.max(5, sharePercent - 5))}
-                >
-                  <Text style={s.stepBtnText}>- 5%</Text>
-                </TouchableOpacity>
-                <View style={{ flex: 1 }}>
-                  <TextInput
-                    style={[s.inputSmall, { textAlign: 'center' }]}
-                    keyboardType="numeric"
-                    value={String(sharePercent)}
-                    onChangeText={v => {
-                      const num = parseInt(v) || 5;
-                      setSharePercent(Math.min(50, Math.max(5, num)));
-                    }}
-                  />
+                  <View style={{ flex: 1 }}>
+                    <TextInput
+                      style={[s.inputSmall, { textAlign: 'center' }]}
+                      keyboardType="numeric"
+                      value={String(sharePercent)}
+                      onChangeText={v => {
+                        const num = parseInt(v) || 5;
+                        setSharePercent(Math.min(50, Math.max(5, num)));
+                      }}
+                    />
+                  </View>
+                  <TouchableOpacity style={s.stepBtn} onPress={() => setSharePercent(Math.min(50, sharePercent + 5))} activeOpacity={0.8}>
+                    <Text style={s.stepBtnText}>+ 5%</Text>
+                  </TouchableOpacity>
                 </View>
+                <View style={s.shareInfo}>
+                  <Text style={s.shareText}>Chủ ngựa nhận: {100 - sharePercent}%</Text>
+                  <Text style={s.shareText}>Jockey nhận: {sharePercent}%</Text>
+                </View>
+
+                <Text style={[s.fieldLabel, { marginTop: 16 }]}>Lời nhắn (tùy chọn)</Text>
+                <TextInput
+                  style={[s.input, { height: 72, textAlignVertical: 'top', paddingTop: 12 }]}
+                  placeholder="Ví dụ: Mong bạn đồng hành cùng chiến mã!"
+                  placeholderTextColor={premiumColors.textMuted}
+                  multiline
+                  value={invMessage}
+                  onChangeText={setInvMessage}
+                />
+              </ScrollView>
+
+              <View style={s.modalActions}>
+                <TouchableOpacity style={s.btnOutlineModal} onPress={() => setShowInviteModal(false)} activeOpacity={0.8}>
+                  <Text style={s.btnOutlineText}>Đóng</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
-                  style={s.stepBtn}
-                  onPress={() => setSharePercent(Math.min(50, sharePercent + 5))}
+                  style={[s.btnPrimaryModal, (!selectedRegId || submitting) && s.btnDisabled]}
+                  onPress={handleSendInvite}
+                  disabled={!selectedRegId || submitting}
+                  activeOpacity={0.8}
                 >
-                  <Text style={s.stepBtnText}>+ 5%</Text>
+                  <Text style={s.btnPrimaryText}>{submitting ? 'Đang xử lý...' : 'Gửi lời mời'}</Text>
                 </TouchableOpacity>
               </View>
-              <View style={s.shareInfo}>
-                <Text style={s.shareText}>Chủ ngựa nhận: {100 - sharePercent}%</Text>
-                <Text style={s.shareText}>Jockey nhận: {sharePercent}%</Text>
-              </View>
-
-              <Text style={[s.fieldLabel, { marginTop: 16 }]}>Lời nhắn (tùy chọn)</Text>
-              <TextInput
-                style={[s.input, { height: 72, textAlignVertical: 'top' }]}
-                placeholder="Ví dụ: Mong bạn đồng hành cùng chiến mã!"
-                placeholderTextColor={C.textMuted}
-                multiline
-                value={invMessage}
-                onChangeText={setInvMessage}
-              />
-            </ScrollView>
-
-            <View style={s.modalActions}>
-              <OutlineButton title="Đóng" onPress={() => setShowInviteModal(false)} />
-              <PrimaryButton title="Gửi lời mời" onPress={handleSendInvite} loading={submitting} disabled={!selectedRegId} />
             </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </AppScreen>
   );
 }
 
 const s = StyleSheet.create({
-  p: { padding: 16, paddingBottom: 32 },
-  tabBar: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: C.cardBorder, backgroundColor: C.card },
-  tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabActive: { borderBottomColor: C.red },
-  tabText: { color: C.textMuted, fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
-  searchWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 12, paddingHorizontal: 12, marginBottom: 12 },
-  searchInput: { flex: 1, color: C.white, fontSize: 13, height: 42 },
-  countText: { color: C.textMuted, fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 },
-  jockeyCard: { backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 16, padding: 16, marginBottom: 12 },
-  jockeyHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
-  jockeyAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.red + '15', borderWidth: 2, borderColor: C.red + '40', alignItems: 'center', justifyContent: 'center' },
-  jockeyName: { color: C.white, fontSize: 14, fontWeight: '900', textTransform: 'uppercase' },
-  jockeyEmail: { color: C.textMuted, fontSize: 10, marginTop: 2 },
-  statsGrid: { flexDirection: 'row', gap: 6, marginBottom: 10 },
-  statItem: { flex: 1, backgroundColor: '#00000030', borderWidth: 1, borderColor: C.cardBorder, borderRadius: 8, padding: 8, alignItems: 'center' },
-  statVal: { color: C.white, fontSize: 14, fontWeight: '900' },
-  statLbl: { color: C.textMuted, fontSize: 8, fontWeight: '700', textTransform: 'uppercase', marginTop: 2 },
-  infoRow: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', marginBottom: 8 },
-  infoText: { color: C.textSecondary, fontSize: 11, fontWeight: '600' },
-  bioText: { color: C.textSecondary, fontSize: 11, fontStyle: 'italic', backgroundColor: C.bg, padding: 8, borderRadius: 8, marginBottom: 4 },
-  invCard: { backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 16, padding: 14, marginBottom: 10 },
-  invHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  invJockey: { color: C.white, fontSize: 13, fontWeight: '800' },
-  invHorse: { color: C.textSecondary, fontSize: 11, marginTop: 4 },
-  invShare: { color: C.tealLight, fontSize: 10, fontWeight: '700', marginTop: 2 },
-  statusBadge: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  statusBadgeText: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  invFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: C.cardBorder },
-  invDate: { color: C.textMuted, fontSize: 10 },
-  cancelBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: '#EF444440', backgroundColor: '#EF444410' },
-  cancelBtnText: { color: '#EF4444', fontSize: 11, fontWeight: '700' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: C.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, borderWidth: 1, borderColor: C.cardBorder, maxHeight: '85%' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  modalTitle: { color: C.white, fontSize: 18, fontWeight: '900', textTransform: 'uppercase' },
-  jockeySummary: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#00000030', borderWidth: 1, borderColor: C.cardBorder, borderRadius: 12, padding: 12, marginBottom: 16 },
-  summaryName: { color: C.white, fontSize: 13, fontWeight: '800' },
-  summaryStats: { color: C.textMuted, fontSize: 10, marginTop: 2 },
-  fieldLabel: { color: C.textSecondary, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
-  regOption: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 10, marginBottom: 6, backgroundColor: '#00000020' },
-  regOptionSelected: { borderColor: C.red + '60', backgroundColor: C.red + '10' },
-  regOptionText: { color: C.white, fontSize: 12, fontWeight: '600', flex: 1 },
-  sliderRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  stepBtn: { backgroundColor: C.red + '15', borderWidth: 1, borderColor: C.red + '40', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, alignItems: 'center', justifyContent: 'center' },
-  stepBtnText: { color: C.red, fontSize: 12, fontWeight: '800' },
-  inputSmall: { backgroundColor: C.inputBg, borderWidth: 1, borderColor: C.cardBorder, color: C.white, borderRadius: 8, height: 36, paddingHorizontal: 12, fontSize: 16, fontWeight: '800' },
-  shareInfo: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-  shareText: { color: C.textMuted, fontSize: 10 },
-  input: { backgroundColor: C.inputBg, borderWidth: 1, borderColor: C.cardBorder, color: C.white, borderRadius: 12, height: 44, paddingHorizontal: 16, fontSize: 13, marginBottom: 12 },
-  modalActions: { flexDirection: 'row', gap: 12, marginTop: 12 },
+  content: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[16],
+    paddingBottom: premiumSpacing[48],
+  },
+  segmentContainer: {
+    flexDirection: 'row',
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[8],
+    padding: 4,
+    marginBottom: premiumSpacing[24],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+  },
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: premiumRadius[8],
+    backgroundColor: 'transparent',
+  },
+  segmentBtnActive: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.borderSoft,
+  },
+  segmentText: {
+    fontSize: 13,
+    color: premiumColors.textSecondary,
+    fontWeight: '500',
+  },
+  segmentTextActive: {
+    color: premiumColors.text,
+    fontWeight: '700',
+  },
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    paddingHorizontal: 12,
+    marginBottom: 12,
+  },
+  searchInput: {
+    flex: 1,
+    color: premiumColors.text,
+    fontSize: 14,
+    height: 48,
+  },
+  countText: {
+    color: premiumColors.textSecondary,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 16,
+  },
+  jockeyCard: {
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 16,
+    marginBottom: 12,
+  },
+  jockeyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  jockeyAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(225, 6, 0, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(225, 6, 0, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  jockeyName: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  jockeyEmail: {
+    color: premiumColors.textMuted,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  statItem: {
+    flex: 1,
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    padding: 10,
+    alignItems: 'center',
+  },
+  statVal: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  statLbl: {
+    color: premiumColors.textMuted,
+    fontSize: 9,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginTop: 4,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    gap: 12,
+    flexWrap: 'wrap',
+    marginBottom: 12,
+  },
+  infoText: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  bioText: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontStyle: 'italic',
+    backgroundColor: premiumColors.surface2,
+    padding: 12,
+    borderRadius: premiumRadius[8],
+    marginBottom: 12,
+  },
+  btnPrimary: {
+    backgroundColor: premiumColors.brand,
+    paddingVertical: 12,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnPrimaryText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  btnDisabled: {
+    opacity: 0.5,
+  },
+  invCard: {
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 16,
+    marginBottom: 12,
+  },
+  invHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  invJockey: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  invHorse: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  invShare: {
+    color: premiumColors.success,
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 4,
+  },
+  statusBadge: {
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  statusBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  invFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: premiumColors.border,
+  },
+  invDate: {
+    color: premiumColors.textMuted,
+    fontSize: 11,
+  },
+  cancelBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: premiumRadius[8],
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  cancelBtnText: {
+    color: premiumColors.danger,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: premiumColors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    color: premiumColors.text,
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  jockeySummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 16,
+    marginBottom: 20,
+  },
+  summaryName: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  summaryStats: {
+    color: premiumColors.textMuted,
+    fontSize: 11,
+    marginTop: 4,
+  },
+  fieldLabel: {
+    color: premiumColors.textSecondary,
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  regOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    marginBottom: 8,
+    backgroundColor: premiumColors.surface2,
+  },
+  regOptionSelected: {
+    borderColor: 'rgba(225, 6, 0, 0.4)',
+    backgroundColor: 'rgba(225, 6, 0, 0.05)',
+  },
+  regOptionText: {
+    color: premiumColors.text,
+    fontSize: 13,
+    fontWeight: '600',
+    flex: 1,
+  },
+  sliderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  stepBtn: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.borderStrong,
+    borderRadius: premiumRadius[8],
+    width: 60,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepBtnText: {
+    color: premiumColors.text,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  inputSmall: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    color: premiumColors.text,
+    borderRadius: premiumRadius[8],
+    height: 48,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  shareInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  shareText: {
+    color: premiumColors.textSecondary,
+    fontSize: 11,
+  },
+  input: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    color: premiumColors.text,
+    borderRadius: premiumRadius[8],
+    height: 48,
+    paddingHorizontal: 16,
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  btnOutlineModal: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: premiumColors.borderStrong,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+  },
+  btnOutlineText: {
+    color: premiumColors.text,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  btnPrimaryModal: {
+    flex: 2,
+    backgroundColor: premiumColors.brand,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+  },
 });

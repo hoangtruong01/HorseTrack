@@ -248,11 +248,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: premiumRadius[6],
+    borderRadius: premiumRadius[8],
     backgroundColor: 'transparent',
   },
   segmentBtnActive: {
-    backgroundColor: premiumColors.surfaceStrong,
+    backgroundColor: premiumColors.surface2,
     borderWidth: 1,
     borderColor: premiumColors.borderSoft,
   },
