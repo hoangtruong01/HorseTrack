@@ -408,7 +408,7 @@ export default function Home() {
         let jockeysCount = 76; // Mockup đẹp nếu lỗi
 
         try {
-          const resHorses = await fetch("/api/v1/horses?limit=1");
+          const resHorses = await fetch("/api/be/horses?limit=1");
           if (resHorses.ok) {
             const resJson = await resHorses.json();
             if (resJson && resJson.success) {
@@ -426,7 +426,7 @@ export default function Home() {
         }
 
         try {
-          const resJockeys = await fetch("/api/v1/jockeys/admin/all?limit=1");
+          const resJockeys = await fetch("/api/be/jockeys?limit=1");
           if (resJockeys.ok) {
             const resJson = await resJockeys.json();
             if (resJson && resJson.success) {

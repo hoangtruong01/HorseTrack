@@ -551,8 +551,6 @@ export const walletApi = {
     apiFetch<CashoutItem>(`/wallet/cashout/lookup?code=${code}`),
   processCashout: (id: string, status: string, rejectReason?: string) =>
     apiFetch(`/wallet/cashout/${id}/process`, { method: "PATCH", body: JSON.stringify({ status, rejectReason }) }),
-  depositForUser: (userId: string, amount: number) =>
-    apiFetch(`/wallet/deposit/for-user/${userId}`, { method: "POST", body: JSON.stringify({ amount }) }),
 };
 
 // ─── Reward Point Ledger ─────────────────────────────────────────────────────
