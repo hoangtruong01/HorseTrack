@@ -284,9 +284,9 @@ export class RacesService {
    * Trong updateStatus tuần tự, race.status === status vừa set nên kết quả không đổi.
    */
   async syncTournamentStatus(id: string): Promise<void> {
-    const race = await this.findOne(id);
-    const status = race.status;
     try {
+      const race = await this.findOne(id);
+      const status = race.status;
       if (status === RaceStatus.LIVE) {
         const tournament = await this.tournamentsService.findOne(
           this.getTournamentIdString(race.tournamentId),
