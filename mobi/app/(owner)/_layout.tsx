@@ -19,7 +19,7 @@ export default function OwnerLayout() {
     }}>
       <Tabs.Screen name="index" options={{ title: 'Trang chủ', headerShown: false, tabBarIcon: ({ color }) => <MaterialIcons size={24} name="home" color={color} /> }} />
       <Tabs.Screen name="horses" options={{ title: 'Chiến mã', headerTitle: 'CHIẾN MÃ', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="pets" color={color} /> }} />
-      <Tabs.Screen name="registrations" options={{ title: 'Ghi danh', headerTitle: 'HỒ SƠ GHI DANH', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="assignment" color={color} /> }} />
+      <Tabs.Screen name="registrations" options={{ title: 'Giải đấu', headerTitle: 'GIẢI ĐẤU', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="emoji-events" color={color} /> }} />
       <Tabs.Screen name="invitations" options={{ title: 'Mời Jockey', headerTitle: 'MỜI JOCKEY', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person-add" color={color} /> }} />
       <Tabs.Screen name="wallet" options={{ title: 'Ví thưởng', headerTitle: 'VÍ THƯỞNG', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person" color={color} /> }} />

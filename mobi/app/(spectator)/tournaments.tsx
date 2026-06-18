@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingState, EmptyState, statusLabel } from '@/components/ui/shared';
 import { tournamentsApi, racesApi, registrationsApi, predictionsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import RaceResultsModal from '@/components/ui/race-results-modal';
 
 export default function SpectatorTournaments() {
   const [data, setData] = useState<any[]>([]);
@@ -27,6 +28,17 @@ export default function SpectatorTournaments() {
   const [selectedHorseId, setSelectedHorseId] = useState('');
   const [betPointsInput, setBetPointsInput] = useState('1');
   const [submittingPrediction, setSubmittingPrediction] = useState(false);
+
+  // Results Modal State
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [resultsRaceId, setResultsRaceId] = useState<string | null>(null);
+  const [resultsRaceName, setResultsRaceName] = useState<string | null>(null);
+
+  const openResultsModal = (race: any) => {
+    setResultsRaceId(race._id || race.id);
+    setResultsRaceName(race.name);
+    setShowResultsModal(true);
+  };
 
   useEffect(() => {
     tournamentsApi
@@ -330,6 +342,16 @@ export default function SpectatorTournaments() {
               ) : (
                 <View style={s.closedPredictionBox}>
                   <Text style={s.closedPredictionText}>Cổng dự đoán đã đóng cho cuộc đua này.</Text>
+                  {selectedRace.status === 'FINISHED' && (
+                    <TouchableOpacity
+                      style={s.resultBtnBlock}
+                      onPress={() => openResultsModal(selectedRace)}
+                      activeOpacity={0.8}
+                    >
+                      <MaterialIcons name="emoji-events" size={18} color="#FFFFFF" />
+                      <Text style={s.resultBtnBlockText}>Xem kết quả cuộc đua</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               )
             )}
@@ -446,23 +468,34 @@ export default function SpectatorTournaments() {
             selectedTourRaces.map((race) => {
               const st = statusLabel(race.status);
               return (
-                <TouchableOpacity
-                  key={race._id}
-                  style={s.raceListItem}
-                  onPress={() => handleSelectRace(race)}
-                  activeOpacity={0.8}
-                >
-                  <View style={s.raceListInfo}>
-                    <Text style={s.raceListName}>{race.name}</Text>
-                    <Text style={s.raceListDetails}>
-                      Cự ly: {race.distanceMeters}m · Bắt đầu: {new Date(race.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} {new Date(race.startTime).toLocaleDateString('vi-VN')}
-                    </Text>
-                  </View>
-                  <View style={[s.badge, { borderColor: st.color + '40', backgroundColor: st.color + '15' }]}>
-                    <Text style={[s.badgeText, { color: st.color }]}>{st.label}</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#6F7785" />
-                </TouchableOpacity>
+                <View key={race._id} style={s.raceListItemContainer}>
+                  <TouchableOpacity
+                    style={s.raceListItem}
+                    onPress={() => handleSelectRace(race)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={s.raceListInfo}>
+                      <Text style={s.raceListName}>{race.name}</Text>
+                      <Text style={s.raceListDetails}>
+                        Cự ly: {race.distanceMeters}m · Bắt đầu: {new Date(race.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} {new Date(race.startTime).toLocaleDateString('vi-VN')}
+                      </Text>
+                    </View>
+                    <View style={[s.badge, { borderColor: st.color + '40', backgroundColor: st.color + '15' }]}>
+                      <Text style={[s.badgeText, { color: st.color }]}>{st.label}</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={20} color="#6F7785" />
+                  </TouchableOpacity>
+                  {race.status === 'FINISHED' && (
+                    <TouchableOpacity
+                      style={s.resultBtnInline}
+                      onPress={() => openResultsModal(race)}
+                      activeOpacity={0.8}
+                    >
+                      <MaterialIcons name="emoji-events" size={14} color="#34D399" />
+                      <Text style={s.resultBtnInlineText}>Xem kết quả</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               );
             })
           )}
@@ -607,6 +640,12 @@ export default function SpectatorTournaments() {
           <MaterialIcons name="arrow-downward" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       )}
+      <RaceResultsModal
+        visible={showResultsModal}
+        onClose={() => setShowResultsModal(false)}
+        raceId={resultsRaceId}
+        raceName={resultsRaceName}
+      />
     </SafeAreaView>
   );
 }
@@ -1262,6 +1301,46 @@ const s = StyleSheet.create({
     fontSize: 9,
     fontWeight: 'bold',
     color: '#34D399',
+    textTransform: 'uppercase',
+  },
+  raceListItemContainer: {
+    backgroundColor: '#11141B',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  resultBtnInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(52, 211, 153, 0.08)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(52, 211, 153, 0.15)',
+  },
+  resultBtnInlineText: {
+    color: '#34D399',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  resultBtnBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#34D399',
+    borderRadius: 8,
+    paddingVertical: 10,
+    marginTop: 12,
+    width: '100%',
+  },
+  resultBtnBlockText: {
+    color: '#0B0D12',
+    fontSize: 12,
+    fontWeight: '800',
     textTransform: 'uppercase',
   },
 });
