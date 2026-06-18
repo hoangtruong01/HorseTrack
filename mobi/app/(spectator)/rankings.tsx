@@ -193,7 +193,7 @@ export default function SpectatorRankings() {
 const s = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0B0D12',
+    backgroundColor: '#000000',
   },
   headerRow: {
     flexDirection: 'row',

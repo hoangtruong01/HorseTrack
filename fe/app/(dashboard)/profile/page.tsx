@@ -65,10 +65,10 @@ export default function ProfilePage() {
   // Format date of birth nicely
   const formattedDob = user.dob
     ? new Date(user.dob).toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
     : "Chưa cập nhật";
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +127,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className="space-y-8 max-w-4xl mx-auto">
+    <main className="space-y-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
         <PageHeader
           eyebrow="Tài khoản cá nhân"
@@ -150,7 +150,7 @@ export default function ProfilePage() {
           {/* Avatar and main header */}
           <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-white/5">
             <div className="relative group">
-              <div 
+              <div
                 onClick={() => setIsAvatarModalOpen(true)}
                 className="cursor-pointer"
               >
@@ -166,14 +166,18 @@ export default function ProfilePage() {
                   </div>
                 )}
               </div>
-              
+
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-[#1a1a1a] border border-[#333] shadow-lg transition-transform hover:scale-110 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-white border border-gray-200 text-zinc-700 shadow-sm transition-transform hover:scale-110 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-200 dark:shadow-lg"
                 title="Thay đổi ảnh đại diện"
               >
-                {isUploading ? <Loader2 className="size-3.5 text-white animate-spin" /> : <Camera className="size-3.5 text-white" />}
+                {isUploading ? (
+                  <Loader2 className="size-3.5 animate-spin text-current" />
+                ) : (
+                  <Camera className="size-3.5 text-current" />
+                )}
               </button>
               <input
                 type="file"
@@ -273,7 +277,7 @@ export default function ProfilePage() {
                     Ngôn ngữ
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-2.5">
                   <span className={cn("text-xs font-bold transition-colors", mounted && i18n.language === "vi" ? "text-foreground" : "text-muted-foreground")}>
                     VI
@@ -341,24 +345,24 @@ export default function ProfilePage() {
 
       {/* Avatar Preview Modal */}
       {isAvatarModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
           onClick={() => setIsAvatarModalOpen(false)}
         >
-          <button 
+          <button
             className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
             onClick={() => setIsAvatarModalOpen(false)}
           >
             <X className="size-6" />
           </button>
-          <div 
+          <div
             className="relative max-w-2xl max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {user.avatar ? (
-              <img 
-                src={user.avatar} 
-                alt={user.fullName} 
+              <img
+                src={user.avatar}
+                alt={user.fullName}
                 className="w-auto h-auto max-w-full max-h-[90vh] object-contain"
               />
             ) : (

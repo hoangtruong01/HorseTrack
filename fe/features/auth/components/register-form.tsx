@@ -18,12 +18,18 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { defaultDemoRole, rolePreviews } from "../mock-auth-data";
 import type { AuthRole } from "../types";
-import { toast } from "sonner";
+import { sileo } from "sileo";
+import { toast as sonnerToast } from "sonner";
 
 const fieldClass =
   "h-11 w-full rounded-xl border border-input bg-background pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15 disabled:cursor-not-allowed disabled:opacity-60";
 const labelClass =
   "text-xs font-black uppercase tracking-[0.16em] text-muted-foreground";
+
+const customToast = {
+  success: (msg: string, description?: string) => sileo.success({ title: msg, description, duration: 1500 }),
+  error: (msg: string, description?: string) => sonnerToast.error(msg, { description }),
+};
 
 export function RegisterForm() {
   const { register } = useAuth();
@@ -61,12 +67,12 @@ export function RegisterForm() {
 
     try {
       await register(payload);
-      toast.success("Đăng ký tài khoản thành công! Đang chuyển hướng...");
+      customToast.success("Thành công!", "Đăng ký tài khoản thành công! Đang chuyển hướng...");
       window.location.href = selectedPreview.entryPath;
     } catch (err) {
       const errMsg = (err as Error).message || "Đăng ký tài khoản thất bại.";
       setErrorMsg(errMsg);
-      toast.error(errMsg);
+      customToast.error("Đăng ký thất bại", errMsg);
       setIsSubmitting(false);
     }
   }

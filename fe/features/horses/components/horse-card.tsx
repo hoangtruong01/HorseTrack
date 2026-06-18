@@ -71,7 +71,7 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
             src={horse.image}
             alt={horse.name}
             fill
-            className="object-cover transition duration-300 group-hover:scale-105"
+            className="object-contain transition duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-muted-foreground/20">

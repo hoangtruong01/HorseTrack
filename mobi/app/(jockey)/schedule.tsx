@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, RefreshControl, View, Text, TouchableOpacity } from 'react-native';
-import { C, ListItemCard, LoadingState, EmptyState, ErrorState, SectionHeader, statusLabel, formatDateTime } from '@/components/ui/shared';
+import { View, StyleSheet, Text, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
+import { AppScreen } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { jockeyInvitationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import RaceResultsModal from '@/components/ui/race-results-modal';
@@ -43,71 +45,99 @@ export default function JockeySchedule() {
     loadData();
   }, [loadData]);
 
-  if (loading) return <LoadingState />;
+  if (loading && !refreshing) return <LoadingState />;
+
+  const renderItem = ({ item }: { item: any }) => {
+    const st = statusLabel(item.status);
+    const raceName = typeof item.raceId === 'object' ? item.raceId?.name : 'Trận đua';
+    const horseName = typeof item.horseId === 'object' ? item.horseId?.name : 'Ngựa';
+    const startTime = typeof item.raceId === 'object' ? item.raceId?.startTime : undefined;
+    const raceStatus = typeof item.raceId === 'object' ? item.raceId?.status : undefined;
+    const isFinished = raceStatus === 'FINISHED';
+
+    if (isFinished) {
+      return (
+        <View style={styles.cardFinished}>
+          <View style={styles.cardFinishedMain}>
+            <View style={styles.iconContainerFinished}>
+              <MaterialIcons name="event-available" size={20} color={premiumColors.success} />
+            </View>
+            <View style={styles.cardInfo}>
+              <Text style={styles.raceTitle} numberOfLines={1}>{raceName}</Text>
+              <Text style={styles.detailText} numberOfLines={1}>
+                Chiến mã: <Text style={styles.highlight}>{horseName}</Text>
+              </Text>
+              <Text style={styles.detailText} numberOfLines={1}>
+                Thời gian: {formatDateTime(startTime)}
+              </Text>
+            </View>
+            <View style={styles.statusBadgeFinished}>
+              <Text style={styles.statusBadgeFinishedText}>Hoàn thành</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.resultsBtn}
+            onPress={() => openResultsModal(item.raceId)}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="emoji-events" size={16} color={premiumColors.success} />
+            <Text style={styles.resultsBtnText}>Xem kết quả thi đấu</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardIcon}>
+          <MaterialIcons name="event" size={24} color={premiumColors.textSecondary} />
+        </View>
+        <View style={styles.cardInfo}>
+          <Text style={styles.raceTitle} numberOfLines={1}>{raceName}</Text>
+          <Text style={styles.detailText} numberOfLines={1}>
+            Chiến mã: <Text style={styles.highlight}>{horseName}</Text>
+          </Text>
+          <Text style={styles.detailText} numberOfLines={1}>
+            Thời gian: {formatDateTime(startTime)}
+          </Text>
+        </View>
+        <View style={[styles.badge, { borderColor: st.color + '40', backgroundColor: st.color + '18' }]}>
+          <Text style={[styles.badgeText, { color: st.color }]}>{st.label}</Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
-    <View style={s.container}>
-      <ScrollView 
-        style={s.c} 
-        contentContainerStyle={s.p}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
-      >
-        <SectionHeader title={`Lịch thi đấu đã xác nhận (${data.length})`} />
-        {error ? (
-          <ErrorState message={error} onRetry={loadData} />
-        ) : data.length === 0 ? (
-          <EmptyState icon="event" title="Chưa có lịch thi đấu" subtitle="Nhận lời mời từ chủ ngựa trong tab Hòm thư để điền tên vào lịch trình." />
-        ) : (
-          data.map(i => {
-            const st = statusLabel(i.status);
-            const raceName = typeof i.raceId === 'object' ? i.raceId?.name : 'Trận đua';
-            const horseName = typeof i.horseId === 'object' ? i.horseId?.name : 'Ngựa';
-            const startTime = typeof i.raceId === 'object' ? i.raceId?.startTime : undefined;
-            const raceStatus = typeof i.raceId === 'object' ? i.raceId?.status : undefined;
-            const isFinished = raceStatus === 'FINISHED';
+    <AppScreen scroll={false}>
+      <View style={styles.header}>
+        <Text style={styles.eyebrow}>LỊCH TRÌNH VẬN ĐỘNG VIÊN</Text>
+        <Text style={styles.title}>Lịch thi đấu</Text>
+        <View style={styles.accentLine} />
+      </View>
 
-            if (isFinished) {
-              return (
-                <View key={i._id} style={s.jockeyCard}>
-                  <View style={s.jockeyCardMain}>
-                    <View style={s.iconContainer}>
-                      <MaterialIcons name="event-available" size={20} color="#34D399" />
-                    </View>
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={s.cardTitle} numberOfLines={1}>{raceName}</Text>
-                      <Text style={s.cardSubtitle} numberOfLines={1}>
-                        Chiến mã: {horseName} · {formatDateTime(startTime)}
-                      </Text>
-                    </View>
-                    <View style={s.statusBadgeFinished}>
-                      <Text style={s.statusBadgeFinishedText}>Hoàn thành</Text>
-                    </View>
-                  </View>
-                  <TouchableOpacity
-                    style={s.resultsBtn}
-                    onPress={() => openResultsModal(i.raceId)}
-                    activeOpacity={0.8}
-                  >
-                    <MaterialIcons name="emoji-events" size={14} color="#34D399" />
-                    <Text style={s.resultsBtnText}>Xem kết quả thi đấu</Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            }
-
-            return (
-              <ListItemCard
-                key={i._id}
-                title={raceName}
-                subtitle={`Chiến mã: ${horseName} · Thời gian: ${formatDateTime(startTime)}`}
-                rightText={st.label}
-                rightColor={st.color}
-                icon="event"
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={(item) => item._id || item.id}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} colors={[premiumColors.brand]} />
+        }
+        ListEmptyComponent={
+          error ? (
+            <ErrorState message={error} onRetry={loadData} />
+          ) : (
+            <View style={styles.emptyWrap}>
+              <EmptyState 
+                icon="event" 
+                title="Chưa có lịch thi đấu" 
+                subtitle="Nhận lời mời từ chủ ngựa trong tab Hòm thư để điền tên vào lịch trình." 
               />
-            );
-          })
-        )}
-      </ScrollView>
+            </View>
+          )
+        }
+      />
 
       <RaceResultsModal
         visible={showResultsModal}
@@ -115,58 +145,132 @@ export default function JockeySchedule() {
         raceId={resultsRaceId}
         raceName={resultsRaceName}
       />
-    </View>
+    </AppScreen>
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0D12' },
-  c: { flex: 1 },
-  p: { padding: 16, paddingBottom: 32 },
-  jockeyCard: {
-    backgroundColor: '#11141B',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 14,
-    marginBottom: 8,
-    overflow: 'hidden',
+const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[24],
+    paddingBottom: premiumSpacing[16],
   },
-  jockeyCardMain: {
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: premiumColors.brand,
+    letterSpacing: 1,
+    marginBottom: premiumSpacing[8],
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: premiumColors.text,
+    marginBottom: premiumSpacing[8],
+  },
+  accentLine: {
+    width: 36,
+    height: 3,
+    backgroundColor: premiumColors.brand,
+    borderRadius: 2,
+  },
+  listContent: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingBottom: premiumSpacing[48],
+  },
+  emptyWrap: {
+    marginTop: premiumSpacing[24],
+  },
+
+  // ── Card ──
+  card: {
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: premiumSpacing[16],
+    marginBottom: premiumSpacing[16],
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
-    gap: 12,
+    gap: premiumSpacing[12],
   },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(52, 211, 153, 0.12)',
+  cardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: premiumRadius[8],
+    backgroundColor: premiumColors.surface2,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: premiumColors.border,
   },
-  cardTitle: {
-    color: '#FFFFFF',
-    fontSize: 13,
+  cardInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  raceTitle: {
+    color: premiumColors.text,
+    fontSize: 15,
     fontWeight: '700',
+    marginBottom: 4,
   },
-  cardSubtitle: {
-    color: '#AEB6C2',
-    fontSize: 11,
+  detailText: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
     marginTop: 2,
   },
-  statusBadgeFinished: {
-    backgroundColor: 'rgba(52, 211, 153, 0.1)',
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+  highlight: {
+    color: premiumColors.text,
+    fontWeight: '600',
+  },
+  badge: {
     borderWidth: 1,
-    borderColor: 'rgba(52, 211, 153, 0.2)',
+    borderRadius: premiumRadius[4],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+
+  // ── Finished Card ──
+  cardFinished: {
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.borderSoft,
+    borderRadius: premiumRadius[12],
+    marginBottom: premiumSpacing[16],
+    overflow: 'hidden',
+  },
+  cardFinishedMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: premiumSpacing[16],
+    gap: premiumSpacing[12],
+  },
+  iconContainerFinished: {
+    width: 48,
+    height: 48,
+    borderRadius: premiumRadius[8],
+    backgroundColor: premiumColors.success + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: premiumColors.success + '30',
+  },
+  statusBadgeFinished: {
+    backgroundColor: premiumColors.success + '15',
+    borderRadius: premiumRadius[4],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: premiumColors.success + '30',
   },
   statusBadgeFinishedText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '800',
-    color: '#34D399',
+    color: premiumColors.success,
     textTransform: 'uppercase',
   },
   resultsBtn: {
@@ -174,14 +278,14 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(52, 211, 153, 0.08)',
+    paddingVertical: 12,
+    backgroundColor: premiumColors.success + '10',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(52, 211, 153, 0.15)',
+    borderTopColor: premiumColors.success + '20',
   },
   resultsBtnText: {
-    color: '#34D399',
-    fontSize: 12,
+    color: premiumColors.success,
+    fontSize: 13,
     fontWeight: '800',
   },
 });

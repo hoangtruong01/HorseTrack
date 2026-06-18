@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { C, Card, EmptyState, ErrorState, ListItemCard, LoadingState, SectionHeader, formatDateTime, statusLabel } from '@/components/ui/shared';
+import { AppScreen, Section } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { EmptyState, ErrorState, LoadingState, formatDateTime, statusLabel } from '@/components/ui/shared';
 import { rewardPointLedgerApi, predictionsApi } from '@/lib/api-client';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function SpectatorWallet() {
   const router = useRouter();
@@ -42,165 +45,284 @@ export default function SpectatorWallet() {
     loadData();
   }, [loadData]);
 
-  if (loading) return <LoadingState />;
+  if (loading && !refreshing) return <LoadingState />;
 
   return (
-    <ScrollView
-      style={s.c}
-      contentContainerStyle={s.p}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
-    >
-      {/* Wallet Balance Card */}
-      <Card>
-        <Text style={s.label}>ĐIỂM HIỆN TẠI</Text>
-        <Text style={s.balance}>
-          {balance.toLocaleString()} <Text style={s.unit}>Pts</Text>
-        </Text>
-        <Text style={s.hint}>Dự đoán đúng nhận điểm thưởng, sai trừ điểm cược tương ứng.</Text>
-      </Card>
+    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+      <View style={styles.content}>
+        
+        {/* ── Header Card ── */}
+        <View style={styles.balanceCard}>
+          <Text style={styles.balanceEyebrow}>ĐIỂM HIỆN TẠI</Text>
+          <View style={styles.balanceRow}>
+            <Text style={styles.balanceValue}>{balance.toLocaleString()}</Text>
+            <Text style={styles.balanceUnit}> Pts</Text>
+          </View>
+          <Text style={styles.balanceHint}>Dự đoán đúng nhận thưởng điểm, sai trừ điểm theo cấu hình hệ thống.</Text>
+        </View>
 
-      {/* Segments Options */}
-      <View style={s.segmentContainer}>
-        <TouchableOpacity
-          style={[s.segmentBtn, activeTab === 'transactions' && s.segmentBtnActive]}
-          onPress={() => setActiveTab('transactions')}
-          activeOpacity={0.8}
-        >
-          <Text style={[s.segmentText, activeTab === 'transactions' && s.segmentTextActive]}>Lịch sử giao dịch</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[s.segmentBtn, activeTab === 'predictions' && s.segmentBtnActive]}
-          onPress={() => setActiveTab('predictions')}
-          activeOpacity={0.8}
-        >
-          <Text style={[s.segmentText, activeTab === 'predictions' && s.segmentTextActive]}>Lịch sử dự đoán</Text>
-        </TouchableOpacity>
+        {/* ── Segments Options ── */}
+        <View style={styles.segmentContainer}>
+          <TouchableOpacity
+            style={[styles.segmentBtn, activeTab === 'transactions' && styles.segmentBtnActive]}
+            onPress={() => setActiveTab('transactions')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.segmentText, activeTab === 'transactions' && styles.segmentTextActive]}>Lịch sử giao dịch</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.segmentBtn, activeTab === 'predictions' && styles.segmentBtnActive]}
+            onPress={() => setActiveTab('predictions')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.segmentText, activeTab === 'predictions' && styles.segmentTextActive]}>Lịch sử dự đoán</Text>
+          </TouchableOpacity>
+        </View>
+
+        {error ? (
+          <ErrorState message={error} onRetry={loadData} />
+        ) : activeTab === 'transactions' ? (
+          <Section title={`Lịch sử giao dịch (${history.length})`}>
+            {history.length === 0 ? (
+              <EmptyState icon="history" title="Chưa có giao dịch" subtitle="Lịch sử điểm thưởng sẽ hiển thị tại đây." />
+            ) : (
+              <View style={styles.listContainer}>
+                {history.map((item) => {
+                  const delta = item.pointsDelta ?? 0;
+                  const isPositive = delta >= 0;
+                  
+                  return (
+                    <View key={item._id || item.id} style={styles.rowItem}>
+                      <View style={styles.rowAvatar}>
+                        <MaterialIcons name="swap-vert" size={20} color={premiumColors.textSecondary} />
+                      </View>
+                      <View style={styles.rowInfo}>
+                        <Text style={styles.rowTitle} numberOfLines={1}>{item.note || 'Giao dịch điểm thưởng'}</Text>
+                        <Text style={styles.rowSubtitle} numberOfLines={1}>
+                          {`${formatDateTime(item.createdAt)} · Số dư sau: ${(item.balanceAfter ?? 0).toLocaleString()} Pts`}
+                        </Text>
+                      </View>
+                      <View style={styles.rowRight}>
+                        <Text style={[styles.deltaText, { color: isPositive ? premiumColors.success : premiumColors.danger }]}>
+                          {isPositive ? '+' : ''}{delta.toLocaleString()} Pts
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </Section>
+        ) : (
+          <Section title={`Lịch sử dự đoán (${predictions.length})`}>
+            {predictions.length === 0 ? (
+              <View style={styles.emptyWrap}>
+                <EmptyState icon="psychology" title="Chưa có dự đoán" subtitle="Bạn chưa đặt dự đoán cho trận đua nào. Hãy vào Giải đấu để bắt đầu!" />
+                <TouchableOpacity
+                  style={styles.emptyBtn}
+                  onPress={() => router.push('/(spectator)/tournaments' as any)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.emptyBtnText}>Tạo dự đoán đầu tiên</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.listContainer}>
+                {predictions.map((p) => {
+                  const st = statusLabel(p.status);
+                  const horse = typeof p.predictedHorseId === 'object' ? p.predictedHorseId?.name : 'Ngựa';
+                  const race = typeof p.raceId === 'object' ? p.raceId?.name : 'Trận đua';
+                  const rId = typeof p.raceId === 'object' ? p.raceId?._id : p.raceId;
+                  
+                  // Calculate points gain/loss display
+                  let rewardDisplay = '';
+                  let rewardColor = premiumColors.textSecondary;
+                  if (p.status === 'WON') {
+                    rewardDisplay = `+${p.rewardPoints || 0} Pts`;
+                    rewardColor = premiumColors.success;
+                  } else if (p.status === 'LOST') {
+                    rewardDisplay = `-${p.betPoints || 0} Pts`;
+                    rewardColor = premiumColors.danger;
+                  } else if (p.status === 'PENDING') {
+                    rewardDisplay = 'Đang chờ';
+                    rewardColor = premiumColors.warning;
+                  } else {
+                    rewardDisplay = st.label;
+                  }
+
+                  return (
+                    <TouchableOpacity
+                      key={p._id || p.id}
+                      style={styles.rowItem}
+                      onPress={rId ? () => router.push(`/(spectator)/race/${rId}` as any) : undefined}
+                      activeOpacity={rId ? 0.7 : 1}
+                    >
+                      <View style={styles.rowAvatar}>
+                        <MaterialIcons name="psychology" size={20} color={premiumColors.textSecondary} />
+                      </View>
+                      <View style={styles.rowInfo}>
+                        <Text style={styles.rowTitle} numberOfLines={1}>{horse}</Text>
+                        <Text style={styles.rowSubtitle} numberOfLines={1}>
+                          {`Trận: ${race} · ${formatDateTime(p.createdAt)}`}
+                        </Text>
+                      </View>
+                      <View style={styles.rowRight}>
+                        <Text style={[styles.deltaText, { color: rewardColor }]}>
+                          {rewardDisplay}
+                        </Text>
+                      </View>
+                      {rId && (
+                        <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} style={{ marginLeft: 4 }} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+          </Section>
+        )}
+
       </View>
-
-      {error ? (
-        <ErrorState message={error} onRetry={loadData} />
-      ) : activeTab === 'transactions' ? (
-        // Transactions List Tab
-        <View style={s.tabContent}>
-          <SectionHeader title={`Lịch sử giao dịch (${history.length})`} />
-          {history.length === 0 ? (
-            <EmptyState icon="history" title="Chưa có giao dịch" subtitle="Lịch sử điểm thưởng sẽ hiển thị tại đây." />
-          ) : (
-            history.map((item) => {
-              const delta = item.pointsDelta ?? 0;
-              return (
-                <ListItemCard
-                  key={item._id}
-                  title={item.note || 'Giao dịch điểm thưởng'}
-                  subtitle={`${formatDateTime(item.createdAt)} · Số dư sau: ${(item.balanceAfter ?? 0).toLocaleString()} Pts`}
-                  rightText={`${delta > 0 ? '+' : ''}${delta.toLocaleString()} Pts`}
-                  rightColor={delta >= 0 ? C.tealLight : '#EF4444'}
-                  icon="swap-vert"
-                />
-              );
-            })
-          )}
-        </View>
-      ) : (
-        // Predictions List Tab
-        <View style={s.tabContent}>
-          <SectionHeader title={`Lịch sử dự đoán (${predictions.length})`} />
-          {predictions.length === 0 ? (
-            <View style={s.emptyContainer}>
-              <EmptyState icon="history" title="Chưa có dự đoán" subtitle="Bạn chưa đặt dự đoán cho trận đua nào. Hãy vào Giải đấu để bắt đầu!" />
-              <TouchableOpacity
-                style={s.emptyBtn}
-                onPress={() => router.push('/(spectator)/tournaments' as any)}
-                activeOpacity={0.8}
-              >
-                <Text style={s.emptyBtnText}>Tạo dự đoán đầu tiên</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            predictions.map((p) => {
-              const st = statusLabel(p.status);
-              const horse = typeof p.predictedHorseId === 'object' ? p.predictedHorseId?.name : 'Ngựa';
-              const race = typeof p.raceId === 'object' ? p.raceId?.name : 'Trận đua';
-              const rId = typeof p.raceId === 'object' ? p.raceId?._id : p.raceId;
-              
-              // Calculate points gain/loss display
-              let rewardDisplay = '';
-              let rewardColor = C.textSecondary;
-              if (p.status === 'WON') {
-                rewardDisplay = `+${p.rewardPoints || 0} Pts`;
-                rewardColor = C.tealLight;
-              } else if (p.status === 'LOST') {
-                rewardDisplay = `-${p.betPoints || 0} Pts`;
-                rewardColor = '#EF4444';
-              } else if (p.status === 'PENDING') {
-                rewardDisplay = 'Đang chờ';
-                rewardColor = '#F59E0B';
-              }
-
-              return (
-                <ListItemCard
-                  key={p._id}
-                  title={`Dự đoán: ${horse}`}
-                  subtitle={`Trận: ${race} · ${formatDateTime(p.createdAt)}`}
-                  rightText={rewardDisplay || st.label}
-                  rightColor={rewardColor}
-                  icon="psychology"
-                  onPress={rId ? () => router.push(`/(spectator)/race/${rId}` as any) : undefined}
-                />
-              );
-            })
-          )}
-        </View>
-      )}
-    </ScrollView>
+    </AppScreen>
   );
 }
 
-const s = StyleSheet.create({
-  c: { flex: 1, backgroundColor: C.bg },
-  p: { padding: 16, paddingBottom: 32 },
-  label: { color: C.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
-  balance: { color: C.white, fontSize: 36, fontWeight: '900', marginTop: 8 },
-  unit: { fontSize: 18, color: C.textSecondary },
-  hint: { color: C.textMuted, fontSize: 11, marginTop: 8 },
+const styles = StyleSheet.create({
+  content: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[24],
+    paddingBottom: premiumSpacing[48],
+  },
+  
+  // ── Balance Card ──
+  balanceCard: {
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    padding: premiumSpacing[20],
+    marginBottom: premiumSpacing[24],
+    alignItems: 'center',
+  },
+  balanceEyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: premiumColors.brand,
+    letterSpacing: 1.5,
+    marginBottom: premiumSpacing[12],
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: premiumSpacing[12],
+  },
+  balanceValue: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: premiumColors.text,
+  },
+  balanceUnit: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: premiumColors.textSecondary,
+    marginLeft: 4,
+  },
+  balanceHint: {
+    fontSize: 12,
+    color: premiumColors.textMuted,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+
+  // ── Segments ──
   segmentContainer: {
     flexDirection: 'row',
-    backgroundColor: '#171B24',
-    borderRadius: 8,
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[8],
     padding: 4,
-    marginTop: 20,
-    marginBottom: 8,
+    marginBottom: premiumSpacing[24],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
   },
   segmentBtn: {
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: premiumRadius[8],
     backgroundColor: 'transparent',
   },
   segmentBtnActive: {
-    backgroundColor: '#202633',
+    backgroundColor: premiumColors.surface2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.borderSoft,
   },
   segmentText: {
     fontSize: 13,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     fontWeight: '500',
   },
   segmentTextActive: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontWeight: '700',
   },
-  tabContent: {
-    marginTop: 10,
+
+  // ── Transaction List ──
+  listContainer: {
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    overflow: 'hidden',
   },
-  emptyContainer: {
+  rowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: premiumSpacing[16],
+    borderBottomWidth: 1,
+    borderBottomColor: premiumColors.border,
+    gap: premiumSpacing[12],
+  },
+  rowAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: premiumRadius[8],
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  rowInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  rowTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: premiumColors.text,
+    marginBottom: 4,
+  },
+  rowSubtitle: {
+    fontSize: 12,
+    color: premiumColors.textMuted,
+  },
+  rowRight: {
+    flexShrink: 0,
+    marginLeft: premiumSpacing[8],
+  },
+  deltaText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+  // ── Empty State ──
+  emptyWrap: {
     paddingVertical: 20,
     alignItems: 'center',
   },
   emptyBtn: {
-    backgroundColor: C.red,
+    backgroundColor: premiumColors.brand,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 22,
@@ -208,7 +330,7 @@ const s = StyleSheet.create({
     marginTop: 16,
   },
   emptyBtnText: {
-    color: C.white,
+    color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 13,
   },

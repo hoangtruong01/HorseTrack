@@ -1,6 +1,8 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, statusLabel } from '@/components/ui/shared';
 import { tournamentsApi, racesApi, registrationsApi, predictionsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -9,6 +11,7 @@ import RaceResultsModal from '@/components/ui/race-results-modal';
 export default function SpectatorTournaments() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'open' | 'upcoming' | 'draft'>('all');
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -47,6 +50,7 @@ export default function SpectatorTournaments() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
 
   const filteredData = data.filter((t) => {
     if (selectedFilter === 'all') return true;
@@ -144,11 +148,11 @@ export default function SpectatorTournaments() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ONGOING': return '#E10600';
-      case 'OPEN_REGISTRATION': return '#34D399';
-      case 'CLOSED_REGISTRATION': return '#F59E0B';
+      case 'ONGOING': return premiumColors.brand;
+      case 'OPEN_REGISTRATION': return premiumColors.success;
+      case 'CLOSED_REGISTRATION': return premiumColors.warning;
       case 'COMPLETED': return '#8B5CF6';
-      default: return '#6F7785';
+      default: return premiumColors.textMuted;
     }
   };
 
@@ -230,7 +234,7 @@ export default function SpectatorTournaments() {
                     </Text>
                   </View>
                   <View style={s.predictedReward}>
-                    <Text style={[s.predictedRewardText, { color: currentPrediction.status === 'WON' ? '#34D399' : '#E10600' }]}>
+                    <Text style={[s.predictedRewardText, { color: currentPrediction.status === 'WON' ? premiumColors.success : premiumColors.brand }]}>
                       {currentPrediction.status === 'WON' ? `+${currentPrediction.rewardPoints || 0} Pts` :
                        currentPrediction.status === 'LOST' ? `-${currentPrediction.betPoints || 0} Pts` : 'Chờ kết quả'}
                     </Text>
@@ -315,7 +319,7 @@ export default function SpectatorTournaments() {
                             <Text style={s.quickBetBtnText}>100 Pts</Text>
                           </TouchableOpacity>
                           <TouchableOpacity style={[s.quickBetBtn, s.quickBetAllIn]} onPress={() => setBetPointsInput(String(balance))}>
-                            <Text style={[s.quickBetBtnText, { color: '#FFFFFF' }]}>All In</Text>
+                            <Text style={[s.quickBetBtnText, { color: premiumColors.text }]}>All In</Text>
                           </TouchableOpacity>
                         </View>
                       )}
@@ -448,7 +452,7 @@ export default function SpectatorTournaments() {
             <View style={s.infoRow}>
               <MaterialIcons name="monetization-on" size={16} color="#F59E0B" />
               <Text style={s.infoLabel}>Quỹ giải thưởng:</Text>
-              <Text style={[s.infoValue, { color: '#E10600', fontWeight: '900' }]}>
+              <Text style={[s.infoValue, { color: premiumColors.brand, fontWeight: '900' }]}>
                 {(selectedTour.prizePool || 0).toLocaleString('vi-VN')} Pts
               </Text>
             </View>
@@ -653,7 +657,7 @@ export default function SpectatorTournaments() {
 const s = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0B0D12',
+    backgroundColor: premiumColors.bg,
   },
   headerRow: {
     flexDirection: 'row',
@@ -665,7 +669,7 @@ const s = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
   },
   headerActions: {
     flexDirection: 'row',
@@ -686,21 +690,21 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#171B24',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   chipSelected: {
-    borderColor: '#E10600',
-    backgroundColor: 'rgba(225, 6, 0, 0.15)',
+    borderColor: premiumColors.brand,
+    backgroundColor: (premiumColors.brand + '20'),
   },
   chipText: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     fontWeight: '500',
   },
   chipTextSelected: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontWeight: '700',
   },
   scrollView: {
@@ -720,11 +724,11 @@ const s = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#E10600',
+    backgroundColor: premiumColors.brand,
   },
   countText: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
   featuredCard: {
     height: 160,
@@ -761,19 +765,19 @@ const s = StyleSheet.create({
   featuredBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#E10600',
+    color: premiumColors.brand,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   featuredTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginBottom: 6,
   },
   featuredSubtitle: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     lineHeight: 16,
   },
   featuredChevronContainer: {
@@ -783,7 +787,7 @@ const s = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: premiumColors.border,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
@@ -791,9 +795,9 @@ const s = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
@@ -802,7 +806,7 @@ const s = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 10,
-    backgroundColor: 'rgba(225, 6, 0, 0.08)',
+    backgroundColor: (premiumColors.brand + '15'),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -814,12 +818,12 @@ const s = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginBottom: 4,
   },
   cardSubtitle: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
   badge: {
     borderWidth: 1,
@@ -843,7 +847,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: premiumColors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -854,7 +858,7 @@ const s = StyleSheet.create({
   // Level 2 & 3 Detail Styles
   detailContainer: {
     flex: 1,
-    backgroundColor: '#0B0D12',
+    backgroundColor: premiumColors.bg,
   },
   backButton: {
     flexDirection: 'row',
@@ -865,7 +869,7 @@ const s = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     fontWeight: '500',
   },
   detailContent: {
@@ -888,7 +892,7 @@ const s = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: '#171B24',
+    backgroundColor: premiumColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -904,20 +908,20 @@ const s = StyleSheet.create({
   tourDetailName: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginTop: 8,
     marginBottom: 4,
   },
   tourDetailDesc: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     lineHeight: 16,
   },
   infoSection: {
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     padding: 16,
     marginBottom: 20,
     gap: 12,
@@ -929,12 +933,12 @@ const s = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 13,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     width: 110,
   },
   infoValue: {
     fontSize: 13,
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontWeight: '600',
     flex: 1,
   },
@@ -948,14 +952,14 @@ const s = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
   },
   raceListItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     borderRadius: 12,
     padding: 14,
     marginBottom: 10,
@@ -966,27 +970,27 @@ const s = StyleSheet.create({
   raceListName: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginBottom: 4,
   },
   raceListDetails: {
     fontSize: 11,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
 
   // Race Details & Predictions
   raceDetailHeader: {
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     padding: 16,
     marginBottom: 20,
   },
   raceDetailLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#E10600',
+    color: premiumColors.brand,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -994,7 +998,7 @@ const s = StyleSheet.create({
   raceDetailName: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginBottom: 8,
   },
   raceDetailMeta: {
@@ -1004,27 +1008,27 @@ const s = StyleSheet.create({
   },
   raceDetailMetaText: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
   predictionBox: {
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     padding: 16,
     marginBottom: 20,
   },
   predictionBoxTitle: {
     fontSize: 13,
     fontWeight: '900',
-    color: '#E10600',
+    color: premiumColors.brand,
     letterSpacing: 1,
     marginBottom: 14,
   },
   predictedContainer: {
-    backgroundColor: 'rgba(52, 211, 153, 0.05)',
+    backgroundColor: (premiumColors.success + '10'),
     borderWidth: 1,
-    borderColor: 'rgba(52, 211, 153, 0.15)',
+    borderColor: (premiumColors.success + '20'),
     borderRadius: 8,
     padding: 12,
   },
@@ -1037,7 +1041,7 @@ const s = StyleSheet.create({
   predictedTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#34D399',
+    color: premiumColors.success,
   },
   predictedDetail: {
     flexDirection: 'row',
@@ -1047,11 +1051,11 @@ const s = StyleSheet.create({
   predictedHorseName: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
   },
   predictedStatus: {
     fontSize: 11,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     marginTop: 2,
   },
   predictedReward: {
@@ -1063,7 +1067,7 @@ const s = StyleSheet.create({
   },
   predictedBetText: {
     fontSize: 10,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     marginTop: 2,
   },
   predictionForm: {
@@ -1071,11 +1075,11 @@ const s = StyleSheet.create({
   },
   formLabel: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
   emptyFormText: {
     fontSize: 12,
-    color: '#6F7785',
+    color: premiumColors.textMuted,
     fontStyle: 'italic',
     textAlign: 'center',
     paddingVertical: 12,
@@ -1086,34 +1090,34 @@ const s = StyleSheet.create({
   horseSelectCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#171B24',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     borderRadius: 8,
     padding: 12,
     gap: 10,
   },
   horseSelectCardActive: {
-    borderColor: '#E10600',
-    backgroundColor: 'rgba(225,6,0,0.05)',
+    borderColor: premiumColors.brand,
+    backgroundColor: (premiumColors.brand + '10'),
   },
   radioCircle: {
     width: 18,
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: '#6F7785',
+    borderColor: premiumColors.textMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   radioCircleActive: {
-    borderColor: '#E10600',
+    borderColor: premiumColors.brand,
   },
   radioCircleInner: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#E10600',
+    backgroundColor: premiumColors.brand,
   },
   horseSelectInfo: {
     flex: 1,
@@ -1121,14 +1125,14 @@ const s = StyleSheet.create({
   horseSelectName: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
   horseSelectNameActive: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
   },
   horseSelectJockey: {
     fontSize: 11,
-    color: '#6F7785',
+    color: premiumColors.textMuted,
     marginTop: 2,
   },
   betPointsSection: {
@@ -1142,11 +1146,11 @@ const s = StyleSheet.create({
   },
   betPointsLabel: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
   betPointsBalance: {
     fontSize: 12,
-    color: '#34D399',
+    color: premiumColors.success,
     fontWeight: '600',
   },
   betInputWrapper: {
@@ -1157,13 +1161,13 @@ const s = StyleSheet.create({
   textInput: {
     flex: 1,
     height: 40,
-    backgroundColor: '#171B24',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingRight: 40,
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontSize: 13,
     fontWeight: 'bold',
   },
@@ -1171,7 +1175,7 @@ const s = StyleSheet.create({
     position: 'absolute',
     right: 12,
     fontSize: 12,
-    color: '#6F7785',
+    color: premiumColors.textMuted,
     fontWeight: 'bold',
   },
   quickBetRow: {
@@ -1183,18 +1187,18 @@ const s = StyleSheet.create({
     height: 30,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-    backgroundColor: '#171B24',
+    borderColor: premiumColors.border,
+    backgroundColor: premiumColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   quickBetAllIn: {
-    borderColor: '#E10600',
-    backgroundColor: 'rgba(225,6,0,0.15)',
+    borderColor: premiumColors.brand,
+    backgroundColor: (premiumColors.brand + '20'),
   },
   quickBetBtnText: {
     fontSize: 10,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     fontWeight: 'bold',
   },
   warningBox: {
@@ -1212,17 +1216,17 @@ const s = StyleSheet.create({
   },
   warningText: {
     fontSize: 11,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     marginTop: 2,
   },
   submitBtn: {
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#E10600',
+    backgroundColor: premiumColors.brand,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    shadowColor: '#E10600',
+    shadowColor: premiumColors.brand,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -1232,40 +1236,40 @@ const s = StyleSheet.create({
     opacity: 0.5,
   },
   submitBtnText: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontSize: 13,
     fontWeight: '800',
   },
   closedPredictionBox: {
-    backgroundColor: '#171B24',
+    backgroundColor: premiumColors.surface,
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
   },
   closedPredictionText: {
     fontSize: 12,
-    color: '#6F7785',
+    color: premiumColors.textMuted,
     fontStyle: 'italic',
   },
   tableCard: {
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     overflow: 'hidden',
   },
   tableHeaderRow: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.02)',
+    backgroundColor: premiumColors.border,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
   },
   tableHeaderCell: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#6F7785',
+    color: premiumColors.textMuted,
     textTransform: 'uppercase',
   },
   tableRow: {
@@ -1274,25 +1278,25 @@ const s = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.02)',
+    borderColor: premiumColors.border,
   },
   laneText: {
     fontSize: 14,
     fontWeight: '900',
-    color: '#E10600',
+    color: premiumColors.brand,
   },
   horseNameText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
   },
   jockeyNameText: {
     fontSize: 10,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     marginTop: 2,
   },
   approvedBadge: {
-    backgroundColor: 'rgba(52, 211, 153, 0.1)',
+    backgroundColor: (premiumColors.success + '15'),
     borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -1300,14 +1304,14 @@ const s = StyleSheet.create({
   approvedBadgeText: {
     fontSize: 9,
     fontWeight: 'bold',
-    color: '#34D399',
+    color: premiumColors.success,
     textTransform: 'uppercase',
   },
   raceListItemContainer: {
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: premiumColors.border,
     marginBottom: 8,
     overflow: 'hidden',
   },
@@ -1317,12 +1321,12 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 10,
-    backgroundColor: 'rgba(52, 211, 153, 0.08)',
+    backgroundColor: (premiumColors.success + '10'),
     borderTopWidth: 1,
-    borderTopColor: 'rgba(52, 211, 153, 0.15)',
+    borderTopColor: (premiumColors.success + '20'),
   },
   resultBtnInlineText: {
-    color: '#34D399',
+    color: premiumColors.success,
     fontSize: 12,
     fontWeight: '800',
   },
@@ -1331,14 +1335,14 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#34D399',
+    backgroundColor: premiumColors.success,
     borderRadius: 8,
     paddingVertical: 10,
     marginTop: 12,
     width: '100%',
   },
   resultBtnBlockText: {
-    color: '#0B0D12',
+    color: premiumColors.bg,
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',

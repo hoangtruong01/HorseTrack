@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, ViewStyle, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { premiumColors, premiumSpacing, premiumRadius, premiumTypography, PremiumTone, getPremiumToneColor } from './premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius, premiumTypography, premiumShadows, PremiumTone, getPremiumToneColor } from './premium-tokens';
 
 // ─── AppScreen ──────────────────────────────────────────────────────────────
 interface AppScreenProps {
@@ -230,13 +230,20 @@ export function AppButton({ title, onPress, variant = 'primary', loading, disabl
   } else if (isGhost) {
     backgroundColor = 'transparent';
     borderColor = 'transparent';
+  } else {
+    // Secondary
+    backgroundColor = premiumColors.surfaceGlassStrong;
+    borderColor = premiumColors.borderGlass;
   }
+
+  const isPrimaryButton = isPrimary && !disabled && !loading;
 
   return (
     <TouchableOpacity
       style={[
         styles.button,
         { backgroundColor, borderColor },
+        isPrimaryButton ? premiumShadows.redGlow : undefined,
         (disabled || loading) && styles.buttonDisabled
       ]}
       onPress={onPress}
@@ -299,13 +306,14 @@ const styles = StyleSheet.create({
 
   // HeroPanel
   heroPanel: {
-    backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[16],
+    backgroundColor: premiumColors.surfaceGlassStrong,
+    borderRadius: premiumRadius[24],
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: premiumColors.borderGlass,
     overflow: 'hidden',
     marginHorizontal: premiumSpacing[16],
     marginBottom: premiumSpacing[16],
+    ...premiumShadows.glass,
   },
   heroAccent: {
     position: 'absolute',
@@ -365,11 +373,12 @@ const styles = StyleSheet.create({
 
   // MetricCard
   metricCard: {
-    backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[12],
+    backgroundColor: premiumColors.surfaceGlass,
+    borderRadius: premiumRadius[16],
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: premiumColors.borderGlass,
     padding: premiumSpacing[12],
+    ...premiumShadows.subtle,
   },
   metricHeader: {
     flexDirection: 'row',
@@ -389,14 +398,15 @@ const styles = StyleSheet.create({
 
   // ActionTile
   actionTile: {
-    backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[12],
+    backgroundColor: premiumColors.surfaceGlass,
+    borderRadius: premiumRadius[16],
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: premiumColors.borderSoft,
     padding: premiumSpacing[12],
     alignItems: 'center',
     justifyContent: 'center',
     gap: premiumSpacing[8],
+    ...premiumShadows.subtle,
   },
   actionIconWrapper: {
     width: 36,
@@ -433,7 +443,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     paddingHorizontal: premiumSpacing[16],
-    marginBottom: premiumSpacing[12],
+    marginBottom: premiumSpacing[16],
   },
   sectionTitle: {
     fontSize: premiumTypography.sizes[16],
