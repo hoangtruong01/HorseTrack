@@ -18,7 +18,7 @@ export async function PATCH(
 
     const { invitationId } = await params;
 
-    const response = await fetch(`http://localhost:3000/api/v1/jockey-invitations/${invitationId}/cancel`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jockey-invitations/${invitationId}/cancel`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -163,7 +163,10 @@ export default function AdminHorsesPage() {
 
       <div>
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Đang tải...</div>
+          <div className="flex flex-col items-center justify-center py-16 text-foreground/55">
+  <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
+  <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
+</div>
         ) : horses.length === 0 ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có ngựa nào.</div>
         ) : viewMode === "grid" ? (

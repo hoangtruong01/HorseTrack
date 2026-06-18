@@ -18,7 +18,7 @@ export async function GET(
 
     const { horseId } = await params;
 
-    const response = await fetch(`http://localhost:3000/api/v1/race-records/horse/${horseId}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/race-records/horse/${horseId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

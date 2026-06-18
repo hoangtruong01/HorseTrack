@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const page = searchParams.get("page") || "1";
     const limit = searchParams.get("limit") || "100";
 
-    const response = await fetch(`http://localhost:3000/api/v1/jockeys?page=${page}&limit=${limit}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jockeys?page=${page}&limit=${limit}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

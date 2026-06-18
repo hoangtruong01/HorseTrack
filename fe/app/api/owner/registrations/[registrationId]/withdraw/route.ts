@@ -18,7 +18,7 @@ export async function PATCH(
 
     const { registrationId } = await params;
 
-    const response = await fetch(`http://localhost:3000/api/v1/registrations/${registrationId}/withdraw`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/registrations/${registrationId}/withdraw`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,

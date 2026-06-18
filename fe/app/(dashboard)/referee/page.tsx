@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -231,7 +232,7 @@ export default function RefereeDashboardPage() {
   if (isLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
       </div>
     );
   }
@@ -256,11 +257,10 @@ export default function RefereeDashboardPage() {
         <section className="relative overflow-hidden rounded-3xl border border-border bg-card/60 backdrop-blur-xl p-8 shadow-sm">
           <div className="space-y-4 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                profile?.approvalStatus === "REJECTED"
-                  ? "bg-red-500/10 text-red-500 border border-red-500/20"
-                  : "bg-primary/10 text-primary border border-primary/20"
-              }`}>
+              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${profile?.approvalStatus === "REJECTED"
+                ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                : "bg-primary/10 text-primary border border-primary/20"
+                }`}>
                 {profile?.approvalStatus === "REJECTED" ? "Hồ sơ bị từ chối" : "Cần hoàn thiện hồ sơ"}
               </span>
             </div>
@@ -369,7 +369,7 @@ export default function RefereeDashboardPage() {
                 </p>
               </div>
             </div>
-            
+
             <Button
               variant="outline"
               onClick={() => setIsEditingProfile((v) => !v)}
@@ -467,7 +467,7 @@ export default function RefereeDashboardPage() {
               ? raceIdRaw
               : raceIdRaw?._id || (raceIdRaw as unknown as { id?: string })?.id;
             const raceObj = typeof raceIdRaw !== "string" ? raceIdRaw : null;
-            
+
             return (
               <section className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -479,27 +479,27 @@ export default function RefereeDashboardPage() {
                       <h4 className="text-base font-bold text-foreground">
                         {raceObj?.name || "Đang tải..."}
                       </h4>
-                      <StatusBadge 
+                      <StatusBadge
                         label={
                           activeAssignment.status === "assigned" ? "Chờ duyệt" :
-                          activeAssignment.status === "accepted" ? "Đã nhận" :
-                          activeAssignment.status === "declined" ? "Đã từ chối" : "Đã hủy"
+                            activeAssignment.status === "accepted" ? "Đã nhận" :
+                              activeAssignment.status === "declined" ? "Đã từ chối" : "Đã hủy"
                         }
                         tone={
                           activeAssignment.status === "accepted" ? "green" :
-                          activeAssignment.status === "assigned" ? "yellow" :
-                          activeAssignment.status === "declined" ? "red" : "slate"
+                            activeAssignment.status === "assigned" ? "yellow" :
+                              activeAssignment.status === "declined" ? "red" : "slate"
                         }
                       />
                     </div>
-                    
+
                     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-md border border-border/50">
-                        <Clock className="size-3.5 text-primary" /> 
+                        <Clock className="size-3.5 text-primary" />
                         {formatDateTime(raceObj?.startTime)}
                       </span>
                       <span className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-md border border-border/50">
-                        <ShieldAlert className="size-3.5 text-primary" /> 
+                        <ShieldAlert className="size-3.5 text-primary" />
                         {activeAssignment.role === "main" ? "Trọng tài chính" : "Trọng tài phụ"}
                       </span>
                     </div>
@@ -564,7 +564,7 @@ export default function RefereeDashboardPage() {
                   <Link href="/referee/reports">Xem tất cả</Link>
                 </Button>
               </div>
-              
+
               {recentReports.length > 0 ? (
                 <div className="space-y-2">
                   {recentReports.map((report) => (
@@ -612,7 +612,7 @@ export default function RefereeDashboardPage() {
                   <Link href="/referee/violations">Xem tất cả</Link>
                 </Button>
               </div>
-              
+
               {recentViolations.length > 0 ? (
                 <div className="space-y-2">
                   {recentViolations.map((violation) => (

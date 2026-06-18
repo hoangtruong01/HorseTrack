@@ -14,7 +14,7 @@ export async function GET() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/v1/notifications/my-notifications?page=1&limit=50", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/my-notifications?page=1&limit=50`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -63,7 +63,7 @@ export async function PATCH(request: Request) {
 
     if (all === "true") {
       // Đánh dấu tất cả đã đọc
-      const response = await fetch("http://localhost:3000/api/v1/notifications/read-all", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/read-all`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ export async function PATCH(request: Request) {
       }
     } else if (id) {
       // Đánh dấu một thông báo đã đọc
-      const response = await fetch(`http://localhost:3000/api/v1/notifications/${id}/read`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/${id}/read`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -94,52 +94,52 @@ export function UserDropdownMenu({
         />
       </button>
 
-       {isOpen && (
-         <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
-           {/* Profile Link */}
-           <Link
-             href="/profile"
-             onClick={closeMenu}
-             className="flex items-center gap-3 border-b border-border px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
-           >
-             <User className="size-4.5" />
-             <span>{t("nav.profile", "Profile")}</span>
-           </Link>
+      {isOpen && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
+          {/* Profile Link */}
+          <Link
+            href="/profile"
+            onClick={closeMenu}
+            className="flex items-center gap-3 border-b border-border px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+          >
+            <User className="size-4.5" />
+            <span>{t("nav.profile", "Profile")}</span>
+          </Link>
 
-           {/* Dashboard Link */}
-           <Link
-             href={getDashboardHref()}
-             onClick={closeMenu}
-             className="flex items-center gap-3 border-b border-border px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
-           >
-             <LayoutDashboard className="size-4.5" />
-             <span>{t("nav.dashboard", "Dashboard")}</span>
-           </Link>
+          {/* Dashboard Link */}
+          <Link
+            href={getDashboardHref()}
+            onClick={closeMenu}
+            className="flex items-center gap-3 border-b border-border px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+          >
+            <LayoutDashboard className="size-4.5" />
+            <span>{t("nav.dashboard", "Dashboard")}</span>
+          </Link>
 
-            {/* Settings Link */}
-            <Link
-              href="/settings"
-              onClick={closeMenu}
-              className="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
-            >
-              <Settings className="size-4.5" />
-              <span>{t("nav.settings", "Settings")}</span>
-            </Link>
+          {/* Settings Link */}
+          <Link
+            href="/settings"
+            onClick={closeMenu}
+            className="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+          >
+            <Settings className="size-4.5" />
+            <span>{t("nav.settings", "Settings")}</span>
+          </Link>
 
-            {/* Logout Button */}
-            <button
-              onClick={() => {
-                closeMenu();
-                toast.success(t("auth.logoutSuccess"));
-                logout();
-              }}
-              className="w-full flex items-center gap-3 border-t border-border px-5 py-3.5 text-sm font-semibold text-red-500 hover:text-red-600 transition hover:bg-secondary text-left cursor-pointer"
-            >
-              <LogOut className="size-4.5" />
-              <span>{t("nav.logout", "Logout")}</span>
-            </button>
-          </div>
-       )}
+          {/* Logout Button */}
+          <button
+            onClick={() => {
+              closeMenu();
+              toast.success(t("auth.loginForm.logoutSuccess"));
+              logout();
+            }}
+            className="w-full flex items-center gap-3 border-t border-border px-5 py-3.5 text-sm font-semibold text-red-500 hover:text-red-600 transition hover:bg-secondary text-left cursor-pointer"
+          >
+            <LogOut className="size-4.5" />
+            <span>{t("nav.logout", "Logout")}</span>
+          </button>
+        </div>
+      )}
 
     </div>
   );

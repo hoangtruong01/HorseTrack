@@ -13,7 +13,7 @@ export async function GET() {
       );
     }
 
-    const response = await fetch("http://localhost:3000/api/v1/jockey-invitations/sent", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jockey-invitations/sent`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    const response = await fetch("http://localhost:3000/api/v1/jockey-invitations", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jockey-invitations`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

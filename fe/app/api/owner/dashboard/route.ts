@@ -13,7 +13,7 @@ export async function GET() {
       );
     }
 
-    const response = await fetch("http://localhost:3000/api/v1/dashboard/owner", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/owner`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

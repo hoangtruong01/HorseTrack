@@ -162,7 +162,11 @@
       "statusFinished": "Completed",
       "showing": "Showing {{start}} to {{end}} of {{total}} results",
       "btnPrev": "Previous",
-      "btnNext": "Next"
+      "btnNext": "Next",
+      "statusPaid": "Success",
+      "statusRejected": "Rejected",
+      "statusFailed": "Failed",
+      "statusPending": "Pending"
     }
   },
   "settings": {

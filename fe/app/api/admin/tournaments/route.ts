@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const payload = await request.json();
 
-    const response = await fetch("http://localhost:3000/api/v1/tournaments", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
