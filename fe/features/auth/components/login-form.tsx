@@ -129,6 +129,7 @@ export function LoginForm() {
           userName: user.fullName,
         }),
       );
+      
       router.push(`/${targetRole}`);
     } catch (err) {
       const defaultErr = t("auth.loginForm.loginError");
