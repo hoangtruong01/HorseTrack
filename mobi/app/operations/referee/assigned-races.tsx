@@ -203,6 +203,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+    paddingBottom: 110,
   },
   loadingContainer: {
     flex: 1,
@@ -334,6 +335,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(18, 18, 22, 0.86)',
     gap: 8,
+    marginBottom: 80,
   },
   backHomeButtonText: {
     color: '#AAAAAA',

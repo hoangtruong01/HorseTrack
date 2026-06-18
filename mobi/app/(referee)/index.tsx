@@ -6,24 +6,30 @@ import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { refereeAssignmentsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
+import { refereeAssignmentsApi, rankingsApi } from '@/lib/api-client';
 
 export default function RefereeHome() {
   const router = useRouter();
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [topHorses, setTopHorses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     setError(null);
-    try {
-      const res = await refereeAssignmentsApi.myAssignments({ limit: 10 });
-      setAssignments((res as any).data || res || []);
-    } catch (err: any) {
-      setError(err.message || 'Lỗi tải phân công');
-    } finally {
-      setLoading(false);
-    }
+    Promise.all([
+      refereeAssignmentsApi.myAssignments({ limit: 10 }).catch(() => []),
+      rankingsApi.globalHorses().catch(() => [])
+    ])
+      .then(([aRes, hRes]) => {
+        setAssignments((aRes as any).data || aRes || []);
+        setTopHorses((hRes as any).data || hRes || []);
+      })
+      .catch((err: any) => setError(err.message || 'Lỗi tải phân công'))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -86,6 +92,20 @@ export default function RefereeHome() {
             <Text style={styles.metricLabel}>PHÂN CÔNG MỚI</Text>
             <View style={styles.metricValueRow}>
               <Text style={styles.metricValue}>{pendingCount}</Text>
+        <Text style={styles.welcomeTitle}>Giám Sát & Điều Hành</Text>
+        <Text style={styles.welcomeSub}>Duyệt phân công trận đấu, thực hiện kiểm tra điểm danh, log vi phạm và công bố kết quả trận đua.</Text>
+      </Card>
+
+      <View style={styles.actionsGrid}>
+        {[
+          { title: 'Phân Công', icon: 'assignment', path: '/assignments', color: '#F59E0B' },
+          { title: 'Điểm Danh', icon: 'fact-check', path: '/pre-race', color: '#38BDF8' },
+          { title: 'Thẩm Định', icon: 'gavel', path: '/judging', color: '#EF4444' },
+          { title: 'Ví Thưởng', icon: 'account-balance-wallet', path: '/wallet', color: '#34D399' },
+        ].map((act, idx) => (
+          <TouchableOpacity key={idx} style={styles.actionBtn} onPress={() => router.push(act.path as any)}>
+            <View style={[styles.actionIconWrap, { backgroundColor: act.color + '15' }]}>
+              <MaterialIcons name={act.icon as any} size={24} color={act.color} />
             </View>
           </View>
           <View style={[styles.metricCell, styles.cellBorderBottom]}>
@@ -123,45 +143,33 @@ export default function RefereeHome() {
           />
         </Section>
 
-        {/* ── Recent Assignments ── */}
-        <Section
-          title="Phân công mới nhất"
-          actionLabel="Xem tất cả"
-          onAction={() => router.push('/assignments')}
-        >
-          {assignments.length === 0 ? (
-            <Text style={styles.empty}>Chưa có phân công nào gần đây.</Text>
-          ) : (
-            assignments.slice(0, 3).map(a => {
-              const s = statusLabel(a.status);
-              const raceName = a.raceId?.name || 'Trận đua';
-              const roleName = a.role === 'main' ? 'Trọng tài chính' : 'Trợ lý';
-              
-              return (
-                <TouchableOpacity
-                  key={a._id || a.id}
-                  style={styles.rowItem}
-                  onPress={() => router.push('/assignments')}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.rowAvatar}>
-                    <MaterialIcons name="assignment-turned-in" size={18} color={premiumColors.textSecondary} />
-                  </View>
-                  <View style={styles.rowInfo}>
-                    <Text style={styles.rowTitle} numberOfLines={1}>{raceName}</Text>
-                    <Text style={styles.rowSubtitle} numberOfLines={1}>Vai trò: {roleName}</Text>
-                  </View>
-                  <View style={[styles.rowBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
-                    <Text style={[styles.rowBadgeText, { color: s.color }]}>{s.label}</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
-                </TouchableOpacity>
-              );
-            })
-          )}
-        </Section>
-      </View>
-    </AppScreen>
+      <SectionHeader title="Phân công mới nhất" />
+      {assignments.length === 0 ? (
+        <Text style={styles.empty}>Chưa có phân công nào.</Text>
+      ) : (
+        assignments.slice(0, 3).map(a => {
+          const s = statusLabel(a.status);
+          const raceName = a.raceId?.name || 'Trận đua';
+          return <ListItemCard key={a._id} title={raceName} subtitle={`Vai trò: ${a.role === 'main' ? 'Trọng tài chính' : 'Trợ lý'}`} rightText={s.label} rightColor={s.color} icon="assignment-turned-in" />;
+        })
+      )}
+
+      <SectionHeader title="Bảng xếp hạng chiến mã" />
+      {topHorses.length === 0 ? (
+        <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
+      ) : (
+        topHorses.slice(0, 5).map((horse, idx) => (
+          <ListItemCard
+            key={horse._id}
+            title={`${idx + 1}. ${horse.name.toUpperCase()}`}
+            subtitle={`Tốc độ: ${horse.baseSpeed} | Thể lực: ${horse.staminaScore}`}
+            icon="emoji-events"
+            rightText={`Thắng: ${horse.stats?.wins || 0}`}
+            rightColor="#F59E0B"
+          />
+        ))
+      )}
+    </ScrollView>
   );
 }
 
@@ -339,4 +347,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: premiumSpacing[16],
   },
+  container: { flex: 1, backgroundColor: C.bg },
+  content: { padding: 16, paddingBottom: 110 },
+  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  heroCard: { backgroundColor: C.card, padding: 20, marginBottom: 16, borderRadius: 16, borderWidth: 1, borderColor: C.cardBorder },
+  heroHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  welcomeLabel: { color: C.red, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
+  welcomeTitle: { color: C.white, fontSize: 24, fontWeight: '900', marginBottom: 6 },
+  welcomeSub: { color: C.textSecondary, fontSize: 13, lineHeight: 20 },
+  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+  actionBtn: { flex: 1, minWidth: '20%', backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 16, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
+  actionIconWrap: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  actionText: { color: C.white, fontSize: 10, fontWeight: '700', textAlign: 'center' },
+  empty: { color: C.textMuted, fontSize: 12, textAlign: 'center', marginVertical: 16 },
 });
