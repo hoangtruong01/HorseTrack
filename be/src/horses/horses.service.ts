@@ -19,11 +19,6 @@ import {
   RegistrationDocument,
   RegistrationStatus,
 } from '../registrations/schemas/registration.schema';
-import {
-  RaceResult,
-  RaceResultDocument,
-  RaceResultStatus,
-} from '../race-results/schemas/race-result.schema';
 
 type HorseJson = Horse & { id: string; totalRaces?: number; wins?: number };
 
@@ -33,8 +28,6 @@ export class HorsesService {
     @InjectModel(Horse.name) private horseModel: Model<HorseDocument>,
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
-    @InjectModel(RaceResult.name)
-    private resultModel: Model<RaceResultDocument>,
   ) {}
 
   /** Owner creates a horse – ownerId comes from JWT */
@@ -131,7 +124,7 @@ export class HorsesService {
       this.horseModel.countDocuments(filter),
     ]);
 
-    const data = await this.enrichHorsesWithStats(docs);
+    const data = this.enrichHorsesWithStats(docs);
 
     return {
       data,
@@ -155,7 +148,7 @@ export class HorsesService {
       this.horseModel.countDocuments(filter),
     ]);
 
-    const data = await this.enrichHorsesWithStats(docs);
+    const data = this.enrichHorsesWithStats(docs);
 
     return {
       data,
@@ -166,49 +159,15 @@ export class HorsesService {
   /** Get single horse by id */
   async findOne(id: string): Promise<HorseJson> {
     const doc = await this.findDocument(id);
-    const [enriched] = await this.enrichHorsesWithStats([doc]);
+    const [enriched] = this.enrichHorsesWithStats([doc]);
     return enriched;
   }
 
-  /**
-   * Batch-enrich horse docs with totalRaces & wins stats.
-   * Uses aggregation pipeline to avoid N+1 query problem.
-   */
-  private async enrichHorsesWithStats(
-    docs: HorseDocument[],
-  ): Promise<HorseJson[]> {
-    if (docs.length === 0) return [];
-
-    const horseIds = docs.map((d) => d._id);
-
-    // Single aggregation query replaces 2*N individual countDocuments calls
-    const statsAgg = await this.resultModel.aggregate<{
-      _id: Types.ObjectId;
-      totalRaces: number;
-      wins: number;
-    }>([
-      {
-        $match: {
-          horseId: { $in: horseIds },
-          status: RaceResultStatus.PUBLISHED,
-        },
-      },
-      {
-        $group: {
-          _id: '$horseId',
-          totalRaces: { $sum: 1 },
-          wins: { $sum: { $cond: [{ $eq: ['$rank', 1] }, 1, 0] } },
-        },
-      },
-    ]);
-
-    const statsMap = new Map(statsAgg.map((s) => [String(s._id), s]));
-
+  private enrichHorsesWithStats(docs: HorseDocument[]): HorseJson[] {
     return docs.map((d) => {
       const json = d.toJSON() as unknown as HorseJson;
-      const stats = statsMap.get(String(d._id));
-      json.totalRaces = stats?.totalRaces ?? 0;
-      json.wins = stats?.wins ?? 0;
+      json.totalRaces = d.totalRaces ?? 0;
+      json.wins = d.winCount ?? 0;
       return json;
     });
   }

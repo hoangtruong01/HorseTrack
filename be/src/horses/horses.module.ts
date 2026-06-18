@@ -8,17 +8,11 @@ import {
   Registration,
   RegistrationSchema,
 } from '../registrations/schemas/registration.schema';
-import {
-  RaceResult,
-  RaceResultSchema,
-} from '../race-results/schemas/race-result.schema';
-
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Horse.name, schema: HorseSchema },
       { name: Registration.name, schema: RegistrationSchema },
-      { name: RaceResult.name, schema: RaceResultSchema },
     ]),
     CloudinaryModule,
   ],
