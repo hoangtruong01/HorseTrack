@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { C, Card, useThemeColors } from '@/components/ui/shared';
+import { AppScreen, Section } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { useAuth } from '@/providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
-  const theme = useThemeColors();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const performLogout = async () => {
@@ -34,69 +34,180 @@ export default function ProfileScreen() {
   };
 
   const roleMap: Record<string, string> = {
-    admin: '👑 Quản trị viên',
-    owner: '🐴 Chủ ngựa',
-    jockey: '🏇 Nài ngựa',
-    referee: '🏁 Trọng tài',
-    spectator: '📣 Khán giả',
-    counter_staff: '🏪 Nhân viên quầy',
+    admin: 'Quản trị viên',
+    owner: 'Chủ ngựa',
+    jockey: 'Nài ngựa',
+    referee: 'Trọng tài',
+    spectator: 'Khán giả',
+    counter_staff: 'Nhân viên quầy',
   };
 
   return (
-    <ScrollView style={[s.c, { backgroundColor: theme.bg }]} contentContainerStyle={s.p}>
-      <View style={s.avatarWrap}>
-        <View style={s.avatar}>
-          <MaterialIcons name="person" size={40} color={theme.red} />
+    <AppScreen scroll>
+      <View style={styles.content}>
+        
+        {/* ── Account Header ── */}
+        <View style={styles.header}>
+          <View style={styles.avatarWrap}>
+            <MaterialIcons name="person" size={40} color={premiumColors.textMuted} />
+          </View>
+          <Text style={styles.name}>{user?.fullName || 'Người dùng'}</Text>
+          <Text style={styles.email}>{user?.email}</Text>
+          
+          <View style={styles.rolesRow}>
+            {user?.roles.map(r => (
+              <View key={r} style={styles.roleBadge}>
+                <Text style={styles.roleText}>{roleMap[r] || r}</Text>
+              </View>
+            ))}
+          </View>
         </View>
-        <Text style={[s.name, { color: theme.white }]}>{user?.fullName || 'Người dùng'}</Text>
-        <Text style={[s.email, { color: theme.textSecondary }]}>{user?.email}</Text>
-        <View style={s.rolesRow}>
-          {user?.roles.map(r => (
-            <View key={r} style={s.roleBadge}>
-              <Text style={s.roleText}>{roleMap[r] || r}</Text>
-            </View>
-          ))}
-        </View>
+
+        {/* ── Information details ── */}
+        <Section title="Thông tin cá nhân">
+          <View style={styles.infoContainer}>
+            <InfoRow icon="phone" label="Số điện thoại" value={user?.phone || 'Chưa cập nhật'} />
+            <View style={styles.separator} />
+            <InfoRow icon="location-on" label="Địa chỉ" value={user?.address || 'Chưa cập nhật'} />
+            <View style={styles.separator} />
+            <InfoRow icon="cake" label="Ngày sinh" value={user?.dob || 'Chưa cập nhật'} />
+          </View>
+        </Section>
+
+        {/* ── Logout Action ── */}
+        <TouchableOpacity 
+          style={styles.logoutBtn} 
+          onPress={handleLogout} 
+          disabled={isLoggingOut}
+          activeOpacity={0.7}
+        >
+          <MaterialIcons name="logout" size={20} color={premiumColors.danger} />
+          <Text style={styles.logoutText}>Đăng xuất</Text>
+        </TouchableOpacity>
+
       </View>
-
-      <Card>
-        <InfoRow icon="phone" label="Số điện thoại" value={user?.phone || 'Chưa cập nhật'} theme={theme} />
-        <InfoRow icon="location-on" label="Địa chỉ" value={user?.address || 'Chưa cập nhật'} theme={theme} />
-        <InfoRow icon="cake" label="Ngày sinh" value={user?.dob || 'Chưa cập nhật'} theme={theme} />
-      </Card>
-
-      <TouchableOpacity style={s.logoutBtn} onPress={handleLogout} disabled={isLoggingOut}>
-        <MaterialIcons name="logout" size={20} color="#EF4444" />
-        <Text style={s.logoutText}>Đăng xuất</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    </AppScreen>
   );
 }
 
-function InfoRow({ icon, label, value, theme }: { icon: string; label: string; value: string; theme: any }) {
+function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <View style={[s.infoRow, { borderBottomColor: theme.cardBorder }]}>
-      <MaterialIcons name={icon as any} size={18} color={theme.textMuted} />
-      <View style={{ flex: 1 }}>
-        <Text style={[s.infoLabel, { color: theme.textMuted }]}>{label}</Text>
-        <Text style={[s.infoValue, { color: theme.white }]}>{value}</Text>
+    <View style={styles.infoRow}>
+      <MaterialIcons name={icon as any} size={20} color={premiumColors.textMuted} />
+      <View style={styles.infoTextContainer}>
+        <Text style={styles.infoLabel}>{label}</Text>
+        <Text style={styles.infoValue}>{value}</Text>
       </View>
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  c: { flex: 1 }, p: { padding: 16, paddingBottom: 48 },
-  avatarWrap: { alignItems: 'center', marginBottom: 24 },
-  avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: C.red + '15', borderWidth: 2, borderColor: C.red, alignItems: 'center', justifyContent: 'center' },
-  name: { fontSize: 18, fontWeight: '900', marginTop: 12 },
-  email: { fontSize: 12, marginTop: 4 },
-  rolesRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  roleBadge: { backgroundColor: C.red + '15', borderWidth: 1, borderColor: C.red + '40', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 },
-  roleText: { color: C.red, fontSize: 11, fontWeight: '700' },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1 },
-  infoLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  infoValue: { fontSize: 13, fontWeight: '600', marginTop: 2 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#EF444440', backgroundColor: '#EF444410' },
-  logoutText: { color: '#EF4444', fontSize: 14, fontWeight: '700' },
+const styles = StyleSheet.create({
+  content: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[32],
+    paddingBottom: premiumSpacing[48],
+  },
+  
+  // ── Header ──
+  header: {
+    alignItems: 'center',
+    marginBottom: premiumSpacing[32],
+  },
+  avatarWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: premiumSpacing[16],
+  },
+  name: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: premiumColors.text,
+    marginBottom: 4,
+  },
+  email: {
+    fontSize: 13,
+    color: premiumColors.textSecondary,
+    marginBottom: premiumSpacing[12],
+  },
+  rolesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: premiumSpacing[8],
+  },
+  roleBadge: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    paddingHorizontal: premiumSpacing[12],
+    paddingVertical: 6,
+  },
+  roleText: {
+    color: premiumColors.text,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+
+  // ── Info Card ──
+  infoContainer: {
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    overflow: 'hidden',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: premiumColors.border,
+    marginLeft: 48, // Aligned with the text
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: premiumSpacing[16],
+    gap: premiumSpacing[16],
+  },
+  infoTextContainer: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: premiumColors.textMuted,
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: premiumColors.text,
+    fontWeight: '500',
+  },
+
+  // ── Logout Button ──
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: premiumSpacing[8],
+    marginTop: premiumSpacing[24],
+    paddingVertical: premiumSpacing[16],
+    borderRadius: premiumRadius[8],
+    borderWidth: 1,
+    borderColor: premiumColors.danger + '40',
+    backgroundColor: premiumColors.danger + '10',
+  },
+  logoutText: {
+    color: premiumColors.danger,
+    fontSize: 14,
+    fontWeight: '700',
+  },
 });

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, ActivityIndicator, Alert, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../providers/auth-provider';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('spectator@horsetrack.local');
@@ -46,38 +47,45 @@ export default function LoginScreen() {
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+          
           <View style={styles.headerContainer}>
             <Text style={styles.brandTitle}>HORSETRACK</Text>
+            <View style={styles.accentLine} />
             <Text style={styles.brandSubtitle}>RACING MANAGEMENT PLATFORM</Text>
           </View>
 
           <View style={styles.formContainer}>
-            <Text style={styles.label}>EMAIL</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="nhập email của bạn"
-              placeholderTextColor="#58585B"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>EMAIL ĐĂNG NHẬP</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="nhập email của bạn"
+                placeholderTextColor={premiumColors.textMuted}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-            <Text style={styles.label}>MẬT KHẨU</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="nhập mật khẩu"
-              placeholderTextColor="#58585B"
-              secureTextEntry
-              autoCapitalize="none"
-            />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>MẬT KHẨU</Text>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="nhập mật khẩu"
+                placeholderTextColor={premiumColors.textMuted}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+            </View>
 
             <TouchableOpacity 
               style={[styles.loginButton, loading && styles.disabledButton]} 
               onPress={handleLogin}
               disabled={loading}
+              activeOpacity={0.8}
             >
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
@@ -86,8 +94,10 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={styles.registerLink}>
-              <Text style={styles.registerLinkText}>Chưa có tài khoản? <Text style={styles.redText}>Đăng ký ngay</Text></Text>
+            <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={styles.registerLink} activeOpacity={0.6}>
+              <Text style={styles.registerLinkText}>
+                Chưa có tài khoản? <Text style={styles.highlightText}>Đăng ký ngay</Text>
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -100,27 +110,27 @@ export default function LoginScreen() {
           <View style={styles.quickLoginContainer}>
             <Text style={styles.quickLoginHelp}>Chọn nhanh vai trò để thử nghiệm hệ thống:</Text>
             <View style={styles.grid}>
-              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('spectator@horsetrack.local')}>
-                <Text style={styles.quickCardTitle}>KHÁN GIẢ</Text>
-                <Text style={styles.quickCardEmail}>spectator@horsetrack.local</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('owner@horsetrack.local')}>
-                <Text style={styles.quickCardTitle}>CHỦ NGỰA</Text>
-                <Text style={styles.quickCardEmail}>owner@horsetrack.local</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('jockey@horsetrack.local')}>
-                <Text style={styles.quickCardTitle}>NÀI NGỰA (JOCKEY)</Text>
-                <Text style={styles.quickCardEmail}>jockey@horsetrack.local</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.quickCard} onPress={() => loginAsRole('referee@horsetrack.local')}>
-                <Text style={styles.quickCardTitle}>TRỌNG TÀI</Text>
-                <Text style={styles.quickCardEmail}>referee@horsetrack.local</Text>
-              </TouchableOpacity>
+              {[
+                { title: 'KHÁN GIẢ', email: 'spectator@horsetrack.local' },
+                { title: 'CHỦ NGỰA', email: 'owner@horsetrack.local' },
+                { title: 'NÀI NGỰA', email: 'jockey@horsetrack.local' },
+                { title: 'TRỌNG TÀI', email: 'referee@horsetrack.local' }
+              ].map((role) => (
+                <TouchableOpacity 
+                  key={role.email}
+                  style={styles.quickCard} 
+                  onPress={() => loginAsRole(role.email)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.quickCardTitle}>{role.title}</Text>
+                  <Text style={styles.quickCardEmail} numberOfLines={1} ellipsizeMode="tail">
+                    {role.email}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
+
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -130,64 +140,77 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1C1C25',
+    backgroundColor: premiumColors.bg,
   },
   scrollContent: {
-    padding: 24,
-    justifyContent: 'center',
+    paddingHorizontal: premiumSpacing[24],
+    paddingTop: premiumSpacing[48],
+    paddingBottom: premiumSpacing[48],
   },
+  
+  // ── Header ──
   headerContainer: {
-    alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 32,
+    alignItems: 'flex-start',
+    marginBottom: premiumSpacing[40],
   },
   brandTitle: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 2,
-    fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-CondensedBold' : 'sans-serif-condensed',
+    color: premiumColors.text,
+    letterSpacing: 1.5,
+  },
+  accentLine: {
+    width: 48,
+    height: 4,
+    backgroundColor: premiumColors.brand,
+    borderRadius: 2,
+    marginTop: premiumSpacing[8],
+    marginBottom: premiumSpacing[12],
   },
   brandSubtitle: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#E10600',
-    letterSpacing: 3,
-    marginTop: 4,
+    color: premiumColors.textSecondary,
+    letterSpacing: 2,
   },
+
+  // ── Form ──
   formContainer: {
     width: '100%',
-    marginBottom: 32,
+    marginBottom: premiumSpacing[32],
+  },
+  inputGroup: {
+    marginBottom: premiumSpacing[20],
   },
   label: {
-    color: '#E0DEDC',
+    color: premiumColors.textSecondary,
     fontSize: 11,
     fontWeight: '700',
-    marginBottom: 6,
+    marginBottom: premiumSpacing[8],
     letterSpacing: 1,
   },
   input: {
-    backgroundColor: '#15151E',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
-    borderColor: '#303037',
-    borderRadius: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    paddingHorizontal: premiumSpacing[16],
+    height: 52,
     fontSize: 14,
-    color: '#FFFFFF',
-    marginBottom: 20,
-    height: 48,
+    color: premiumColors.text,
   },
+  
+  // ── Button ──
   loginButton: {
-    backgroundColor: '#E10600',
-    borderRadius: 24,
-    height: 48,
+    backgroundColor: premiumColors.brand,
+    borderRadius: premiumRadius[8],
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: premiumSpacing[8],
   },
   disabledButton: {
-    backgroundColor: '#58585B',
+    backgroundColor: premiumColors.surface2,
   },
   loginButtonText: {
     color: '#FFFFFF',
@@ -195,69 +218,76 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1,
   },
+  
+  // ── Links ──
   registerLink: {
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: premiumSpacing[24],
+    paddingVertical: premiumSpacing[8],
   },
   registerLinkText: {
-    color: '#E0DEDC',
+    color: premiumColors.textSecondary,
     fontSize: 13,
   },
-  redText: {
-    color: '#E10600',
+  highlightText: {
+    color: premiumColors.brand,
     fontWeight: '700',
   },
+
+  // ── Divider ──
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: premiumSpacing[24],
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#303037',
+    backgroundColor: premiumColors.border,
   },
   dividerText: {
-    color: '#58585B',
-    fontSize: 11,
+    color: premiumColors.textMuted,
+    fontSize: 10,
     fontWeight: '700',
-    paddingHorizontal: 12,
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+    marginHorizontal: premiumSpacing[16],
   },
+
+  // ── Demo Section ──
   quickLoginContainer: {
     width: '100%',
   },
   quickLoginHelp: {
-    color: '#AAAAAA',
+    color: premiumColors.textMuted,
     fontSize: 12,
-    marginBottom: 16,
     textAlign: 'center',
+    marginBottom: premiumSpacing[16],
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
+    gap: premiumSpacing[12],
   },
   quickCard: {
-    backgroundColor: '#15151E',
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
-    borderColor: '#303037',
-    borderRadius: 8,
-    padding: 12,
-    width: '47%',
-    marginBottom: 4,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    padding: premiumSpacing[12],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   quickCardTitle: {
-    color: '#E10600',
+    color: premiumColors.text,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.5,
     marginBottom: 4,
   },
   quickCardEmail: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '500',
+    color: premiumColors.textMuted,
+    fontSize: 10,
   },
 });
