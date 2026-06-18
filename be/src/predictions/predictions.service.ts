@@ -4,8 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { ClientSession, Connection, Model, Types } from 'mongoose';
 import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
 import {
   RaceResult,
@@ -38,6 +38,7 @@ export interface PayoutNotifyIntent {
 @Injectable()
 export class PredictionsService {
   constructor(
+    @InjectConnection() private connection: Connection,
     @InjectModel(Prediction.name)
     private predictionModel: Model<PredictionDocument>,
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
@@ -109,25 +110,37 @@ export class PredictionsService {
       }
     }
 
-    const prediction = await this.predictionModel.create({
-      raceId: new Types.ObjectId(dto.raceId),
-      userId: new Types.ObjectId(userId),
-      predictedHorseId: new Types.ObjectId(dto.predictedHorseId),
-      status: PredictionStatus.PENDING,
-      betPoints: betAmount,
-    });
-
-    if (betAmount >= 2) {
-      await this.ledgerService.debit({
-        userId,
-        points: betAmount,
-        sourceType: LedgerSourceType.PREDICTION_REWARD,
-        sourceId: String(prediction._id),
-        note: `Đặt cược dự đoán ${betAmount} điểm cho trận đấu ${race.name}`,
+    const session = await this.connection.startSession();
+    let prediction: PredictionDocument;
+    try {
+      await session.withTransaction(async () => {
+        [prediction] = await this.predictionModel.create(
+          [
+            {
+              raceId: new Types.ObjectId(dto.raceId),
+              userId: new Types.ObjectId(userId),
+              predictedHorseId: new Types.ObjectId(dto.predictedHorseId),
+              status: PredictionStatus.PENDING,
+              betPoints: betAmount,
+            },
+          ],
+          { session },
+        );
+        if (betAmount >= 2) {
+          await this.ledgerService.debit({
+            userId,
+            points: betAmount,
+            sourceType: LedgerSourceType.PREDICTION_REWARD,
+            sourceId: String(prediction!._id),
+            note: `Đặt cược dự đoán ${betAmount} điểm cho trận đấu ${race.name}`,
+            session,
+          });
+        }
       });
+    } finally {
+      await session.endSession();
     }
-
-    return prediction;
+    return prediction!;
   }
 
   async cancelPrediction(
@@ -286,7 +299,9 @@ export class PredictionsService {
     const winners = await this.resultModel
       .find({
         raceId: new Types.ObjectId(raceId),
-        status: { $in: [RaceResultStatus.CONFIRMED, RaceResultStatus.PUBLISHED] },
+        status: {
+          $in: [RaceResultStatus.CONFIRMED, RaceResultStatus.PUBLISHED],
+        },
         rank: 1,
       })
       .session(session ?? null);
