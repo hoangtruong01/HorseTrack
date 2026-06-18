@@ -120,6 +120,12 @@ export function RaceForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Guard: check if image is still uploading
+    if (uploading) {
+      toast.error("Vui lòng chờ ảnh tải lên xong trước khi lưu.");
+      return;
+    }
+
     if (!tournamentId) {
       toast.error("Vui lòng chọn giải đấu chính.");
       return;
