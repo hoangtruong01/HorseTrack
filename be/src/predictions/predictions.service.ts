@@ -299,7 +299,9 @@ export class PredictionsService {
     const winners = await this.resultModel
       .find({
         raceId: new Types.ObjectId(raceId),
-        status: { $in: [RaceResultStatus.CONFIRMED, RaceResultStatus.PUBLISHED] },
+        status: {
+          $in: [RaceResultStatus.CONFIRMED, RaceResultStatus.PUBLISHED],
+        },
         rank: 1,
       })
       .session(session ?? null);

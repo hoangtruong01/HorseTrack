@@ -100,7 +100,8 @@ export class AiController {
   // ─── Predictions ─────────────────────────────────────────────────────────────
 
   @Post('predictions/generate/:raceId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
   @ApiBearerAuth()
   @ApiOperation({
     summary:
@@ -117,7 +118,8 @@ export class AiController {
   }
 
   @Get('predictions/:raceId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
   @ApiBearerAuth()
   @ApiOperation({
     summary:

@@ -137,6 +137,7 @@ export class TournamentsService {
     }
 
     const now = new Date();
+    const bypassDateGuards = process.env.BYPASS_DATE_GUARDS === 'true';
 
     if (newStatus === TournamentStatus.OPEN_REGISTRATION) {
       const raceCount = await this.raceModel.countDocuments({
@@ -167,13 +168,21 @@ export class TournamentsService {
       }
     }
 
-    if (newStatus === TournamentStatus.ONGOING && now < tournament.startDate) {
+    if (
+      !bypassDateGuards &&
+      newStatus === TournamentStatus.ONGOING &&
+      now < tournament.startDate
+    ) {
       throw new BadRequestException(
         'Cannot start tournament: start date has not been reached yet',
       );
     }
 
-    if (newStatus === TournamentStatus.COMPLETED && now < tournament.endDate) {
+    if (
+      !bypassDateGuards &&
+      newStatus === TournamentStatus.COMPLETED &&
+      now < tournament.endDate
+    ) {
       throw new BadRequestException(
         'Cannot complete tournament: end date has not been reached yet',
       );

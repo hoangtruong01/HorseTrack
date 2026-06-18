@@ -126,19 +126,24 @@ export class PredictionEngineService {
       llmReasoning ??
       'Dự đoán được tổng hợp từ lịch sử thi đấu và các chỉ số sức mạnh của từng ngựa.';
 
-    return this.predictionModel.findOneAndUpdate(
-      { raceId: new Types.ObjectId(raceId) },
-      {
-        $set: {
-          rankings,
-          source,
-          confidenceLevel,
-          reasoning,
-          generatedAt: new Date(),
+    return this.predictionModel
+      .findOneAndUpdate(
+        { raceId: new Types.ObjectId(raceId) },
+        {
+          $set: {
+            rankings,
+            source,
+            confidenceLevel,
+            reasoning,
+            generatedAt: new Date(),
+          },
         },
-      },
-      { upsert: true, new: true },
-    ).populate('rankings.horseId', 'name breed') as Promise<AIPredictionSuggestionDocument>;
+        { upsert: true, new: true },
+      )
+      .populate(
+        'rankings.horseId',
+        'name breed',
+      ) as Promise<AIPredictionSuggestionDocument>;
   }
 
   private async buildEntry(

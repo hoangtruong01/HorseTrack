@@ -149,8 +149,8 @@ export class HorsesController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
-  @ApiOperation({ summary: 'List all horses (Admin & Spectators)' })
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR, RoleName.OWNER, RoleName.JOCKEY)
+  @ApiOperation({ summary: 'List all horses' })
   findAll(@Query() query: ListHorsesDto) {
     return this.horsesService.findAll(query.page, query.limit, query.search);
   }
