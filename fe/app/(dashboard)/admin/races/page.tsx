@@ -1,14 +1,12 @@
 "use client";
 import Image from "next/image";
 
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import {
-  Eye, Flag, Loader2, RefreshCw, Plus, Trash2, Search, Trophy
-} from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { racesApi, type RaceItem } from "@/lib/api-client";
+import { Eye, Flag, RefreshCw, Search, Trash2, Trophy } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -22,10 +20,25 @@ const statusColors: Record<string, string> = {
 };
 
 const STATUS_OPTIONS = [
-  "SCHEDULED", "CHECKING", "READY", "LIVE", "FINISHED", "RESULT_PUBLISHED", "CANCELLED",
+  "SCHEDULED",
+  "CHECKING",
+  "READY",
+  "LIVE",
+  "FINISHED",
+  "RESULT_PUBLISHED",
+  "CANCELLED",
 ];
 
-const STATUS_FILTERS = ["ALL", "SCHEDULED", "CHECKING", "READY", "LIVE", "FINISHED", "RESULT_PUBLISHED", "CANCELLED"];
+const STATUS_FILTERS = [
+  "ALL",
+  "SCHEDULED",
+  "CHECKING",
+  "READY",
+  "LIVE",
+  "FINISHED",
+  "RESULT_PUBLISHED",
+  "CANCELLED",
+];
 
 export default function AdminRacesPage() {
   const [races, setRaces] = useState<RaceItem[]>([]);
@@ -41,7 +54,11 @@ export default function AdminRacesPage() {
     try {
       const res = await racesApi.list({ page: p, limit: 20 });
       setRaces(res.data || []);
-      setMeta({ total: res.meta?.total || 0, page: res.meta?.page || 1, totalPages: res.meta?.totalPages || 1 });
+      setMeta({
+        total: res.meta?.total || 0,
+        page: res.meta?.page || 1,
+        totalPages: res.meta?.totalPages || 1,
+      });
     } catch (e) {
       toast.error((e as Error).message || "Không thể lấy danh sách trận đua");
     } finally {
@@ -83,12 +100,14 @@ export default function AdminRacesPage() {
   // Client-side filtering
   const filteredRaces = races.filter((r) => {
     const matchStatus = statusFilter === "ALL" || r.status === statusFilter;
-    const matchSearch = !search || r.name.toLowerCase().includes(search.toLowerCase());
+    const matchSearch =
+      !search || r.name.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
 
   const getTournamentName = (r: RaceItem): string => {
-    if (typeof r.tournamentId === "object" && r.tournamentId?.name) return r.tournamentId.name;
+    if (typeof r.tournamentId === "object" && r.tournamentId?.name)
+      return r.tournamentId.name;
     return "—";
   };
 
@@ -133,13 +152,24 @@ export default function AdminRacesPage() {
       {/* Race Table */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
-          <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải danh sách trận đua...</p>
+          <Image
+            src="/skeletonHorse.gif"
+            alt="Đang tải..."
+            width={80}
+            height={80}
+            unoptimized
+            className="object-contain mx-auto"
+          />
+          <p className="mt-4 text-xs font-mono uppercase tracking-widest">
+            Đang tải danh sách trận đua...
+          </p>
         </div>
       ) : filteredRaces.length === 0 ? (
         <div className="rounded-2xl border border-border bg-card/70 p-12 text-center shadow-xl">
           <Flag className="size-12 text-muted-foreground/30 mx-auto mb-3 stroke-[1.5]" />
-          <h4 className="text-base font-bold text-foreground uppercase tracking-wider mb-1">Không có trận đua nào</h4>
+          <h4 className="text-base font-bold text-foreground uppercase tracking-wider mb-1">
+            Không có trận đua nào
+          </h4>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
             {search || statusFilter !== "ALL"
               ? "Không tìm thấy trận đua nào phù hợp bộ lọc hiện tại."
@@ -150,22 +180,30 @@ export default function AdminRacesPage() {
         <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl">
           <div className="flex justify-between items-center px-5 pt-4 pb-2">
             <span className="text-xs text-muted-foreground">
-              Hiển thị <strong className="text-foreground">{filteredRaces.length}</strong> / {meta.total} trận đua
+              Hiển thị{" "}
+              <strong className="text-foreground">
+                {filteredRaces.length}
+              </strong>{" "}
+              / {meta.total} trận đua
             </span>
-            <Button onClick={() => fetchRaces(page)} variant="ghost" className="size-8 p-0 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground">
+            <Button
+              onClick={() => fetchRaces(page)}
+              variant="ghost"
+              className="size-8 p-0 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+            >
               <RefreshCw className="size-4" />
             </Button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-y border-border bg-muted text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-y border-border bg-muted text-muted-foreground font-black uppercase tracking-wider whitespace-nowrap">
                   <th className="p-4 w-12">#</th>
                   <th className="p-4">Tên trận đua</th>
                   <th className="p-4">Giải đấu</th>
                   <th className="p-4">Cự ly</th>
                   <th className="p-4">Thời gian</th>
-                  <th className="p-4">Số ngựa</th>
+                  <th className="p-4">Số ngựa tối đa</th>
                   <th className="p-4">Giải thưởng</th>
                   <th className="p-4">Trạng thái</th>
                   <th className="p-4 text-right">Thao tác</th>
@@ -173,31 +211,54 @@ export default function AdminRacesPage() {
               </thead>
               <tbody className="divide-y divide-white/5 text-foreground/70">
                 {filteredRaces.map((race, index) => {
-                  const isLocked = ["LIVE", "FINISHED", "RESULT_PUBLISHED"].includes(race.status);
+                  const isLocked = [
+                    "LIVE",
+                    "FINISHED",
+                    "RESULT_PUBLISHED",
+                  ].includes(race.status);
                   return (
-                    <tr key={race._id} className="hover:bg-white/[0.01] transition duration-200">
-                      <td className="p-4 font-mono font-bold text-muted-foreground/70">{(meta.page - 1) * 20 + index + 1}</td>
+                    <tr
+                      key={race._id}
+                      className="hover:bg-white/[0.01] transition duration-200"
+                    >
+                      <td className="p-4 font-mono font-bold text-muted-foreground/70">
+                        {(meta.page - 1) * 20 + index + 1}
+                      </td>
                       <td className="p-4">
-                        <span className="font-bold text-foreground block">{race.name}</span>
-                        {race.description && <span className="text-[10px] text-muted-foreground/70 font-normal line-clamp-1">{race.description}</span>}
+                        <span className="font-bold text-foreground block">
+                          {race.name}
+                        </span>
+                        {race.description && (
+                          <span className="text-[10px] text-muted-foreground/70 font-normal line-clamp-1">
+                            {race.description}
+                          </span>
+                        )}
                       </td>
                       <td className="p-4">
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary">
-                          <Trophy className="size-3" /> {getTournamentName(race)}
+                          <Trophy className="size-3" />{" "}
+                          {getTournamentName(race)}
                         </span>
                       </td>
                       <td className="p-4">
-                        <span className="block font-bold">{race.distanceMeters}m</span>
-                        <span className="text-[10px] text-muted-foreground/70">{race.trackCondition || "—"}</span>
+                        <span className="block font-bold">
+                          {race.distanceMeters}m
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/70">
+                          {race.trackCondition || "—"}
+                        </span>
                       </td>
                       <td className="p-4 font-mono font-bold">
                         {new Date(race.startTime).toLocaleString("vi-VN", {
-                          day: "2-digit", month: "2-digit", year: "numeric",
-                          hour: "2-digit", minute: "2-digit",
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })}
                       </td>
                       <td className="p-4 font-mono font-bold">
-                        {race.participantsCount || 0}/{race.maxParticipants || 8}
+                        {race.maxParticipants}
                       </td>
                       <td className="p-4 font-mono font-bold text-teal-400">
                         {(race.prize || 0).toLocaleString()} pts
@@ -206,11 +267,19 @@ export default function AdminRacesPage() {
                         <select
                           value={race.status}
                           disabled={actionLoading === race._id}
-                          onChange={(e) => handleStatusChange(race._id, e.target.value)}
+                          onChange={(e) =>
+                            handleStatusChange(race._id, e.target.value)
+                          }
                           className={`rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-muted focus:outline-none focus:ring-1 focus:ring-primary/40 disabled:opacity-50 cursor-pointer ${statusColors[race.status] || "text-muted-foreground border-border"}`}
                         >
-                          {STATUS_OPTIONS.map(opt => (
-                            <option key={opt} value={opt} className="bg-card text-foreground">{opt}</option>
+                          {STATUS_OPTIONS.map((opt) => (
+                            <option
+                              key={opt}
+                              value={opt}
+                              className="bg-card text-foreground"
+                            >
+                              {opt}
+                            </option>
                           ))}
                         </select>
                       </td>
@@ -226,7 +295,11 @@ export default function AdminRacesPage() {
                           onClick={() => handleDelete(race._id, race.name)}
                           disabled={actionLoading === race._id || isLocked}
                           className="rounded-lg border border-red-500/20 bg-red-500/5 hover:bg-red-500/20 px-2.5 py-1.5 text-red-400 hover:text-foreground transition disabled:opacity-30"
-                          title={isLocked ? "Trận đấu đang diễn ra hoặc đã kết thúc" : "Xóa trận đua"}
+                          title={
+                            isLocked
+                              ? "Trận đấu đang diễn ra hoặc đã kết thúc"
+                              : "Xóa trận đua"
+                          }
                         >
                           <Trash2 className="size-3.5" />
                         </button>
@@ -249,7 +322,8 @@ export default function AdminRacesPage() {
                 ← Trang trước
               </button>
               <span className="text-xs text-muted-foreground">
-                Trang <strong className="text-foreground">{meta.page}</strong> / {meta.totalPages}
+                Trang <strong className="text-foreground">{meta.page}</strong> /{" "}
+                {meta.totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
@@ -265,5 +339,3 @@ export default function AdminRacesPage() {
     </main>
   );
 }
-
-

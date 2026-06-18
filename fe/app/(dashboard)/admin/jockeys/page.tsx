@@ -1,11 +1,19 @@
 "use client";
 import Image from "next/image";
 
-import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, ShieldAlert, FileText, User, Eye, X } from "lucide-react";
-import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { jockeysApi, type JockeyItem } from "@/lib/api-client";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  FileText,
+  ShieldAlert,
+  User,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const STATUSES = ["ACTIVE", "UNAVAILABLE", "SUSPENDED"];
 const statusColors: Record<string, string> = {
@@ -30,7 +38,12 @@ const approvalColors: Record<string, string> = {
 
 export default function AdminJockeysPage() {
   const [jockeys, setJockeys] = useState<JockeyItem[]>([]);
-  const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 15,
+    totalPages: 1,
+  });
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
   const [filterApproval, setFilterApproval] = useState("");
@@ -43,23 +56,30 @@ export default function AdminJockeysPage() {
   // Preview Image Modal State
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const fetchJockeys = useCallback(async (page = 1) => {
-    setLoading(true);
-    try {
-      const res = await jockeysApi.listAdmin({
-        page,
-        limit: 15,
-        status: filterStatus || undefined,
-        approvalStatus: filterApproval || undefined,
-      });
-      setJockeys(res.data);
-      setMeta(res.meta);
-    } catch (e) {
-      toast.error((e as Error).message ?? "Lỗi tải dữ liệu");
-    } finally { setLoading(false); }
-  }, [filterStatus, filterApproval]);
+  const fetchJockeys = useCallback(
+    async (page = 1) => {
+      setLoading(true);
+      try {
+        const res = await jockeysApi.listAdmin({
+          page,
+          limit: 15,
+          status: filterStatus || undefined,
+          approvalStatus: filterApproval || undefined,
+        });
+        setJockeys(res.data);
+        setMeta(res.meta);
+      } catch (e) {
+        toast.error((e as Error).message ?? "Lỗi tải dữ liệu");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filterStatus, filterApproval],
+  );
 
-  useEffect(() => { void fetchJockeys(1); }, [fetchJockeys]);
+  useEffect(() => {
+    void fetchJockeys(1);
+  }, [fetchJockeys]);
 
   const handleChangeStatus = async (id: string, status: string) => {
     setActionLoading(id);
@@ -67,8 +87,11 @@ export default function AdminJockeysPage() {
       await jockeysApi.changeStatus(id, status);
       toast.success(`Đã cập nhật status → ${status}`);
       await fetchJockeys(meta.page);
-    } catch (e) { toast.error((e as Error).message); }
-    finally { setActionLoading(null); }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleApprove = async (id: string) => {
@@ -125,8 +148,14 @@ export default function AdminJockeysPage() {
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
-          <option value="" className="bg-card text-foreground">Tất cả Status</option>
-          {STATUSES.map(s => <option key={s} value={s} className="bg-card text-foreground">{s}</option>)}
+          <option value="" className="bg-card text-foreground">
+            Tất cả Status
+          </option>
+          {STATUSES.map((s) => (
+            <option key={s} value={s} className="bg-card text-foreground">
+              {s}
+            </option>
+          ))}
         </select>
 
         <select
@@ -134,8 +163,14 @@ export default function AdminJockeysPage() {
           value={filterApproval}
           onChange={(e) => setFilterApproval(e.target.value)}
         >
-          {APPROVAL_STATUSES.map(a => (
-            <option key={a.value} value={a.value} className="bg-card text-foreground">{a.label}</option>
+          {APPROVAL_STATUSES.map((a) => (
+            <option
+              key={a.value}
+              value={a.value}
+              className="bg-card text-foreground"
+            >
+              {a.label}
+            </option>
           ))}
         </select>
 
@@ -147,40 +182,74 @@ export default function AdminJockeysPage() {
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-3">
-            <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
-            <p className="text-xs font-mono uppercase tracking-widest">Đang tải hồ sơ Jockey...</p>
+            <Image
+              src="/skeletonHorse.gif"
+              alt="Đang tải..."
+              width={80}
+              height={80}
+              unoptimized
+              className="object-contain mx-auto"
+            />
+            <p className="text-xs font-mono uppercase tracking-widest">
+              Đang tải hồ sơ Jockey...
+            </p>
           </div>
         ) : jockeys.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground/70 space-y-3">
             <ShieldAlert className="size-10 text-foreground/20" />
-            <p className="text-sm font-bold uppercase">Không tìm thấy hồ sơ nào</p>
-            <p className="text-xs text-muted-foreground">Các jockey đăng ký hồ sơ sẽ xuất hiện tại đây.</p>
+            <p className="text-sm font-bold uppercase">
+              Không tìm thấy hồ sơ nào
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Các jockey đăng ký hồ sơ sẽ xuất hiện tại đây.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Jockey</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Giấy phép</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Thể chất & Bio</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Kiểm duyệt</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Races / Wins</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-                  <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">Thao tác</th>
+                <tr className="border-b border-border bg-muted whitespace-nowrap">
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Jockey
+                  </th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Giấy phép
+                  </th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Thể chất & Bio
+                  </th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Kiểm duyệt
+                  </th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Races / Wins
+                  </th>
+                  <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Status
+                  </th>
+                  <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {jockeys.map((j) => (
-                  <tr key={j._id} className="hover:bg-muted transition-colors group">
+                  <tr
+                    key={j._id}
+                    className="hover:bg-muted transition-colors group"
+                  >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="size-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                           <User className="size-4" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-foreground leading-none">{getUserName(j.userId)}</p>
-                          <p className="text-xs text-muted-foreground/70 mt-1">{getUserEmail(j.userId)}</p>
+                          <p className="text-sm font-semibold text-foreground leading-none">
+                            {getUserName(j.userId)}
+                          </p>
+                          <p className="text-xs text-muted-foreground/70 mt-1">
+                            {getUserEmail(j.userId)}
+                          </p>
                         </div>
                       </div>
                     </td>
@@ -188,7 +257,9 @@ export default function AdminJockeysPage() {
                       {j.licenseImage ? (
                         <button
                           type="button"
-                          onClick={() => setPreviewImage(j.licenseImage ?? null)}
+                          onClick={() =>
+                            setPreviewImage(j.licenseImage ?? null)
+                          }
                           className="block relative h-12 w-20 rounded-md overflow-hidden border border-border group/img focus:outline-none"
                         >
                           <img
@@ -201,13 +272,16 @@ export default function AdminJockeysPage() {
                           </div>
                         </button>
                       ) : (
-                        <span className="text-[11px] text-muted-foreground/50 italic">-</span>
+                        <span className="text-[11px] text-muted-foreground/50 italic">
+                          -
+                        </span>
                       )}
                     </td>
                     <td className="px-5 py-4 max-w-xs">
                       <div className="space-y-1">
                         <p className="text-xs text-foreground/70">
-                          {j.experienceYears ?? 0} năm KN · {j.heightCm ?? "?"}cm · {j.weightKg ?? "?"}kg
+                          {j.experienceYears ?? 0} năm KN · {j.heightCm ?? "?"}
+                          cm · {j.weightKg ?? "?"}kg
                         </p>
                         {j.certificates && (
                           <p className="text-xs text-teal-300 font-semibold flex items-center gap-1">
@@ -216,26 +290,41 @@ export default function AdminJockeysPage() {
                           </p>
                         )}
                         {j.bio ? (
-                          <p className="text-[11px] text-muted-foreground line-clamp-2">{j.bio}</p>
+                          <p className="text-[11px] text-muted-foreground line-clamp-2">
+                            {j.bio}
+                          </p>
                         ) : (
-                          <p className="text-[11px] text-foreground/30 italic">Chưa điền tiểu sử</p>
-                        )}
-
-                        {j.approvalStatus === "REJECTED" && j.rejectionReason && (
-                          <p className="text-[10px] text-red-400 bg-red-400/5 p-1.5 rounded border border-red-500/10 mt-1">
-                            Lý do loại: {j.rejectionReason}
+                          <p className="text-[11px] text-foreground/30 italic">
+                            Chưa điền tiểu sử
                           </p>
                         )}
+
+                        {j.approvalStatus === "REJECTED" &&
+                          j.rejectionReason && (
+                            <p className="text-[10px] text-red-400 bg-red-400/5 p-1.5 rounded border border-red-500/10 mt-1">
+                              Lý do loại: {j.rejectionReason}
+                            </p>
+                          )}
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${approvalColors[j.approvalStatus || "PENDING"]}`}>
-                        {j.approvalStatus === "PENDING" ? "Chờ duyệt" : j.approvalStatus === "APPROVED" ? "Đã duyệt" : "Từ chối"}
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${approvalColors[j.approvalStatus || "PENDING"]}`}
+                      >
+                        {j.approvalStatus === "PENDING"
+                          ? "Chờ duyệt"
+                          : j.approvalStatus === "APPROVED"
+                            ? "Đã duyệt"
+                            : "Từ chối"}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-sm text-foreground">{j.totalRaces ?? 0} / {j.wins ?? 0}</td>
+                    <td className="px-5 py-4 text-sm text-foreground">
+                      {j.totalRaces ?? 0} / {j.wins ?? 0}
+                    </td>
                     <td className="px-5 py-4">
-                      <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColors[j.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColors[j.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}
+                      >
                         {j.status}
                       </span>
                     </td>
@@ -261,12 +350,29 @@ export default function AdminJockeysPage() {
                         <select
                           value={j.status}
                           disabled={actionLoading !== null}
-                          onChange={(e) => handleChangeStatus(j._id, e.target.value)}
+                          onChange={(e) =>
+                            handleChangeStatus(j._id, e.target.value)
+                          }
                           className="rounded-lg border border-border bg-muted px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
                         >
-                          <option value="available" className="bg-card text-foreground">available</option>
-                          <option value="unavailable" className="bg-card text-foreground">unavailable</option>
-                          <option value="suspended" className="bg-card text-foreground">suspended</option>
+                          <option
+                            value="available"
+                            className="bg-card text-foreground"
+                          >
+                            available
+                          </option>
+                          <option
+                            value="unavailable"
+                            className="bg-card text-foreground"
+                          >
+                            unavailable
+                          </option>
+                          <option
+                            value="suspended"
+                            className="bg-card text-foreground"
+                          >
+                            suspended
+                          </option>
                         </select>
                       )}
                     </td>
@@ -280,13 +386,21 @@ export default function AdminJockeysPage() {
 
       {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
-          <button onClick={() => fetchJockeys(meta.page - 1)} disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
+          <button
+            onClick={() => fetchJockeys(meta.page - 1)}
+            disabled={meta.page <= 1}
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition"
+          >
             <ChevronLeft className="size-4" /> Trước
           </button>
-          <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
-          <button onClick={() => fetchJockeys(meta.page + 1)} disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
+          <span className="text-sm text-muted-foreground">
+            Trang {meta.page} / {meta.totalPages}
+          </span>
+          <button
+            onClick={() => fetchJockeys(meta.page + 1)}
+            disabled={meta.page >= meta.totalPages}
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition"
+          >
             Sau <ChevronRight className="size-4" />
           </button>
         </div>
@@ -298,14 +412,19 @@ export default function AdminJockeysPage() {
           <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-red-400">
               <ShieldAlert className="size-6 shrink-0" />
-              <h3 className="text-lg font-bold uppercase">Từ chối hồ sơ Jockey</h3>
+              <h3 className="text-lg font-bold uppercase">
+                Từ chối hồ sơ Jockey
+              </h3>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Vui lòng nhập lý do từ chối phê duyệt hồ sơ Jockey này. Lý do sẽ được hiển thị trên dashboard của Jockey để họ sửa đổi và nộp lại.
+              Vui lòng nhập lý do từ chối phê duyệt hồ sơ Jockey này. Lý do sẽ
+              được hiển thị trên dashboard của Jockey để họ sửa đổi và nộp lại.
             </p>
             <form onSubmit={handleRejectSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground">Lý do từ chối</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground">
+                  Lý do từ chối
+                </label>
                 <textarea
                   required
                   value={rejectionReason}
@@ -318,7 +437,10 @@ export default function AdminJockeysPage() {
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => { setRejectingId(null); setRejectionReason(""); }}
+                  onClick={() => {
+                    setRejectingId(null);
+                    setRejectionReason("");
+                  }}
                   className="h-9 px-4 rounded-xl border border-border bg-transparent text-xs font-bold uppercase text-foreground hover:bg-muted transition"
                 >
                   Hủy bỏ
@@ -362,5 +484,3 @@ export default function AdminJockeysPage() {
     </main>
   );
 }
-
-
