@@ -211,7 +211,7 @@ export function RaceForm() {
         </div>
         <Button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || uploading}
           className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-foreground font-bold uppercase tracking-wider text-xs h-10 px-5"
         >
           {submitting ? (
