@@ -132,7 +132,7 @@ export default function AssignedRacesScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.opsButton, { backgroundColor: '#303037', borderColor: '#E10600', borderWidth: 1 }]}
+              style={[styles.opsButton, { backgroundColor: 'rgba(255,255,255,0.09)', borderColor: '#E10600', borderWidth: 1 }]}
               onPress={() => router.push({ pathname: '/operations/referee/violation-log', params: { raceId: race._id } })}
             >
               <MaterialIcons name="warning" size={18} color="#E10600" />
@@ -199,14 +199,14 @@ export default function AssignedRacesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1C1C25',
+    backgroundColor: '#000000',
   },
   listContent: {
     padding: 16,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#1C1C25',
+    backgroundColor: '#000000',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -216,9 +216,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   card: {
-    backgroundColor: '#15151E',
+    backgroundColor: 'rgba(18, 18, 22, 0.86)',
     borderWidth: 1,
-    borderColor: '#303037',
+    borderColor: 'rgba(255,255,255,0.09)',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     borderBottomWidth: 1,
-    borderBottomColor: '#1C1C25',
+    borderBottomColor: '#000000',
     paddingBottom: 10,
     marginBottom: 10,
   },
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: '#1C1C25',
+    borderTopColor: '#000000',
     paddingTop: 12,
   },
   actionButton: {
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rejectButton: {
-    backgroundColor: '#303037',
+    backgroundColor: 'rgba(255,255,255,0.09)',
     borderWidth: 1,
     borderColor: '#E10600',
   },
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: '#1C1C25',
+    borderTopColor: '#000000',
     paddingTop: 12,
   },
   opsButton: {
@@ -329,10 +329,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: 48,
     borderTopWidth: 1,
-    borderTopColor: '#303037',
+    borderTopColor: 'rgba(255,255,255,0.09)',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#15151E',
+    backgroundColor: 'rgba(18, 18, 22, 0.86)',
     gap: 8,
   },
   backHomeButtonText: {

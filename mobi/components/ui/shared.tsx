@@ -2,17 +2,18 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Platform, Appearance } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { premiumColors } from './premium-tokens';
 
 // ─── Shared Colors ──────────────────────────────────────────────────────────
 export const C = {
   get bg() {
-    return Appearance.getColorScheme() === 'light' ? '#F7F4F1' : '#1C1C25';
+    return Appearance.getColorScheme() === 'light' ? '#F7F4F1' : premiumColors.bg;
   },
   get card() {
-    return Appearance.getColorScheme() === 'light' ? '#FFFFFF' : '#15151E';
+    return Appearance.getColorScheme() === 'light' ? '#FFFFFF' : premiumColors.surface2;
   },
   get cardBorder() {
-    return Appearance.getColorScheme() === 'light' ? '#EAEAEA' : '#303037';
+    return Appearance.getColorScheme() === 'light' ? '#EAEAEA' : premiumColors.border;
   },
   red: '#E10600',
   teal: '#067E6A',
@@ -31,7 +32,7 @@ export const C = {
     return Appearance.getColorScheme() === 'light' ? '#8A8A8E' : '#58585B';
   },
   get inputBg() {
-    return Appearance.getColorScheme() === 'light' ? '#F2F2F7' : '#15151E';
+    return Appearance.getColorScheme() === 'light' ? '#F2F2F7' : premiumColors.surface3;
   },
 };
 
@@ -39,9 +40,9 @@ export function useThemeColors() {
   const colorScheme = useColorScheme() ?? 'light';
   const isDark = colorScheme === 'dark';
   return {
-    bg: isDark ? '#1C1C25' : '#F7F4F1',
-    card: isDark ? '#15151E' : '#FFFFFF',
-    cardBorder: isDark ? '#303037' : '#EAEAEA',
+    bg: isDark ? premiumColors.bg : '#F7F4F1',
+    card: isDark ? premiumColors.surface2 : '#FFFFFF',
+    cardBorder: isDark ? premiumColors.border : '#EAEAEA',
     red: '#E10600',
     teal: '#067E6A',
     tealLight: '#34D399',
@@ -50,7 +51,7 @@ export function useThemeColors() {
     textPrimary: isDark ? '#FFFFFF' : '#1C1C25',
     textSecondary: isDark ? '#AAAAAA' : '#58585B',
     textMuted: isDark ? '#58585B' : '#8A8A8E',
-    inputBg: isDark ? '#15151E' : '#F2F2F7',
+    inputBg: isDark ? premiumColors.surface3 : '#F2F2F7',
   };
 }
 
@@ -130,9 +131,9 @@ export function StatusBadge({ label, color }: { label: string; color: string }) 
 // ─── Card Container ─────────────────────────────────────────────────────────
 export function Card({ children, style }: { children: React.ReactNode; style?: any }) {
   const theme = useThemeColors();
-  const isDark = theme.bg === '#1C1C25';
-  const bg = isDark ? 'rgba(255,255,255,0.055)' : theme.card;
-  const border = isDark ? 'rgba(255,255,255,0.14)' : theme.cardBorder;
+  const isDark = theme.bg === premiumColors.bg;
+  const bg = isDark ? premiumColors.surfaceGlass : theme.card;
+  const border = isDark ? premiumColors.borderGlass : theme.cardBorder;
   return <View style={[styles.card, { backgroundColor: bg, borderColor: border, borderRadius: 16 }, style]}>{children}</View>;
 }
 
@@ -141,7 +142,7 @@ export function PrimaryButton({ title, onPress, loading, disabled, color }: {
   title: string; onPress: () => void; loading?: boolean; disabled?: boolean; color?: string;
 }) {
   const theme = useThemeColors();
-  const isDark = theme.bg === '#1C1C25';
+  const isDark = theme.bg === premiumColors.bg;
   const activeColor = color || theme.red;
   return (
     <TouchableOpacity
@@ -181,9 +182,9 @@ export function ListItemCard({ title, subtitle, rightText, rightColor, onPress, 
   title: string; subtitle?: string; rightText?: string; rightColor?: string; onPress?: () => void; icon?: string;
 }) {
   const theme = useThemeColors();
-  const isDark = theme.bg === '#1C1C25';
-  const bg = isDark ? 'rgba(255,255,255,0.035)' : theme.card;
-  const border = isDark ? 'rgba(255,255,255,0.07)' : theme.cardBorder;
+  const isDark = theme.bg === premiumColors.bg;
+  const bg = isDark ? premiumColors.surfaceGlassSubtle : theme.card;
+  const border = isDark ? premiumColors.borderSoft : theme.cardBorder;
   const content = (
     <View style={[styles.listItem, { backgroundColor: bg, borderColor: border, borderRadius: 12 }]}>
       {icon && (

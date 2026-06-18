@@ -79,31 +79,6 @@ export default function OwnerHome() {
 
   return (
     <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
-      {/* ── Header Row ── */}
-      <View style={styles.headerRow}>
-        <Text style={styles.headerLogo}>HORSETRACK</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.bellButton} activeOpacity={0.7}>
-            <View style={styles.bellIconContainer}>
-              <MaterialIcons name="notifications-none" size={24} color="#FFFFFF" />
-              <View style={styles.bellDot} />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.avatarButton} 
-            onPress={() => router.push('/(owner)/profile' as any)}
-            activeOpacity={0.7}
-          >
-            {user?.avatar ? (
-              <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <MaterialIcons name="person" size={20} color="#FFFFFF" />
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
 
       {/* ── Hero – flat racing viewer ── */}
       <View style={styles.hero}>
@@ -255,67 +230,7 @@ export default function OwnerHome() {
 }
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: premiumSpacing[16],
-    paddingVertical: premiumSpacing[12],
-    backgroundColor: '#0B0D12',
-  },
-  headerLogo: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 1.5,
-    fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-CondensedBold' : 'sans-serif-condensed',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  bellButton: {
-    position: 'relative',
-  },
-  bellIconContainer: {
-    position: 'relative',
-    padding: 4,
-  },
-  bellDot: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#E10600',
-    borderWidth: 1.5,
-    borderColor: '#0B0D12',
-  },
-  avatarButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 18,
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 18,
-    backgroundColor: '#202633',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+
   // ── Hero ──
   hero: {
     paddingHorizontal: premiumSpacing[16],
@@ -323,20 +238,22 @@ const styles = StyleSheet.create({
     paddingBottom: premiumSpacing[24],
     position: 'relative',
     overflow: 'hidden',
-    backgroundColor: '#0B0D12',
+    backgroundColor: '#000000',
     minHeight: 180,
     justifyContent: 'center',
   },
   heroImage: {
     position: 'absolute',
-    right: -20,
-    bottom: -15,
-    width: '60%',
-    height: '130%',
-    opacity: 0.75,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    opacity: 0.35,
   },
   heroContent: {
-    width: '58%',
+    width: '85%',
     zIndex: 2,
   },
   heroEyebrow: {

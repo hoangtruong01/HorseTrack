@@ -61,16 +61,23 @@ export default function RefereeHome() {
         <Text style={styles.heroSubtitle}>Theo dõi phân công, kiểm tra và kết quả đường đua.</Text>
       </View>
 
-      {/* ── Operational Intelligence ── */}
-      <View style={styles.oiBlock}>
-        <View style={styles.oiAccent} />
-        <View style={styles.oiContent}>
-          <Text style={styles.oiLabel}>OPERATIONAL INTELLIGENCE</Text>
-          <Text style={styles.oiValue}>
-            {pendingCount} phân công mới • {acceptedCount} nhiệm vụ đã nhận
+      {/* ── Overview Card ── */}
+      <TouchableOpacity 
+        style={styles.overviewCard} 
+        onPress={() => router.push('/(referee)/assignments')}
+        activeOpacity={0.8}
+      >
+        <View style={styles.overviewIconContainer}>
+          <MaterialIcons name="calendar-today" size={20} color="#FFFFFF" />
+        </View>
+        <View style={styles.overviewContent}>
+          <Text style={styles.overviewTitle}>Tổng quan hôm nay</Text>
+          <Text style={styles.overviewSubtitle}>
+            {pendingCount} phân công mới · {acceptedCount} nhiệm vụ đã nhận
           </Text>
         </View>
-      </View>
+        <MaterialIcons name="chevron-right" size={20} color={premiumColors.textSecondary} />
+      </TouchableOpacity>
 
       <View style={styles.content}>
         {/* ── Metrics 2×2 grid – telemetry style ── */}
@@ -191,35 +198,43 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // ── Operational Intelligence ──
-  oiBlock: {
+  overviewCard: {
     flexDirection: 'row',
-    backgroundColor: premiumColors.surface2,
+    alignItems: 'center',
+    backgroundColor: 'rgba(225, 6, 0, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(225, 6, 0, 0.15)',
     marginHorizontal: premiumSpacing[16],
     marginBottom: premiumSpacing[24],
+    borderRadius: premiumRadius[12],
+    padding: premiumSpacing[16],
+    shadowColor: '#E10600',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  overviewIconContainer: {
+    width: 48,
+    height: 48,
     borderRadius: premiumRadius[8],
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: premiumColors.border,
+    backgroundColor: '#E10600',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  oiAccent: {
-    width: 3,
-    backgroundColor: premiumColors.brand,
-  },
-  oiContent: {
+  overviewContent: {
     flex: 1,
-    padding: premiumSpacing[12],
+    paddingLeft: premiumSpacing[12],
   },
-  oiLabel: {
-    fontSize: 10,
+  overviewTitle: {
+    fontSize: 15,
     fontWeight: '700',
-    color: premiumColors.textMuted,
-    letterSpacing: 0.5,
+    color: '#FFFFFF',
     marginBottom: 4,
   },
-  oiValue: {
-    fontSize: 13,
-    color: premiumColors.text,
+  overviewSubtitle: {
+    fontSize: 12,
+    color: '#AEB6C2',
   },
 
   // ── Content wrapper ──
