@@ -1387,11 +1387,6 @@ export default function Home() {
                       feat.gradient
                     )} />
 
-                    {/* Step number on background */}
-                    <span className="absolute top-4 right-6 text-7xl font-black text-foreground/[0.02] group-hover:text-foreground/[0.06] transition-colors duration-500 select-none pointer-events-none font-mono">
-                      {feat.step}
-                    </span>
-
                     {/* Nội dung bên trong thẻ */}
                     <div className={cn("h-full flex flex-col justify-between relative z-10", isWide ? "lg:flex-row lg:items-center lg:gap-8" : "")}>
                       <div className="space-y-6 flex-1">
