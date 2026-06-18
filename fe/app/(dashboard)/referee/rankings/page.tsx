@@ -118,21 +118,19 @@ export default function RefereeRankingsPage() {
       <div className="flex border-b border-border max-w-sm">
         <button
           onClick={() => setActiveTab("horses")}
-          className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
-            activeTab === "horses"
+          className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${activeTab === "horses"
               ? "text-primary border-b-2 border-primary"
               : "text-muted-foreground hover:text-white"
-          }`}
+            }`}
         >
           🐎 Chiến Mã Vô Địch
         </button>
         <button
           onClick={() => setActiveTab("jockeys")}
-          className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
-            activeTab === "jockeys"
+          className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${activeTab === "jockeys"
               ? "text-primary border-b-2 border-primary"
               : "text-muted-foreground hover:text-white"
-          }`}
+            }`}
         >
           🏇 Nài Ngựa Hàng Đầu
         </button>
@@ -175,15 +173,14 @@ export default function RefereeRankingsPage() {
                     <tr key={horse.horseId} className="hover:bg-white/[0.01] transition duration-200">
                       <td className="p-4 text-center">
                         <span
-                          className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
-                            horse.rank === 1
+                          className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${horse.rank === 1
                               ? "bg-yellow-500 text-black shadow-[0_0_12px_rgba(234,179,8,0.3)] animate-pulse"
                               : horse.rank === 2
-                              ? "bg-slate-300 text-black"
-                              : horse.rank === 3
-                              ? "bg-[#CD7F32] text-white"
-                              : "bg-white/5 border border-border text-muted-foreground"
-                          }`}
+                                ? "bg-slate-300 text-black"
+                                : horse.rank === 3
+                                  ? "bg-[#CD7F32] text-white"
+                                  : "bg-white/5 border border-border text-muted-foreground"
+                            }`}
                         >
                           {horse.rank}
                         </span>
@@ -248,15 +245,14 @@ export default function RefereeRankingsPage() {
                     <tr key={jockey.jockeyUserId} className="hover:bg-white/[0.01] transition duration-200">
                       <td className="p-4 text-center">
                         <span
-                          className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
-                            jockey.rank === 1
+                          className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${jockey.rank === 1
                               ? "bg-yellow-500 text-black shadow-[0_0_12px_rgba(234,179,8,0.3)] animate-pulse"
                               : jockey.rank === 2
-                              ? "bg-slate-300 text-black"
-                              : jockey.rank === 3
-                              ? "bg-[#CD7F32] text-white"
-                              : "bg-white/5 border border-border text-muted-foreground"
-                          }`}
+                                ? "bg-slate-300 text-black"
+                                : jockey.rank === 3
+                                  ? "bg-[#CD7F32] text-white"
+                                  : "bg-white/5 border border-border text-muted-foreground"
+                            }`}
                         >
                           {jockey.rank}
                         </span>

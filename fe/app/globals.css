@@ -49,11 +49,11 @@
 }
 
 :root {
-  --background: #ffffff;
+  --background: #fcf2f2;
   --foreground: #0a0a0a;
-  --card: #ffffff;
+  --card: #fdf7f7;
   --card-foreground: #0a0a0a;
-  --popover: #ffffff;
+  --popover: #fcf2f2;
   --popover-foreground: #0a0a0a;
   --primary: #e10600;
   --primary-foreground: #ffffff;
@@ -73,7 +73,7 @@
   --chart-4: #52525b;
   --chart-5: #71717a;
   --radius: 0.5rem;
-  --sidebar: #ffffff;
+  --sidebar: #fdf7f7;
   --sidebar-foreground: #0a0a0a;
   --sidebar-primary: #e10600;
   --sidebar-primary-foreground: #ffffff;
@@ -124,6 +124,7 @@
 
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
 
   html.dark {
@@ -165,7 +166,7 @@
         rgba(6, 126, 106, 0.06),
         transparent 24rem
       ),
-      linear-gradient(135deg, #ffffff 0%, #fafafa 42%, #f5f5f5 100%);
+      linear-gradient(135deg, #fcf2f2 0%, #fdf7f7 42%, #f9eded 100%);
   }
 
   ::selection {
@@ -225,4 +226,143 @@
   .f1-status-upcoming {
     @apply bg-[#F8CD46] text-[#1C1C25];
   }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLYTELLING ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
+/* Đường kẻ ngang vẽ dần (chapter divider) */
+@keyframes lineDrawRight {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.scrollytelling-line-draw {
+  animation: lineDrawRight 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Hero text reveal – từng dòng trượt lên */
+@keyframes heroTextReveal {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.scrollytelling-hero-reveal {
+  animation: heroTextReveal 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.scrollytelling-hero-reveal-delay-1 {
+  animation: heroTextReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.scrollytelling-hero-reveal-delay-2 {
+  animation: heroTextReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.scrollytelling-hero-reveal-delay-3 {
+  animation: heroTextReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+
+.scrollytelling-hero-reveal-delay-4 {
+  animation: heroTextReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+}
+
+/* Card cascade – trượt lên lần lượt */
+@keyframes cardCascade {
+  from {
+    opacity: 0;
+    transform: translateY(60px) rotateX(8deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
+}
+
+.scrollytelling-card-cascade {
+  animation: cardCascade 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Floating nhẹ nhàng lên xuống */
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.scrollytelling-float {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+.scrollytelling-float-delayed {
+  animation: floatGentle 5s ease-in-out 1s infinite;
+}
+
+/* Pulse glow cho các điểm nhấn */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 6, 0, 0.4); }
+  50% { box-shadow: 0 0 20px 4px rgba(225, 6, 0, 0.15); }
+}
+
+.scrollytelling-pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* Parallax scroll hint – mũi tên nhấp nháy */
+@keyframes scrollHintBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(10px); opacity: 1; }
+}
+
+.scrollytelling-scroll-hint {
+  animation: scrollHintBounce 2s ease-in-out infinite;
+}
+
+/* Số đếm scale khi xuất hiện */
+@keyframes numberPop {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.scrollytelling-number-pop {
+  animation: numberPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Gradient shift nhẹ cho section backgrounds */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.scrollytelling-gradient-bg {
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease-in-out infinite;
+}
+
+/* Spin chậm cho decorative elements */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
 }

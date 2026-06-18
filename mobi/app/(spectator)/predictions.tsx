@@ -52,10 +52,10 @@ export default function SpectatorPredictions() {
             <ErrorState message={error} onRetry={loadData} />
           ) : data.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <EmptyState icon="psychology" title="Chưa có dự đoán" subtitle="Bạn chưa đặt dự đoán cho trận đua nào. Hãy vào Lịch đua để bắt đầu!" />
+              <EmptyState icon="history" title="Chưa có dự đoán" subtitle="Bạn chưa đặt dự đoán cho trận đua nào. Hãy vào Giải đấu để bắt đầu!" />
               <TouchableOpacity 
                 style={styles.emptyCta}
-                onPress={() => router.push('/(spectator)/races' as any)}
+                onPress={() => router.push('/(spectator)/tournaments' as any)}
                 activeOpacity={0.8}
               >
                 <Text style={styles.emptyCtaText}>Tạo dự đoán đầu tiên</Text>

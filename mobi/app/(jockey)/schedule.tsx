@@ -1,16 +1,28 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, StyleSheet, Text, FlatList, RefreshControl } from 'react-native';
-import { AppScreen, Section } from '@/components/ui/premium';
+import { View, StyleSheet, Text, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
+import { AppScreen } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { jockeyInvitationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import RaceResultsModal from '@/components/ui/race-results-modal';
 
 export default function JockeySchedule() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Results Modal State
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [resultsRaceId, setResultsRaceId] = useState<string | null>(null);
+  const [resultsRaceName, setResultsRaceName] = useState<string | null>(null);
+
+  const openResultsModal = (race: any) => {
+    setResultsRaceId(race._id || race.id);
+    setResultsRaceName(race.name);
+    setShowResultsModal(true);
+  };
 
   const loadData = useCallback(async () => {
     setError(null);
@@ -40,6 +52,40 @@ export default function JockeySchedule() {
     const raceName = typeof item.raceId === 'object' ? item.raceId?.name : 'Trận đua';
     const horseName = typeof item.horseId === 'object' ? item.horseId?.name : 'Ngựa';
     const startTime = typeof item.raceId === 'object' ? item.raceId?.startTime : undefined;
+    const raceStatus = typeof item.raceId === 'object' ? item.raceId?.status : undefined;
+    const isFinished = raceStatus === 'FINISHED';
+
+    if (isFinished) {
+      return (
+        <View style={styles.cardFinished}>
+          <View style={styles.cardFinishedMain}>
+            <View style={styles.iconContainerFinished}>
+              <MaterialIcons name="event-available" size={20} color={premiumColors.success} />
+            </View>
+            <View style={styles.cardInfo}>
+              <Text style={styles.raceTitle} numberOfLines={1}>{raceName}</Text>
+              <Text style={styles.detailText} numberOfLines={1}>
+                Chiến mã: <Text style={styles.highlight}>{horseName}</Text>
+              </Text>
+              <Text style={styles.detailText} numberOfLines={1}>
+                Thời gian: {formatDateTime(startTime)}
+              </Text>
+            </View>
+            <View style={styles.statusBadgeFinished}>
+              <Text style={styles.statusBadgeFinishedText}>Hoàn thành</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.resultsBtn}
+            onPress={() => openResultsModal(item.raceId)}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="emoji-events" size={16} color={premiumColors.success} />
+            <Text style={styles.resultsBtnText}>Xem kết quả thi đấu</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
     return (
       <View style={styles.card}>
@@ -91,6 +137,13 @@ export default function JockeySchedule() {
             </View>
           )
         }
+      />
+
+      <RaceResultsModal
+        visible={showResultsModal}
+        onClose={() => setShowResultsModal(false)}
+        raceId={resultsRaceId}
+        raceName={resultsRaceName}
       />
     </AppScreen>
   );
@@ -153,6 +206,7 @@ const styles = StyleSheet.create({
   },
   cardInfo: {
     flex: 1,
+    minWidth: 0,
   },
   raceTitle: {
     color: premiumColors.text,
@@ -178,5 +232,60 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 10,
     fontWeight: '700',
+  },
+
+  // ── Finished Card ──
+  cardFinished: {
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.borderSoft,
+    borderRadius: premiumRadius[12],
+    marginBottom: premiumSpacing[16],
+    overflow: 'hidden',
+  },
+  cardFinishedMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: premiumSpacing[16],
+    gap: premiumSpacing[12],
+  },
+  iconContainerFinished: {
+    width: 48,
+    height: 48,
+    borderRadius: premiumRadius[8],
+    backgroundColor: premiumColors.success + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: premiumColors.success + '30',
+  },
+  statusBadgeFinished: {
+    backgroundColor: premiumColors.success + '15',
+    borderRadius: premiumRadius[4],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: premiumColors.success + '30',
+  },
+  statusBadgeFinishedText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: premiumColors.success,
+    textTransform: 'uppercase',
+  },
+  resultsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    backgroundColor: premiumColors.success + '10',
+    borderTopWidth: 1,
+    borderTopColor: premiumColors.success + '20',
+  },
+  resultsBtnText: {
+    color: premiumColors.success,
+    fontSize: 13,
+    fontWeight: '800',
   },
 });

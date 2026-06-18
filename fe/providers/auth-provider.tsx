@@ -30,6 +30,7 @@ type AuthContextType = {
     roles?: string[];
     password?: string;
   }) => Promise<AuthUser>;
+  updateUser: (data: Partial<AuthUser>) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -146,8 +147,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = (data: Partial<AuthUser>) => {
+    if (user) {
+      setUser({ ...user, ...data });
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, logout, register }}>
+    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
