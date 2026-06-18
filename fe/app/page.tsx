@@ -434,7 +434,7 @@ export default function Home() {
       <section id="hero" className="relative min-h-[640px] lg:min-h-[720px] flex items-center py-16 overflow-hidden">
         {/* Background Overlay — Parallax layer */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.12] pointer-events-none mix-blend-lighten will-change-transform"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.06] dark:opacity-[0.12] pointer-events-none mix-blend-multiply dark:mix-blend-lighten will-change-transform"
           style={{ backgroundImage: "url('/hero_horse_racing.png')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-background via-background/90 to-primary/5 pointer-events-none" />
