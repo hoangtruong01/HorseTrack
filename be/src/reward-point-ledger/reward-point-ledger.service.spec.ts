@@ -2,7 +2,10 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken, getConnectionToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { LedgerSourceType, RewardPointLedger } from './schemas/reward-point-ledger.schema';
+import {
+  LedgerSourceType,
+  RewardPointLedger,
+} from './schemas/reward-point-ledger.schema';
 import { User } from '../users/schemas/user.schema';
 import { RewardPointLedgerService } from './reward-point-ledger.service';
 

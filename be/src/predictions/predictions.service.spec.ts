@@ -27,7 +27,11 @@ describe('PredictionsService', () => {
   let resultModel: { find: jest.Mock };
   let raceModel: { findById?: jest.Mock };
   let registrationModel: { findOne?: jest.Mock };
-  let ledgerService: { credit: jest.Mock; debit: jest.Mock; getBalance?: jest.Mock };
+  let ledgerService: {
+    credit: jest.Mock;
+    debit: jest.Mock;
+    getBalance?: jest.Mock;
+  };
   let notificationsService: { send: jest.Mock };
 
   const raceId = new Types.ObjectId().toHexString();
@@ -66,7 +70,10 @@ describe('PredictionsService', () => {
     resultModel = { find: jest.fn() };
     raceModel = { findById: jest.fn() };
     registrationModel = { findOne: jest.fn() };
-    ledgerService = { credit: jest.fn().mockResolvedValue(undefined), debit: jest.fn().mockResolvedValue(undefined) };
+    ledgerService = {
+      credit: jest.fn().mockResolvedValue(undefined),
+      debit: jest.fn().mockResolvedValue(undefined),
+    };
     notificationsService = { send: jest.fn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -75,7 +82,10 @@ describe('PredictionsService', () => {
         { provide: getModelToken(Prediction.name), useValue: predictionModel },
         { provide: getModelToken(Race.name), useValue: raceModel },
         { provide: getModelToken(RaceResult.name), useValue: resultModel },
-        { provide: getModelToken(Registration.name), useValue: registrationModel },
+        {
+          provide: getModelToken(Registration.name),
+          useValue: registrationModel,
+        },
         { provide: RewardPointLedgerService, useValue: ledgerService },
         { provide: NotificationsService, useValue: notificationsService },
       ],
@@ -101,7 +111,7 @@ describe('PredictionsService', () => {
 
       // findOneAndUpdate exec trả về updated prediction (not null → not skipped)
       const updatedPrediction = { ...prediction, status: PredictionStatus.WON };
-      (predictionModel.findOneAndUpdate as jest.Mock).mockReturnValue({
+      predictionModel.findOneAndUpdate.mockReturnValue({
         exec: jest.fn().mockResolvedValue(updatedPrediction),
       });
 
@@ -145,8 +155,11 @@ describe('PredictionsService', () => {
         session: jest.fn().mockResolvedValue([losingPrediction]),
       });
 
-      const updatedPrediction = { ...losingPrediction, status: PredictionStatus.LOST };
-      (predictionModel.findOneAndUpdate as jest.Mock).mockReturnValue({
+      const updatedPrediction = {
+        ...losingPrediction,
+        status: PredictionStatus.LOST,
+      };
+      predictionModel.findOneAndUpdate.mockReturnValue({
         exec: jest.fn().mockResolvedValue(updatedPrediction),
       });
 
