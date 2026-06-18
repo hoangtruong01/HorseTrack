@@ -3,19 +3,26 @@ import { ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-nati
 import { useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
-import { refereeAssignmentsApi } from '@/lib/api-client';
+import { refereeAssignmentsApi, rankingsApi } from '@/lib/api-client';
 
 export default function RefereeHome() {
   const router = useRouter();
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [topHorses, setTopHorses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(() => {
     setLoading(true);
     setError(null);
-    refereeAssignmentsApi.myAssignments({ limit: 10 })
-      .then(r => setAssignments((r as any).data || r || []))
+    Promise.all([
+      refereeAssignmentsApi.myAssignments({ limit: 10 }).catch(() => []),
+      rankingsApi.globalHorses().catch(() => [])
+    ])
+      .then(([aRes, hRes]) => {
+        setAssignments((aRes as any).data || aRes || []);
+        setTopHorses((hRes as any).data || hRes || []);
+      })
       .catch((err: any) => setError(err.message || 'Lỗi tải phân công'))
       .finally(() => setLoading(false));
   }, []);
@@ -50,8 +57,8 @@ export default function RefereeHome() {
         {[
           { title: 'Phân Công', icon: 'assignment', path: '/assignments', color: '#F59E0B' },
           { title: 'Điểm Danh', icon: 'fact-check', path: '/pre-race', color: '#38BDF8' },
-          { title: 'Vi Phạm', icon: 'gavel', path: '/violations', color: '#EF4444' },
-          { title: 'Kết Quả', icon: 'emoji-events', path: '/results', color: '#34D399' },
+          { title: 'Thẩm Định', icon: 'gavel', path: '/judging', color: '#EF4444' },
+          { title: 'Ví Thưởng', icon: 'account-balance-wallet', path: '/wallet', color: '#34D399' },
         ].map((act, idx) => (
           <TouchableOpacity key={idx} style={styles.actionBtn} onPress={() => router.push(act.path as any)}>
             <View style={[styles.actionIconWrap, { backgroundColor: act.color + '15' }]}>
@@ -77,13 +84,29 @@ export default function RefereeHome() {
           return <ListItemCard key={a._id} title={raceName} subtitle={`Vai trò: ${a.role === 'main' ? 'Trọng tài chính' : 'Trợ lý'}`} rightText={s.label} rightColor={s.color} icon="assignment-turned-in" />;
         })
       )}
+
+      <SectionHeader title="Bảng xếp hạng chiến mã" />
+      {topHorses.length === 0 ? (
+        <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
+      ) : (
+        topHorses.slice(0, 5).map((horse, idx) => (
+          <ListItemCard
+            key={horse._id}
+            title={`${idx + 1}. ${horse.name.toUpperCase()}`}
+            subtitle={`Tốc độ: ${horse.baseSpeed} | Thể lực: ${horse.staminaScore}`}
+            icon="emoji-events"
+            rightText={`Thắng: ${horse.stats?.wins || 0}`}
+            rightColor="#F59E0B"
+          />
+        ))
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
-  content: { padding: 16, paddingBottom: 32 },
+  content: { padding: 16, paddingBottom: 110 },
   statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   heroCard: { backgroundColor: C.card, padding: 20, marginBottom: 16, borderRadius: 16, borderWidth: 1, borderColor: C.cardBorder },
   heroHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
