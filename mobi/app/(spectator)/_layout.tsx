@@ -19,8 +19,9 @@ export default function SpectatorLayout() {
     }}>
       <Tabs.Screen name="index" options={{ title: 'Trang chủ', headerTitle: 'HORSETRACK', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="home" color={color} /> }} />
       <Tabs.Screen name="tournaments" options={{ title: 'Giải đấu', headerShown: false, tabBarIcon: ({ color }) => <MaterialIcons size={24} name="emoji-events" color={color} /> }} />
-      <Tabs.Screen name="races" options={{ title: 'Lịch đua', headerTitle: 'LỊCH ĐUA', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="directions-run" color={color} /> }} />
-      <Tabs.Screen name="predictions" options={{ title: 'Dự đoán', headerTitle: 'DỰ ĐOÁN', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="psychology" color={color} /> }} />
+      <Tabs.Screen name="races" options={{ href: null }} />
+      <Tabs.Screen name="predictions" options={{ href: null }} />
+      <Tabs.Screen name="rankings" options={{ title: 'Xếp hạng', headerShown: false, tabBarIcon: ({ color }) => <MaterialIcons size={24} name="military-tech" color={color} /> }} />
       <Tabs.Screen name="wallet" options={{ title: 'Ví điểm', headerTitle: 'VÍ ĐIỂM', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person" color={color} /> }} />
       <Tabs.Screen name="race/[id]" options={{ href: null, headerTitle: 'CHI TIẾT TRẬN ĐUA' }} />
