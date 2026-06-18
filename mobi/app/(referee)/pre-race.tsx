@@ -155,7 +155,7 @@ export default function RefereePreRace() {
 }
 
 const s = StyleSheet.create({
-  c: { flex: 1, backgroundColor: C.bg }, p: { padding: 16, paddingBottom: 32 },
+  c: { flex: 1, backgroundColor: C.bg }, p: { padding: 16, paddingBottom: 110 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, backgroundColor: C.card, borderBottomWidth: 1, borderBottomColor: C.cardBorder },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   backTxt: { color: C.white, fontSize: 13, fontWeight: '700' },
