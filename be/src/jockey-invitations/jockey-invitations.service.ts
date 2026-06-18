@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -236,10 +237,10 @@ export class JockeyInvitationsService {
         }
       }
 
-      // Bind jockey to registration + save jockeySharePercent
+      // Bind jockey to registration + save jockeySharePercent (atomic: only if not already assigned)
       const updatedReg = await this.registrationModel
-        .findByIdAndUpdate(
-          invitation.registrationId,
+        .findOneAndUpdate(
+          { _id: invitation.registrationId, jockeyUserId: null },
           {
             jockeyUserId: invitation.jockeyUserId,
             jockeySharePercent: invitation.jockeySharePercent,
@@ -247,6 +248,12 @@ export class JockeyInvitationsService {
           { new: true },
         )
         .populate('horseId');
+
+      if (!updatedReg) {
+        throw new ConflictException(
+          'Đăng ký thi đấu này đã được phân công nài ngựa khác',
+        );
+      }
 
       // Find other pending invitations to auto-cancel and notify other jockeys
       const otherPending = await this.invitationModel.find({
