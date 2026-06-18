@@ -99,9 +99,11 @@ export class PayosService {
   async handleWebhook(body: unknown): Promise<void> {
     if (!this.payos) {
       this.logger.error(
-        'PayOS webhook nhận được nhưng PAYOS credentials chưa cấu hình — payment sẽ kẹt PENDING. Kiểm tra biến môi trường PAYOS_*.',
+        'PayOS webhook nhận được nhưng PAYOS credentials chưa cấu hình. Kiểm tra biến môi trường PAYOS_*.',
       );
-      return;
+      throw new BadRequestException(
+        'PayOS chưa được cấu hình — webhook bị từ chối',
+      );
     }
 
     let webhookData: Awaited<
