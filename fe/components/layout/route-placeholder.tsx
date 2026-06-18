@@ -33,7 +33,7 @@ export function RoutePlaceholder({
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary">
                 {card.label}
               </p>
-              <p className="mt-4 text-2xl font-black uppercase text-white">
+              <p className="mt-4 text-2xl font-black uppercase text-foreground">
                 {card.value}
               </p>
             </article>
