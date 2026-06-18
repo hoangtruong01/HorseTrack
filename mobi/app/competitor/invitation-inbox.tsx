@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView, RefreshControl } from 'react-native';
 import { jockeyInvitationsApi } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { AppScreen } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 
 export default function InvitationInboxScreen() {
   const [invitations, setInvitations] = useState<any[]>([]);
@@ -64,9 +66,9 @@ export default function InvitationInboxScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACCEPTED': return '#067E6A';
-      case 'REJECTED': return '#E10600';
-      default: return '#E1A200';
+      case 'ACCEPTED': return premiumColors.success;
+      case 'REJECTED': return premiumColors.danger;
+      default: return premiumColors.warning;
     }
   };
 
@@ -76,44 +78,47 @@ export default function InvitationInboxScreen() {
     const horseName = item.horseId?.name || 'Chiến mã';
     const ownerName = item.ownerId?.fullName || 'Chủ trại';
     const isPending = item.status === 'PENDING';
+    const statusColor = getStatusColor(item.status);
 
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <View>
+          <View style={styles.cardHeaderLeft}>
             <Text style={styles.tourLabel} numberOfLines={1}>{tourName.toUpperCase()}</Text>
             <Text style={styles.raceName} numberOfLines={1}>{raceName.toUpperCase()}</Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-            <Text style={styles.statusBadgeText}>{getStatusText(item.status)}</Text>
+          <View style={[styles.badge, { backgroundColor: statusColor + '15', borderColor: statusColor + '40' }]}>
+            <Text style={[styles.badgeText, { color: statusColor }]}>{getStatusText(item.status)}</Text>
           </View>
         </View>
 
         <View style={styles.cardBody}>
           <View style={styles.infoRow}>
-            <MaterialIcons name="pets" size={14} color="#E10600" />
-            <Text style={styles.infoText}>Chiến mã: <Text style={styles.whiteText}>{horseName.toUpperCase()}</Text></Text>
+            <MaterialIcons name="pets" size={14} color={premiumColors.textMuted} />
+            <Text style={styles.infoText}>Chiến mã: <Text style={styles.highlightText}>{horseName.toUpperCase()}</Text></Text>
           </View>
           <View style={styles.infoRow}>
-            <MaterialIcons name="person" size={14} color="#AAAAAA" />
-            <Text style={styles.infoText}>Chủ ngựa: <Text style={styles.whiteText}>{ownerName}</Text></Text>
+            <MaterialIcons name="person" size={14} color={premiumColors.textMuted} />
+            <Text style={styles.infoText}>Chủ ngựa: <Text style={styles.highlightText}>{ownerName}</Text></Text>
           </View>
         </View>
 
         {isPending && (
-          <View style={styles.actionsContainer}>
+          <View style={styles.actionsRow}>
             <TouchableOpacity 
-              style={[styles.actionButton, styles.rejectButton]}
+              style={[styles.btn, styles.btnReject]}
               onPress={() => handleRespond(item._id, 'REJECTED')}
+              activeOpacity={0.7}
             >
-              <Text style={styles.actionButtonText}>TỪ CHỐI</Text>
+              <Text style={styles.btnRejectText}>TỪ CHỐI</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.actionButton, styles.acceptButton]}
+              style={[styles.btn, styles.btnAccept]}
               onPress={() => handleRespond(item._id, 'ACCEPTED')}
+              activeOpacity={0.7}
             >
-              <Text style={styles.actionButtonText}>CHẤP NHẬN</Text>
+              <Text style={styles.btnAcceptText}>CHẤP NHẬN</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -121,10 +126,10 @@ export default function InvitationInboxScreen() {
     );
   };
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#E10600" />
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={premiumColors.brand} />
         <Text style={styles.loadingText}>Đang tải danh sách lời mời...</Text>
       </View>
     );
@@ -132,22 +137,29 @@ export default function InvitationInboxScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.eyebrow}>HOẠT ĐỘNG THI ĐẤU</Text>
+        <Text style={styles.title}>Hòm thư lời mời</Text>
+        <View style={styles.accentLine} />
+      </View>
+
       <FlatList
         data={invitations}
         renderItem={renderItem}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item._id || item.id}
         contentContainerStyle={styles.listContent}
-        onRefresh={onRefresh}
-        refreshing={refreshing}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} colors={[premiumColors.brand]} />
+        }
         ListEmptyComponent={
           error ? (
             <View style={styles.emptyContainer}>
-              <MaterialIcons name="error-outline" size={48} color="#E10600" />
-              <Text style={[styles.emptyText, { color: '#E10600' }]}>{error}</Text>
+              <MaterialIcons name="error-outline" size={48} color={premiumColors.danger} />
+              <Text style={[styles.emptyText, { color: premiumColors.danger, marginTop: 12 }]}>{error}</Text>
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <MaterialIcons name="mail-outline" size={48} color="#58585B" />
+              <MaterialIcons name="mail-outline" size={48} color={premiumColors.textMuted} />
               <Text style={styles.emptyText}>Hòm thư lời mời của bạn đang trống.</Text>
             </View>
           )
@@ -160,115 +172,160 @@ export default function InvitationInboxScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1C1C25',
+    backgroundColor: premiumColors.bg,
   },
-  listContent: {
-    padding: 16,
-  },
-  loadingContainer: {
+  centerContainer: {
     flex: 1,
-    backgroundColor: '#1C1C25',
+    backgroundColor: premiumColors.bg,
     alignItems: 'center',
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#AAAAAA',
+    color: premiumColors.textSecondary,
     fontSize: 14,
-    marginTop: 12,
+    marginTop: premiumSpacing[12],
   },
+  
+  // ── Header ──
+  header: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[24],
+    paddingBottom: premiumSpacing[16],
+  },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: premiumColors.brand,
+    letterSpacing: 1,
+    marginBottom: premiumSpacing[8],
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: premiumColors.text,
+    marginBottom: premiumSpacing[8],
+  },
+  accentLine: {
+    width: 36,
+    height: 3,
+    backgroundColor: premiumColors.brand,
+    borderRadius: 2,
+  },
+
+  listContent: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingBottom: premiumSpacing[48],
+  },
+  
+  // ── Card ──
   card: {
-    backgroundColor: '#15151E',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
-    borderColor: '#303037',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: premiumSpacing[16],
+    marginBottom: premiumSpacing[16],
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     borderBottomWidth: 1,
-    borderBottomColor: '#1C1C25',
-    paddingBottom: 10,
-    marginBottom: 10,
+    borderBottomColor: premiumColors.border,
+    paddingBottom: premiumSpacing[12],
+    marginBottom: premiumSpacing[12],
+  },
+  cardHeaderLeft: {
+    flex: 1,
+    paddingRight: 8,
   },
   tourLabel: {
-    color: '#E10600',
-    fontSize: 9,
+    color: premiumColors.brand,
+    fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.5,
+    marginBottom: 4,
   },
   raceName: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '900',
-    marginTop: 2,
+    color: premiumColors.text,
+    fontSize: 15,
+    fontWeight: '700',
   },
-  statusBadge: {
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+  badge: {
+    borderWidth: 1,
+    borderRadius: premiumRadius[4],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
-  statusBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 8,
-    fontWeight: '900',
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '700',
   },
+
   cardBody: {
-    gap: 6,
-    marginBottom: 12,
+    gap: premiumSpacing[8],
+    marginBottom: premiumSpacing[4],
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   infoText: {
-    color: '#AAAAAA',
-    fontSize: 12,
+    color: premiumColors.textSecondary,
+    fontSize: 13,
   },
-  whiteText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+  highlightText: {
+    color: premiumColors.text,
+    fontWeight: '600',
   },
-  actionsContainer: {
+
+  // ── Actions ──
+  actionsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: premiumSpacing[12],
+    marginTop: premiumSpacing[16],
+    paddingTop: premiumSpacing[12],
     borderTopWidth: 1,
-    borderTopColor: '#1C1C25',
-    paddingTop: 12,
+    borderTopColor: premiumColors.border,
   },
-  actionButton: {
+  btn: {
     flex: 1,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  rejectButton: {
-    backgroundColor: '#303037',
     borderWidth: 1,
-    borderColor: '#E10600',
   },
-  acceptButton: {
-    backgroundColor: '#E10600',
+  btnReject: {
+    backgroundColor: premiumColors.surface2,
+    borderColor: premiumColors.border,
   },
-  actionButtonText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  btnRejectText: {
+    color: premiumColors.text,
+    fontSize: 12,
+    fontWeight: '700',
   },
+  btnAccept: {
+    backgroundColor: premiumColors.brand + '20',
+    borderColor: premiumColors.brand + '50',
+  },
+  btnAcceptText: {
+    color: premiumColors.brand,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  // ── Empty ──
   emptyContainer: {
+    paddingVertical: premiumSpacing[48],
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 80,
   },
   emptyText: {
-    color: '#AAAAAA',
+    color: premiumColors.textMuted,
     fontSize: 13,
-    marginTop: 12,
+    marginTop: premiumSpacing[12],
     textAlign: 'center',
   },
 });

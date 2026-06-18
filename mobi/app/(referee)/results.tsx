@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
-import { C, Card, SectionHeader, ListItemCard, LoadingState, EmptyState, statusLabel, PrimaryButton } from '@/components/ui/shared';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { AppScreen, Section } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState } from '@/components/ui/shared';
 import { refereeAssignmentsApi, raceChecksApi, raceResultsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -26,18 +28,29 @@ export default function RefereeResults() {
   const [confirming, setConfirming] = useState(false);
   const [resultsStatus, setResultsStatus] = useState('DRAFT');
   const [entryRows, setEntryRows] = useState<EntryRow[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const loadAssignments = async () => {
+  const loadAssignments = useCallback(async () => {
     try {
       const res = await refereeAssignmentsApi.myAssignments({ limit: 50 });
       const list = (res as any).data || res || [];
       setAssignments(list.filter((a: any) => a.status === 'accepted'));
     } catch {} finally { setLoading(false); }
-  };
+  }, []);
 
   useEffect(() => {
     loadAssignments();
-  }, []);
+  }, [loadAssignments]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    if (!selectedRaceId) {
+      await loadAssignments();
+    } else {
+      await selectRace(selectedRaceId, selectedRaceName);
+    }
+    setRefreshing(false);
+  }, [selectedRaceId, selectedRaceName, loadAssignments]);
 
   const selectRace = async (raceId: string, raceName: string) => {
     setSelectedRaceId(raceId);
@@ -132,6 +145,7 @@ export default function RefereeResults() {
       { text: 'Hủy', style: 'cancel' },
       {
         text: 'Khóa kết quả',
+        style: 'destructive',
         onPress: async () => {
           setConfirming(true);
           try {
@@ -150,38 +164,49 @@ export default function RefereeResults() {
 
   const isLocked = resultsStatus === 'CONFIRMED' || resultsStatus === 'PUBLISHED';
 
-  if (loading) return <LoadingState />;
+  if (loading && !refreshing) return <LoadingState />;
 
   if (!selectedRaceId) {
     return (
-      <ScrollView style={s.c} contentContainerStyle={s.p}>
-        <SectionHeader title="Chọn trận đua cần nhập kết quả" />
-        {assignments.length === 0 ? (
-          <EmptyState icon="sports-score" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
-        ) : (
-          assignments.map(a => {
-            const race = a.raceId;
-            if (!race) return null;
-            return (
-              <ListItemCard
-                key={a._id}
-                title={race.name}
-                subtitle={`Trạng thái: ${race.status}`}
-                onPress={() => selectRace(race._id, race.name)}
-                icon="sports-score"
-              />
-            );
-          })
-        )}
-      </ScrollView>
+      <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+        <View style={s.content}>
+          <Section title="Chọn trận đua cần nhập kết quả">
+            {assignments.length === 0 ? (
+              <EmptyState icon="sports-score" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
+            ) : (
+              assignments.map(a => {
+                const race = a.raceId;
+                if (!race) return null;
+                return (
+                  <TouchableOpacity
+                    key={a._id || a.id}
+                    style={s.assignmentCard}
+                    onPress={() => selectRace(race._id || race.id, race.name)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={s.cardIconWrap}>
+                      <MaterialIcons name="sports-score" size={20} color={premiumColors.brand} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.assignmentTitle} numberOfLines={1}>{race.name}</Text>
+                      <Text style={s.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </Section>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.bg }}>
+    <AppScreen refreshing={refreshing} onRefresh={onRefresh}>
       <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => setSelectedRaceId(null)}>
-          <MaterialIcons name="arrow-back" size={20} color={C.white} />
+        <TouchableOpacity style={s.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
+          <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
           <Text style={s.backTxt}>Quay lại</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
@@ -190,32 +215,45 @@ export default function RefereeResults() {
       <View style={s.statusCard}>
         <View>
           <Text style={s.statusLabel}>TRẠNG THÁI BIÊN BẢN</Text>
-          <View style={[s.statusBadge, { backgroundColor: isLocked ? '#067E6A' : '#E1A200' }]}>
-            <Text style={s.statusBadgeText}>{isLocked ? 'ĐÃ XÁC NHẬN (LOCKED)' : 'BẢN NHÁP (DRAFT)'}</Text>
+          <View style={[s.statusBadge, { backgroundColor: isLocked ? 'rgba(52, 211, 153, 0.15)' : 'rgba(234, 179, 8, 0.15)' }]}>
+            <Text style={[s.statusBadgeText, { color: isLocked ? premiumColors.success : premiumColors.warning }]}>
+              {isLocked ? 'ĐÃ XÁC NHẬN (LOCKED)' : 'BẢN NHÁP (DRAFT)'}
+            </Text>
           </View>
         </View>
         {!isLocked && (
           <View style={s.topActions}>
-            <TouchableOpacity style={[s.topActionBtn, { backgroundColor: '#E1A200' }]} onPress={handleSimulate} disabled={simulating}>
-              <Text style={s.topActionBtnText}>GIẢ LẬP</Text>
+            <TouchableOpacity 
+              style={[s.topActionBtn, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: 'rgba(234, 179, 8, 0.3)' }]} 
+              onPress={handleSimulate} 
+              disabled={simulating}
+              activeOpacity={0.8}
+            >
+              <Text style={[s.topActionBtnText, { color: premiumColors.warning }]}>{simulating ? '...' : 'GIẢ LẬP'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[s.topActionBtn, { backgroundColor: C.card, borderColor: C.cardBorder, borderWidth: 1 }]} onPress={handleBulkSave} disabled={saving}>
-              <Text style={s.topActionBtnText}>LƯU NHÁP</Text>
+            <TouchableOpacity 
+              style={s.topActionBtnOutline} 
+              onPress={handleBulkSave} 
+              disabled={saving}
+              activeOpacity={0.8}
+            >
+              <Text style={s.topActionBtnOutlineText}>{saving ? '...' : 'LƯU NHÁP'}</Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
 
-      {loadingDetails ? <LoadingState /> : (
+      {loadingDetails && !refreshing ? <LoadingState /> : (
         <FlatList
           data={entryRows}
           keyExtractor={(item) => item.horseId}
-          contentContainerStyle={s.p}
+          contentContainerStyle={s.listContent}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <EmptyState icon="sports" title="Không có chiến mã" subtitle="Chưa có ngựa đua được xác nhận kiểm duyệt để nhập kết quả." />
           }
           renderItem={({ item, index }) => (
-            <Card>
+            <View style={s.resultCard}>
               <View style={s.cardHeader}>
                 <Text style={s.horseName}>{item.horseName.toUpperCase()}</Text>
                 {item.rank ? (
@@ -232,7 +270,7 @@ export default function RefereeResults() {
                   value={item.finishTimeSecs}
                   onChangeText={txt => handleRowChange(index, 'finishTimeSecs', txt)}
                   placeholder="Ví dụ: 72.45"
-                  placeholderTextColor={C.textMuted}
+                  placeholderTextColor={premiumColors.textMuted}
                   keyboardType="numeric"
                   editable={!isLocked}
                 />
@@ -250,6 +288,7 @@ export default function RefereeResults() {
                         style={[s.chip, isActive && s.chipActive, isLocked && s.chipLocked]}
                         onPress={() => !isLocked && handleRowChange(index, 'outcome', out)}
                         disabled={isLocked}
+                        activeOpacity={0.8}
                       >
                         <Text style={[s.chipText, isActive && s.chipTextActive]}>{label}</Text>
                       </TouchableOpacity>
@@ -257,21 +296,260 @@ export default function RefereeResults() {
                   })}
                 </View>
               </View>
-            </Card>
+            </View>
           )}
         />
       )}
 
       {!isLocked && entryRows.length > 0 && (
-        <TouchableOpacity style={s.confirmButton} onPress={handleConfirm} disabled={confirming}>
-          <Text style={s.confirmButtonText}>XÁC NHẬN KHÓA KẾT QUẢ</Text>
-        </TouchableOpacity>
+        <View style={s.footer}>
+          <TouchableOpacity 
+            style={s.confirmButton} 
+            onPress={handleConfirm} 
+            disabled={confirming}
+            activeOpacity={0.9}
+          >
+            <Text style={s.confirmButtonText}>{confirming ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN KHÓA KẾT QUẢ'}</Text>
+          </TouchableOpacity>
+        </View>
       )}
-    </View>
+    </AppScreen>
   );
 }
 
 const s = StyleSheet.create({
+  content: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[16],
+    paddingBottom: premiumSpacing[48],
+  },
+  listContent: {
+    padding: premiumSpacing[16],
+    paddingBottom: premiumSpacing[48],
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    backgroundColor: premiumColors.headerBg,
+    borderBottomWidth: 1,
+    borderBottomColor: premiumColors.headerBorder,
+  },
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: premiumColors.surface2,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: premiumRadius[8],
+    borderWidth: 1,
+    borderColor: premiumColors.borderSoft,
+  },
+  backTxt: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  headerTitle: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '900',
+    flex: 1,
+  },
+  assignmentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 16,
+    marginBottom: 12,
+  },
+  cardIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: premiumRadius[8],
+    backgroundColor: 'rgba(225, 6, 0, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  assignmentTitle: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  assignmentSubtitle: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+  },
+  statusCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: premiumColors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: premiumColors.border,
+    padding: 16,
+  },
+  statusLabel: {
+    color: premiumColors.textMuted,
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  statusBadge: {
+    borderRadius: premiumRadius[4],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 6,
+    alignSelf: 'flex-start',
+  },
+  statusBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  topActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  topActionBtn: {
+    borderRadius: premiumRadius[8],
+    height: 32,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  topActionBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  topActionBtnOutline: {
+    borderRadius: premiumRadius[8],
+    height: 32,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: premiumColors.borderStrong,
+    backgroundColor: premiumColors.surface2,
+  },
+  topActionBtnOutlineText: {
+    color: premiumColors.text,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  resultCard: {
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 16,
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: premiumColors.border,
+    paddingBottom: 12,
+    marginBottom: 12,
+  },
+  horseName: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  rankBadge: {
+    backgroundColor: 'rgba(225, 6, 0, 0.15)',
+    borderRadius: premiumRadius[4],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(225, 6, 0, 0.3)',
+  },
+  rankText: {
+    color: premiumColors.brand,
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  formRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  label: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  timeInput: {
+    width: 120,
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    color: premiumColors.text,
+    borderRadius: premiumRadius[8],
+    height: 40,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    textAlign: 'right',
+  },
+  disabledInput: {
+    backgroundColor: premiumColors.surface,
+    color: premiumColors.textMuted,
+  },
+  statusChips: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  chip: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  chipActive: {
+    backgroundColor: 'rgba(52, 211, 153, 0.15)',
+    borderColor: premiumColors.success,
+  },
+  chipLocked: {
+    opacity: 0.6,
+  },
+  chipText: {
+    color: premiumColors.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  chipTextActive: {
+    color: premiumColors.success,
+  },
+  footer: {
+    padding: 16,
+    paddingBottom: 32,
+    backgroundColor: premiumColors.bg,
+  },
+  confirmButton: {
+    backgroundColor: premiumColors.brand,
+    height: 54,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
   c: { flex: 1, backgroundColor: C.bg }, p: { padding: 16, paddingBottom: 110 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, backgroundColor: C.card, borderBottomWidth: 1, borderBottomColor: C.cardBorder },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
