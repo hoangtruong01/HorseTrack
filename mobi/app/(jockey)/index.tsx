@@ -117,10 +117,10 @@ export default function JockeyHome() {
           <ActionGrid
             columns={2}
             actions={[
-              { title: 'Hòm thư', subtitle: 'Xem lời mời mới', icon: 'mail', tone: 'brand', onPress: () => router.push('/invitations') },
+              { title: 'Hòm thư', subtitle: 'Xem lời mời mới', icon: 'mail', tone: 'brand', onPress: () => router.push('/inbox') },
               { title: 'Lịch đua', subtitle: 'Theo dõi lịch nhận', icon: 'event', tone: 'brand', onPress: () => router.push('/schedule') },
               { title: 'Thành tích', subtitle: 'Theo dõi hiệu suất', icon: 'trending-up', tone: 'brand', onPress: () => router.push('/performance') },
-              { title: 'Ví điểm', subtitle: 'Quản lý phần thưởng', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/wallet') },
+              { title: 'Chiến mã', subtitle: 'Ngựa đã nhận', icon: 'pets', tone: 'brand', onPress: () => router.push('/horses') },
             ]}
           />
         </Section>
@@ -129,7 +129,7 @@ export default function JockeyHome() {
         <Section
           title="Lời mời gần đây"
           actionLabel="Xem tất cả"
-          onAction={() => router.push('/invitations')}
+          onAction={() => router.push('/inbox')}
         >
           {invitations.length === 0 ? (
             <Text style={styles.empty}>Chưa có lời mời thi đấu nào gần đây.</Text>
@@ -142,14 +142,15 @@ export default function JockeyHome() {
               
               let subtitleParts = [];
               if (ownerName) subtitleParts.push(`Từ: ${ownerName}`);
-              if (i.prizeSharePercentage) subtitleParts.push(`Thưởng: ${i.prizeSharePercentage}%`);
+              const sharePercent = i.jockeySharePercent ?? i.prizeSharePercentage;
+              if (sharePercent !== undefined && sharePercent !== null) subtitleParts.push(`Thưởng: ${sharePercent}%`);
               const finalSubtitle = subtitleParts.join(' · ');
 
               return (
                 <TouchableOpacity
                   key={i._id || i.id}
                   style={styles.rowItem}
-                  onPress={() => router.push('/invitations')}
+                  onPress={() => router.push('/inbox')}
                   activeOpacity={0.7}
                 >
                   <View style={styles.rowAvatar}>
