@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { tournamentsApi, racesApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useAuth } from '@/providers/auth-provider';
 
 export default function SpectatorHome() {
   const router = useRouter();
+  const { user } = useAuth();
   const [balance, setBalance] = useState(0);
   const [tournaments, setTournaments] = useState<any[]>([]);
   const [races, setRaces] = useState<any[]>([]);
@@ -62,12 +64,44 @@ export default function SpectatorHome() {
 
   return (
     <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+      {/* ── Header Row ── */}
+      <View style={styles.headerRow}>
+        <Text style={styles.headerLogo}>HORSETRACK</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.bellButton} activeOpacity={0.7}>
+            <View style={styles.bellIconContainer}>
+              <MaterialIcons name="notifications" size={24} color="#FFFFFF" />
+              <View style={styles.bellDot} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.avatarButton} 
+            onPress={() => router.push('/(tabs)/profile')}
+            activeOpacity={0.7}
+          >
+            {user?.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <MaterialIcons name="person" size={20} color="#FFFFFF" />
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* ── Hero – flat racing viewer ── */}
       <View style={styles.hero}>
-        <Text style={styles.heroEyebrow}>Race Viewer</Text>
-        <Text style={styles.heroTitle}>Đường đua hôm nay</Text>
-        <View style={styles.heroAccentLine} />
-        <Text style={styles.heroSubtitle}>Theo dõi lịch đua, dự đoán và điểm thưởng.</Text>
+        <Image 
+          source={require('../../assets/images/hero_horse_racing.png')} 
+          style={styles.heroImage}
+          resizeMode="cover"
+        />
+        <View style={styles.heroContent}>
+          <Text style={styles.heroEyebrow}>Race Viewer</Text>
+          <Text style={styles.heroTitle}>Đường đua hôm nay</Text>
+          <Text style={styles.heroSubtitle}>Theo dõi lịch đua, dự đoán kết quả và nhận điểm thưởng.</Text>
+        </View>
       </View>
 
       {/* ── Operational Intelligence ── */}
@@ -204,11 +238,89 @@ export default function SpectatorHome() {
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: premiumSpacing[16],
+    paddingVertical: premiumSpacing[12],
+    backgroundColor: '#0B0D12',
+  },
+  headerLogo: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 1.5,
+    fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-CondensedBold' : 'sans-serif-condensed',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  bellButton: {
+    position: 'relative',
+  },
+  bellIconContainer: {
+    position: 'relative',
+    padding: 4,
+  },
+  bellDot: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#E10600',
+    borderWidth: 1.5,
+    borderColor: '#0B0D12',
+  },
+  avatarButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 18,
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 18,
+    backgroundColor: '#202633',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   // ── Hero ──
   hero: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[24],
-    paddingBottom: premiumSpacing[20],
+    paddingBottom: premiumSpacing[24],
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: '#0B0D12',
+    minHeight: 180,
+    justifyContent: 'center',
+  },
+  heroImage: {
+    position: 'absolute',
+    right: -20,
+    bottom: -15,
+    width: '60%',
+    height: '130%',
+    opacity: 0.75,
+  },
+  heroContent: {
+    width: '58%',
+    zIndex: 2,
   },
   heroEyebrow: {
     fontSize: 11,
@@ -222,13 +334,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: premiumColors.text,
     marginBottom: premiumSpacing[8],
-  },
-  heroAccentLine: {
-    width: 36,
-    height: 3,
-    backgroundColor: premiumColors.brand,
-    borderRadius: 2,
-    marginBottom: premiumSpacing[12],
   },
   heroSubtitle: {
     fontSize: 14,

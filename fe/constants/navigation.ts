@@ -25,10 +25,10 @@ import {
 import type { NavigationItem } from "@/types/navigation";
 
 export const publicNavigation: NavigationItem[] = [
-  { title: "Home", href: "/", icon: Home, itemKey: "public.home" },
-  { title: "Tournaments", href: "/tournaments", icon: Trophy, itemKey: "public.tournaments" },
-  { title: "Races", href: "/races", icon: Flag, itemKey: "public.races" },
-  { title: "Rankings", href: "#", icon: Gauge, itemKey: "public.rankings" },
+  { title: "Home", href: "/#hero", icon: Home, itemKey: "public.home" },
+  { title: "Tournaments", href: "/#tournaments", icon: Trophy, itemKey: "public.tournaments" },
+  { title: "Races", href: "/#globe", icon: Flag, itemKey: "public.races" },
+  { title: "Rankings", href: "/#rankings", icon: Gauge, itemKey: "public.rankings" },
   { title: "Predictions", href: "#", icon: Bell, itemKey: "public.predictions" },
   { title: "News", href: "#", icon: ClipboardCheck, itemKey: "public.news" },
   { title: "Contact", href: "/#contact", icon: Users, itemKey: "public.contact" },

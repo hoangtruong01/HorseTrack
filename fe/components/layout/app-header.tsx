@@ -133,19 +133,21 @@ export function AppHeader({ className }: AppHeaderProps) {
           </button>
           {user ? (
             <>
-              <Link
-                href={getWalletHref()}
-                className="flex items-center gap-2 rounded-xl border border-border bg-card/40 hover:bg-card px-4 py-2 text-xs font-black uppercase tracking-wider text-foreground transition duration-150"
-              >
-                <Wallet className="size-4 text-primary" />
-                <span>
-                  {points !== null
-                    ? `${points.toLocaleString("vi-VN")} ${!mounted ? "Điểm" : t("wallet.balance.pointsUnit", "Điểm")}`
-                    : !mounted
-                      ? "Làm mới số dư"
-                      : t("wallet.balance.refreshAria")}
-                </span>
-              </Link>
+              {user.roles[0] !== "admin" && (
+                <Link
+                  href={getWalletHref()}
+                  className="flex items-center gap-2 rounded-xl border border-border bg-card/40 hover:bg-card px-4 py-2 text-xs font-black uppercase tracking-wider text-foreground transition duration-150"
+                >
+                  <Wallet className="size-4 text-primary" />
+                  <span>
+                    {points !== null
+                      ? `${points.toLocaleString("vi-VN")} ${!mounted ? "Điểm" : t("wallet.balance.pointsUnit", "Điểm")}`
+                      : !mounted
+                        ? "Làm mới số dư"
+                        : t("wallet.balance.refreshAria")}
+                  </span>
+                </Link>
+              )}
               <NotificationsBell />
               <UserDropdownMenu
                 userName={user.fullName}
@@ -177,15 +179,17 @@ export function AppHeader({ className }: AppHeaderProps) {
           </button>
           {user && (
             <>
-              <Link
-                href={getWalletHref()}
-                className="flex items-center gap-1.5 rounded-xl border border-border bg-card/40 hover:bg-card px-3 py-1.5 text-xs font-black uppercase tracking-wider text-foreground transition duration-150"
-              >
-                <Wallet className="size-3.5 text-primary" />
-                <span>
-                  {points !== null ? points.toLocaleString("vi-VN") : "..."}
-                </span>
-              </Link>
+              {user.roles[0] !== "admin" && (
+                <Link
+                  href={getWalletHref()}
+                  className="flex items-center gap-1.5 rounded-xl border border-border bg-card/40 hover:bg-card px-3 py-1.5 text-xs font-black uppercase tracking-wider text-foreground transition duration-150"
+                >
+                  <Wallet className="size-3.5 text-primary" />
+                  <span>
+                    {points !== null ? points.toLocaleString("vi-VN") : "..."}
+                  </span>
+                </Link>
+              )}
               <NotificationsBell />
             </>
           )}
@@ -256,7 +260,7 @@ export function AppHeader({ className }: AppHeaderProps) {
                       </span>
                     </div>
                   </div>
-                  {points !== null && (
+                  {points !== null && user.roles[0] !== "admin" && (
                     <Link
                       href={getWalletHref()}
                       onClick={() => setMobileMenuOpen(false)}
