@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { 
-  Trophy, Calendar, MapPin, Award, Users, Search, 
+import {
+  Trophy, Calendar, MapPin, Award, Users, Search,
   ArrowLeft, Flag, Loader2, Compass, Layers, Activity, User, ShieldCheck, ChevronRight,
-  CheckCircle, Coins
+  CheckCircle, Coins, Brain, Lock, ChevronDown
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,13 @@ import {
   refereeAssignmentsApi,
   predictionsApi,
   walletApi,
+  aiApi,
   type TournamentItem,
   type RaceItem,
   type RegistrationItem,
   type AssignmentItem,
-  type PredictionItem
+  type PredictionItem,
+  type AiPredictionItem
 } from "@/lib/api-client";
 import { toast } from "sonner";
 
@@ -113,6 +115,12 @@ export default function SpectatorTournamentsPage() {
   const [balance, setBalance] = useState(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [betPointsInput, setBetPointsInput] = useState<string>("1");
+
+  // AI prediction states
+  const [aiPrediction, setAiPrediction] = useState<AiPredictionItem | null>(null);
+  const [loadingAiPrediction, setLoadingAiPrediction] = useState(false);
+  const [aiPredictionExpanded, setAiPredictionExpanded] = useState(false);
+  const [aiNoSubscription, setAiNoSubscription] = useState(false);
   
   // Loaders
   const [loadingTours, setLoadingTours] = useState(true);
@@ -284,29 +292,51 @@ export default function SpectatorTournamentsPage() {
   const handleSelectRace = async (race: RaceItem) => {
     setSelectedRace(race);
     setLoadingRaceDetails(true);
-    try {
-      // 1. Fetch approved registrations (participants)
-      const regRes = await registrationsApi.list({ 
-        raceId: race._id, 
-        status: "APPROVED", 
-        limit: 100 
-      });
-      setSelectedRaceRegistrations(regRes.data || []);
+    setSelectedRaceRegistrations([]);
+    setSelectedRaceReferee(null);
+    setAiPrediction(null);
+    setAiPredictionExpanded(false);
+    setAiNoSubscription(false);
 
-      // 2. Fetch referee assignments
-      const refRes = await refereeAssignmentsApi.listByRace(race._id, { limit: 5 });
-      if (refRes.data && refRes.data.length > 0) {
-        setSelectedRaceReferee(refRes.data[0]);
-      } else {
-        setSelectedRaceReferee(null);
-      }
+    // Fetch registrations and referee assignments independently
+    const [regResult] = await Promise.allSettled([
+      registrationsApi.list({ raceId: race._id, status: "APPROVED", limit: 100 }),
+      refereeAssignmentsApi.listByRace(race._id, { limit: 5 }).then((refRes) => {
+        if (refRes.data && refRes.data.length > 0) {
+          setSelectedRaceReferee(refRes.data[0]);
+        }
+      }).catch(() => { /* referee endpoint không khả dụng với role này */ }),
+    ]);
+
+    if (regResult.status === "fulfilled") {
+      setSelectedRaceRegistrations(regResult.value.data || []);
+    } else {
+      console.error("Lỗi khi tải danh sách chiến mã:", regResult.reason);
+      toast.error("Không thể tải danh sách chiến mã tham gia trận đấu");
+    }
+
+    setLoadingRaceDetails(false);
+  };
+
+  const handleToggleAiPrediction = async () => {
+    if (aiPredictionExpanded) {
+      setAiPredictionExpanded(false);
+      return;
+    }
+    setAiPredictionExpanded(true);
+    if (aiPrediction || aiNoSubscription) return;
+    if (!selectedRace) return;
+    setLoadingAiPrediction(true);
+    try {
+      const data = await aiApi.generatePrediction(selectedRace._id);
+      setAiPrediction(data);
     } catch (e) {
-      console.error("Lỗi khi tải chi tiết trận đua:", e);
-      toast.error("Không thể tải thông tin đội hình tham gia trận đấu");
-      setSelectedRaceRegistrations([]);
-      setSelectedRaceReferee(null);
+      const msg = (e as Error).message ?? "";
+      if (msg.toLowerCase().includes("subscription") || msg.toLowerCase().includes("forbidden") || msg.includes("403")) {
+        setAiNoSubscription(true);
+      }
     } finally {
-      setLoadingRaceDetails(false);
+      setLoadingAiPrediction(false);
     }
   };
 
@@ -909,6 +939,78 @@ export default function SpectatorTournamentsPage() {
                           <span className="text-xs font-black uppercase tracking-wider">Dự đoán chiến mã về nhất</span>
                         </div>
  
+                        {/* AI Prediction Toggle */}
+                        <div className="rounded-xl border border-border overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => { void handleToggleAiPrediction(); }}
+                            className="w-full flex items-center justify-between px-3 py-2.5 bg-purple-500/5 hover:bg-purple-500/10 transition-colors text-left"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Brain className="size-3.5 text-purple-400" />
+                              <span className="text-[10px] font-black uppercase tracking-wider text-purple-400">Gợi ý AI</span>
+                              {aiPrediction && (
+                                <span className="text-[9px] font-mono text-purple-300/70">{aiPrediction.confidenceLevel}% tin cậy</span>
+                              )}
+                            </div>
+                            <ChevronDown className={`size-3.5 text-purple-400 transition-transform ${aiPredictionExpanded ? "rotate-180" : ""}`} />
+                          </button>
+
+                          {aiPredictionExpanded && (
+                            <div className="border-t border-border px-3 py-2.5 bg-white/[0.01]">
+                              {loadingAiPrediction ? (
+                                <div className="flex items-center justify-center gap-2 py-3 text-muted-foreground">
+                                  <Loader2 className="size-3.5 animate-spin" />
+                                  <span className="text-[10px]">Đang tải dự đoán AI...</span>
+                                </div>
+                              ) : aiNoSubscription ? (
+                                <div className="flex items-center gap-3 py-2">
+                                  <Lock className="size-4 text-yellow-400 shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] font-bold text-foreground">Yêu cầu gói AI</p>
+                                    <p className="text-[9px] text-muted-foreground">Đăng ký để xem dự đoán xác suất thắng.</p>
+                                  </div>
+                                  <a
+                                    href="/spectator/ai-packages"
+                                    className="shrink-0 text-[9px] font-black uppercase tracking-wider text-purple-400 hover:text-purple-300 transition-colors"
+                                  >
+                                    Mua gói
+                                  </a>
+                                </div>
+                              ) : !aiPrediction ? (
+                                <p className="text-[10px] text-muted-foreground italic text-center py-2">Chưa có dự đoán AI cho cuộc đua này.</p>
+                              ) : (
+                                <div className="space-y-1.5">
+                                  {[...aiPrediction.rankings]
+                                    .sort((a, b) => a.predictedRank - b.predictedRank)
+                                    .slice(0, 3)
+                                    .map((r) => {
+                                      const name = typeof r.horseId === "object" ? r.horseId.name : String(r.horseId);
+                                      const medal = r.predictedRank === 1 ? "🥇" : r.predictedRank === 2 ? "🥈" : "🥉";
+                                      return (
+                                        <div key={r.predictedRank} className="flex items-center gap-2">
+                                          <span className="text-xs w-4 shrink-0">{medal}</span>
+                                          <span className="text-[10px] font-medium text-foreground flex-1 truncate">{name}</span>
+                                          <div className="flex items-center gap-1.5 shrink-0">
+                                            <div className="w-12 h-1 rounded-full bg-muted overflow-hidden">
+                                              <div className="h-full rounded-full bg-purple-400" style={{ width: `${r.winProbability * 100}%` }} />
+                                            </div>
+                                            <span className="text-[9px] font-mono text-purple-300 w-8 text-right">{(r.winProbability * 100).toFixed(0)}%</span>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  {aiPrediction.reasoning && (
+                                    <p className="text-[9px] text-muted-foreground italic border-t border-border pt-1.5 mt-1 leading-relaxed line-clamp-2">
+                                      {aiPrediction.reasoning}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
                         {selectedRaceRegistrations.length === 0 ? (
                           <div className="text-center py-4 border border-dashed border-border rounded-xl bg-white/[0.01]">
                             <p className="text-[10px] text-muted-foreground italic">Chưa có danh sách chiến mã chính thức</p>

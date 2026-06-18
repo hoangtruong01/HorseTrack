@@ -97,9 +97,32 @@ export class RacesService {
     } as unknown as Partial<RaceDocument>);
   }
 
+  private async attachParticipantsCounts(
+    races: RaceDocument[],
+  ): Promise<(RaceDocument & { participantsCount: number })[]> {
+    if (races.length === 0) return [];
+    const raceIds = races.map((r) => r._id);
+    const counts = await this.registrationModel.aggregate<{
+      _id: Types.ObjectId;
+      count: number;
+    }>([
+      {
+        $match: {
+          raceId: { $in: raceIds },
+          status: RegistrationStatus.APPROVED,
+        },
+      },
+      { $group: { _id: '$raceId', count: { $sum: 1 } } },
+    ]);
+    const countMap = new Map(counts.map((c) => [String(c._id), c.count]));
+    return races.map((r) =>
+      Object.assign(r, { participantsCount: countMap.get(String(r._id)) ?? 0 }),
+    );
+  }
+
   async findAll(page = 1, limit = 20) {
     const filter = { deletedAt: { $exists: false } };
-    const [data, total] = await Promise.all([
+    const [races, total] = await Promise.all([
       this.raceModel
         .find(filter)
         .populate('tournamentId', 'name')
@@ -110,6 +133,7 @@ export class RacesService {
         .exec(),
       this.raceModel.countDocuments(filter),
     ]);
+    const data = await this.attachParticipantsCounts(races);
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
@@ -121,7 +145,7 @@ export class RacesService {
       tournamentId: new Types.ObjectId(tournamentId),
       deletedAt: { $exists: false },
     };
-    const [data, total] = await Promise.all([
+    const [races, total] = await Promise.all([
       this.raceModel
         .find(filter)
         .populate('createdBy', 'fullName')
@@ -131,6 +155,7 @@ export class RacesService {
         .exec(),
       this.raceModel.countDocuments(filter),
     ]);
+    const data = await this.attachParticipantsCounts(races);
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
@@ -230,6 +255,10 @@ export class RacesService {
 
     if (status === RaceStatus.CANCELLED) {
       await this.predictionsService.cancelPredictionsForRace(id);
+    }
+
+    if (status === RaceStatus.RESULT_PUBLISHED) {
+      await this.predictionsService.payoutBetsForRace(id, session);
     }
 
     race.status = status;

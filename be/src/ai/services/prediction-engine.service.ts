@@ -138,7 +138,7 @@ export class PredictionEngineService {
         },
       },
       { upsert: true, new: true },
-    ) as Promise<AIPredictionSuggestionDocument>;
+    ).populate('rankings.horseId', 'name breed') as Promise<AIPredictionSuggestionDocument>;
   }
 
   private async buildEntry(
