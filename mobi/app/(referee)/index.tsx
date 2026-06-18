@@ -1,14 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
+import { SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
-import { refereeAssignmentsApi } from '@/lib/api-client';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { C, StatCard, Card, SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { refereeAssignmentsApi, rankingsApi } from '@/lib/api-client';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function RefereeHome() {
   const router = useRouter();
@@ -92,20 +89,6 @@ export default function RefereeHome() {
             <Text style={styles.metricLabel}>PHÂN CÔNG MỚI</Text>
             <View style={styles.metricValueRow}>
               <Text style={styles.metricValue}>{pendingCount}</Text>
-        <Text style={styles.welcomeTitle}>Giám Sát & Điều Hành</Text>
-        <Text style={styles.welcomeSub}>Duyệt phân công trận đấu, thực hiện kiểm tra điểm danh, log vi phạm và công bố kết quả trận đua.</Text>
-      </Card>
-
-      <View style={styles.actionsGrid}>
-        {[
-          { title: 'Phân Công', icon: 'assignment', path: '/assignments', color: '#F59E0B' },
-          { title: 'Điểm Danh', icon: 'fact-check', path: '/pre-race', color: '#38BDF8' },
-          { title: 'Thẩm Định', icon: 'gavel', path: '/judging', color: '#EF4444' },
-          { title: 'Ví Thưởng', icon: 'account-balance-wallet', path: '/wallet', color: '#34D399' },
-        ].map((act, idx) => (
-          <TouchableOpacity key={idx} style={styles.actionBtn} onPress={() => router.push(act.path as any)}>
-            <View style={[styles.actionIconWrap, { backgroundColor: act.color + '15' }]}>
-              <MaterialIcons name={act.icon as any} size={24} color={act.color} />
             </View>
           </View>
           <View style={[styles.metricCell, styles.cellBorderBottom]}>
@@ -169,7 +152,8 @@ export default function RefereeHome() {
           />
         ))
       )}
-    </ScrollView>
+      </View>
+    </AppScreen>
   );
 }
 
@@ -347,17 +331,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: premiumSpacing[16],
   },
-  container: { flex: 1, backgroundColor: C.bg },
-  content: { padding: 16, paddingBottom: 110 },
-  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
-  heroCard: { backgroundColor: C.card, padding: 20, marginBottom: 16, borderRadius: 16, borderWidth: 1, borderColor: C.cardBorder },
-  heroHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  welcomeLabel: { color: C.red, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
-  welcomeTitle: { color: C.white, fontSize: 24, fontWeight: '900', marginBottom: 6 },
-  welcomeSub: { color: C.textSecondary, fontSize: 13, lineHeight: 20 },
-  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
-  actionBtn: { flex: 1, minWidth: '20%', backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 16, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
-  actionIconWrap: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  actionText: { color: C.white, fontSize: 10, fontWeight: '700', textAlign: 'center' },
-  empty: { color: C.textMuted, fontSize: 12, textAlign: 'center', marginVertical: 16 },
 });
