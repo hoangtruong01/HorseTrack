@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model, Types } from 'mongoose';
 import {
   Registration,
@@ -365,5 +366,35 @@ export class JockeyInvitationsService {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
+  }
+
+  @Cron(CronExpression.EVERY_6_HOURS)
+  async expireStaleInvitations(): Promise<void> {
+    try {
+      const expiredInvitations = await this.invitationModel.find({
+        status: InvitationStatus.PENDING,
+        expiredAt: { $lt: new Date() },
+      });
+
+      if (expiredInvitations.length === 0) return;
+
+      await this.invitationModel.updateMany(
+        {
+          _id: { $in: expiredInvitations.map((inv) => inv._id) },
+        },
+        { $set: { status: InvitationStatus.EXPIRED } },
+      );
+
+      for (const inv of expiredInvitations) {
+        await this.notificationsService.send(
+          String(inv.ownerId),
+          'Lời mời hết hạn',
+          `Lời mời nài ngựa của bạn đã hết hạn mà không có phản hồi.`,
+          NotificationType.RACE,
+        );
+      }
+    } catch (err) {
+      console.error('Failed to expire stale jockey invitations:', err);
+    }
   }
 }
