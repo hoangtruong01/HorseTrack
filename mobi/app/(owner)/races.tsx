@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, RefreshControl, Modal, Alert, TextInput } from 'react-native';
-import { C, LoadingState, EmptyState, SectionHeader, Card, PrimaryButton, OutlineButton, statusLabel, formatDate } from '@/components/ui/shared';
+import { AppScreen, Section } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { tournamentsApi, racesApi, horsesApi, registrationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -100,24 +102,20 @@ export default function OwnerRaces() {
     setSelectedTournament(null);
   };
 
-  if (loading) return <LoadingState />;
+  if (loading && !refreshing) return <LoadingState />;
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.bg }}>
-      {view !== 'tournaments' && (
-        <TouchableOpacity style={s.backBtn} onPress={goBack}>
-          <MaterialIcons name="arrow-back" size={20} color={C.textSecondary} />
-          <Text style={s.backText}>Quay lại danh sách giải đấu</Text>
-        </TouchableOpacity>
-      )}
+    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+      <View style={s.content}>
+        {view !== 'tournaments' && (
+          <TouchableOpacity style={s.backBtn} onPress={goBack} activeOpacity={0.8}>
+            <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
+            <Text style={s.backText}>Quay lại danh sách giải đấu</Text>
+          </TouchableOpacity>
+        )}
 
-      <ScrollView
-        contentContainerStyle={s.p}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
-      >
         {view === 'tournaments' ? (
-          <>
-            <SectionHeader title="Chọn giải đấu đang mở" />
+          <Section title="Chọn giải đấu đang mở">
             {tournaments.length === 0 ? (
               <EmptyState icon="emoji-events" title="Chưa có giải đấu" subtitle="Không tìm thấy giải đấu nào." />
             ) : (
@@ -126,159 +124,397 @@ export default function OwnerRaces() {
                 const ts = statusLabel(t.status);
                 const isOpen = t.status === 'OPEN_REGISTRATION';
                 return (
-                  <TouchableOpacity key={id} style={[s.tCard, isOpen && s.tCardOpen]} onPress={() => selectTournament(t)}>
+                  <TouchableOpacity key={id} style={[s.tCard, isOpen && s.tCardOpen]} onPress={() => selectTournament(t)} activeOpacity={0.8}>
                     <View style={{ flex: 1 }}>
                       <Text style={s.tName} numberOfLines={1}>{t.name}</Text>
-                      <Text style={s.tDate}>{formatDate(t.startDate)} — {formatDate(t.endDate)}</Text>
+                      <Text style={s.tDate}>{formatDateTime(t.startDate)} — {formatDateTime(t.endDate)}</Text>
                     </View>
                     <View style={[s.badge, { backgroundColor: ts.color + '20', borderColor: ts.color + '40' }]}>
                       <Text style={[s.badgeText, { color: ts.color }]}>{ts.label}</Text>
                     </View>
-                    <MaterialIcons name="chevron-right" size={20} color={C.textMuted} />
+                    <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
                   </TouchableOpacity>
                 );
               })
             )}
-          </>
+          </Section>
         ) : (
           <>
-            <Card>
+            <View style={s.tHero}>
               <Text style={s.eyebrow}>Đang mở ghi danh</Text>
               <Text style={s.pageTitle}>{selectedTournament?.name}</Text>
               <Text style={s.pageDesc}>{selectedTournament?.description || 'Chọn vòng đua nhỏ bên dưới để đăng ký chiến mã.'}</Text>
-            </Card>
+            </View>
 
-            <SectionHeader title={`Các vòng đua (${races.length})`} />
-            {races.length === 0 ? (
-              <EmptyState icon="flag" title="Chưa có vòng đua" subtitle="Giải đấu này chưa có vòng đua nào được thiết lập." />
-            ) : (
-              races.map(race => {
-                const id = race._id || race.id;
-                const isFull = (race.participantsCount || 0) >= (race.maxParticipants || 20);
-                const isRegistrationOpen = selectedTournament?.status === 'OPEN_REGISTRATION';
+            <Section title={`Các vòng đua (${races.length})`}>
+              {races.length === 0 ? (
+                <EmptyState icon="flag" title="Chưa có vòng đua" subtitle="Giải đấu này chưa có vòng đua nào được thiết lập." />
+              ) : (
+                races.map(race => {
+                  const id = race._id || race.id;
+                  const isFull = (race.participantsCount || 0) >= (race.maxParticipants || 20);
+                  const isRegistrationOpen = selectedTournament?.status === 'OPEN_REGISTRATION';
 
-                return (
-                  <View key={id} style={s.raceCard}>
-                    <View style={s.raceHeader}>
-                      <MaterialIcons name="flag" size={20} color={C.red} />
-                      <Text style={s.raceName} numberOfLines={1}>{race.name}</Text>
-                    </View>
+                  return (
+                    <View key={id} style={s.raceCard}>
+                      <View style={s.raceHeader}>
+                        <MaterialIcons name="flag" size={20} color={premiumColors.brand} />
+                        <Text style={s.raceName} numberOfLines={1}>{race.name}</Text>
+                      </View>
 
-                    <View style={s.raceStats}>
-                      <Text style={s.statText}>📏 Cự ly: {race.distanceMeters}m</Text>
-                      <Text style={s.statText}>📅 Ngày: {formatDate(race.startTime)}</Text>
-                      <Text style={s.statText}>🐴 Chiến mã: {race.participantsCount || 0}/{race.maxParticipants || 20}</Text>
-                    </View>
+                      <View style={s.raceStats}>
+                        <Text style={s.statText}>📏 Cự ly: {race.distanceMeters}m</Text>
+                        <Text style={s.statText}>📅 Ngày: {formatDateTime(race.startTime)}</Text>
+                        <Text style={s.statText}>🐴 Chiến mã: {race.participantsCount || 0}/{race.maxParticipants || 20}</Text>
+                      </View>
 
-                    <View style={s.raceActions}>
-                      {isRegistrationOpen ? (
-                        isFull ? (
-                          <OutlineButton title="Trận đấu đã đầy" onPress={() => {}} />
+                      <View style={s.raceActions}>
+                        {isRegistrationOpen ? (
+                          isFull ? (
+                            <TouchableOpacity style={[s.btnOutline, { opacity: 0.5 }]} disabled>
+                              <Text style={s.btnOutlineText}>Trận đấu đã đầy</Text>
+                            </TouchableOpacity>
+                          ) : (
+                            <TouchableOpacity style={s.btnPrimary} onPress={() => openRegModal(race)} activeOpacity={0.8}>
+                              <Text style={s.btnPrimaryText}>Ghi danh chiến mã</Text>
+                            </TouchableOpacity>
+                          )
                         ) : (
-                          <PrimaryButton title="Ghi danh chiến mã" onPress={() => openRegModal(race)} />
-                        )
-                      ) : (
-                        <OutlineButton title="Giải đấu đã đóng đăng ký" onPress={() => {}} />
-                      )}
+                          <TouchableOpacity style={[s.btnOutline, { opacity: 0.5 }]} disabled>
+                            <Text style={s.btnOutlineText}>Giải đấu đã đóng đăng ký</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
                     </View>
-                  </View>
-                );
-              })
-            )}
+                  );
+                })
+              )}
+            </Section>
           </>
         )}
-      </ScrollView>
 
-      {/* Registration Modal */}
-      <Modal visible={showRegModal} animationType="slide" transparent>
-        <View style={s.modalOverlay}>
-          <View style={s.modalContent}>
-            <View style={s.modalHeader}>
-              <Text style={s.modalTitle}>Ghi Danh Chiến Mã</Text>
-              <TouchableOpacity onPress={() => setShowRegModal(false)}>
-                <MaterialIcons name="close" size={24} color={C.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            {selectedRace && (
-              <View style={s.raceSummary}>
-                <MaterialIcons name="flag" size={20} color={C.red} />
-                <View>
-                  <Text style={s.summaryName}>{selectedRace.name}</Text>
-                  <Text style={s.summaryStats}>{selectedRace.distanceMeters}m · {formatDate(selectedRace.startTime)}</Text>
-                </View>
+        {/* Registration Modal */}
+        <Modal visible={showRegModal} animationType="slide" transparent>
+          <View style={s.modalOverlay}>
+            <View style={s.modalContent}>
+              <View style={s.modalHeader}>
+                <Text style={s.modalTitle}>Ghi Danh Chiến Mã</Text>
+                <TouchableOpacity onPress={() => setShowRegModal(false)}>
+                  <MaterialIcons name="close" size={24} color={premiumColors.textSecondary} />
+                </TouchableOpacity>
               </View>
-            )}
 
-            <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
-              <Text style={s.fieldLabel}>Chọn chiến mã của bạn *</Text>
-              {horses.map(h => {
-                const id = h._id || h.id;
-                const selected = selectedHorseId === id;
-                return (
-                  <TouchableOpacity
-                    key={id}
-                    style={[s.optionCard, selected && s.optionCardSelected]}
-                    onPress={() => setSelectedHorseId(id)}
-                  >
-                    <MaterialIcons name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} size={18} color={selected ? C.red : C.textMuted} />
-                    <Text style={s.optionText}>🐴 {h.name} ({h.breed || 'Chưa rõ'})</Text>
-                  </TouchableOpacity>
-                );
-              })}
+              {selectedRace && (
+                <View style={s.raceSummary}>
+                  <MaterialIcons name="flag" size={20} color={premiumColors.brand} />
+                  <View>
+                    <Text style={s.summaryName}>{selectedRace.name}</Text>
+                    <Text style={s.summaryStats}>{selectedRace.distanceMeters}m · {formatDateTime(selectedRace.startTime)}</Text>
+                  </View>
+                </View>
+              )}
 
-              <Text style={[s.fieldLabel, { marginTop: 16 }]}>Ghi chú thêm</Text>
-              <TextInput
-                style={[s.input, { height: 72, textAlignVertical: 'top' }]}
-                placeholder="Ví dụ: Mong ban tổ chức phê duyệt sớm..."
-                placeholderTextColor={C.textMuted}
-                multiline
-                value={regNote}
-                onChangeText={setRegNote}
-              />
-            </ScrollView>
+              <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
+                <Text style={s.fieldLabel}>Chọn chiến mã của bạn *</Text>
+                {horses.map(h => {
+                  const id = h._id || h.id;
+                  const selected = selectedHorseId === id;
+                  return (
+                    <TouchableOpacity
+                      key={id}
+                      style={[s.optionCard, selected && s.optionCardSelected]}
+                      onPress={() => setSelectedHorseId(id)}
+                      activeOpacity={0.8}
+                    >
+                      <MaterialIcons name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} size={18} color={selected ? premiumColors.brand : premiumColors.textMuted} />
+                      <Text style={s.optionText}>🐴 {h.name} ({h.breed || 'Chưa rõ'})</Text>
+                    </TouchableOpacity>
+                  );
+                })}
 
-            <View style={s.modalActions}>
-              <OutlineButton title="Hủy" onPress={() => setShowRegModal(false)} />
-              <PrimaryButton title="Nộp hồ sơ ghi danh" onPress={handleRegister} loading={submitting} disabled={!selectedHorseId} />
+                <Text style={[s.fieldLabel, { marginTop: 16 }]}>Ghi chú thêm</Text>
+                <TextInput
+                  style={[s.input, { height: 72, textAlignVertical: 'top', paddingTop: 12 }]}
+                  placeholder="Ví dụ: Mong ban tổ chức phê duyệt sớm..."
+                  placeholderTextColor={premiumColors.textMuted}
+                  multiline
+                  value={regNote}
+                  onChangeText={setRegNote}
+                />
+              </ScrollView>
+
+              <View style={s.modalActions}>
+                <TouchableOpacity style={s.btnOutlineModal} onPress={() => setShowRegModal(false)} activeOpacity={0.8}>
+                  <Text style={s.btnOutlineText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[s.btnPrimaryModal, (!selectedHorseId || submitting) && s.btnDisabled]}
+                  onPress={handleRegister}
+                  disabled={!selectedHorseId || submitting}
+                  activeOpacity={0.8}
+                >
+                  <Text style={s.btnPrimaryText}>{submitting ? 'Đang gửi...' : 'Nộp hồ sơ ghi danh'}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </AppScreen>
   );
 }
 
 const s = StyleSheet.create({
-  p: { padding: 16, paddingBottom: 32 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 12, borderBottomWidth: 1, borderBottomColor: C.cardBorder, backgroundColor: C.card },
-  backText: { color: C.textSecondary, fontSize: 12, fontWeight: '700' },
-  tCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 14, padding: 14, marginBottom: 8 },
-  tCardOpen: { borderColor: C.tealLight + '40', backgroundColor: C.tealLight + '03' },
-  tName: { color: C.white, fontSize: 14, fontWeight: '800' },
-  tDate: { color: C.textMuted, fontSize: 10, marginTop: 4 },
-  badge: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  badgeText: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  eyebrow: { color: C.red, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.5 },
-  pageTitle: { color: C.white, fontSize: 18, fontWeight: '900', marginTop: 4 },
-  pageDesc: { color: C.textSecondary, fontSize: 11, marginTop: 6, lineHeight: 16 },
-  raceCard: { backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 16, padding: 16, marginBottom: 12 },
-  raceHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  raceName: { color: C.white, fontSize: 14, fontWeight: '800' },
-  raceStats: { gap: 4, marginBottom: 12 },
-  statText: { color: C.textSecondary, fontSize: 11, fontWeight: '600' },
-  raceActions: { marginTop: 4 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: C.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, borderWidth: 1, borderColor: C.cardBorder },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  modalTitle: { color: C.white, fontSize: 18, fontWeight: '900', textTransform: 'uppercase' },
-  raceSummary: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#00000030', borderWidth: 1, borderColor: C.cardBorder, borderRadius: 12, padding: 12, marginBottom: 16 },
-  summaryName: { color: C.white, fontSize: 13, fontWeight: '800' },
-  summaryStats: { color: C.textMuted, fontSize: 10, marginTop: 2 },
-  fieldLabel: { color: C.textSecondary, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
-  optionCard: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 10, marginBottom: 6, backgroundColor: '#00000020' },
-  optionCardSelected: { borderColor: C.red + '60', backgroundColor: C.red + '10' },
-  optionText: { color: C.white, fontSize: 12, fontWeight: '600', flex: 1 },
-  input: { backgroundColor: C.inputBg, borderWidth: 1, borderColor: C.cardBorder, color: C.white, borderRadius: 12, height: 44, paddingHorizontal: 16, fontSize: 13, marginBottom: 12 },
-  modalActions: { flexDirection: 'row', gap: 12, marginTop: 12 },
+  content: {
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[16],
+    paddingBottom: premiumSpacing[48],
+  },
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[8],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    marginBottom: premiumSpacing[24],
+  },
+  backText: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  tCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 14,
+    marginBottom: 8,
+  },
+  tCardOpen: {
+    borderColor: 'rgba(52, 211, 153, 0.4)',
+    backgroundColor: 'rgba(52, 211, 153, 0.05)',
+  },
+  tName: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  tDate: {
+    color: premiumColors.textMuted,
+    fontSize: 10,
+    marginTop: 4,
+  },
+  badge: {
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  badgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  tHero: {
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 20,
+    marginBottom: 24,
+  },
+  eyebrow: {
+    color: premiumColors.brand,
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  pageTitle: {
+    color: premiumColors.text,
+    fontSize: 18,
+    fontWeight: '900',
+    marginTop: 4,
+  },
+  pageDesc: {
+    color: premiumColors.textSecondary,
+    fontSize: 11,
+    marginTop: 6,
+    lineHeight: 16,
+  },
+  raceCard: {
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 16,
+    marginBottom: 12,
+  },
+  raceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  raceName: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  raceStats: {
+    gap: 4,
+    marginBottom: 16,
+  },
+  statText: {
+    color: premiumColors.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  raceActions: {
+    marginTop: 4,
+  },
+  btnPrimary: {
+    backgroundColor: premiumColors.brand,
+    paddingVertical: 12,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+  },
+  btnPrimaryText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  btnOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: premiumColors.borderStrong,
+    paddingVertical: 12,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+  },
+  btnOutlineText: {
+    color: premiumColors.text,
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: premiumColors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    color: premiumColors.text,
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  raceSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    padding: 12,
+    marginBottom: 16,
+  },
+  summaryName: {
+    color: premiumColors.text,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  summaryStats: {
+    color: premiumColors.textMuted,
+    fontSize: 10,
+    marginTop: 2,
+  },
+  fieldLabel: {
+    color: premiumColors.textSecondary,
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    marginBottom: 6,
+    backgroundColor: premiumColors.surface2,
+  },
+  optionCardSelected: {
+    borderColor: 'rgba(225, 6, 0, 0.4)',
+    backgroundColor: 'rgba(225, 6, 0, 0.1)',
+  },
+  optionText: {
+    color: premiumColors.text,
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
+  },
+  input: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    color: premiumColors.text,
+    borderRadius: premiumRadius[8],
+    height: 44,
+    paddingHorizontal: 16,
+    fontSize: 13,
+    marginBottom: 12,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  btnOutlineModal: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: premiumColors.borderStrong,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  btnPrimaryModal: {
+    flex: 2,
+    backgroundColor: premiumColors.brand,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  btnDisabled: {
+    opacity: 0.5,
+  },
 });

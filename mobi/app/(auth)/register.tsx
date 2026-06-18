@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, ActivityIndicator, Alert, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Image, ImageBackground, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../providers/auth-provider';
+import { premiumColors, premiumSpacing, premiumRadius, premiumTypography } from '@/components/ui/premium-tokens';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
@@ -73,6 +74,7 @@ export default function RegisterScreen() {
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
+              
               {/* Logo & Brand Header */}
               <View style={styles.headerContainer}>
                 <Image 
@@ -80,43 +82,40 @@ export default function RegisterScreen() {
                   style={styles.logo} 
                   resizeMode="contain" 
                 />
-                <View style={styles.brandTextContainer}>
-                  <Text style={styles.brandTitleWhite}>ĐĂNG KÝ</Text>
-                  <Text style={styles.brandTitleRed}> HỘI VIÊN</Text>
-                </View>
+                <Text style={styles.brandTitle}>ĐĂNG KÝ HỘI VIÊN</Text>
+                <View style={styles.accentLine} />
                 <Text style={styles.brandSubtitle}>GIA NHẬP TRƯỜNG ĐUA HORSETRACK</Text>
               </View>
 
-              {/* Form Input */}
               <View style={styles.formContainer}>
                 
                 <Text style={styles.label}>HỌ VÀ TÊN *</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="person-outline" size={20} color="#6F7785" style={styles.inputIcon} />
+                  <Ionicons name="person-outline" size={20} color={premiumColors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     value={fullName}
                     onChangeText={setFullName}
                     placeholder="nhập họ tên đầy đủ"
-                    placeholderTextColor="#58585B"
+                    placeholderTextColor={premiumColors.textMuted}
                   />
                 </View>
 
                 <Text style={styles.label}>EMAIL ĐĂNG KÝ *</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="mail-outline" size={20} color="#6F7785" style={styles.inputIcon} />
+                  <Ionicons name="mail-outline" size={20} color={premiumColors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     value={email}
                     onChangeText={setEmail}
                     placeholder="ví dụ: email@gmail.com"
-                    placeholderTextColor="#58585B"
+                    placeholderTextColor={premiumColors.textMuted}
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
                 </View>
 
-                 <Text style={styles.label}>VAI TRÒ THI ĐẤU / VẬN HÀNH *</Text>
+                <Text style={styles.label}>VAI TRÒ THI ĐẤU / VẬN HÀNH *</Text>
                 <View style={styles.roleGrid}>
                   <View style={styles.row}>
                     {rolesList.slice(0, 2).map((item) => {
@@ -135,13 +134,13 @@ export default function RegisterScreen() {
                             <MaterialCommunityIcons 
                               name="horse-variant" 
                               size={18} 
-                              color={isSelected ? '#E10600' : '#6F7785'} 
+                              color={isSelected ? premiumColors.brand : premiumColors.textMuted} 
                             />
                           ) : (
                             <Ionicons 
                               name={item.icon as any} 
                               size={18} 
-                              color={isSelected ? '#E10600' : '#6F7785'} 
+                              color={isSelected ? premiumColors.brand : premiumColors.textMuted} 
                             />
                           )}
                           <Text style={[styles.roleCardText, isSelected && styles.selectedRoleCardText]}>
@@ -168,13 +167,13 @@ export default function RegisterScreen() {
                             <MaterialCommunityIcons 
                               name="horse-variant" 
                               size={18} 
-                              color={isSelected ? '#E10600' : '#6F7785'} 
+                              color={isSelected ? premiumColors.brand : premiumColors.textMuted} 
                             />
                           ) : (
                             <Ionicons 
                               name={item.icon as any} 
                               size={18} 
-                              color={isSelected ? '#E10600' : '#6F7785'} 
+                              color={isSelected ? premiumColors.brand : premiumColors.textMuted} 
                             />
                           )}
                           <Text style={[styles.roleCardText, isSelected && styles.selectedRoleCardText]}>
@@ -188,13 +187,13 @@ export default function RegisterScreen() {
 
                 <Text style={styles.label}>MẬT KHẨU KHỞI TẠO *</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="lock-closed-outline" size={20} color="#6F7785" style={styles.inputIcon} />
+                  <Ionicons name="lock-closed-outline" size={20} color={premiumColors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     value={password}
                     onChangeText={setPassword}
                     placeholder="tối thiểu 6 ký tự"
-                    placeholderTextColor="#58585B"
+                    placeholderTextColor={premiumColors.textMuted}
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
                   />
@@ -206,49 +205,48 @@ export default function RegisterScreen() {
                     <Ionicons 
                       name={showPassword ? "eye-outline" : "eye-off-outline"} 
                       size={20} 
-                      color="#6F7785" 
+                      color={premiumColors.textMuted} 
                     />
                   </TouchableOpacity>
                 </View>
 
                 <Text style={styles.label}>SỐ ĐIỆN THOẠI</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="call-outline" size={20} color="#6F7785" style={styles.inputIcon} />
+                  <Ionicons name="call-outline" size={20} color={premiumColors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     value={phone}
                     onChangeText={setPhone}
                     placeholder="nhập số điện thoại"
-                    placeholderTextColor="#58585B"
+                    placeholderTextColor={premiumColors.textMuted}
                     keyboardType="phone-pad"
                   />
                 </View>
 
                 <Text style={styles.label}>ĐỊA CHỈ</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="location-outline" size={20} color="#6F7785" style={styles.inputIcon} />
+                  <Ionicons name="location-outline" size={20} color={premiumColors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     value={address}
                     onChangeText={setAddress}
                     placeholder="nhập địa chỉ thường trú"
-                    placeholderTextColor="#58585B"
+                    placeholderTextColor={premiumColors.textMuted}
                   />
                 </View>
 
                 <Text style={styles.label}>NGÀY SINH (YYYY-MM-DD)</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="calendar-outline" size={20} color="#6F7785" style={styles.inputIcon} />
+                  <Ionicons name="calendar-outline" size={20} color={premiumColors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     value={dob}
                     onChangeText={setDob}
                     placeholder="ví dụ: 1995-08-20"
-                    placeholderTextColor="#58585B"
+                    placeholderTextColor={premiumColors.textMuted}
                   />
                 </View>
 
-                {/* Register Button */}
                 <TouchableOpacity 
                   style={[styles.registerButton, loading && styles.disabledButton]} 
                   onPress={handleRegister}
@@ -256,20 +254,19 @@ export default function RegisterScreen() {
                   activeOpacity={0.8}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#FFFFFF" size="small" />
+                    <ActivityIndicator color={premiumColors.text} size="small" />
                   ) : (
-                    <Text style={styles.registerButtonText}>Gửi yêu cầu đăng ký</Text>
+                    <Text style={styles.registerButtonText}>GỬI YÊU CẦU ĐĂNG KÝ</Text>
                   )}
                 </TouchableOpacity>
 
-                {/* Login Link */}
                 <TouchableOpacity 
                   onPress={() => router.push('/(auth)/login')} 
                   style={styles.loginLink}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.loginLinkText}>
-                    Đã có tài khoản? <Text style={styles.redText}>Đăng nhập</Text>
+                    Đã có tài khoản? <Text style={styles.highlightText}>Đăng nhập</Text>
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -288,72 +285,70 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(9, 11, 17, 0.92)', // Slightly darker overlay for forms with more text fields
+    backgroundColor: 'rgba(9, 11, 17, 0.92)', 
   },
   container: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 20 : 40,
-    paddingBottom: 40,
+    paddingHorizontal: premiumSpacing[24],
+    paddingTop: Platform.OS === 'ios' ? 20 : premiumSpacing[40],
+    paddingBottom: premiumSpacing[40],
   },
+  
+  // ── Header ──
   headerContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: premiumSpacing[32],
   },
   logo: {
     width: 60,
     height: 60,
     marginBottom: 10,
   },
-  brandTextContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  brandTitleWhite: {
+  brandTitle: {
     fontSize: 24,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     letterSpacing: 1,
-    fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-CondensedBold' : 'sans-serif-condensed',
   },
-  brandTitleRed: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#E10600',
-    letterSpacing: 1,
-    fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-CondensedBold' : 'sans-serif-condensed',
+  accentLine: {
+    width: 48,
+    height: 4,
+    backgroundColor: premiumColors.brand,
+    borderRadius: 2,
+    marginTop: premiumSpacing[8],
+    marginBottom: premiumSpacing[12],
   },
   brandSubtitle: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#E10600',
-    letterSpacing: 2,
+    color: premiumColors.textSecondary,
+    letterSpacing: 1.5,
   },
+
+  // ── Form ──
   formContainer: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: premiumSpacing[24],
   },
   label: {
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     fontSize: 11,
     fontWeight: '700',
-    marginBottom: 8,
-    letterSpacing: 1.2,
+    marginBottom: premiumSpacing[8],
+    letterSpacing: 1,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 8,
-    marginBottom: 18,
-    height: 48,
-    paddingHorizontal: 14,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    marginBottom: premiumSpacing[16],
+    height: 52,
+    paddingHorizontal: premiumSpacing[16],
   },
   inputIcon: {
     marginRight: 12,
@@ -361,77 +356,79 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
-    color: '#FFFFFF',
+    color: premiumColors.text,
     height: '100%',
   },
   eyeButton: {
     padding: 6,
   },
+
+  // ── Role Selector (Grid) ──
   roleGrid: {
     gap: 10,
-    marginBottom: 18,
+    marginBottom: premiumSpacing[16],
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 10,
   },
   roleCard: {
-    backgroundColor: '#11141B',
+    backgroundColor: premiumColors.surfaceGlass,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
-    borderRadius: 8,
+    borderColor: premiumColors.borderSoft,
+    borderRadius: premiumRadius[8],
     paddingVertical: 12,
-    width: '48.5%',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
   },
   selectedRoleCard: {
-    borderColor: '#E10600',
-    backgroundColor: 'rgba(225, 6, 0, 0.08)',
+    borderColor: premiumColors.brand,
+    backgroundColor: premiumColors.brand + '15',
   },
   roleCardText: {
-    color: '#6F7785',
+    color: premiumColors.textMuted,
     fontSize: 11,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
   selectedRoleCardText: {
-    color: '#E10600',
+    color: premiumColors.brand,
   },
+
+  // ── Button ──
   registerButton: {
-    backgroundColor: '#E10600',
-    borderRadius: 24,
-    height: 48,
+    backgroundColor: premiumColors.brand,
+    borderRadius: premiumRadius[8],
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
-    shadowColor: '#E10600',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    marginTop: premiumSpacing[16],
   },
   disabledButton: {
-    backgroundColor: '#58585B',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: premiumColors.surface2,
   },
   registerButtonText: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontSize: 14,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
+
+  // ── Links ──
   loginLink: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: premiumSpacing[24],
+    paddingVertical: premiumSpacing[8],
   },
   loginLinkText: {
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
     fontSize: 13,
   },
-  redText: {
-    color: '#E10600',
+  highlightText: {
+    color: premiumColors.brand,
     fontWeight: '700',
   },
 });

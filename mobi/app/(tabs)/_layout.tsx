@@ -4,6 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { premiumColors } from '@/components/ui/premium-tokens';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -16,9 +17,9 @@ export default function TabLayout() {
         tabBarInactiveTintColor: themeColors.tabIconDefault,
         headerShown: true,
         headerStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#15151E' : '#FFFFFF',
+          backgroundColor: colorScheme === 'dark' ? premiumColors.headerBg : '#FFFFFF',
           borderBottomWidth: 1,
-          borderBottomColor: colorScheme === 'dark' ? '#303037' : '#D3DADE',
+          borderBottomColor: colorScheme === 'dark' ? premiumColors.headerBorder : '#D3DADE',
         },
         headerTitleStyle: {
           color: themeColors.text,
@@ -27,9 +28,9 @@ export default function TabLayout() {
           letterSpacing: 1,
         },
         tabBarStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#15151E' : '#FFFFFF',
+          backgroundColor: colorScheme === 'dark' ? premiumColors.headerBg : '#FFFFFF',
           borderTopWidth: 1,
-          borderTopColor: colorScheme === 'dark' ? '#303037' : '#D3DADE',
+          borderTopColor: colorScheme === 'dark' ? premiumColors.headerBorder : '#D3DADE',
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
