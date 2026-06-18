@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { RegistrationReviewPanel } from "@/features/registrations/components/registration-review-panel";
 import { registrationsApi } from "@/lib/api-client";
-import type { RaceRegistration } from "@/features/registrations/mock-registrations";
+import type { RaceRegistration, RegistrationStatus } from "@/features/registrations/mock-registrations";
 import { toast } from "sonner";
 
 export default function AdminRegistrationDetailPage() {
@@ -27,10 +27,11 @@ export default function AdminRegistrationDetailPage() {
       const statusVal = item.status || "PENDING";
       const statusLower = statusVal.toLowerCase();
       
-      let statusMapped: "pending" | "approved" | "rejected" = "pending";
-      if (statusLower === "approved") statusMapped = "approved";
-      if (statusLower === "rejected") statusMapped = "rejected";
-      if (statusLower === "cancelled" || statusLower === "withdrawn") statusMapped = "rejected";
+      let statusMapped: RegistrationStatus = "pending";
+      if (statusLower === "approved")  statusMapped = "approved";
+      if (statusLower === "rejected")  statusMapped = "rejected";
+      if (statusLower === "cancelled") statusMapped = "cancelled";
+      if (statusLower === "withdrawn") statusMapped = "withdrawn";
 
       const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
       const formattedDate = createdDate.toLocaleDateString("vi-VN") + " · " + createdDate.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });

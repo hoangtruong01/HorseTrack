@@ -62,6 +62,16 @@ export class RefereeAssignmentsService {
       );
     }
 
+    // 2b. Validate referee profile is APPROVED
+    const profile = await this.refereeProfilesService.findByUserId(
+      dto.refereeUserId,
+    );
+    if (profile.approvalStatus !== RefereeApprovalStatus.APPROVED) {
+      throw new BadRequestException(
+        'Referee profile must be APPROVED before assignment',
+      );
+    }
+
     // 3. Validate race exists
     const race = await this.racesService.findOne(dto.raceId);
 
@@ -201,14 +211,22 @@ export class RefereeAssignmentsService {
         ? RefereeAssignmentStatus.ACCEPTED
         : RefereeAssignmentStatus.DECLINED;
 
-    return assignment.save();
+    const saved = await assignment.save();
+
+    if (assignment.status === RefereeAssignmentStatus.DECLINED) {
+      await this.revertRaceIfNoAcceptedReferee(String(assignment.raceId));
+    }
+
+    return saved;
   }
 
   async removeAssignment(id: string): Promise<RefereeAssignmentDocument> {
     const assignment = await this.assignmentModel.findById(id);
     if (!assignment) throw new NotFoundException('Assignment not found');
     assignment.status = RefereeAssignmentStatus.REMOVED;
-    return assignment.save();
+    const saved = await assignment.save();
+    await this.revertRaceIfNoAcceptedReferee(String(assignment.raceId));
+    return saved;
   }
 
   async findByRace(raceId: string, page = 1, limit = 20) {
@@ -246,6 +264,23 @@ export class RefereeAssignmentsService {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
+  }
+
+  private async revertRaceIfNoAcceptedReferee(raceId: string): Promise<void> {
+    try {
+      const acceptedCount = await this.assignmentModel.countDocuments({
+        raceId: new Types.ObjectId(raceId),
+        status: RefereeAssignmentStatus.ACCEPTED,
+      });
+      if (acceptedCount === 0) {
+        const race = await this.racesService.findOne(raceId);
+        if (race.status === RaceStatus.READY) {
+          await this.racesService.setStatus(raceId, RaceStatus.CHECKING);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to revert race status after referee change:', err);
+    }
   }
 
   /** Used by races.service to verify READY precondition */

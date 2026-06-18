@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -110,9 +111,15 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get user by id' })
   @ApiResponse({ status: 200, type: UserResponseDto })
-  async findOne(@Param('id', ParseObjectIdPipe) id: string) {
-    const user = await this.usersService.findById(id);
-    return plainToInstance(UserResponseDto, user.toObject(), {
+  async findOne(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
+    if (user.id !== id && !user.roles.includes(RoleName.ADMIN)) {
+      throw new ForbiddenException('You can only view your own profile');
+    }
+    const fetchedUser = await this.usersService.findById(id);
+    return plainToInstance(UserResponseDto, fetchedUser.toObject(), {
       excludeExtraneousValues: true,
     });
   }

@@ -5,8 +5,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { RacesService } from '../races/races.service';
 import { RaceStatus } from '../races/schemas/race.schema';
 import {
@@ -29,10 +29,14 @@ import {
   RaceResultStatus,
   RaceIncident,
 } from './schemas/race-result.schema';
-import { PredictionsService } from '../predictions/predictions.service';
+import {
+  PayoutNotifyIntent,
+  PredictionsService,
+} from '../predictions/predictions.service';
 import { PrizesService } from '../prizes/prizes.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { Jockey } from '../jockeys/schemas/jockey.schema';
+import { Horse, HorseDocument } from '../horses/schemas/horse.schema';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
 import { JwtUser } from '../common/interfaces/jwt-user.interface';
@@ -44,6 +48,8 @@ import {
   ViolationPenalty,
   ViolationSeverity,
 } from '../race-violations/schemas/race-violation.schema';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
 /** Points by finishing rank */
 const POINTS_MAP: Record<number, number> = { 1: 10, 2: 7, 3: 5, 4: 3 };
@@ -60,6 +66,8 @@ export class RaceResultsService {
     private assignmentModel: Model<RefereeAssignmentDocument>,
     @InjectModel(Jockey.name)
     private jockeyModel: Model<Jockey>,
+    @InjectModel(Horse.name)
+    private horseModel: Model<HorseDocument>,
     @InjectModel(RaceViolation.name)
     private violationModel: Model<RaceViolationDocument>,
     private racesService: RacesService,
@@ -67,6 +75,8 @@ export class RaceResultsService {
     private predictionsService: PredictionsService,
     private auditLogsService: AuditLogsService,
     private notificationsService: NotificationsService,
+    @InjectConnection() private connection: Connection,
+    private ledgerService: RewardPointLedgerService,
   ) {}
 
   private async validateRefereeAssigned(
@@ -533,7 +543,6 @@ export class RaceResultsService {
       throw new BadRequestException('No results to publish for this race');
     }
 
-    // All results must be CONFIRMED
     const unconfirmed = results.some(
       (r) => r.status !== RaceResultStatus.CONFIRMED,
     );
@@ -543,39 +552,102 @@ export class RaceResultsService {
       );
     }
 
-    // Only the winner receives the prize
-    const prizeByRank: Record<number, number> = {
-      1: race.prize ?? 0,
-    };
-
+    const prizeByRank: Record<number, number> = { 1: race.prize ?? 0 };
     const now = new Date();
-    await Promise.all(
-      results.map((result) => {
-        const prizeAmount =
-          result.outcome === RaceResultOutcome.FINISHED && result.rank
-            ? (prizeByRank[result.rank] ?? 0)
-            : 0;
-        return this.resultModel.findByIdAndUpdate(result._id, {
-          $set: {
-            status: RaceResultStatus.PUBLISHED,
-            prizeAmount,
-            publishedBy,
-            publishedAt: now,
-          },
+
+    const session = await this.connection.startSession();
+    let notifyIntents: PayoutNotifyIntent[] = [];
+    try {
+      await session.withTransaction(async () => {
+        notifyIntents = [];
+
+        await Promise.all(
+          results.map((result) => {
+            const prizeAmount =
+              result.outcome === RaceResultOutcome.FINISHED && result.rank
+                ? (prizeByRank[result.rank] ?? 0)
+                : 0;
+            return this.resultModel.findByIdAndUpdate(
+              result._id,
+              {
+                $set: {
+                  status: RaceResultStatus.PUBLISHED,
+                  prizeAmount,
+                  publishedBy,
+                  publishedAt: now,
+                },
+              },
+              { session },
+            );
+          }),
+        );
+
+        await this.racesService.setStatus(
+          raceId,
+          RaceStatus.RESULT_PUBLISHED,
+          session,
+        );
+
+        await this.prizesService.createPrizesForRace(raceId, session);
+
+        notifyIntents = await this.predictionsService.payoutBetsForRace(
+          raceId,
+          session,
+        );
+
+        for (const result of results) {
+          const pts = result.points ?? 0;
+          if (result.outcome === RaceResultOutcome.FINISHED && pts > 0) {
+            const alreadyCredited = await this.ledgerService.exists(
+              String(result.ownerId),
+              LedgerSourceType.RACE_WIN_REWARD,
+              String(result._id),
+              session,
+            );
+            if (!alreadyCredited) {
+              await this.ledgerService.credit({
+                userId: String(result.ownerId),
+                points: pts,
+                sourceType: LedgerSourceType.RACE_WIN_REWARD,
+                sourceId: String(result._id),
+                note: `Điểm thưởng hạng ${result.rank} giải đua`,
+                session,
+              });
+            }
+          }
+        }
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    // ── Sau commit: side-effect best-effort (không rollback tiền) ──
+    await this.racesService.syncTournamentStatus(raceId);
+
+    // Update cached win stats on Horse and Jockey documents (best-effort)
+    try {
+      for (const result of results) {
+        const isWin =
+          result.rank === 1 && result.outcome === RaceResultOutcome.FINISHED;
+
+        await this.horseModel.findByIdAndUpdate(result.horseId, {
+          $inc: { totalRaces: 1, winCount: isWin ? 1 : 0 },
         });
-      }),
-    );
 
-    // Update race status to RESULT_PUBLISHED
-    await this.racesService.updateStatus(raceId, RaceStatus.RESULT_PUBLISHED);
+        if (result.jockeyUserId) {
+          await this.jockeyModel.findOneAndUpdate(
+            { userId: result.jockeyUserId },
+            { $inc: { totalRaces: 1, winCount: isWin ? 1 : 0 } },
+          );
+        }
+      }
+    } catch (err) {
+      console.error(
+        'Failed to update cached win stats after race publish:',
+        err,
+      );
+    }
 
-    // Auto-create prizes (legacy prize records)
-    await this.prizesService.createPrizesForRace(raceId);
-
-    // Resolve predictions
-    await this.predictionsService.payoutBetsForRace(raceId);
-
-    // Send notifications to the winning horse owner
     const winnerResult = results.find((r) => r.rank === 1);
     if (winnerResult) {
       await this.notificationsService.send(
@@ -583,6 +655,15 @@ export class RaceResultsService {
         'Chiến thắng vang dội!',
         `Chúc mừng! Chú ngựa của bạn đã giành chiến thắng vị trí thứ nhất trong cuộc đua ${race.name}.`,
         NotificationType.REWARD,
+      );
+    }
+
+    for (const intent of notifyIntents) {
+      await this.notificationsService.send(
+        intent.userId,
+        intent.title,
+        intent.body,
+        intent.type,
       );
     }
 
@@ -601,6 +682,16 @@ export class RaceResultsService {
   }
 
   async applyViolationsToResults(raceId: string): Promise<void> {
+    const publishedExists = await this.resultModel.exists({
+      raceId: new Types.ObjectId(raceId),
+      status: RaceResultStatus.PUBLISHED,
+    });
+    if (publishedExists) {
+      throw new BadRequestException(
+        'Không thể áp dụng vi phạm cho kết quả đã công bố',
+      );
+    }
+
     const results = await this.resultModel.find({
       raceId: new Types.ObjectId(raceId),
     });

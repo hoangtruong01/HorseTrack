@@ -5,8 +5,6 @@ export type UserSubscriptionDocument = UserSubscription & Document;
 
 export enum SubscriptionStatus {
   ACTIVE = 'ACTIVE',
-  EXPIRED = 'EXPIRED',
-  CANCELLED = 'CANCELLED',
 }
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })

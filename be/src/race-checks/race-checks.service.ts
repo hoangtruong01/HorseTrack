@@ -25,6 +25,7 @@ import {
   RaceCheck,
   RaceCheckDocument,
   RaceCheckStatus,
+  RACE_CHECK_STATUS_FLOW,
 } from './schemas/race-check.schema';
 
 @Injectable()
@@ -124,6 +125,13 @@ export class RaceChecksService {
       throw new ForbiddenException('You can only update checks you submitted');
     }
 
+    const allowed = RACE_CHECK_STATUS_FLOW[check.status];
+    if (!allowed.includes(dto.status)) {
+      throw new BadRequestException(
+        `Invalid status transition: ${check.status} → ${dto.status}`,
+      );
+    }
+
     check.status = dto.status;
     if (dto.healthNote !== undefined) check.healthNote = dto.healthNote;
     if (dto.equipmentNote !== undefined)
@@ -135,7 +143,23 @@ export class RaceChecksService {
       check.checkedAt = new Date();
     }
 
-    return check.save();
+    const saved = await check.save();
+
+    if (dto.status === RaceCheckStatus.FAILED) {
+      try {
+        const race = await this.racesService.findOne(String(check.raceId));
+        if (race.status === RaceStatus.READY) {
+          await this.racesService.setStatus(
+            String(check.raceId),
+            RaceStatus.CHECKING,
+          );
+        }
+      } catch (err) {
+        console.error('Failed to revert race status after check failed:', err);
+      }
+    }
+
+    return saved;
   }
 
   async findByRace(raceId: string) {

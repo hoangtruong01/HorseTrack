@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { PredictionsService } from '../predictions/predictions.service';
 import { TournamentStatus } from '../tournaments/schemas/tournament.schema';
@@ -97,9 +97,32 @@ export class RacesService {
     } as unknown as Partial<RaceDocument>);
   }
 
+  private async attachParticipantsCounts(
+    races: RaceDocument[],
+  ): Promise<(RaceDocument & { participantsCount: number })[]> {
+    if (races.length === 0) return [];
+    const raceIds = races.map((r) => r._id);
+    const counts = await this.registrationModel.aggregate<{
+      _id: Types.ObjectId;
+      count: number;
+    }>([
+      {
+        $match: {
+          raceId: { $in: raceIds },
+          status: RegistrationStatus.APPROVED,
+        },
+      },
+      { $group: { _id: '$raceId', count: { $sum: 1 } } },
+    ]);
+    const countMap = new Map(counts.map((c) => [String(c._id), c.count]));
+    return races.map((r) =>
+      Object.assign(r, { participantsCount: countMap.get(String(r._id)) ?? 0 }),
+    );
+  }
+
   async findAll(page = 1, limit = 20) {
     const filter = { deletedAt: { $exists: false } };
-    const [data, total] = await Promise.all([
+    const [races, total] = await Promise.all([
       this.raceModel
         .find(filter)
         .populate('tournamentId', 'name')
@@ -110,6 +133,7 @@ export class RacesService {
         .exec(),
       this.raceModel.countDocuments(filter),
     ]);
+    const data = await this.attachParticipantsCounts(races);
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
@@ -121,7 +145,7 @@ export class RacesService {
       tournamentId: new Types.ObjectId(tournamentId),
       deletedAt: { $exists: false },
     };
-    const [data, total] = await Promise.all([
+    const [races, total] = await Promise.all([
       this.raceModel
         .find(filter)
         .populate('createdBy', 'fullName')
@@ -131,6 +155,7 @@ export class RacesService {
         .exec(),
       this.raceModel.countDocuments(filter),
     ]);
+    const data = await this.attachParticipantsCounts(races);
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
@@ -203,7 +228,12 @@ export class RacesService {
     return race.save();
   }
 
-  async updateStatus(id: string, status: RaceStatus): Promise<RaceDocument> {
+  /** Ghi status thuần (validate transition + guard); KHÔNG cascade tournament. */
+  async setStatus(
+    id: string,
+    status: RaceStatus,
+    session?: ClientSession,
+  ): Promise<RaceDocument> {
     const race = await this.findOne(id);
 
     const allowedTransitions = RACE_STATUS_FLOW[race.status] || [];
@@ -223,15 +253,36 @@ export class RacesService {
       await this.validateReadyConditions(id);
     }
 
+    if (status === RaceStatus.LIVE) {
+      const acceptedReferee = await this.refereeAssignmentModel.findOne({
+        raceId: new Types.ObjectId(id),
+        status: RefereeAssignmentStatus.ACCEPTED,
+      });
+      if (!acceptedReferee) {
+        throw new BadRequestException(
+          'Race cannot go LIVE: no referee has accepted the assignment',
+        );
+      }
+    }
+
     if (status === RaceStatus.CANCELLED) {
       await this.predictionsService.cancelPredictionsForRace(id);
     }
 
     race.status = status;
-    const savedRace = await race.save();
+    return session ? race.save({ session }) : race.save();
+  }
 
-    // Automate Tournament Status Transitions:
+  /**
+   * Cascade auto-transition tournament theo trạng thái race hiện tại. Chạy NGOÀI transaction.
+   * Re-query findOne(id) là CỐ Ý: hàm được gọi standalone sau khi transaction commit
+   * (Task 5 publishByRace gọi sau commit), đảm bảo đọc trạng thái đã persist.
+   * Trong updateStatus tuần tự, race.status === status vừa set nên kết quả không đổi.
+   */
+  async syncTournamentStatus(id: string): Promise<void> {
     try {
+      const race = await this.findOne(id);
+      const status = race.status;
       if (status === RaceStatus.LIVE) {
         const tournament = await this.tournamentsService.findOne(
           this.getTournamentIdString(race.tournamentId),
@@ -282,11 +333,20 @@ export class RacesService {
         }
       }
     } catch (err) {
-      // Log errors but don't block the main race status update
       console.error('Failed to automate tournament status transition:', err);
     }
+  }
 
-    return savedRace;
+  /** Giữ chữ ký cũ: ghi status + cascade (cho mọi caller hiện tại). */
+  async updateStatus(id: string, status: RaceStatus): Promise<RaceDocument> {
+    if (status === RaceStatus.RESULT_PUBLISHED) {
+      throw new BadRequestException(
+        'Không thể chuyển trực tiếp sang RESULT_PUBLISHED. Dùng endpoint publish result.',
+      );
+    }
+    const saved = await this.setStatus(id, status);
+    await this.syncTournamentStatus(id);
+    return saved;
   }
 
   /** Enforce pre-race conditions before READY transition */

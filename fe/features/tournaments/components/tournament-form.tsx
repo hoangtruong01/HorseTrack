@@ -81,6 +81,12 @@ export function TournamentForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Guard: check if image is still uploading
+    if (uploading) {
+      toast.error("Vui lòng chờ ảnh tải lên xong trước khi lưu.");
+      return;
+    }
+
     // Validations
     if (!name.trim()) {
       toast.error("Vui lòng nhập tên giải đấu.");
@@ -411,7 +417,7 @@ export function TournamentForm() {
           </Button>
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || uploading}
             className="rounded-full font-black tracking-wider text-foreground bg-primary hover:bg-[#B80500] shadow-[0_4px_16px_rgba(225,6,0,0.35)]"
           >
             {isLoading ? "Đang xử lý..." : "Tạo giải đấu"}

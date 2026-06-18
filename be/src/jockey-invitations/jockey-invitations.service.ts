@@ -1,10 +1,12 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model, Types } from 'mongoose';
 import {
   Registration,
@@ -236,10 +238,10 @@ export class JockeyInvitationsService {
         }
       }
 
-      // Bind jockey to registration + save jockeySharePercent
+      // Bind jockey to registration + save jockeySharePercent (atomic: only if not already assigned)
       const updatedReg = await this.registrationModel
-        .findByIdAndUpdate(
-          invitation.registrationId,
+        .findOneAndUpdate(
+          { _id: invitation.registrationId, jockeyUserId: null },
           {
             jockeyUserId: invitation.jockeyUserId,
             jockeySharePercent: invitation.jockeySharePercent,
@@ -247,6 +249,12 @@ export class JockeyInvitationsService {
           { new: true },
         )
         .populate('horseId');
+
+      if (!updatedReg) {
+        throw new ConflictException(
+          'Đăng ký thi đấu này đã được phân công nài ngựa khác',
+        );
+      }
 
       // Find other pending invitations to auto-cancel and notify other jockeys
       const otherPending = await this.invitationModel.find({
@@ -358,5 +366,35 @@ export class JockeyInvitationsService {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
+  }
+
+  @Cron(CronExpression.EVERY_6_HOURS)
+  async expireStaleInvitations(): Promise<void> {
+    try {
+      const expiredInvitations = await this.invitationModel.find({
+        status: InvitationStatus.PENDING,
+        expiredAt: { $lt: new Date() },
+      });
+
+      if (expiredInvitations.length === 0) return;
+
+      await this.invitationModel.updateMany(
+        {
+          _id: { $in: expiredInvitations.map((inv) => inv._id) },
+        },
+        { $set: { status: InvitationStatus.EXPIRED } },
+      );
+
+      for (const inv of expiredInvitations) {
+        await this.notificationsService.send(
+          String(inv.ownerId),
+          'Lời mời hết hạn',
+          `Lời mời nài ngựa của bạn đã hết hạn mà không có phản hồi.`,
+          NotificationType.RACE,
+        );
+      }
+    } catch (err) {
+      console.error('Failed to expire stale jockey invitations:', err);
+    }
   }
 }

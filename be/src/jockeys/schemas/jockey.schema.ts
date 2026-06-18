@@ -75,6 +75,12 @@ export class Jockey {
 
   @Prop()
   personality?: string;
+
+  @Prop({ default: 0 })
+  winCount!: number;
+
+  @Prop({ default: 0 })
+  totalRaces!: number;
 }
 
 export const JockeySchema = SchemaFactory.createForClass(Jockey);

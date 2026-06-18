@@ -4,11 +4,6 @@ import { Document, Types } from 'mongoose';
 export type WalletTransactionDocument = WalletTransaction & Document;
 
 export enum TransactionType {
-  DEPOSIT = 'DEPOSIT',
-  WITHDRAW = 'WITHDRAW',
-  PURCHASE = 'PURCHASE',
-  POINT_REDEMPTION = 'POINT_REDEMPTION',
-  PRIZE_EARNING = 'PRIZE_EARNING',
   REWARD_CASHOUT = 'REWARD_CASHOUT',
 }
 

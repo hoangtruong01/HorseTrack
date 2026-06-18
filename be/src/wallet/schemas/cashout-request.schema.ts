@@ -38,6 +38,9 @@ export class CashoutRequest {
   @Prop({ type: Types.ObjectId, ref: 'User' })
   paidBy?: Types.ObjectId; // Counter Staff or Admin
 
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  rejectedBy?: Types.ObjectId;
+
   @Prop()
   paidAt?: Date;
 

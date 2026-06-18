@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { ClientSession, Connection, Model, Types } from 'mongoose';
 import {
   LedgerSourceType,
   RewardPointLedger,
@@ -15,6 +15,7 @@ export interface LedgerParams {
   sourceId?: string;
   note?: string;
   createdBy?: string;
+  session?: ClientSession;
 }
 
 @Injectable()
@@ -24,6 +25,7 @@ export class RewardPointLedgerService {
     private ledgerModel: Model<RewardPointLedgerDocument>,
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
+    @InjectConnection() private connection: Connection,
   ) {}
 
   private buildUserIdFilter(userId: string) {
@@ -31,49 +33,74 @@ export class RewardPointLedgerService {
   }
 
   async getBalance(userId: string): Promise<number> {
-    const latest = await this.ledgerModel
-      .findOne({ userId: this.buildUserIdFilter(userId) })
-      .sort({ createdAt: -1 })
-      .exec();
-    return latest?.balanceAfter ?? 0;
+    const user = await this.userModel.findById(userId).select('points').exec();
+    return user?.points ?? 0;
   }
 
   async exists(
     userId: string,
     sourceType: LedgerSourceType,
     sourceId: string,
+    session?: ClientSession,
   ): Promise<boolean> {
-    const entry = await this.ledgerModel.findOne({
+    const query = this.ledgerModel.findOne({
       userId: new Types.ObjectId(userId),
       sourceType,
       sourceId: new Types.ObjectId(sourceId),
     });
+    if (session) query.session(session);
+    const entry = await query.exec();
     return !!entry;
   }
 
-  async credit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
-    // Atomic increment on User — prevents race conditions
+  private async creditCore(
+    params: LedgerParams,
+    session: ClientSession,
+  ): Promise<RewardPointLedgerDocument> {
     const updatedUser = await this.userModel
       .findByIdAndUpdate(
         params.userId,
         { $inc: { points: params.points } },
         { new: true },
       )
+      .session(session)
       .exec();
 
     const balanceAfter = updatedUser?.points ?? params.points;
 
-    const entry = await this.ledgerModel.create({
-      userId: new Types.ObjectId(params.userId),
-      sourceType: params.sourceType,
-      sourceId: params.sourceId,
-      pointsDelta: params.points,
-      balanceAfter,
-      note: params.note,
-      createdBy: params.createdBy,
-    });
-
+    const [entry] = await this.ledgerModel.create(
+      [
+        {
+          userId: new Types.ObjectId(params.userId),
+          sourceType: params.sourceType,
+          sourceId: params.sourceId,
+          pointsDelta: params.points,
+          balanceAfter,
+          note: params.note,
+          createdBy: params.createdBy,
+        },
+      ],
+      { session },
+    );
     return entry;
+  }
+
+  async credit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
+    if (params.session) {
+      return this.creditCore(params, params.session);
+    }
+    const session = await this.connection.startSession();
+    try {
+      session.startTransaction();
+      const entry = await this.creditCore(params, session);
+      await session.commitTransaction();
+      return entry;
+    } catch (err) {
+      if (session.inTransaction()) await session.abortTransaction();
+      throw err;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async updateNote(
@@ -86,8 +113,10 @@ export class RewardPointLedgerService {
       .exec();
   }
 
-  async debit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
-    // Atomic: decrement ONLY if balance is sufficient — prevents race conditions
+  private async debitCore(
+    params: LedgerParams,
+    session: ClientSession,
+  ): Promise<RewardPointLedgerDocument> {
     const updatedUser = await this.userModel
       .findOneAndUpdate(
         {
@@ -97,29 +126,49 @@ export class RewardPointLedgerService {
         { $inc: { points: -params.points } },
         { new: true },
       )
+      .session(session)
       .exec();
 
     if (!updatedUser) {
-      // Either user not found or insufficient balance
       const currentBalance = await this.getBalance(params.userId);
       throw new BadRequestException(
         `Insufficient points. Current balance: ${currentBalance}, required: ${params.points}`,
       );
     }
 
-    const balanceAfter = updatedUser.points;
-
-    const entry = await this.ledgerModel.create({
-      userId: new Types.ObjectId(params.userId),
-      sourceType: params.sourceType,
-      sourceId: params.sourceId,
-      pointsDelta: -params.points,
-      balanceAfter,
-      note: params.note,
-      createdBy: params.createdBy,
-    });
-
+    const [entry] = await this.ledgerModel.create(
+      [
+        {
+          userId: new Types.ObjectId(params.userId),
+          sourceType: params.sourceType,
+          sourceId: params.sourceId,
+          pointsDelta: -params.points,
+          balanceAfter: updatedUser.points,
+          note: params.note,
+          createdBy: params.createdBy,
+        },
+      ],
+      { session },
+    );
     return entry;
+  }
+
+  async debit(params: LedgerParams): Promise<RewardPointLedgerDocument> {
+    if (params.session) {
+      return this.debitCore(params, params.session);
+    }
+    const session = await this.connection.startSession();
+    try {
+      session.startTransaction();
+      const entry = await this.debitCore(params, session);
+      await session.commitTransaction();
+      return entry;
+    } catch (err) {
+      if (session.inTransaction()) await session.abortTransaction();
+      throw err;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async findByUser(userId: string, page = 1, limit = 20) {

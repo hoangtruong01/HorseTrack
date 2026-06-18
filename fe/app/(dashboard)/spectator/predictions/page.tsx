@@ -1,13 +1,13 @@
 "use client";
 import Image from "next/image";
 
-import { useEffect, useState, useCallback } from "react";
-import { toast } from "sonner";
-import { Bell, Activity, Award, Coins, Loader2, ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { predictionsApi, walletApi, type PredictionItem } from "@/lib/api-client";
+import { Activity, Award, Bell, Coins, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function SpectatorPredictionsPage() {
   const [balance, setBalance] = useState(0);
@@ -127,7 +127,7 @@ export default function SpectatorPredictionsPage() {
             <div className="pt-2">
               <Button asChild className="w-full rounded-xl bg-primary hover:bg-[#B80500] text-white text-xs font-black uppercase tracking-wider py-2.5">
                 <Link href="/spectator/tournaments" className="flex items-center justify-center gap-1.5">
-                  Đến trang Giải Đấu để dự đoán <ArrowRight className="size-3.5" />
+                  Đến trang Giải Đấu để dự đoán
                 </Link>
               </Button>
             </div>

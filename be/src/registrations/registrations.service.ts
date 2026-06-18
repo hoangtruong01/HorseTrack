@@ -24,21 +24,30 @@ import {
   RegistrationDocument,
   RegistrationStatus,
 } from './schemas/registration.schema';
+import {
+  RaceResult,
+  RaceResultDocument,
+  RaceResultStatus,
+} from '../race-results/schemas/race-result.schema';
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { PredictionsService } from '../predictions/predictions.service';
 
 @Injectable()
 export class RegistrationsService {
   constructor(
     @InjectModel(Registration.name)
     private registrationModel: Model<RegistrationDocument>,
+    @InjectModel(RaceResult.name)
+    private raceResultModel: Model<RaceResultDocument>,
     private horsesService: HorsesService,
     private tournamentsService: TournamentsService,
     private racesService: RacesService,
     private notificationsService: NotificationsService,
     private auditLogsService: AuditLogsService,
+    private predictionsService: PredictionsService,
   ) {}
 
   async create(
@@ -306,6 +315,35 @@ export class RegistrationsService {
       );
     }
     reg.status = RegistrationStatus.WITHDRAWN;
-    return reg.save();
+    const saved = await reg.save();
+    try {
+      const raceId = String(
+        (reg.raceId as unknown as { _id?: string })._id ?? reg.raceId,
+      );
+      const horseId = String(
+        (reg.horseId as unknown as { _id?: string })._id ?? reg.horseId,
+      );
+      await this.predictionsService.cancelPredictionsForHorseInRace(
+        raceId,
+        horseId,
+      );
+    } catch (err) {
+      console.error(
+        'Failed to cancel predictions after registration withdrawn:',
+        err,
+      );
+    }
+    try {
+      await this.raceResultModel.deleteMany({
+        raceRegistrationId: reg._id,
+        status: RaceResultStatus.DRAFT,
+      });
+    } catch (err) {
+      console.error(
+        'Failed to clean up draft race results after registration withdrawn:',
+        err,
+      );
+    }
+    return saved;
   }
 }

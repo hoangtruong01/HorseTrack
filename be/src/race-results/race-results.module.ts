@@ -14,7 +14,9 @@ import { PrizesModule } from '../prizes/prizes.module';
 import { PredictionsModule } from '../predictions/predictions.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
 import { Jockey, JockeySchema } from '../jockeys/schemas/jockey.schema';
+import { Horse, HorseSchema } from '../horses/schemas/horse.schema';
 import {
   RaceViolation,
   RaceViolationSchema,
@@ -29,6 +31,7 @@ import { RaceResultsService } from './race-results.service';
       { name: Registration.name, schema: RegistrationSchema },
       { name: RefereeAssignment.name, schema: RefereeAssignmentSchema },
       { name: Jockey.name, schema: JockeySchema },
+      { name: Horse.name, schema: HorseSchema },
       { name: RaceViolation.name, schema: RaceViolationSchema },
     ]),
     RacesModule,
@@ -36,6 +39,7 @@ import { RaceResultsService } from './race-results.service';
     PredictionsModule,
     AuditLogsModule,
     NotificationsModule,
+    RewardPointLedgerModule,
   ],
   controllers: [RaceResultsController],
   providers: [RaceResultsService],

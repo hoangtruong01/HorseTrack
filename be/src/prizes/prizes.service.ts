@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import {
   RaceResult,
   RaceResultDocument,
@@ -42,29 +42,38 @@ export class PrizesService {
   ) {}
 
   /** Generate prize for the race winner when results are published and credit wallets */
-  async createPrizesForRace(raceId: string): Promise<PrizeDocument[]> {
-    const race = await this.raceModel.findById(raceId);
+  async createPrizesForRace(
+    raceId: string,
+    session?: ClientSession,
+  ): Promise<PrizeDocument[]> {
+    const race = await this.raceModel.findById(raceId).session(session ?? null);
     if (!race) throw new NotFoundException('Race not found');
 
     const createdPrizes: PrizeDocument[] = [];
     const totalPrize = race.prize ?? 0;
 
     if (totalPrize > 0) {
-      const winnerResult = await this.resultModel.findOne({
-        raceId: new Types.ObjectId(raceId),
-        status: RaceResultStatus.PUBLISHED,
-        rank: 1,
-      });
+      const winnerResult = await this.resultModel
+        .findOne({
+          raceId: new Types.ObjectId(raceId),
+          status: RaceResultStatus.PUBLISHED,
+          rank: 1,
+        })
+        .session(session ?? null);
 
       if (winnerResult) {
-        const horse = await this.horseModel.findById(winnerResult.horseId);
+        const horse = await this.horseModel
+          .findById(winnerResult.horseId)
+          .session(session ?? null);
         if (horse) {
           // Read jockeySharePercent from registration (fallback to 30% if not set)
           let jockeySharePct = 30;
-          const registration = await this.registrationModel.findOne({
-            raceId: new Types.ObjectId(raceId),
-            horseId: winnerResult.horseId,
-          });
+          const registration = await this.registrationModel
+            .findOne({
+              raceId: new Types.ObjectId(raceId),
+              horseId: winnerResult.horseId,
+            })
+            .session(session ?? null);
           if (registration?.jockeySharePercent) {
             jockeySharePct = registration.jockeySharePercent;
           }
@@ -75,64 +84,92 @@ export class PrizesService {
 
           // 1. Process Horse Owner Prize
           if (ownerAmount > 0 && horse.ownerId) {
-            const existingOwnerPrize = await this.prizeModel.findOne({
-              raceId: new Types.ObjectId(raceId),
-              horseId: winnerResult.horseId,
-              ownerId: horse.ownerId,
-            });
-
-            if (!existingOwnerPrize) {
-              // Credit owner's ledger directly
+            const ownerAlreadyCredited = await this.ledgerService.exists(
+              String(horse.ownerId),
+              LedgerSourceType.RACE_WIN_REWARD,
+              raceId,
+              session,
+            );
+            if (!ownerAlreadyCredited) {
               await this.ledgerService.credit({
                 userId: String(horse.ownerId),
                 points: ownerAmount,
                 sourceType: LedgerSourceType.RACE_WIN_REWARD,
                 sourceId: raceId,
                 note: `Received ${ownerSharePct}% winner reward for race "${race.name}" (Horse: ${horse.name})`,
+                session,
               });
+            }
 
-              const ownerPrize = await this.prizeModel.create({
-                tournamentId: race.tournamentId,
+            const existingOwnerPrize = await this.prizeModel
+              .findOne({
                 raceId: new Types.ObjectId(raceId),
                 horseId: winnerResult.horseId,
                 ownerId: horse.ownerId,
-                rank: 1,
-                amount: ownerAmount,
-                status: PrizePaymentStatus.PAID,
-                paidAt: new Date(),
-              });
+              })
+              .session(session ?? null);
+            if (!existingOwnerPrize) {
+              const [ownerPrize] = await this.prizeModel.create(
+                [
+                  {
+                    tournamentId: race.tournamentId,
+                    raceId: new Types.ObjectId(raceId),
+                    horseId: winnerResult.horseId,
+                    ownerId: horse.ownerId,
+                    rank: 1,
+                    amount: ownerAmount,
+                    status: PrizePaymentStatus.PAID,
+                    paidAt: new Date(),
+                  },
+                ],
+                { session: session ?? null },
+              );
               createdPrizes.push(ownerPrize);
             }
           }
 
           // 2. Process Jockey Prize
           if (jockeyAmount > 0 && winnerResult.jockeyUserId) {
-            const existingJockeyPrize = await this.prizeModel.findOne({
-              raceId: new Types.ObjectId(raceId),
-              horseId: winnerResult.horseId,
-              ownerId: winnerResult.jockeyUserId,
-            });
-
-            if (!existingJockeyPrize) {
-              // Credit jockey's ledger directly
+            const jockeyAlreadyCredited = await this.ledgerService.exists(
+              String(winnerResult.jockeyUserId),
+              LedgerSourceType.RACE_WIN_REWARD,
+              raceId,
+              session,
+            );
+            if (!jockeyAlreadyCredited) {
               await this.ledgerService.credit({
                 userId: String(winnerResult.jockeyUserId),
                 points: jockeyAmount,
                 sourceType: LedgerSourceType.RACE_WIN_REWARD,
                 sourceId: raceId,
                 note: `Received ${jockeySharePct}% winner reward for race "${race.name}" (Jockey share)`,
+                session,
               });
+            }
 
-              const jockeyPrize = await this.prizeModel.create({
-                tournamentId: race.tournamentId,
+            const existingJockeyPrize = await this.prizeModel
+              .findOne({
                 raceId: new Types.ObjectId(raceId),
                 horseId: winnerResult.horseId,
                 ownerId: winnerResult.jockeyUserId,
-                rank: 1,
-                amount: jockeyAmount,
-                status: PrizePaymentStatus.PAID,
-                paidAt: new Date(),
-              });
+              })
+              .session(session ?? null);
+            if (!existingJockeyPrize) {
+              const [jockeyPrize] = await this.prizeModel.create(
+                [
+                  {
+                    tournamentId: race.tournamentId,
+                    raceId: new Types.ObjectId(raceId),
+                    horseId: winnerResult.horseId,
+                    ownerId: winnerResult.jockeyUserId,
+                    rank: 1,
+                    amount: jockeyAmount,
+                    status: PrizePaymentStatus.PAID,
+                    paidAt: new Date(),
+                  },
+                ],
+                { session: session ?? null },
+              );
               createdPrizes.push(jockeyPrize);
             }
           }
@@ -141,10 +178,12 @@ export class PrizesService {
     }
 
     // 3. Process Referee Salaries
-    const refereeAssignments = await this.assignmentModel.find({
-      raceId: new Types.ObjectId(raceId),
-      status: RefereeAssignmentStatus.ACCEPTED,
-    });
+    const refereeAssignments = await this.assignmentModel
+      .find({
+        raceId: new Types.ObjectId(raceId),
+        status: RefereeAssignmentStatus.ACCEPTED,
+      })
+      .session(session ?? null);
 
     for (const ass of refereeAssignments) {
       if (ass.salary > 0 && ass.refereeUserId) {
@@ -153,6 +192,7 @@ export class PrizesService {
           String(ass.refereeUserId),
           LedgerSourceType.REFEREE_SALARY,
           raceId,
+          session,
         );
 
         if (!alreadyPaid) {
@@ -166,6 +206,7 @@ export class PrizesService {
                 ? 'Trọng tài chính'
                 : 'Trọng tài phụ'
             }`,
+            session,
           });
         }
       }

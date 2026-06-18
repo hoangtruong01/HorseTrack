@@ -51,9 +51,6 @@ export class User {
   @Prop({ default: 0 })
   points!: number;
 
-  @Prop({ default: 0 })
-  balance!: number;
-
   @Prop({ default: 'local' })
   provider?: string;
 

@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
 import {
@@ -30,16 +30,10 @@ import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
-const TERMINAL_RACE_STATUSES = [
-  RaceStatus.LIVE,
-  RaceStatus.FINISHED,
-  RaceStatus.RESULT_PUBLISHED,
-  RaceStatus.CANCELLED,
-];
-
 @Injectable()
 export class TournamentsService {
   constructor(
+    @InjectConnection() private connection: Connection,
     @InjectModel(Tournament.name)
     private tournamentModel: Model<TournamentDocument>,
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
@@ -143,6 +137,7 @@ export class TournamentsService {
     }
 
     const now = new Date();
+    const bypassDateGuards = process.env.BYPASS_DATE_GUARDS === 'true';
 
     if (newStatus === TournamentStatus.OPEN_REGISTRATION) {
       const raceCount = await this.raceModel.countDocuments({
@@ -173,13 +168,21 @@ export class TournamentsService {
       }
     }
 
-    if (newStatus === TournamentStatus.ONGOING && now < tournament.startDate) {
+    if (
+      !bypassDateGuards &&
+      newStatus === TournamentStatus.ONGOING &&
+      now < tournament.startDate
+    ) {
       throw new BadRequestException(
         'Cannot start tournament: start date has not been reached yet',
       );
     }
 
-    if (newStatus === TournamentStatus.COMPLETED && now < tournament.endDate) {
+    if (
+      !bypassDateGuards &&
+      newStatus === TournamentStatus.COMPLETED &&
+      now < tournament.endDate
+    ) {
       throw new BadRequestException(
         'Cannot complete tournament: end date has not been reached yet',
       );
@@ -187,6 +190,10 @@ export class TournamentsService {
 
     if (newStatus === TournamentStatus.CANCELLED) {
       await this.cascadeCancel(id, tournament.name);
+    }
+
+    if (newStatus === TournamentStatus.COMPLETED) {
+      await this.cascadeCompleteRaces(id);
     }
 
     tournament.status = newStatus;
@@ -210,60 +217,73 @@ export class TournamentsService {
     tournamentId: string,
     tournamentName: string,
   ): Promise<void> {
-    // Get all race IDs before cancelling
     const races = await this.raceModel.find({
       tournamentId,
-      status: { $nin: TERMINAL_RACE_STATUSES },
+      status: { $nin: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED] },
     });
     const raceIds = races.map((r) => r._id);
 
-    if (raceIds.length > 0) {
-      const pendingPredictions = await this.predictionModel.find({
-        raceId: { $in: raceIds },
-        status: PredictionStatus.PENDING,
-      });
+    if (raceIds.length === 0) return;
 
-      for (const p of pendingPredictions) {
-        if (p.betPoints && p.betPoints >= 2) {
-          await this.ledgerService.credit({
-            userId: String(p.userId),
-            points: p.betPoints,
-            sourceType: LedgerSourceType.PREDICTION_REWARD,
-            sourceId: String(p._id),
-            note: `Hoàn trả cược dự đoán (+${p.betPoints} điểm) do giải đấu bị hủy`,
-          });
+    const pendingPredictions = await this.predictionModel.find({
+      raceId: { $in: raceIds },
+      status: PredictionStatus.PENDING,
+    });
 
-          await this.notificationsService.send(
-            String(p.userId),
-            'Dự đoán bị hủy',
-            `Giải đấu bị hủy, bạn được hoàn trả ${p.betPoints} điểm cược dự đoán.`,
-            NotificationType.PREDICTION,
-          );
+    const session = await this.connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        for (const p of pendingPredictions) {
+          if (p.betPoints && p.betPoints >= 2) {
+            await this.ledgerService.credit({
+              userId: String(p.userId),
+              points: p.betPoints,
+              sourceType: LedgerSourceType.PREDICTION_REWARD,
+              sourceId: String(p._id),
+              note: `Hoàn trả cược dự đoán (+${p.betPoints} điểm) do giải đấu bị hủy`,
+              session,
+            });
+          }
         }
+
+        await Promise.all([
+          this.raceModel.updateMany(
+            { _id: { $in: raceIds } },
+            { $set: { status: RaceStatus.CANCELLED } },
+            { session },
+          ),
+          this.predictionModel.updateMany(
+            { raceId: { $in: raceIds }, status: PredictionStatus.PENDING },
+            { $set: { status: PredictionStatus.CANCELLED } },
+            { session },
+          ),
+          this.registrationModel.updateMany(
+            { raceId: { $in: raceIds }, status: RegistrationStatus.PENDING },
+            { $set: { status: RegistrationStatus.CANCELLED } },
+            { session },
+          ),
+          this.registrationModel.updateMany(
+            { raceId: { $in: raceIds }, status: RegistrationStatus.APPROVED },
+            { $set: { status: RegistrationStatus.WITHDRAWN } },
+            { session },
+          ),
+        ]);
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    for (const p of pendingPredictions) {
+      if (p.betPoints && p.betPoints >= 2) {
+        await this.notificationsService.send(
+          String(p.userId),
+          'Dự đoán bị hủy',
+          `Giải đấu bị hủy, bạn được hoàn trả ${p.betPoints} điểm cược dự đoán.`,
+          NotificationType.PREDICTION,
+        );
       }
     }
 
-    await Promise.all([
-      // Cancel non-terminal races
-      this.raceModel.updateMany(
-        { tournamentId, status: { $nin: TERMINAL_RACE_STATUSES } },
-        { $set: { status: RaceStatus.CANCELLED } },
-      ),
-      // Cancel all non-cancelled registrations
-      this.registrationModel.updateMany(
-        { tournamentId, status: { $ne: RegistrationStatus.CANCELLED } },
-        { $set: { status: RegistrationStatus.CANCELLED } },
-      ),
-      // Cancel pending predictions for all races in tournament
-      raceIds.length > 0
-        ? this.predictionModel.updateMany(
-            { raceId: { $in: raceIds }, status: PredictionStatus.PENDING },
-            { $set: { status: PredictionStatus.CANCELLED } },
-          )
-        : Promise.resolve(),
-    ]);
-
-    // Notify all affected owners
     const ownerIds = await this.registrationModel.distinct('ownerId', {
       tournamentId,
     });
@@ -277,6 +297,30 @@ export class TournamentsService {
             NotificationType.RACE,
           ),
         ),
+      );
+    }
+  }
+
+  private async cascadeCompleteRaces(tournamentId: string): Promise<void> {
+    try {
+      await this.raceModel.updateMany(
+        {
+          tournamentId: new Types.ObjectId(tournamentId),
+          status: {
+            $nin: [
+              RaceStatus.FINISHED,
+              RaceStatus.RESULT_PUBLISHED,
+              RaceStatus.CANCELLED,
+            ],
+          },
+          deletedAt: { $exists: false },
+        },
+        { $set: { status: RaceStatus.CANCELLED } },
+      );
+    } catch (err) {
+      console.error(
+        'Failed to cascade-cancel races when tournament completed:',
+        err,
       );
     }
   }

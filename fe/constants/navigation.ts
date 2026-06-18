@@ -4,7 +4,6 @@ import {
   Bell,
   Brain,
   ClipboardCheck,
-  CreditCard,
   FileText,
   Flag,
   Gauge,
@@ -157,28 +156,12 @@ export const dashboardNavigation: NavigationItem[] = [
     itemKey: "admin.aiPackages",
   },
   {
-    title: "AI Revenue",
-    href: "/admin/ai/payments",
-    role: "Admin",
-    icon: CreditCard,
-    description: "Xem doanh thu từ các giao dịch đăng ký gói AI.",
-    itemKey: "admin.aiPayments",
-  },
-  {
     title: "AI Predictions",
     href: "/admin/ai/predictions",
     role: "Admin",
     icon: Sparkles,
     description: "Sinh và xem dự đoán AI cho từng cuộc đua.",
     itemKey: "admin.aiPredictions",
-  },
-  {
-    title: "AI Arrangements",
-    href: "/admin/ai/arrangements",
-    role: "Admin",
-    icon: ListChecks,
-    description: "Sinh và quản lý đề xuất sắp xếp cuộc đua tự động.",
-    itemKey: "admin.aiArrangements",
   },
   // ─── OWNER ──────────────────────────────────────────────────────────
   {

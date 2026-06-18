@@ -14,11 +14,13 @@ import type {
 
 const meta: Record<
   RegistrationStatus,
-  { label: string; tone: "yellow" | "green" | "red" }
+  { label: string; tone: "yellow" | "green" | "red" | "slate" }
 > = {
-  pending: { label: "Pending", tone: "yellow" },
-  approved: { label: "Approved", tone: "green" },
-  rejected: { label: "Rejected", tone: "red" },
+  pending:   { label: "Chờ duyệt",  tone: "yellow" },
+  approved:  { label: "Đã duyệt",   tone: "green" },
+  rejected:  { label: "Từ chối",    tone: "red" },
+  cancelled: { label: "Đã hủy",     tone: "slate" },
+  withdrawn: { label: "Đã rút",     tone: "slate" },
 };
 
 const DEMO_ROW_LIMIT = 8;

@@ -16,11 +16,6 @@ import {
   JockeyStatus,
   JockeyApprovalStatus,
 } from './schemas/jockey.schema';
-import {
-  RaceResult,
-  RaceResultDocument,
-  RaceResultStatus,
-} from '../race-results/schemas/race-result.schema';
 
 type JockeyJson = Jockey & { id: string; totalRaces?: number; wins?: number };
 
@@ -28,8 +23,6 @@ type JockeyJson = Jockey & { id: string; totalRaces?: number; wins?: number };
 export class JockeysService {
   constructor(
     @InjectModel(Jockey.name) private jockeyModel: Model<JockeyDocument>,
-    @InjectModel(RaceResult.name)
-    private resultModel: Model<RaceResultDocument>,
     private usersService: UsersService,
   ) {}
 
@@ -78,27 +71,13 @@ export class JockeysService {
       this.jockeyModel.countDocuments(filter),
     ]);
 
-    const data = await Promise.all(
-      docs.map(async (d) => {
-        const json = d.toJSON() as unknown as JockeyJson;
-        const userId =
-          (d.userId as unknown as { _id?: Types.ObjectId })?._id ?? d.userId;
-        const [totalRaces, wins] = await Promise.all([
-          this.resultModel.countDocuments({
-            jockeyUserId: userId,
-            status: RaceResultStatus.PUBLISHED,
-          }),
-          this.resultModel.countDocuments({
-            jockeyUserId: userId,
-            status: RaceResultStatus.PUBLISHED,
-            rank: 1,
-          }),
-        ]);
-        json.totalRaces = totalRaces;
-        json.wins = wins;
-        return json;
-      }),
-    );
+    const data = docs.map((d) => {
+      const json = d.toJSON() as unknown as JockeyJson;
+      json.totalRaces =
+        (d as unknown as { totalRaces?: number }).totalRaces ?? 0;
+      json.wins = (d as unknown as { winCount?: number }).winCount ?? 0;
+      return json;
+    });
 
     return {
       data,
@@ -127,27 +106,13 @@ export class JockeysService {
       this.jockeyModel.countDocuments(filter),
     ]);
 
-    const data = await Promise.all(
-      docs.map(async (d) => {
-        const json = d.toJSON() as unknown as JockeyJson;
-        const userId =
-          (d.userId as unknown as { _id?: Types.ObjectId })?._id ?? d.userId;
-        const [totalRaces, wins] = await Promise.all([
-          this.resultModel.countDocuments({
-            jockeyUserId: userId,
-            status: RaceResultStatus.PUBLISHED,
-          }),
-          this.resultModel.countDocuments({
-            jockeyUserId: userId,
-            status: RaceResultStatus.PUBLISHED,
-            rank: 1,
-          }),
-        ]);
-        json.totalRaces = totalRaces;
-        json.wins = wins;
-        return json;
-      }),
-    );
+    const data = docs.map((d) => {
+      const json = d.toJSON() as unknown as JockeyJson;
+      json.totalRaces =
+        (d as unknown as { totalRaces?: number }).totalRaces ?? 0;
+      json.wins = (d as unknown as { winCount?: number }).winCount ?? 0;
+      return json;
+    });
 
     return {
       data,
@@ -175,44 +140,20 @@ export class JockeysService {
       throw new NotFoundException('Jockey profile not found');
     }
 
-    const [totalRaces, wins] = await Promise.all([
-      this.resultModel.countDocuments({
-        jockeyUserId: new Types.ObjectId(userId),
-        status: RaceResultStatus.PUBLISHED,
-      }),
-      this.resultModel.countDocuments({
-        jockeyUserId: new Types.ObjectId(userId),
-        status: RaceResultStatus.PUBLISHED,
-        rank: 1,
-      }),
-    ]);
-
     const json = jockey.toJSON() as unknown as JockeyJson;
-    json.totalRaces = totalRaces;
-    json.wins = wins;
+    json.totalRaces =
+      (jockey as unknown as { totalRaces?: number }).totalRaces ?? 0;
+    json.wins = (jockey as unknown as { winCount?: number }).winCount ?? 0;
     return json;
   }
 
   async findOne(id: string): Promise<JockeyJson> {
     const jockey = await this.findDocument(id);
-    const userId =
-      (jockey.userId as unknown as { _id?: Types.ObjectId })?._id ??
-      jockey.userId;
-    const [totalRaces, wins] = await Promise.all([
-      this.resultModel.countDocuments({
-        jockeyUserId: userId,
-        status: RaceResultStatus.PUBLISHED,
-      }),
-      this.resultModel.countDocuments({
-        jockeyUserId: userId,
-        status: RaceResultStatus.PUBLISHED,
-        rank: 1,
-      }),
-    ]);
 
     const json = jockey.toJSON() as unknown as JockeyJson;
-    json.totalRaces = totalRaces;
-    json.wins = wins;
+    json.totalRaces =
+      (jockey as unknown as { totalRaces?: number }).totalRaces ?? 0;
+    json.wins = (jockey as unknown as { winCount?: number }).winCount ?? 0;
     return json;
   }
 

@@ -42,6 +42,7 @@ export class RegistrationsController {
   }
 
   @Get()
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
   @ApiOperation({
     summary: 'List all registrations (Admin / Spectators)',
   })
@@ -70,6 +71,7 @@ export class RegistrationsController {
   }
 
   @Get(':id')
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR, RoleName.OWNER)
   @ApiOperation({ summary: 'Get registration detail' })
   findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.registrationsService.findOne(id);
