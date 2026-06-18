@@ -29,6 +29,7 @@ export type CashoutQueueRequest = {
   redemptionCode: string;
   status: "PENDING" | "APPROVED" | "PAID" | "REJECTED" | "FAILED";
   rejectReason?: string;
+  rejectedBy?: string;
   createdAt: string;
   paidBy?: string;
   paidAt?: string;
@@ -142,5 +143,11 @@ export function mapCashoutToQueueRequest(cashout: CashoutItem): CashoutQueueRequ
               : undefined,
     paidAt: cashout.paidAt,
     rejectReason: cashout.rejectReason,
+    rejectedBy:
+      typeof cashout.rejectedBy === "object"
+        ? cashout.rejectedBy.fullName
+        : typeof cashout.rejectedBy === "string"
+          ? cashout.rejectedBy
+          : undefined,
   };
 }

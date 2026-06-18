@@ -515,6 +515,7 @@ export interface CashoutItem {
   redemptionCode: string;
   status: string;
   approvedBy?: { _id: string; fullName: string } | string;
+  rejectedBy?: { _id: string; fullName: string } | string;
   paidBy?: { _id: string; fullName: string } | string;
   paidAt?: string;
   rejectReason?: string;
