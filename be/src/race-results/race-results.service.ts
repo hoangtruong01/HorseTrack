@@ -36,6 +36,7 @@ import {
 import { PrizesService } from '../prizes/prizes.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { Jockey } from '../jockeys/schemas/jockey.schema';
+import { Horse, HorseDocument } from '../horses/schemas/horse.schema';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
 import { JwtUser } from '../common/interfaces/jwt-user.interface';
@@ -65,6 +66,8 @@ export class RaceResultsService {
     private assignmentModel: Model<RefereeAssignmentDocument>,
     @InjectModel(Jockey.name)
     private jockeyModel: Model<Jockey>,
+    @InjectModel(Horse.name)
+    private horseModel: Model<HorseDocument>,
     @InjectModel(RaceViolation.name)
     private violationModel: Model<RaceViolationDocument>,
     private racesService: RacesService,
@@ -620,6 +623,30 @@ export class RaceResultsService {
 
     // ── Sau commit: side-effect best-effort (không rollback tiền) ──
     await this.racesService.syncTournamentStatus(raceId);
+
+    // Update cached win stats on Horse and Jockey documents (best-effort)
+    try {
+      for (const result of results) {
+        const isWin =
+          result.rank === 1 && result.outcome === RaceResultOutcome.FINISHED;
+
+        await this.horseModel.findByIdAndUpdate(result.horseId, {
+          $inc: { totalRaces: 1, winCount: isWin ? 1 : 0 },
+        });
+
+        if (result.jockeyUserId) {
+          await this.jockeyModel.findOneAndUpdate(
+            { userId: result.jockeyUserId },
+            { $inc: { totalRaces: 1, winCount: isWin ? 1 : 0 } },
+          );
+        }
+      }
+    } catch (err) {
+      console.error(
+        'Failed to update cached win stats after race publish:',
+        err,
+      );
+    }
 
     const winnerResult = results.find((r) => r.rank === 1);
     if (winnerResult) {

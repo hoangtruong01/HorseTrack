@@ -107,6 +107,12 @@ export class Horse {
   @Prop()
   description?: string;
 
+  @Prop({ default: 0 })
+  winCount!: number;
+
+  @Prop({ default: 0 })
+  totalRaces!: number;
+
   @Prop()
   deletedAt?: Date;
 }
