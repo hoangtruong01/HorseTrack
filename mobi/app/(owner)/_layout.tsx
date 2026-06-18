@@ -17,7 +17,7 @@ export default function OwnerLayout() {
       headerTitleStyle: { color: t.text, fontWeight: '900', fontSize: 15, letterSpacing: 1 },
       tabBarStyle: { backgroundColor: isDark ? '#15151E' : '#FFFFFF', borderTopWidth: 1, borderTopColor: isDark ? '#303037' : '#D3DADE', height: 60, paddingBottom: 8, paddingTop: 8 },
     }}>
-      <Tabs.Screen name="index" options={{ title: 'Trang chủ', headerTitle: 'CHỦ NGỰA', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="home" color={color} /> }} />
+      <Tabs.Screen name="index" options={{ title: 'Trang chủ', headerShown: false, tabBarIcon: ({ color }) => <MaterialIcons size={24} name="home" color={color} /> }} />
       <Tabs.Screen name="horses" options={{ title: 'Chiến mã', headerTitle: 'CHIẾN MÃ', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="pets" color={color} /> }} />
       <Tabs.Screen name="registrations" options={{ title: 'Ghi danh', headerTitle: 'HỒ SƠ GHI DANH', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="assignment" color={color} /> }} />
       <Tabs.Screen name="invitations" options={{ title: 'Mời Jockey', headerTitle: 'MỜI JOCKEY', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person-add" color={color} /> }} />
