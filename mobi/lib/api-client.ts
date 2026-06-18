@@ -373,6 +373,7 @@ export const registrationsApi = {
 
 export const raceResultsApi = {
   getByRace: (raceId: string) => apiFetch<any>(`/race-results/race/${raceId}`),
+  getByTournament: (tournamentId: string) => apiFetch<any>(`/race-results/tournament/${tournamentId}`),
   simulate: (raceId: string) => apiFetch<any>(`/race-results/race/${raceId}/simulate`, { method: 'POST' }),
   bulkSave: (raceId: string, results: any[]) => apiFetch<any>(`/race-results/race/${raceId}/bulk`, { method: 'POST', body: JSON.stringify({ results }) }),
   confirm: (raceId: string) => apiFetch<any>(`/race-results/race/${raceId}/confirm`, { method: 'PATCH' }),
@@ -448,4 +449,6 @@ export const raceViolationsApi = {
   }) => apiFetch<any>('/race-violations', { method: 'POST', body: JSON.stringify(dto) }),
   listByRace: (raceId: string) => apiFetch<any>(`/race-violations/race/${raceId}`),
 };
+
+
 

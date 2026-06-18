@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
-import { horsesApi, registrationsApi, rewardPointLedgerApi, dashboardApi, tournamentsApi, racesApi } from '@/lib/api-client';
+import { horsesApi, registrationsApi, rewardPointLedgerApi, dashboardApi, tournamentsApi, racesApi, rankingsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -16,6 +16,7 @@ export default function OwnerHome() {
   const [regCount, setRegCount] = useState(0);
   const [winnings, setWinnings] = useState(0);
   const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
+  const [topHorses, setTopHorses] = useState<any[]>([]);
   const [upcomingRacesCount, setUpcomingRacesCount] = useState(3);
   const [openTournamentsCount, setOpenTournamentsCount] = useState(2);
   const [loading, setLoading] = useState(true);
@@ -25,13 +26,14 @@ export default function OwnerHome() {
   const loadData = useCallback(async () => {
     setError(null);
     try {
-      const [horsesRes, regRes, balanceRes, statsRes, racesRes, tournamentsRes] = await Promise.all([
+      const [horsesRes, regRes, balanceRes, statsRes, racesRes, tournamentsRes, rankingsRes] = await Promise.all([
         horsesApi.listMine({ limit: 1 }),
         registrationsApi.listMine({ limit: 5 }),
         rewardPointLedgerApi.myBalance(),
         dashboardApi.getOwnerStats(),
         racesApi.list({ limit: 10 }).catch(() => ({ data: [] })),
         tournamentsApi.list({ limit: 10 }).catch(() => ({ data: [] })),
+        rankingsApi.globalHorses().catch(() => []),
       ]);
       
       setHorsesCount((horsesRes as any).meta?.total || 0);
@@ -39,6 +41,8 @@ export default function OwnerHome() {
       setRegCount((regRes as any).meta?.total || 0);
       setBalance((balanceRes as any).balance || 0);
       setWinnings(statsRes?.winnings?.total || 0);
+      const ranks = Array.isArray(rankingsRes) ? rankingsRes : (rankingsRes as any)?.data || [];
+      setTopHorses(ranks.slice(0, 3));
 
       const upcoming = (racesRes as any).data?.length || 0;
       const openTournaments = (tournamentsRes as any).data?.filter((t: any) => t.status === 'ONGOING').length || 0;
@@ -207,6 +211,38 @@ export default function OwnerHome() {
                   <View style={[styles.regBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
                     <Text style={[styles.regBadgeText, { color: s.color }]}>{s.label}</Text>
                   </View>
+                  <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </Section>
+
+        {/* ── Bảng xếp hạng chiến mã ── */}
+        <Section
+          title="Bảng xếp hạng"
+          actionLabel="Xem tất cả"
+          onAction={() => router.push('/(owner)/rankings' as any)}
+        >
+          {topHorses.length === 0 ? (
+            <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
+          ) : (
+            topHorses.map((h, idx) => {
+              const rank = h.rank || idx + 1;
+              const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+              return (
+                <TouchableOpacity
+                  key={h.horseId || idx}
+                  style={styles.rankRow}
+                  onPress={() => router.push('/(owner)/rankings' as any)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.rankMedal}>{medal}</Text>
+                  <View style={styles.rankInfo}>
+                    <Text style={styles.rankTitle} numberOfLines={1}>{h.horseName || 'Chiến mã ẩn danh'}</Text>
+                    <Text style={styles.rankSubtitle} numberOfLines={1}>Chủ: {h.ownerName || '—'} · Thắng: {h.wins || 0}</Text>
+                  </View>
+                  <Text style={styles.rankPoints}>{h.totalPoints?.toLocaleString()} Pts</Text>
                   <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
                 </TouchableOpacity>
               );
@@ -473,5 +509,39 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     marginVertical: premiumSpacing[16],
+  },
+  rankRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: premiumSpacing[12],
+    borderBottomWidth: 1,
+    borderBottomColor: premiumColors.border,
+    gap: premiumSpacing[12],
+  },
+  rankMedal: {
+    fontSize: 16,
+    fontWeight: '800',
+    width: 32,
+    textAlign: 'center',
+  },
+  rankInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  rankTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: premiumColors.text,
+    marginBottom: 2,
+  },
+  rankSubtitle: {
+    fontSize: 12,
+    color: premiumColors.textMuted,
+  },
+  rankPoints: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#F59E0B',
+    flexShrink: 0,
   },
 });
