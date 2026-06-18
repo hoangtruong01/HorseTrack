@@ -4,7 +4,6 @@ import {
   Bell,
   Brain,
   ClipboardCheck,
-  CreditCard,
   FileText,
   Flag,
   Gauge,
@@ -155,14 +154,6 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Brain,
     description: "Tạo và quản lý các gói dự đoán AI cho Spectator.",
     itemKey: "admin.aiPackages",
-  },
-  {
-    title: "AI Revenue",
-    href: "/admin/ai/payments",
-    role: "Admin",
-    icon: CreditCard,
-    description: "Xem doanh thu từ các giao dịch đăng ký gói AI.",
-    itemKey: "admin.aiPayments",
   },
   {
     title: "AI Predictions",

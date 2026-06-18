@@ -1,8 +1,9 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 
 import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { aiApi, type AiPaymentItem } from "@/lib/api-client";
@@ -24,15 +25,13 @@ function getName(field: AiPaymentItem["userId"] | AiPaymentItem["packageId"]) {
 
 export default function AdminAiPaymentsPage() {
   const [payments, setPayments] = useState<AiPaymentItem[]>([]);
-  const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
 
-  const fetchPayments = useCallback(async (page = 1) => {
+  const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await aiApi.listRevenue({ page, limit: 15 });
-      setPayments(res.data);
-      setMeta(res.meta);
+      const data = await aiApi.listRevenue();
+      setPayments(data ?? []);
     } catch (e) {
       toast.error((e as Error).message ?? "Lỗi tải dữ liệu");
     } finally {
@@ -40,26 +39,35 @@ export default function AdminAiPaymentsPage() {
     }
   }, []);
 
-  useEffect(() => { void fetchPayments(1); }, [fetchPayments]);
+  useEffect(() => { void fetchPayments(); }, [fetchPayments]);
 
   return (
     <main className="space-y-6">
-      <PageHeader
-        eyebrow="AI Service"
-        title="Doanh Thu Gói AI"
-        description="Xem toàn bộ giao dịch mua gói dự đoán AI của Spectator qua cổng thanh toán PayOS."
-      />
+      <div className="flex items-start justify-between">
+        <PageHeader
+          eyebrow="AI Service"
+          title="Doanh Thu Gói AI"
+          description="Xem toàn bộ giao dịch mua gói dự đoán AI của Spectator qua cổng thanh toán PayOS."
+        />
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted transition shrink-0"
+        >
+          <ArrowLeft className="size-3.5" />
+          Dashboard
+        </Link>
+      </div>
 
       <div className="text-sm text-muted-foreground">
-        Tổng: <strong className="text-foreground">{meta.total}</strong> giao dịch
+        Tổng: <strong className="text-foreground">{payments.length}</strong> giao dịch
       </div>
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-foreground/55">
-  <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
-  <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
-</div>
+            <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
+            <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
+          </div>
         ) : payments.length === 0 ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có giao dịch nào.</div>
         ) : (
@@ -97,20 +105,6 @@ export default function AdminAiPaymentsPage() {
           </div>
         )}
       </div>
-
-      {meta.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3">
-          <button onClick={() => fetchPayments(meta.page - 1)} disabled={meta.page <= 1}
-            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
-            <ChevronLeft className="size-4" /> Trước
-          </button>
-          <span className="text-sm text-muted-foreground">Trang {meta.page} / {meta.totalPages}</span>
-          <button onClick={() => fetchPayments(meta.page + 1)} disabled={meta.page >= meta.totalPages}
-            className="flex items-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2 text-sm text-foreground hover:bg-white/[0.06] disabled:opacity-40 transition">
-            Sau <ChevronRight className="size-4" />
-          </button>
-        </div>
-      )}
     </main>
   );
 }

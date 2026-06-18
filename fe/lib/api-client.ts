@@ -762,12 +762,7 @@ export const aiApi = {
       status: "ACTIVE" | "EXPIRED" | "CANCELLED";
     } | null>("/ai/my-subscription"),
 
-  listRevenue: (params?: { page?: number; limit?: number }) => {
-    const qs = new URLSearchParams();
-    if (params?.page) qs.set("page", String(params.page));
-    if (params?.limit) qs.set("limit", String(params.limit));
-    return apiFetch<PaginatedResult<AiPaymentItem>>(`/ai/payments?${qs}`);
-  },
+  listRevenue: () => apiFetch<AiPaymentItem[]>("/ai/payments"),
 
   generatePrediction: (raceId: string) =>
     apiFetch<AiPredictionItem>(`/ai/predictions/generate/${raceId}`, {

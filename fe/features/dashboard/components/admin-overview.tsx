@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ClipboardCheck, Trophy, Users, AlertCircle, RefreshCw, Flag, CheckCircle } from "lucide-react";
+import { ClipboardCheck, Trophy, Users, AlertCircle, RefreshCw, Flag, CheckCircle, CreditCard, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { StatCard } from "@/components/data-display/stat-card";
@@ -12,7 +12,7 @@ import { RaceOpsTable } from "@/features/dashboard/components/race-ops-table";
 import { quickActions } from "@/features/dashboard/mock-admin-dashboard";
 
 import { cn } from "@/lib/utils";
-import { dashboardApi, registrationsApi, racesApi, RaceItem } from "@/lib/api-client";
+import { dashboardApi, registrationsApi, racesApi, aiApi, RaceItem, type AiPaymentItem } from "@/lib/api-client";
 import type { StatCardSemantic } from "@/components/data-display/stat-card";
 
 type DashboardData = {
@@ -25,11 +25,28 @@ type DashboardData = {
   racesList: RaceItem[];
 };
 
+const statusColors: Record<string, string> = {
+  SUCCESS: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+  PENDING: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
+  FAILED: "text-red-400 bg-red-400/10 border-red-400/20",
+};
+
+function getPaymentName(field: AiPaymentItem["userId"] | AiPaymentItem["packageId"]) {
+  if (!field) return "—";
+  if (typeof field === "object") {
+    if ("fullName" in field) return field.fullName;
+    if ("name" in field) return field.name;
+  }
+  return String(field);
+}
+
 export function AdminOverview() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<DashboardData | null>(null);
+  const [aiPayments, setAiPayments] = useState<AiPaymentItem[]>([]);
+  const [aiRevenueTotal, setAiRevenueTotal] = useState(0);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -76,6 +93,13 @@ export function AdminOverview() {
 
   useEffect(() => {
     fetchData();
+    aiApi.listRevenue().then((items) => {
+      const list = items ?? [];
+      setAiPayments(list.slice(0, 5));
+      setAiRevenueTotal(
+        list.filter((p) => p.status === "SUCCESS").reduce((sum, p) => sum + p.amount, 0)
+      );
+    }).catch(() => {});
   }, [fetchData]);
 
   // Calculate KPI stats based on real data
@@ -265,6 +289,65 @@ export function AdminOverview() {
           onRefresh={fetchData}
         />
       </div>
+
+      {/* ── AI Revenue Section ─────────────────────────────────────── */}
+      <section aria-label="Doanh thu AI">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <CreditCard className="size-4 text-primary" />
+            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">Doanh Thu AI</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <TrendingUp className="size-3.5 text-emerald-400" />
+              <span className="font-mono font-bold text-emerald-400">{aiRevenueTotal.toLocaleString("vi-VN")} đ</span>
+              <span className="text-muted-foreground/60">từ giao dịch thành công</span>
+            </div>
+            <Link href="/admin/ai/payments" className="text-xs font-semibold text-primary hover:underline">
+              Xem tất cả →
+            </Link>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          {aiPayments.length === 0 ? (
+            <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
+              Chưa có giao dịch nào.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Người dùng</th>
+                    <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Gói AI</th>
+                    <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">Số tiền (VND)</th>
+                    <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Trạng thái</th>
+                    <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Thời gian</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {aiPayments.map((p) => (
+                    <tr key={p._id} className="hover:bg-muted transition-colors">
+                      <td className="px-5 py-3.5 text-sm text-foreground">{getPaymentName(p.userId)}</td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground">{getPaymentName(p.packageId)}</td>
+                      <td className="px-5 py-3.5 text-right font-mono font-bold text-primary">{p.amount.toLocaleString("vi-VN")}</td>
+                      <td className="px-5 py-3.5">
+                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase ${statusColors[p.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground">
+                        {p.createdAt ? new Date(p.createdAt).toLocaleString("vi-VN") : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </section>
     </main>
   );
 }
