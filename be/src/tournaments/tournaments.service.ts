@@ -192,6 +192,10 @@ export class TournamentsService {
       await this.cascadeCancel(id, tournament.name);
     }
 
+    if (newStatus === TournamentStatus.COMPLETED) {
+      await this.cascadeCompleteRaces(id);
+    }
+
     tournament.status = newStatus;
     const saved = await tournament.save();
 
@@ -293,6 +297,30 @@ export class TournamentsService {
             NotificationType.RACE,
           ),
         ),
+      );
+    }
+  }
+
+  private async cascadeCompleteRaces(tournamentId: string): Promise<void> {
+    try {
+      await this.raceModel.updateMany(
+        {
+          tournamentId: new Types.ObjectId(tournamentId),
+          status: {
+            $nin: [
+              RaceStatus.FINISHED,
+              RaceStatus.RESULT_PUBLISHED,
+              RaceStatus.CANCELLED,
+            ],
+          },
+          deletedAt: { $exists: false },
+        },
+        { $set: { status: RaceStatus.CANCELLED } },
+      );
+    } catch (err) {
+      console.error(
+        'Failed to cascade-cancel races when tournament completed:',
+        err,
       );
     }
   }
