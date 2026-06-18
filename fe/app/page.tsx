@@ -26,6 +26,9 @@ import {
 } from "lucide-react";
 import { AppHeader } from "@/components/layout/app-header";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { ChapterNav } from "@/components/ui/chapter-nav";
+import { CountUp } from "@/components/ui/count-up";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { tournamentsApi, racesApi, rankingsApi, TournamentItem, RaceItem, RankingEntry, JockeyRankingEntry } from "@/lib/api-client";
@@ -420,46 +423,50 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* ═══ Scrollytelling: Progress Bar + Chapter Navigation ═══ */}
+      <ScrollProgress />
+      <ChapterNav />
+
       {/* 1. Header (Navbar) */}
       <AppHeader />
 
       {/* 2. Hero Section */}
-      <section className="relative min-h-[640px] lg:min-h-[720px] flex items-center py-16 overflow-hidden">
-        {/* Background Overlay */}
+      <section id="hero" className="relative min-h-[640px] lg:min-h-[720px] flex items-center py-16 overflow-hidden">
+        {/* Background Overlay — Parallax layer */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.12] pointer-events-none mix-blend-lighten"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.12] pointer-events-none mix-blend-lighten will-change-transform"
           style={{ backgroundImage: "url('/hero_horse_racing.png')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-background via-background/90 to-primary/5 pointer-events-none" />
 
-        {/* Decorative Neon Blurs */}
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-[#067E6A]/10 rounded-full blur-[120px] pointer-events-none" />
+        {/* Decorative Neon Blurs — floating animation */}
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none scrollytelling-float" />
+        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-[#067E6A]/10 rounded-full blur-[120px] pointer-events-none scrollytelling-float-delayed" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
 
-          {/* Left Block: Hero Intro */}
-          <div className="space-y-8 animate-fade-in duration-700">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary">
-              <span className="size-2 rounded-full bg-primary animate-ping" />
+          {/* Left Block: Hero Intro — Scrollytelling text reveal */}
+          <div className="space-y-8">
+            <span className="scrollytelling-hero-reveal inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary">
+              <span className="size-2 rounded-full bg-primary scrollytelling-pulse-glow" />
               {t("homepage.badge", "NỀN TẢNG GIẢI ĐẤU TRỰC TUYẾN")}
             </span>
 
-            <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl uppercase">
+            <h1 className="scrollytelling-hero-reveal-delay-1 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl uppercase">
               {t("homepage.heroTitle1", "Quản Lý Giải Đua Ngựa")} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-500 to-amber-400 drop-shadow-[0_2px_15px_rgba(225,6,0,0.15)]">
                 {t("homepage.heroTitleHighlight", "Thông Minh & Toàn Diện")}
               </span>
             </h1>
 
-            <p className="max-w-xl text-base sm:text-lg leading-relaxed text-muted-foreground font-medium">
+            <p className="scrollytelling-hero-reveal-delay-2 max-w-xl text-base sm:text-lg leading-relaxed text-muted-foreground font-medium">
               {t(
                 "homepage.heroSubtitle",
                 "Đăng ký chiến mã, kết nối nài ngựa chuyên nghiệp, xếp lịch đua tự động, cập nhật kết quả thời gian thực và tham gia dự đoán kịch tính.",
               )}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+            <div className="scrollytelling-hero-reveal-delay-3 flex flex-col sm:flex-row gap-4 pt-2">
               <Link
                 href="/register"
                 className="group relative flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary px-8 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/95 transition-all duration-300 shadow-[0_8px_30px_rgb(225,6,0,0.3)] hover:shadow-[0_8px_35px_rgb(225,6,0,0.5)] hover:-translate-y-0.5 active:translate-y-0"
@@ -477,8 +484,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Block: Live Status Board */}
-          <div className="rounded-[2.5rem] border border-border/80 bg-card/60 p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.25)] backdrop-blur-xl space-y-6 relative overflow-hidden animate-fade-in duration-1000">
+          {/* Right Block: Live Status Board — Scrollytelling card reveal */}
+          <div className="scrollytelling-hero-reveal-delay-4 rounded-[2.5rem] border border-border/80 bg-card/60 p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.25)] backdrop-blur-xl space-y-6 relative overflow-hidden">
             {/* Top glass reflection */}
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
 
@@ -621,12 +628,20 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            {/* Scroll hint — mời cuộn xuống */}
+            <div className="scrollytelling-hero-reveal-delay-4 flex flex-col items-center gap-2 mt-6 lg:hidden">
+              <div className="scrollytelling-scroll-hint flex flex-col items-center gap-1">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Cuộn để khám phá</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary/50"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* 3. Quick Stats Section (Thống kê thời gian thực) */}
-      <section className="py-14 bg-secondary/15 backdrop-blur-sm relative overflow-hidden">
+      <section id="stats" className="py-14 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.01] to-transparent" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -639,7 +654,7 @@ export default function Home() {
                 </div>
                 <div>
                   <span className="block text-3xl font-extrabold text-foreground leading-none">
-                    {loading ? "..." : stats.tournaments}
+                    {loading ? "..." : <CountUp end={stats.tournaments} className="tabular-nums" />}
                   </span>
                   <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
                     Giải đấu
@@ -659,7 +674,7 @@ export default function Home() {
                 </div>
                 <div>
                   <span className="block text-3xl font-extrabold text-foreground leading-none">
-                    {loading ? "..." : stats.horses}+
+                    {loading ? "..." : <CountUp end={stats.horses} suffix="+" className="tabular-nums" />}
                   </span>
                   <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
                     Ngựa đua đăng ký
@@ -679,7 +694,7 @@ export default function Home() {
                 </div>
                 <div>
                   <span className="block text-3xl font-extrabold text-foreground leading-none">
-                    {loading ? "..." : stats.jockeys}+
+                    {loading ? "..." : <CountUp end={stats.jockeys} suffix="+" className="tabular-nums" />}
                   </span>
                   <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
                     Nài ngựa chuyên nghiệp
@@ -699,7 +714,7 @@ export default function Home() {
                 </div>
                 <div>
                   <span className="block text-3xl font-extrabold text-foreground leading-none">
-                    {loading ? "..." : stats.races}
+                    {loading ? "..." : <CountUp end={stats.races} className="tabular-nums" />}
                   </span>
                   <span className="block text-xs font-black uppercase tracking-wider text-muted-foreground mt-2 leading-none">
                     Trận đua đã kết thúc
@@ -716,7 +731,7 @@ export default function Home() {
       </section>
 
       {/* 4. Featured Tournaments Section (Giải đấu nổi bật - Dữ liệu thực tế) */}
-      <section className="py-20 relative overflow-hidden">
+      <section id="tournaments" className="py-20 relative overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
 
           <ScrollReveal>
@@ -841,7 +856,7 @@ export default function Home() {
       </section>
 
       {/* 5. Rankings Section (Bảng xếp hạng toàn cầu - Thiết kế hiện đại & Animated) */}
-      <section className="py-20 bg-secondary/10 relative overflow-hidden">
+      <section id="rankings" className="py-20 relative overflow-hidden">
         {/* Style injection for smooth staggered animations */}
         <style dangerouslySetInnerHTML={{
           __html: `
@@ -1173,7 +1188,7 @@ export default function Home() {
       </section>
 
       {/* 5.5. Global Globe Tournaments Section */}
-      <section className="py-24 relative overflow-hidden bg-background">
+      <section id="globe" className="py-24 relative overflow-hidden">
         {/* Glow Effects */}
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute bottom-1/4 left-10 w-96 h-96 bg-yellow-500/5 rounded-full blur-[140px] pointer-events-none" />
@@ -1309,7 +1324,7 @@ export default function Home() {
       </section>
 
       {/* 6. Core Features Section (Tính năng cốt lõi - Thiết kế hiện đại & Hiệu ứng tương tác) */}
-      <section className="py-24 relative overflow-hidden bg-background">
+      <section id="features" className="py-24 relative overflow-hidden">
         <style dangerouslySetInnerHTML={{
           __html: `
           @keyframes featureCardFadeInUp {
