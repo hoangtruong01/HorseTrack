@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
-import { C, LoadingState, EmptyState, SectionHeader, Card, statusLabel, formatDate } from '@/components/ui/shared';
+import { LoadingState, EmptyState, statusLabel, formatDate } from '@/components/ui/shared';
+import { AppScreen } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius, premiumTypography } from '@/components/ui/premium-tokens';
 import { tournamentsApi, racesApi, raceResultsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -78,21 +80,24 @@ export default function OwnerResults() {
   if (loading) return <LoadingState />;
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.bg }}>
+    <AppScreen padded={false}>
       {view !== 'tournaments' && (
         <TouchableOpacity style={st.backBtn} onPress={goBack}>
-          <MaterialIcons name="arrow-back" size={20} color={C.textSecondary} />
+          <MaterialIcons name="arrow-back" size={24} color={premiumColors.text} />
           <Text style={st.backText}>Quay lại</Text>
         </TouchableOpacity>
       )}
 
       <ScrollView
         contentContainerStyle={st.p}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} colors={[premiumColors.brand]} />}
       >
         {view === 'tournaments' && (
           <>
-            <SectionHeader title="Chọn giải đấu để xem kết quả" />
+            <View style={st.headerBox}>
+              <Text style={st.eyebrow}>Kết quả giải đấu</Text>
+              <Text style={st.pageTitle}>Chọn giải đấu</Text>
+            </View>
             {tournaments.length === 0 ? (
               <EmptyState icon="emoji-events" title="Chưa có giải đấu" subtitle="Không tìm thấy giải đấu nào." />
             ) : (
@@ -100,15 +105,15 @@ export default function OwnerResults() {
                 const id = t._id || t.id;
                 const ts = statusLabel(t.status);
                 return (
-                  <TouchableOpacity key={id} style={st.tournamentCard} onPress={() => selectTournament(t)}>
+                  <TouchableOpacity key={id} style={st.cardItem} onPress={() => selectTournament(t)}>
                     <View style={{ flex: 1 }}>
-                      <Text style={st.tName} numberOfLines={1}>{t.name}</Text>
-                      <Text style={st.tDate}>{formatDate(t.startDate)} — {formatDate(t.endDate)}</Text>
+                      <Text style={st.cardTitle} numberOfLines={1}>{t.name}</Text>
+                      <Text style={st.cardSub}>{formatDate(t.startDate)} — {formatDate(t.endDate)}</Text>
                     </View>
                     <View style={[st.badge, { backgroundColor: ts.color + '20', borderColor: ts.color + '40' }]}>
                       <Text style={[st.badgeText, { color: ts.color }]}>{ts.label}</Text>
                     </View>
-                    <MaterialIcons name="chevron-right" size={20} color={C.textMuted} />
+                    <MaterialIcons name="chevron-right" size={24} color={premiumColors.textMuted} />
                   </TouchableOpacity>
                 );
               })
@@ -118,23 +123,23 @@ export default function OwnerResults() {
 
         {view === 'races' && (
           <>
-            <Card>
+            <View style={st.headerBox}>
               <Text style={st.eyebrow}>Kết quả thi đấu</Text>
               <Text style={st.pageTitle}>{selectedTournament?.name}</Text>
-            </Card>
+            </View>
             {races.length === 0 ? (
               <EmptyState icon="flag" title="Chưa có kết quả" subtitle="Chưa có trận đua nào kết thúc trong giải đấu này." />
             ) : (
               races.map(race => {
                 const id = race._id || race.id;
                 return (
-                  <TouchableOpacity key={id} style={st.raceCard} onPress={() => selectRace(race)}>
-                    <View style={st.raceIcon}><MaterialIcons name="flag" size={20} color={C.red} /></View>
+                  <TouchableOpacity key={id} style={st.cardItem} onPress={() => selectRace(race)}>
+                    <View style={st.iconBox}><MaterialIcons name="flag" size={24} color={premiumColors.brand} /></View>
                     <View style={{ flex: 1 }}>
-                      <Text style={st.raceName} numberOfLines={1}>{race.name}</Text>
-                      <Text style={st.raceInfo}>{race.distanceMeters}m · {formatDate(race.startTime)}</Text>
+                      <Text style={st.cardTitle} numberOfLines={1}>{race.name}</Text>
+                      <Text style={st.cardSub}>{race.distanceMeters}m · {formatDate(race.startTime)}</Text>
                     </View>
-                    <MaterialIcons name="chevron-right" size={20} color={C.textMuted} />
+                    <MaterialIcons name="chevron-right" size={24} color={premiumColors.textMuted} />
                   </TouchableOpacity>
                 );
               })
@@ -144,57 +149,61 @@ export default function OwnerResults() {
 
         {view === 'detail' && (
           <>
-            <Card>
+            <View style={st.headerBox}>
               <Text style={st.eyebrow}>{selectedTournament?.name}</Text>
               <Text style={st.pageTitle}>{selectedRace?.name}</Text>
-            </Card>
+            </View>
             {results.length === 0 ? (
               <EmptyState icon="leaderboard" title="Chưa có kết quả" subtitle="Kết quả chưa được công bố." />
             ) : (
-              results.map((res, idx) => {
-                const horseName = typeof res.horseId === 'object' ? res.horseId?.name : 'Ngựa ẩn';
-                const jockeyName = typeof res.jockeyUserId === 'object' ? res.jockeyUserId?.fullName : 'Nài ẩn';
-                return (
-                  <View key={res._id || idx} style={st.resultRow}>
-                    <Text style={st.rankText}>{rankIcon(res.rank)}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={st.horseText}>{horseName}</Text>
-                      <Text style={st.jockeyText}>Nài: {jockeyName}</Text>
+              <View style={st.resultsContainer}>
+                {results.map((res, idx) => {
+                  const horseName = typeof res.horseId === 'object' ? res.horseId?.name : 'Ngựa ẩn';
+                  const jockeyName = typeof res.jockeyUserId === 'object' ? res.jockeyUserId?.fullName : 'Nài ẩn';
+                  return (
+                    <View key={res._id || idx} style={st.resultRow}>
+                      <View style={st.rankBox}>
+                        <Text style={st.rankText}>{rankIcon(res.rank)}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={st.horseText}>{horseName}</Text>
+                        <Text style={st.jockeyText}>Nài: {jockeyName}</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={st.timeText}>{formatTime(res.finishTimeMs)}</Text>
+                        <Text style={st.ptsText}>+{res.points || 0} PTS</Text>
+                      </View>
                     </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={st.timeText}>{formatTime(res.finishTimeMs)}</Text>
-                      <Text style={st.ptsText}>+{res.points || 0} PTS</Text>
-                    </View>
-                  </View>
-                );
-              })
+                  );
+                })}
+              </View>
             )}
           </>
         )}
       </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
 const st = StyleSheet.create({
-  p: { padding: 16, paddingBottom: 32 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 12, borderBottomWidth: 1, borderBottomColor: C.cardBorder, backgroundColor: C.card },
-  backText: { color: C.textSecondary, fontSize: 12, fontWeight: '700' },
-  tournamentCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 14, padding: 14, marginBottom: 8 },
-  tName: { color: C.white, fontSize: 14, fontWeight: '800' },
-  tDate: { color: C.textMuted, fontSize: 10, marginTop: 4 },
-  badge: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  badgeText: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  eyebrow: { color: C.red, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.5 },
-  pageTitle: { color: C.white, fontSize: 18, fontWeight: '900', marginTop: 4 },
-  raceCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 14, padding: 14, marginBottom: 8 },
-  raceIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: C.red + '15', alignItems: 'center', justifyContent: 'center' },
-  raceName: { color: C.white, fontSize: 13, fontWeight: '800' },
-  raceInfo: { color: C.textMuted, fontSize: 10, marginTop: 4 },
-  resultRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.card, borderWidth: 1, borderColor: C.cardBorder, borderRadius: 14, padding: 14, marginBottom: 8 },
-  rankText: { fontSize: 20, minWidth: 36, textAlign: 'center' },
-  horseText: { color: C.white, fontSize: 13, fontWeight: '800' },
-  jockeyText: { color: C.textSecondary, fontSize: 11, marginTop: 2 },
-  timeText: { color: C.white, fontSize: 13, fontWeight: '900', fontVariant: ['tabular-nums'] },
-  ptsText: { color: C.tealLight, fontSize: 11, fontWeight: '800', marginTop: 2 },
+  p: { padding: premiumSpacing[16], paddingBottom: premiumSpacing[32] },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: premiumSpacing[8], padding: premiumSpacing[16], backgroundColor: premiumColors.surfaceGlassStrong, borderBottomWidth: 1, borderBottomColor: premiumColors.borderGlass },
+  backText: { color: premiumColors.text, fontSize: premiumTypography.sizes[14], fontWeight: premiumTypography.weights.bold },
+  headerBox: { marginBottom: premiumSpacing[24] },
+  eyebrow: { color: premiumColors.brand, fontSize: premiumTypography.sizes[12], fontWeight: premiumTypography.weights.bold, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: premiumSpacing[4] },
+  pageTitle: { color: premiumColors.text, fontSize: premiumTypography.sizes[24], fontWeight: premiumTypography.weights.black },
+  cardItem: { flexDirection: 'row', alignItems: 'center', gap: premiumSpacing[12], backgroundColor: premiumColors.surfaceGlass, borderWidth: 1, borderColor: premiumColors.borderSoft, borderRadius: premiumRadius[16], padding: premiumSpacing[16], marginBottom: premiumSpacing[12] },
+  cardTitle: { color: premiumColors.text, fontSize: premiumTypography.sizes[16], fontWeight: premiumTypography.weights.bold, marginBottom: premiumSpacing[4] },
+  cardSub: { color: premiumColors.textMuted, fontSize: premiumTypography.sizes[13] },
+  badge: { borderWidth: 1, borderRadius: premiumRadius[8], paddingHorizontal: premiumSpacing[8], paddingVertical: 4 },
+  badgeText: { fontSize: premiumTypography.sizes[11], fontWeight: premiumTypography.weights.bold, textTransform: 'uppercase', letterSpacing: 0.5 },
+  iconBox: { width: 48, height: 48, borderRadius: premiumRadius[12], backgroundColor: premiumColors.brandSoft, alignItems: 'center', justifyContent: 'center' },
+  resultsContainer: { gap: premiumSpacing[12] },
+  resultRow: { flexDirection: 'row', alignItems: 'center', gap: premiumSpacing[12], backgroundColor: premiumColors.surfaceGlass, borderWidth: 1, borderColor: premiumColors.borderSoft, borderRadius: premiumRadius[16], padding: premiumSpacing[12] },
+  rankBox: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: premiumColors.surfaceGlassStrong, borderRadius: premiumRadius[12] },
+  rankText: { fontSize: 24, textAlign: 'center' },
+  horseText: { color: premiumColors.text, fontSize: premiumTypography.sizes[16], fontWeight: premiumTypography.weights.bold, marginBottom: 2 },
+  jockeyText: { color: premiumColors.textSecondary, fontSize: premiumTypography.sizes[13] },
+  timeText: { color: premiumColors.text, fontSize: premiumTypography.sizes[16], fontWeight: premiumTypography.weights.black, fontVariant: ['tabular-nums'] },
+  ptsText: { color: premiumColors.gold, fontSize: premiumTypography.sizes[13], fontWeight: premiumTypography.weights.bold, marginTop: 4 },
 });

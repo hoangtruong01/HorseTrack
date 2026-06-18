@@ -90,8 +90,8 @@ export function EmptyState({ icon, title, subtitle }: { icon: string; title: str
   return (
     <View style={styles.emptyState}>
       <MaterialIcons name={icon as any} size={48} color={theme.textMuted} />
-      <Text style={[styles.emptyTitle, { color: theme.white }]}>{title}</Text>
-      <Text style={[styles.emptySubtitle, { color: theme.textMuted }]}>{subtitle}</Text>
+      <Text style={[styles.emptyTitle, { color: theme.textPrimary, marginTop: 12 }]}>{title}</Text>
+      <Text style={[styles.emptySubtitle, { color: theme.textSecondary, marginTop: 8 }]}>{subtitle}</Text>
     </View>
   );
 }
@@ -102,8 +102,8 @@ export function ErrorState({ title, message, onRetry }: { title?: string; messag
   return (
     <View style={styles.emptyState}>
       <MaterialIcons name="error-outline" size={48} color={theme.red} />
-      <Text style={[styles.emptyTitle, { color: theme.white }]}>{title || 'Không tải được dữ liệu'}</Text>
-      <Text selectable style={[styles.emptySubtitle, { color: theme.textMuted }]}>{message}</Text>
+      <Text style={[styles.emptyTitle, { color: theme.textPrimary, marginTop: 12 }]}>{title || 'Không tải được dữ liệu'}</Text>
+      <Text selectable style={[styles.emptySubtitle, { color: theme.textSecondary, marginTop: 8, marginBottom: 16 }]}>{message}</Text>
       <OutlineButton title="Thử lại" onPress={onRetry} color={theme.red} />
     </View>
   );
@@ -121,7 +121,7 @@ export function LoadingState() {
 // ─── Status Badge ───────────────────────────────────────────────────────────
 export function StatusBadge({ label, color }: { label: string; color: string }) {
   return (
-    <View style={[styles.badge, { backgroundColor: color + '20', borderColor: color + '40' }]}>
+    <View style={[styles.badge, { backgroundColor: color + '15', borderColor: color + '40', borderRadius: 8 }]}>
       <Text style={[styles.badgeText, { color }]}>{label}</Text>
     </View>
   );
@@ -130,7 +130,10 @@ export function StatusBadge({ label, color }: { label: string; color: string }) 
 // ─── Card Container ─────────────────────────────────────────────────────────
 export function Card({ children, style }: { children: React.ReactNode; style?: any }) {
   const theme = useThemeColors();
-  return <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }, style]}>{children}</View>;
+  const isDark = theme.bg === '#1C1C25';
+  const bg = isDark ? 'rgba(255,255,255,0.055)' : theme.card;
+  const border = isDark ? 'rgba(255,255,255,0.14)' : theme.cardBorder;
+  return <View style={[styles.card, { backgroundColor: bg, borderColor: border, borderRadius: 16 }, style]}>{children}</View>;
 }
 
 // ─── Primary Button ─────────────────────────────────────────────────────────
@@ -138,10 +141,16 @@ export function PrimaryButton({ title, onPress, loading, disabled, color }: {
   title: string; onPress: () => void; loading?: boolean; disabled?: boolean; color?: string;
 }) {
   const theme = useThemeColors();
+  const isDark = theme.bg === '#1C1C25';
   const activeColor = color || theme.red;
   return (
     <TouchableOpacity
-      style={[styles.primaryBtn, { backgroundColor: activeColor }, (disabled || loading) && styles.disabledBtn]}
+      style={[
+        styles.primaryBtn, 
+        { backgroundColor: activeColor }, 
+        (disabled || loading) && styles.disabledBtn,
+        isDark && !disabled && !loading ? { shadowColor: activeColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.22, shadowRadius: 8, elevation: 3 } : {}
+      ]}
       onPress={onPress}
       disabled={disabled || loading}
     >
@@ -172,8 +181,11 @@ export function ListItemCard({ title, subtitle, rightText, rightColor, onPress, 
   title: string; subtitle?: string; rightText?: string; rightColor?: string; onPress?: () => void; icon?: string;
 }) {
   const theme = useThemeColors();
+  const isDark = theme.bg === '#1C1C25';
+  const bg = isDark ? 'rgba(255,255,255,0.035)' : theme.card;
+  const border = isDark ? 'rgba(255,255,255,0.07)' : theme.cardBorder;
   const content = (
-    <View style={[styles.listItem, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
+    <View style={[styles.listItem, { backgroundColor: bg, borderColor: border, borderRadius: 12 }]}>
       {icon && (
         <View style={[styles.listItemIcon, { backgroundColor: theme.red + '15' }]}>
           <MaterialIcons name={icon as any} size={20} color={theme.red} />
