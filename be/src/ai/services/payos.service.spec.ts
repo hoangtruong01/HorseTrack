@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { getModelToken } from '@nestjs/mongoose';
@@ -23,7 +24,7 @@ describe('PayosService.handleWebhook (unconfigured)', () => {
     service = module.get(PayosService);
   });
 
-  it('logs an error instead of silently ignoring when PayOS is not configured', async () => {
+  it('logs an error and throws BadRequestException when PayOS is not configured', async () => {
     const errorSpy = jest
       .spyOn(
         (service as unknown as { logger: { error: jest.Mock } }).logger,
@@ -31,7 +32,9 @@ describe('PayosService.handleWebhook (unconfigured)', () => {
       )
       .mockImplementation(() => undefined);
 
-    await service.handleWebhook({ orderCode: 123 });
+    await expect(service.handleWebhook({ orderCode: 123 })).rejects.toThrow(
+      BadRequestException,
+    );
 
     expect(errorSpy).toHaveBeenCalled();
   });

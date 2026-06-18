@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
+import { getConnectionToken, getModelToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { TournamentsService } from './tournaments.service';
 import { Tournament } from './schemas/tournament.schema';
@@ -45,6 +45,15 @@ describe('TournamentsService', () => {
       providers: [
         TournamentsService,
         {
+          provide: getConnectionToken(),
+          useValue: {
+            startSession: jest.fn().mockResolvedValue({
+              withTransaction: jest.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+              endSession: jest.fn().mockResolvedValue(undefined),
+            }),
+          },
+        },
+        {
           provide: getModelToken(Tournament.name),
           useValue: {
             findById: jest.fn().mockReturnValue({
@@ -87,6 +96,7 @@ describe('TournamentsService', () => {
       expect(raceModel.updateMany).toHaveBeenCalledWith(
         { _id: { $in: [raceOid] } },
         { $set: { status: RaceStatus.CANCELLED } },
+        expect.objectContaining({ session: expect.any(Object) }),
       );
     });
 
@@ -100,6 +110,7 @@ describe('TournamentsService', () => {
       expect(registrationModel.updateMany).toHaveBeenCalledWith(
         { raceId: { $in: [raceOid] }, status: RegistrationStatus.PENDING },
         { $set: { status: RegistrationStatus.CANCELLED } },
+        expect.objectContaining({ session: expect.any(Object) }),
       );
     });
 
@@ -113,6 +124,7 @@ describe('TournamentsService', () => {
       expect(registrationModel.updateMany).toHaveBeenCalledWith(
         { raceId: { $in: [raceOid] }, status: RegistrationStatus.APPROVED },
         { $set: { status: RegistrationStatus.WITHDRAWN } },
+        expect.objectContaining({ session: expect.any(Object) }),
       );
     });
 

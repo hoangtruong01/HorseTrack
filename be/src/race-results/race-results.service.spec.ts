@@ -10,6 +10,7 @@ import {
 import { Registration } from '../registrations/schemas/registration.schema';
 import { RefereeAssignment } from '../referee-assignments/schemas/referee-assignment.schema';
 import { Jockey } from '../jockeys/schemas/jockey.schema';
+import { Horse } from '../horses/schemas/horse.schema';
 import { RaceViolation } from '../race-violations/schemas/race-violation.schema';
 import { RacesService } from '../races/races.service';
 import { PrizesService } from '../prizes/prizes.service';
@@ -108,6 +109,10 @@ describe('RaceResultsService', () => {
         {
           provide: getModelToken(Jockey.name),
           useValue: { findOne: jest.fn() },
+        },
+        {
+          provide: getModelToken(Horse.name),
+          useValue: { findByIdAndUpdate: jest.fn() },
         },
         {
           provide: getModelToken(RaceViolation.name),

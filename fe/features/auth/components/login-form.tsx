@@ -123,19 +123,20 @@ export function LoginForm() {
         targetRole = "counter-staff";
       }
 
-      toast.success(
-        t("auth.loginForm.loginSuccess"),
-        t("auth.loginForm.loginSuccessDescription", {
+      toast.success(t("auth.loginForm.loginSuccess"), {
+        description: t("auth.loginForm.loginSuccessDescription", {
           userName: user.fullName,
         }),
-      );
-      
+      });
       router.push(`/${targetRole}`);
     } catch (err) {
       const defaultErr = t("auth.loginForm.loginError");
       const errMsg = (err as Error).message || defaultErr;
       setErrorMsg(errMsg);
-      toast.error(defaultErr, errMsg !== defaultErr ? errMsg : undefined);
+      toast.error(
+        defaultErr,
+        errMsg !== defaultErr ? { description: errMsg } : undefined,
+      );
       setIsSubmitting(false);
     }
   }

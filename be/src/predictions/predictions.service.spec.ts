@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
+import { getConnectionToken, getModelToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { PredictionsService } from './predictions.service';
 import { Prediction, PredictionStatus } from './schemas/prediction.schema';
@@ -79,6 +79,7 @@ describe('PredictionsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PredictionsService,
+        { provide: getConnectionToken(), useValue: { startSession: jest.fn() } },
         { provide: getModelToken(Prediction.name), useValue: predictionModel },
         { provide: getModelToken(Race.name), useValue: raceModel },
         { provide: getModelToken(RaceResult.name), useValue: resultModel },

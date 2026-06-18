@@ -211,27 +211,24 @@ describe('RacesService', () => {
 
   describe('updateStatus', () => {
     it('vẫn cascade (gọi syncTournamentStatus)', async () => {
-      const race = makeRace(RaceStatus.FINISHED);
+      const race = makeRace(RaceStatus.SCHEDULED);
       raceModel.findOne.mockReturnValue(race);
 
       const syncSpy = jest
         .spyOn(service, 'syncTournamentStatus')
         .mockResolvedValue(undefined);
 
-      await service.updateStatus(raceId, RaceStatus.RESULT_PUBLISHED);
+      await service.updateStatus(raceId, RaceStatus.CANCELLED);
 
       expect(syncSpy).toHaveBeenCalledWith(raceId);
     });
 
     it('trả về RaceDocument đã save', async () => {
-      const race = makeRace(RaceStatus.FINISHED);
+      const race = makeRace(RaceStatus.SCHEDULED);
       raceModel.findOne.mockReturnValue(race);
       jest.spyOn(service, 'syncTournamentStatus').mockResolvedValue(undefined);
 
-      const result = await service.updateStatus(
-        raceId,
-        RaceStatus.RESULT_PUBLISHED,
-      );
+      const result = await service.updateStatus(raceId, RaceStatus.CANCELLED);
 
       expect(result).toBe(race);
     });
