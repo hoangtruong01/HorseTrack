@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
 import {
@@ -33,6 +33,7 @@ import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-le
 @Injectable()
 export class TournamentsService {
   constructor(
+    @InjectConnection() private connection: Connection,
     @InjectModel(Tournament.name)
     private tournamentModel: Model<TournamentDocument>,
     @InjectModel(Race.name) private raceModel: Model<RaceDocument>,
@@ -203,70 +204,73 @@ export class TournamentsService {
     tournamentId: string,
     tournamentName: string,
   ): Promise<void> {
-    // Get all race IDs before cancelling
     const races = await this.raceModel.find({
       tournamentId,
       status: { $nin: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED] },
     });
     const raceIds = races.map((r) => r._id);
 
-    if (raceIds.length > 0) {
-      const pendingPredictions = await this.predictionModel.find({
-        raceId: { $in: raceIds },
-        status: PredictionStatus.PENDING,
-      });
+    if (raceIds.length === 0) return;
 
-      for (const p of pendingPredictions) {
-        if (p.betPoints && p.betPoints >= 2) {
-          await this.ledgerService.credit({
-            userId: String(p.userId),
-            points: p.betPoints,
-            sourceType: LedgerSourceType.PREDICTION_REWARD,
-            sourceId: String(p._id),
-            note: `Hoàn trả cược dự đoán (+${p.betPoints} điểm) do giải đấu bị hủy`,
-          });
+    const pendingPredictions = await this.predictionModel.find({
+      raceId: { $in: raceIds },
+      status: PredictionStatus.PENDING,
+    });
 
-          await this.notificationsService.send(
-            String(p.userId),
-            'Dự đoán bị hủy',
-            `Giải đấu bị hủy, bạn được hoàn trả ${p.betPoints} điểm cược dự đoán.`,
-            NotificationType.PREDICTION,
-          );
+    const session = await this.connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        for (const p of pendingPredictions) {
+          if (p.betPoints && p.betPoints >= 2) {
+            await this.ledgerService.credit({
+              userId: String(p.userId),
+              points: p.betPoints,
+              sourceType: LedgerSourceType.PREDICTION_REWARD,
+              sourceId: String(p._id),
+              note: `Hoàn trả cược dự đoán (+${p.betPoints} điểm) do giải đấu bị hủy`,
+              session,
+            });
+          }
         }
+
+        await Promise.all([
+          this.raceModel.updateMany(
+            { _id: { $in: raceIds } },
+            { $set: { status: RaceStatus.CANCELLED } },
+            { session },
+          ),
+          this.predictionModel.updateMany(
+            { raceId: { $in: raceIds }, status: PredictionStatus.PENDING },
+            { $set: { status: PredictionStatus.CANCELLED } },
+            { session },
+          ),
+          this.registrationModel.updateMany(
+            { raceId: { $in: raceIds }, status: RegistrationStatus.PENDING },
+            { $set: { status: RegistrationStatus.CANCELLED } },
+            { session },
+          ),
+          this.registrationModel.updateMany(
+            { raceId: { $in: raceIds }, status: RegistrationStatus.APPROVED },
+            { $set: { status: RegistrationStatus.WITHDRAWN } },
+            { session },
+          ),
+        ]);
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    for (const p of pendingPredictions) {
+      if (p.betPoints && p.betPoints >= 2) {
+        await this.notificationsService.send(
+          String(p.userId),
+          'Dự đoán bị hủy',
+          `Giải đấu bị hủy, bạn được hoàn trả ${p.betPoints} điểm cược dự đoán.`,
+          NotificationType.PREDICTION,
+        );
       }
     }
 
-    await Promise.all([
-      // Cancel exactly the races captured in raceIds (consistent scope with find above)
-      raceIds.length > 0
-        ? this.raceModel.updateMany(
-            { _id: { $in: raceIds } },
-            { $set: { status: RaceStatus.CANCELLED } },
-          )
-        : Promise.resolve(),
-      // Cancel pending predictions for cancelled races
-      raceIds.length > 0
-        ? this.predictionModel.updateMany(
-            { raceId: { $in: raceIds }, status: PredictionStatus.PENDING },
-            { $set: { status: PredictionStatus.CANCELLED } },
-          )
-        : Promise.resolve(),
-    ]);
-
-    // PENDING → CANCELLED; APPROVED → WITHDRAWN
-    // REJECTED registrations are intentionally skipped — rejection is terminal.
-    if (raceIds.length > 0) {
-      await this.registrationModel.updateMany(
-        { raceId: { $in: raceIds }, status: RegistrationStatus.PENDING },
-        { $set: { status: RegistrationStatus.CANCELLED } },
-      );
-      await this.registrationModel.updateMany(
-        { raceId: { $in: raceIds }, status: RegistrationStatus.APPROVED },
-        { $set: { status: RegistrationStatus.WITHDRAWN } },
-      );
-    }
-
-    // Notify all affected owners
     const ownerIds = await this.registrationModel.distinct('ownerId', {
       tournamentId,
     });
