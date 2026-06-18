@@ -11,6 +11,7 @@ import { RegistrationsController } from './registrations.controller';
 import { RegistrationsService } from './registrations.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { PredictionsModule } from '../predictions/predictions.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuditLogsModule } from '../audit-logs/audit-logs.module';
     RacesModule,
     NotificationsModule,
     AuditLogsModule,
+    PredictionsModule,
   ],
   controllers: [RegistrationsController],
   providers: [RegistrationsService],

@@ -290,6 +290,45 @@ export class PredictionsService {
     );
   }
 
+  async cancelPredictionsForHorseInRace(
+    raceId: string,
+    horseId: string,
+  ): Promise<void> {
+    const pending = await this.predictionModel.find({
+      raceId: new Types.ObjectId(raceId),
+      predictedHorseId: new Types.ObjectId(horseId),
+      status: PredictionStatus.PENDING,
+    });
+
+    for (const p of pending) {
+      if (p.betPoints && p.betPoints >= 2) {
+        await this.ledgerService.credit({
+          userId: String(p.userId),
+          points: p.betPoints,
+          sourceType: LedgerSourceType.PREDICTION_REWARD,
+          sourceId: String(p._id),
+          note: `Hoàn trả cược dự đoán (+${p.betPoints} điểm) do ngựa rút khỏi race`,
+        });
+
+        await this.notificationsService.send(
+          String(p.userId),
+          'Dự đoán bị hủy',
+          `Ngựa bạn dự đoán đã rút khỏi cuộc đua, bạn được hoàn trả ${p.betPoints} điểm cược.`,
+          NotificationType.PREDICTION,
+        );
+      }
+    }
+
+    await this.predictionModel.updateMany(
+      {
+        raceId: new Types.ObjectId(raceId),
+        predictedHorseId: new Types.ObjectId(horseId),
+        status: PredictionStatus.PENDING,
+      },
+      { $set: { status: PredictionStatus.CANCELLED, evaluatedAt: new Date() } },
+    );
+  }
+
   async payoutBetsForRace(
     raceId: string,
     session?: ClientSession,
