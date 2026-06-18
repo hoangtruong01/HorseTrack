@@ -25,7 +25,7 @@ import { useTheme } from "next-themes";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
-import { sileo } from "sileo";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function ProfilePage() {
@@ -76,11 +76,11 @@ export default function ProfilePage() {
     if (!file) return;
 
     if (!file.type.match(/\/(jpg|jpeg|png|webp|gif)$/)) {
-      sileo.error({ title: "Vui lòng chọn file hình ảnh (jpg, png, webp, gif)" });
+      toast.error("Vui lòng chọn file hình ảnh (jpg, png, webp, gif)");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      sileo.error({ title: "Kích thước file tối đa là 5MB" });
+      toast.error("Kích thước file tối đa là 5MB");
       return;
     }
 
@@ -115,9 +115,9 @@ export default function ProfilePage() {
       }
 
       updateUser({ avatar: imageUrl });
-      sileo.success({ title: "Cập nhật ảnh đại diện thành công" });
+      toast.success("Cập nhật ảnh đại diện thành công");
     } catch (error: any) {
-      sileo.error({ title: error.message || "Đã xảy ra lỗi" });
+      toast.error(error.message || "Đã xảy ra lỗi");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

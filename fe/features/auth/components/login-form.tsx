@@ -22,12 +22,7 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { sileo } from "sileo";
-
-const toast = {
-  success: (msg: string) => sileo.success({ title: msg, duration: 1200 }),
-  error: (msg: string) => sileo.error({ title: msg, duration: 1200 }),
-};
+import { toast } from "sonner";
 
 const fieldClass =
   "h-11 w-full rounded-xl border border-border bg-input pl-10 pr-10 text-sm text-foreground placeholder:text-foreground/30 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-60";

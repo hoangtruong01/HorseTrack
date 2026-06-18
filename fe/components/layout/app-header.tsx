@@ -11,12 +11,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { NotificationsBell } from "@/components/layout/notifications-bell";
 import { UserDropdownMenu } from "@/components/layout/user-dropdown-menu";
-import { sileo } from "sileo";
-
-const toast = {
-  success: (msg: string) => sileo.success({ title: msg, duration: 1200 }),
-  error: (msg: string) => sileo.error({ title: msg, duration: 1200 }),
-};
+import { toast } from "sonner";
 
 export type AppHeaderProps = {
   className?: string;
