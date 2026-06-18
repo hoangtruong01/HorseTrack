@@ -48,7 +48,9 @@ describe('TournamentsService', () => {
           provide: getConnectionToken(),
           useValue: {
             startSession: jest.fn().mockResolvedValue({
-              withTransaction: jest.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+              withTransaction: jest
+                .fn()
+                .mockImplementation(async (fn: () => Promise<void>) => fn()),
               endSession: jest.fn().mockResolvedValue(undefined),
             }),
           },
@@ -96,6 +98,7 @@ describe('TournamentsService', () => {
       expect(raceModel.updateMany).toHaveBeenCalledWith(
         { _id: { $in: [raceOid] } },
         { $set: { status: RaceStatus.CANCELLED } },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         expect.objectContaining({ session: expect.any(Object) }),
       );
     });
@@ -110,6 +113,7 @@ describe('TournamentsService', () => {
       expect(registrationModel.updateMany).toHaveBeenCalledWith(
         { raceId: { $in: [raceOid] }, status: RegistrationStatus.PENDING },
         { $set: { status: RegistrationStatus.CANCELLED } },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         expect.objectContaining({ session: expect.any(Object) }),
       );
     });
@@ -124,6 +128,7 @@ describe('TournamentsService', () => {
       expect(registrationModel.updateMany).toHaveBeenCalledWith(
         { raceId: { $in: [raceOid] }, status: RegistrationStatus.APPROVED },
         { $set: { status: RegistrationStatus.WITHDRAWN } },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         expect.objectContaining({ session: expect.any(Object) }),
       );
     });
