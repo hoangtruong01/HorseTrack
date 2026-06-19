@@ -1,20 +1,17 @@
 # Academic Search Keywords Matrix
 
-Bảng dưới đây liệt kê các từ khóa tìm kiếm học thuật (Search Queries) và mô-đun ứng dụng tương ứng (Target Module) được rút ra từ 10 bài báo nghiên cứu nền tảng để phát triển dự án **Horse Racing Tournament Management System**:
+Bảng dưới đây liệt kê các từ khóa tìm kiếm học thuật (Search Queries)  được rút ra từ 10 bài báo nghiên cứu nền tảng để phát triển dự án **Horse Racing Tournament Management System**.
 
 | STT | Từ khóa tìm kiếm học thuật (Search Queries) | Mô-đun ứng dụng tương ứng (Target Module) |
-|---|---|---|
-| 01 | `"Retrieval-Augmented Generation"` `"educational question answering"` `"course-specific QA"` `"LLM"` | **Core-RAG:** Pipeline hỏi đáp tài liệu học tập dựa trên RAG |
-| 02 | `"Dense Passage Retrieval"` `"open-domain question answering"` `"BERT dual encoder"` `"FAISS"` | **Retrieval-Core:** Truy xuất ngữ nghĩa bằng embedding và vector database |
-| 03 | `"DPR"` `"semantic search"` `"vector database"` `"BM25 hard negatives"` | **Embedding-Service:** Lựa chọn và tối ưu mô hình embedding cho tài liệu học tập |
-| 04 | `"RAG"` `"BART generator"` `"DPR retriever"` `"knowledge-intensive NLP"` | **Answer-Generation:** Sinh câu trả lời dựa trên context retrieved từ tài liệu |
-| 05 | `"Dynamic Document Relevance"` `"DR-RAG"` `"multi-hop question answering"` `"Query Document Concatenation"` | **Advanced-Retrieval:** Truy xuất nhiều bước cho câu hỏi cần nhiều phần tài liệu |
-| 06 | `"Self-RAG"` `"self-reflection"` `"reflection tokens"` `"citation accuracy"` | **Answer-Verification:** Tự đánh giá câu trả lời, giảm hallucination và tăng độ tin cậy |
-| 07 | `"Corrective RAG"` `"retrieval evaluator"` `"corrective retrieval"` `"hallucination reduction"` | **Retrieval-Evaluation:** Đánh giá và sửa lỗi chunk retrieved trước khi sinh câu trả lời |
-| 08 | `"Educational RAG"` `"LLM code interpreter"` `"STEM education"` `"reasoning capability"` | **STEM-Support:** Hỗ trợ câu hỏi học thuật cần tính toán, suy luận hoặc giải thích công thức |
-| 09 | `"AI Tutor"` `"course-adaptive"` `"Retrieval-Augmented Generation"` `"grounded generation"` | **AI-Tutor:** Gia sư AI thích ứng theo từng môn học thông qua tài liệu được upload |
-| 10 | `"RAG chatbots for education"` `"student satisfaction"` `"learning effectiveness"` `"hallucination rate"` | **Evaluation-Metric:** Đánh giá hiệu quả học tập, độ chính xác, hallucination và trải nghiệm sinh viên |
-| 11 | `"citation-based answering"` `"retrieval relevance"` `"faithfulness"` `"source grounding"` | **Citation-Answering:** Hiển thị nguồn/chunk tham chiếu cho câu trả lời học tập |
-| 12 | `"personalized learning assistant"` `"student learning history"` `"adaptive learning"` `"AI tutor personalization"` | **Personalized-Learning:** Cá nhân hóa gợi ý học tập dựa trên lịch sử và tiến độ của sinh viên |
-| 13 | `"multi-hop retrieval"` `"academic documents"` `"syllabus question answering"` `"lecture notes retrieval"` | **Academic-QA:** Hỏi đáp trên syllabus, slide, lecture notes và PDF môn học |
-| 14 | `"RAG evaluation benchmark"` `"Exact Match"` `"F1 score"` `"Recall"` `"response time"` | **Benchmarking:** Thiết kế bộ đánh giá LLM-only vs Basic RAG vs Enhanced RAG |
+|:---|:---|:---|
+| 01 | `"Genetic Algorithm" "POX-Heuristic" "Tournament Scheduling" "Sport scheduling constraints"` | **Tournament-Scheduling:** Tự động hóa lập lịch giải đấu và tối ưu hóa thời gian nghỉ cho ngựa. |
+| 02 | `"Horse racing prediction" "Artificial Neural Networks" "non-linear prediction model"` | **Prediction-Model:** Xây dựng module dự đoán kết quả dựa trên dữ liệu phi tuyến. |
+| 03 | `"Learning-to-Rank" "LambdaRank" "Horse race prediction" "Top-k prediction"` | **Ranking-Management:** Module xếp hạng thứ bậc ngựa tham gia (Top-k). |
+| 04 | `"Machine Learning pipeline" "XGBoost for tabular data" "data preprocessing in racing"` | **AI-Service-ETL:** Pipeline xử lý dữ liệu thô (ETL) và trích xuất đặc trưng (Feature Engineering). |
+| 05 | `"Thoroughbred performance" "Horse demographics influence" "feature engineering in animal science"` | **Database-Schema:** Xác định các trường dữ liệu thực thể Ngựa/Nài ngựa. |
+
+| 06 | `"Wireless Sensor Networks" "intelligent sports management system" "real-time data acquisition"` | **IoT-Data-Layer:** Thiết kế tầng thu thập dữ liệu cảm biến thời gian thực. |
+| 07 | `"Pari-mutuel wagering" "true odds vs public odds" "betting market efficiency"` | **Betting-Strategy:** Tích hợp dữ liệu thị trường (Live Odds) vào module dự đoán. |
+| 08 | `"Constraint programming" "sports scheduling bibliography" "hard and soft constraints"` | **Backend-Logic:** Thiết lập bộ quy tắc Validation logic cho giải đấu (Rule-based). |
+| 09 | `"Horse Herd Optimization" "cloud task scheduling" "Multi-Objective optimization"` | **Backend-Infrastructure:** Tối ưu hóa phân bổ tài nguyên Cloud cho hệ thống. |
+| 10 | `"Association Rules" "Decision support system" "sports event management system"` | **Admin-Dashboard:** Kiến trúc hỗ trợ ra quyết định và quản lý vận hành B/S. |
