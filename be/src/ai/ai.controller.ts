@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Param,
   Post,
   Req,
@@ -62,6 +63,7 @@ export class AiController {
   }
 
   @Post('payments/webhook')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Webhook nhận callback từ PayOS (public)',
     description: 'Endpoint này dành cho PayOS gọi vào khi thanh toán hoàn tất.',
