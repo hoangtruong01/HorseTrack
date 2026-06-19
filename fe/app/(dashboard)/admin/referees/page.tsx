@@ -161,7 +161,7 @@ export default function AdminRefereesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border bg-muted">
+                <tr className="border-b border-border bg-muted whitespace-nowrap">
                   <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trọng tài</th>
                   <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Giấy phép</th>
                   <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kinh nghiệm</th>

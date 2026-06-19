@@ -62,6 +62,18 @@ export class AiController {
     return this.aiService.initiateSubscription(dto.packageId, user.id);
   }
 
+  @Post('payments/sync/:orderCode')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'orderCode', type: Number })
+  @ApiOperation({
+    summary: 'Sync trạng thái payment từ PayOS (gọi sau khi return/cancel)',
+  })
+  syncPaymentStatus(@Param('orderCode') orderCode: string) {
+    return this.aiService.syncPaymentStatus(Number(orderCode));
+  }
+
   @Post('payments/webhook')
   @HttpCode(200)
   @ApiOperation({

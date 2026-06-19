@@ -86,8 +86,7 @@ export default function AdminRegistrationsPage() {
       
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-border bg-card p-5">
-          <ClipboardCheck className="size-5 text-primary" />
-          <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-primary">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
             Chờ duyệt (PENDING)
           </p>
           <p className="mt-2 font-mono text-4xl font-black text-foreground">

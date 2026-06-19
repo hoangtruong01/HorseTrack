@@ -155,14 +155,6 @@ export const dashboardNavigation: NavigationItem[] = [
     description: "Tạo và quản lý các gói dự đoán AI cho Spectator.",
     itemKey: "admin.aiPackages",
   },
-  {
-    title: "AI Predictions",
-    href: "/admin/ai/predictions",
-    role: "Admin",
-    icon: Sparkles,
-    description: "Sinh và xem dự đoán AI cho từng cuộc đua.",
-    itemKey: "admin.aiPredictions",
-  },
   // ─── OWNER ──────────────────────────────────────────────────────────
   {
     title: "Trạm Điều Hành",
