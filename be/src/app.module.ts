@@ -17,7 +17,6 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { PredictionsModule } from './predictions/predictions.module';
 import { PrizesModule } from './prizes/prizes.module';
 import { RaceChecksModule } from './race-checks/race-checks.module';
-import { RaceRecordsModule } from './race-records/race-records.module';
 import { RaceResultsModule } from './race-results/race-results.module';
 import { RaceViolationsModule } from './race-violations/race-violations.module';
 import { RacesModule } from './races/races.module';
@@ -61,7 +60,6 @@ import { RefereeReportsModule } from './referee-reports/referee-reports.module';
     PredictionsModule,
     WalletModule,
     AiModule,
-    RaceRecordsModule,
     NotificationsModule,
     DashboardModule,
     UploadsModule,

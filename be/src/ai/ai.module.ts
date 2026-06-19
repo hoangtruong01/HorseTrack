@@ -16,10 +16,6 @@ import {
   RaceResult,
   RaceResultSchema,
 } from '../race-results/schemas/race-result.schema';
-import {
-  RaceRecord,
-  RaceRecordSchema,
-} from '../race-records/schemas/race-record.schema';
 import { Jockey, JockeySchema } from '../jockeys/schemas/jockey.schema';
 import {
   AIPredictionPackage,
@@ -51,7 +47,6 @@ import { PayosService } from './services/payos.service';
       { name: Horse.name, schema: HorseSchema },
       { name: Registration.name, schema: RegistrationSchema },
       { name: RaceResult.name, schema: RaceResultSchema },
-      { name: RaceRecord.name, schema: RaceRecordSchema },
       { name: Jockey.name, schema: JockeySchema },
       { name: AIPredictionPackage.name, schema: AIPredictionPackageSchema },
       { name: Payment.name, schema: PaymentSchema },

@@ -10,7 +10,7 @@ export interface HorsePredictionMeta {
   winCount: number;
   totalRaces: number;
   recentRanks: number[];
-  avgSpeedKmh: number;
+  avgSpeedKmh?: number;
   jockeySkill?: string;
   predictedRank: number;
   winProbability: number;
@@ -68,7 +68,7 @@ export class LlmService {
             ? `3 race gần nhất: hạng ${h.recentRanks.join(', ')}`
             : 'chưa có lịch sử';
         const speed =
-          h.avgSpeedKmh > 0
+          h.avgSpeedKmh && h.avgSpeedKmh > 0
             ? `tốc độ trung bình ${h.avgSpeedKmh.toFixed(1)} km/h`
             : '';
         const jockey = h.jockeySkill ? `jockey ${h.jockeySkill}` : '';

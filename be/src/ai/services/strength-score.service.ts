@@ -5,7 +5,6 @@ import { HorseHealthStatus } from '../../horses/schemas/horse.schema';
 import type { JockeyDocument } from '../../jockeys/schemas/jockey.schema';
 import type { RaceResultDocument } from '../../race-results/schemas/race-result.schema';
 import { RaceResultOutcome } from '../../race-results/schemas/race-result.schema';
-import type { RaceRecordDocument } from '../../race-records/schemas/race-record.schema';
 
 export interface HorseStrengthResult {
   horseId: string;
@@ -25,7 +24,6 @@ export class StrengthScoreService {
   compute(
     horse: HorseDocument,
     results: RaceResultDocument[],
-    records: RaceRecordDocument[],
     jockey: JockeyDocument | null,
     lastRaceDate: Date | null,
     raceDate: Date,
@@ -45,16 +43,14 @@ export class StrengthScoreService {
 
       const winRate = this.computeWinRate(results);
       const avgRankScore = this.computeAvgRankScore(results);
-      const avgSpeed = this.computeAvgSpeed(records);
       const recentForm = this.computeRecentForm(results);
       const jockeyScore = this.computeJockeyScore(jockey, results);
       const horseAttrScore = this.computeHorseAttrScore(horse);
 
       let score =
-        winRate * 25 +
-        avgRankScore * 20 +
-        avgSpeed * 15 +
-        recentForm * 20 +
+        winRate * 30 +
+        avgRankScore * 25 +
+        recentForm * 25 +
         jockeyScore * 10 +
         horseAttrScore * 10;
 
@@ -94,14 +90,6 @@ export class StrengthScoreService {
     const avg =
       ranked.reduce((sum, r) => sum + (r.rank ?? 5), 0) / ranked.length;
     return Math.max(0, 1 - (avg - 1) / 10);
-  }
-
-  private computeAvgSpeed(records: RaceRecordDocument[]): number {
-    const withSpeed = records.filter((r) => r.speed > 0);
-    if (!withSpeed.length) return 0;
-    const avg =
-      withSpeed.reduce((sum, r) => sum + r.speed, 0) / withSpeed.length;
-    return Math.min(1, avg / 80);
   }
 
   private computeRecentForm(results: RaceResultDocument[]): number {
