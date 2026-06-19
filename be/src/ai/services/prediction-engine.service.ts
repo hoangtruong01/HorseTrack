@@ -17,10 +17,6 @@ import {
   type RaceResultDocument,
 } from '../../race-results/schemas/race-result.schema';
 import {
-  RaceRecord,
-  type RaceRecordDocument,
-} from '../../race-records/schemas/race-record.schema';
-import {
   Jockey,
   type JockeyDocument,
 } from '../../jockeys/schemas/jockey.schema';
@@ -52,8 +48,6 @@ export class PredictionEngineService {
     @InjectModel(Horse.name) private horseModel: Model<HorseDocument>,
     @InjectModel(RaceResult.name)
     private raceResultModel: Model<RaceResultDocument>,
-    @InjectModel(RaceRecord.name)
-    private raceRecordModel: Model<RaceRecordDocument>,
     @InjectModel(Jockey.name) private jockeyModel: Model<JockeyDocument>,
     @InjectModel(AIPredictionSuggestion.name)
     private predictionModel: Model<AIPredictionSuggestionDocument>,
@@ -160,7 +154,6 @@ export class PredictionEngineService {
         winCount: 0,
         totalRaces: 0,
         recentRanks: [],
-        avgSpeedKmh: 0,
       },
     });
 
@@ -173,11 +166,6 @@ export class PredictionEngineService {
         .find({ horseId })
         .sort({ createdAt: -1 })
         .limit(20);
-
-      const records = await this.raceRecordModel
-        .find({ horseId })
-        .sort({ createdAt: -1 })
-        .limit(10);
 
       let jockey: JockeyDocument | null = null;
       if (reg.jockeyUserId) {
@@ -195,7 +183,6 @@ export class PredictionEngineService {
       const scoreResult = this.strengthScore.compute(
         horse,
         results,
-        records,
         jockey,
         lastRaceDate,
         raceDate,
@@ -206,10 +193,6 @@ export class PredictionEngineService {
         .slice(0, 3)
         .map((r) => r.rank)
         .filter((r): r is number => r != null);
-      const avgSpeedKmh =
-        records.length > 0
-          ? records.reduce((sum, r) => sum + (r.speed ?? 0), 0) / records.length
-          : 0;
 
       return {
         horseId,
@@ -223,7 +206,6 @@ export class PredictionEngineService {
           winCount,
           totalRaces: results.length,
           recentRanks,
-          avgSpeedKmh,
           jockeySkill: jockey?.skillLevel,
         },
       };

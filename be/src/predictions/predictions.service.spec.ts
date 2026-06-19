@@ -79,7 +79,10 @@ describe('PredictionsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PredictionsService,
-        { provide: getConnectionToken(), useValue: { startSession: jest.fn() } },
+        {
+          provide: getConnectionToken(),
+          useValue: { startSession: jest.fn() },
+        },
         { provide: getModelToken(Prediction.name), useValue: predictionModel },
         { provide: getModelToken(Race.name), useValue: raceModel },
         { provide: getModelToken(RaceResult.name), useValue: resultModel },
