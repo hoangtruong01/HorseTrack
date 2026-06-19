@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, Platform } from 'react-native';
 import { walletApi, type WalletTxItem } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function WalletScreen() {
   const colorScheme = useColorScheme() ?? 'light';

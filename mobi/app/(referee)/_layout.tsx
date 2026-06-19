@@ -12,7 +12,7 @@ export default function RefereeLayout() {
   const { user } = useAuth();
 
   return (
-    <Tabs 
+    <Tabs
       tabBar={(props) => <DockTabBar {...props} />}
       screenOptions={{
         ...dockOptions,
@@ -24,7 +24,7 @@ export default function RefereeLayout() {
       <Tabs.Screen name="judging" options={{ title: 'Thẩm định', headerTitle: 'THẨM ĐỊNH KẾT QUẢ', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="gavel" color={color} /> }} />
       <Tabs.Screen name="wallet" options={{ title: 'Ví', headerTitle: 'VÍ ĐIỆN TỬ', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} /> }} />
-      
+
       {/* Ẩn các trang con vì đã gộp vào Judging */}
       <Tabs.Screen name="violations" options={{ href: null, tabBarItemStyle: { display: 'none' }, title: 'Vi phạm', headerTitle: 'GHI NHẬN VI PHẠM' }} />
       <Tabs.Screen name="results" options={{ href: null, tabBarItemStyle: { display: 'none' }, title: 'Kết quả', headerTitle: 'KẾT QUẢ TRẬN ĐUA' }} />

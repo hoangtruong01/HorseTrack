@@ -12,5 +12,7 @@ if (Platform.OS !== 'android' && apiURL.includes('10.0.2.2')) {
   apiURL = apiURL.replace('10.0.2.2', 'localhost');
 }
 
+console.log(apiURL);
+
 export const BASE_URL = apiURL;
 
