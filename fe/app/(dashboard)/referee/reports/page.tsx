@@ -96,7 +96,7 @@ export default function RefereeReportsPage() {
       const reportsMap: Record<string, RefereeReport[]> = {};
       await Promise.all(
         myAssignments.map(async (a: Assignment) => {
-          const rId = a.raceId._id || a.raceId.id;
+          const rId = a.raceId._id || a.raceId.id || "";
           const repRes = await fetch(`/api/referee/referee-reports/race/${rId}`);
           if (repRes.ok) {
             const repData = await repRes.json();
@@ -232,7 +232,7 @@ export default function RefereeReportsPage() {
                 >
                   <option value="" className="bg-card">-- Chọn cuộc đua giám sát --</option>
                   {assignments.map((a) => {
-                    const rId = a.raceId?._id || a.raceId?.id;
+                    const rId = a.raceId?._id || a.raceId?.id || "";
                     const aId = a._id || a.id || rId;
                     return (
                       <option key={aId} value={rId || ""} className="bg-card">
@@ -265,7 +265,7 @@ export default function RefereeReportsPage() {
                 >
                   <option value="" className="bg-card">-- Tất cả / Không chọn --</option>
                   {horsesForSelectedRace.map((h) => {
-                    const horseId = h.horseId?._id || h.horseId?.id;
+                    const horseId = h.horseId?._id || h.horseId?.id || "";
                     const hId = h._id || h.id || horseId;
                     return (
                       <option key={hId} value={horseId || ""} className="bg-card">
@@ -337,9 +337,9 @@ export default function RefereeReportsPage() {
             <div className="space-y-3">
               {assignments.map((assignment) => {
                 if (!assignment.raceId) return null;
-                const raceId = assignment.raceId._id || assignment.raceId.id;
-                const raceReports = reports[raceId ?? ""] || [];
-                const isExpanded = expandedRaces[raceId ?? ""] || false;
+                const raceId = assignment.raceId._id || assignment.raceId.id || "";
+                const raceReports = reports[raceId] || [];
+                const isExpanded = expandedRaces[raceId] || false;
                 const assignmentId = assignment._id || assignment.id || raceId;
 
                 return (
@@ -433,7 +433,7 @@ export default function RefereeReportsPage() {
                         )}
                         <div className="pt-2 flex justify-end">
                           <Button asChild variant="outline" className="h-9 px-4 rounded-full text-xs font-bold uppercase">
-                            <Link href={`/referee/races/${assignment.raceId._id || assignment.raceId.id}`}>
+                            <Link href={`/referee/races/${assignment.raceId._id || assignment.raceId.id || ""}`}>
                               Đi tới Cuộc Đua <ArrowRight className="size-3.5 ml-1" />
                             </Link>
                           </Button>
