@@ -2,8 +2,8 @@
 
 import { AlertTriangle, Award, Gift, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +13,11 @@ export type CashoutRequestFormProps = {
   onCancel: () => void;
 };
 
-export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: CashoutRequestFormProps) {
+export function CashoutRequestForm({
+  availablePoints,
+  onSubmit,
+  onCancel,
+}: CashoutRequestFormProps) {
   const { t } = useTranslation();
   const [points, setPoints] = useState<number>(Math.min(100, availablePoints));
   const [isLoading, setIsLoading] = useState(false);
@@ -43,12 +47,14 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-lg sm:p-6">
+    <div className="rounded-2xl border border-border bg-card p-3 shadow-lg sm:p-6">
       <div>
         <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.24em] text-primary">
           <Gift className="size-4" /> {t("wallet.cashoutForm.eyebrow")}
         </p>
-        <h2 className="mt-1 text-2xl font-black uppercase text-foreground">{t("wallet.cashoutForm.title")}</h2>
+        <h2 className="mt-1 text-2xl font-black uppercase text-foreground">
+          {t("wallet.cashoutForm.title")}
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("wallet.cashoutForm.desc")}
         </p>
@@ -56,12 +62,20 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div className="flex items-center justify-between rounded-xl border border-border/5 bg-muted/[0.02] p-4">
-          <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">{t("wallet.cashoutForm.balanceLabel")}</span>
-          <span className="font-mono text-xl font-black text-emerald-400">{availablePoints.toLocaleString("vi-VN")} {t("wallet.cashoutForm.pointsSuffix")}</span>
+          <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">
+            {t("wallet.cashoutForm.balanceLabel")}
+          </span>
+          <span className="font-mono text-xl font-black text-emerald-400">
+            {availablePoints.toLocaleString("vi-VN")}{" "}
+            {t("wallet.cashoutForm.pointsSuffix")}
+          </span>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="points-input" className="block text-xs font-black uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="points-input"
+            className="block text-xs font-black uppercase tracking-wider text-muted-foreground"
+          >
             {t("wallet.cashoutForm.amountLabel")}
           </label>
           <div className="relative">
@@ -72,7 +86,8 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
               max={availablePoints}
               value={pointsStr}
               onChange={(e) => {
-                const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                const val =
+                  e.target.value === "" ? 0 : parseInt(e.target.value, 10);
                 setPoints(Number.isNaN(val) ? 0 : val);
               }}
               required
@@ -92,8 +107,12 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
         <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-primary/5 p-4">
           <Award className="size-8 shrink-0 text-primary" />
           <div className="text-xs">
-            <p className="font-bold uppercase tracking-wider text-foreground">{t("wallet.cashoutForm.infoTitle")}</p>
-            <p className="mt-0.5 text-muted-foreground">{t("wallet.cashoutForm.infoDesc")}</p>
+            <p className="font-bold uppercase tracking-wider text-foreground">
+              {t("wallet.cashoutForm.infoTitle")}
+            </p>
+            <p className="mt-0.5 text-muted-foreground">
+              {t("wallet.cashoutForm.infoDesc")}
+            </p>
           </div>
         </div>
 
@@ -108,22 +127,24 @@ export function CashoutRequestForm({ availablePoints, onSubmit, onCancel }: Cash
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 pt-3 sm:flex-row">
+        <div className="grid grid-cols-2 gap-2 pt-3">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isLoading}
-            className="h-12 flex-1 rounded-full border-border/10 bg-transparent font-black uppercase tracking-wider text-foreground hover:bg-muted/5"
+            className="h-12 w-full rounded-full border-border/10 bg-transparent font-black uppercase tracking-wider text-foreground hover:bg-muted/5"
           >
             {t("wallet.cashoutForm.btnCancel")}
           </Button>
           <Button
             type="submit"
             disabled={isLoading || points <= 0 || points > availablePoints}
-            className="h-12 flex-1 rounded-full bg-primary font-black uppercase tracking-wider text-foreground shadow-[0_4px_16px_rgba(225,6,0,0.35)] hover:bg-[#B80500]"
+            className="h-12 w-full rounded-full bg-primary font-black uppercase tracking-wider text-foreground shadow-[0_4px_16px_rgba(225,6,0,0.35)] hover:bg-[#B80500]"
           >
-            {isLoading ? t("wallet.cashoutForm.btnProcessing") : t("wallet.cashoutForm.btnSubmit")}
+            {isLoading
+              ? t("wallet.cashoutForm.btnProcessing")
+              : t("wallet.cashoutForm.btnSubmit")}
           </Button>
         </div>
       </form>

@@ -118,7 +118,7 @@
       "warningOver": "Note: Do not redeem more points than your available balance at the time of receiving gifts at the counter.",
       "warningAudit": "Redemption transactions are securely audited and logged in the Ledger system.",
       "btnCancel": "Cancel",
-      "btnSubmit": "Generate Code",
+      "btnSubmit": "Generate",
       "btnProcessing": "Processing...",
       "errInvalid": "Please enter a valid amount of points.",
       "errExceed": "Redemption points exceed your current balance.",

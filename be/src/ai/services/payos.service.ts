@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Webhook } from '@payos/node';
@@ -142,6 +147,46 @@ export class PayosService {
       payment.status = PaymentStatus.FAILED;
       await payment.save();
     }
+  }
+
+  async syncPaymentStatus(orderCode: number): Promise<PaymentStatus> {
+    if (!this.payos) {
+      throw new BadRequestException('PayOS chưa được cấu hình');
+    }
+
+    const payment = await this.paymentModel.findOne({
+      payosOrderCode: orderCode,
+    });
+    if (!payment) {
+      throw new NotFoundException(
+        `Không tìm thấy payment với orderCode ${orderCode}`,
+      );
+    }
+
+    if (payment.status !== PaymentStatus.PENDING) {
+      return payment.status;
+    }
+
+    try {
+      const info = await this.payos.paymentRequests.get(orderCode);
+      if (info.status === 'PAID') {
+        payment.status = PaymentStatus.SUCCESS;
+        await payment.save();
+        await this.activateSubscription(
+          payment.userId.toString(),
+          payment.packageId.toString(),
+        );
+      } else if (info.status === 'CANCELLED' || info.status === 'EXPIRED') {
+        payment.status = PaymentStatus.FAILED;
+        await payment.save();
+      }
+    } catch (err: unknown) {
+      this.logger.error(
+        `PayOS sync failed for orderCode ${orderCode}: ${String(err)}`,
+      );
+    }
+
+    return payment.status;
   }
 
   private async activateSubscription(

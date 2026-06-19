@@ -64,6 +64,11 @@ export class AiService {
     return this.payosService.handleWebhook(body);
   }
 
+  async syncPaymentStatus(orderCode: number): Promise<{ status: string }> {
+    const status = await this.payosService.syncPaymentStatus(orderCode);
+    return { status };
+  }
+
   async checkSubscriptionActive(userId: string): Promise<boolean> {
     const now = new Date();
     const sub = await this.subscriptionModel.findOne({

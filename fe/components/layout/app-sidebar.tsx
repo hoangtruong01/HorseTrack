@@ -64,6 +64,109 @@ export function AppSidebar({
     ? items.filter((item) => item.role === role)
     : items;
 
+  const hasGroups = visibleItems.some((item) => item.group);
+
+  const grouped: { group: string | null; items: NavigationItem[] }[] = [];
+  if (hasGroups) {
+    const seen = new Map<string, NavigationItem[]>();
+    const order: (string | null)[] = [];
+    for (const item of visibleItems) {
+      const key = item.group ?? "__ungrouped__";
+      if (!seen.has(key)) {
+        seen.set(key, []);
+        order.push(item.group ?? null);
+      }
+      seen.get(key)!.push(item);
+    }
+    for (const g of order) {
+      grouped.push({ group: g, items: seen.get(g ?? "__ungrouped__")! });
+    }
+  }
+
+  const renderItem = (item: NavigationItem) => {
+    const Icon = item.icon;
+    const isActive =
+      currentHref === item.href ||
+      activeHref === item.href ||
+      (item.href === pathname && !currentHref.includes("?tab="));
+
+    return (
+      <Tooltip.Root key={item.href + item.title}>
+        <Tooltip.Trigger asChild>
+          <Link
+            href={item.href}
+            scroll={false}
+            className={cn(
+              "group relative flex items-center rounded-lg border border-transparent p-3 text-sm transition-all duration-300 ease-in-out hover:border-border hover:bg-secondary hover:text-foreground",
+              isCollapsed ? "justify-center gap-0" : "gap-3",
+              isActive && "border-primary/60 bg-primary/10 text-foreground",
+            )}
+          >
+            {Icon ? (
+              <Icon
+                className={cn(
+                  "shrink-0 text-primary transition-all duration-300",
+                  isCollapsed ? "size-5 mx-auto" : "mt-0.5 size-4",
+                )}
+                aria-hidden="true"
+              />
+            ) : null}
+            <span
+              className={cn(
+                "overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap flex flex-col justify-center",
+                isCollapsed ? "max-w-0 opacity-0" : "max-w-[200px] opacity-100",
+              )}
+            >
+              <span className="block font-bold uppercase tracking-[0.08em]">
+                {!mounted
+                  ? item.title
+                  : item.itemKey
+                  ? t(`navigation.${item.itemKey}.title`)
+                  : item.title}
+              </span>
+              {item.description ? (
+                <span className="mt-1 block text-xs leading-4 text-muted-foreground truncate">
+                  {!mounted
+                    ? item.description
+                    : item.itemKey
+                    ? t(`navigation.${item.itemKey}.description`)
+                    : item.description}
+                </span>
+              ) : null}
+            </span>
+          </Link>
+        </Tooltip.Trigger>
+        {isCollapsed && (
+          <Tooltip.Portal>
+            <Tooltip.Content
+              side="right"
+              align="center"
+              sideOffset={12}
+              className="z-50 rounded-md bg-card/95 backdrop-blur-sm border border-border px-3 py-1.5 text-foreground shadow-xl select-none max-w-xs flex flex-col gap-0.5"
+            >
+              <span className="text-xs font-bold uppercase tracking-wider">
+                {!mounted
+                  ? item.title
+                  : item.itemKey
+                  ? t(`navigation.${item.itemKey}.title`)
+                  : item.title}
+              </span>
+              {item.description && (
+                <span className="text-[10px] text-muted-foreground normal-case font-normal leading-snug">
+                  {!mounted
+                    ? item.description
+                    : item.itemKey
+                    ? t(`navigation.${item.itemKey}.description`)
+                    : item.description}
+                </span>
+              )}
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        )}
+      </Tooltip.Root>
+    );
+  };
+
   return (
     <Tooltip.Provider delayDuration={350}>
       <aside
@@ -87,94 +190,24 @@ export function AppSidebar({
         </button>
 
         <div className="flex flex-col flex-1 overflow-hidden">
-          <nav className="space-y-2 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {visibleItems.map((item) => {
-              const Icon = item.icon;
-              // Xác định active dựa trên cả path và query param
-              const isActive =
-                currentHref === item.href ||
-                activeHref === item.href ||
-                (item.href === pathname && !currentHref.includes("?tab="));
-
-              return (
-                <Tooltip.Root key={item.href + item.title}>
-                  <Tooltip.Trigger asChild>
-                    <Link
-                      href={item.href}
-                      scroll={false}
-                      className={cn(
-                        "group relative flex items-center rounded-lg border border-transparent p-3 text-sm transition-all duration-300 ease-in-out hover:border-border hover:bg-secondary hover:text-foreground",
-                        isCollapsed ? "justify-center gap-0" : "gap-3",
-                        isActive &&
-                        "border-primary/60 bg-primary/10 text-foreground",
-                      )}
-                    >
-                      {Icon ? (
-                        <Icon
-                          className={cn(
-                            "shrink-0 text-primary transition-all duration-300",
-                            isCollapsed ? "size-5 mx-auto" : "mt-0.5 size-4",
-                          )}
-                          aria-hidden="true"
-                        />
-                      ) : null}
-                      <span
-                        className={cn(
-                          "overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap flex flex-col justify-center",
-                          isCollapsed
-                            ? "max-w-0 opacity-0"
-                            : "max-w-[200px] opacity-100",
-                        )}
-                      >
-                        <span className="block font-bold uppercase tracking-[0.08em]">
-                          {!mounted
-                            ? item.title
-                            : item.itemKey
-                            ? t(`navigation.${item.itemKey}.title`)
-                            : item.title}
-                        </span>
-                        {item.description ? (
-                          <span className="mt-1 block text-xs leading-4 text-muted-foreground truncate">
-                            {!mounted
-                              ? item.description
-                              : item.itemKey
-                              ? t(`navigation.${item.itemKey}.description`)
-                              : item.description}
-                          </span>
-                        ) : null}
-                      </span>
-                    </Link>
-                  </Tooltip.Trigger>
-                  {isCollapsed && (
-                    <Tooltip.Portal>
-                      <Tooltip.Content
-                        side="right"
-                        align="center"
-                        sideOffset={12}
-                        className="z-50 rounded-md bg-card/95 backdrop-blur-sm border border-border px-3 py-1.5 text-foreground shadow-xl select-none max-w-xs flex flex-col gap-0.5"
-                      >
-                        <span className="text-xs font-bold uppercase tracking-wider">
-                          {!mounted
-                            ? item.title
-                            : item.itemKey
-                            ? t(`navigation.${item.itemKey}.title`)
-                            : item.title}
-                        </span>
-                        {item.description && (
-                          <span className="text-[10px] text-muted-foreground normal-case font-normal leading-snug">
-                            {!mounted
-                              ? item.description
-                              : item.itemKey
-                              ? t(`navigation.${item.itemKey}.description`)
-                              : item.description}
-                          </span>
-                        )}
-                      </Tooltip.Content>
-                    </Tooltip.Portal>
-                  )}
-                </Tooltip.Root>
-              );
-            })}
+          <nav className="space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {hasGroups
+              ? grouped.map(({ group, items: groupItems }) => (
+                  <div key={group ?? "__ungrouped__"} className="mb-1">
+                    {group && !isCollapsed && (
+                      <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 first:mt-0">
+                        {group}
+                      </p>
+                    )}
+                    {group && isCollapsed && (
+                      <div className="my-2 mx-auto w-6 border-t border-border/50" />
+                    )}
+                    <div className="space-y-0.5">
+                      {groupItems.map(renderItem)}
+                    </div>
+                  </div>
+                ))
+              : visibleItems.map(renderItem)}
           </nav>
         </div>
       </aside>

@@ -39,7 +39,7 @@ export function RaceForm() {
   const [imagePreview, setImagePreview] = useState("");
   const [uploading, setUploading] = useState(false);
 
-  const [existingRaces, setExistingRaces] = useState<any[]>([]);
+  const [existingRaces, setExistingRaces] = useState<{ prize?: number }[]>([]);
   const [loadingRaces, setLoadingRaces] = useState(false);
 
   useEffect(() => {

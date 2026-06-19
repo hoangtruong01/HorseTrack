@@ -116,8 +116,8 @@ export default function ProfilePage() {
 
       updateUser({ avatar: imageUrl });
       toast.success("Cập nhật ảnh đại diện thành công");
-    } catch (error: any) {
-      toast.error(error.message || "Đã xảy ra lỗi");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Đã xảy ra lỗi");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

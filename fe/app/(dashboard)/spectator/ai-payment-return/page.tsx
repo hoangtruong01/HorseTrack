@@ -1,9 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle, XCircle } from "lucide-react";
+import { apiFetch } from "@/lib/api-client";
 
 function PaymentReturnContent() {
   const params = useSearchParams();
@@ -11,6 +12,12 @@ function PaymentReturnContent() {
   const orderCode = params.get("orderCode");
 
   const isSuccess = status === "PAID";
+
+  useEffect(() => {
+    if (!isSuccess && orderCode) {
+      apiFetch(`/ai/payments/sync/${orderCode}`, { method: "POST" }).catch(() => {});
+    }
+  }, [isSuccess, orderCode]);
 
   return (
     <main className="flex min-h-[60vh] items-center justify-center">

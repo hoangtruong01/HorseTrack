@@ -19,7 +19,11 @@ export default function SpectatorDashboardPage() {
   const [loadingBalance, setLoadingBalance] = useState(true);
   
   // Dashboard Stats
-  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  type DashboardStats = {
+    tournaments?: { ongoing?: number };
+    predictions?: { total?: number; winRate?: number };
+  };
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   
   // Tournaments & Races
@@ -71,9 +75,9 @@ export default function SpectatorDashboardPage() {
       );
       // Sort by: ONGOING first, then OPEN_REGISTRATION, then others
       const sorted = activeTournaments.sort((a, b) => {
-        const statusOrder = { ONGOING: 0, OPEN_REGISTRATION: 1 };
-        const aOrder = (statusOrder as any)[a.status] ?? 2;
-        const bOrder = (statusOrder as any)[b.status] ?? 2;
+        const statusOrder: Record<string, number> = { ONGOING: 0, OPEN_REGISTRATION: 1 };
+        const aOrder = statusOrder[a.status] ?? 2;
+        const bOrder = statusOrder[b.status] ?? 2;
         return aOrder - bOrder;
       });
       setTournaments(sorted.slice(0, 2));
