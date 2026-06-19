@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Platform, Alert, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Platform, Alert, ScrollView } from 'react-native';
 import { useAuth } from '../../providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();

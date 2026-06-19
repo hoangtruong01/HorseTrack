@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, Alert, SafeAreaView, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, Alert, Platform } from 'react-native';
 import { walletApi, type CashoutItem } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CashoutRequestScreen() {
   const [walletBalance, setWalletBalance] = useState({ points: 0, cash: 0 });
