@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Platform, TextInput, Alert, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform, TextInput, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { racesApi, registrationsApi, predictionsApi, walletApi, raceResultsApi, type RaceItem, type RegistrationItem } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ExploreScreen() {
   const { tournamentId } = useLocalSearchParams<{ tournamentId?: string }>();

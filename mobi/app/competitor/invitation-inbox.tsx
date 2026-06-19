@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView, RefreshControl } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { jockeyInvitationsApi } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { AppScreen } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function InvitationInboxScreen() {
   const [invitations, setInvitations] = useState<any[]>([]);

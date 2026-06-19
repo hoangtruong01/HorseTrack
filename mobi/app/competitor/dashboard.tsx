@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Platform, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../providers/auth-provider';
 import { walletApi } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CompetitorDashboard() {
   const { user } = useAuth();

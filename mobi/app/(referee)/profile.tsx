@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Image } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Image, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { C, Card, useThemeColors, StatCard, SectionHeader, LoadingState, ErrorState, EmptyState } from '@/components/ui/shared';
 import { useAuth } from '@/providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { refereeAssignmentsApi } from '@/lib/api-client';
+import { refereeAssignmentsApi, usersApi, uploadsApi } from '@/lib/api-client';
 
 export default function RefereeProfile() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const router = useRouter();
   const theme = useThemeColors();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Performance state
   const [assignments, setAssignments] = useState<any[]>([]);
@@ -30,6 +32,49 @@ export default function RefereeProfile() {
       router.replace('/login');
     } finally {
       setIsLoggingOut(false);
+    }
+  };
+
+  const pickAndUploadAvatar = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets[0]) return;
+      
+      const asset = result.assets[0];
+      setIsUploading(true);
+      
+      const formData = new FormData();
+      const filename = asset.uri.split('/').pop() || 'avatar.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image`;
+      
+      formData.append('file', {
+        uri: asset.uri,
+        name: filename,
+        type,
+      } as any);
+
+      const uploadRes = await uploadsApi.uploadImage(formData);
+      const imageUrl = uploadRes.url;
+      
+      const userId = (user as any)?._id || (user as any)?.id;
+      if (userId) {
+        await usersApi.update(userId, { avatar: imageUrl });
+        if (updateUser) {
+          updateUser({ avatar: imageUrl });
+        }
+        Alert.alert('Thành công', 'Cập nhật ảnh đại diện thành công');
+      }
+    } catch (error: any) {
+      Alert.alert('Lỗi', error.message || 'Không thể tải ảnh lên');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -59,12 +104,22 @@ export default function RefereeProfile() {
   return (
     <ScrollView style={[s.c, { backgroundColor: theme.bg }]} contentContainerStyle={s.p}>
       <View style={s.avatarWrap}>
-        <View style={s.avatar}>
-          {user?.avatar ? (
-            <Image source={{ uri: user.avatar }} style={s.avatarImage} />
-          ) : (
-            <MaterialIcons name="person" size={40} color={theme.red} />
-          )}
+        <View style={s.avatarContainer}>
+          <TouchableOpacity style={s.avatar} onPress={pickAndUploadAvatar} disabled={isUploading}>
+            {user?.avatar ? (
+              <Image source={{ uri: user.avatar }} style={s.avatarImage} />
+            ) : (
+              <MaterialIcons name="person" size={40} color={theme.red} />
+            )}
+            {isUploading && (
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator color="#fff" />
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity style={s.cameraBtn} onPress={pickAndUploadAvatar} disabled={isUploading}>
+            <MaterialIcons name="camera-alt" size={14} color="#fff" />
+          </TouchableOpacity>
         </View>
         <Text style={[s.name, { color: theme.white }]}>{user?.fullName || 'Người dùng'}</Text>
         <Text style={[s.email, { color: theme.textSecondary }]}>{user?.email}</Text>
@@ -122,8 +177,10 @@ function InfoRow({ icon, label, value, theme }: { icon: string; label: string; v
 const s = StyleSheet.create({
   c: { flex: 1 }, p: { padding: 16, paddingBottom: 110 },
   avatarWrap: { alignItems: 'center', marginBottom: 24 },
+  avatarContainer: { position: 'relative' },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: C.red + '15', borderWidth: 2, borderColor: C.red, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   avatarImage: { width: '100%', height: '100%' },
+  cameraBtn: { position: 'absolute', bottom: 0, right: 0, backgroundColor: C.red, width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#121212' },
   name: { fontSize: 18, fontWeight: '900', marginTop: 12 },
   email: { fontSize: 12, marginTop: 4 },
   rolesRow: { flexDirection: 'row', gap: 8, marginTop: 12 },

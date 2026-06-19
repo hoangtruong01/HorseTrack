@@ -95,7 +95,7 @@ export function HeroPanel({ eyebrow, title, subtitle, icon, metric, metricLabel,
           </View>
         )}
       </View>
-      
+
       {(metric || action) && (
         <View style={styles.heroFooter}>
           {metric ? (
@@ -214,7 +214,7 @@ export function AppButton({ title, onPress, variant = 'primary', loading, disabl
   const isPrimary = variant === 'primary';
   const isDanger = variant === 'danger';
   const isGhost = variant === 'ghost';
-  
+
   let backgroundColor = premiumColors.surface2;
   let textColor = premiumColors.text;
   let borderColor = premiumColors.border;
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
-  
+
   // AppHeader
   headerContainer: {
     flexDirection: 'row',

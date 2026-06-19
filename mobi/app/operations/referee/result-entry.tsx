@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { raceChecksApi, raceResultsApi, racesApi, type RaceItem } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ErrorState } from '../../../components/ui/shared';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface EntryRow {
   raceRegistrationId: string;

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { tournamentsApi, type TournamentItem } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import { useThemeColors } from '@/components/ui/shared';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TournamentsScreen() {
   const [tournaments, setTournaments] = useState<TournamentItem[]>([]);

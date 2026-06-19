@@ -30,6 +30,7 @@ type AuthContextType = {
     roles?: string[];
     password?: string;
   }) => Promise<AuthUser>;
+  updateUser: (updates: Partial<AuthUser>) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -224,8 +225,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = async (updates: Partial<AuthUser>) => {
+    if (!user) return;
+    const updatedUser = { ...user, ...updates };
+    setUser(updatedUser);
+    const storedAuth = await readStoredAuth();
+    if (storedAuth) {
+      await saveStoredAuth({ ...storedAuth, user: updatedUser });
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, register }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

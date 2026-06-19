@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, RefreshControl, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
 import { AppScreen } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/shared';
 import { jockeyInvitationsApi } from '@/lib/api-client';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function JockeyHorsesScreen() {
   const [horsesData, setHorsesData] = useState<any[]>([]);

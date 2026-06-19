@@ -228,6 +228,13 @@ export const usersApi = {
     if (params?.role) qs.set('role', params.role);
     return apiFetch<PaginatedResult<UserItem>>(`/users?${qs}`);
   },
+  update: (id: string, data: any) =>
+    apiFetch<UserItem>(`/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+};
+
+export const uploadsApi = {
+  uploadImage: (formData: FormData) =>
+    apiFetch<{ url: string }>('/uploads', { method: 'POST', body: formData }),
 };
 
 export const horsesApi = {

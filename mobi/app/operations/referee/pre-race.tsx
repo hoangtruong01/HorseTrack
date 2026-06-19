@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, SafeAreaView, Platform } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { raceChecksApi, racesApi, type RaceItem } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ErrorState } from '../../../components/ui/shared';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PreRaceChecksScreen() {
   const { raceId } = useLocalSearchParams<{ raceId: string }>();
