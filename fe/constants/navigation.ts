@@ -42,6 +42,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Gauge,
     description: "Tổng quan hệ thống: users, tournaments, races, bets.",
     itemKey: "admin.dashboard",
+    group: "Tổng Quan",
   },
   {
     title: "Quản Lý & Phân Quyền",
@@ -50,6 +51,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Users,
     description: "Quản lý tài khoản: xem, ban/unban, xóa và phân quyền hệ thống.",
     itemKey: "admin.users",
+    group: "Nhân Sự",
   },
   {
     title: "Horse Management",
@@ -58,6 +60,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: ShieldCheck,
     description: "Quản lý ngựa: xem toàn bộ, cập nhật trạng thái.",
     itemKey: "admin.horses",
+    group: "Nhân Sự",
   },
   {
     title: "Jockey Management",
@@ -66,6 +69,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Star,
     description: "Quản lý jockey: duyệt profiles, đổi trạng thái.",
     itemKey: "admin.jockeys",
+    group: "Nhân Sự",
   },
   {
     title: "Referee Management",
@@ -74,6 +78,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Users,
     description: "Quản lý trọng tài: duyệt hồ sơ, đổi trạng thái hoạt động.",
     itemKey: "admin.referees",
+    group: "Nhân Sự",
   },
   {
     title: "Tournament Management",
@@ -82,6 +87,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Trophy,
     description: "Quản lý giải: tạo, cập nhật, thay đổi trạng thái.",
     itemKey: "admin.tournaments",
+    group: "Giải Đấu",
   },
   {
     title: "Race Management",
@@ -90,6 +96,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Flag,
     description: "Quản lý vòng đua: tạo, cập nhật trạng thái các race.",
     itemKey: "admin.races",
+    group: "Giải Đấu",
   },
   {
     title: "Registration Approval",
@@ -98,6 +105,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: ClipboardCheck,
     description: "Duyệt đăng ký: approve/reject horse registrations.",
     itemKey: "admin.registrations",
+    group: "Giải Đấu",
   },
   {
     title: "Referee Assignment",
@@ -106,38 +114,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Award,
     description: "Phân công trọng tài: assign referee cho từng race.",
     itemKey: "admin.refereeAssignments",
-  },
-  {
-    title: "Ranking Management",
-    href: "/admin/rankings",
-    role: "Admin",
-    icon: Medal,
-    description: "Xem/cập nhật ranking ngựa và jockey theo giải.",
-    itemKey: "admin.rankings",
-  },
-  {
-    title: "Prize Management",
-    href: "/admin/prizes",
-    role: "Admin",
-    icon: Trophy,
-    description: "Quản lý giải thưởng: xem, cập nhật trạng thái payment.",
-    itemKey: "admin.prizes",
-  },
-  {
-    title: "Bet Management",
-    href: "/admin/bets",
-    role: "Admin",
-    icon: Activity,
-    description: "Quản lý dự đoán: xem tất cả bets của hệ thống.",
-    itemKey: "admin.bets",
-  },
-  {
-    title: "Wallet Transactions",
-    href: "/admin/wallet",
-    role: "Admin",
-    icon: Wallet,
-    description: "Quản lý giao dịch điểm: nạp tiền, cashout queue.",
-    itemKey: "admin.wallet",
+    group: "Giải Đấu",
   },
   {
     title: "Results",
@@ -146,6 +123,43 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: ListChecks,
     description: "Per-race result review and publish queue.",
     itemKey: "admin.results",
+    group: "Kết Quả & Thưởng",
+  },
+  {
+    title: "Ranking Management",
+    href: "/admin/rankings",
+    role: "Admin",
+    icon: Medal,
+    description: "Xem/cập nhật ranking ngựa và jockey theo giải.",
+    itemKey: "admin.rankings",
+    group: "Kết Quả & Thưởng",
+  },
+  {
+    title: "Prize Management",
+    href: "/admin/prizes",
+    role: "Admin",
+    icon: Trophy,
+    description: "Quản lý giải thưởng: xem, cập nhật trạng thái payment.",
+    itemKey: "admin.prizes",
+    group: "Kết Quả & Thưởng",
+  },
+  {
+    title: "Bet Management",
+    href: "/admin/bets",
+    role: "Admin",
+    icon: Activity,
+    description: "Quản lý dự đoán: xem tất cả bets của hệ thống.",
+    itemKey: "admin.bets",
+    group: "Tài Chính",
+  },
+  {
+    title: "Wallet Transactions",
+    href: "/admin/wallet",
+    role: "Admin",
+    icon: Wallet,
+    description: "Quản lý giao dịch điểm: nạp tiền, cashout queue.",
+    itemKey: "admin.wallet",
+    group: "Tài Chính",
   },
   {
     title: "AI Packages",
@@ -154,6 +168,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Brain,
     description: "Tạo và quản lý các gói dự đoán AI cho Spectator.",
     itemKey: "admin.aiPackages",
+    group: "AI",
   },
   // ─── OWNER ──────────────────────────────────────────────────────────
   {
@@ -163,6 +178,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Home,
     description: "Stable shell for horses, registration, jockey handoff.",
     itemKey: "owner.dashboard",
+    group: "Tổng Quan",
   },
   {
     title: "Chuồng Chiến Mã",
@@ -171,6 +187,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: ShieldCheck,
     description: "Manage your horse stable, health status and details.",
     itemKey: "owner.horses",
+    group: "Chiến Mã",
   },
   {
     title: "Đăng Ký Trận Đua",
@@ -179,6 +196,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Flag,
     description: "Browse open races and enroll your healthy horses.",
     itemKey: "owner.races",
+    group: "Chiến Mã",
   },
   {
     title: "Lịch Sử Ghi Danh",
@@ -187,6 +205,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: ClipboardCheck,
     description: "Track approval progress of your horse race registrations.",
     itemKey: "owner.registrations",
+    group: "Chiến Mã",
   },
   {
     title: "Mời Jockey",
@@ -195,6 +214,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Users,
     description: "Invite professional jockeys for your approved horses.",
     itemKey: "owner.jockeyInvitations",
+    group: "Chiến Mã",
   },
   {
     title: "Kết Quả Thi Đấu",
@@ -203,6 +223,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Activity,
     description: "Theo dõi kết quả các trận đua và xếp hạng cán đích chính thức.",
     itemKey: "owner.results",
+    group: "Kết Quả",
   },
   {
     title: "Bảng Xếp Hạng",
@@ -211,6 +232,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Medal,
     description: "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch.",
     itemKey: "owner.rankings",
+    group: "Kết Quả",
   },
   {
     title: "Ví Của Tôi",
@@ -219,6 +241,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Wallet,
     description: "View rewards ledger, split earnings, and request cashouts.",
     itemKey: "owner.wallet",
+    group: "Tài Chính",
   },
   // ─── JOCKEY ──────────────────────────────────────────────────────────
   {
@@ -228,6 +251,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Gauge,
     description: "Bảng điều khiển tổng hợp, lịch đua, lời mời mới và kết quả gần đây.",
     itemKey: "jockey.dashboard",
+    group: "Tổng Quan",
   },
   {
     title: "Lời Mời Cưỡi Ngựa",
@@ -236,6 +260,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Users,
     description: "Tiếp nhận và phản hồi lời mời thi đấu từ các chủ ngựa.",
     itemKey: "jockey.invitations",
+    group: "Thi Đấu",
   },
   {
     title: "Lịch Thi Đấu Đã Nhận",
@@ -244,6 +269,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Flag,
     description: "Xem chi tiết lịch đua đã nhận lời và thông tin chiến mã.",
     itemKey: "jockey.assigned",
+    group: "Thi Đấu",
   },
   {
     title: "Bảng Xếp Hạng",
@@ -252,6 +278,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Medal,
     description: "Bảng xếp hạng chiến mã và nài ngựa xuất sắc nhất theo số lần vô địch.",
     itemKey: "jockey.rankings",
+    group: "Thi Đấu",
   },
   {
     title: "Hồ Sơ Của Tôi",
@@ -260,6 +287,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: UserCircle,
     description: "Tạo và cập nhật hồ sơ nài ngựa: chiều cao, cân nặng, kinh nghiệm.",
     itemKey: "jockey.profile",
+    group: "Cá Nhân",
   },
   {
     title: "Ví Của Tôi",
@@ -268,6 +296,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Wallet,
     description: "Xem điểm thưởng chia tỷ lệ 30% và lịch sử cashout.",
     itemKey: "jockey.wallet",
+    group: "Cá Nhân",
   },
   // ─── REFEREE ──────────────────────────────────────────────────────────
   {
@@ -277,6 +306,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Home,
     description: "Bảng điều khiển giám sát tổng hợp của Trọng tài.",
     itemKey: "referee.dashboard",
+    group: "Tổng Quan",
   },
   {
     title: "Race Được Phân Công",
@@ -285,6 +315,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Flag,
     description: "Danh sách các cuộc đua được phân công giám sát và điều hành.",
     itemKey: "referee.assignments",
+    group: "Điều Hành Race",
   },
   {
     title: "Pre-race Check",
@@ -293,6 +324,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: ShieldCheck,
     description: "Kiểm tra sức khỏe ngựa và điểm danh nài ngựa trước Race.",
     itemKey: "referee.preRace",
+    group: "Điều Hành Race",
   },
   {
     title: "Theo Dõi Race",
@@ -301,6 +333,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Activity,
     description: "Theo dõi trạng thái xuất phát và trực tiếp của cuộc đua.",
     itemKey: "referee.monitoring",
+    group: "Điều Hành Race",
   },
   {
     title: "Xác Nhận Kết Quả",
@@ -309,6 +342,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Award,
     description: "Nhập thời gian về đích chính thức và xếp hạng chiến mã.",
     itemKey: "referee.resultEntry",
+    group: "Ghi Nhận",
   },
   {
     title: "Ghi Nhận Vi Phạm",
@@ -317,6 +351,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Siren,
     description: "Báo cáo lỗi vi phạm và tự động áp dụng giây phạt kỷ luật.",
     itemKey: "referee.violations",
+    group: "Ghi Nhận",
   },
   {
     title: "Biên Bản Thi Đấu",
@@ -325,6 +360,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: FileText,
     description: "Quản lý và lập biên bản thi đấu chính thức cho các cuộc đua.",
     itemKey: "referee.reports",
+    group: "Ghi Nhận",
   },
   {
     title: "Bảng Xếp Hạng",
@@ -333,6 +369,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Medal,
     description: "Theo dõi bảng tổng hợp hiệu suất thi đấu của toàn bộ nài ngựa và chiến mã.",
     itemKey: "referee.rankings",
+    group: "Ghi Nhận",
   },
   {
     title: "Ví Của Tôi",
@@ -341,6 +378,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Wallet,
     description: "Xem điểm lương tích lũy và thực hiện yêu cầu rút điểm.",
     itemKey: "referee.wallet",
+    group: "Tài Chính",
   },
   // ─── SPECTATOR ──────────────────────────────────────────────────────────
   {
@@ -350,6 +388,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Trophy,
     description: "Danh sách giải đấu nổi bật đang diễn ra và sắp khởi tranh.",
     itemKey: "spectator.dashboard",
+    group: "Tổng Quan",
   },
   {
     title: "Giải Đấu & Dự Đoán",
@@ -358,6 +397,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Trophy,
     description: "Xem giải đấu, lịch trình đua, đội hình tham gia và đặt dự đoán trực tiếp.",
     itemKey: "spectator.tournaments",
+    group: "Theo Dõi",
   },
   {
     title: "Kết Quả Trực Tiếp",
@@ -366,6 +406,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Activity,
     description: "Xem trực tiếp kết quả và trạng thái về đích của các chú ngựa.",
     itemKey: "spectator.results",
+    group: "Theo Dõi",
   },
   {
     title: "Bảng Xếp Hạng",
@@ -374,14 +415,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Medal,
     description: "Bảng xếp hạng thành tích chiến mã và nài ngựa xuất sắc nhất.",
     itemKey: "spectator.rankings",
-  },
-  {
-    title: "Ví Điểm Thưởng",
-    href: "/spectator/wallet",
-    role: "Spectator",
-    icon: Wallet,
-    description: "Ví điểm dự đoán, lịch sử quy đổi và mã nhận thưởng tại quầy.",
-    itemKey: "spectator.wallet",
+    group: "Theo Dõi",
   },
   {
     title: "Lịch Sử Dự Đoán",
@@ -390,6 +424,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Bell,
     description: "Xem lại danh sách và trạng thái các lượt dự đoán đã thực hiện.",
     itemKey: "spectator.predictions",
+    group: "Dự Đoán",
   },
   {
     title: "Gói Dự Đoán AI",
@@ -398,6 +433,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Brain,
     description: "Xem và đăng ký gói dự đoán AI được hỗ trợ bởi machine learning.",
     itemKey: "spectator.aiPackages",
+    group: "AI",
   },
   {
     title: "Dự Đoán AI",
@@ -406,6 +442,16 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Sparkles,
     description: "Xem dự đoán kết quả cuộc đua từ AI (yêu cầu đăng ký gói).",
     itemKey: "spectator.aiPredictions",
+    group: "AI",
+  },
+  {
+    title: "Ví Điểm Thưởng",
+    href: "/spectator/wallet",
+    role: "Spectator",
+    icon: Wallet,
+    description: "Ví điểm dự đoán, lịch sử quy đổi và mã nhận thưởng tại quầy.",
+    itemKey: "spectator.wallet",
+    group: "Tài Chính",
   },
   // ─── COUNTER STAFF ──────────────────────────────────────────────────
   {
@@ -415,6 +461,7 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Gauge,
     description: "Tổng quan quầy giao dịch, tra cứu nhanh thông tin và thống kê.",
     itemKey: "counterStaff.dashboard",
+    group: "Tổng Quan",
   },
   {
     title: "Đổi Thưởng Vật Lý",
@@ -423,5 +470,6 @@ export const dashboardNavigation: NavigationItem[] = [
     icon: Gift,
     description: "Xử lý hàng đợi đổi quà, phê duyệt và xác nhận trao quà vật lý.",
     itemKey: "counterStaff.redemptions",
+    group: "Giao Dịch",
   },
 ];

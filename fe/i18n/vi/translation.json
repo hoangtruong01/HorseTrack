@@ -118,7 +118,7 @@
       "warningOver": "Lưu ý: Không đổi điểm quá số điểm hiện có của bạn tại thời điểm nhận quà tại quầy.",
       "warningAudit": "Giao dịch đổi thưởng được kiểm toán bảo mật và ghi lại trong hệ thống Ledger.",
       "btnCancel": "Hủy Bỏ",
-      "btnSubmit": "Tạo Mã Nhận Thưởng",
+      "btnSubmit": "Tạo Mã",
       "btnProcessing": "Đang xử lý...",
       "errInvalid": "Vui lòng nhập số điểm hợp lệ.",
       "errExceed": "Số điểm đổi vượt quá số dư hiện có của bạn.",
