@@ -11,18 +11,13 @@ async function handleProxy(
 ) {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
-  if (!token) {
-    return new Response(
-      JSON.stringify({ message: "Phiên đăng nhập đã hết hạn." }),
-      { status: 401, headers: { "content-type": "application/json" } }
-    );
-  }
 
   const { path } = await context.params;
   const url = new URL(req.url);
   const backendUrl = `${getBackendBase()}/${path.join("/")}${url.search}`;
 
-  const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const contentType = req.headers.get("content-type");
   if (contentType) headers["content-type"] = contentType;
 
