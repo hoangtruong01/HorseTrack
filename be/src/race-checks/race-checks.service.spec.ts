@@ -11,6 +11,7 @@ import { RacesService } from '../races/races.service';
 describe('RaceChecksService', () => {
   let service: RaceChecksService;
   let checkModel: { findById: jest.Mock };
+  let assignmentModel: { findOne: jest.Mock };
 
   const refereeId = new Types.ObjectId().toHexString();
 
@@ -25,6 +26,7 @@ describe('RaceChecksService', () => {
 
   beforeEach(async () => {
     checkModel = { findById: jest.fn() };
+    assignmentModel = { findOne: jest.fn().mockResolvedValue({ _id: 'assignmentId' }) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -36,7 +38,7 @@ describe('RaceChecksService', () => {
         },
         {
           provide: getModelToken(RefereeAssignment.name),
-          useValue: { findOne: jest.fn() },
+          useValue: assignmentModel,
         },
         { provide: RacesService, useValue: { findOne: jest.fn() } },
       ],

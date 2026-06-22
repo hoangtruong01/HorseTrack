@@ -120,7 +120,7 @@ export default function RefereeRankingsPage() {
           onClick={() => setActiveTab("horses")}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${activeTab === "horses"
               ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground hover:text-white"
+              : "text-muted-foreground hover:text-foreground"
             }`}
         >
           🐎 Chiến Mã Vô Địch
@@ -129,7 +129,7 @@ export default function RefereeRankingsPage() {
           onClick={() => setActiveTab("jockeys")}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${activeTab === "jockeys"
               ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground hover:text-white"
+              : "text-muted-foreground hover:text-foreground"
             }`}
         >
           🏇 Nài Ngựa Hàng Đầu
@@ -142,7 +142,7 @@ export default function RefereeRankingsPage() {
           <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-border bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-b border-border bg-muted/60 text-muted-foreground font-black uppercase tracking-wider">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Tên Chiến Mã</th>
                   <th className="p-4">Giống Ngựa</th>
@@ -158,7 +158,7 @@ export default function RefereeRankingsPage() {
                   [1, 2, 3].map((n) => (
                     <tr key={n} className="animate-pulse">
                       <td className="p-4" colSpan={8}>
-                        <div className="h-6 bg-white/5 rounded" />
+                        <div className="h-6 bg-muted rounded" />
                       </td>
                     </tr>
                   ))
@@ -170,7 +170,7 @@ export default function RefereeRankingsPage() {
                   </tr>
                 ) : (
                   horseRankings.map((horse) => (
-                    <tr key={horse.horseId} className="hover:bg-white/[0.01] transition duration-200">
+                    <tr key={horse.horseId} className="hover:bg-muted/40 transition duration-200">
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${horse.rank === 1
@@ -179,7 +179,7 @@ export default function RefereeRankingsPage() {
                                 ? "bg-slate-300 text-black"
                                 : horse.rank === 3
                                   ? "bg-[#CD7F32] text-white"
-                                  : "bg-white/5 border border-border text-muted-foreground"
+                                  : "bg-muted border border-border text-muted-foreground"
                             }`}
                         >
                           {horse.rank}
@@ -215,7 +215,7 @@ export default function RefereeRankingsPage() {
           <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-border bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                <tr className="border-b border-border bg-muted/60 text-muted-foreground font-black uppercase tracking-wider">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Họ Tên Nài Ngựa</th>
                   <th className="p-4">Cấp Độ</th>
@@ -230,7 +230,7 @@ export default function RefereeRankingsPage() {
                   [1, 2, 3].map((n) => (
                     <tr key={n} className="animate-pulse">
                       <td className="p-4" colSpan={7}>
-                        <div className="h-6 bg-white/5 rounded" />
+                        <div className="h-6 bg-muted rounded" />
                       </td>
                     </tr>
                   ))
@@ -242,7 +242,7 @@ export default function RefereeRankingsPage() {
                   </tr>
                 ) : (
                   jockeyRankings.map((jockey) => (
-                    <tr key={jockey.jockeyUserId} className="hover:bg-white/[0.01] transition duration-200">
+                    <tr key={jockey.jockeyUserId} className="hover:bg-muted/40 transition duration-200">
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${jockey.rank === 1
@@ -251,7 +251,7 @@ export default function RefereeRankingsPage() {
                                 ? "bg-slate-300 text-black"
                                 : jockey.rank === 3
                                   ? "bg-[#CD7F32] text-white"
-                                  : "bg-white/5 border border-border text-muted-foreground"
+                                  : "bg-muted border border-border text-muted-foreground"
                             }`}
                         >
                           {jockey.rank}
@@ -264,7 +264,7 @@ export default function RefereeRankingsPage() {
                         )}
                       </td>
                       <td className="p-4 text-muted-foreground">{getSkillLevelText(jockey.skillLevel)}</td>
-                      <td className="p-4 text-center text-white font-medium">
+                      <td className="p-4 text-center text-foreground font-medium">
                         {jockey.experienceYears ? `${jockey.experienceYears} năm` : "—"}
                       </td>
                       <td className="p-4 text-center font-bold text-foreground">{jockey.totalRaces}</td>
