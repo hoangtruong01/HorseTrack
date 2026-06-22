@@ -54,7 +54,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   } catch {
     raw = text;
   }
-  
+
   if (!res.ok) {
     if (res.status === 401 || res.status === 403) {
       setAuthToken(null);
@@ -457,5 +457,8 @@ export const raceViolationsApi = {
   listByRace: (raceId: string) => apiFetch<any>(`/race-violations/race/${raceId}`),
 };
 
-
-
+export const notificationsApi = {
+  list: () => apiFetch<any>('/notifications/my-notifications'),
+  markAsRead: (id: string) => apiFetch<any>(`/notifications/my-notifications/${id}/read`, { method: 'PATCH' }),
+  readAll: () => apiFetch<any>('/notifications/my-notifications/read-all', { method: 'PATCH' }),
+}

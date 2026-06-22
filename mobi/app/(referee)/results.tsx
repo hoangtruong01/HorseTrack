@@ -225,7 +225,7 @@ export default function RefereeResults() {
           </View>
         </View>
         {!isLocked && (
-          <View style={s.topActions}>
+          <View style={styles.topActions}>
             {/*
             <TouchableOpacity 
               style={[styles.topActionBtn, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: 'rgba(234, 179, 8, 0.3)' }]} 
@@ -326,11 +326,11 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   listContent: {
     padding: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',

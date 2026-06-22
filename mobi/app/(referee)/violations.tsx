@@ -328,11 +328,11 @@ const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   listContent: {
     padding: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',

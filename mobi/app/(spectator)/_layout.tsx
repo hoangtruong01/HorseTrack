@@ -21,7 +21,7 @@ export default function SpectatorLayout() {
       <TouchableOpacity
         activeOpacity={0.7}
         style={{ position: 'relative' }}
-        onPress={() => Alert.alert('Thông báo', 'Tính năng thông báo đang được phát triển.', [{ text: 'OK' }])}
+        onPress={() => router.push('/(spectator)/notifications' as any)}
       >
         <View style={{ position: 'relative', padding: 4 }}>
           <MaterialIcons name="notifications-none" size={24} color={t.text} />
@@ -54,6 +54,7 @@ export default function SpectatorLayout() {
       <Tabs.Screen name="predictions" options={{ href: null }} />
       <Tabs.Screen name="rankings" options={{ title: 'Xếp hạng', headerShown: false, tabBarIcon: ({ color }) => <MaterialIcons size={24} name="military-tech" color={color} /> }} />
       <Tabs.Screen name="wallet" options={{ title: 'Ví điểm', headerTitle: 'VÍ ĐIỂM', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} /> }} />
+      <Tabs.Screen name="notifications" options={{ title: 'Thông báo', headerTitle: 'THÔNG BÁO', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="notifications-none" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} /> }} />
       <Tabs.Screen name="race/[id]" options={{ href: null, headerTitle: 'CHI TIẾT TRẬN ĐUA' }} />
     </Tabs>

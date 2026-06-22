@@ -1,14 +1,30 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius , usePremiumColors } from '@/components/ui/premium-tokens';
-import { LoadingState, EmptyState } from '@/components/ui/shared';
+import { premiumColors as defaultPremiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState, useThemeColors } from '@/components/ui/shared';
 import { refereeAssignmentsApi, raceChecksApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Stack, Tabs } from 'expo-router';
+
+// Background Pattern
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
 
 export default function RefereePreRace() {
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
   const premiumColors = usePremiumColors();
-  const styles = getStyles(premiumColors);
+  const styles = React.useMemo(() => getStyles(isDark, theme, insets, premiumColors), [isDark, theme, insets, premiumColors]);
 
   const [assignments, setAssignments] = useState<any[]>([]);
   const [selectedRaceId, setSelectedRaceId] = useState<string | null>(null);
@@ -98,7 +114,18 @@ export default function RefereePreRace() {
 
   if (!selectedRaceId) {
     return (
-      <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+      <View style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <Tabs.Screen options={{ headerShown: false }} />
+        <GridBackground isDark={isDark} />
+
+        {/* Custom Sleek Header */}
+        <View style={styles.customHeader}>
+          <View style={styles.headerSpacer} />
+          <Text style={styles.headerTitle}>KIỂM TRA TRẬN ĐUA</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+
         <View style={styles.content}>
           <Section title="Chọn trận đua cần điểm danh / kiểm tra">
             {assignments.length === 0 ? (
@@ -128,18 +155,23 @@ export default function RefereePreRace() {
             )}
           </Section>
         </View>
-      </AppScreen>
+      </View>
     );
   }
 
   return (
-    <AppScreen refreshing={refreshing} onRefresh={onRefresh}>
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <Tabs.Screen options={{ headerShown: false }} />
+      <GridBackground isDark={isDark} />
+
+      {/* Custom Sleek Header */}
+      <View style={styles.customHeader}>
         <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
-          <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
-          <Text style={styles.backTxt}>Quay lại</Text>
+          <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       {loadingChecks && !refreshing ? <LoadingState /> : (
@@ -181,23 +213,23 @@ export default function RefereePreRace() {
                 </View>
 
                 {isUpdating ? <ActivityIndicator color={premiumColors.brand} style={{ marginVertical: 12 }} /> : (
-                  <View style={s.actionRow}>
+                  <View style={styles.actionRow}>
                     {/* Jockey Check-in toggle */}
                     {!isPassed && !isFailed && (
                       <TouchableOpacity
-                        style={s.checkInRow}
+                        style={styles.checkInRow}
                         onPress={() => setJockeyPresent(prev => ({ ...prev, [item._id || item.id]: !prev[item._id || item.id] }))}
                         activeOpacity={0.8}
                       >
-                        <View style={[s.checkbox, jockeyPresent[item._id || item.id] && s.checkboxChecked]}>
+                        <View style={[styles.checkbox, jockeyPresent[item._id || item.id] && styles.checkboxChecked]}>
                           {jockeyPresent[item._id || item.id] && <MaterialIcons name="check" size={12} color="#FFFFFF" />}
                         </View>
-                        <Text style={s.checkInLabel}>Jockey đã có mặt tại khu vực xuất phát</Text>
+                        <Text style={styles.checkInLabel}>Jockey đã có mặt tại khu vực xuất phát</Text>
                       </TouchableOpacity>
                     )}
                     {!isPassed && (
                       <TouchableOpacity
-                        style={[s.btn, s.btnPass]}
+                        style={[styles.btn, styles.btnPass]}
                         onPress={() => handleUpdateCheck(item._id || item.id, 'passed')}
                         activeOpacity={0.8}
                       >
@@ -229,51 +261,53 @@ export default function RefereePreRace() {
           }}
         />
       )}
-    </AppScreen>
+    </View>
   );
 }
 
-const getStyles = (premiumColors: any) => StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
+  },
+  // Custom Header
+  customHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Math.max(insets.top, 16),
+    paddingBottom: 12,
+    zIndex: 10,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
+  },
+  headerSpacer: {
+    width: 36,
+  },
+  headerTitle: {
+    color: theme.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   listContent: {
     padding: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 16,
-    backgroundColor: premiumColors.headerBg,
-    borderBottomWidth: 1,
-    borderBottomColor: premiumColors.headerBorder,
+    paddingBottom: 100,
   },
   backBtn: {
-    flexDirection: 'row',
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: premiumColors.surface2,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: premiumRadius[8],
-    borderWidth: 1,
-    borderColor: premiumColors.borderSoft,
   },
-  backTxt: {
-    color: premiumColors.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  headerTitle: {
-    color: premiumColors.text,
-    fontSize: 14,
-    fontWeight: '900',
-    flex: 1,
-  },
+
   assignmentCard: {
     flexDirection: 'row',
     alignItems: 'center',

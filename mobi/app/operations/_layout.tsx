@@ -47,6 +47,12 @@ export default function OperationsLayout() {
           title: 'NHẬP KẾT QUẢ',
         }}
       />
+      <Stack.Screen
+        name="referee/wallet"
+        options={{
+          headerShown: false,
+        }}
+      />
 
     </Stack>
   );

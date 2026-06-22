@@ -3,12 +3,27 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { refereeAssignmentsApi } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useThemeColors } from '@/components/ui/shared';
+import { Stack, Tabs, useRouter } from 'expo-router';
+
+// Background Pattern
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
 
 export default function AssignedRacesScreen() {
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
   const premiumColors = usePremiumColors();
-  const styles = getStyles(premiumColors);
+  const styles = React.useMemo(() => getStyles(isDark, theme, insets, premiumColors), [isDark, theme, insets, premiumColors]);
 
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -167,7 +182,19 @@ export default function AssignedRacesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <Tabs.Screen options={{ headerShown: false }} />
+
+      <GridBackground isDark={isDark} />
+
+      {/* Custom Sleek Header */}
+      <View style={styles.customHeader}>
+        <View style={styles.headerSpacer} />
+        <Text style={styles.headerTitle}>NHIỆM VỤ PHÂN CÔNG</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
       <FlatList
         data={assignments}
         renderItem={renderItem}
@@ -197,14 +224,34 @@ export default function AssignedRacesScreen() {
         <MaterialIcons name="arrow-back" size={18} color={premiumColors.textSecondary} />
         <Text style={styles.backHomeButtonText}>QUAY LẠI TRANG CHỦ</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 
-const getStyles = (premiumColors: any) => StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: premiumColors.bg,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
+  },
+  // Custom Header
+  customHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Math.max(insets.top, 16),
+    paddingBottom: 12,
+    zIndex: 10,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
+  },
+  headerSpacer: {
+    width: 36,
+  },
+  headerTitle: {
+    color: theme.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   listContent: {
     padding: 16,
