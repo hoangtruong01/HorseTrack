@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Image, ActivityIndicator, Switch, Appearance } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Image, ActivityIndicator, Appearance } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as SecureStore from 'expo-secure-store';
-import { C, Card, useThemeColors, StatCard, SectionHeader, LoadingState, ErrorState, EmptyState } from '@/components/ui/shared';
+import { C, Card, useThemeColors, StatCard, LoadingState } from '@/components/ui/shared';
 import { useAuth } from '@/providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { refereeAssignmentsApi, usersApi, uploadsApi } from '@/lib/api-client';
+import { refereeAssignmentsApi, usersApi, uploadsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function RefereeProfile() {
@@ -51,13 +51,20 @@ export default function RefereeProfile() {
     }
   };
 
-  // Performance state
+  // Performance & Wallet state
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [balance, setBalance] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
-    refereeAssignmentsApi.myAssignments({ limit: 100 })
-      .then(r => setAssignments((r as any).data || []))
+    Promise.all([
+      refereeAssignmentsApi.myAssignments({ limit: 100 }),
+      rewardPointLedgerApi.myBalance()
+    ])
+      .then(([assRes, balRes]) => {
+        setAssignments((assRes as any).data || []);
+        setBalance((balRes as any).balance || 0);
+      })
       .catch(() => { })
       .finally(() => setLoadingStats(false));
   }, []);
@@ -149,7 +156,7 @@ export default function RefereeProfile() {
               <MaterialIcons name="person" size={40} color={theme.red} />
             )}
             {isUploading && (
-              <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }]}>
+              <View style={[StyleSheet.absoluteFill, s.avatarLoading]}>
                 <ActivityIndicator color="#fff" />
               </View>
             )}
@@ -169,24 +176,52 @@ export default function RefereeProfile() {
         </View>
       </View>
 
-      <Card style={{ marginBottom: 24 }}>
+      {/* Tích hợp Wallet */}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => router.push('/operations/referee/wallet')}
+        style={s.walletWrapper}
+      >
+        <Card style={[s.walletCard, { backgroundColor: isDark ? '#1A1A1E' : '#FAFAFA', borderColor: theme.red }]}>
+          <View style={[s.walletIconContainer, { backgroundColor: isDark ? '#2C2C30' : '#E5E7EB' }]}>
+            <MaterialIcons name="account-balance-wallet" size={24} color={theme.red} />
+          </View>
+          <View style={s.flex1}>
+            <Text style={[s.walletSubtext, { color: isDark ? '#E5E7EB' : '#4B5563' }]}>SỐ DƯ VÍ TRỌNG TÀI</Text>
+            <Text style={[s.walletBalance, { color: theme.red }]}>
+              {loadingStats ? '...' : `${balance.toLocaleString()} PTS`}
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={24} color={theme.textMuted} />
+        </Card>
+      </TouchableOpacity>
+
+      <Card style={s.infoCard}>
         <InfoRow icon="phone" label="Số điện thoại" value={user?.phone || 'Chưa cập nhật'} theme={theme} />
         <InfoRow icon="location-on" label="Địa chỉ" value={user?.address || 'Chưa cập nhật'} theme={theme} />
         <InfoRow icon="cake" label="Ngày sinh" value={user?.dob || 'Chưa cập nhật'} theme={theme} />
 
-        <View style={[s.infoRow, { borderBottomWidth: 0, paddingBottom: 0, flexDirection: 'column', alignItems: 'flex-start' }]}>
-          <Text style={[s.infoLabel, { color: theme.textMuted, marginBottom: 8 }]}>GIAO DIỆN HIỂN THỊ</Text>
-          <View style={{ flexDirection: 'row', backgroundColor: theme.inputBg, borderRadius: 8, padding: 4, width: '100%' }}>
+        <View style={[s.infoRow, s.themeSelectorRow]}>
+          <Text style={[s.infoLabel, s.themeSelectorLabel, { color: theme.textMuted }]}>GIAO DIỆN HIỂN THỊ</Text>
+          <View style={[s.themeSelectorContainer, { backgroundColor: theme.inputBg }]}>
             {(['system', 'light', 'dark'] as const).map(mode => {
               const isSelected = themeMode === mode;
               const labels = { system: 'Hệ thống', light: 'Sáng', dark: 'Tối' };
               return (
                 <TouchableOpacity
                   key={mode}
-                  style={{ flex: 1, paddingVertical: 8, alignItems: 'center', backgroundColor: isSelected ? theme.card : 'transparent', borderRadius: 6, shadowColor: isSelected ? '#000' : 'transparent', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } }}
+                  style={[
+                    s.themeOptionBtn,
+                    { backgroundColor: isSelected ? theme.card : 'transparent', shadowColor: isSelected ? '#000' : 'transparent' }
+                  ]}
                   onPress={() => changeThemeMode(mode)}
                 >
-                  <Text style={{ fontSize: 13, fontWeight: isSelected ? '700' : '500', color: isSelected ? theme.textPrimary : theme.textMuted }}>{labels[mode]}</Text>
+                  <Text style={[
+                    s.themeOptionText,
+                    { fontWeight: isSelected ? '700' : '500', color: isSelected ? theme.textPrimary : theme.textMuted }
+                  ]}>
+                    {labels[mode]}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
@@ -222,7 +257,7 @@ function InfoRow({ icon, label, value, theme }: { icon: string; label: string; v
   return (
     <View style={[s.infoRow, { borderBottomColor: theme.cardBorder }]}>
       <MaterialIcons name={icon as any} size={18} color={theme.textMuted} />
-      <View style={{ flex: 1 }}>
+      <View style={s.flex1}>
         <Text style={[s.infoLabel, { color: theme.textMuted }]}>{label}</Text>
         <Text style={[s.infoValue, { color: theme.white }]}>{value}</Text>
       </View>
@@ -231,26 +266,51 @@ function InfoRow({ icon, label, value, theme }: { icon: string; label: string; v
 }
 
 const s = StyleSheet.create({
-  c: { flex: 1 }, p: { padding: 16, paddingBottom: 110 },
+  // Global & General
+  c: { flex: 1 },
+  p: { padding: 16, paddingBottom: 110 },
+  flex1: { flex: 1 },
+
+  // Avatar Section
   avatarWrap: { alignItems: 'center', marginBottom: 24 },
   avatarContainer: { position: 'relative' },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: C.red + '15', borderWidth: 2, borderColor: C.red, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   avatarImage: { width: '100%', height: '100%' },
+  avatarLoading: { backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
   cameraBtn: { position: 'absolute', bottom: 0, right: 0, backgroundColor: C.red, width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#121212' },
   name: { fontSize: 18, fontWeight: '900', marginTop: 12 },
   email: { fontSize: 12, marginTop: 4 },
+
+  // Roles
   rolesRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
   roleBadge: { backgroundColor: C.red + '15', borderWidth: 1, borderColor: C.red + '40', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 },
   roleText: { color: C.red, fontSize: 11, fontWeight: '700' },
+
+  // Wallet Section
+  walletWrapper: { marginBottom: 24 },
+  walletCard: { flexDirection: 'row', alignItems: 'center', borderWidth: 1 },
+  walletIconContainer: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
+  walletSubtext: { fontSize: 13, marginBottom: 4, fontWeight: '600' },
+  walletBalance: { fontSize: 24, fontWeight: '800' },
+
+  // Info Details & Theme Selector
+  infoCard: { marginBottom: 24 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1 },
   infoLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   infoValue: { fontSize: 13, fontWeight: '600', marginTop: 2 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#EF444440', backgroundColor: '#EF444410' },
-  logoutText: { color: '#EF4444', fontSize: 14, fontWeight: '700' },
+  themeSelectorRow: { borderBottomWidth: 0, paddingBottom: 0, flexDirection: 'column', alignItems: 'flex-start' },
+  themeSelectorLabel: { marginBottom: 8 },
+  themeSelectorContainer: { flexDirection: 'row', borderRadius: 8, padding: 4, width: '100%' },
+  themeOptionBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6, shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } },
+  themeOptionText: { fontSize: 13 },
 
-  // Performance styles
+  // Performance Section
   summaryCard: { backgroundColor: C.card, marginBottom: 12 },
   sub: { color: C.red, fontSize: 10, fontWeight: '800', letterSpacing: 1 },
   title: { color: C.white, fontSize: 20, fontWeight: '900', marginTop: 4 },
   statsRow: { flexDirection: 'column', gap: 8 },
+
+  // Logout
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#EF444440', backgroundColor: '#EF444410' },
+  logoutText: { color: '#EF4444', fontSize: 14, fontWeight: '700' },
 });
