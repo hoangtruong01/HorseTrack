@@ -46,8 +46,8 @@ export default function OwnerHome() {
 
       const upcoming = (racesRes as any).data?.length || 0;
       const openTournaments = (tournamentsRes as any).data?.filter((t: any) => t.status === 'ONGOING').length || 0;
-      setUpcomingRacesCount(upcoming || 3);
-      setOpenTournamentsCount(openTournaments || 2);
+      setUpcomingRacesCount(upcoming);
+      setOpenTournamentsCount(openTournaments);
     } catch (err: any) {
       setError(err.message || 'Lỗi tải dữ liệu');
     } finally { setLoading(false); }
@@ -88,16 +88,16 @@ export default function OwnerHome() {
           resizeMode="cover"
         />
         <View style={styles.heroContent}>
-          <Text style={styles.heroEyebrow}>Race Viewer</Text>
-          <Text style={styles.heroTitle}>Đường đua hôm nay</Text>
-          <Text style={styles.heroSubtitle}>Theo dõi lịch đua, dự đoán kết quả và nhận điểm thưởng.</Text>
+          <Text style={styles.heroEyebrow}>OWNER PORTAL</Text>
+          <Text style={styles.heroTitle}>Bảng điều khiển</Text>
+          <Text style={styles.heroSubtitle}>Quản lý chiến mã, ghi danh giải đua và theo dõi kết quả.</Text>
         </View>
       </View>
 
       {/* ── Overview Card ── */}
       <TouchableOpacity 
         style={styles.overviewCard} 
-        onPress={() => router.push('/races' as any)}
+        onPress={() => router.push('/(owner)/registrations' as any)}
         activeOpacity={0.8}
       >
         <View style={styles.overviewIconContainer}>
@@ -149,7 +149,7 @@ export default function OwnerHome() {
             columns={2}
             actions={[
               { title: 'Chuồng ngựa', subtitle: 'Quản lý hồ sơ', icon: 'pets', tone: 'brand', onPress: () => router.push('/horses' as any) },
-              { title: 'Đăng ký đua', subtitle: 'Chọn giải phù hợp', icon: 'flag', tone: 'brand', onPress: () => router.push('/races' as any) },
+              { title: 'Đăng ký đua', subtitle: 'Chọn giải phù hợp', icon: 'flag', tone: 'brand', onPress: () => router.push('/(owner)/registrations' as any) },
               { title: 'Lời mời', subtitle: 'Mời nài ngựa', icon: 'person-add', tone: 'brand', onPress: () => router.push('/invitations' as any) },
               { title: 'Ví thưởng', subtitle: 'Theo dõi điểm', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/wallet' as any) },
             ]}

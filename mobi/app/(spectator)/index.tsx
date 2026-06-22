@@ -82,7 +82,7 @@ export default function SpectatorHome() {
       {/* ── Overview Card ── */}
       <TouchableOpacity 
         style={styles.overviewCard} 
-        onPress={() => router.push('/races')}
+        onPress={() => router.push('/(spectator)/tournaments')}
         activeOpacity={0.8}
       >
         <View style={styles.overviewIconContainer}>
@@ -138,7 +138,7 @@ export default function SpectatorHome() {
             columns={2}
             actions={[
               { title: 'Giải Đấu', subtitle: 'Xem giải đang mở', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/tournaments') },
-              { title: 'Trận Đua', subtitle: 'Theo dõi trận sắp tới', icon: 'flag', tone: 'brand', onPress: () => router.push('/races') },
+              { title: 'Trận Đua', subtitle: 'Theo dõi trận sắp tới', icon: 'flag', tone: 'brand', onPress: () => router.push('/(spectator)/tournaments') },
               { title: 'Dự Đoán', subtitle: 'Quản lý lựa chọn', icon: 'online-prediction', tone: 'brand', onPress: () => router.push('/predictions') },
               { title: 'Ví Điểm', subtitle: 'Theo dõi phần thưởng', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/wallet') },
             ]}
@@ -184,7 +184,7 @@ export default function SpectatorHome() {
         <Section
           title="Trận đua sắp tới"
           actionLabel="Xem tất cả"
-          onAction={() => router.push('/races')}
+          onAction={() => router.push('/(spectator)/tournaments')}
         >
           {races.length === 0 ? (
             <Text style={styles.empty}>Hiện tại không có trận đua nào sắp diễn ra.</Text>
@@ -195,7 +195,7 @@ export default function SpectatorHome() {
                 <TouchableOpacity
                   key={r._id || r.id}
                   style={styles.rowItem}
-                  onPress={() => router.push('/races')}
+                  onPress={() => router.push('/(spectator)/tournaments')}
                   activeOpacity={0.7}
                 >
                   <View style={styles.rowAvatar}>

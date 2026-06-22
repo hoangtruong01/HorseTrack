@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, StyleSheet, Text, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, SectionList, RefreshControl, TouchableOpacity } from 'react-native';
 import { AppScreen } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
@@ -8,7 +8,8 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import RaceResultsModal from '@/components/ui/race-results-modal';
 
 export default function JockeySchedule() {
-  const [data, setData] = useState<any[]>([]);
+  const [pendingData, setPendingData] = useState<any[]>([]);
+  const [acceptedData, setAcceptedData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,8 @@ export default function JockeySchedule() {
     try {
       const r = await jockeyInvitationsApi.listReceived({ limit: 50 });
       const list = (r as any).data || [];
-      setData(list.filter((i: any) => i.status === 'ACCEPTED'));
+      setPendingData(list.filter((i: any) => i.status === 'PENDING'));
+      setAcceptedData(list.filter((i: any) => i.status === 'ACCEPTED'));
     } catch (err: any) {
       setError(err.message || 'Không thể tải lịch trình.');
     } finally {
@@ -108,6 +110,13 @@ export default function JockeySchedule() {
     );
   };
 
+  const sections = [
+    ...(pendingData.length > 0 ? [{ title: `Lời mời chờ xử lý (${pendingData.length})`, data: pendingData, isPending: true }] : []),
+    ...(acceptedData.length > 0 ? [{ title: `Lịch đã nhận (${acceptedData.length})`, data: acceptedData, isPending: false }] : []),
+  ];
+
+  const isEmpty = pendingData.length === 0 && acceptedData.length === 0;
+
   return (
     <AppScreen scroll={false}>
       <View style={styles.header}>
@@ -116,28 +125,38 @@ export default function JockeySchedule() {
         <View style={styles.accentLine} />
       </View>
 
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id || item.id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} colors={[premiumColors.brand]} />
-        }
-        ListEmptyComponent={
-          error ? (
-            <ErrorState message={error} onRetry={loadData} />
-          ) : (
-            <View style={styles.emptyWrap}>
-              <EmptyState 
-                icon="event" 
-                title="Chưa có lịch thi đấu" 
-                subtitle="Nhận lời mời từ chủ ngựa trong tab Hòm thư để điền tên vào lịch trình." 
-              />
+      {error ? (
+        <View style={{ paddingHorizontal: premiumSpacing[16], marginTop: premiumSpacing[16] }}>
+          <ErrorState message={error} onRetry={loadData} />
+        </View>
+      ) : isEmpty ? (
+        <View style={styles.emptyWrap}>
+          <EmptyState
+            icon="event"
+            title="Chưa có lịch thi đấu"
+            subtitle="Nhận lời mời từ chủ ngựa trong tab Hòm thư để điền tên vào lịch trình."
+          />
+        </View>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item._id || item.id}
+          contentContainerStyle={styles.listContent}
+          stickySectionHeadersEnabled={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} colors={[premiumColors.brand]} />
+          }
+          renderSectionHeader={({ section }) => (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{section.title}</Text>
+              {section.isPending && (
+                <Text style={styles.sectionNote}>Vào Hòm thư để chấp nhận/từ chối</Text>
+              )}
             </View>
-          )
-        }
-      />
+          )}
+          renderItem={({ item }) => renderItem({ item })}
+        />
+      )}
 
       <RaceResultsModal
         visible={showResultsModal}
@@ -180,6 +199,26 @@ const styles = StyleSheet.create({
   },
   emptyWrap: {
     marginTop: premiumSpacing[24],
+    paddingHorizontal: premiumSpacing[16],
+  },
+  sectionHeader: {
+    paddingVertical: premiumSpacing[8],
+    marginBottom: premiumSpacing[8],
+    marginTop: premiumSpacing[8],
+    borderBottomWidth: 1,
+    borderBottomColor: premiumColors.border,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: premiumColors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sectionNote: {
+    fontSize: 11,
+    color: premiumColors.brand,
+    marginTop: 2,
   },
 
   // ── Card ──

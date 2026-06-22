@@ -59,6 +59,13 @@ export default function OwnerHorses() {
 
   const handleCreate = async () => {
     if (!form.name.trim()) { Alert.alert('Lỗi', 'Vui lòng nhập tên chiến mã.'); return; }
+    if (form.age) {
+      const ageNum = parseInt(form.age, 10);
+      if (isNaN(ageNum) || ageNum < 1 || ageNum > 30) {
+        Alert.alert('Lỗi', 'Tuổi chiến mã phải là số nguyên từ 1 đến 30.');
+        return;
+      }
+    }
     setCreating(true);
     try {
       let body: any;
