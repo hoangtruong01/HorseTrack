@@ -304,7 +304,7 @@ export default function OwnerTournamentsAndRegistrations() {
                   </View>
                 </View>
 
-                <Section title={`Các vòng đua nhỏ (${races.length})`}>
+                <Section title={`Vòng đua của giải: ${selectedTournament?.name} (${races.length})`}>
                   {races.length === 0 ? (
                     <EmptyState icon="flag" title="Chưa có vòng đua" subtitle="Giải đấu này chưa có vòng đua nào được thiết lập." />
                   ) : (
@@ -437,7 +437,7 @@ export default function OwnerTournamentsAndRegistrations() {
                 <View style={s.raceSummary}>
                   <MaterialIcons name="flag" size={20} color={premiumColors.brand} />
                   <View>
-                    <Text style={s.summaryName}>{selectedRace.name}</Text>
+                    <Text style={s.summaryName}>{selectedTournament?.name} › {selectedRace.name}</Text>
                     <Text style={s.summaryStats}>{selectedRace.distanceMeters}m · {formatDateTime(selectedRace.startTime)}</Text>
                   </View>
                 </View>

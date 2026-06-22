@@ -225,7 +225,8 @@ export default function RefereeResults() {
           </View>
         </View>
         {!isLocked && (
-          <View style={styles.topActions}>
+          <View style={s.topActions}>
+            {/*
             <TouchableOpacity 
               style={[styles.topActionBtn, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: 'rgba(234, 179, 8, 0.3)' }]} 
               onPress={handleSimulate} 
@@ -234,6 +235,7 @@ export default function RefereeResults() {
             >
               <Text style={[styles.topActionBtnText, { color: premiumColors.warning }]}>{simulating ? '...' : 'GIẢ LẬP'}</Text>
             </TouchableOpacity>
+            */}
             <TouchableOpacity 
               style={styles.topActionBtnOutline} 
               onPress={handleBulkSave} 

@@ -1,6 +1,6 @@
 import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
-import { View, TouchableOpacity, Image } from 'react-native';
+import { View, TouchableOpacity, Image, Alert } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -18,10 +18,13 @@ export default function OwnerLayout() {
 
   const renderHeaderRight = () => (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingRight: 16 }}>
-      <TouchableOpacity activeOpacity={0.7} style={{ position: 'relative' }}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={{ position: 'relative' }}
+        onPress={() => Alert.alert('Thông báo', 'Tính năng thông báo đang được phát triển.', [{ text: 'OK' }])}
+      >
         <View style={{ position: 'relative', padding: 4 }}>
           <MaterialIcons name="notifications-none" size={24} color={t.text} />
-          <View style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: 4, backgroundColor: '#E10600', borderWidth: 1.5, borderColor: isDark ? premiumColors.headerBg : '#FFFFFF' }} />
         </View>
       </TouchableOpacity>
       <TouchableOpacity 

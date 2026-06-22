@@ -15,7 +15,7 @@ function getRoleRoute(roles: string[]): string {
   switch (role) {
     case 'admin':
     case 'counter_staff':
-      return '/(spectator)';
+      return '/not-supported';
     case 'owner':
     case 'horse_owner':
       return '/(owner)';

@@ -17,6 +17,7 @@ export default function RefereePreRace() {
   const [loading, setLoading] = useState(true);
   const [loadingChecks, setLoadingChecks] = useState(false);
   const [failNotes, setFailNotes] = useState<Record<string, string>>({});
+  const [jockeyPresent, setJockeyPresent] = useState<Record<string, boolean>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -58,12 +59,30 @@ export default function RefereePreRace() {
   };
 
   const handleUpdateCheck = async (checkId: string, status: 'passed' | 'failed') => {
+    // Warn if marking as passed but jockey not confirmed present
+    if (status === 'passed' && !jockeyPresent[checkId]) {
+      Alert.alert(
+        'Xác nhận điểm danh',
+        'Jockey chưa được xác nhận có mặt. Bạn có muốn tiếp tục không?',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Tiếp tục',
+            onPress: () => doUpdate(checkId, status, false),
+          },
+        ]
+      );
+      return;
+    }
+    doUpdate(checkId, status, jockeyPresent[checkId] ?? false);
+  };
+
+  const doUpdate = async (checkId: string, status: 'passed' | 'failed', checkedIn: boolean) => {
     const notes = status === 'failed' ? failNotes[checkId] || 'Không đạt chuẩn sức khỏe' : undefined;
     setUpdatingId(checkId);
     try {
-      await raceChecksApi.update(checkId, { status, healthNote: notes, jockeyCheckedIn: true });
+      await raceChecksApi.update(checkId, { status, healthNote: notes, jockeyCheckedIn: checkedIn });
       Alert.alert('Thành công', 'Đã cập nhật trạng thái kiểm tra.');
-      // Refresh checks
       if (selectedRaceId) {
         const checksRes = await raceChecksApi.listByRace(selectedRaceId);
         setChecks(checksRes.data || checksRes || []);
@@ -162,10 +181,23 @@ export default function RefereePreRace() {
                 </View>
 
                 {isUpdating ? <ActivityIndicator color={premiumColors.brand} style={{ marginVertical: 12 }} /> : (
-                  <View style={styles.actionRow}>
+                  <View style={s.actionRow}>
+                    {/* Jockey Check-in toggle */}
+                    {!isPassed && !isFailed && (
+                      <TouchableOpacity
+                        style={s.checkInRow}
+                        onPress={() => setJockeyPresent(prev => ({ ...prev, [item._id || item.id]: !prev[item._id || item.id] }))}
+                        activeOpacity={0.8}
+                      >
+                        <View style={[s.checkbox, jockeyPresent[item._id || item.id] && s.checkboxChecked]}>
+                          {jockeyPresent[item._id || item.id] && <MaterialIcons name="check" size={12} color="#FFFFFF" />}
+                        </View>
+                        <Text style={s.checkInLabel}>Jockey đã có mặt tại khu vực xuất phát</Text>
+                      </TouchableOpacity>
+                    )}
                     {!isPassed && (
-                      <TouchableOpacity 
-                        style={[styles.btn, styles.btnPass]} 
+                      <TouchableOpacity
+                        style={[s.btn, s.btnPass]}
                         onPress={() => handleUpdateCheck(item._id || item.id, 'passed')}
                         activeOpacity={0.8}
                       >
@@ -357,6 +389,33 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     borderRadius: premiumRadius[8],
     height: 44,
     paddingHorizontal: 12,
+    fontSize: 13,
+  },
+  checkInRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: premiumColors.border,
+    backgroundColor: premiumColors.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  checkboxChecked: {
+    borderColor: premiumColors.success,
+    backgroundColor: premiumColors.success,
+  },
+  checkInLabel: {
+    flex: 1,
+    color: premiumColors.textSecondary,
     fontSize: 13,
   },
 });

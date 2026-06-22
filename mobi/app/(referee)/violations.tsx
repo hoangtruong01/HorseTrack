@@ -13,6 +13,7 @@ export default function RefereeViolations() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [selectedRaceId, setSelectedRaceId] = useState<string | null>(null);
   const [selectedRaceName, setSelectedRaceName] = useState<string>('');
+  const [selectedRaceStatus, setSelectedRaceStatus] = useState<string>('');
   const [horses, setHorses] = useState<any[]>([]);
   const [violations, setViolations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,9 +50,10 @@ export default function RefereeViolations() {
     setRefreshing(false);
   }, [selectedRaceId, selectedRaceName, loadAssignments]);
 
-  const selectRace = async (raceId: string, raceName: string) => {
+  const selectRace = async (raceId: string, raceName: string, raceStatus?: string) => {
     setSelectedRaceId(raceId);
     setSelectedRaceName(raceName);
+    setSelectedRaceStatus(raceStatus || '');
     setLoadingDetails(true);
     try {
       const [checksRes, violationsRes] = await Promise.all([
@@ -69,6 +71,14 @@ export default function RefereeViolations() {
   };
 
   const handleSubmit = async () => {
+    // Guard: chỉ cho phép ghi violation khi race đang ONGOING
+    if (selectedRaceStatus !== 'ONGOING') {
+      Alert.alert(
+        'Không thể ghi vi phạm',
+        `Trận đua đang ở trạng thái "${selectedRaceStatus || 'Chưa xác định'}". Chỉ có thể ghi biên bản vi phạm khi trận đua đang diễn ra (ONGOING).`
+      );
+      return;
+    }
     if (!selectedHorseId) {
       Alert.alert('Lỗi', 'Vui lòng chọn chiến mã vi phạm.');
       return;
@@ -129,7 +139,7 @@ export default function RefereeViolations() {
                   <TouchableOpacity
                     key={a._id || a.id}
                     style={s.assignmentCard}
-                    onPress={() => selectRace(race._id || race.id, race.name)}
+                    onPress={() => selectRace(race._id || race.id, race.name, race.status)}
                     activeOpacity={0.8}
                   >
                     <View style={s.cardIconWrap}>
@@ -169,6 +179,14 @@ export default function RefereeViolations() {
           ListHeaderComponent={
             <View style={s.formCard}>
               <Text style={s.formTitle}>LẬP BIÊN BẢN VI PHẠM</Text>
+              {selectedRaceStatus !== 'ONGOING' && (
+                <View style={s.statusWarning}>
+                  <MaterialIcons name="warning" size={16} color={premiumColors.warning} />
+                  <Text style={s.statusWarningText}>
+                    {`Trận đua đang ở trạng thái "${selectedRaceStatus || 'Chưa xác định'}". Chỉ có thể ghi vi phạm khi race đang diễn ra (ONGOING).`}
+                  </Text>
+                </View>
+              )}
               
               <Text style={s.label}>CHIẾN MÁ VI PHẠM:</Text>
               <View style={s.selectorRow}>
@@ -302,6 +320,8 @@ interface Styles {
   badgeTextWarning: TextStyle;
   penaltyTxt: TextStyle;
   descText: TextStyle;
+  statusWarning: ViewStyle;
+  statusWarningText: TextStyle;
 }
 
 const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
@@ -381,6 +401,23 @@ const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
     borderRadius: premiumRadius[12],
     padding: 20,
     marginBottom: 24,
+  },
+  statusWarning: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: premiumColors.warning + '18',
+    borderWidth: 1,
+    borderColor: premiumColors.warning + '40',
+    borderRadius: premiumRadius[8],
+    padding: 12,
+    marginBottom: 16,
+  },
+  statusWarningText: {
+    flex: 1,
+    color: premiumColors.warning,
+    fontSize: 12,
+    lineHeight: 18,
   },
   formTitle: {
     color: premiumColors.text,

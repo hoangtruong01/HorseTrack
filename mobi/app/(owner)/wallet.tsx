@@ -9,6 +9,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 export default function OwnerWallet() {
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState<any[]>([]);
+  const [cashouts, setCashouts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,12 +19,14 @@ export default function OwnerWallet() {
   const loadData = useCallback(async () => {
     setError(null);
     try {
-      const [balanceRes, historyRes] = await Promise.all([
+      const [balanceRes, historyRes, cashoutsRes] = await Promise.all([
         rewardPointLedgerApi.myBalance(),
         rewardPointLedgerApi.myHistory({ limit: 50 }),
+        walletApi.myCashouts({ limit: 20 }).catch(() => ({ data: [] })),
       ]);
       setBalance(balanceRes.balance ?? 0);
       setHistory(historyRes.data || []);
+      setCashouts((cashoutsRes as any).data || []);
     } catch (err: any) {
       setError(err.message || 'Không thể tải ví thưởng. Vui lòng thử lại.');
     } finally {
@@ -126,6 +129,39 @@ export default function OwnerWallet() {
                       <Text style={[styles.deltaText, { color: isPositive ? premiumColors.success : premiumColors.danger }]}>
                         {isPositive ? '+' : ''}{delta.toLocaleString()} Pts
                       </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </Section>
+
+        {/* ── Cashout Requests History ── */}
+        <Section title={`Yêu cầu quy đổi đã gửi (${cashouts.length})`}>
+          {cashouts.length === 0 ? (
+            <EmptyState icon="receipt-long" title="Chưa có yêu cầu" subtitle="Bạn chưa gửi yêu cầu quy đổi điểm nào." />
+          ) : (
+            <View style={styles.listContainer}>
+              {cashouts.map((c) => {
+                const isPending = c.status === 'PENDING';
+                const statusColor = isPending ? premiumColors.warning : premiumColors.success;
+                const statusLabel = isPending ? 'Chờ xử lý' : c.status === 'COMPLETED' ? 'Hoàn thành' : c.status;
+                return (
+                  <View key={c._id || c.id} style={styles.rowItem}>
+                    <View style={styles.rowAvatar}>
+                      <MaterialIcons name="swap-horiz" size={20} color={statusColor} />
+                    </View>
+                    <View style={styles.rowInfo}>
+                      <Text style={styles.rowTitle} numberOfLines={1}>
+                        Mã: {c.redemptionCode || c._id?.slice(-6)?.toUpperCase() || '---'}
+                      </Text>
+                      <Text style={styles.rowSubtitle} numberOfLines={1}>
+                        {c.pointsRedeemed?.toLocaleString() || 0} Điểm · {formatDateTime(c.createdAt)}
+                      </Text>
+                    </View>
+                    <View style={[styles.rowRight, { backgroundColor: statusColor + '18', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }]}>
+                      <Text style={[styles.deltaText, { color: statusColor, fontSize: 11 }]}>{statusLabel}</Text>
                     </View>
                   </View>
                 );
