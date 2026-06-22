@@ -21,17 +21,8 @@ async function bootstrap() {
   // ── Serve uploads statically ──
   app.useStaticAssets(join(__dirname, '..', 'public'));
 
-  // ── CORS: allow both Web (Next.js) and Mobile (React Native) ──
-  const corsOrigins = [
-    process.env.CORS_ORIGIN,
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:8081',
-    'http://localhost:19006',
-  ].filter(Boolean) as string[];
-
   app.enableCors({
-    origin: corsOrigins,
+    origin: true,
     credentials: true,
   });
 

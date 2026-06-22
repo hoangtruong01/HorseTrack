@@ -1,6 +1,6 @@
 
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, statusLabel } from '@/components/ui/shared';
@@ -43,13 +43,25 @@ export default function SpectatorTournaments() {
     setShowResultsModal(true);
   };
 
-  useEffect(() => {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadTournaments = useCallback(() => {
     tournamentsApi
       .list({ limit: 50 })
       .then((r) => setData((r as any).data || []))
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false); setRefreshing(false); });
   }, []);
+
+  useEffect(() => { loadTournaments(); }, [loadTournaments]);
+
+  const onRefresh = useCallback(() => {
+    // Only refresh at level 1 (tournament list)
+    if (!selectedTour) {
+      setRefreshing(true);
+      loadTournaments();
+    }
+  }, [selectedTour, loadTournaments]);
 
 
   const filteredData = data.filter((t) => {
@@ -172,7 +184,9 @@ export default function SpectatorTournaments() {
           activeOpacity={0.7}
         >
           <MaterialIcons name="arrow-back" size={20} color="#AEB6C2" />
-          <Text style={s.backButtonText}>Quay lại giải đấu</Text>
+          <Text style={s.backButtonText}>
+            Quay lại (Giải đấu &gt; Trận đua)
+          </Text>
         </TouchableOpacity>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.detailContent}>
@@ -566,6 +580,9 @@ export default function SpectatorTournaments() {
         style={s.scrollView}
         contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} colors={[premiumColors.brand]} />
+        }
       >
         {/* Count Row */}
         <View style={s.countRow}>
