@@ -3,11 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { refereeAssignmentsApi, rankingsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function RefereeHome() {
+  const premiumColors = usePremiumColors();
+  const styles = getStyles(premiumColors);
+
   const router = useRouter();
   const [assignments, setAssignments] = useState<any[]>([]);
   const [topHorses, setTopHorses] = useState<any[]>([]);
@@ -65,8 +68,8 @@ export default function RefereeHome() {
       </View>
 
       {/* ── Overview Card ── */}
-      <TouchableOpacity 
-        style={styles.overviewCard} 
+      <TouchableOpacity
+        style={styles.overviewCard}
         onPress={() => router.push('/(referee)/assignments')}
         activeOpacity={0.8}
       >
@@ -126,38 +129,38 @@ export default function RefereeHome() {
           />
         </Section>
 
-      <SectionHeader title="Phân công mới nhất" />
-      {assignments.length === 0 ? (
-        <Text style={styles.empty}>Chưa có phân công nào.</Text>
-      ) : (
-        assignments.slice(0, 3).map(a => {
-          const s = statusLabel(a.status);
-          const raceName = a.raceId?.name || 'Trận đua';
-          return <ListItemCard key={a._id} title={raceName} subtitle={`Vai trò: ${a.role === 'main' ? 'Trọng tài chính' : 'Trợ lý'}`} rightText={s.label} rightColor={s.color} icon="assignment-turned-in" />;
-        })
-      )}
+        <SectionHeader title="Phân công mới nhất" />
+        {assignments.length === 0 ? (
+          <Text style={styles.empty}>Chưa có phân công nào.</Text>
+        ) : (
+          assignments.slice(0, 3).map(a => {
+            const s = statusLabel(a.status);
+            const raceName = a.raceId?.name || 'Trận đua';
+            return <ListItemCard key={a._id} title={raceName} subtitle={`Vai trò: ${a.role === 'main' ? 'Trọng tài chính' : 'Trợ lý'}`} rightText={s.label} rightColor={s.color} icon="assignment-turned-in" />;
+          })
+        )}
 
-      <SectionHeader title="Bảng xếp hạng chiến mã" />
-      {topHorses.length === 0 ? (
-        <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
-      ) : (
-        topHorses.slice(0, 5).map((horse, idx) => (
-          <ListItemCard
-            key={horse.horseId || idx}
-            title={`${idx + 1}. ${(horse.horseName || 'Chiến mã').toUpperCase()}`}
-            subtitle={`Giống: ${horse.breed || 'Chưa rõ'} · Điểm: ${horse.totalPoints || 0} PTS`}
-            icon="emoji-events"
-            rightText={`Thắng: ${horse.wins || 0}`}
-            rightColor="#F59E0B"
-          />
-        ))
-      )}
+        <SectionHeader title="Bảng xếp hạng chiến mã" />
+        {topHorses.length === 0 ? (
+          <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
+        ) : (
+          topHorses.slice(0, 5).map((horse, idx) => (
+            <ListItemCard
+              key={horse.horseId || idx}
+              title={`${idx + 1}. ${(horse.horseName || 'Chiến mã').toUpperCase()}`}
+              subtitle={`Giống: ${horse.breed || 'Chưa rõ'} · Điểm: ${horse.totalPoints || 0} PTS`}
+              icon="emoji-events"
+              rightText={`Thắng: ${horse.wins || 0}`}
+              rightColor="#F59E0B"
+            />
+          ))
+        )}
       </View>
     </AppScreen>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (premiumColors: any) => StyleSheet.create({
   // ── Hero ──
   hero: {
     paddingHorizontal: premiumSpacing[16],
@@ -221,12 +224,12 @@ const styles = StyleSheet.create({
   overviewTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginBottom: 4,
   },
   overviewSubtitle: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
 
   // ── Content wrapper ──

@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius , usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState } from '@/components/ui/shared';
 import { refereeAssignmentsApi, raceChecksApi, raceViolationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function RefereeViolations() {
+  const premiumColors = usePremiumColors();
+  const s = getStyles(premiumColors);
+
   const [assignments, setAssignments] = useState<any[]>([]);
   const [selectedRaceId, setSelectedRaceId] = useState<string | null>(null);
   const [selectedRaceName, setSelectedRaceName] = useState<string>('');
@@ -301,7 +304,7 @@ interface Styles {
   descText: TextStyle;
 }
 
-const s = StyleSheet.create<Styles>({
+const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],

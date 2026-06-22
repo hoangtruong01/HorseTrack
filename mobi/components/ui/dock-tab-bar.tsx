@@ -17,6 +17,8 @@ export function DockTabIcon({
   focused: boolean;
   children: React.ReactNode;
 }) {
+  const isDark = useColorScheme() === 'dark';
+  const dockStyles = getDockStyles(isDark);
   return (
     <View style={[dockStyles.iconWrapper, focused && dockStyles.iconWrapperActive]}>
       {children}
@@ -32,6 +34,8 @@ export function DockAvatarIcon({
   focused: boolean;
   avatarUri?: string | null;
 }) {
+  const isDark = useColorScheme() === 'dark';
+  const dockStyles = getDockStyles(isDark);
   return (
     <DockTabIcon focused={focused}>
       {avatarUri ? (
@@ -56,10 +60,14 @@ export function DockNotificationIcon({
   focused: boolean;
   count?: number;
 }) {
+  const isDark = useColorScheme() === 'dark';
+  const dockStyles = getDockStyles(isDark);
+  const inactiveColor = isDark ? '#b0b3b8' : '#65676B';
+  const activeColor = isDark ? '#ffffff' : '#E10600';
   return (
     <DockTabIcon focused={focused}>
       <View>
-        <MaterialIcons size={26} name="notifications" color={focused ? '#ffffff' : '#b0b3b8'} />
+        <MaterialIcons size={26} name="notifications" color={focused ? activeColor : inactiveColor} />
         {count != null && count > 0 && (
           <View style={dockStyles.badge}>
             <Text style={dockStyles.badgeText}>{count > 99 ? '99+' : String(count)}</Text>
@@ -80,8 +88,8 @@ export function useDockScreenOptions() {
 
   return {
     tabBarShowLabel: false,
-    tabBarActiveTintColor: '#ffffff',
-    tabBarInactiveTintColor: '#b0b3b8',
+    tabBarActiveTintColor: isDark ? '#ffffff' : '#E10600',
+    tabBarInactiveTintColor: isDark ? '#b0b3b8' : '#65676B',
     headerShown: true,
     headerStyle: {
       backgroundColor: isDark ? '#15151E' : '#FFFFFF',
@@ -102,7 +110,7 @@ export function useDockScreenOptions() {
       height: 60,
       minHeight: 60,
       maxHeight: 60,
-      backgroundColor: '#242526',
+      backgroundColor: isDark ? '#242526' : '#FFFFFF',
       borderRadius: 30,
       borderTopWidth: 0,
       paddingHorizontal: 8,
@@ -137,13 +145,13 @@ export function useDockScreenOptions() {
   };
 }
 
-export const dockStyles = StyleSheet.create({
+export const getDockStyles = (isDark: boolean) => StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row' as const,
     position: 'absolute' as const,
     alignSelf: 'center' as const,
     height: 60,
-    backgroundColor: '#242526',
+    backgroundColor: isDark ? '#242526' : '#FFFFFF',
     borderRadius: 30,
     borderWidth: 0,
     elevation: 12,
@@ -174,7 +182,7 @@ export const dockStyles = StyleSheet.create({
     borderRadius: 22, // Bo góc mềm mại tương ứng với chiều rộng mới
   },
   iconWrapperActive: {
-    backgroundColor: '#3a3b3c',
+    backgroundColor: isDark ? '#3a3b3c' : '#F0F2F5',
   },
   badge: {
     position: 'absolute',
@@ -187,7 +195,7 @@ export const dockStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#242526',
+    borderColor: isDark ? '#242526' : '#FFFFFF',
     paddingHorizontal: 2,
   },
   badgeText: {
@@ -222,6 +230,10 @@ export function DockTabBar({ state, descriptors, navigation }: BottomTabBarProps
   const insets = useSafeAreaInsets();
   const paddingBottom = Platform.OS === 'ios' ? Math.max(insets.bottom, 16) : 16;
   const TAB_WIDTH = 60;
+  const isDark = useColorScheme() === 'dark';
+  const dockStyles = getDockStyles(isDark);
+  const activeColor = isDark ? '#ffffff' : '#E10600';
+  const inactiveColor = isDark ? '#b0b3b8' : '#65676B';
 
   const visibleRoutes = state.routes.filter(route => {
     const { options } = descriptors[route.key];
@@ -297,10 +309,10 @@ export function DockTabBar({ state, descriptors, navigation }: BottomTabBarProps
             {options.tabBarIcon
               ? options.tabBarIcon({
                 focused: isFocused,
-                color: isFocused ? '#ffffff' : '#b0b3b8',
+                color: isFocused ? activeColor : inactiveColor,
                 size: 24,
               })
-              : <Text style={{ color: isFocused ? '#fff' : '#b0b3b8' }}>{options.title}</Text>}
+              : <Text style={{ color: isFocused ? activeColor : inactiveColor }}>{options.title}</Text>}
           </TouchableOpacity>
         );
       })}

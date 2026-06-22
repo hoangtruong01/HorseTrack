@@ -1,3 +1,4 @@
+import { usePremiumColors } from '@/components/ui/premium-tokens';
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import RefereeResults from './results';
@@ -5,6 +6,9 @@ import RefereeViolations from './violations';
 import { C } from '@/components/ui/shared';
 
 export default function RefereeJudging() {
+  const premiumColors = usePremiumColors();
+  const styles = getStyles(premiumColors);
+
   const [activeTab, setActiveTab] = useState<'results' | 'violations'>('results');
 
   return (
@@ -37,7 +41,7 @@ export default function RefereeJudging() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (premiumColors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: C.bg,

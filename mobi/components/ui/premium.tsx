@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, ViewStyle, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { premiumColors, premiumSpacing, premiumRadius, premiumTypography, premiumShadows, PremiumTone, getPremiumToneColor } from './premium-tokens';
+import { usePremiumColors, premiumSpacing, premiumRadius, premiumTypography, premiumShadows, PremiumTone, getPremiumToneColor } from './premium-tokens';
 
 // ─── AppScreen ──────────────────────────────────────────────────────────────
 interface AppScreenProps {
@@ -16,6 +16,9 @@ interface AppScreenProps {
 }
 
 export function AppScreen({ children, scroll, padded, refreshing, onRefresh, style, contentStyle }: AppScreenProps) {
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
+
   const innerContent = (
     <View style={[padded && styles.paddedContainer, contentStyle]}>
       {children}
@@ -56,6 +59,9 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ eyebrow, title, subtitle, right }: AppHeaderProps) {
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
+
   return (
     <View style={styles.headerContainer}>
       <View style={styles.flex1}>
@@ -80,6 +86,9 @@ interface HeroPanelProps {
 }
 
 export function HeroPanel({ eyebrow, title, subtitle, icon, metric, metricLabel, action }: HeroPanelProps) {
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
+
   return (
     <View style={styles.heroPanel}>
       <View style={styles.heroAccent} />
@@ -120,7 +129,10 @@ interface MetricCardProps {
 }
 
 export function MetricCard({ label, value, icon, tone = 'neutral' }: MetricCardProps) {
-  const toneColor = getPremiumToneColor(tone);
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
+
+  const toneColor = getPremiumToneColor(tone, premiumColors);
   return (
     <View style={styles.metricCard}>
       <View style={styles.metricHeader}>
@@ -142,7 +154,10 @@ interface ActionTileProps {
 }
 
 export function ActionTile({ title, subtitle, icon, tone = 'neutral', onPress }: ActionTileProps) {
-  const toneColor = getPremiumToneColor(tone);
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
+
+  const toneColor = getPremiumToneColor(tone, premiumColors);
   return (
     <TouchableOpacity style={styles.actionTile} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.actionIconWrapper, { backgroundColor: toneColor + '1A' }]}>
@@ -161,6 +176,9 @@ interface ActionGridProps {
 }
 
 export function ActionGrid({ actions, columns = 2 }: ActionGridProps) {
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
+
   return (
     <View style={styles.actionGrid}>
       {actions.map((action, index) => (
@@ -182,6 +200,9 @@ interface SectionProps {
 }
 
 export function Section({ title, subtitle, actionLabel, onAction, children }: SectionProps) {
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
+
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
@@ -211,6 +232,9 @@ interface AppButtonProps {
 }
 
 export function AppButton({ title, onPress, variant = 'primary', loading, disabled, icon }: AppButtonProps) {
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
+
   const isPrimary = variant === 'primary';
   const isDanger = variant === 'danger';
   const isGhost = variant === 'ghost';
@@ -263,7 +287,7 @@ export function AppButton({ title, onPress, variant = 'primary', loading, disabl
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
+const getStyles = (premiumColors: any) => StyleSheet.create({
   flex1: { flex: 1 },
   screen: {
     flex: 1,

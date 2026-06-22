@@ -7,6 +7,9 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '../providers/auth-provider';
 
+import * as SecureStore from 'expo-secure-store';
+import { Appearance } from 'react-native';
+
 function getRoleRoute(roles: string[]): string {
   const role = (roles[0] || 'spectator').toLowerCase();
   switch (role) {
@@ -31,6 +34,11 @@ function RootLayoutContent() {
   const [isMounted, setIsMounted] = React.useState(false);
 
   useEffect(() => {
+    SecureStore.getItemAsync('app_theme_mode').then(res => {
+      if (res === 'light' || res === 'dark' || res === 'system') {
+        Appearance.setColorScheme(res === 'system' ? null : (res as 'light' | 'dark'));
+      }
+    });
     setIsMounted(true);
   }, []);
 

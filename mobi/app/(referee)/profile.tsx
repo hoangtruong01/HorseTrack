@@ -1,18 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Image, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Image, ActivityIndicator, Switch, Appearance } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import * as SecureStore from 'expo-secure-store';
 import { C, Card, useThemeColors, StatCard, SectionHeader, LoadingState, ErrorState, EmptyState } from '@/components/ui/shared';
 import { useAuth } from '@/providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { refereeAssignmentsApi, usersApi, uploadsApi } from '@/lib/api-client';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function RefereeProfile() {
   const { user, logout, updateUser } = useAuth();
   const router = useRouter();
   const theme = useThemeColors();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>('system');
+
+  useEffect(() => {
+    SecureStore.getItemAsync('app_theme_mode').then(res => {
+      if (res === 'light' || res === 'dark' || res === 'system') {
+        setThemeMode(res);
+      }
+    });
+  }, []);
+  
+  const changeThemeMode = (mode: 'system' | 'light' | 'dark') => {
+    setThemeMode(mode);
+    SecureStore.setItemAsync('app_theme_mode', mode);
+    Appearance.setColorScheme(mode === 'system' ? null : mode);
+  };
   
   // Performance state
   const [assignments, setAssignments] = useState<any[]>([]);
@@ -136,6 +155,25 @@ export default function RefereeProfile() {
         <InfoRow icon="phone" label="Số điện thoại" value={user?.phone || 'Chưa cập nhật'} theme={theme} />
         <InfoRow icon="location-on" label="Địa chỉ" value={user?.address || 'Chưa cập nhật'} theme={theme} />
         <InfoRow icon="cake" label="Ngày sinh" value={user?.dob || 'Chưa cập nhật'} theme={theme} />
+        
+        <View style={[s.infoRow, { borderBottomWidth: 0, paddingBottom: 0, flexDirection: 'column', alignItems: 'flex-start' }]}>
+          <Text style={[s.infoLabel, { color: theme.textMuted, marginBottom: 8 }]}>GIAO DIỆN HIỂN THỊ</Text>
+          <View style={{ flexDirection: 'row', backgroundColor: theme.inputBg, borderRadius: 8, padding: 4, width: '100%' }}>
+            {(['system', 'light', 'dark'] as const).map(mode => {
+              const isSelected = themeMode === mode;
+              const labels = { system: 'Hệ thống', light: 'Sáng', dark: 'Tối' };
+              return (
+                <TouchableOpacity
+                  key={mode}
+                  style={{ flex: 1, paddingVertical: 8, alignItems: 'center', backgroundColor: isSelected ? theme.card : 'transparent', borderRadius: 6, shadowColor: isSelected ? '#000' : 'transparent', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } }}
+                  onPress={() => changeThemeMode(mode)}
+                >
+                  <Text style={{ fontSize: 13, fontWeight: isSelected ? '700' : '500', color: isSelected ? theme.textPrimary : theme.textMuted }}>{labels[mode]}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
       </Card>
 
       <Card style={s.summaryCard}>

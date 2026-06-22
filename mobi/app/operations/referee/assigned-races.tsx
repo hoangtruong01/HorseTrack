@@ -1,3 +1,4 @@
+import { usePremiumColors } from '@/components/ui/premium-tokens';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { refereeAssignmentsApi } from '../../../lib/api-client';
@@ -6,6 +7,9 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AssignedRacesScreen() {
+  const premiumColors = usePremiumColors();
+  const styles = getStyles(premiumColors);
+
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -128,12 +132,12 @@ export default function AssignedRacesScreen() {
               style={styles.opsButton}
               onPress={() => router.push({ pathname: '/operations/referee/pre-race', params: { raceId: race._id } })}
             >
-              <MaterialIcons name="fact-check" size={18} color="#FFFFFF" />
+              <MaterialIcons name="fact-check" size={18} color={premiumColors.text} />
               <Text style={styles.opsButtonText}>ĐIỂM DANH</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.opsButton, { backgroundColor: 'rgba(255,255,255,0.09)', borderColor: '#E10600', borderWidth: 1 }]}
+              style={[styles.opsButton, { backgroundColor: premiumColors.border, borderColor: '#E10600', borderWidth: 1 }]}
               onPress={() => router.push({ pathname: '/operations/referee/violation-log', params: { raceId: race._id } })}
             >
               <MaterialIcons name="warning" size={18} color="#E10600" />
@@ -144,7 +148,7 @@ export default function AssignedRacesScreen() {
               style={[styles.opsButton, { backgroundColor: '#E1A200' }]}
               onPress={() => router.push({ pathname: '/operations/referee/result-entry', params: { raceId: race._id } })}
             >
-              <MaterialIcons name="emoji-events" size={18} color="#FFFFFF" />
+              <MaterialIcons name="emoji-events" size={18} color={premiumColors.text} />
               <Text style={styles.opsButtonText}>KẾT QUẢ</Text>
             </TouchableOpacity>
           </View>
@@ -179,7 +183,7 @@ export default function AssignedRacesScreen() {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <MaterialIcons name="assignment-late" size={48} color="#58585B" />
+              <MaterialIcons name="assignment-late" size={48} color={premiumColors.textMuted} />
               <Text style={styles.emptyText}>Bạn chưa nhận được phân công nào gần đây.</Text>
             </View>
           )
@@ -190,17 +194,17 @@ export default function AssignedRacesScreen() {
         style={styles.backHomeButton}
         onPress={() => router.replace('/(referee)')}
       >
-        <MaterialIcons name="arrow-back" size={18} color="#AAAAAA" />
+        <MaterialIcons name="arrow-back" size={18} color={premiumColors.textSecondary} />
         <Text style={styles.backHomeButtonText}>QUAY LẠI TRANG CHỦ</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (premiumColors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: premiumColors.bg,
   },
   listContent: {
     padding: 16,
@@ -208,19 +212,19 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: premiumColors.bg,
     alignItems: 'center',
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#AAAAAA',
+    color: premiumColors.textSecondary,
     fontSize: 14,
     marginTop: 12,
   },
   card: {
-    backgroundColor: 'rgba(18, 18, 22, 0.86)',
+    backgroundColor: premiumColors.surface2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.09)',
+    borderColor: premiumColors.border,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -230,18 +234,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     borderBottomWidth: 1,
-    borderBottomColor: '#000000',
+    borderBottomColor: premiumColors.bg,
     paddingBottom: 10,
     marginBottom: 10,
   },
   raceName: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontSize: 15,
     fontWeight: '900',
     fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-CondensedBold' : 'sans-serif-condensed',
   },
   startTimeText: {
-    color: '#AAAAAA',
+    color: premiumColors.textSecondary,
     fontSize: 11,
     marginTop: 2,
   },
@@ -251,7 +255,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   statusBadgeText: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontSize: 8,
     fontWeight: '900',
   },
@@ -260,18 +264,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   bodyText: {
-    color: '#AAAAAA',
+    color: premiumColors.textSecondary,
     fontSize: 12,
   },
   whiteBold: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontWeight: '700',
   },
   actionsContainer: {
     flexDirection: 'row',
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: '#000000',
+    borderTopColor: premiumColors.bg,
     paddingTop: 12,
   },
   actionButton: {
@@ -282,7 +286,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rejectButton: {
-    backgroundColor: 'rgba(255,255,255,0.09)',
+    backgroundColor: premiumColors.border,
     borderWidth: 1,
     borderColor: '#E10600',
   },
@@ -290,7 +294,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E10600',
   },
   actionButtonText: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontSize: 11,
     fontWeight: '800',
   },
@@ -298,7 +302,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: '#000000',
+    borderTopColor: premiumColors.bg,
     paddingTop: 12,
   },
   opsButton: {
@@ -312,7 +316,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   opsButtonText: {
-    color: '#FFFFFF',
+    color: premiumColors.text,
     fontSize: 9,
     fontWeight: '800',
   },
@@ -322,7 +326,7 @@ const styles = StyleSheet.create({
     paddingVertical: 80,
   },
   emptyText: {
-    color: '#AAAAAA',
+    color: premiumColors.textSecondary,
     fontSize: 13,
     marginTop: 12,
     textAlign: 'center',
@@ -331,15 +335,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: 48,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.09)',
+    borderTopColor: premiumColors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(18, 18, 22, 0.86)',
+    backgroundColor: premiumColors.surface2,
     gap: 8,
     marginBottom: 80,
   },
   backHomeButtonText: {
-    color: '#AAAAAA',
+    color: premiumColors.textSecondary,
     fontSize: 12,
     fontWeight: '800',
   },
