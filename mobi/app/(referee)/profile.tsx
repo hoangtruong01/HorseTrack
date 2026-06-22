@@ -20,19 +20,37 @@ export default function RefereeProfile() {
   const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>('system');
 
   useEffect(() => {
-    SecureStore.getItemAsync('app_theme_mode').then(res => {
-      if (res === 'light' || res === 'dark' || res === 'system') {
-        setThemeMode(res);
-      }
-    });
+    if (Platform.OS === 'web') {
+      try {
+        const res = localStorage.getItem('app_theme_mode');
+        if (res === 'light' || res === 'dark' || res === 'system') {
+          setThemeMode(res);
+        }
+      } catch (e) { }
+    } else {
+      SecureStore.getItemAsync('app_theme_mode').then(res => {
+        if (res === 'light' || res === 'dark' || res === 'system') {
+          setThemeMode(res);
+        }
+      }).catch(() => { });
+    }
   }, []);
-  
+
   const changeThemeMode = (mode: 'system' | 'light' | 'dark') => {
     setThemeMode(mode);
-    SecureStore.setItemAsync('app_theme_mode', mode);
-    Appearance.setColorScheme(mode === 'system' ? null : mode);
+    if (Platform.OS === 'web') {
+      try {
+        localStorage.setItem('app_theme_mode', mode);
+      } catch (e) { }
+    } else {
+      SecureStore.setItemAsync('app_theme_mode', mode).catch(() => { });
+    }
+
+    if (typeof Appearance.setColorScheme === 'function') {
+      try { Appearance.setColorScheme(mode === 'system' ? null : mode); } catch (e) { }
+    }
   };
-  
+
   // Performance state
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
@@ -40,7 +58,7 @@ export default function RefereeProfile() {
   useEffect(() => {
     refereeAssignmentsApi.myAssignments({ limit: 100 })
       .then(r => setAssignments((r as any).data || []))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingStats(false));
   }, []);
 
@@ -64,15 +82,15 @@ export default function RefereeProfile() {
       });
 
       if (result.canceled || !result.assets[0]) return;
-      
+
       const asset = result.assets[0];
       setIsUploading(true);
-      
+
       const formData = new FormData();
       const filename = asset.uri.split('/').pop() || 'avatar.jpg';
       const match = /\.(\w+)$/.exec(filename);
       const type = match ? `image/${match[1]}` : `image`;
-      
+
       formData.append('file', {
         uri: asset.uri,
         name: filename,
@@ -81,7 +99,7 @@ export default function RefereeProfile() {
 
       const uploadRes = await uploadsApi.uploadImage(formData);
       const imageUrl = uploadRes.url;
-      
+
       const userId = (user as any)?._id || (user as any)?.id;
       if (userId) {
         await usersApi.update(userId, { avatar: imageUrl });
@@ -155,7 +173,7 @@ export default function RefereeProfile() {
         <InfoRow icon="phone" label="Số điện thoại" value={user?.phone || 'Chưa cập nhật'} theme={theme} />
         <InfoRow icon="location-on" label="Địa chỉ" value={user?.address || 'Chưa cập nhật'} theme={theme} />
         <InfoRow icon="cake" label="Ngày sinh" value={user?.dob || 'Chưa cập nhật'} theme={theme} />
-        
+
         <View style={[s.infoRow, { borderBottomWidth: 0, paddingBottom: 0, flexDirection: 'column', alignItems: 'flex-start' }]}>
           <Text style={[s.infoLabel, { color: theme.textMuted, marginBottom: 8 }]}>GIAO DIỆN HIỂN THỊ</Text>
           <View style={{ flexDirection: 'row', backgroundColor: theme.inputBg, borderRadius: 8, padding: 4, width: '100%' }}>
@@ -229,7 +247,7 @@ const s = StyleSheet.create({
   infoValue: { fontSize: 13, fontWeight: '600', marginTop: 2 },
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#EF444440', backgroundColor: '#EF444410' },
   logoutText: { color: '#EF4444', fontSize: 14, fontWeight: '700' },
-  
+
   // Performance styles
   summaryCard: { backgroundColor: C.card, marginBottom: 12 },
   sub: { color: C.red, fontSize: 10, fontWeight: '800', letterSpacing: 1 },

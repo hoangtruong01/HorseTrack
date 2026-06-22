@@ -8,7 +8,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '../providers/auth-provider';
 
 import * as SecureStore from 'expo-secure-store';
-import { Appearance } from 'react-native';
+import { Appearance, Platform } from 'react-native';
 
 function getRoleRoute(roles: string[]): string {
   const role = (roles[0] || 'spectator').toLowerCase();
@@ -34,11 +34,21 @@ function RootLayoutContent() {
   const [isMounted, setIsMounted] = React.useState(false);
 
   useEffect(() => {
-    SecureStore.getItemAsync('app_theme_mode').then(res => {
+    const applyTheme = (res: string | null) => {
       if (res === 'light' || res === 'dark' || res === 'system') {
-        Appearance.setColorScheme(res === 'system' ? null : (res as 'light' | 'dark'));
+        if (typeof Appearance.setColorScheme === 'function') {
+          try { Appearance.setColorScheme(res === 'system' ? null : (res as 'light' | 'dark')); } catch (e) {}
+        }
       }
-    });
+    };
+
+    if (Platform.OS === 'web') {
+      try {
+        applyTheme(localStorage.getItem('app_theme_mode'));
+      } catch (e) {}
+    } else {
+      SecureStore.getItemAsync('app_theme_mode').then(applyTheme).catch(() => {});
+    }
     setIsMounted(true);
   }, []);
 
