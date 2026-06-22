@@ -143,11 +143,11 @@ export default function RefereeHome() {
       ) : (
         topHorses.slice(0, 5).map((horse, idx) => (
           <ListItemCard
-            key={horse._id}
-            title={`${idx + 1}. ${horse.name.toUpperCase()}`}
-            subtitle={`Tốc độ: ${horse.baseSpeed} | Thể lực: ${horse.staminaScore}`}
+            key={horse.horseId || idx}
+            title={`${idx + 1}. ${(horse.horseName || 'Chiến mã').toUpperCase()}`}
+            subtitle={`Giống: ${horse.breed || 'Chưa rõ'} · Điểm: ${horse.totalPoints || 0} PTS`}
             icon="emoji-events"
-            rightText={`Thắng: ${horse.stats?.wins || 0}`}
+            rightText={`Thắng: ${horse.wins || 0}`}
             rightColor="#F59E0B"
           />
         ))
