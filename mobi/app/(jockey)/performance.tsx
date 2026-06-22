@@ -16,8 +16,8 @@ export default function JockeyPerformance() {
     jockeyInvitationsApi.listReceived({ limit: 50 })
       .then(r => {
         const list = (r as any).data || [];
-        const completed = list.filter((i: any) => i.status === 'ACCEPTED'); // Only accepted races count
-        setData(completed);
+        const accepted = list.filter((i: any) => i.status === 'ACCEPTED');
+        setData(accepted);
       })
       .catch((err: any) => setError(err.message || 'Lỗi tải thành tích'))
       .finally(() => setLoading(false));
@@ -45,8 +45,9 @@ export default function JockeyPerformance() {
             {/* ── Honest official stats (No fake performance) ── */}
             <View style={styles.statsContainer}>
               <View style={styles.statBox}>
-                <Text style={styles.statLabel}>SỐ TRẬN THAM GIA</Text>
+                <Text style={styles.statLabel}>LỜI MỜI ĐÃ NHẬN</Text>
                 <Text style={styles.statValue}>{data.length}</Text>
+                <Text style={styles.statNote}>(*Tạm tính từ lời mời)</Text>
               </View>
             </View>
 
@@ -134,6 +135,11 @@ const styles = StyleSheet.create({
     color: premiumColors.brand,
     fontSize: 32,
     fontWeight: '900',
+  },
+  statNote: {
+    color: premiumColors.textMuted,
+    fontSize: 10,
+    marginTop: 4,
   },
 
   // ── Section ──

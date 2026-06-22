@@ -22,8 +22,17 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!fullName || !email || !password) {
+    if (!fullName.trim() || !email.trim() || !password) {
       Alert.alert('Lỗi', 'Họ tên, email và mật khẩu là các trường bắt buộc.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert('Lỗi', 'Địa chỉ email không hợp lệ. Vui lòng kiểm tra lại.');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự.');
       return;
     }
     setLoading(true);

@@ -37,8 +37,14 @@ export default function OwnerInvitations() {
       const invData = (invRes as any).data || invRes || [];
       setInvitations(Array.isArray(invData) ? invData : []);
       const regData = (regRes as any).data || [];
-      // Only show approved regs without jockey assigned
-      setApprovedRegs(regData.filter((r: any) => r.status === 'APPROVED' && !r.jockeyUserId));
+      // Only show approved regs without jockey assigned and race is not finished
+      const validRaceStatuses = ['SCHEDULED', 'CHECKING', 'READY'];
+      setApprovedRegs(regData.filter((r: any) => {
+        const isApprovedNoJockey = r.status === 'APPROVED' && !r.jockeyUserId;
+        const rStatus = r.raceId?.status;
+        const isRaceValid = validRaceStatuses.includes(rStatus);
+        return isApprovedNoJockey && isRaceValid;
+      }));
     } catch {} finally { setLoading(false); }
   }, []);
 
@@ -52,6 +58,17 @@ export default function OwnerInvitations() {
 
   const handleSendInvite = async () => {
     if (!selectedRegId || !selectedJockey) { Alert.alert('Lỗi', 'Vui lòng chọn trận đua.'); return; }
+    
+    // Guard: kiểm tra lại status của race trước khi gọi API
+    const reg = approvedRegs.find(r => (r._id || r.id) === selectedRegId);
+    if (reg) {
+      const rStatus = reg.raceId?.status;
+      if (!['SCHEDULED', 'CHECKING', 'READY'].includes(rStatus)) {
+        Alert.alert('Lỗi', 'Không thể mời Jockey vì trận đua đã kết thúc hoặc đã công bố kết quả.');
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       const jockeyId = selectedJockey.userId?._id || selectedJockey.userId?.id || selectedJockey.userId || selectedJockey._id;
@@ -69,7 +86,11 @@ export default function OwnerInvitations() {
       setSharePercent(30);
       loadData();
     } catch (err: any) {
-      Alert.alert('Lỗi', err.message || 'Gửi lời mời thất bại.');
+      let msg = err.message || 'Gửi lời mời thất bại.';
+      if (msg.includes('Cannot invite a jockey when race is in RESULT_PUBLISHED status')) {
+        msg = 'Không thể mời Jockey vì trận đua đã công bố kết quả.';
+      }
+      Alert.alert('Lỗi', msg);
     } finally { setSubmitting(false); }
   };
 
@@ -93,10 +114,6 @@ export default function OwnerInvitations() {
   };
 
   const openInviteModal = (jockey: any) => {
-    if (approvedRegs.length === 0) {
-      Alert.alert('Thông báo', 'Bạn chưa có slot đăng ký nào đã duyệt và chưa gán Jockey. Vui lòng đăng ký trận đua trước.');
-      return;
-    }
     setSelectedJockey(jockey);
     setSelectedRegId('');
     setSharePercent(30);
@@ -201,12 +218,11 @@ export default function OwnerInvitations() {
                     {j.bio && <Text style={s.bioText} numberOfLines={2}>&quot;{j.bio}&quot;</Text>}
 
                     <TouchableOpacity
-                      style={[s.btnPrimary, approvedRegs.length === 0 && s.btnDisabled]}
+                      style={s.btnPrimary}
                       onPress={() => openInviteModal(j)}
-                      disabled={approvedRegs.length === 0}
                       activeOpacity={0.8}
                     >
-                      <Text style={s.btnPrimaryText}>{approvedRegs.length > 0 ? '＋ Gửi lời mời' : 'Chưa có slot trống'}</Text>
+                      <Text style={s.btnPrimaryText}>＋ Gửi lời mời</Text>
                     </TouchableOpacity>
                   </View>
                 );
@@ -282,23 +298,37 @@ export default function OwnerInvitations() {
 
               <ScrollView style={{ maxHeight: 350 }} showsVerticalScrollIndicator={false}>
                 <Text style={s.fieldLabel}>Chọn ngựa & trận đua *</Text>
-                {approvedRegs.map(r => {
-                  const horse = typeof r.horseId === 'object' ? r.horseId?.name : 'Ngựa';
-                  const race = typeof r.raceId === 'object' ? r.raceId?.name : 'Trận đua';
-                  const id = r._id || r.id;
-                  const selected = selectedRegId === id;
-                  return (
-                    <TouchableOpacity
-                      key={id}
-                      style={[s.regOption, selected && s.regOptionSelected]}
-                      onPress={() => setSelectedRegId(id)}
-                      activeOpacity={0.8}
-                    >
-                      <MaterialIcons name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} size={18} color={selected ? premiumColors.brand : premiumColors.textMuted} />
-                      <Text style={s.regOptionText}>🐴 {horse} — 🏁 {race}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                {approvedRegs.length === 0 ? (
+                  <Text style={{ color: premiumColors.warning, fontSize: 13, marginVertical: 12, lineHeight: 20 }}>
+                    Không có trận đua nào còn có thể mời Jockey. Chỉ có thể mời trước khi trận đua kết thúc.
+                  </Text>
+                ) : (
+                  approvedRegs.map(r => {
+                    const horse = typeof r.horseId === 'object' ? r.horseId?.name : 'Ngựa';
+                    const race = typeof r.raceId === 'object' ? r.raceId?.name : 'Trận đua';
+                    const tournament = typeof r.tournamentId === 'object' ? r.tournamentId?.name : '';
+                    const id = r._id || r.id;
+                    const selected = selectedRegId === id;
+                    const dateStr = r.raceId?.startTime ? formatDateTime(r.raceId.startTime) : '';
+
+                    return (
+                      <TouchableOpacity
+                        key={id}
+                        style={[s.regOption, selected && s.regOptionSelected]}
+                        onPress={() => setSelectedRegId(id)}
+                        activeOpacity={0.8}
+                      >
+                        <MaterialIcons name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} size={18} color={selected ? premiumColors.brand : premiumColors.textMuted} />
+                        <View style={{ flex: 1, marginLeft: 12 }}>
+                          <Text style={s.regOptionText}>🐴 {horse}</Text>
+                          <Text style={{ fontSize: 12, color: premiumColors.textSecondary, marginTop: 4 }}>
+                            🏁 {tournament ? `${tournament} - ` : ''}{race}{dateStr ? ` (${dateStr})` : ''}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })
+                )}
 
                 <Text style={[s.fieldLabel, { marginTop: 16 }]}>% Chia thưởng cho Jockey (5-50%): {sharePercent}%</Text>
                 <View style={s.sliderRow}>

@@ -8,8 +8,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('spectator@horsetrack.local');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -85,7 +85,7 @@ export default function LoginScreen() {
                     style={styles.input}
                     value={email}
                     onChangeText={setEmail}
-                    placeholder="spectator@horsetrack.local"
+                    placeholder="email@example.com"
                     placeholderTextColor={premiumColors.textMuted}
                     keyboardType="email-address"
                     autoCapitalize="none"
