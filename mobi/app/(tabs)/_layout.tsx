@@ -1,41 +1,18 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { premiumColors } from '@/components/ui/premium-tokens';
+import { useAuth } from '@/providers/auth-provider';
+import { DockTabBar, useDockScreenOptions, DockAvatarIcon } from '@/components/ui/dock-tab-bar';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const themeColors = Colors[colorScheme ?? 'dark'];
+  const dockOptions = useDockScreenOptions();
+  const { user } = useAuth();
 
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: themeColors.tint,
-        tabBarInactiveTintColor: themeColors.tabIconDefault,
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: colorScheme === 'dark' ? premiumColors.headerBg : '#FFFFFF',
-          borderBottomWidth: 1,
-          borderBottomColor: colorScheme === 'dark' ? premiumColors.headerBorder : '#D3DADE',
-        },
-        headerTitleStyle: {
-          color: themeColors.text,
-          fontWeight: '900',
-          fontSize: 16,
-          letterSpacing: 1,
-        },
-        tabBarStyle: {
-          backgroundColor: colorScheme === 'dark' ? premiumColors.headerBg : '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: colorScheme === 'dark' ? premiumColors.headerBorder : '#D3DADE',
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
-      }}>
+      tabBar={(props) => <DockTabBar {...props} />}
+      screenOptions={{ ...dockOptions }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -65,7 +42,7 @@ export default function TabLayout() {
         options={{
           title: 'Cá Nhân',
           headerTitle: 'HỒ SƠ HỘI VIÊN',
-          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person" color={color} />,
+          tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} />,
         }}
       />
     </Tabs>

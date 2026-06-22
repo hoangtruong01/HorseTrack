@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius , usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState } from '@/components/ui/shared';
 import { refereeAssignmentsApi, raceChecksApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function RefereePreRace() {
+  const premiumColors = usePremiumColors();
+  const styles = getStyles(premiumColors);
+
   const [assignments, setAssignments] = useState<any[]>([]);
   const [selectedRaceId, setSelectedRaceId] = useState<string | null>(null);
   const [selectedRaceName, setSelectedRaceName] = useState<string>('');
@@ -96,7 +99,7 @@ export default function RefereePreRace() {
   if (!selectedRaceId) {
     return (
       <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={s.content}>
+        <View style={styles.content}>
           <Section title="Chọn trận đua cần điểm danh / kiểm tra">
             {assignments.length === 0 ? (
               <EmptyState icon="checklist" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
@@ -107,16 +110,16 @@ export default function RefereePreRace() {
                 return (
                   <TouchableOpacity
                     key={a._id || a.id}
-                    style={s.assignmentCard}
+                    style={styles.assignmentCard}
                     onPress={() => selectRace(race._id || race.id, race.name)}
                     activeOpacity={0.8}
                   >
-                    <View style={s.cardIconWrap}>
+                    <View style={styles.cardIconWrap}>
                       <MaterialIcons name="checklist" size={20} color={premiumColors.brand} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={s.assignmentTitle} numberOfLines={1}>{race.name}</Text>
-                      <Text style={s.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
+                      <Text style={styles.assignmentTitle} numberOfLines={1}>{race.name}</Text>
+                      <Text style={styles.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
                     </View>
                     <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
                   </TouchableOpacity>
@@ -131,19 +134,19 @@ export default function RefereePreRace() {
 
   return (
     <AppScreen refreshing={refreshing} onRefresh={onRefresh}>
-      <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
           <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
-          <Text style={s.backTxt}>Quay lại</Text>
+          <Text style={styles.backTxt}>Quay lại</Text>
         </TouchableOpacity>
-        <Text style={s.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
+        <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
       </View>
 
       {loadingChecks && !refreshing ? <LoadingState /> : (
         <FlatList
           data={checks}
           keyExtractor={(item) => item._id || item.id}
-          contentContainerStyle={s.listContent}
+          contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <EmptyState icon="pets" title="Chưa chốt danh sách ngựa" subtitle="Cuộc đua này chưa có danh sách chiến mã tham gia." />
@@ -156,21 +159,21 @@ export default function RefereePreRace() {
             const isFailed = item.status === 'failed';
             
             return (
-              <View style={s.checkCard}>
-                <View style={s.cardHeader}>
+              <View style={styles.checkCard}>
+                <View style={styles.cardHeader}>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.horseName}>{horse.name.toUpperCase()}</Text>
-                    <Text style={s.jockeyName}>Nài ngựa: {item.jockeyUserId?.fullName || 'Chưa gán'}</Text>
+                    <Text style={styles.horseName}>{horse.name.toUpperCase()}</Text>
+                    <Text style={styles.jockeyName}>Nài ngựa: {item.jockeyUserId?.fullName || 'Chưa gán'}</Text>
                   </View>
                   <View style={[
-                    s.badge,
-                    isPassed && s.badgePassed,
-                    isFailed && s.badgeFailed
+                    styles.badge,
+                    isPassed && styles.badgePassed,
+                    isFailed && styles.badgeFailed
                   ]}>
                     <Text style={[
-                      s.badgeText,
-                      isPassed && s.badgeTextPassed,
-                      isFailed && s.badgeTextFailed
+                      styles.badgeText,
+                      isPassed && styles.badgeTextPassed,
+                      isFailed && styles.badgeTextFailed
                     ]}>
                       {isPassed ? 'ĐẠT CHUẨN' : isFailed ? 'BỊ LOẠI' : 'CHƯA CHECK'}
                     </Text>
@@ -198,24 +201,24 @@ export default function RefereePreRace() {
                         onPress={() => handleUpdateCheck(item._id || item.id, 'passed')}
                         activeOpacity={0.8}
                       >
-                        <Text style={s.btnTxt}>ĐẠT CHUẨN</Text>
+                        <Text style={styles.btnTxt}>ĐẠT CHUẨN</Text>
                       </TouchableOpacity>
                     )}
                     {!isFailed && (
-                      <View style={s.failContainer}>
+                      <View style={styles.failContainer}>
                         <TextInput
-                          style={s.input}
+                          style={styles.input}
                           placeholder="Lý do loại..."
                           placeholderTextColor={premiumColors.textMuted}
                           value={failNotes[item._id || item.id] || ''}
                           onChangeText={txt => setFailNotes({ ...failNotes, [item._id || item.id]: txt })}
                         />
                         <TouchableOpacity 
-                          style={[s.btn, s.btnFail]} 
+                          style={[styles.btn, styles.btnFail]} 
                           onPress={() => handleUpdateCheck(item._id || item.id, 'failed')}
                           activeOpacity={0.8}
                         >
-                          <Text style={s.btnTxt}>LOẠI</Text>
+                          <Text style={styles.btnTxt}>LOẠI</Text>
                         </TouchableOpacity>
                       </View>
                     )}
@@ -230,7 +233,7 @@ export default function RefereePreRace() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (premiumColors: any) => StyleSheet.create({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],

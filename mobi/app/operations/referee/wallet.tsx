@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TextInput } from 'react-native';
-import { C, Card, EmptyState, ErrorState, ListItemCard, LoadingState, PrimaryButton, SectionHeader, StatCard, formatDateTime } from '@/components/ui/shared';
+import { C, Card, EmptyState, ErrorState, ListItemCard, LoadingState, PrimaryButton, SectionHeader, StatCard, formatDateTime, useThemeColors } from '@/components/ui/shared';
 import { rewardPointLedgerApi, walletApi } from '@/lib/api-client';
 
 export default function RefereeWallet() {
@@ -60,13 +60,16 @@ export default function RefereeWallet() {
     }
   };
 
+  const theme = useThemeColors();
+  const s = getStyles(theme);
+
   if (loading) return <LoadingState />;
 
   return (
     <ScrollView
       style={s.c}
       contentContainerStyle={s.p}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.red} colors={[C.red]} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.red} colors={[theme.red]} />}
     >
       <StatCard label="Điểm hiện tại" value={`${balance.toLocaleString()} PTS`} icon="account-balance-wallet" color="#F59E0B" />
 
@@ -75,7 +78,7 @@ export default function RefereeWallet() {
         <TextInput
           style={s.input}
           placeholder="Nhập số điểm cần rút..."
-          placeholderTextColor={C.textMuted}
+          placeholderTextColor={theme.textMuted}
           keyboardType="numeric"
           value={redeemAmount}
           onChangeText={setRedeemAmount}
@@ -107,9 +110,9 @@ export default function RefereeWallet() {
   );
 }
 
-const s = StyleSheet.create({
-  c: { flex: 1, backgroundColor: C.bg },
+const getStyles = (theme: any) => StyleSheet.create({
+  c: { flex: 1, backgroundColor: theme.bg },
   p: { padding: 16, paddingBottom: 110 },
-  sectionSubTitle: { color: C.white, fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { backgroundColor: C.inputBg, borderWidth: 1, borderColor: C.cardBorder, color: C.white, borderRadius: 12, height: 44, paddingHorizontal: 16, fontSize: 13 },
+  sectionSubTitle: { color: theme.white, fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { backgroundColor: theme.inputBg, borderWidth: 1, borderColor: theme.cardBorder, color: theme.white, borderRadius: 12, height: 44, paddingHorizontal: 16, fontSize: 13 },
 });

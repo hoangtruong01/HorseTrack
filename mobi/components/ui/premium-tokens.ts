@@ -1,3 +1,5 @@
+import { useColorScheme } from 'react-native';
+
 export const premiumColors = {
   bg: '#000000',
   surface: 'rgba(12, 12, 14, 0.92)',
@@ -24,9 +26,31 @@ export const premiumColors = {
   redGlow: 'rgba(225,6,0,0.22)',
   redGlowStrong: 'rgba(225,6,0,0.32)',
   headerBg: '#000000',
-  headerGlass: 'rgba(255,255,255,0.035)',
   headerBorder: 'rgba(255,255,255,0.07)',
 };
+
+export function usePremiumColors() {
+  const isDark = useColorScheme() === 'dark';
+  return {
+    ...premiumColors,
+    bg: isDark ? premiumColors.bg : '#F7F4F1',
+    surface: isDark ? premiumColors.surface : '#FFFFFF',
+    surface2: isDark ? premiumColors.surface2 : '#FFFFFF',
+    surface3: isDark ? premiumColors.surface3 : '#F2F2F7',
+    border: isDark ? premiumColors.border : '#EAEAEA',
+    borderStrong: isDark ? premiumColors.borderStrong : '#D1D5DB',
+    text: isDark ? premiumColors.text : '#1C1C25',
+    textSecondary: isDark ? premiumColors.textSecondary : '#58585B',
+    textMuted: isDark ? premiumColors.textMuted : '#8A8A8E',
+    surfaceGlass: isDark ? premiumColors.surfaceGlass : '#FFFFFF',
+    surfaceGlassStrong: isDark ? premiumColors.surfaceGlassStrong : '#F9FAFB',
+    surfaceGlassSubtle: isDark ? premiumColors.surfaceGlassSubtle : '#FFFFFF',
+    borderGlass: isDark ? premiumColors.borderGlass : '#EAEAEA',
+    borderSoft: isDark ? premiumColors.borderSoft : '#EAEAEA',
+    headerBg: isDark ? premiumColors.headerBg : '#FFFFFF',
+    headerBorder: isDark ? premiumColors.headerBorder : '#D3DADE',
+  };
+}
 
 export const premiumSpacing = {
   4: 4,
@@ -99,14 +123,14 @@ export const premiumShadows = {
 
 export type PremiumTone = 'brand' | 'success' | 'warning' | 'danger' | 'info' | 'gold' | 'neutral';
 
-export function getPremiumToneColor(tone?: PremiumTone): string {
+export function getPremiumToneColor(tone?: PremiumTone, colors: any = premiumColors): string {
   switch (tone) {
-    case 'brand': return premiumColors.brand;
-    case 'success': return premiumColors.success;
-    case 'warning': return premiumColors.warning;
-    case 'danger': return premiumColors.danger;
-    case 'info': return premiumColors.info;
-    case 'gold': return premiumColors.gold;
-    case 'neutral': default: return premiumColors.textSecondary;
+    case 'brand': return colors.brand;
+    case 'success': return colors.success;
+    case 'warning': return colors.warning;
+    case 'danger': return colors.danger;
+    case 'info': return colors.info;
+    case 'gold': return colors.gold;
+    case 'neutral': default: return colors.textSecondary;
   }
 }

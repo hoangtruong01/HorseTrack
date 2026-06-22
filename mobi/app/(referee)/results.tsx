@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius , usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState } from '@/components/ui/shared';
 import { refereeAssignmentsApi, raceChecksApi, raceResultsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -18,6 +18,9 @@ interface EntryRow {
 }
 
 export default function RefereeResults() {
+  const premiumColors = usePremiumColors();
+  const styles = getStyles(premiumColors);
+
   const [assignments, setAssignments] = useState<any[]>([]);
   const [selectedRaceId, setSelectedRaceId] = useState<string | null>(null);
   const [selectedRaceName, setSelectedRaceName] = useState<string>('');
@@ -169,7 +172,7 @@ export default function RefereeResults() {
   if (!selectedRaceId) {
     return (
       <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={s.content}>
+        <View style={styles.content}>
           <Section title="Chọn trận đua cần nhập kết quả">
             {assignments.length === 0 ? (
               <EmptyState icon="sports-score" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
@@ -180,16 +183,16 @@ export default function RefereeResults() {
                 return (
                   <TouchableOpacity
                     key={a._id || a.id}
-                    style={s.assignmentCard}
+                    style={styles.assignmentCard}
                     onPress={() => selectRace(race._id || race.id, race.name)}
                     activeOpacity={0.8}
                   >
-                    <View style={s.cardIconWrap}>
+                    <View style={styles.cardIconWrap}>
                       <MaterialIcons name="sports-score" size={20} color={premiumColors.brand} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={s.assignmentTitle} numberOfLines={1}>{race.name}</Text>
-                      <Text style={s.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
+                      <Text style={styles.assignmentTitle} numberOfLines={1}>{race.name}</Text>
+                      <Text style={styles.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
                     </View>
                     <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
                   </TouchableOpacity>
@@ -204,19 +207,19 @@ export default function RefereeResults() {
 
   return (
     <AppScreen refreshing={refreshing} onRefresh={onRefresh}>
-      <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
           <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
-          <Text style={s.backTxt}>Quay lại</Text>
+          <Text style={styles.backTxt}>Quay lại</Text>
         </TouchableOpacity>
-        <Text style={s.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
+        <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
       </View>
 
-      <View style={s.statusCard}>
+      <View style={styles.statusCard}>
         <View>
-          <Text style={s.statusLabel}>TRẠNG THÁI BIÊN BẢN</Text>
-          <View style={[s.statusBadge, { backgroundColor: isLocked ? 'rgba(52, 211, 153, 0.15)' : 'rgba(234, 179, 8, 0.15)' }]}>
-            <Text style={[s.statusBadgeText, { color: isLocked ? premiumColors.success : premiumColors.warning }]}>
+          <Text style={styles.statusLabel}>TRẠNG THÁI BIÊN BẢN</Text>
+          <View style={[styles.statusBadge, { backgroundColor: isLocked ? 'rgba(52, 211, 153, 0.15)' : 'rgba(234, 179, 8, 0.15)' }]}>
+            <Text style={[styles.statusBadgeText, { color: isLocked ? premiumColors.success : premiumColors.warning }]}>
               {isLocked ? 'ĐÃ XÁC NHẬN (LOCKED)' : 'BẢN NHÁP (DRAFT)'}
             </Text>
           </View>
@@ -225,21 +228,21 @@ export default function RefereeResults() {
           <View style={s.topActions}>
             {/*
             <TouchableOpacity 
-              style={[s.topActionBtn, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: 'rgba(234, 179, 8, 0.3)' }]} 
+              style={[styles.topActionBtn, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: 'rgba(234, 179, 8, 0.3)' }]} 
               onPress={handleSimulate} 
               disabled={simulating}
               activeOpacity={0.8}
             >
-              <Text style={[s.topActionBtnText, { color: premiumColors.warning }]}>{simulating ? '...' : 'GIẢ LẬP'}</Text>
+              <Text style={[styles.topActionBtnText, { color: premiumColors.warning }]}>{simulating ? '...' : 'GIẢ LẬP'}</Text>
             </TouchableOpacity>
             */}
             <TouchableOpacity 
-              style={s.topActionBtnOutline} 
+              style={styles.topActionBtnOutline} 
               onPress={handleBulkSave} 
               disabled={saving}
               activeOpacity={0.8}
             >
-              <Text style={s.topActionBtnOutlineText}>{saving ? '...' : 'LƯU NHÁP'}</Text>
+              <Text style={styles.topActionBtnOutlineText}>{saving ? '...' : 'LƯU NHÁP'}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -249,26 +252,26 @@ export default function RefereeResults() {
         <FlatList
           data={entryRows}
           keyExtractor={(item) => item.horseId}
-          contentContainerStyle={s.listContent}
+          contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <EmptyState icon="sports" title="Không có chiến mã" subtitle="Chưa có ngựa đua được xác nhận kiểm duyệt để nhập kết quả." />
           }
           renderItem={({ item, index }) => (
-            <View style={s.resultCard}>
-              <View style={s.cardHeader}>
-                <Text style={s.horseName}>{item.horseName.toUpperCase()}</Text>
+            <View style={styles.resultCard}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.horseName}>{item.horseName.toUpperCase()}</Text>
                 {item.rank ? (
-                  <View style={s.rankBadge}>
-                    <Text style={s.rankText}>HẠNG {item.rank}</Text>
+                  <View style={styles.rankBadge}>
+                    <Text style={styles.rankText}>HẠNG {item.rank}</Text>
                   </View>
                 ) : null}
               </View>
 
-              <View style={s.formRow}>
-                <Text style={s.label}>Thời gian (giây):</Text>
+              <View style={styles.formRow}>
+                <Text style={styles.label}>Thời gian (giây):</Text>
                 <TextInput
-                  style={[s.timeInput, isLocked && s.disabledInput]}
+                  style={[styles.timeInput, isLocked && styles.disabledInput]}
                   value={item.finishTimeSecs}
                   onChangeText={txt => handleRowChange(index, 'finishTimeSecs', txt)}
                   placeholder="Ví dụ: 72.45"
@@ -278,21 +281,21 @@ export default function RefereeResults() {
                 />
               </View>
 
-              <View style={s.formRow}>
-                <Text style={s.label}>Trạng thái:</Text>
-                <View style={s.statusChips}>
+              <View style={styles.formRow}>
+                <Text style={styles.label}>Trạng thái:</Text>
+                <View style={styles.statusChips}>
                   {['finished', 'disqualified', 'did_not_finish'].map(out => {
                     const isActive = item.outcome === out;
                     const label = out === 'finished' ? 'Về đích' : out === 'disqualified' ? 'Loại' : 'DNF';
                     return (
                       <TouchableOpacity
                         key={out}
-                        style={[s.chip, isActive && s.chipActive, isLocked && s.chipLocked]}
+                        style={[styles.chip, isActive && styles.chipActive, isLocked && styles.chipLocked]}
                         onPress={() => !isLocked && handleRowChange(index, 'outcome', out)}
                         disabled={isLocked}
                         activeOpacity={0.8}
                       >
-                        <Text style={[s.chipText, isActive && s.chipTextActive]}>{label}</Text>
+                        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{label}</Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -304,14 +307,14 @@ export default function RefereeResults() {
       )}
 
       {!isLocked && entryRows.length > 0 && (
-        <View style={s.footer}>
+        <View style={styles.footer}>
           <TouchableOpacity 
-            style={s.confirmButton} 
+            style={styles.confirmButton} 
             onPress={handleConfirm} 
             disabled={confirming}
             activeOpacity={0.9}
           >
-            <Text style={s.confirmButtonText}>{confirming ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN KHÓA KẾT QUẢ'}</Text>
+            <Text style={styles.confirmButtonText}>{confirming ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN KHÓA KẾT QUẢ'}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -319,7 +322,7 @@ export default function RefereeResults() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (premiumColors: any) => StyleSheet.create({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],
