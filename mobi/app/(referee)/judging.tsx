@@ -4,10 +4,11 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import RefereeResults from './results';
 import RefereeViolations from './violations';
 import { C, useThemeColors } from '@/components/ui/shared';
-import { Stack, Tabs } from 'expo-router';
+import { Stack, Tabs, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { rewardPointLedgerApi } from '@/lib/api-client';
 
 // Background Pattern
 const GridBackground = ({ isDark }: { isDark: boolean }) => {
@@ -26,7 +27,15 @@ export default function RefereeJudging() {
   const theme = useThemeColors();
   const styles = React.useMemo(() => getStyles(isDark, theme, insets, premiumColors), [isDark, theme, insets, premiumColors]);
 
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'results' | 'violations'>('results');
+  const [balance, setBalance] = useState(0);
+
+  React.useEffect(() => {
+    rewardPointLedgerApi.myBalance()
+      .then((res: any) => setBalance(res.balance || 0))
+      .catch(() => {});
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -39,7 +48,10 @@ export default function RefereeJudging() {
       <View style={styles.customHeader}>
         <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>THẨM ĐỊNH KẾT QUẢ</Text>
-        <View style={styles.headerSpacer} />
+        <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+          <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+          <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Segmented Control */}
@@ -94,6 +106,22 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     fontSize: 16,
     fontWeight: '800',
     letterSpacing: 0.5,
+  },
+  headerWallet: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    minWidth: 36,
+    justifyContent: 'center',
+  },
+  headerWalletText: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    fontWeight: '800',
   },
   segmentContainer: {
     flexDirection: 'row',

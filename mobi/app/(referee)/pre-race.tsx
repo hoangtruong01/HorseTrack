@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, A
 import { AppScreen, Section } from '@/components/ui/premium';
 import { premiumColors as defaultPremiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, useThemeColors } from '@/components/ui/shared';
-import { refereeAssignmentsApi, raceChecksApi } from '@/lib/api-client';
+import { refereeAssignmentsApi, raceChecksApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Stack, Tabs } from 'expo-router';
+import { Stack, Tabs, useRouter } from 'expo-router';
 
 // Background Pattern
 const GridBackground = ({ isDark }: { isDark: boolean }) => {
@@ -36,6 +36,14 @@ export default function RefereePreRace() {
   const [jockeyPresent, setJockeyPresent] = useState<Record<string, boolean>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const router = useRouter();
+
+  useEffect(() => {
+    rewardPointLedgerApi.myBalance()
+      .then((res: any) => setBalance(res.balance || 0))
+      .catch(() => {});
+  }, []);
 
   const loadAssignments = useCallback(async () => {
     try {
@@ -123,7 +131,10 @@ export default function RefereePreRace() {
         <View style={styles.customHeader}>
           <View style={styles.headerSpacer} />
           <Text style={styles.headerTitle}>KIỂM TRA TRẬN ĐUA</Text>
-          <View style={styles.headerSpacer} />
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
@@ -171,7 +182,10 @@ export default function RefereePreRace() {
           <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
-        <View style={styles.headerSpacer} />
+        <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+          <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+          <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+        </TouchableOpacity>
       </View>
 
       {loadingChecks && !refreshing ? <LoadingState /> : (
@@ -289,6 +303,22 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     fontSize: 16,
     fontWeight: '800',
     letterSpacing: 0.5,
+  },
+  headerWallet: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    minWidth: 36,
+    justifyContent: 'center',
+  },
+  headerWalletText: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    fontWeight: '800',
   },
   content: {
     paddingHorizontal: premiumSpacing[16],

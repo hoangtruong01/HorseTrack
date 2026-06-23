@@ -1,7 +1,7 @@
 import { usePremiumColors } from '@/components/ui/premium-tokens';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
-import { refereeAssignmentsApi } from '../../../lib/api-client';
+import { refereeAssignmentsApi, rewardPointLedgerApi } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -29,15 +29,20 @@ export default function AssignedRacesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [balance, setBalance] = useState(0);
   const router = useRouter();
 
   const loadAssignments = React.useCallback(async () => {
     setError(null);
     try {
-      const res = await refereeAssignmentsApi.myAssignments({ limit: 50 });
+      const [res, balRes] = await Promise.all([
+        refereeAssignmentsApi.myAssignments({ limit: 50 }),
+        rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 }))
+      ]);
       if (res) {
         setAssignments((res as any).data || res);
       }
+      setBalance((balRes as any).balance || 0);
     } catch (err: any) {
       console.error('Lỗi lấy phân công trọng tài:', err);
       setError(err.message || 'Không thể tải danh sách phân công.');
@@ -192,7 +197,10 @@ export default function AssignedRacesScreen() {
       <View style={styles.customHeader}>
         <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>NHIỆM VỤ PHÂN CÔNG</Text>
-        <View style={styles.headerSpacer} />
+        <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+          <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+          <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -252,6 +260,22 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     fontSize: 16,
     fontWeight: '800',
     letterSpacing: 0.5,
+  },
+  headerWallet: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    minWidth: 36,
+    justifyContent: 'center',
+  },
+  headerWalletText: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    fontWeight: '800',
   },
   listContent: {
     padding: 16,
