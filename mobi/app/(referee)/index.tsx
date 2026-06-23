@@ -85,15 +85,21 @@ export default function RefereeHome() {
 
       {/* Custom Sleek Header */}
       <View style={styles.customHeader}>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>TRUNG TÂM TRỌNG TÀI</Text>
-        <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-          <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-          <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-        </TouchableOpacity>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitle}>TRANG CHỦ</Text>
+          </View>
+        </View>
+        <View style={styles.headerLeft} />
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} />}
         showsVerticalScrollIndicator={false}
@@ -216,8 +222,13 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     zIndex: 10,
     backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
   },
-  headerSpacer: {
-    width: 36,
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
   headerTitle: {
     color: theme.textPrimary,

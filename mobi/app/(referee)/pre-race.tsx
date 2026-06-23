@@ -42,7 +42,7 @@ export default function RefereePreRace() {
   useEffect(() => {
     rewardPointLedgerApi.myBalance()
       .then((res: any) => setBalance(res.balance || 0))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const loadAssignments = useCallback(async () => {
@@ -51,7 +51,7 @@ export default function RefereePreRace() {
       const list = (res as any).data || res || [];
       // Only show accepted assignments
       setAssignments(list.filter((a: any) => a.status === 'accepted'));
-    } catch {} finally { setLoading(false); }
+    } catch { } finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
@@ -129,12 +129,18 @@ export default function RefereePreRace() {
 
         {/* Custom Sleek Header */}
         <View style={styles.customHeader}>
-          <View style={styles.headerSpacer} />
-          <Text style={styles.headerTitle}>KIỂM TRA TRẬN ĐUA</Text>
-          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-          </TouchableOpacity>
+          <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={styles.headerTitle}>KIỂM TRA</Text>
+            </View>
+          </View>
+          <View style={styles.headerLeft} />
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+              <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+              <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.content}>
@@ -178,14 +184,22 @@ export default function RefereePreRace() {
 
       {/* Custom Sleek Header */}
       <View style={styles.customHeader}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
-          <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
-        <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-          <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-          <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-        </TouchableOpacity>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
+          </View>
+        </View>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
+            <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loadingChecks && !refreshing ? <LoadingState /> : (
@@ -203,7 +217,7 @@ export default function RefereePreRace() {
             const isUpdating = updatingId === (item._id || item.id);
             const isPassed = item.status === 'passed';
             const isFailed = item.status === 'failed';
-            
+
             return (
               <View style={styles.checkCard}>
                 <View style={styles.cardHeader}>
@@ -259,8 +273,8 @@ export default function RefereePreRace() {
                           value={failNotes[item._id || item.id] || ''}
                           onChangeText={txt => setFailNotes({ ...failNotes, [item._id || item.id]: txt })}
                         />
-                        <TouchableOpacity 
-                          style={[styles.btn, styles.btnFail]} 
+                        <TouchableOpacity
+                          style={[styles.btn, styles.btnFail]}
                           onPress={() => handleUpdateCheck(item._id || item.id, 'failed')}
                           activeOpacity={0.8}
                         >
@@ -295,8 +309,13 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     zIndex: 10,
     backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
   },
-  headerSpacer: {
-    width: 36,
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
   headerTitle: {
     color: theme.textPrimary,

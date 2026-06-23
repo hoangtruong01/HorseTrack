@@ -103,7 +103,7 @@ export default function AssignedRacesScreen() {
 
     const isPending = item.status === 'assigned';
     const isAccepted = item.status === 'accepted';
-    
+
     const startTimeStr = new Date(race.startTime).toLocaleString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
@@ -130,14 +130,14 @@ export default function AssignedRacesScreen() {
 
         {isPending && (
           <View style={styles.actionsContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.actionButton, styles.rejectButton]}
               onPress={() => handleRespond(item._id, 'declined')}
             >
               <Text style={styles.actionButtonText}>TỪ CHỐI</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[styles.actionButton, styles.acceptButton]}
               onPress={() => handleRespond(item._id, 'accepted')}
             >
@@ -148,7 +148,7 @@ export default function AssignedRacesScreen() {
 
         {isAccepted && (
           <View style={styles.acceptedWorkContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.opsButton}
               onPress={() => router.push({ pathname: '/operations/referee/pre-race', params: { raceId: race._id } })}
             >
@@ -156,7 +156,7 @@ export default function AssignedRacesScreen() {
               <Text style={styles.opsButtonText}>ĐIỂM DANH</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.opsButton, { backgroundColor: premiumColors.border, borderColor: '#E10600', borderWidth: 1 }]}
               onPress={() => router.push({ pathname: '/operations/referee/violation-log', params: { raceId: race._id } })}
             >
@@ -164,7 +164,7 @@ export default function AssignedRacesScreen() {
               <Text style={[styles.opsButtonText, { color: '#E10600' }]}>VI PHẠM</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.opsButton, { backgroundColor: '#E1A200' }]}
               onPress={() => router.push({ pathname: '/operations/referee/result-entry', params: { raceId: race._id } })}
             >
@@ -195,12 +195,18 @@ export default function AssignedRacesScreen() {
 
       {/* Custom Sleek Header */}
       <View style={styles.customHeader}>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>NHIỆM VỤ PHÂN CÔNG</Text>
-        <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-          <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-          <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-        </TouchableOpacity>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitle}>NHIỆM VỤ</Text>
+          </View>
+        </View>
+        <View style={styles.headerLeft} />
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -225,7 +231,7 @@ export default function AssignedRacesScreen() {
         }
       />
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.backHomeButton}
         onPress={() => router.replace('/(referee)')}
       >
@@ -252,8 +258,13 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     zIndex: 10,
     backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
   },
-  headerSpacer: {
-    width: 36,
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
   headerTitle: {
     color: theme.textPrimary,

@@ -1,9 +1,9 @@
-import { usePremiumColors } from '@/components/ui/premium-tokens';
+import { premiumColors as defaultPremiumColors, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import RefereeResults from './results';
 import RefereeViolations from './violations';
-import { C, useThemeColors } from '@/components/ui/shared';
+import { useThemeColors } from '@/components/ui/shared';
 import { Stack, Tabs, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -34,7 +34,7 @@ export default function RefereeJudging() {
   React.useEffect(() => {
     rewardPointLedgerApi.myBalance()
       .then((res: any) => setBalance(res.balance || 0))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   return (
@@ -46,12 +46,18 @@ export default function RefereeJudging() {
 
       {/* Custom Sleek Header */}
       <View style={styles.customHeader}>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>THẨM ĐỊNH KẾT QUẢ</Text>
-        <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-          <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-          <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-        </TouchableOpacity>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitle}>GIÁM ĐỊNH</Text>
+          </View>
+        </View>
+        <View style={styles.headerLeft} />
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Segmented Control */}
@@ -76,7 +82,7 @@ export default function RefereeJudging() {
 
       {/* Main Content */}
       <View style={styles.content}>
-        {activeTab === 'results' ? <RefereeResults /> : <RefereeViolations />}
+        {activeTab === 'results' ? <RefereeResults nested /> : <RefereeViolations nested />}
       </View>
     </View>
   );
@@ -98,8 +104,13 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     zIndex: 10,
     backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
   },
-  headerSpacer: {
-    width: 36,
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
   headerTitle: {
     color: theme.textPrimary,
@@ -125,30 +136,36 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
   },
   segmentContainer: {
     flexDirection: 'row',
-    backgroundColor: C.card,
-    padding: 12,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: C.cardBorder,
+    borderBottomColor: premiumColors.borderSoft || premiumColors.border,
+    zIndex: 10,
   },
   segmentBtn: {
     flex: 1,
-    height: 40,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
-    backgroundColor: C.inputBg,
+    borderRadius: premiumRadius[12],
+    backgroundColor: premiumColors.surface2,
     marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
   },
   segmentBtnActive: {
-    backgroundColor: C.red,
+    backgroundColor: 'rgba(225, 6, 0, 0.1)',
+    borderColor: premiumColors.brand,
   },
   segmentTxt: {
-    color: C.textMuted,
-    fontSize: 11,
-    fontWeight: '800',
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
   },
   segmentTxtActive: {
-    color: C.white,
+    color: premiumColors.brand,
+    fontWeight: '800',
   },
   content: {
     flex: 1,
