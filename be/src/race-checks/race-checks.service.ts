@@ -121,9 +121,18 @@ export class RaceChecksService {
     const check = await this.checkModel.findById(id);
     if (!check) throw new NotFoundException('Race check not found');
 
-    if (String(check.checkedBy) !== checkedBy) {
-      throw new ForbiddenException('You can only update checks you submitted');
+    const assignment = await this.assignmentModel.findOne({
+      raceId: check.raceId,
+      refereeUserId: new Types.ObjectId(checkedBy),
+      status: RefereeAssignmentStatus.ACCEPTED,
+    });
+    if (!assignment) {
+      throw new ForbiddenException(
+        'You must be an accepted referee for this race to update checks',
+      );
     }
+
+    check.checkedBy = new Types.ObjectId(checkedBy);
 
     const allowed = RACE_CHECK_STATUS_FLOW[check.status];
     if (!allowed.includes(dto.status)) {

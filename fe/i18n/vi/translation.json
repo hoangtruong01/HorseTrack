@@ -965,11 +965,11 @@
         "description": "Bảng giám sát tổng hợp của trọng tài."
       },
       "assignments": {
-        "title": "Cuộc đua được phân công",
+        "title": "Phân công trọng tài",
         "description": "Danh sách cuộc đua được giao giám sát."
       },
       "preRace": {
-        "title": "Kiểm tra trước giờ đua",
+        "title": "Kiểm tra trước đua",
         "description": "Kiểm tra sức khỏe ngựa và điểm danh nài ngựa."
       },
       "monitoring": {
