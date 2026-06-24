@@ -2,12 +2,21 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
-import { LoadingState, EmptyState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState, ErrorState, statusLabel, formatDateTime, useThemeColors } from '@/components/ui/shared';
 import { predictionsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from 'react-native';
 
 export default function SpectatorPredictions() {
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
+  const pc = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, theme, insets, pc), [isDark, theme, insets, pc]);
+
   const router = useRouter();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +48,7 @@ export default function SpectatorPredictions() {
   return (
     <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
       <View style={styles.content}>
-        
+
         <View style={styles.header}>
           <Text style={styles.eyebrow}>HOẠT ĐỘNG KHÁN GIẢ</Text>
           <Text style={styles.title}>Lịch sử dự đoán</Text>
@@ -53,7 +62,7 @@ export default function SpectatorPredictions() {
           ) : data.length === 0 ? (
             <View style={styles.emptyContainer}>
               <EmptyState icon="history" title="Chưa có dự đoán" subtitle="Bạn chưa đặt dự đoán cho trận đua nào. Hãy vào Giải đấu để bắt đầu!" />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.emptyCta}
                 onPress={() => router.push('/(spectator)/tournaments' as any)}
                 activeOpacity={0.8}
@@ -68,7 +77,7 @@ export default function SpectatorPredictions() {
                 const horse = typeof p.predictedHorseId === 'object' ? p.predictedHorseId?.name : 'Ngựa';
                 const race = typeof p.raceId === 'object' ? p.raceId?.name : 'Trận đua';
                 const rId = typeof p.raceId === 'object' ? p.raceId?._id : p.raceId;
-                
+
                 return (
                   <TouchableOpacity
                     key={p._id || p.id}
@@ -102,7 +111,7 @@ export default function SpectatorPredictions() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSheet.create({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[24],
@@ -114,33 +123,33 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: 11,
     fontWeight: '700',
-    color: premiumColors.brand,
+    color: pc.brand,
     letterSpacing: 1,
     marginBottom: premiumSpacing[8],
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
     marginBottom: premiumSpacing[8],
   },
   accentLine: {
     width: 36,
     height: 3,
-    backgroundColor: premiumColors.brand,
+    backgroundColor: pc.brand,
     borderRadius: 2,
     marginBottom: premiumSpacing[12],
   },
   subtitle: {
     fontSize: 14,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     lineHeight: 20,
   },
   emptyContainer: {
     paddingVertical: premiumSpacing[20],
   },
   emptyCta: {
-    backgroundColor: premiumColors.brand,
+    backgroundColor: pc.brand,
     padding: premiumSpacing[16],
     borderRadius: premiumRadius[8],
     alignItems: 'center',
@@ -153,10 +162,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   listContainer: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderRadius: premiumRadius[12],
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     overflow: 'hidden',
   },
   rowItem: {
@@ -164,16 +173,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: premiumSpacing[16],
     borderBottomWidth: 1,
-    borderBottomColor: premiumColors.border,
+    borderBottomColor: pc.border,
     gap: premiumSpacing[12],
   },
   rowAvatar: {
     width: 44,
     height: 44,
     borderRadius: premiumRadius[8],
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: pc.surface2,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -185,12 +194,12 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: premiumColors.text,
+    color: pc.text,
     marginBottom: 4,
   },
   rowSubtitle: {
     fontSize: 12,
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
   },
   rowBadge: {
     borderWidth: 1,

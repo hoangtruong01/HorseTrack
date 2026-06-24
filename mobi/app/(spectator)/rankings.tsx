@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, RefreshControl, Image } from 'react-native';
 import { LoadingState, EmptyState, ErrorState } from '@/components/ui/shared';
-import { rankingsApi } from '@/lib/api-client';
+import { rankingsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +30,7 @@ export default function SpectatorRankings() {
   const [activeTab, setActiveTab] = useState<'horses' | 'jockeys'>('horses');
   const [horses, setHorses] = useState<any[]>([]);
   const [jockeys, setJockeys] = useState<any[]>([]);
+  const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,9 +38,10 @@ export default function SpectatorRankings() {
   const loadData = useCallback(async () => {
     setError(null);
     try {
-      const [horsesRes, jockeysRes] = await Promise.all([
+      const [horsesRes, jockeysRes, bRes] = await Promise.all([
         rankingsApi.globalHorses().catch(() => []),
         rankingsApi.globalJockeys().catch(() => []),
+        rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
       ]);
 
       // Sort and map ranks manually if not present
@@ -54,6 +56,7 @@ export default function SpectatorRankings() {
 
       setHorses(mappedHorses);
       setJockeys(mappedJockeys);
+      setBalance((bRes as any).balance || 0);
     } catch (err: any) {
       setError(err.message || 'Không thể tải bảng xếp hạng. Vui lòng thử lại.');
     } finally {
@@ -182,7 +185,12 @@ export default function SpectatorRankings() {
           </View>
         </View>
         <View style={styles.headerLeft} />
-        <View style={styles.headerRight} />
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/(spectator)/profile')}>
+            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Segment Tabs */}
@@ -318,6 +326,22 @@ const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSh
   headerRight: {
     flex: 1,
     alignItems: 'flex-end',
+  },
+  headerWallet: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    minWidth: 36,
+    justifyContent: 'center',
+  },
+  headerWalletText: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    fontWeight: '800',
   },
   headerTitleText: {
     fontSize: 16,
