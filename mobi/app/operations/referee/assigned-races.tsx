@@ -1,4 +1,4 @@
-import { usePremiumColors } from '@/components/ui/premium-tokens';
+import { usePremiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { refereeAssignmentsApi, rewardPointLedgerApi } from '../../../lib/api-client';
@@ -91,9 +91,9 @@ export default function AssignedRacesScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'accepted': return '#067E6A';
-      case 'declined': return '#E10600';
-      default: return '#E1A200';
+      case 'accepted': return premiumColors.success;
+      case 'declined': return premiumColors.danger;
+      default: return premiumColors.warning;
     }
   };
 
@@ -118,8 +118,8 @@ export default function AssignedRacesScreen() {
             <Text style={styles.raceName}>{race.name.toUpperCase()}</Text>
             <Text style={styles.startTimeText}>Bắt đầu: {startTimeStr}</Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-            <Text style={styles.statusBadgeText}>{getStatusText(item.status)}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
+            <Text style={[styles.statusBadgeText, { color: getStatusColor(item.status) }]}>{getStatusText(item.status)}</Text>
           </View>
         </View>
 
@@ -133,15 +133,17 @@ export default function AssignedRacesScreen() {
             <TouchableOpacity
               style={[styles.actionButton, styles.rejectButton]}
               onPress={() => handleRespond(item._id, 'declined')}
+              activeOpacity={0.8}
             >
-              <Text style={styles.actionButtonText}>TỪ CHỐI</Text>
+              <Text style={styles.rejectButtonText}>TỪ CHỐI</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.actionButton, styles.acceptButton]}
               onPress={() => handleRespond(item._id, 'accepted')}
+              activeOpacity={0.8}
             >
-              <Text style={styles.actionButtonText}>CHẤP NHẬN</Text>
+              <Text style={styles.acceptButtonText}>CHẤP NHẬN</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -151,25 +153,28 @@ export default function AssignedRacesScreen() {
             <TouchableOpacity
               style={styles.opsButton}
               onPress={() => router.push({ pathname: '/operations/referee/pre-race', params: { raceId: race._id } })}
+              activeOpacity={0.8}
             >
-              <MaterialIcons name="fact-check" size={18} color={premiumColors.text} />
+              <MaterialIcons name="fact-check" size={18} color={premiumColors.brand} />
               <Text style={styles.opsButtonText}>ĐIỂM DANH</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.opsButton, { backgroundColor: premiumColors.border, borderColor: '#E10600', borderWidth: 1 }]}
+              style={styles.opsButton}
               onPress={() => router.push({ pathname: '/operations/referee/violation-log', params: { raceId: race._id } })}
+              activeOpacity={0.8}
             >
-              <MaterialIcons name="warning" size={18} color="#E10600" />
-              <Text style={[styles.opsButtonText, { color: '#E10600' }]}>VI PHẠM</Text>
+              <MaterialIcons name="warning" size={18} color={premiumColors.warning} />
+              <Text style={[styles.opsButtonText, { color: premiumColors.warning }]}>VI PHẠM</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.opsButton, { backgroundColor: '#E1A200' }]}
+              style={styles.opsButton}
               onPress={() => router.push({ pathname: '/operations/referee/result-entry', params: { raceId: race._id } })}
+              activeOpacity={0.8}
             >
-              <MaterialIcons name="emoji-events" size={18} color={premiumColors.text} />
-              <Text style={styles.opsButtonText}>KẾT QUẢ</Text>
+              <MaterialIcons name="emoji-events" size={18} color={premiumColors.success} />
+              <Text style={[styles.opsButtonText, { color: premiumColors.success }]}>KẾT QUẢ</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -180,7 +185,7 @@ export default function AssignedRacesScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#E10600" />
+        <ActivityIndicator size="large" color={premiumColors.brand} />
         <Text style={styles.loadingText}>Đang tải danh sách phân công...</Text>
       </View>
     );
@@ -216,11 +221,12 @@ export default function AssignedRacesScreen() {
         contentContainerStyle={styles.listContent}
         onRefresh={onRefresh}
         refreshing={refreshing}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           error ? (
             <View style={styles.emptyContainer}>
-              <MaterialIcons name="error-outline" size={48} color="#E10600" />
-              <Text style={[styles.emptyText, { color: '#E10600' }]}>{error}</Text>
+              <MaterialIcons name="error-outline" size={48} color={premiumColors.danger} />
+              <Text style={[styles.emptyText, { color: premiumColors.danger }]}>{error}</Text>
             </View>
           ) : (
             <View style={styles.emptyContainer}>
@@ -281,12 +287,12 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     fontWeight: '800',
   },
   listContent: {
-    padding: 16,
+    padding: premiumSpacing[16],
     paddingBottom: 110,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: premiumColors.bg,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -296,102 +302,117 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     marginTop: 12,
   },
   card: {
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: premiumColors.surface,
     borderWidth: 1,
     borderColor: premiumColors.border,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: premiumRadius[16],
+    padding: premiumSpacing[16],
+    marginBottom: premiumSpacing[16],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0.2 : 0.05,
+    shadowRadius: 12,
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     borderBottomWidth: 1,
-    borderBottomColor: premiumColors.bg,
-    paddingBottom: 10,
-    marginBottom: 10,
+    borderBottomColor: premiumColors.border,
+    paddingBottom: 12,
+    marginBottom: 12,
   },
   raceName: {
     color: premiumColors.text,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '900',
-    fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-CondensedBold' : 'sans-serif-condensed',
   },
   startTimeText: {
     color: premiumColors.textSecondary,
-    fontSize: 11,
-    marginTop: 2,
+    fontSize: 12,
+    marginTop: 4,
   },
   statusBadge: {
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderRadius: premiumRadius[8],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   statusBadgeText: {
-    color: premiumColors.text,
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: '900',
   },
   cardBody: {
-    gap: 4,
-    marginBottom: 12,
+    gap: 6,
+    marginBottom: 16,
   },
   bodyText: {
     color: premiumColors.textSecondary,
-    fontSize: 12,
+    fontSize: 13,
   },
   whiteBold: {
     color: premiumColors.text,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   actionsContainer: {
     flexDirection: 'row',
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: premiumColors.bg,
-    paddingTop: 12,
+    borderTopColor: premiumColors.border,
+    paddingTop: 16,
   },
   actionButton: {
     flex: 1,
-    height: 36,
-    borderRadius: 18,
+    height: 44,
+    borderRadius: premiumRadius[24],
     alignItems: 'center',
     justifyContent: 'center',
   },
   rejectButton: {
-    backgroundColor: premiumColors.border,
+    backgroundColor: premiumColors.surface2,
     borderWidth: 1,
-    borderColor: '#E10600',
+    borderColor: premiumColors.border,
   },
   acceptButton: {
-    backgroundColor: '#E10600',
+    backgroundColor: premiumColors.brand,
+    shadowColor: premiumColors.brand,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  actionButtonText: {
-    color: premiumColors.text,
-    fontSize: 11,
+  rejectButtonText: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  acceptButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '800',
   },
   acceptedWorkContainer: {
     flexDirection: 'row',
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: premiumColors.bg,
-    paddingTop: 12,
+    borderTopColor: premiumColors.border,
+    paddingTop: 16,
   },
   opsButton: {
     flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#067E6A',
-    borderRadius: 6,
-    height: 36,
+    flexDirection: 'column',
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    height: 64,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 6,
   },
   opsButtonText: {
-    color: premiumColors.text,
-    fontSize: 9,
+    color: premiumColors.brand,
+    fontSize: 10,
     fontWeight: '800',
   },
   emptyContainer: {
@@ -404,21 +425,5 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     fontSize: 13,
     marginTop: 12,
     textAlign: 'center',
-  },
-  backHomeButton: {
-    flexDirection: 'row',
-    height: 48,
-    borderTopWidth: 1,
-    borderTopColor: premiumColors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: premiumColors.surface2,
-    gap: 8,
-    marginBottom: 80,
-  },
-  backHomeButtonText: {
-    color: premiumColors.textSecondary,
-    fontSize: 12,
-    fontWeight: '800',
   },
 });
