@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutRight } from 'react-native-reanimated';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors as defaultPremiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, useThemeColors } from '@/components/ui/shared';
 import { refereeAssignmentsApi, raceChecksApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -120,67 +121,62 @@ export default function RefereePreRace() {
 
   if (loading && !refreshing) return <LoadingState />;
 
-  if (!selectedRaceId) {
-    return (
-      <View style={styles.container}>
-        <Stack.Screen options={{ headerShown: false }} />
-        <Tabs.Screen options={{ headerShown: false }} />
-        <GridBackground isDark={isDark} />
-
-        {/* Custom Sleek Header */}
-        <View style={styles.customHeader}>
-          <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={styles.headerTitle}>KIỂM TRA</Text>
-            </View>
-          </View>
-          <View style={styles.headerLeft} />
-          <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-              <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-              <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.content}>
-          <Section title="Chọn trận đua cần điểm danh / kiểm tra">
-            {assignments.length === 0 ? (
-              <EmptyState icon="checklist" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
-            ) : (
-              assignments.map(a => {
-                const race = a.raceId;
-                if (!race) return null;
-                return (
-                  <TouchableOpacity
-                    key={a._id || a.id}
-                    style={styles.assignmentCard}
-                    onPress={() => selectRace(race._id || race.id, race.name)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.cardIconWrap}>
-                      <MaterialIcons name="checklist" size={20} color={premiumColors.brand} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.assignmentTitle} numberOfLines={1}>{race.name}</Text>
-                      <Text style={styles.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
-                    </View>
-                    <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
-                  </TouchableOpacity>
-                );
-              })
-            )}
-          </Section>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <Tabs.Screen options={{ headerShown: false }} />
       <GridBackground isDark={isDark} />
+
+      {!selectedRaceId ? (
+        <Animated.View style={styles.flex1} entering={FadeIn} exiting={FadeOut}>
+          {/* Custom Sleek Header */}
+          <View style={styles.customHeader}>
+            <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={styles.headerTitle}>KIỂM TRA</Text>
+              </View>
+            </View>
+            <View style={styles.headerLeft} />
+            <View style={styles.headerRight}>
+              <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+                <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+                <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.content}>
+            <Section title="Chọn trận đua cần điểm danh / kiểm tra">
+              {assignments.length === 0 ? (
+                <EmptyState icon="checklist" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
+              ) : (
+                assignments.map(a => {
+                  const race = a.raceId;
+                  if (!race) return null;
+                  return (
+                    <TouchableOpacity
+                      key={a._id || a.id}
+                      style={styles.assignmentCard}
+                      onPress={() => selectRace(race._id || race.id, race.name)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.cardIconWrap}>
+                        <MaterialIcons name="checklist" size={20} color={premiumColors.brand} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.assignmentTitle} numberOfLines={1}>{race.name}</Text>
+                        <Text style={styles.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
+                      </View>
+                      <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
+                    </TouchableOpacity>
+                  );
+                })
+              )}
+            </Section>
+          </View>
+        </Animated.View>
+      ) : (
+        <Animated.View style={styles.flex1} entering={SlideInRight} exiting={SlideOutRight}>
 
       {/* Custom Sleek Header */}
       <View style={styles.customHeader}>
@@ -219,7 +215,7 @@ export default function RefereePreRace() {
             const isFailed = item.status === 'failed';
 
             return (
-              <View style={styles.checkCard}>
+              <View style={[styles.checkCard, isPassed && styles.cardPassed, isFailed && styles.cardFailed]}>
                 <View style={styles.cardHeader}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.horseName}>{horse.name.toUpperCase()}</Text>
@@ -261,7 +257,8 @@ export default function RefereePreRace() {
                         onPress={() => handleUpdateCheck(item._id || item.id, 'passed')}
                         activeOpacity={0.8}
                       >
-                        <Text style={styles.btnTxt}>ĐẠT CHUẨN</Text>
+                        <MaterialIcons name="check-circle" size={16} color="#FFFFFF" style={{ marginRight: 8 }} />
+                        <Text style={styles.btnTxt}>XÁC NHẬN ĐẠT</Text>
                       </TouchableOpacity>
                     )}
                     {!isFailed && (
@@ -278,6 +275,7 @@ export default function RefereePreRace() {
                           onPress={() => handleUpdateCheck(item._id || item.id, 'failed')}
                           activeOpacity={0.8}
                         >
+                          <MaterialIcons name="cancel" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
                           <Text style={styles.btnTxt}>LOẠI</Text>
                         </TouchableOpacity>
                       </View>
@@ -289,6 +287,8 @@ export default function RefereePreRace() {
           }}
         />
       )}
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -297,6 +297,9 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
   container: {
     flex: 1,
     backgroundColor: isDark ? '#09090B' : '#F4F4F5',
+  },
+  flex1: {
+    flex: 1,
   },
   // Custom Header
   customHeader: {
@@ -387,30 +390,43 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     fontSize: 12,
   },
   checkCard: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
-    padding: 16,
-    marginBottom: 16,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: premiumRadius[16],
+    padding: premiumSpacing[16],
+    marginBottom: premiumSpacing[16],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0.2 : 0.05,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  cardPassed: {
+    borderColor: isDark ? 'rgba(52, 211, 153, 0.3)' : 'rgba(52, 211, 153, 0.5)',
+    backgroundColor: isDark ? 'rgba(52, 211, 153, 0.05)' : 'rgba(52, 211, 153, 0.02)',
+  },
+  cardFailed: {
+    borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)',
+    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.05)' : 'rgba(239, 68, 68, 0.02)',
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     borderBottomWidth: 1,
-    borderBottomColor: premiumColors.border,
+    borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     paddingBottom: 12,
     marginBottom: 12,
   },
   horseName: {
     color: premiumColors.text,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '800',
   },
   jockeyName: {
     color: premiumColors.textSecondary,
-    fontSize: 12,
+    fontSize: 13,
     marginTop: 4,
   },
   badge: {
@@ -420,15 +436,15 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     backgroundColor: premiumColors.surface2,
   },
   badgePassed: {
-    backgroundColor: 'rgba(52, 211, 153, 0.15)',
+    backgroundColor: isDark ? 'rgba(52, 211, 153, 0.15)' : 'rgba(52, 211, 153, 0.1)',
   },
   badgeFailed: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',
   },
   badgeText: {
     fontSize: 10,
-    fontWeight: '900',
-    color: premiumColors.textSecondary,
+    fontWeight: '800',
+    color: premiumColors.textMuted,
   },
   badgeTextPassed: {
     color: premiumColors.success,
@@ -446,7 +462,8 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     alignItems: 'center',
   },
   btn: {
-    height: 44,
+    flexDirection: 'row',
+    height: 40,
     borderRadius: premiumRadius[8],
     alignItems: 'center',
     justifyContent: 'center',
@@ -462,15 +479,16 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '800',
+    letterSpacing: 0.5,
   },
   input: {
     flex: 1,
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F9FAFB',
     borderWidth: 1,
     borderColor: premiumColors.border,
     color: premiumColors.text,
     borderRadius: premiumRadius[8],
-    height: 44,
+    height: 40,
     paddingHorizontal: 12,
     fontSize: 13,
   },

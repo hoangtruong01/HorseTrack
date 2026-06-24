@@ -50,11 +50,11 @@ export default function NotificationsScreen() {
   }, [loadData]);
 
   const handleMarkAsRead = async (item: any) => {
-    if (item.read) return;
+    if (item.isRead) return;
     try {
       await notificationsApi.markAsRead(item._id || item.id);
       setNotifications(prev => prev.map(n => 
-        (n._id || n.id) === (item._id || item.id) ? { ...n, read: true } : n
+        (n._id || n.id) === (item._id || item.id) ? { ...n, isRead: true } : n
       ));
     } catch (err: any) {
       Alert.alert('Lỗi', 'Không thể đánh dấu đã đọc.');
@@ -62,11 +62,11 @@ export default function NotificationsScreen() {
   };
 
   const handleReadAll = async () => {
-    const hasUnread = notifications.some(n => !n.read);
+    const hasUnread = notifications.some(n => !n.isRead);
     if (!hasUnread) return;
     try {
       await notificationsApi.readAll();
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     } catch (err: any) {
       Alert.alert('Lỗi', 'Không thể đánh dấu đã đọc tất cả.');
     }
@@ -74,19 +74,19 @@ export default function NotificationsScreen() {
 
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
-      style={[styles.notificationCard, !item.read && styles.notificationCardUnread]} 
+      style={[styles.notificationCard, !item.isRead && styles.notificationCardUnread]} 
       onPress={() => handleMarkAsRead(item)}
       activeOpacity={0.8}
     >
       <View style={styles.iconContainer}>
         <MaterialIcons 
-          name={!item.read ? "notifications-active" : "notifications"} 
+          name={!item.isRead ? "notifications-active" : "notifications"} 
           size={24} 
-          color={!item.read ? premiumColors.brand : premiumColors.textMuted} 
+          color={!item.isRead ? premiumColors.brand : premiumColors.textMuted} 
         />
       </View>
       <View style={styles.cardContent}>
-        <Text style={[styles.cardTitle, !item.read && styles.cardTitleUnread]}>
+        <Text style={[styles.cardTitle, !item.isRead && styles.cardTitleUnread]}>
           {item.title || 'Thông báo'}
         </Text>
         <Text style={styles.cardMessage} numberOfLines={2}>
@@ -208,7 +208,7 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
   },
   notificationCard: {
     flexDirection: 'row',
-    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#F9FAFB',
     borderRadius: premiumRadius[12],
     padding: 16,
     marginBottom: 12,
@@ -216,8 +216,8 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
   notificationCardUnread: {
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.05)' : 'rgba(225, 6, 0, 0.03)',
-    borderColor: isDark ? 'rgba(225, 6, 0, 0.2)' : 'rgba(225, 6, 0, 0.1)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.1)' : 'rgba(225, 6, 0, 0.05)',
+    borderColor: isDark ? 'rgba(225, 6, 0, 0.3)' : 'rgba(225, 6, 0, 0.2)',
   },
   iconContainer: {
     width: 40,

@@ -459,6 +459,6 @@ export const raceViolationsApi = {
 
 export const notificationsApi = {
   list: () => apiFetch<any>('/notifications/my-notifications'),
-  markAsRead: (id: string) => apiFetch<any>(`/notifications/my-notifications/${id}/read`, { method: 'PATCH' }),
-  readAll: () => apiFetch<any>('/notifications/my-notifications/read-all', { method: 'PATCH' }),
-}
+  markAsRead: (id: string) => apiFetch<any>(`/notifications/${id}/read`, { method: 'PATCH' }),
+  readAll: () => apiFetch<any>('/notifications/read-all', { method: 'PATCH' }),
+};

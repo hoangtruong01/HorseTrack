@@ -92,6 +92,7 @@ export function useDockScreenOptions() {
   const dockBottom = Platform.OS === 'ios' ? Math.max(insets.bottom, 16) : 16;
 
   return {
+    animation: 'shift' as const, // Added slide/shift animation for tab screens
     tabBarShowLabel: false,
     tabBarActiveTintColor: isDark ? '#ffffff' : '#E10600',
     tabBarInactiveTintColor: isDark ? '#b0b3b8' : '#65676B',

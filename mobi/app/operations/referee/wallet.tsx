@@ -9,6 +9,15 @@ import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+// Background Pattern
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
+
 export default function RefereeWallet() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -16,7 +25,7 @@ export default function RefereeWallet() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const premiumColors = usePremiumColors();
-  const styles = React.useMemo(() => getStyles(premiumColors, isDark), [premiumColors, isDark]);
+  const styles = React.useMemo(() => getStyles(premiumColors, isDark, theme, insets), [premiumColors, isDark, theme, insets]);
 
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState<any[]>([]);
@@ -81,16 +90,23 @@ export default function RefereeWallet() {
   if (loading && !refreshing) return <LoadingState />;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.bg }]}>
+    <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
+      <GridBackground isDark={isDark} />
 
       {/* Custom Sleek Header */}
-      <View style={[styles.customHeader, { paddingTop: Math.max(insets.top, 16) }]}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.8}>
-          <MaterialIcons name="chevron-left" size={28} color={theme.textPrimary} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>VÍ TRỌNG TÀI</Text>
-        <View style={styles.headerSpacer} />
+      <View style={styles.customHeader}>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitle}>VÍ TRỌNG TÀI</Text>
+          </View>
+        </View>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.8}>
+            <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerRight} />
       </View>
 
       <ScrollView 
@@ -229,32 +245,42 @@ export default function RefereeWallet() {
   );
 }
 
-const getStyles = (premiumColors: any, isDark: boolean) => StyleSheet.create({
+const getStyles = (premiumColors: any, isDark: boolean, theme: any, insets: any) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
   customHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
+    paddingTop: Math.max(insets.top, 16),
     paddingBottom: 12,
     zIndex: 10,
-    backgroundColor: isDark ? 'rgba(28, 28, 37, 0.85)' : 'rgba(247, 244, 241, 0.85)',
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
+  },
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  headerTitle: {
+    color: theme.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   backBtn: {
     width: 36,
     height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
     justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerSpacer: {
-    width: 36,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    alignItems: 'center',
   },
   content: {
     paddingHorizontal: premiumSpacing[16],

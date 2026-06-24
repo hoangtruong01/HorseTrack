@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutRight } from 'react-native-reanimated';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator, ViewStyle, TextStyle, Image } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius , usePremiumColors } from '@/components/ui/premium-tokens';
@@ -124,11 +125,13 @@ export default function RefereeViolations({ nested }: { nested?: boolean }) {
 
   if (loading && !refreshing) return <LoadingState />;
 
-  if (!selectedRaceId) {
-    return (
-      <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
-        <View style={s.content}>
-          <Section title="Chọn trận đua cần lập biên bản vi phạm">
+  return (
+    <View style={{ flex: 1 }}>
+      {!selectedRaceId ? (
+        <Animated.View style={{ flex: 1 }} entering={FadeIn} exiting={FadeOut}>
+          <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
+            <View style={s.content}>
+              <Section title="Chọn trận đua cần lập biên bản vi phạm">
             {assignments.length === 0 ? (
               <EmptyState icon="gavel" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
             ) : (
@@ -154,15 +157,14 @@ export default function RefereeViolations({ nested }: { nested?: boolean }) {
                 );
               })
             )}
-          </Section>
-        </View>
-      </AppScreen>
-    );
-  }
-
-  return (
-    <AppScreen refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
-      <View style={s.header}>
+              </Section>
+            </View>
+          </AppScreen>
+        </Animated.View>
+      ) : (
+        <Animated.View style={{ flex: 1 }} entering={SlideInRight} exiting={SlideOutRight}>
+          <AppScreen refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
+            <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
           <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
           <Text style={s.backTxt}>QUAY LẠI</Text>
@@ -305,8 +307,11 @@ export default function RefereeViolations({ nested }: { nested?: boolean }) {
             );
           }}
         />
+            )}
+          </AppScreen>
+        </Animated.View>
       )}
-    </AppScreen>
+    </View>
   );
 }
 

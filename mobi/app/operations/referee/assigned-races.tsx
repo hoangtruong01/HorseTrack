@@ -230,14 +230,6 @@ export default function AssignedRacesScreen() {
           )
         }
       />
-
-      <TouchableOpacity
-        style={styles.backHomeButton}
-        onPress={() => router.replace('/(referee)')}
-      >
-        <MaterialIcons name="arrow-back" size={18} color={premiumColors.textSecondary} />
-        <Text style={styles.backHomeButtonText}>QUAY LẠI TRANG CHỦ</Text>
-      </TouchableOpacity>
     </View>
   );
 }

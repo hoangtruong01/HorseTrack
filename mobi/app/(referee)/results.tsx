@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutRight } from 'react-native-reanimated';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator, Image, ScrollView } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
@@ -171,10 +172,12 @@ export default function RefereeResults({ nested }: { nested?: boolean }) {
 
   if (loading && !refreshing) return <LoadingState />;
 
-  if (!selectedRaceId) {
-    return (
-      <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
-        <View style={styles.content}>
+  return (
+    <View style={{ flex: 1 }}>
+      {!selectedRaceId ? (
+        <Animated.View style={{ flex: 1 }} entering={FadeIn} exiting={FadeOut}>
+          <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
+            <View style={styles.content}>
           <Section title="Chọn trận đua cần nhập kết quả">
             {assignments.length === 0 ? (
               <EmptyState icon="sports-score" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
@@ -203,13 +206,12 @@ export default function RefereeResults({ nested }: { nested?: boolean }) {
             )}
           </Section>
         </View>
-      </AppScreen>
-    );
-  }
-
-  return (
-    <AppScreen refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
-      <View style={styles.header}>
+          </AppScreen>
+        </Animated.View>
+      ) : (
+        <Animated.View style={{ flex: 1 }} entering={SlideInRight} exiting={SlideOutRight}>
+          <AppScreen refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
+            <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
           <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
           <Text style={styles.backTxt}>Quay lại</Text>
@@ -418,8 +420,11 @@ export default function RefereeResults({ nested }: { nested?: boolean }) {
             <Text style={styles.confirmButtonText}>{confirming ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN KHÓA KẾT QUẢ'}</Text>
           </TouchableOpacity>
         </View>
+          )}
+        </AppScreen>
+      </Animated.View>
       )}
-    </AppScreen>
+    </View>
   );
 }
 
