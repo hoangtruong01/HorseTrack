@@ -152,16 +152,22 @@ export default function ProfileScreen() {
 
       {/* Custom Sleek Header */}
       <View style={styles.customHeader}>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>CÁ NHÂN</Text>
-        <TouchableOpacity 
-          style={styles.settingsBtn} 
-          onPress={() => router.push('/settings')}
-          activeOpacity={0.8}
-        >
-          <MaterialIcons name="settings" size={22} color={theme.textPrimary} />
-          {hasNotification && <View style={styles.notificationBadge} />}
-        </TouchableOpacity>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitleText}>CÁ NHÂN</Text>
+          </View>
+        </View>
+        <View style={styles.headerLeft} />
+        <View style={styles.headerRight}>
+          <TouchableOpacity 
+            style={styles.settingsBtn} 
+            onPress={() => router.push('/settings')}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="settings" size={22} color={theme.textPrimary} />
+            {hasNotification && <View style={styles.notificationBadge} />}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView 
@@ -283,25 +289,36 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
   
-  // Custom Header
   customHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
     paddingTop: Math.max(insets.top, 16),
     paddingBottom: 12,
+    paddingHorizontal: 16,
+    minHeight: Math.max(insets.top, 16) + 48,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     zIndex: 10,
-    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
   },
-  headerSpacer: {
-    width: 36, // To balance the gear icon
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
   },
-  headerTitle: {
-    color: theme.textPrimary,
+  headerRight: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerTitleText: {
     fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   settingsBtn: {
     width: 36,

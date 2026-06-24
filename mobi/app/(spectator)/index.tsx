@@ -1,16 +1,36 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, ScrollView, RefreshControl } from 'react-native';
+import { useRouter, Stack, Tabs } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
-import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { ActionGrid, Section } from '@/components/ui/premium';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { tournamentsApi, racesApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useAuth } from '@/providers/auth-provider';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useThemeColors } from '@/components/ui/shared';
+
+// Background Pattern
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
 
 export default function SpectatorHome() {
   const router = useRouter();
   const { user } = useAuth();
+  
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, theme, insets, premiumColors), [isDark, theme, insets, premiumColors]);
+
   const [balance, setBalance] = useState(0);
   const [tournaments, setTournaments] = useState<any[]>([]);
   const [races, setRaces] = useState<any[]>([]);
@@ -22,9 +42,9 @@ export default function SpectatorHome() {
     setError(null);
     try {
       const [balRes, tRes, rRes] = await Promise.all([
-        rewardPointLedgerApi.myBalance(),
-        tournamentsApi.list({ limit: 5 }),
-        racesApi.list({ limit: 5 }),
+        rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
+        tournamentsApi.list({ limit: 5 }).catch(() => ({ data: [] })),
+        racesApi.list({ limit: 5 }).catch(() => ({ data: [] })),
       ]);
       setBalance((balRes as any).balance || 0);
       setTournaments((tRes as any).data || []);
@@ -56,177 +76,261 @@ export default function SpectatorHome() {
 
   if (error) {
     return (
-      <AppScreen scroll padded refreshing={refreshing} onRefresh={onRefresh}>
-        <ErrorState message={error} onRetry={loadData} />
-      </AppScreen>
+      <View style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <Tabs.Screen options={{ headerShown: false }} />
+        <GridBackground isDark={isDark} />
+        <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+          <ErrorState message={error} onRetry={loadData} />
+        </ScrollView>
+      </View>
     );
   }
 
   return (
-    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <Tabs.Screen options={{ headerShown: false }} />
+      <GridBackground isDark={isDark} />
 
-      {/* ── Hero – flat racing viewer ── */}
-      <View style={styles.hero}>
-        <Image 
-          source={require('../../assets/images/hero_horse_racing.png')} 
-          style={styles.heroImage}
-          resizeMode="cover"
-        />
-        <View style={styles.heroContent}>
-          <Text style={styles.heroEyebrow}>Race Viewer</Text>
-          <Text style={styles.heroTitle}>Đường đua hôm nay</Text>
-          <Text style={styles.heroSubtitle}>Theo dõi lịch đua, dự đoán kết quả và nhận điểm thưởng.</Text>
+      {/* Custom Sleek Header */}
+      <View style={styles.customHeader}>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitleText}>HORSETRACK</Text>
+          </View>
+        </View>
+        <View style={styles.headerLeft} />
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/(spectator)/profile')}>
+            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
-      {/* ── Overview Card ── */}
-      <TouchableOpacity 
-        style={styles.overviewCard} 
-        onPress={() => router.push('/(spectator)/tournaments')}
-        activeOpacity={0.8}
+      <ScrollView 
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} />}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.overviewIconContainer}>
-          <MaterialIcons name="calendar-today" size={20} color="#FFFFFF" />
-        </View>
-        <View style={styles.overviewContent}>
-          <Text style={styles.overviewTitle}>Tổng quan hôm nay</Text>
-          <Text style={styles.overviewSubtitle}>
-            {races.length} trận sắp tới · {tournaments.filter(t => t.status === 'ONGOING').length} giải đấu đang mở
-          </Text>
-        </View>
-        <MaterialIcons name="chevron-right" size={20} color={premiumColors.textSecondary} />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        {/* ── Metrics 2×2 grid – telemetry style ── */}
-        <View style={styles.metricsContainer}>
-          <View style={[styles.metricCell, styles.cellBorderRight, styles.cellBorderBottom]}>
-            <Text style={styles.metricLabel}>VÍ ĐIỂM</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{formatCompact(balance)}</Text>
-              <Text style={styles.metricUnit}> điểm</Text>
-            </View>
-          </View>
-          <View style={[styles.metricCell, styles.cellBorderBottom]}>
-            <Text style={styles.metricLabel}>GIẢI ĐANG DIỄN RA</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>
-                {tournaments.filter(t => t.status === 'ONGOING').length}
-              </Text>
-              <Text style={styles.metricUnit}> giải</Text>
-            </View>
-          </View>
-          <View style={[styles.metricCell, styles.cellBorderRight]}>
-            <Text style={styles.metricLabel}>GIẢI ĐẤU NỔI BẬT</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{tournaments.length}</Text>
-              <Text style={styles.metricUnit}> giải</Text>
-            </View>
-          </View>
-          <View style={styles.metricCell}>
-            <Text style={styles.metricLabel}>TRẬN ĐUA SẮP TỚI</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={[styles.metricValue, styles.metricValueAccent]}>{races.length}</Text>
-              <Text style={[styles.metricUnit, styles.metricUnitAccent]}> trận</Text>
+        {/* ── Hero – flat racing viewer ── */}
+        <View style={styles.heroContainer}>
+          <View style={styles.heroCard}>
+            <Image 
+              source={require('../../assets/images/hero_horse_racing.png')} 
+              style={styles.heroImage}
+              resizeMode="cover"
+            />
+            <View style={styles.heroContent}>
+              <View style={styles.heroBadge}>
+                <Text style={styles.heroBadgeText}>RACE VIEWER</Text>
+              </View>
+              <Text style={styles.heroTitle}>Đường đua hôm nay</Text>
+              <Text style={styles.heroSubtitle}>Theo dõi lịch đua, dự đoán kết quả và nhận điểm thưởng hấp dẫn.</Text>
             </View>
           </View>
         </View>
 
-        {/* ── Quick Actions ── */}
-        <Section title="Tiện ích">
-          <ActionGrid
-            columns={2}
-            actions={[
-              { title: 'Giải Đấu', subtitle: 'Xem giải đang mở', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/tournaments') },
-              { title: 'Trận Đua', subtitle: 'Theo dõi trận sắp tới', icon: 'flag', tone: 'brand', onPress: () => router.push('/(spectator)/tournaments') },
-              { title: 'Dự Đoán', subtitle: 'Quản lý lựa chọn', icon: 'online-prediction', tone: 'brand', onPress: () => router.push('/predictions') },
-              { title: 'Ví Điểm', subtitle: 'Theo dõi phần thưởng', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/wallet') },
-            ]}
-          />
-        </Section>
-
-        {/* ── Featured Tournaments ── */}
-        <Section
-          title="Giải đấu nổi bật"
-          actionLabel="Xem tất cả"
-          onAction={() => router.push('/tournaments')}
+        {/* ── Overview Card ── */}
+        <TouchableOpacity 
+          style={styles.overviewCard} 
+          onPress={() => router.push('/(spectator)/tournaments')}
+          activeOpacity={0.8}
         >
-          {tournaments.length === 0 ? (
-            <Text style={styles.empty}>Hiện tại không có giải đấu nào đang diễn ra.</Text>
-          ) : (
-            tournaments.slice(0, 3).map(t => {
-              const s = statusLabel(t.status);
-              return (
-                <TouchableOpacity
-                  key={t._id || t.id}
-                  style={styles.rowItem}
-                  onPress={() => router.push('/tournaments')}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.rowAvatar}>
-                    <MaterialIcons name="emoji-events" size={18} color={premiumColors.textSecondary} />
-                  </View>
-                  <View style={styles.rowInfo}>
-                    <Text style={styles.rowTitle} numberOfLines={1}>{t.name}</Text>
-                    <Text style={styles.rowSubtitle} numberOfLines={1}>{t.location || 'Chưa có địa điểm'}</Text>
-                  </View>
-                  <View style={[styles.rowBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
-                    <Text style={[styles.rowBadgeText, { color: s.color }]}>{s.label}</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
-                </TouchableOpacity>
-              );
-            })
-          )}
-        </Section>
+          <View style={styles.overviewIconContainer}>
+            <MaterialIcons name="calendar-today" size={20} color="#FFFFFF" />
+          </View>
+          <View style={styles.overviewContent}>
+            <Text style={styles.overviewTitle}>Tổng quan hôm nay</Text>
+            <Text style={styles.overviewSubtitle}>
+              {races.length} trận sắp tới · {tournaments.filter(t => t.status === 'ONGOING').length} giải đấu đang mở
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={premiumColors.textSecondary} />
+        </TouchableOpacity>
 
-        {/* ── Upcoming Races ── */}
-        <Section
-          title="Trận đua sắp tới"
-          actionLabel="Xem tất cả"
-          onAction={() => router.push('/(spectator)/tournaments')}
-        >
-          {races.length === 0 ? (
-            <Text style={styles.empty}>Hiện tại không có trận đua nào sắp diễn ra.</Text>
-          ) : (
-            races.slice(0, 3).map(r => {
-              const s = statusLabel(r.status);
-              return (
-                <TouchableOpacity
-                  key={r._id || r.id}
-                  style={styles.rowItem}
-                  onPress={() => router.push('/(spectator)/tournaments')}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.rowAvatar}>
-                    <MaterialIcons name="flag" size={18} color={premiumColors.textSecondary} />
-                  </View>
-                  <View style={styles.rowInfo}>
-                    <Text style={styles.rowTitle} numberOfLines={1}>{r.name}</Text>
-                    <Text style={styles.rowSubtitle} numberOfLines={1}>{formatDateTime(r.startTime)}</Text>
-                  </View>
-                  <View style={[styles.rowBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
-                    <Text style={[styles.rowBadgeText, { color: s.color }]}>{s.label}</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
-                </TouchableOpacity>
-              );
-            })
-          )}
-        </Section>
-      </View>
-    </AppScreen>
+        <View style={styles.content}>
+          {/* ── Metrics 2×2 grid – telemetry style ── */}
+          <View style={styles.metricsContainer}>
+            <View style={[styles.metricCell, styles.cellBorderRight, styles.cellBorderBottom]}>
+              <Text style={styles.metricLabel}>VÍ ĐIỂM</Text>
+              <View style={styles.metricValueRow}>
+                <Text style={styles.metricValue}>{formatCompact(balance)}</Text>
+                <Text style={styles.metricUnit}> điểm</Text>
+              </View>
+            </View>
+            <View style={[styles.metricCell, styles.cellBorderBottom]}>
+              <Text style={styles.metricLabel}>GIẢI ĐANG DIỄN RA</Text>
+              <View style={styles.metricValueRow}>
+                <Text style={styles.metricValue}>
+                  {tournaments.filter(t => t.status === 'ONGOING').length}
+                </Text>
+                <Text style={styles.metricUnit}> giải</Text>
+              </View>
+            </View>
+            <View style={[styles.metricCell, styles.cellBorderRight]}>
+              <Text style={styles.metricLabel}>GIẢI ĐẤU NỔI BẬT</Text>
+              <View style={styles.metricValueRow}>
+                <Text style={styles.metricValue}>{tournaments.length}</Text>
+                <Text style={styles.metricUnit}> giải</Text>
+              </View>
+            </View>
+            <View style={styles.metricCell}>
+              <Text style={styles.metricLabel}>TRẬN ĐUA SẮP TỚI</Text>
+              <View style={styles.metricValueRow}>
+                <Text style={[styles.metricValue, styles.metricValueAccent]}>{races.length}</Text>
+                <Text style={[styles.metricUnit, styles.metricUnitAccent]}> trận</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* ── Quick Actions ── */}
+          <Section title="Tiện ích">
+            <ActionGrid
+              columns={2}
+              actions={[
+                { title: 'Giải Đấu', subtitle: 'Xem giải đang mở', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/tournaments') },
+                { title: 'Trận Đua', subtitle: 'Theo dõi trận sắp tới', icon: 'flag', tone: 'brand', onPress: () => router.push('/(spectator)/tournaments') },
+                { title: 'Dự Đoán', subtitle: 'Quản lý lựa chọn', icon: 'online-prediction', tone: 'brand', onPress: () => router.push('/predictions') },
+                { title: 'Ví Điểm', subtitle: 'Theo dõi phần thưởng', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/(spectator)/profile') },
+              ]}
+            />
+          </Section>
+
+          {/* ── Featured Tournaments ── */}
+          <Section
+            title="Giải đấu nổi bật"
+            actionLabel="Xem tất cả"
+            onAction={() => router.push('/tournaments')}
+          >
+            {tournaments.length === 0 ? (
+              <Text style={styles.empty}>Hiện tại không có giải đấu nào đang diễn ra.</Text>
+            ) : (
+              tournaments.slice(0, 3).map(t => {
+                const s = statusLabel(t.status);
+                return (
+                  <TouchableOpacity
+                    key={t._id || t.id}
+                    style={styles.rowItem}
+                    onPress={() => router.push('/tournaments')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.rowAvatar}>
+                      <MaterialIcons name="emoji-events" size={18} color={premiumColors.textSecondary} />
+                    </View>
+                    <View style={styles.rowInfo}>
+                      <Text style={styles.rowTitle} numberOfLines={1}>{t.name}</Text>
+                      <Text style={styles.rowSubtitle} numberOfLines={1}>{t.location || 'Chưa có địa điểm'}</Text>
+                    </View>
+                    <View style={[styles.rowBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
+                      <Text style={[styles.rowBadgeText, { color: s.color }]}>{s.label}</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </Section>
+
+          {/* ── Upcoming Races ── */}
+          <Section
+            title="Trận đua sắp tới"
+            actionLabel="Xem tất cả"
+            onAction={() => router.push('/(spectator)/tournaments')}
+          >
+            {races.length === 0 ? (
+              <Text style={styles.empty}>Hiện tại không có trận đua nào sắp diễn ra.</Text>
+            ) : (
+              races.slice(0, 3).map(r => {
+                const s = statusLabel(r.status);
+                return (
+                  <TouchableOpacity
+                    key={r._id || r.id}
+                    style={styles.rowItem}
+                    onPress={() => router.push('/(spectator)/tournaments')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.rowAvatar}>
+                      <MaterialIcons name="flag" size={18} color={premiumColors.textSecondary} />
+                    </View>
+                    <View style={styles.rowInfo}>
+                      <Text style={styles.rowTitle} numberOfLines={1}>{r.name}</Text>
+                      <Text style={styles.rowSubtitle} numberOfLines={1}>{formatDateTime(r.startTime)}</Text>
+                    </View>
+                    <View style={[styles.rowBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
+                      <Text style={[styles.rowBadgeText, { color: s.color }]}>{s.label}</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </Section>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
+  },
+  // Custom Header
+  customHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: Math.max(insets.top, 16),
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    minHeight: Math.max(insets.top, 16) + 48,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    zIndex: 10,
+  },
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  headerTitleText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  headerWallet: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    minWidth: 36,
+    justifyContent: 'center',
+  },
+  headerWalletText: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    fontWeight: '800',
+  },
 
   // ── Hero ──
-  hero: {
+  heroContainer: {
     paddingHorizontal: premiumSpacing[16],
-    paddingTop: premiumSpacing[24],
+    paddingTop: premiumSpacing[16],
     paddingBottom: premiumSpacing[24],
-    position: 'relative',
+  },
+  heroCard: {
+    borderRadius: premiumRadius[16],
     overflow: 'hidden',
     backgroundColor: '#000000',
     minHeight: 180,
@@ -243,43 +347,46 @@ const styles = StyleSheet.create({
     opacity: 0.35,
   },
   heroContent: {
-    width: '85%',
+    padding: premiumSpacing[20],
     zIndex: 2,
   },
-  heroEyebrow: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: premiumColors.brand,
+  heroBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(225, 6, 0, 0.8)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: premiumRadius[4],
+    marginBottom: premiumSpacing[12],
+  },
+  heroBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFFFFF',
     letterSpacing: 1,
-    marginBottom: premiumSpacing[8],
   },
   heroTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: premiumColors.text,
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#FFFFFF',
     marginBottom: premiumSpacing[8],
+    letterSpacing: -0.5,
   },
   heroSubtitle: {
-    fontSize: 14,
-    color: premiumColors.textSecondary,
-    lineHeight: 20,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.8)',
+    lineHeight: 18,
   },
 
   overviewCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(225, 6, 0, 0.05)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.08)' : 'rgba(225, 6, 0, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(225, 6, 0, 0.15)',
+    borderColor: isDark ? 'rgba(225, 6, 0, 0.2)' : 'rgba(225, 6, 0, 0.15)',
     marginHorizontal: premiumSpacing[16],
     marginBottom: premiumSpacing[24],
     borderRadius: premiumRadius[12],
     padding: premiumSpacing[16],
-    shadowColor: '#E10600',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
   },
   overviewIconContainer: {
     width: 48,
@@ -288,6 +395,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E10600',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#E10600',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   overviewContent: {
     flex: 1,
@@ -295,19 +407,20 @@ const styles = StyleSheet.create({
   },
   overviewTitle: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontWeight: '800',
+    color: premiumColors.text,
     marginBottom: 4,
   },
   overviewSubtitle: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
+    fontWeight: '500',
   },
 
   // ── Content wrapper ──
   content: {
     paddingHorizontal: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 110,
   },
 
   // ── Metrics grid ──
@@ -335,7 +448,7 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '800',
     color: premiumColors.textMuted,
     letterSpacing: 0.5,
     marginBottom: premiumSpacing[8],
@@ -346,7 +459,7 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '800',
     color: premiumColors.text,
   },
   metricValueAccent: {
@@ -356,6 +469,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: premiumColors.textMuted,
     marginLeft: 2,
+    fontWeight: '600',
   },
   metricUnitAccent: {
     color: premiumColors.brand,
@@ -388,13 +502,14 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: premiumColors.text,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   rowSubtitle: {
     fontSize: 12,
-    color: premiumColors.textMuted,
+    color: premiumColors.textSecondary,
+    fontWeight: '500',
   },
   rowBadge: {
     borderWidth: 1,
@@ -405,7 +520,7 @@ const styles = StyleSheet.create({
   },
   rowBadgeText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '800',
   },
 
   // ── Empty state ──

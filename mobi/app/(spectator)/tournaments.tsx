@@ -1,14 +1,32 @@
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Alert, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
-import { LoadingState, EmptyState, statusLabel } from '@/components/ui/shared';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState, statusLabel, useThemeColors } from '@/components/ui/shared';
 import { tournamentsApi, racesApi, registrationsApi, predictionsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import RaceResultsModal from '@/components/ui/race-results-modal';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Stack, Tabs } from 'expo-router';
+
+// Background Pattern
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
 
 export default function SpectatorTournaments() {
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
+  const pc = usePremiumColors();
+  const s = React.useMemo(() => getStyles(isDark, theme, insets, pc), [isDark, theme, insets, pc]);
+
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -160,11 +178,11 @@ export default function SpectatorTournaments() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ONGOING': return premiumColors.brand;
-      case 'OPEN_REGISTRATION': return premiumColors.success;
-      case 'CLOSED_REGISTRATION': return premiumColors.warning;
+      case 'ONGOING': return pc.brand;
+      case 'OPEN_REGISTRATION': return pc.success;
+      case 'CLOSED_REGISTRATION': return pc.warning;
       case 'COMPLETED': return '#8B5CF6';
-      default: return premiumColors.textMuted;
+      default: return pc.textMuted;
     }
   };
 
@@ -177,17 +195,25 @@ export default function SpectatorTournaments() {
     });
 
     return (
-      <SafeAreaView style={s.safeArea} edges={['top', 'left', 'right']}>
-        <TouchableOpacity
-          style={s.backButton}
-          onPress={() => setSelectedRace(null)}
-          activeOpacity={0.7}
-        >
-          <MaterialIcons name="arrow-back" size={20} color="#AEB6C2" />
-          <Text style={s.backButtonText}>
-            Quay lại (Giải đấu &gt; Trận đua)
-          </Text>
-        </TouchableOpacity>
+      <View style={s.safeArea}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <Tabs.Screen options={{ headerShown: false }} />
+        <GridBackground isDark={isDark} />
+
+        {/* Custom Sleek Header */}
+        <View style={s.customHeader}>
+          <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={s.headerTitleText}>CHI TIẾT TRẬN ĐUA</Text>
+            </View>
+          </View>
+          <View style={s.headerLeft}>
+            <TouchableOpacity style={s.backIconButton} onPress={() => setSelectedRace(null)} activeOpacity={0.7}>
+              <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
+            </TouchableOpacity>
+          </View>
+          <View style={s.headerRight} />
+        </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.detailContent}>
           {/* Race Header Info */}
@@ -411,7 +437,7 @@ export default function SpectatorTournaments() {
             </View>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     );
   };
 
@@ -419,15 +445,25 @@ export default function SpectatorTournaments() {
   const renderTournamentDetail = () => {
     if (!selectedTour) return null;
     return (
-      <SafeAreaView style={s.safeArea} edges={['top', 'left', 'right']}>
-        <TouchableOpacity
-          style={s.backButton}
-          onPress={() => setSelectedTour(null)}
-          activeOpacity={0.7}
-        >
-          <MaterialIcons name="arrow-back" size={20} color="#AEB6C2" />
-          <Text style={s.backButtonText}>Quay lại giải đấu</Text>
-        </TouchableOpacity>
+      <View style={s.safeArea}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <Tabs.Screen options={{ headerShown: false }} />
+        <GridBackground isDark={isDark} />
+
+        {/* Custom Sleek Header */}
+        <View style={s.customHeader}>
+          <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={s.headerTitleText}>CHI TIẾT GIẢI ĐẤU</Text>
+            </View>
+          </View>
+          <View style={s.headerLeft}>
+            <TouchableOpacity style={s.backIconButton} onPress={() => setSelectedTour(null)} activeOpacity={0.7}>
+              <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
+            </TouchableOpacity>
+          </View>
+          <View style={s.headerRight} />
+        </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.detailContent}>
           {/* Tournament Poster Card */}
@@ -518,7 +554,7 @@ export default function SpectatorTournaments() {
             })
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     );
   };
 
@@ -528,16 +564,25 @@ export default function SpectatorTournaments() {
 
   // Render Level 1: Tournaments List
   return (
-    <SafeAreaView style={s.safeArea} edges={['top', 'left', 'right']}>
-      {/* ── Header Row ── */}
-      <View style={s.headerRow}>
-        <Text style={s.headerTitle}>Giải đấu</Text>
-        <View style={s.headerActions}>
+    <View style={s.safeArea}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <Tabs.Screen options={{ headerShown: false }} />
+      <GridBackground isDark={isDark} />
+
+      {/* Custom Sleek Header */}
+      <View style={s.customHeader}>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={s.headerTitleText}>GIẢI ĐẤU</Text>
+          </View>
+        </View>
+        <View style={s.headerLeft} />
+        <View style={s.headerRight}>
           <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
-            <MaterialIcons name="search" size={24} color="#FFFFFF" />
+            <MaterialIcons name="search" size={22} color={theme.textPrimary} />
           </TouchableOpacity>
           <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
-            <MaterialIcons name="filter-list" size={24} color="#FFFFFF" />
+            <MaterialIcons name="filter-list" size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -667,34 +712,61 @@ export default function SpectatorTournaments() {
         raceId={resultsRaceId}
         raceName={resultsRaceName}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: premiumColors.bg,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
-  headerRow: {
+  customHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingTop: Math.max(insets.top, 16),
+    paddingBottom: 12,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    minHeight: Math.max(insets.top, 16) + 48,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    zIndex: 10,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: premiumColors.text,
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
   },
-  headerActions: {
+  headerRight: {
+    flex: 1,
     flexDirection: 'row',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+  },
+  headerTitleText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  backIconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconButton: {
-    padding: 4,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   filtersContainer: {
     flexDirection: 'row',
