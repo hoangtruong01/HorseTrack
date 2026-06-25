@@ -52,8 +52,9 @@ export default function OwnerLayout() {
       <Tabs.Screen name="horses" options={{ title: 'Chiến mã', headerTitle: 'CHIẾN MÃ', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="pets" color={color} /> }} />
       <Tabs.Screen name="registrations" options={{ title: 'Giải đấu', headerTitle: 'GIẢI ĐẤU', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="emoji-events" color={color} /> }} />
       <Tabs.Screen name="invitations" options={{ title: 'Mời Jockey', headerTitle: 'MỜI JOCKEY', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person-add" color={color} /> }} />
-      <Tabs.Screen name="wallet" options={{ title: 'Ví thưởng', headerTitle: 'VÍ THƯỞNG', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} /> }} />
+      <Tabs.Screen name="notifications" options={{ title: 'Thông báo', headerTitle: 'THÔNG BÁO', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="notifications" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} /> }} />
+      <Tabs.Screen name="wallet" options={{ href: null, title: 'Ví thưởng', headerTitle: 'VÍ THƯỞNG' }} />
       <Tabs.Screen name="results" options={{ href: null, title: 'Kết quả', headerTitle: 'KẾT QUẢ THI ĐẤU' }} />
       <Tabs.Screen name="rankings" options={{ href: null, title: 'Bảng xếp hạng', headerTitle: 'BẢNG XẾP HẠNG' }} />
       <Tabs.Screen name="races" options={{ href: null, title: 'Đăng ký thi đấu', headerTitle: 'ĐĂNG KÝ THI ĐẤU' }} />

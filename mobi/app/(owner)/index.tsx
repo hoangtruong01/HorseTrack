@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react
 import { useRouter } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { horsesApi, registrationsApi, rewardPointLedgerApi, dashboardApi, tournamentsApi, racesApi, rankingsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -78,7 +79,8 @@ export default function OwnerHome() {
   }
 
   return (
-    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={false}>
+      <SleekHeader title="TRANG CHỦ" showWallet={true} />
 
       {/* ── Hero – flat racing viewer ── */}
       <View style={styles.hero}>
