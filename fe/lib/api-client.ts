@@ -676,6 +676,7 @@ export interface RaceResultItem {
   horseId: { _id: string; name: string; breed: string } | string;
   rank?: number;
   finishTimeMs?: number;
+  rawFinishTimeMs?: number;
   outcome: "finished" | "disqualified" | "did_not_start" | "did_not_finish";
   incident: "none" | "minor_stumble" | "lane_drift" | "gate_delay" | "collision" | "injury";
   points: number;

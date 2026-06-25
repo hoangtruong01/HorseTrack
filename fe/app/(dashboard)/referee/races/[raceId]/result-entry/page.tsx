@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-import { racesApi, raceChecksApi, raceResultsApi, type RaceResultItem } from "@/lib/api-client";
+import { racesApi, raceChecksApi, raceResultsApi, raceViolationsApi, type RaceResultItem, type ViolationItem } from "@/lib/api-client";
 
 // Types
 type Race = {
@@ -48,6 +48,7 @@ export default function RefereeResultEntryPage() {
 
   const [race, setRace] = useState<Race | null>(null);
   const [results, setResults] = useState<RaceResultItem[]>([]);
+  const [violations, setViolations] = useState<ViolationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Operations loading
@@ -81,7 +82,17 @@ export default function RefereeResultEntryPage() {
       let horsesList: RaceCheck[] = [];
       const checksData = await raceChecksApi.listByRace(raceId);
       horsesList = (checksData || []) as unknown as RaceCheck[];
-      // 3. Fetch current race results
+
+      // 3. Fetch race violations
+      let violationsList: ViolationItem[] = [];
+      try {
+        violationsList = await raceViolationsApi.listByRace(raceId) || [];
+        setViolations(violationsList);
+      } catch {
+        violationsList = [];
+      }
+
+      // 4. Fetch current race results
       let existingResults: RaceResultItem[] = [];
       try {
         existingResults = await raceResultsApi.listByRace(raceId) || [];
@@ -90,21 +101,31 @@ export default function RefereeResultEntryPage() {
         existingResults = [];
       }
 
-      // 4. Map existing results or initialize blank rows
+      // 5. Map existing results or initialize blank rows
       const rows = horsesList.map((h) => {
         const existing = existingResults.find((r) => {
           const rHorseId = typeof r.horseId === "object" ? r.horseId?._id : r.horseId;
           return rHorseId === h.horseId?._id;
         });
 
+        // Check if horse has a disqualified violation
+        const horseViolations = violationsList.filter((v) => {
+          const vHorseId = typeof v.horseId === "object" ? v.horseId?._id : v.horseId;
+          return vHorseId === h.horseId?._id;
+        });
+        const hasDqViolation = horseViolations.some((v) => v.penalty === "disqualified");
+        const defaultOutcome = hasDqViolation ? "disqualified" : "finished";
+
         return {
           raceRegistrationId: h.raceRegistrationId?._id,
           horseId: h.horseId?._id,
           horseName: h.horseId?.name,
           horseBreed: h.horseId?.breed,
-          outcome: existing?.outcome || "finished",
+          outcome: existing?.outcome || defaultOutcome,
           incident: existing?.incident || "none",
-          finishTimeSecs: existing?.finishTimeMs ? (existing.finishTimeMs / 1000).toString() : "",
+          finishTimeSecs: existing?.rawFinishTimeMs 
+            ? (existing.rawFinishTimeMs / 1000).toString() 
+            : (existing?.finishTimeMs ? (existing.finishTimeMs / 1000).toString() : ""),
           rank: existing?.rank ? existing.rank.toString() : "",
           note: existing?.note || "",
         };
@@ -259,6 +280,48 @@ export default function RefereeResultEntryPage() {
         }
       />
 
+      {/* Violations Summary Alert Card */}
+      {violations.length > 0 && (
+        <section className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 space-y-3 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-3 opacity-10">
+            <Siren className="size-24 text-red-500" />
+          </div>
+          <div className="relative">
+            <h4 className="text-xs font-black uppercase text-red-500 tracking-wider flex items-center gap-1.5 mb-2">
+              <Siren className="size-4 animate-pulse" /> Các lỗi vi phạm đã ghi nhận trong trận đấu ({violations.length})
+            </h4>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {violations.map((v) => {
+                const isDq = v.penalty === "disqualified";
+                return (
+                  <div key={v._id} className={`rounded-xl border p-3 space-y-1 text-xs transition duration-200 hover:scale-[1.01] bg-card ${isDq ? "border-red-500/30" : "border-amber-500/20"}`}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-extrabold uppercase text-foreground">
+                        {v.horseId && typeof v.horseId === "object" ? v.horseId.name : "Chiến mã"}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${isDq ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"}`}>
+                        {isDq ? "Truất quyền" : "Phạt +giây"}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground text-[11px] leading-normal">
+                      Lỗi: <span className="font-bold text-foreground">
+                        {v.type === "track_violation" ? "Lỗi đường đua" : v.type === "false_start" ? "Xuất phát sai" : v.type === "dangerous_riding" ? "Đua nguy hiểm" : v.type}
+                      </span>
+                      {v.severity && ` (${v.severity === "minor" ? "Nhẹ" : v.severity === "major" ? "Trung bình" : "Nghiêm trọng"})`}
+                    </p>
+                    {v.description && (
+                      <p className="text-[10px] text-muted-foreground/80 bg-muted/40 p-1.5 rounded italic mt-1 border border-border/30">
+                        "{v.description}"
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Control Actions / Banner */}
       <section className="relative overflow-hidden rounded-2xl border border-border dark:border-white/10 bg-card p-5 shadow-md">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(225,6,0,0.1),transparent_25rem)]" />
@@ -371,41 +434,86 @@ export default function RefereeResultEntryPage() {
                       <td className="p-4">
                         <p className="font-bold text-foreground uppercase">{row.horseName}</p>
                         <p className="text-[10px] text-muted-foreground mt-0.5">{row.horseBreed}</p>
-                      </td>
-                      <td className="p-4">
-                        {isLocked ? (
-                          <span className="text-foreground font-bold uppercase">{row.outcome}</span>
-                        ) : (
-                          <select
-                            value={row.outcome}
-                            onChange={(e) => handleRowChange(i, "outcome", e.target.value)}
-                            className="rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground focus:outline-none"
-                          >
-                            <option value="finished" className="bg-card">FINISHED (Hoàn thành)</option>
-                            <option value="disqualified" className="bg-card">DISQUALIFIED (Truất quyền)</option>
-                            <option value="did_not_start" className="bg-card">DID_NOT_START (Không xuất phát)</option>
-                            <option value="did_not_finish" className="bg-card">DID_NOT_FINISH (Không về đích)</option>
-                          </select>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        {isLocked ? (
-                          <span className="text-foreground font-black">{row.finishTimeSecs ? `${row.finishTimeSecs}s` : "—"}</span>
-                        ) : (
-                          <div className="flex items-center gap-1.5 max-w-[120px]">
-                            <input
-                              type="number"
-                              step="0.001"
-                              min="0"
-                              placeholder="72.450"
-                              value={row.finishTimeSecs}
-                              onChange={(e) => handleRowChange(i, "finishTimeSecs", e.target.value)}
-                              disabled={row.outcome !== "finished"}
-                              className="w-full rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-                            />
-                            <span className="text-muted-foreground">s</span>
+                        {/* Violations List for this horse */}
+                        {violations.filter(v => {
+                          const vHorseId = typeof v.horseId === "object" ? v.horseId?._id : v.horseId;
+                          return vHorseId === row.horseId;
+                        }).map(v => (
+                          <div key={v._id} className="mt-1 flex items-center gap-1 text-[9px] font-bold text-red-500 dark:text-red-400">
+                            <span className="size-1 rounded-full bg-red-500 animate-pulse shrink-0" />
+                            <span>
+                              {v.penalty === "time_penalty" ? `Phạt +${v.severity === "minor" ? "3" : v.severity === "major" ? "6" : "12"}s` : "Bị loại (Disqualified)"}
+                            </span>
                           </div>
-                        )}
+                        ))}
+                      </td>
+                      <td className="p-4">
+                        {(() => {
+                          const horseViolations = violations.filter(v => {
+                            const vHorseId = typeof v.horseId === "object" ? v.horseId?._id : v.horseId;
+                            return vHorseId === row.horseId;
+                          });
+                          const isDqByViolation = horseViolations.some(v => v.penalty === "disqualified");
+
+                          if (isLocked) {
+                            return <span className="text-foreground font-bold uppercase">{row.outcome}</span>;
+                          }
+
+                          return (
+                            <div className="space-y-1">
+                              <select
+                                value={isDqByViolation ? "disqualified" : row.outcome}
+                                onChange={(e) => handleRowChange(i, "outcome", e.target.value)}
+                                disabled={isDqByViolation}
+                                className="rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                <option value="finished" className="bg-card">FINISHED (Hoàn thành)</option>
+                                <option value="disqualified" className="bg-card">DISQUALIFIED (Truất quyền)</option>
+                                <option value="did_not_start" className="bg-card">DID_NOT_START (Không xuất phát)</option>
+                                <option value="did_not_finish" className="bg-card">DID_NOT_FINISH (Không về đích)</option>
+                              </select>
+                              {isDqByViolation && (
+                                <p className="text-[9px] font-black text-red-500 dark:text-red-400 uppercase tracking-wider">Bắt buộc truất quyền</p>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td className="p-4">
+                        {(() => {
+                          const horseViolations = violations.filter(v => {
+                            const vHorseId = typeof v.horseId === "object" ? v.horseId?._id : v.horseId;
+                            return vHorseId === row.horseId;
+                          });
+                          const isDqByViolation = horseViolations.some(v => v.penalty === "disqualified");
+
+                          if (isLocked) {
+                            return <span className="text-foreground font-black">{row.finishTimeSecs ? `${row.finishTimeSecs}s` : "—"}</span>;
+                          }
+
+                          return (
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 max-w-[120px]">
+                                <input
+                                  type="number"
+                                  step="0.001"
+                                  min="0"
+                                  placeholder="72.450"
+                                  value={isDqByViolation ? "" : row.finishTimeSecs}
+                                  onChange={(e) => handleRowChange(i, "finishTimeSecs", e.target.value)}
+                                  disabled={row.outcome !== "finished" || isDqByViolation}
+                                  className="w-full rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                                />
+                                <span className="text-muted-foreground">s</span>
+                              </div>
+                              {existingResult && existingResult.rawFinishTimeMs && existingResult.finishTimeMs && existingResult.finishTimeMs !== existingResult.rawFinishTimeMs && (
+                                <p className="text-[9px] font-bold text-red-500 dark:text-red-400 leading-none">
+                                  Chung cuộc: {(existingResult.finishTimeMs / 1000).toFixed(3)}s
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="p-4">
                         {isLocked ? (

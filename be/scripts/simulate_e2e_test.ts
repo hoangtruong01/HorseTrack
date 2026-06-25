@@ -85,7 +85,7 @@ async function runSimulation() {
     console.log(`- Jockey 2: ${jockey2User.fullName} (${jockey2User._id})`);
 
     // Fetch 2 horses owned by the owner
-    const ownerHorses = await horsesCollection.find({ ownerId: ownerUser._id }).toArray();
+    const ownerHorses = await horsesCollection.find({ ownerId: ownerUser._id, status: 'ACTIVE' }).toArray();
     if (ownerHorses.length < 2) {
       throw new Error('Owner must have at least 2 active/approved horses.');
     }
@@ -94,19 +94,18 @@ async function runSimulation() {
     console.log(`- Horse 1: ${horse1.name} (${horse1._id})`);
     console.log(`- Horse 2: ${horse2.name} (${horse2._id})`);
 
-    // Ensure spectator has some points (at least 10 pts) for prediction checks
+    // Ensure spectator has exactly 0 points to allow FREE prediction (betPoints = 0)
     const currentPoints = await ledgerService.getBalance(String(spectatorUser._id));
-    if (currentPoints < 10) {
-      console.log(`- Spectator balance is ${currentPoints} Pts. Crediting 100 Pts for testing.`);
-      await ledgerService.credit({
+    if (currentPoints > 0) {
+      console.log(`- Spectator balance is ${currentPoints} Pts. Debiting ${currentPoints} Pts to reset to 0 Pts.`);
+      await ledgerService.debit({
         userId: String(spectatorUser._id),
-        points: 100,
+        points: currentPoints,
         sourceType: 'admin_adjustment' as any,
-        note: 'E2E Simulation Topup'
+        note: 'E2E Simulation Reset'
       });
-    } else {
-      console.log(`- Spectator balance: ${currentPoints} Pts.`);
     }
+    console.log(`- Spectator balance: 0 Pts.`);
 
     // 2. Create Tournament
     console.log('\n[Step 2] Creating new tournament...');
@@ -129,10 +128,6 @@ async function runSimulation() {
 
     console.log(`- Tournament created: ${tournament.name} (${tournament._id})`);
 
-    // Open tournament registration
-    await tournamentsService.updateStatus(String(tournament._id), TournamentStatus.OPEN_REGISTRATION, String(adminUser._id));
-    console.log('- Tournament status set to OPEN_REGISTRATION');
-
     // 3. Create Race under Tournament
     console.log('\n[Step 3] Creating race under tournament...');
     const raceStartTime = new Date();
@@ -150,6 +145,10 @@ async function runSimulation() {
     }, String(adminUser._id));
 
     console.log(`- Race created: ${race.name} (${race._id})`);
+
+    // Open tournament registration
+    await tournamentsService.updateStatus(String(tournament._id), TournamentStatus.OPEN_REGISTRATION, String(adminUser._id));
+    console.log('- Tournament status set to OPEN_REGISTRATION');
 
     // 4. Register Horse 1 & Horse 2
     console.log('\n[Step 4] Registering horses for race...');
@@ -187,15 +186,15 @@ async function runSimulation() {
     console.log(`- Invite 1 sent: ${invite1._id} to Jockey 1 (${jockey1User.fullName})`);
     console.log(`- Invite 2 sent: ${invite2._id} to Jockey 2 (${jockey2User.fullName})`);
 
-    // Accept invitations
-    await invitationsService.respond(String(invite1._id), InvitationStatus.ACCEPTED, String(jockey1User._id));
-    await invitationsService.respond(String(invite2._id), InvitationStatus.ACCEPTED, String(jockey2User._id));
-    console.log('- Both jockeys accepted invitations and are assigned to registration.');
-
     // Approve registrations
     await registrationsService.approve(String(reg1._id), String(adminUser._id));
     await registrationsService.approve(String(reg2._id), String(adminUser._id));
     console.log('- Both horse registrations APPROVED by Admin.');
+
+    // Accept invitations
+    await invitationsService.respond(String(invite1._id), InvitationStatus.ACCEPTED, String(jockey1User._id));
+    await invitationsService.respond(String(invite2._id), InvitationStatus.ACCEPTED, String(jockey2User._id));
+    console.log('- Both jockeys accepted invitations and are assigned to registration.');
 
     // 6. Spectator places a prediction on Horse 1
     // We will place a FREE prediction (points = 0)
@@ -206,7 +205,7 @@ async function runSimulation() {
     const prediction = await predictionsService.create({
       raceId: String(race._id),
       predictedHorseId: String(horse1._id),
-      betPoints: 0, // Free prediction
+      betPoints: 1, // Free prediction
     }, String(spectatorUser._id));
 
     console.log(`- Prediction placed on ${horse1.name}. ID: ${prediction._id}, betPoints: ${prediction.betPoints}`);
