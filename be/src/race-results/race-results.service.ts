@@ -740,6 +740,8 @@ export class RaceResultsService {
           notes.push(
             `+${penalty / 1000}s phạt do lỗi: ${vio.type} (${vio.severity})`,
           );
+        } else if (vio.penalty === ViolationPenalty.WARNING) {
+          notes.push(`Cảnh cáo do lỗi: ${vio.type}`);
         }
       }
 

@@ -294,13 +294,35 @@ export default function RefereeResultEntryPage() {
               {violations.map((v) => {
                 const isDq = v.penalty === "disqualified";
                 return (
-                  <div key={v._id} className={`rounded-xl border p-3 space-y-1 text-xs transition duration-200 hover:scale-[1.01] bg-card ${isDq ? "border-red-500/30" : "border-amber-500/20"}`}>
+                  <div key={v._id} className={`rounded-xl border p-3 space-y-1 text-xs transition duration-200 hover:scale-[1.01] bg-card ${
+                    v.penalty === "disqualified"
+                      ? "border-red-500/30"
+                      : v.penalty === "time_penalty"
+                      ? "border-amber-500/20"
+                      : v.penalty === "warning"
+                      ? "border-blue-500/20"
+                      : "border-border/30"
+                  }`}>
                     <div className="flex justify-between items-center mb-1">
                       <span className="font-extrabold uppercase text-foreground">
                         {v.horseId && typeof v.horseId === "object" ? v.horseId.name : "Chiến mã"}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${isDq ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"}`}>
-                        {isDq ? "Truất quyền" : "Phạt +giây"}
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                        v.penalty === "disqualified"
+                          ? "bg-red-500/10 text-red-500 border-red-500/20"
+                          : v.penalty === "time_penalty"
+                          ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          : v.penalty === "warning"
+                          ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                          : "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                      }`}>
+                        {v.penalty === "disqualified"
+                          ? "Truất quyền"
+                          : v.penalty === "time_penalty"
+                          ? "Phạt +giây"
+                          : v.penalty === "warning"
+                          ? "Cảnh cáo"
+                          : "Không phạt"}
                       </span>
                     </div>
                     <p className="text-muted-foreground text-[11px] leading-normal">
@@ -442,7 +464,13 @@ export default function RefereeResultEntryPage() {
                           <div key={v._id} className="mt-1 flex items-center gap-1 text-[9px] font-bold text-red-500 dark:text-red-400">
                             <span className="size-1 rounded-full bg-red-500 animate-pulse shrink-0" />
                             <span>
-                              {v.penalty === "time_penalty" ? `Phạt +${v.severity === "minor" ? "3" : v.severity === "major" ? "6" : "12"}s` : "Bị loại (Disqualified)"}
+                              {v.penalty === "time_penalty"
+                                ? `Phạt +${v.severity === "minor" ? "3" : v.severity === "major" ? "6" : "12"}s`
+                                : v.penalty === "warning"
+                                ? "Cảnh cáo nhắc nhở (Warning)"
+                                : v.penalty === "disqualified"
+                                ? "Bị loại (Disqualified)"
+                                : "Không phạt (None)"}
                             </span>
                           </div>
                         ))}
