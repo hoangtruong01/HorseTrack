@@ -9,7 +9,7 @@ export default function JockeyLayout() {
   const { user } = useAuth();
 
   return (
-    <Tabs 
+    <Tabs
       tabBar={(props) => <DockTabBar {...props} />}
       screenOptions={{ ...dockOptions }}
     >
@@ -18,7 +18,9 @@ export default function JockeyLayout() {
       <Tabs.Screen name="schedule" options={{ title: 'Lịch đua', headerTitle: 'LỊCH THI ĐẤU', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="event" color={color} /> }} />
       <Tabs.Screen name="horses" options={{ title: 'Chiến mã', headerTitle: 'CHIẾN MÃ ĐIỀU KHIỂN', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="pets" color={color} /> }} />
       <Tabs.Screen name="performance" options={{ title: 'Thành tích', headerTitle: 'BẢNG THÀNH TÍCH', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="emoji-events" color={color} /> }} />
+      <Tabs.Screen name="notifications" options={{ title: 'Thông báo', headerTitle: 'THÔNG BÁO', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="notifications" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} /> }} />
+      <Tabs.Screen name="wallet" options={{ href: null }} />
     </Tabs>
   );
 }

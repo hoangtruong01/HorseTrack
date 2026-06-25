@@ -42,7 +42,7 @@ export default function ProfileScreen() {
 
   // Check if current layout is owner or spectator to show wallet
   const currentGroup = segments[0] as string;
-  const showWallet = currentGroup === '(owner)' || currentGroup === '(spectator)';
+  const showWallet = currentGroup === '(owner)' || currentGroup === '(spectator)' || currentGroup === '(jockey)';
   
   useEffect(() => {
     if (showWallet) {
@@ -135,10 +135,8 @@ export default function ProfileScreen() {
   const displayRole = roleMap[primaryRole] || primaryRole;
 
   const handleWalletPress = () => {
-    if (currentGroup === '(owner)') {
-      router.push('/(owner)/wallet');
-    } else if (currentGroup === '(spectator)') {
-      router.push('/(spectator)/wallet');
+    if (['(owner)', '(spectator)', '(jockey)', '(referee)'].includes(currentGroup)) {
+      router.push(`/${currentGroup}/wallet` as any);
     }
   };
 
@@ -227,7 +225,11 @@ export default function ProfileScreen() {
               <Text style={styles.infoText}>Ngày sinh: <Text style={styles.infoValue}>{user?.dob || 'Nhấn để cập nhật'}</Text></Text>
             </View>
 
-            <TouchableOpacity style={styles.editBtn} activeOpacity={0.8}>
+            <TouchableOpacity 
+              style={styles.editBtn} 
+              activeOpacity={0.8}
+              onPress={() => Alert.alert('Thông báo', 'Tính năng sửa hồ sơ đang được cập nhật.')}
+            >
               <Text style={styles.editBtnText}>SỬA HỒ SƠ</Text>
             </TouchableOpacity>
           </View>
