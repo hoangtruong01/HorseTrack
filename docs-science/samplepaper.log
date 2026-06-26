@@ -1,0 +1,294 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.6.22)  24 JUN 2026 19:43
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**./samplepaper.tex
+(samplepaper.tex
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-05-26>
+(llncs.cls
+Document Class: llncs 2018/03/10 v2.20 
+ LaTeX document class for Lecture Notes in Computer Science
+(D:\MikTex\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(D:\MikTex\tex/latex/base\size10.clo
+File: size10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count276
+\c@section=\count277
+\c@subsection=\count278
+\c@subsubsection=\count279
+\c@paragraph=\count280
+\c@subparagraph=\count281
+\c@figure=\count282
+\c@table=\count283
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen150
+) (D:\MikTex\tex/latex/tools\multicol.sty
+Package: multicol 2025/10/21 v2.0b multicolumn formatting (FMi)
+\c@tracingmulticols=\count284
+\mult@box=\box53
+\multicol@leftmargin=\dimen151
+\c@unbalance=\count285
+\c@collectmore=\count286
+\doublecol@number=\count287
+\multicoltolerance=\count288
+\multicolpretolerance=\count289
+\full@width=\dimen152
+\page@free=\dimen153
+\premulticols=\dimen154
+\postmulticols=\dimen155
+\multicolsep=\skip51
+\multicolbaselineskip=\skip52
+\partial@page=\box54
+\last@line=\box55
+\mc@boxedresult=\box56
+\maxbalancingoverflow=\dimen156
+\mult@rightbox=\box57
+\mult@grightbox=\box58
+\mult@firstbox=\box59
+\mult@gfirstbox=\box60
+\@tempa=\box61
+\@tempa=\box62
+\@tempa=\box63
+\@tempa=\box64
+\@tempa=\box65
+\@tempa=\box66
+\@tempa=\box67
+\@tempa=\box68
+\@tempa=\box69
+\@tempa=\box70
+\@tempa=\box71
+\@tempa=\box72
+\@tempa=\box73
+\@tempa=\box74
+\@tempa=\box75
+\@tempa=\box76
+\@tempa=\box77
+\@tempa=\box78
+\@tempa=\box79
+\@tempa=\box80
+\@tempa=\box81
+\@tempa=\box82
+\@tempa=\box83
+\@tempa=\box84
+\@tempa=\box85
+\@tempa=\box86
+\@tempa=\box87
+\@tempa=\box88
+\@tempa=\box89
+\@tempa=\box90
+\@tempa=\box91
+\@tempa=\box92
+\@tempa=\box93
+\@tempa=\box94
+\@tempa=\box95
+\@tempa=\box96
+\c@minrows=\count290
+\c@columnbadness=\count291
+\c@finalcolumnbadness=\count292
+\last@try=\dimen157
+\multicolovershoot=\dimen158
+\multicolundershoot=\dimen159
+\mult@nat@firstbox=\box97
+\colbreak@box=\box98
+\mc@col@check@num=\count293
+\g__mc_curr_col_int=\count294
+) (C:\Users\trung\AppData\Roaming\MiKTeX\tex/latex/aliascnt\aliascnt.sty
+Package: aliascnt 2026-03-08 v1.7 Alias counters (HO)
+
+
+Package aliascnt Warning: The package is obsolete. Check the documentation. on 
+input line 62.
+
+)
+\c@chapter=\count295
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 362.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 363.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 364.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 365.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 366.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 367.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 368.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 369.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 370.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 371.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 372.
+\tocchpnum=\dimen160
+\tocsecnum=\dimen161
+\tocsectotal=\dimen162
+\tocsubsecnum=\dimen163
+\tocsubsectotal=\dimen164
+\tocsubsubsecnum=\dimen165
+\tocsubsubsectotal=\dimen166
+\tocparanum=\dimen167
+\tocparatotal=\dimen168
+\tocsubparanum=\dimen169
+\@tempcntc=\count296
+\fnindent=\dimen170
+\c@@inst=\count297
+\c@@auth=\count298
+\c@auco=\count299
+\instindent=\dimen171
+\authrun=\box99
+\authorrunning=\toks17
+\tocauthor=\toks18
+\titrun=\box100
+\titlerunning=\toks19
+\toctitle=\toks20
+\c@theorem=\count300
+\c@case=\count301
+\c@conjecture=\count302
+\c@corollary=\count303
+\c@definition=\count304
+\c@example=\count305
+\c@exercise=\count306
+\c@lemma=\count307
+\c@note=\count308
+\c@problem=\count309
+\c@property=\count310
+\c@proposition=\count311
+\c@question=\count312
+\c@solution=\count313
+\c@remark=\count314
+\headlineindent=\dimen172
+) (D:\MikTex\tex/latex/graphics\graphicx.sty
+Package: graphicx 2026-05-17 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
+
+(D:\MikTex\tex/latex/graphics\keyval.sty
+Package: keyval 2026-05-17 v1.15 key=value parser (DPC)
+\KV@toks@=\toks21
+)
+(D:\MikTex\tex/latex/graphics\graphics.sty
+Package: graphics 2026-05-17 v1.4h Standard LaTeX Graphics (DPC,SPQR)
+
+(D:\MikTex\tex/latex/graphics\trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+)
+(D:\MikTex\tex/latex/graphics-cfg\graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+
+(D:\MikTex\tex/latex/graphics-def\pdftex.def
+File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen173
+\Gin@req@width=\dimen174
+)
+(D:\MikTex\tex/latex/l3backend\l3backend-pdftex.def
+File: l3backend-pdftex.def 2026-02-18 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count315
+) (samplepaper.aux)
+\openout1 = `samplepaper.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+
+(D:\MikTex\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count316
+\scratchdimen=\dimen175
+\scratchbox=\box101
+\nofMPsegments=\count317
+\nofMParguments=\count318
+\everyMPshowfont=\toks22
+\MPscratchCnt=\count319
+\MPscratchDim=\dimen176
+\MPnumerator=\count320
+\makeMPintoPDFobject=\count321
+\everyMPtoPDFconversion=\toks23
+) (D:\MikTex\tex/latex/epstopdf-pkg\epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+
+(D:\MikTex\tex/latex/00miktex\epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
+))
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 38.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 38.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 38.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9> on input line 38.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 38.
+LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 
+38.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 38.
+
+
+LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
+(Font)              using `OMS/cmsy/m/n' instead
+(Font)              for symbol `textbraceleft' on input line 38.
+
+[1
+
+{C:/Users/trung/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+Package epstopdf Info: Source file: <fig1.eps>
+(epstopdf)                    date: 2017-10-04 16:21:13
+(epstopdf)                    size: 357553 bytes
+(epstopdf)             Output file: <fig1-eps-converted-to.pdf>
+(epstopdf)                    date: 2026-06-22 15:46:02
+(epstopdf)                    size: 36500 bytes
+(epstopdf)             Command: <miktex-epstopdf --outfile=fig1-eps-converted-t
+o.pdf fig1.eps>
+(epstopdf)             \includegraphics on input line 92.
+Package epstopdf Info: Output file is already uptodate.
+<fig1-eps-converted-to.pdf, id=21, 345.29pt x 142.5325pt>
+File: fig1-eps-converted-to.pdf Graphic file (type pdf)
+<use fig1-eps-converted-to.pdf>
+Package pdftex.def Info: fig1-eps-converted-to.pdf  used on input line 92.
+(pdftex.def)             Requested size: 347.12354pt x 143.29115pt.
+ [2 <./fig1-eps-converted-to.pdf>] (samplepaper.aux)
+ ***********
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-05-26>
+ ***********
+
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 1860 strings out of 467509
+ 28253 string characters out of 5425685
+ 451169 words of memory out of 5000000
+ 31114 multiletter control sequences out of 15000+600000
+ 635627 words of font info for 66 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 57i,8n,65p,313b,259s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\trung\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
+0900.pk><D:/MikTex/fonts/type1/public/amsfonts/cm/cmbx10.pfb><D:/MikTex/fonts/t
+ype1/public/amsfonts/cm/cmbx12.pfb><D:/MikTex/fonts/type1/public/amsfonts/cm/cm
+bx9.pfb><D:/MikTex/fonts/type1/public/amsfonts/cm/cmmi10.pfb><D:/MikTex/fonts/t
+ype1/public/amsfonts/cm/cmmi6.pfb><D:/MikTex/fonts/type1/public/amsfonts/cm/cmm
+i7.pfb><D:/MikTex/fonts/type1/public/amsfonts/cm/cmmib10.pfb><D:/MikTex/fonts/t
+ype1/public/amsfonts/cm/cmr10.pfb><D:/MikTex/fonts/type1/public/amsfonts/cm/cmr
+6.pfb><D:/MikTex/fonts/type1/public/amsfonts/cm/cmr7.pfb><D:/MikTex/fonts/type1
+/public/amsfonts/cm/cmr9.pfb><D:/MikTex/fonts/type1/public/amsfonts/cm/cmsy7.pf
+b><D:/MikTex/fonts/type1/public/amsfonts/cm/cmsy9.pfb><D:/MikTex/fonts/type1/pu
+blic/amsfonts/cm/cmti10.pfb><D:/MikTex/fonts/type1/public/amsfonts/cm/cmti9.pfb
+><D:/MikTex/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
+Output written on samplepaper.pdf (2 pages, 235299 bytes).
+PDF statistics:
+ 107 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -399,7 +399,7 @@ export class RaceResultsService {
         ? (POINTS_MAP[dto.rank] ?? DEFAULT_POINTS)
         : 0;
 
-    return this.resultModel.create({
+    const result = await this.resultModel.create({
       tournamentId: race.tournamentId,
       raceId: new Types.ObjectId(dto.raceId),
       raceRegistrationId: new Types.ObjectId(dto.raceRegistrationId),
@@ -415,6 +415,9 @@ export class RaceResultsService {
       note: dto.note,
       recordedBy: new Types.ObjectId(recordedBy),
     });
+
+    await this.applyViolationsToResults(dto.raceId);
+    return this.resultModel.findById(result._id).exec() as unknown as RaceResultDocument;
   }
 
   async findByRace(raceId: string, user?: JwtUser) {
@@ -737,6 +740,8 @@ export class RaceResultsService {
           notes.push(
             `+${penalty / 1000}s phạt do lỗi: ${vio.type} (${vio.severity})`,
           );
+        } else if (vio.penalty === ViolationPenalty.WARNING) {
+          notes.push(`Cảnh cáo do lỗi: ${vio.type}`);
         }
       }
 
@@ -854,7 +859,9 @@ export class RaceResultsService {
       result.rawFinishTimeMs = undefined;
     }
 
-    return result.save();
+    const saved = await result.save();
+    await this.applyViolationsToResults(String(saved.raceId));
+    return this.resultModel.findById(id).exec() as unknown as RaceResultDocument;
   }
 
   async bulkSave(
