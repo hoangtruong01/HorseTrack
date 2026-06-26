@@ -12,6 +12,8 @@ import {
   Award,
   CheckCircle2,
   Lock,
+  PlusCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -32,6 +34,7 @@ type RaceCheck = {
   _id: string;
   raceRegistrationId: {
     _id: string;
+    jockeyUserId?: string | { _id: string; fullName: string };
   };
   horseId: {
     _id: string;
@@ -39,7 +42,6 @@ type RaceCheck = {
     breed: string;
   };
 };
-
 
 export default function RefereeResultEntryPage() {
   const params = useParams();
@@ -55,6 +57,14 @@ export default function RefereeResultEntryPage() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+
+  // Violations form states
+  const [horses, setHorses] = useState<RaceCheck[]>([]);
+  const [selectedHorseId, setSelectedHorseId] = useState("");
+  const [violationType, setViolationType] = useState("track_violation");
+  const [violationPenaltyOption, setViolationPenaltyOption] = useState("3s");
+  const [description, setDescription] = useState("");
+  const [isSubmittingViolation, setIsSubmittingViolation] = useState(false);
 
   // Manual entry table state
   const [entryRows, setEntryRows] = useState<
@@ -82,6 +92,7 @@ export default function RefereeResultEntryPage() {
       let horsesList: RaceCheck[] = [];
       const checksData = await raceChecksApi.listByRace(raceId);
       horsesList = (checksData || []) as unknown as RaceCheck[];
+      setHorses(horsesList);
 
       // 3. Fetch race violations
       let violationsList: ViolationItem[] = [];
@@ -144,6 +155,80 @@ export default function RefereeResultEntryPage() {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
+
+  const handleSubmitViolation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedHorseId) {
+      toast.error("Vui lòng chọn ngựa vi phạm");
+      return;
+    }
+
+    setIsSubmittingViolation(true);
+    try {
+      // Find the selected horse check to extract IDs
+      const selectedHorse = horses.find((h) => h.horseId?._id === selectedHorseId);
+      if (!selectedHorse) throw new Error("Không tìm thấy thông tin ngựa đã chọn");
+
+      // Extract jockey ID
+      const reg = selectedHorse.raceRegistrationId as { _id: string; jockeyUserId?: string | { _id: string } };
+      const jockeyUserId = typeof reg?.jockeyUserId === "object" ? reg?.jockeyUserId?._id : reg?.jockeyUserId;
+      let penalty = "time_penalty";
+      let severity = "minor";
+
+      if (violationPenaltyOption === "3s") {
+        penalty = "time_penalty";
+        severity = "minor";
+      } else if (violationPenaltyOption === "6s") {
+        penalty = "time_penalty";
+        severity = "major";
+      } else if (violationPenaltyOption === "12s") {
+        penalty = "time_penalty";
+        severity = "critical";
+      } else if (violationPenaltyOption === "warning") {
+        penalty = "warning";
+        severity = "minor";
+      } else if (violationPenaltyOption === "disqualified") {
+        penalty = "disqualified";
+        severity = "critical";
+      }
+
+      const payload = {
+        raceId,
+        type: violationType,
+        severity,
+        penalty,
+        raceRegistrationId: reg?._id,
+        horseId: selectedHorseId,
+        jockeyUserId,
+        description,
+      };
+
+      const res = await fetch("/api/referee/race-violations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || "Ghi nhận vi phạm thất bại");
+      }
+
+      toast.success("Ghi nhận vi phạm thành công! Hệ thống sẽ tự động áp dụng phạt khi khóa kết quả.");
+      // Reset form
+      setSelectedHorseId("");
+      setViolationType("track_violation");
+      setViolationPenaltyOption("3s");
+      setDescription("");
+      
+      // Reload violations and results
+      await fetchData();
+    } catch (err) {
+      toast.error((err as Error).message || "Lỗi khi lưu vi phạm.");
+    } finally {
+      setIsSubmittingViolation(false);
+    }
+  };
 
   const handleSimulate = async () => {
     setIsSimulating(true);
@@ -269,44 +354,173 @@ export default function RefereeResultEntryPage() {
         eyebrow="Ghi nhận thứ hạng"
         title="Nhập Kết Quả Thi Đấu"
         description="Nhập thời gian về đích thủ công hoặc kích hoạt thuật toán giả lập thời gian chạy dựa trên các chỉ số ngựa và biến cố trên sân."
-        actions={
-          <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-11 rounded-full">
-              <Link href={`/referee/races/${raceId}/violations`}>
-                <Siren className="size-4 mr-1 text-primary" /> Vi phạm
-              </Link>
-            </Button>
-          </div>
-        }
       />
 
-      {/* Violations Summary Alert Card */}
-      {violations.length > 0 && (
-        <section className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 space-y-3 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-3 opacity-10">
-            <Siren className="size-24 text-red-500" />
+      {/* Violations Section */}
+      <section className="space-y-4">
+        {/* Info on Penalties */}
+        {!isLocked && (
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 flex flex-col md:flex-row gap-4 text-xs">
+            <div className="flex items-start gap-3 w-full">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
+                <AlertTriangle className="size-5" />
+              </div>
+              <div className="space-y-2 flex-1">
+                <div>
+                  <h4 className="font-bold text-foreground uppercase text-xs tracking-wider flex items-center gap-1.5">
+                    Hệ thống phạt tự động (Automatic Penalties)
+                  </h4>
+                  <p className="text-muted-foreground mt-0.5">
+                    Các vi phạm có hình phạt <span className="font-bold text-foreground">Cộng giây phạt (time_penalty)</span> sẽ được tự động cộng trực tiếp vào thời gian hoàn thành của ngựa khi trọng tài thực hiện khóa kết quả.
+                  </p>
+                </div>
+                <div className="grid gap-2.5 sm:grid-cols-2 md:grid-cols-4">
+                  <div className="rounded-xl border border-teal-500/20 bg-teal-500/5 p-2.5">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-teal-500">Nhẹ (Minor)</span>
+                    <p className="text-xs font-black text-teal-300">+3.000ms (+3s)</p>
+                  </div>
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-2.5">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-500">Trung bình (Major)</span>
+                    <p className="text-xs font-black text-amber-300">+6.000ms (+6s)</p>
+                  </div>
+                  <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-2.5">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-red-500">Nghiêm trọng (Critical)</span>
+                    <p className="text-xs font-black text-red-300">+12.000ms (+12s)</p>
+                  </div>
+                  <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-2.5">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-red-500">Truất quyền (Disqualified)</span>
+                    <p className="text-[10px] text-muted-foreground leading-snug">Hủy xếp hạng, Điểm = 0, Thưởng = 0</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="relative">
-            <h4 className="text-xs font-black uppercase text-red-500 tracking-wider flex items-center gap-1.5 mb-2">
-              <Siren className="size-4 animate-pulse" /> Các lỗi vi phạm đã ghi nhận trong trận đấu ({violations.length})
-            </h4>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {violations.map((v) => {
-                const isDq = v.penalty === "disqualified";
-                return (
-                  <div key={v._id} className={`rounded-xl border p-3 space-y-1 text-xs transition duration-200 hover:scale-[1.01] bg-card ${
-                    v.penalty === "disqualified"
-                      ? "border-red-500/30"
-                      : v.penalty === "time_penalty"
-                      ? "border-amber-500/20"
-                      : v.penalty === "warning"
-                      ? "border-blue-500/20"
-                      : "border-border/30"
-                  }`}>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-extrabold uppercase text-foreground">
-                        {v.horseId && typeof v.horseId === "object" ? v.horseId.name : "Chiến mã"}
-                      </span>
+        )}
+
+        <div className={`grid gap-6 ${!isLocked ? "lg:grid-cols-[1fr_1.2fr]" : "grid-cols-1"} items-start`}>
+          {/* Form: Ghi nhận vi phạm nhanh */}
+          {!isLocked && (
+            <div className="rounded-2xl border border-border dark:border-white/10 bg-card p-5 shadow-md space-y-4">
+              <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                <PlusCircle className="size-4 text-primary" />
+                Ghi nhận vi phạm nhanh
+              </h3>
+              <form onSubmit={handleSubmitViolation} className="space-y-4 text-xs">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Chọn ngựa vi phạm</label>
+                    <select
+                      value={selectedHorseId}
+                      onChange={(e) => setSelectedHorseId(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                      required
+                    >
+                      <option value="" className="bg-card">-- Chọn chiến mã --</option>
+                      {horses.map((h) => (
+                        <option key={h.horseId?._id} value={h.horseId?._id} className="bg-card">
+                          {h.horseId?.name} ({h.horseId?.breed})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Loại vi phạm</label>
+                    <select
+                      value={violationType}
+                      onChange={(e) => setViolationType(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                    >
+                      <option value="track_violation" className="bg-card">Vi phạm đường đua (TRACK)</option>
+                      <option value="false_start" className="bg-card">Xuất phát sai quy định (FALSE START)</option>
+                      <option value="dangerous_riding" className="bg-card">Đua xe/kỵ sĩ nguy hiểm (DANGEROUS)</option>
+                      <option value="equipment_violation" className="bg-card">Lỗi trang thiết bị bảo hộ (EQUIPMENT)</option>
+                      <option value="other" className="bg-card">Lỗi vi phạm khác (OTHER)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Hình phạt đề xuất (Tùy chọn)</label>
+                    <select
+                      value={violationPenaltyOption}
+                      onChange={(e) => setViolationPenaltyOption(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                    >
+                      <option value="3s" className="bg-card">Phạt 3 giây (+3s)</option>
+                      <option value="6s" className="bg-card">Phạt 6 giây (+6s)</option>
+                      <option value="12s" className="bg-card">Phạt 12 giây (+12s)</option>
+                      <option value="warning" className="bg-card">Nhắc nhở (Cảnh cáo)</option>
+                      <option value="disqualified" className="bg-card">Truất quyền thi đấu (Disqualified)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase text-muted-foreground">Mô tả sự cố vi phạm chi tiết</label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Ví dụ: Kỵ sĩ cố ý ép làn tại khúc cua thứ hai, chèn ép số hiệu 04 chệch khoảng 1.5m..."
+                    rows={3}
+                    className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none resize-none"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={isSubmittingViolation || !selectedHorseId}
+                    className="rounded-full bg-primary hover:bg-primary/90 font-black uppercase text-xs h-10 px-6 text-primary-foreground"
+                  >
+                    {isSubmittingViolation ? "Đang ghi nhận..." : "Ghi nhận lỗi vi phạm"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* List: Nhật ký vi phạm đã ghi nhận */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-1.5">
+              <Siren className="size-4 text-red-500 animate-pulse" />
+              Nhật ký vi phạm đã ghi nhận ({violations.length})
+            </h3>
+
+            {violations.length === 0 ? (
+              <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/40 text-muted-foreground text-xs">
+                Chưa có vi phạm nào được ghi nhận cho cuộc đua này.
+              </div>
+            ) : (
+              <div className={`grid gap-3 ${!isLocked ? "grid-cols-1" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
+                {violations.map((v) => (
+                  <div
+                    key={v._id}
+                    className={`rounded-xl border p-4 space-y-3 shadow-sm relative transition duration-200 hover:scale-[1.01] bg-card ${
+                      v.penalty === "disqualified"
+                        ? "border-red-500/30"
+                        : v.penalty === "time_penalty"
+                        ? "border-amber-500/20"
+                        : v.penalty === "warning"
+                        ? "border-blue-500/20"
+                        : "border-border/30"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${
+                          v.severity === "critical" ? "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20" :
+                          v.severity === "major" ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" :
+                          "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
+                        }`}>
+                          {v.severity === "critical" ? "CRITICAL" : v.severity === "major" ? "MAJOR" : "MINOR"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">
+                          · {v.type === "track_violation" ? "LỖI ĐƯỜNG ĐUA" :
+                             v.type === "false_start" ? "XUẤT PHÁT SAI" :
+                             v.type === "dangerous_riding" ? "ĐUA NGUY HIỂM" : "VI PHẠM KHÁC"}
+                        </span>
+                      </div>
                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
                         v.penalty === "disqualified"
                           ? "bg-red-500/10 text-red-500 border-red-500/20"
@@ -325,24 +539,32 @@ export default function RefereeResultEntryPage() {
                           : "Không phạt"}
                       </span>
                     </div>
-                    <p className="text-muted-foreground text-[11px] leading-normal">
-                      Lỗi: <span className="font-bold text-foreground">
-                        {v.type === "track_violation" ? "Lỗi đường đua" : v.type === "false_start" ? "Xuất phát sai" : v.type === "dangerous_riding" ? "Đua nguy hiểm" : v.type}
-                      </span>
-                      {v.severity && ` (${v.severity === "minor" ? "Nhẹ" : v.severity === "major" ? "Trung bình" : "Nghiêm trọng"})`}
-                    </p>
-                    {v.description && (
-                      <p className="text-[10px] text-muted-foreground/80 bg-muted/40 p-1.5 rounded italic mt-1 border border-border/30">
-                        "{v.description}"
-                      </p>
-                    )}
+
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-foreground uppercase">Chiến mã: {v.horseId?.name}</p>
+                      {v.jockeyUserId && (
+                        <p className="text-[10px] text-muted-foreground">
+                          Kỵ sĩ: <strong className="text-foreground">
+                            {typeof v.jockeyUserId === "object" ? v.jockeyUserId.fullName : v.jockeyUserId}
+                          </strong>
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">"{v.description}"</p>
+                    </div>
+
+                    <div className="h-px bg-border" />
+
+                    <div className="flex justify-between items-center text-[9px] text-muted-foreground font-bold uppercase">
+                      <span>Ghi bởi: {v.reportedBy?.fullName || "Trọng tài"}</span>
+                      <span>{v.createdAt ? new Date(v.createdAt).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' }) : "—"}</span>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Control Actions / Banner */}
       <section className="relative overflow-hidden rounded-2xl border border-border dark:border-white/10 bg-card p-5 shadow-md">
