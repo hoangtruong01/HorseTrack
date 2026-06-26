@@ -141,6 +141,12 @@ export default function RefereeResultEntryPage() {
           note: existing?.note || "",
         };
       });
+      // Sort by rank ascending; rows without rank go to the bottom
+      rows.sort((a, b) => {
+        const rankA = a.rank ? parseInt(a.rank) : Infinity;
+        const rankB = b.rank ? parseInt(b.rank) : Infinity;
+        return rankA - rankB;
+      });
       setEntryRows(rows);
     } catch (err) {
       console.error(err);
@@ -738,7 +744,21 @@ export default function RefereeResultEntryPage() {
                           const isDqByViolation = horseViolations.some(v => v.penalty === "disqualified");
 
                           if (isLocked) {
-                            return <span className="text-foreground font-black">{row.finishTimeSecs ? `${row.finishTimeSecs}s` : "—"}</span>;
+                            const displayTimeMs = existingResult?.finishTimeMs;
+                            const rawTimeMs = existingResult?.rawFinishTimeMs;
+                            const hasPenalty = displayTimeMs && rawTimeMs && displayTimeMs !== rawTimeMs;
+                            return (
+                              <div className="space-y-1">
+                                <span className="text-foreground font-black">
+                                  {displayTimeMs ? `${(displayTimeMs / 1000).toFixed(3)}s` : "—"}
+                                </span>
+                                {hasPenalty && (
+                                  <p className="text-[9px] font-bold text-amber-500 leading-none">
+                                    Gốc: {(rawTimeMs / 1000).toFixed(3)}s · Phạt: +{((displayTimeMs - rawTimeMs) / 1000).toFixed(1)}s
+                                  </p>
+                                )}
+                              </div>
+                            );
                           }
 
                           return (
