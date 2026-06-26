@@ -8,10 +8,12 @@ import {
   PlusCircle,
   ChevronDown,
   ChevronUp,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { toast } from "sonner";
+import { raceViolationsApi, type ViolationItem } from "@/lib/api-client";
 
 // Types
 type RaceInfo = {
@@ -63,6 +65,7 @@ type RaceCheck = {
 export default function RefereeReportsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [reports, setReports] = useState<Record<string, RefereeReport[]>>({});
+  const [violations, setViolations] = useState<Record<string, ViolationItem[]>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -92,19 +95,29 @@ export default function RefereeReportsPage() {
       );
       setAssignments(myAssignments);
 
-      // 2. Fetch reports for each race in parallel
+      // 2. Fetch reports and violations for each race in parallel
       const reportsMap: Record<string, RefereeReport[]> = {};
+      const violationsMap: Record<string, ViolationItem[]> = {};
       await Promise.all(
         myAssignments.map(async (a: Assignment) => {
           const rId = a.raceId._id || a.raceId.id || "";
+          // Fetch referee reports
           const repRes = await fetch(`/api/referee/referee-reports/race/${rId}`);
           if (repRes.ok) {
             const repData = await repRes.json();
             reportsMap[rId] = repData.data || [];
           }
+          // Fetch race violations (ghi lỗi trong trận)
+          try {
+            const vioData = await raceViolationsApi.listByRace(rId);
+            violationsMap[rId] = vioData || [];
+          } catch {
+            violationsMap[rId] = [];
+          }
         })
       );
       setReports(reportsMap);
+      setViolations(violationsMap);
     } catch (err) {
       console.error(err);
       toast.error((err as Error).message || "Lỗi tải danh sách cuộc đua.");
@@ -339,6 +352,7 @@ export default function RefereeReportsPage() {
                 if (!assignment.raceId) return null;
                 const raceId = assignment.raceId._id || assignment.raceId.id || "";
                 const raceReports = reports[raceId] || [];
+                const raceViolations = violations[raceId] || [];
                 const isExpanded = expandedRaces[raceId] || false;
                 const assignmentId = assignment._id || assignment.id || raceId;
 
@@ -356,8 +370,13 @@ export default function RefereeReportsPage() {
                         <h4 className="text-xs font-black uppercase text-foreground leading-tight">
                           {assignment.raceId.name}
                         </h4>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase">
-                          Biên bản lưu vết: <strong className="text-teal-600 dark:text-teal-400">{raceReports.length} bản</strong>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase flex items-center gap-3">
+                          <span>
+                            Biên bản: <strong className="text-teal-600 dark:text-teal-400">{raceReports.length} bản</strong>
+                          </span>
+                          <span>
+                            Vi phạm: <strong className={raceViolations.length > 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground"}>{raceViolations.length} lỗi</strong>
+                          </span>
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -372,65 +391,136 @@ export default function RefereeReportsPage() {
                       </div>
                     </div>
 
-                    {/* Reports List for this race */}
+                    {/* Reports & Violations List for this race */}
                     {isExpanded && (
-                      <div className="p-4 border-t border-border space-y-4 bg-muted/40">
-                        {raceReports.length === 0 ? (
-                          <p className="text-xs text-muted-foreground italic py-2">
-                            Cuộc đua này chưa có biên bản nào được lập.
-                          </p>
-                        ) : (
-                          <div className="space-y-3">
-                            {raceReports.map((rep) => (
-                              <div
-                                key={rep._id}
-                                className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
-                              >
-                                <div className="flex justify-between items-center gap-2">
-                                  <span className={`px-2 py-0.5 rounded text-[8px] font-bold border ${
-                                    rep.type === "PRE_RACE" 
-                                      ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" 
-                                      : "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
-                                  }`}>
-                                    {rep.type === "PRE_RACE" ? "TRƯỚC TRẬN" : "SAU TRẬN"}
-                                  </span>
-                                  <span className="text-[9px] text-muted-foreground">
-                                    {new Date(rep.createdAt).toLocaleString("vi-VN")}
-                                  </span>
-                                </div>
+                      <div className="p-4 border-t border-border space-y-5 bg-muted/40">
+                        {/* Biên bản section */}
+                        <div className="space-y-3">
+                          <h5 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                            Biên bản lưu vết ({raceReports.length})
+                          </h5>
+                          {raceReports.length === 0 ? (
+                            <p className="text-xs text-muted-foreground italic py-2">
+                              Cuộc đua này chưa có biên bản nào được lập.
+                            </p>
+                          ) : (
+                            <div className="space-y-3">
+                              {raceReports.map((rep) => (
+                                <div
+                                  key={rep._id}
+                                  className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
+                                >
+                                  <div className="flex justify-between items-center gap-2">
+                                    <span className={`px-2 py-0.5 rounded text-[8px] font-bold border ${
+                                      rep.type === "PRE_RACE" 
+                                        ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" 
+                                        : "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
+                                    }`}>
+                                      {rep.type === "PRE_RACE" ? "TRƯỚC TRẬN" : "SAU TRẬN"}
+                                    </span>
+                                    <span className="text-[9px] text-muted-foreground">
+                                      {new Date(rep.createdAt).toLocaleString("vi-VN")}
+                                    </span>
+                                  </div>
 
-                                {rep.horseId && (
-                                  <p className="text-[10px] font-bold text-foreground">
-                                    Chiến mã liên quan: <span className="text-teal-600 dark:text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
+                                  {rep.horseId && (
+                                    <p className="text-[10px] font-bold text-foreground">
+                                      Chiến mã liên quan: <span className="text-teal-600 dark:text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
+                                    </p>
+                                  )}
+
+                                  <p className="text-foreground leading-relaxed font-medium">
+                                    {rep.description}
                                   </p>
-                                )}
 
-                                <p className="text-foreground leading-relaxed font-medium">
-                                  {rep.description}
-                                </p>
+                                  {(rep.violation || rep.penalty) && (
+                                    <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-muted/50 text-[10px]">
+                                      {rep.violation && (
+                                        <p className="text-muted-foreground">
+                                          Lỗi vi phạm: <strong className="text-amber-600 dark:text-yellow-400 font-bold">{rep.violation}</strong>
+                                        </p>
+                                      )}
+                                      {rep.penalty && (
+                                        <p className="text-muted-foreground">
+                                          Hình phạt: <strong className="text-red-600 dark:text-red-400 font-bold">{rep.penalty}</strong>
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
 
-                                {(rep.violation || rep.penalty) && (
-                                  <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-muted/50 text-[10px]">
-                                    {rep.violation && (
-                                      <p className="text-muted-foreground">
-                                        Lỗi vi phạm: <strong className="text-amber-600 dark:text-yellow-400 font-bold">{rep.violation}</strong>
+                                  <p className="text-[9px] text-muted-foreground pt-1.5 border-t border-border text-right uppercase font-bold">
+                                    Ký tên: {rep.refereeId?.fullName}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Vi phạm / Ghi lỗi section */}
+                        <div className="space-y-3">
+                          <h5 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <AlertTriangle className="size-3.5 text-amber-500" />
+                            Lịch sử ghi lỗi vi phạm ({raceViolations.length})
+                          </h5>
+                          {raceViolations.length === 0 ? (
+                            <p className="text-xs text-muted-foreground italic py-2">
+                              Chưa có vi phạm nào được ghi nhận cho cuộc đua này.
+                            </p>
+                          ) : (
+                            <div className="space-y-3">
+                              {raceViolations.map((v) => (
+                                <div
+                                  key={v._id}
+                                  className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
+                                >
+                                  <div className="flex justify-between items-start gap-2">
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${
+                                        v.severity === "critical" ? "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20" :
+                                        v.severity === "major" ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" :
+                                        "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
+                                      }`}>
+                                        {v.severity === "critical" ? "CRITICAL" : v.severity === "major" ? "MAJOR" : "MINOR"}
+                                      </span>
+                                      <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">
+                                        · {v.type === "track_violation" ? "LỖI ĐƯỜNG ĐUA" :
+                                           v.type === "false_start" ? "XUẤT PHÁT SAI" :
+                                           v.type === "dangerous_riding" ? "KỴ SĨ ÉP LÀN" :
+                                           v.type === "equipment_violation" ? "LỖI TRANG THIẾT BỊ" : "VI PHẠM KHÁC"}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-muted-foreground font-bold uppercase bg-muted border border-border px-2 py-0.5 rounded shrink-0">
+                                      {v.penalty === "time_penalty" ? "Phạt cộng giây" :
+                                       v.penalty === "warning" ? "Cảnh cáo" :
+                                       v.penalty === "disqualified" ? "TRUẤT QUYỀN" : "Không phạt"}
+                                    </span>
+                                  </div>
+
+                                  <div className="space-y-1">
+                                    <p className="text-xs font-bold text-foreground uppercase">
+                                      Chiến mã: {v.horseId?.name || "N/A"}
+                                    </p>
+                                    {v.jockeyUserId && (
+                                      <p className="text-[10px] text-muted-foreground">
+                                        Kỵ sĩ: <strong className="text-foreground">{v.jockeyUserId?.fullName}</strong>
                                       </p>
                                     )}
-                                    {rep.penalty && (
-                                      <p className="text-muted-foreground">
-                                        Hình phạt: <strong className="text-red-600 dark:text-red-400 font-bold">{rep.penalty}</strong>
-                                      </p>
+                                    {v.description && (
+                                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">{v.description}</p>
                                     )}
                                   </div>
-                                )}
 
-                                <p className="text-[9px] text-muted-foreground pt-1.5 border-t border-border text-right uppercase font-bold">
-                                  Ký tên: {rep.refereeId?.fullName}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                                  <div className="flex justify-between items-center text-[9px] text-muted-foreground font-bold uppercase pt-1.5 border-t border-border">
+                                    <span>Ghi nhận bởi: {v.reportedBy?.fullName || "—"}</span>
+                                    <span>{v.createdAt ? new Date(v.createdAt).toLocaleString("vi-VN") : "—"}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
                         <div className="pt-2 flex justify-end">
                           <Button asChild variant="outline" className="h-9 px-4 rounded-full text-xs font-bold uppercase">
                             <Link href={`/referee/races/${assignment.raceId._id || assignment.raceId.id || ""}`}>
