@@ -340,17 +340,8 @@ export const dashboardNavigation: NavigationItem[] = [
     href: "/referee/result-entry",
     role: "Referee",
     icon: Award,
-    description: "Nhập thời gian về đích chính thức và xếp hạng chiến mã.",
+    description: "Nhập kết quả, ghi nhận vi phạm và xác nhận biên bản thi đấu.",
     itemKey: "referee.resultEntry",
-    group: "Ghi Nhận",
-  },
-  {
-    title: "Ghi Nhận Vi Phạm",
-    href: "/referee/violations",
-    role: "Referee",
-    icon: Siren,
-    description: "Báo cáo lỗi vi phạm và tự động áp dụng giây phạt kỷ luật.",
-    itemKey: "referee.violations",
     group: "Ghi Nhận",
   },
   {
