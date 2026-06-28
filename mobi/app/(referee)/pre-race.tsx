@@ -1,14 +1,31 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutRight } from 'react-native-reanimated';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius , usePremiumColors } from '@/components/ui/premium-tokens';
-import { LoadingState, EmptyState } from '@/components/ui/shared';
-import { refereeAssignmentsApi, raceChecksApi } from '@/lib/api-client';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState, useThemeColors } from '@/components/ui/shared';
+import { refereeAssignmentsApi, raceChecksApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Stack, Tabs, useRouter } from 'expo-router';
+
+// Background Pattern
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
 
 export default function RefereePreRace() {
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
   const premiumColors = usePremiumColors();
-  const styles = getStyles(premiumColors);
+  const styles = React.useMemo(() => getStyles(isDark, theme, insets, premiumColors), [isDark, theme, insets, premiumColors]);
 
   const [assignments, setAssignments] = useState<any[]>([]);
   const [selectedRaceId, setSelectedRaceId] = useState<string | null>(null);
@@ -20,6 +37,14 @@ export default function RefereePreRace() {
   const [jockeyPresent, setJockeyPresent] = useState<Record<string, boolean>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const router = useRouter();
+
+  useEffect(() => {
+    rewardPointLedgerApi.myBalance()
+      .then((res: any) => setBalance(res.balance || 0))
+      .catch(() => { });
+  }, []);
 
   const loadAssignments = useCallback(async () => {
     try {
@@ -27,7 +52,7 @@ export default function RefereePreRace() {
       const list = (res as any).data || res || [];
       // Only show accepted assignments
       setAssignments(list.filter((a: any) => a.status === 'accepted'));
-    } catch {} finally { setLoading(false); }
+    } catch { } finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
@@ -96,50 +121,81 @@ export default function RefereePreRace() {
 
   if (loading && !refreshing) return <LoadingState />;
 
-  if (!selectedRaceId) {
-    return (
-      <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={styles.content}>
-          <Section title="Chọn trận đua cần điểm danh / kiểm tra">
-            {assignments.length === 0 ? (
-              <EmptyState icon="checklist" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
-            ) : (
-              assignments.map(a => {
-                const race = a.raceId;
-                if (!race) return null;
-                return (
-                  <TouchableOpacity
-                    key={a._id || a.id}
-                    style={styles.assignmentCard}
-                    onPress={() => selectRace(race._id || race.id, race.name)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.cardIconWrap}>
-                      <MaterialIcons name="checklist" size={20} color={premiumColors.brand} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.assignmentTitle} numberOfLines={1}>{race.name}</Text>
-                      <Text style={styles.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
-                    </View>
-                    <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
-                  </TouchableOpacity>
-                );
-              })
-            )}
-          </Section>
-        </View>
-      </AppScreen>
-    );
-  }
-
   return (
-    <AppScreen refreshing={refreshing} onRefresh={onRefresh}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
-          <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
-          <Text style={styles.backTxt}>Quay lại</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <Tabs.Screen options={{ headerShown: false }} />
+      <GridBackground isDark={isDark} />
+
+      {!selectedRaceId ? (
+        <Animated.View style={styles.flex1} entering={FadeIn} exiting={FadeOut}>
+          {/* Custom Sleek Header */}
+          <View style={styles.customHeader}>
+            <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={styles.headerTitle}>KIỂM TRA</Text>
+              </View>
+            </View>
+            <View style={styles.headerLeft} />
+            <View style={styles.headerRight}>
+              <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+                <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+                <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.content}>
+            <Section title="Chọn trận đua cần điểm danh / kiểm tra">
+              {assignments.length === 0 ? (
+                <EmptyState icon="checklist" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
+              ) : (
+                assignments.map(a => {
+                  const race = a.raceId;
+                  if (!race) return null;
+                  return (
+                    <TouchableOpacity
+                      key={a._id || a.id}
+                      style={styles.assignmentCard}
+                      onPress={() => selectRace(race._id || race.id, race.name)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.cardIconWrap}>
+                        <MaterialIcons name="checklist" size={20} color={premiumColors.brand} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.assignmentTitle} numberOfLines={1}>{race.name}</Text>
+                        <Text style={styles.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
+                      </View>
+                      <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
+                    </TouchableOpacity>
+                  );
+                })
+              )}
+            </Section>
+          </View>
+        </Animated.View>
+      ) : (
+        <Animated.View style={styles.flex1} entering={SlideInRight} exiting={SlideOutRight}>
+
+      {/* Custom Sleek Header */}
+      <View style={styles.customHeader}>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
+          </View>
+        </View>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
+            <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
+            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
+            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loadingChecks && !refreshing ? <LoadingState /> : (
@@ -157,9 +213,9 @@ export default function RefereePreRace() {
             const isUpdating = updatingId === (item._id || item.id);
             const isPassed = item.status === 'passed';
             const isFailed = item.status === 'failed';
-            
+
             return (
-              <View style={styles.checkCard}>
+              <View style={[styles.checkCard, isPassed && styles.cardPassed, isFailed && styles.cardFailed]}>
                 <View style={styles.cardHeader}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.horseName}>{horse.name.toUpperCase()}</Text>
@@ -181,27 +237,28 @@ export default function RefereePreRace() {
                 </View>
 
                 {isUpdating ? <ActivityIndicator color={premiumColors.brand} style={{ marginVertical: 12 }} /> : (
-                  <View style={s.actionRow}>
+                  <View style={styles.actionRow}>
                     {/* Jockey Check-in toggle */}
                     {!isPassed && !isFailed && (
                       <TouchableOpacity
-                        style={s.checkInRow}
+                        style={styles.checkInRow}
                         onPress={() => setJockeyPresent(prev => ({ ...prev, [item._id || item.id]: !prev[item._id || item.id] }))}
                         activeOpacity={0.8}
                       >
-                        <View style={[s.checkbox, jockeyPresent[item._id || item.id] && s.checkboxChecked]}>
+                        <View style={[styles.checkbox, jockeyPresent[item._id || item.id] && styles.checkboxChecked]}>
                           {jockeyPresent[item._id || item.id] && <MaterialIcons name="check" size={12} color="#FFFFFF" />}
                         </View>
-                        <Text style={s.checkInLabel}>Jockey đã có mặt tại khu vực xuất phát</Text>
+                        <Text style={styles.checkInLabel}>Jockey đã có mặt tại khu vực xuất phát</Text>
                       </TouchableOpacity>
                     )}
                     {!isPassed && (
                       <TouchableOpacity
-                        style={[s.btn, s.btnPass]}
+                        style={[styles.btn, styles.btnPass]}
                         onPress={() => handleUpdateCheck(item._id || item.id, 'passed')}
                         activeOpacity={0.8}
                       >
-                        <Text style={styles.btnTxt}>ĐẠT CHUẨN</Text>
+                        <MaterialIcons name="check-circle" size={16} color="#FFFFFF" style={{ marginRight: 8 }} />
+                        <Text style={styles.btnTxt}>XÁC NHẬN ĐẠT</Text>
                       </TouchableOpacity>
                     )}
                     {!isFailed && (
@@ -213,11 +270,12 @@ export default function RefereePreRace() {
                           value={failNotes[item._id || item.id] || ''}
                           onChangeText={txt => setFailNotes({ ...failNotes, [item._id || item.id]: txt })}
                         />
-                        <TouchableOpacity 
-                          style={[styles.btn, styles.btnFail]} 
+                        <TouchableOpacity
+                          style={[styles.btn, styles.btnFail]}
                           onPress={() => handleUpdateCheck(item._id || item.id, 'failed')}
                           activeOpacity={0.8}
                         >
+                          <MaterialIcons name="cancel" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
                           <Text style={styles.btnTxt}>LOẠI</Text>
                         </TouchableOpacity>
                       </View>
@@ -229,51 +287,79 @@ export default function RefereePreRace() {
           }}
         />
       )}
-    </AppScreen>
+        </Animated.View>
+      )}
+    </View>
   );
 }
 
-const getStyles = (premiumColors: any) => StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
+  },
+  flex1: {
+    flex: 1,
+  },
+  // Custom Header
+  customHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Math.max(insets.top, 16),
+    paddingBottom: 12,
+    zIndex: 10,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
+  },
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  headerTitle: {
+    color: theme.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  headerWallet: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    minWidth: 36,
+    justifyContent: 'center',
+  },
+  headerWalletText: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    fontWeight: '800',
+  },
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   listContent: {
     padding: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 16,
-    backgroundColor: premiumColors.headerBg,
-    borderBottomWidth: 1,
-    borderBottomColor: premiumColors.headerBorder,
+    paddingBottom: 100,
   },
   backBtn: {
-    flexDirection: 'row',
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: premiumColors.surface2,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: premiumRadius[8],
-    borderWidth: 1,
-    borderColor: premiumColors.borderSoft,
   },
-  backTxt: {
-    color: premiumColors.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  headerTitle: {
-    color: premiumColors.text,
-    fontSize: 14,
-    fontWeight: '900',
-    flex: 1,
-  },
+
   assignmentCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -304,30 +390,43 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     fontSize: 12,
   },
   checkCard: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
-    padding: 16,
-    marginBottom: 16,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: premiumRadius[16],
+    padding: premiumSpacing[16],
+    marginBottom: premiumSpacing[16],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0.2 : 0.05,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  cardPassed: {
+    borderColor: isDark ? 'rgba(52, 211, 153, 0.3)' : 'rgba(52, 211, 153, 0.5)',
+    backgroundColor: isDark ? 'rgba(52, 211, 153, 0.05)' : 'rgba(52, 211, 153, 0.02)',
+  },
+  cardFailed: {
+    borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)',
+    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.05)' : 'rgba(239, 68, 68, 0.02)',
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     borderBottomWidth: 1,
-    borderBottomColor: premiumColors.border,
+    borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     paddingBottom: 12,
     marginBottom: 12,
   },
   horseName: {
     color: premiumColors.text,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '800',
   },
   jockeyName: {
     color: premiumColors.textSecondary,
-    fontSize: 12,
+    fontSize: 13,
     marginTop: 4,
   },
   badge: {
@@ -337,15 +436,15 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     backgroundColor: premiumColors.surface2,
   },
   badgePassed: {
-    backgroundColor: 'rgba(52, 211, 153, 0.15)',
+    backgroundColor: isDark ? 'rgba(52, 211, 153, 0.15)' : 'rgba(52, 211, 153, 0.1)',
   },
   badgeFailed: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',
   },
   badgeText: {
     fontSize: 10,
-    fontWeight: '900',
-    color: premiumColors.textSecondary,
+    fontWeight: '800',
+    color: premiumColors.textMuted,
   },
   badgeTextPassed: {
     color: premiumColors.success,
@@ -363,7 +462,8 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     alignItems: 'center',
   },
   btn: {
-    height: 44,
+    flexDirection: 'row',
+    height: 40,
     borderRadius: premiumRadius[8],
     alignItems: 'center',
     justifyContent: 'center',
@@ -379,15 +479,16 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '800',
+    letterSpacing: 0.5,
   },
   input: {
     flex: 1,
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F9FAFB',
     borderWidth: 1,
     borderColor: premiumColors.border,
     color: premiumColors.text,
     borderRadius: premiumRadius[8],
-    height: 44,
+    height: 40,
     paddingHorizontal: 12,
     fontSize: 13,
   },

@@ -18,7 +18,7 @@ const GridBackground = ({ isDark }: { isDark: boolean }) => {
   );
 };
 
-export default function RefereeWallet() {
+export default function JockeyWallet() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const theme = useThemeColors();
@@ -98,7 +98,7 @@ export default function RefereeWallet() {
       <View style={styles.customHeader}>
         <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.headerTitle}>VÍ TRỌNG TÀI</Text>
+            <Text style={styles.headerTitle}>VÍ JOCKEY</Text>
           </View>
         </View>
         <View style={styles.headerLeft}>

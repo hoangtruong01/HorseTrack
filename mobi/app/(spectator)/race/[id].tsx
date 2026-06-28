@@ -5,9 +5,19 @@ import { racesApi, registrationsApi, predictionsApi, walletApi, type RaceItem, t
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ErrorState } from '../../../components/ui/shared';
 import { AppScreen } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from 'react-native';
+import { useThemeColors } from '@/components/ui/shared';
 
 export default function SpectatorRaceDetail() {
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
+  const pc = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, theme, insets, pc), [isDark, theme, insets, pc]);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
@@ -229,7 +239,7 @@ export default function SpectatorRaceDetail() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSheet.create({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[24],
@@ -239,13 +249,13 @@ const styles = StyleSheet.create({
   // ── Error & Fallbacks ──
   failContainer: {
     flex: 1,
-    backgroundColor: premiumColors.bg,
+    backgroundColor: pc.bg,
     alignItems: 'center',
     justifyContent: 'center',
     padding: premiumSpacing[24],
   },
   failText: {
-    color: premiumColors.text,
+    color: pc.text,
     fontSize: 14,
     marginTop: premiumSpacing[16],
   },
@@ -253,7 +263,7 @@ const styles = StyleSheet.create({
     marginTop: premiumSpacing[16],
   },
   backButtonText: {
-    color: premiumColors.brand,
+    color: pc.brand,
     fontSize: 12,
     fontWeight: '800',
     letterSpacing: 1,
@@ -267,7 +277,7 @@ const styles = StyleSheet.create({
     marginBottom: premiumSpacing[24],
   },
   navBackText: {
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
@@ -280,35 +290,35 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: 11,
     fontWeight: '700',
-    color: premiumColors.brand,
+    color: pc.brand,
     letterSpacing: 1,
     marginBottom: premiumSpacing[8],
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
     marginBottom: premiumSpacing[8],
   },
   accentLine: {
     width: 36,
     height: 3,
-    backgroundColor: premiumColors.brand,
+    backgroundColor: pc.brand,
     borderRadius: 2,
     marginBottom: premiumSpacing[12],
   },
   subtitle: {
     fontSize: 14,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     lineHeight: 20,
   },
 
   // ── Form Card ──
   cardContainer: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderRadius: premiumRadius[12],
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     overflow: 'hidden',
     paddingBottom: premiumSpacing[24],
   },
@@ -318,27 +328,27 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: premiumSpacing[16],
     borderBottomWidth: 1,
-    borderBottomColor: premiumColors.border,
-    backgroundColor: premiumColors.surface2,
+    borderBottomColor: pc.border,
+    backgroundColor: pc.surface2,
   },
   walletTitle: {
     fontSize: 12,
     fontWeight: '800',
-    color: premiumColors.text,
+    color: pc.text,
     letterSpacing: 0.5,
   },
   walletBadge: {
-    backgroundColor: premiumColors.brand + '20',
+    backgroundColor: pc.brand + '20',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: premiumColors.brand + '50',
+    borderColor: pc.brand + '50',
   },
   walletBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: premiumColors.brand,
+    color: pc.brand,
   },
 
   // ── Empty / Blocked state ──
@@ -350,7 +360,7 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 13,
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
     textAlign: 'center',
   },
 
@@ -360,7 +370,7 @@ const styles = StyleSheet.create({
   },
   instruction: {
     fontSize: 13,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     marginBottom: premiumSpacing[16],
   },
   optionsList: {
@@ -373,13 +383,13 @@ const styles = StyleSheet.create({
     padding: premiumSpacing[16],
     borderRadius: premiumRadius[8],
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    backgroundColor: premiumColors.surface2,
+    borderColor: pc.border,
+    backgroundColor: pc.surface2,
     gap: premiumSpacing[12],
   },
   radioCardSelected: {
-    borderColor: premiumColors.brand,
-    backgroundColor: premiumColors.brand + '10',
+    borderColor: pc.brand,
+    backgroundColor: pc.brand + '10',
   },
   radioInfo: {
     flex: 1,
@@ -387,15 +397,15 @@ const styles = StyleSheet.create({
   radioName: {
     fontSize: 14,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
     marginBottom: 4,
   },
   radioNameSelected: {
-    color: premiumColors.brand,
+    color: pc.brand,
   },
   radioBreed: {
     fontSize: 12,
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
   },
   
   // ── Input ──
@@ -403,33 +413,33 @@ const styles = StyleSheet.create({
     marginBottom: premiumSpacing[24],
   },
   inputLabel: {
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     fontSize: 11,
     fontWeight: '700',
     marginBottom: premiumSpacing[8],
     letterSpacing: 1,
   },
   input: {
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: pc.surface2,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     borderRadius: premiumRadius[8],
     paddingHorizontal: premiumSpacing[16],
     height: 52,
     fontSize: 14,
-    color: premiumColors.text,
+    color: pc.text,
   },
 
   // ── CTA ──
   primaryBtn: {
-    backgroundColor: premiumColors.brand,
+    backgroundColor: pc.brand,
     borderRadius: premiumRadius[8],
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryBtnDisabled: {
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: pc.surface2,
   },
   primaryBtnText: {
     color: '#FFFFFF',

@@ -1,14 +1,32 @@
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Alert, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
-import { LoadingState, EmptyState, statusLabel } from '@/components/ui/shared';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { LoadingState, EmptyState, statusLabel, useThemeColors } from '@/components/ui/shared';
 import { tournamentsApi, racesApi, registrationsApi, predictionsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import RaceResultsModal from '@/components/ui/race-results-modal';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Stack, Tabs } from 'expo-router';
+
+// Background Pattern
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
 
 export default function SpectatorTournaments() {
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
+  const pc = usePremiumColors();
+  const s = React.useMemo(() => getStyles(isDark, theme, insets, pc), [isDark, theme, insets, pc]);
+
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -160,11 +178,11 @@ export default function SpectatorTournaments() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ONGOING': return premiumColors.brand;
-      case 'OPEN_REGISTRATION': return premiumColors.success;
-      case 'CLOSED_REGISTRATION': return premiumColors.warning;
+      case 'ONGOING': return pc.brand;
+      case 'OPEN_REGISTRATION': return pc.success;
+      case 'CLOSED_REGISTRATION': return pc.warning;
       case 'COMPLETED': return '#8B5CF6';
-      default: return premiumColors.textMuted;
+      default: return pc.textMuted;
     }
   };
 
@@ -177,17 +195,25 @@ export default function SpectatorTournaments() {
     });
 
     return (
-      <SafeAreaView style={s.safeArea} edges={['top', 'left', 'right']}>
-        <TouchableOpacity
-          style={s.backButton}
-          onPress={() => setSelectedRace(null)}
-          activeOpacity={0.7}
-        >
-          <MaterialIcons name="arrow-back" size={20} color="#AEB6C2" />
-          <Text style={s.backButtonText}>
-            Quay lại (Giải đấu &gt; Trận đua)
-          </Text>
-        </TouchableOpacity>
+      <View style={s.safeArea}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <Tabs.Screen options={{ headerShown: false }} />
+        <GridBackground isDark={isDark} />
+
+        {/* Custom Sleek Header */}
+        <View style={s.customHeader}>
+          <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={s.headerTitleText}>CHI TIẾT TRẬN ĐUA</Text>
+            </View>
+          </View>
+          <View style={s.headerLeft}>
+            <TouchableOpacity style={s.backIconButton} onPress={() => setSelectedRace(null)} activeOpacity={0.7}>
+              <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
+            </TouchableOpacity>
+          </View>
+          <View style={s.headerRight} />
+        </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.detailContent}>
           {/* Race Header Info */}
@@ -411,7 +437,7 @@ export default function SpectatorTournaments() {
             </View>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     );
   };
 
@@ -419,15 +445,25 @@ export default function SpectatorTournaments() {
   const renderTournamentDetail = () => {
     if (!selectedTour) return null;
     return (
-      <SafeAreaView style={s.safeArea} edges={['top', 'left', 'right']}>
-        <TouchableOpacity
-          style={s.backButton}
-          onPress={() => setSelectedTour(null)}
-          activeOpacity={0.7}
-        >
-          <MaterialIcons name="arrow-back" size={20} color="#AEB6C2" />
-          <Text style={s.backButtonText}>Quay lại giải đấu</Text>
-        </TouchableOpacity>
+      <View style={s.safeArea}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <Tabs.Screen options={{ headerShown: false }} />
+        <GridBackground isDark={isDark} />
+
+        {/* Custom Sleek Header */}
+        <View style={s.customHeader}>
+          <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={s.headerTitleText}>CHI TIẾT GIẢI ĐẤU</Text>
+            </View>
+          </View>
+          <View style={s.headerLeft}>
+            <TouchableOpacity style={s.backIconButton} onPress={() => setSelectedTour(null)} activeOpacity={0.7}>
+              <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
+            </TouchableOpacity>
+          </View>
+          <View style={s.headerRight} />
+        </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.detailContent}>
           {/* Tournament Poster Card */}
@@ -518,7 +554,7 @@ export default function SpectatorTournaments() {
             })
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     );
   };
 
@@ -528,16 +564,25 @@ export default function SpectatorTournaments() {
 
   // Render Level 1: Tournaments List
   return (
-    <SafeAreaView style={s.safeArea} edges={['top', 'left', 'right']}>
-      {/* ── Header Row ── */}
-      <View style={s.headerRow}>
-        <Text style={s.headerTitle}>Giải đấu</Text>
-        <View style={s.headerActions}>
+    <View style={s.safeArea}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <Tabs.Screen options={{ headerShown: false }} />
+      <GridBackground isDark={isDark} />
+
+      {/* Custom Sleek Header */}
+      <View style={s.customHeader}>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={s.headerTitleText}>GIẢI ĐẤU</Text>
+          </View>
+        </View>
+        <View style={s.headerLeft} />
+        <View style={s.headerRight}>
           <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
-            <MaterialIcons name="search" size={24} color="#FFFFFF" />
+            <MaterialIcons name="search" size={22} color={theme.textPrimary} />
           </TouchableOpacity>
           <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
-            <MaterialIcons name="filter-list" size={24} color="#FFFFFF" />
+            <MaterialIcons name="filter-list" size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -667,34 +712,61 @@ export default function SpectatorTournaments() {
         raceId={resultsRaceId}
         raceName={resultsRaceName}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: premiumColors.bg,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
-  headerRow: {
+  customHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingTop: Math.max(insets.top, 16),
+    paddingBottom: 12,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    minHeight: Math.max(insets.top, 16) + 48,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    zIndex: 10,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: premiumColors.text,
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
   },
-  headerActions: {
+  headerRight: {
+    flex: 1,
     flexDirection: 'row',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+  },
+  headerTitleText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  backIconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconButton: {
-    padding: 4,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   filtersContainer: {
     flexDirection: 'row',
@@ -707,21 +779,21 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   chipSelected: {
-    borderColor: premiumColors.brand,
-    backgroundColor: (premiumColors.brand + '20'),
+    borderColor: pc.brand,
+    backgroundColor: (pc.brand + '20'),
   },
   chipText: {
     fontSize: 12,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     fontWeight: '500',
   },
   chipTextSelected: {
-    color: premiumColors.text,
+    color: pc.text,
     fontWeight: '700',
   },
   scrollView: {
@@ -741,11 +813,11 @@ const s = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: premiumColors.brand,
+    backgroundColor: pc.brand,
   },
   countText: {
     fontSize: 12,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
   },
   featuredCard: {
     height: 160,
@@ -782,19 +854,19 @@ const s = StyleSheet.create({
   featuredBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: premiumColors.brand,
+    color: pc.brand,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   featuredTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
     marginBottom: 6,
   },
   featuredSubtitle: {
     fontSize: 12,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     lineHeight: 16,
   },
   featuredChevronContainer: {
@@ -804,7 +876,7 @@ const s = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: premiumColors.border,
+    backgroundColor: pc.border,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
@@ -812,9 +884,9 @@ const s = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
@@ -823,7 +895,7 @@ const s = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 10,
-    backgroundColor: (premiumColors.brand + '15'),
+    backgroundColor: (pc.brand + '15'),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -835,12 +907,12 @@ const s = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
     marginBottom: 4,
   },
   cardSubtitle: {
     fontSize: 12,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
   },
   badge: {
     borderWidth: 1,
@@ -864,7 +936,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -875,7 +947,7 @@ const s = StyleSheet.create({
   // Level 2 & 3 Detail Styles
   detailContainer: {
     flex: 1,
-    backgroundColor: premiumColors.bg,
+    backgroundColor: pc.bg,
   },
   backButton: {
     flexDirection: 'row',
@@ -886,7 +958,7 @@ const s = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     fontWeight: '500',
   },
   detailContent: {
@@ -909,7 +981,7 @@ const s = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -925,20 +997,20 @@ const s = StyleSheet.create({
   tourDetailName: {
     fontSize: 22,
     fontWeight: '800',
-    color: premiumColors.text,
+    color: pc.text,
     marginTop: 8,
     marginBottom: 4,
   },
   tourDetailDesc: {
     fontSize: 12,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     lineHeight: 16,
   },
   infoSection: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     padding: 16,
     marginBottom: 20,
     gap: 12,
@@ -950,12 +1022,12 @@ const s = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 13,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     width: 110,
   },
   infoValue: {
     fontSize: 13,
-    color: premiumColors.text,
+    color: pc.text,
     fontWeight: '600',
     flex: 1,
   },
@@ -969,14 +1041,14 @@ const s = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
   },
   raceListItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     borderRadius: 12,
     padding: 14,
     marginBottom: 10,
@@ -987,27 +1059,27 @@ const s = StyleSheet.create({
   raceListName: {
     fontSize: 15,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
     marginBottom: 4,
   },
   raceListDetails: {
     fontSize: 11,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
   },
 
   // Race Details & Predictions
   raceDetailHeader: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     padding: 16,
     marginBottom: 20,
   },
   raceDetailLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: premiumColors.brand,
+    color: pc.brand,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -1015,7 +1087,7 @@ const s = StyleSheet.create({
   raceDetailName: {
     fontSize: 20,
     fontWeight: '800',
-    color: premiumColors.text,
+    color: pc.text,
     marginBottom: 8,
   },
   raceDetailMeta: {
@@ -1025,27 +1097,27 @@ const s = StyleSheet.create({
   },
   raceDetailMetaText: {
     fontSize: 12,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
   },
   predictionBox: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     padding: 16,
     marginBottom: 20,
   },
   predictionBoxTitle: {
     fontSize: 13,
     fontWeight: '900',
-    color: premiumColors.brand,
+    color: pc.brand,
     letterSpacing: 1,
     marginBottom: 14,
   },
   predictedContainer: {
-    backgroundColor: (premiumColors.success + '10'),
+    backgroundColor: (pc.success + '10'),
     borderWidth: 1,
-    borderColor: (premiumColors.success + '20'),
+    borderColor: (pc.success + '20'),
     borderRadius: 8,
     padding: 12,
   },
@@ -1058,7 +1130,7 @@ const s = StyleSheet.create({
   predictedTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: premiumColors.success,
+    color: pc.success,
   },
   predictedDetail: {
     flexDirection: 'row',
@@ -1068,11 +1140,11 @@ const s = StyleSheet.create({
   predictedHorseName: {
     fontSize: 15,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
   },
   predictedStatus: {
     fontSize: 11,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     marginTop: 2,
   },
   predictedReward: {
@@ -1084,7 +1156,7 @@ const s = StyleSheet.create({
   },
   predictedBetText: {
     fontSize: 10,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     marginTop: 2,
   },
   predictionForm: {
@@ -1092,11 +1164,11 @@ const s = StyleSheet.create({
   },
   formLabel: {
     fontSize: 12,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
   },
   emptyFormText: {
     fontSize: 12,
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
     fontStyle: 'italic',
     textAlign: 'center',
     paddingVertical: 12,
@@ -1107,34 +1179,34 @@ const s = StyleSheet.create({
   horseSelectCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     borderRadius: 8,
     padding: 12,
     gap: 10,
   },
   horseSelectCardActive: {
-    borderColor: premiumColors.brand,
-    backgroundColor: (premiumColors.brand + '10'),
+    borderColor: pc.brand,
+    backgroundColor: (pc.brand + '10'),
   },
   radioCircle: {
     width: 18,
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: premiumColors.textMuted,
+    borderColor: pc.textMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   radioCircleActive: {
-    borderColor: premiumColors.brand,
+    borderColor: pc.brand,
   },
   radioCircleInner: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: premiumColors.brand,
+    backgroundColor: pc.brand,
   },
   horseSelectInfo: {
     flex: 1,
@@ -1142,14 +1214,14 @@ const s = StyleSheet.create({
   horseSelectName: {
     fontSize: 14,
     fontWeight: '700',
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
   },
   horseSelectNameActive: {
-    color: premiumColors.text,
+    color: pc.text,
   },
   horseSelectJockey: {
     fontSize: 11,
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
     marginTop: 2,
   },
   betPointsSection: {
@@ -1163,11 +1235,11 @@ const s = StyleSheet.create({
   },
   betPointsLabel: {
     fontSize: 12,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
   },
   betPointsBalance: {
     fontSize: 12,
-    color: premiumColors.success,
+    color: pc.success,
     fontWeight: '600',
   },
   betInputWrapper: {
@@ -1178,13 +1250,13 @@ const s = StyleSheet.create({
   textInput: {
     flex: 1,
     height: 40,
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingRight: 40,
-    color: premiumColors.text,
+    color: pc.text,
     fontSize: 13,
     fontWeight: 'bold',
   },
@@ -1192,7 +1264,7 @@ const s = StyleSheet.create({
     position: 'absolute',
     right: 12,
     fontSize: 12,
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
     fontWeight: 'bold',
   },
   quickBetRow: {
@@ -1204,18 +1276,18 @@ const s = StyleSheet.create({
     height: 30,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    backgroundColor: premiumColors.surface,
+    borderColor: pc.border,
+    backgroundColor: pc.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   quickBetAllIn: {
-    borderColor: premiumColors.brand,
-    backgroundColor: (premiumColors.brand + '20'),
+    borderColor: pc.brand,
+    backgroundColor: (pc.brand + '20'),
   },
   quickBetBtnText: {
     fontSize: 10,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     fontWeight: 'bold',
   },
   warningBox: {
@@ -1233,17 +1305,17 @@ const s = StyleSheet.create({
   },
   warningText: {
     fontSize: 11,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     marginTop: 2,
   },
   submitBtn: {
     height: 44,
     borderRadius: 22,
-    backgroundColor: premiumColors.brand,
+    backgroundColor: pc.brand,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    shadowColor: premiumColors.brand,
+    shadowColor: pc.brand,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -1253,40 +1325,40 @@ const s = StyleSheet.create({
     opacity: 0.5,
   },
   submitBtnText: {
-    color: premiumColors.text,
+    color: pc.text,
     fontSize: 13,
     fontWeight: '800',
   },
   closedPredictionBox: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
   },
   closedPredictionText: {
     fontSize: 12,
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
     fontStyle: 'italic',
   },
   tableCard: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     overflow: 'hidden',
   },
   tableHeaderRow: {
     flexDirection: 'row',
-    backgroundColor: premiumColors.border,
+    backgroundColor: pc.border,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
   },
   tableHeaderCell: {
     fontSize: 10,
     fontWeight: '700',
-    color: premiumColors.textMuted,
+    color: pc.textMuted,
     textTransform: 'uppercase',
   },
   tableRow: {
@@ -1295,25 +1367,25 @@ const s = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
   },
   laneText: {
     fontSize: 14,
     fontWeight: '900',
-    color: premiumColors.brand,
+    color: pc.brand,
   },
   horseNameText: {
     fontSize: 13,
     fontWeight: '700',
-    color: premiumColors.text,
+    color: pc.text,
   },
   jockeyNameText: {
     fontSize: 10,
-    color: premiumColors.textSecondary,
+    color: pc.textSecondary,
     marginTop: 2,
   },
   approvedBadge: {
-    backgroundColor: (premiumColors.success + '15'),
+    backgroundColor: (pc.success + '15'),
     borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -1321,14 +1393,14 @@ const s = StyleSheet.create({
   approvedBadgeText: {
     fontSize: 9,
     fontWeight: 'bold',
-    color: premiumColors.success,
+    color: pc.success,
     textTransform: 'uppercase',
   },
   raceListItemContainer: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: pc.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: pc.border,
     marginBottom: 8,
     overflow: 'hidden',
   },
@@ -1338,12 +1410,12 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 10,
-    backgroundColor: (premiumColors.success + '10'),
+    backgroundColor: (pc.success + '10'),
     borderTopWidth: 1,
-    borderTopColor: (premiumColors.success + '20'),
+    borderTopColor: (pc.success + '20'),
   },
   resultBtnInlineText: {
-    color: premiumColors.success,
+    color: pc.success,
     fontSize: 12,
     fontWeight: '800',
   },
@@ -1352,14 +1424,14 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: premiumColors.success,
+    backgroundColor: pc.success,
     borderRadius: 8,
     paddingVertical: 10,
     marginTop: 12,
     width: '100%',
   },
   resultBtnBlockText: {
-    color: premiumColors.bg,
+    color: pc.bg,
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',

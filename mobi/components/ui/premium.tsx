@@ -13,9 +13,10 @@ interface AppScreenProps {
   onRefresh?: () => void;
   style?: ViewStyle;
   contentStyle?: ViewStyle;
+  safeArea?: boolean;
 }
 
-export function AppScreen({ children, scroll, padded, refreshing, onRefresh, style, contentStyle }: AppScreenProps) {
+export function AppScreen({ children, scroll, padded, refreshing, onRefresh, style, contentStyle, safeArea = true }: AppScreenProps) {
   const premiumColors = usePremiumColors();
   const styles = React.useMemo(() => getStyles(premiumColors), [premiumColors]);
 
@@ -25,8 +26,11 @@ export function AppScreen({ children, scroll, padded, refreshing, onRefresh, sty
     </View>
   );
 
+  const Container = safeArea ? SafeAreaView : View;
+  const edges = safeArea ? ['top', 'left', 'right'] : undefined;
+
   return (
-    <SafeAreaView style={[styles.screen, style]} edges={['top', 'left', 'right']}>
+    <Container style={[styles.screen, style]} edges={edges as any}>
       {scroll ? (
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -46,7 +50,7 @@ export function AppScreen({ children, scroll, padded, refreshing, onRefresh, sty
       ) : (
         <View style={styles.flex1}>{innerContent}</View>
       )}
-    </SafeAreaView>
+    </Container>
   );
 }
 

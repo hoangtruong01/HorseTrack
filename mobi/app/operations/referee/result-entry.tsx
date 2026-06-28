@@ -1,10 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Platform } from 'react-native';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { raceChecksApi, raceResultsApi, racesApi, type RaceItem } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { ErrorState } from '../../../components/ui/shared';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ErrorState, useThemeColors } from '../../../components/ui/shared';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { premiumColors as defaultPremiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+
+// Background Pattern
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
 
 interface EntryRow {
   raceRegistrationId: string;
@@ -20,6 +31,12 @@ interface EntryRow {
 export default function ResultEntryScreen() {
   const { raceId } = useLocalSearchParams<{ raceId: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = useThemeColors();
+  const premiumColors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, theme, insets, premiumColors), [isDark, theme, insets, premiumColors]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,7 +98,13 @@ export default function ResultEntryScreen() {
   }, [raceId]);
 
   if (!raceId) {
-    return <ErrorState message="Thiếu thông tin cuộc đua.\n\nVui lòng quay lại danh sách phân công và chọn một cuộc đua." onRetry={() => router.back()} />;
+    return (
+      <View style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <GridBackground isDark={isDark} />
+        <ErrorState message="Thiếu thông tin cuộc đua.\n\nVui lòng quay lại danh sách phân công và chọn một cuộc đua." onRetry={() => router.back()} />
+      </View>
+    );
   }
 
   const handleRowChange = (index: number, field: keyof EntryRow, value: any) => {
@@ -179,7 +202,7 @@ export default function ResultEntryScreen() {
             value={item.finishTimeSecs}
             onChangeText={(txt) => handleRowChange(index, 'finishTimeSecs', txt)}
             placeholder="Ví dụ: 72.45"
-            placeholderTextColor="#58585B"
+            placeholderTextColor={premiumColors.textMuted}
             keyboardType="numeric"
             editable={!isLocked}
           />
@@ -201,6 +224,7 @@ export default function ResultEntryScreen() {
                   ]}
                   onPress={() => !isLocked && handleRowChange(index, 'outcome', out)}
                   disabled={isLocked}
+                  activeOpacity={0.8}
                 >
                   <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{label}</Text>
                 </TouchableOpacity>
@@ -216,22 +240,13 @@ export default function ResultEntryScreen() {
             value={item.note}
             onChangeText={(txt) => handleRowChange(index, 'note', txt)}
             placeholder="Lỗi kỹ thuật, va chạm..."
-            placeholderTextColor="#58585B"
+            placeholderTextColor={premiumColors.textMuted}
             editable={!isLocked}
           />
         </View>
       </View>
     );
   };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#E10600" />
-        <Text style={styles.loadingText}>Đang tải danh sách kết quả...</Text>
-      </View>
-    );
-  }
 
   const getStatusTextBadge = () => {
     switch (resultsStatus) {
@@ -245,87 +260,152 @@ export default function ResultEntryScreen() {
     switch (resultsStatus) {
       case 'CONFIRMED':
       case 'PUBLISHED':
-        return '#067E6A';
+        return premiumColors.success;
       default:
-        return '#E1A200';
+        return premiumColors.warning;
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top Controller Bar */}
-      <View style={styles.statusCard}>
-        <View>
-          <Text style={styles.statusLabel}>TRẠNG THÁI BIÊN BẢN</Text>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColorBadge() }]}>
-            <Text style={styles.statusBadgeText}>{getStatusTextBadge()}</Text>
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <GridBackground isDark={isDark} />
+
+      {/* Custom Sleek Header */}
+      <View style={styles.customHeader}>
+        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={styles.headerTitle}>NHẬP KẾT QUẢ</Text>
           </View>
         </View>
-
-        {!isLocked && (
-          <View style={styles.topActions}>
-            <TouchableOpacity 
-              style={[styles.topActionBtn, { backgroundColor: '#E1A200' }, simulating && styles.disabledBtn]}
-              onPress={handleSimulate}
-              disabled={simulating || saving || confirming}
-            >
-              {simulating ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Text style={styles.topActionBtnText}>GIẢ LẬP</Text>}
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.topActionBtn, { backgroundColor: '#15151E', borderColor: '#303037', borderWidth: 1 }, saving && styles.disabledBtn]}
-              onPress={handleBulkSave}
-              disabled={simulating || saving || confirming}
-            >
-              {saving ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Text style={styles.topActionBtnText}>LƯU NHÁP</Text>}
-            </TouchableOpacity>
-          </View>
-        )}
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.8}>
+            <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerRight} />
       </View>
 
-      <FlatList
-        data={entryRows}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.horseId}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <MaterialIcons name="sports" size={40} color="#58585B" />
-            <Text style={styles.emptyText}>Chưa có ngựa đua được xác nhận kiểm duyệt để nhập kết quả.</Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={premiumColors.brand} />
+          <Text style={styles.loadingText}>Đang tải danh sách kết quả...</Text>
+        </View>
+      ) : (
+        <View style={{ flex: 1 }}>
+          {/* Top Controller Bar */}
+          <View style={styles.statusCard}>
+            <View>
+              <Text style={styles.statusLabel}>TRẠNG THÁI BIÊN BẢN</Text>
+              <View style={[styles.statusBadge, { backgroundColor: getStatusColorBadge() + '1A' }]}>
+                <Text style={[styles.statusBadgeText, { color: getStatusColorBadge() }]}>{getStatusTextBadge()}</Text>
+              </View>
+            </View>
 
-      {!isLocked && entryRows.length > 0 && (
-        <TouchableOpacity 
-          style={[styles.confirmButton, confirming && styles.disabledBtn]}
-          onPress={handleConfirm}
-          disabled={confirming}
-        >
-          {confirming ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={styles.confirmButtonText}>XÁC NHẬN KHÓA KẾT QUẢ</Text>
+            {!isLocked && (
+              <View style={styles.topActions}>
+                <TouchableOpacity 
+                  style={[styles.topActionBtn, { backgroundColor: 'rgba(234, 179, 8, 0.15)' }, simulating && styles.disabledBtn]}
+                  onPress={handleSimulate}
+                  disabled={simulating || saving || confirming}
+                  activeOpacity={0.8}
+                >
+                  {simulating ? <ActivityIndicator size="small" color={premiumColors.warning} /> : <Text style={[styles.topActionBtnText, { color: premiumColors.warning }]}>GIẢ LẬP</Text>}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.topActionBtn, { backgroundColor: premiumColors.surface2, borderColor: premiumColors.border, borderWidth: 1 }, saving && styles.disabledBtn]}
+                  onPress={handleBulkSave}
+                  disabled={simulating || saving || confirming}
+                  activeOpacity={0.8}
+                >
+                  {saving ? <ActivityIndicator size="small" color={premiumColors.text} /> : <Text style={[styles.topActionBtnText, { color: premiumColors.text }]}>LƯU NHÁP</Text>}
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          <FlatList
+            data={entryRows}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.horseId}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <MaterialIcons name="sports" size={40} color={premiumColors.textMuted} />
+                <Text style={styles.emptyText}>Chưa có ngựa đua được xác nhận kiểm duyệt để nhập kết quả.</Text>
+              </View>
+            }
+          />
+
+          {!isLocked && entryRows.length > 0 && (
+            <View style={styles.footerWrap}>
+              <TouchableOpacity 
+                style={[styles.confirmButton, confirming && styles.disabledBtn]}
+                onPress={handleConfirm}
+                disabled={confirming}
+                activeOpacity={0.9}
+              >
+                {confirming ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text style={styles.confirmButtonText}>XÁC NHẬN KHÓA KẾT QUẢ</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           )}
-        </TouchableOpacity>
+        </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1C1C25',
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
+  },
+  // Custom Header
+  customHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Math.max(insets.top, 16),
+    paddingBottom: 12,
+    zIndex: 10,
+    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
+  },
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  headerTitle: {
+    color: theme.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#1C1C25',
     alignItems: 'center',
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#AAAAAA',
+    color: premiumColors.textSecondary,
     fontSize: 14,
     marginTop: 12,
   },
@@ -333,24 +413,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#15151E',
+    backgroundColor: premiumColors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#303037',
-    padding: 16,
+    borderBottomColor: premiumColors.border,
+    padding: premiumSpacing[16],
   },
   statusLabel: {
-    color: '#58585B',
+    color: premiumColors.textSecondary,
     fontSize: 9,
     fontWeight: '800',
     marginBottom: 4,
   },
   statusBadge: {
-    borderRadius: 4,
+    borderRadius: premiumRadius[4],
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
   statusBadgeText: {
-    color: '#FFFFFF',
     fontSize: 9,
     fontWeight: '900',
   },
@@ -359,56 +438,60 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   topActionBtn: {
-    borderRadius: 16,
+    borderRadius: premiumRadius[16],
     height: 32,
     paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   disabledBtn: {
-    backgroundColor: '#58585B',
-    borderColor: '#58585B',
+    opacity: 0.6,
   },
   topActionBtnText: {
-    color: '#FFFFFF',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 0.5,
   },
   listContent: {
-    padding: 16,
+    padding: premiumSpacing[16],
+    paddingBottom: 120,
   },
   card: {
-    backgroundColor: '#15151E',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#303037',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: premiumRadius[16],
+    padding: premiumSpacing[16],
+    marginBottom: premiumSpacing[16],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0.2 : 0.05,
+    shadowRadius: 12,
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#1C1C25',
+    borderBottomColor: premiumColors.border,
     paddingBottom: 10,
     marginBottom: 12,
   },
   horseName: {
-    color: '#FFFFFF',
-    fontSize: 14,
+    color: premiumColors.text,
+    fontSize: 16,
     fontWeight: '900',
   },
   rankBadge: {
-    backgroundColor: '#E10600',
-    borderRadius: 4,
+    backgroundColor: premiumColors.danger,
+    borderRadius: premiumRadius[4],
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
   rankText: {
     color: '#FFFFFF',
-    fontSize: 8,
+    fontSize: 10,
     fontWeight: '900',
   },
   formRow: {
@@ -418,69 +501,82 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   label: {
-    color: '#AAAAAA',
-    fontSize: 10,
+    color: premiumColors.textSecondary,
+    fontSize: 11,
     fontWeight: '800',
     width: 110,
   },
   timeInput: {
     flex: 1,
-    backgroundColor: '#1C1C25',
+    backgroundColor: premiumColors.surface2,
     borderWidth: 1,
-    borderColor: '#303037',
-    borderRadius: 6,
-    height: 34,
-    color: '#FFFFFF',
-    paddingHorizontal: 10,
-    fontSize: 13,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    height: 40,
+    color: premiumColors.text,
+    paddingHorizontal: 12,
+    fontSize: 14,
     fontWeight: '700',
     textAlign: 'right',
   },
   disabledInput: {
-    backgroundColor: '#15151E',
-    color: '#58585B',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+    color: premiumColors.textMuted,
   },
   statusChips: {
     flexDirection: 'row',
     gap: 6,
   },
   chip: {
-    backgroundColor: '#1C1C25',
+    backgroundColor: premiumColors.surface2,
     borderWidth: 1,
-    borderColor: '#303037',
-    borderRadius: 14,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[16],
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
   },
   chipActive: {
-    backgroundColor: '#067E6A',
-    borderColor: '#067E6A',
+    backgroundColor: isDark ? 'rgba(52, 211, 153, 0.15)' : 'rgba(52, 211, 153, 0.1)',
+    borderColor: premiumColors.success,
   },
   chipLocked: {
     opacity: 0.7,
   },
   chipText: {
-    color: '#AAAAAA',
-    fontSize: 9,
+    color: premiumColors.textSecondary,
+    fontSize: 10,
     fontWeight: '800',
   },
   chipTextActive: {
-    color: '#FFFFFF',
+    color: premiumColors.success,
   },
   noteInput: {
     flex: 1,
-    backgroundColor: '#1C1C25',
+    backgroundColor: premiumColors.surface2,
     borderWidth: 1,
-    borderColor: '#303037',
-    borderRadius: 6,
-    height: 34,
-    color: '#FFFFFF',
-    paddingHorizontal: 10,
-    fontSize: 12,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    height: 40,
+    color: premiumColors.text,
+    paddingHorizontal: 12,
+    fontSize: 13,
+  },
+  footerWrap: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: premiumColors.surface,
+    borderTopWidth: 1,
+    borderTopColor: premiumColors.border,
+    paddingHorizontal: premiumSpacing[16],
+    paddingTop: premiumSpacing[16],
+    paddingBottom: Platform.OS === 'ios' ? 32 : 16,
   },
   confirmButton: {
-    backgroundColor: '#E10600',
+    backgroundColor: premiumColors.danger,
     height: 48,
+    borderRadius: premiumRadius[12],
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -496,7 +592,7 @@ const styles = StyleSheet.create({
     paddingVertical: 80,
   },
   emptyText: {
-    color: '#AAAAAA',
+    color: premiumColors.textMuted,
     fontSize: 13,
     marginTop: 12,
     textAlign: 'center',

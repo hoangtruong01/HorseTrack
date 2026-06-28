@@ -2,12 +2,17 @@
  * Shared Floating Dock Tab Bar - Dark Facebook-style
  * Dùng chung cho tất cả phân hệ: admin, jockey, owner, referee, counter, spectator, tabs
  */
+/**
+ * Shared Floating Dock Tab Bar - Dark Facebook-style
+ * Dùng chung cho tất cả phân hệ: admin, jockey, owner, referee, counter, spectator, tabs
+ */
 import React from 'react';
-import { View, Text, Image, StyleSheet, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, Platform, TouchableOpacity, Animated } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 // Component icon bọc hiệu ứng Squircle khi active
 export function DockTabIcon({
@@ -41,10 +46,10 @@ export function DockAvatarIcon({
       {avatarUri ? (
         <Image
           source={{ uri: avatarUri }}
-          style={[dockStyles.avatar, { borderColor: focused ? '#2e89ff' : '#ffffff' }]}
+          style={[dockStyles.avatar, { borderColor: focused ? '#E10600' : '#ffffff' }]}
         />
       ) : (
-        <View style={[dockStyles.avatarPlaceholder, { borderColor: focused ? '#2e89ff' : '#ffffff' }]}>
+        <View style={[dockStyles.avatarPlaceholder, { borderColor: focused ? '#E10600' : '#ffffff' }]}>
           <MaterialIcons size={20} name="person" color="#555" />
         </View>
       )}
@@ -87,6 +92,7 @@ export function useDockScreenOptions() {
   const dockBottom = Platform.OS === 'ios' ? Math.max(insets.bottom, 16) : 16;
 
   return {
+    animation: 'shift' as const, // Added slide/shift animation for tab screens
     tabBarShowLabel: false,
     tabBarActiveTintColor: isDark ? '#ffffff' : '#E10600',
     tabBarInactiveTintColor: isDark ? '#b0b3b8' : '#65676B',
@@ -221,10 +227,6 @@ export const getDockStyles = (isDark: boolean) => StyleSheet.create({
   },
 });
 
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { TouchableOpacity, Animated } from 'react-native';
-import { useRef, useEffect } from 'react';
-
 // Shared Custom Animated Bottom Tab Bar
 export function DockTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
@@ -242,10 +244,10 @@ export function DockTabBar({ state, descriptors, navigation }: BottomTabBarProps
     return true;
   });
 
-  const slideAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(0)).current;
   const currentVisibleIndex = visibleRoutes.findIndex(r => r.key === state.routes[state.index].key);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (currentVisibleIndex >= 0) {
       Animated.spring(slideAnim, {
         toValue: currentVisibleIndex * TAB_WIDTH,

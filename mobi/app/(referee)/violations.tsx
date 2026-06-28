@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutRight } from 'react-native-reanimated';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator, ViewStyle, TextStyle, Image } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius , usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState } from '@/components/ui/shared';
 import { refereeAssignmentsApi, raceChecksApi, raceViolationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-export default function RefereeViolations() {
+export default function RefereeViolations({ nested }: { nested?: boolean }) {
   const premiumColors = usePremiumColors();
   const s = getStyles(premiumColors);
 
@@ -124,11 +125,13 @@ export default function RefereeViolations() {
 
   if (loading && !refreshing) return <LoadingState />;
 
-  if (!selectedRaceId) {
-    return (
-      <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={s.content}>
-          <Section title="Chọn trận đua cần lập biên bản vi phạm">
+  return (
+    <View style={{ flex: 1 }}>
+      {!selectedRaceId ? (
+        <Animated.View style={{ flex: 1 }} entering={FadeIn} exiting={FadeOut}>
+          <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
+            <View style={s.content}>
+              <Section title="Chọn trận đua cần lập biên bản vi phạm">
             {assignments.length === 0 ? (
               <EmptyState icon="gavel" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
             ) : (
@@ -154,18 +157,17 @@ export default function RefereeViolations() {
                 );
               })
             )}
-          </Section>
-        </View>
-      </AppScreen>
-    );
-  }
-
-  return (
-    <AppScreen refreshing={refreshing} onRefresh={onRefresh}>
-      <View style={s.header}>
+              </Section>
+            </View>
+          </AppScreen>
+        </Animated.View>
+      ) : (
+        <Animated.View style={{ flex: 1 }} entering={SlideInRight} exiting={SlideOutRight}>
+          <AppScreen refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
+            <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
           <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
-          <Text style={s.backTxt}>Quay lại</Text>
+          <Text style={s.backTxt}>QUAY LẠI</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
       </View>
@@ -181,14 +183,14 @@ export default function RefereeViolations() {
               <Text style={s.formTitle}>LẬP BIÊN BẢN VI PHẠM</Text>
               {selectedRaceStatus !== 'ONGOING' && (
                 <View style={s.statusWarning}>
-                  <MaterialIcons name="warning" size={16} color={premiumColors.warning} />
+                  <MaterialIcons name="info-outline" size={20} color={premiumColors.warning} style={{ marginTop: 2 }} />
                   <Text style={s.statusWarningText}>
                     {`Trận đua đang ở trạng thái "${selectedRaceStatus || 'Chưa xác định'}". Chỉ có thể ghi vi phạm khi race đang diễn ra (ONGOING).`}
                   </Text>
                 </View>
               )}
               
-              <Text style={s.label}>CHIẾN MÁ VI PHẠM:</Text>
+              <Text style={s.label}>1. CHIẾN MÃ VI PHẠM</Text>
               <View style={s.selectorRow}>
                 {horses.map(h => {
                   const horse = h.horseId;
@@ -197,50 +199,60 @@ export default function RefereeViolations() {
                   return (
                     <TouchableOpacity
                       key={horse._id}
-                      style={[s.chip, isSelected && s.chipActive]}
+                      style={[s.horseChip, isSelected && s.horseChipActive]}
                       onPress={() => setSelectedHorseId(horse._id)}
                       activeOpacity={0.8}
                     >
-                      <Text style={[s.chipText, isSelected && s.chipTextActive]}>{horse.name.toUpperCase()}</Text>
+                      {horse.image || horse.avatar ? (
+                        <Image source={{ uri: horse.image || horse.avatar }} style={s.horseChipAvatar} resizeMode="cover" />
+                      ) : (
+                        <View style={s.horseChipAvatarPlaceholder}>
+                          <MaterialIcons name="pets" size={14} color={isSelected ? premiumColors.brand : premiumColors.textMuted} />
+                        </View>
+                      )}
+                      <Text style={[s.horseChipText, isSelected && s.horseChipTextActive]}>{horse.name.toUpperCase()}</Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
 
-              <Text style={s.label}>LOẠI LỖI VI PHẠM:</Text>
-              <View style={s.selectorRow}>
-                {[['track_violation', 'Đường đua'], ['false_start', 'Xuất phát sai'], ['dangerous_riding', 'Ép làn']].map(([k, l]) => (
+              <Text style={s.label}>2. LỖI VI PHẠM</Text>
+              <View style={s.selectorGrid}>
+                {[['track_violation', 'Đường đua', 'add-road'], ['false_start', 'Xuất phát sai', 'timer-off'], ['dangerous_riding', 'Ép làn', 'warning']].map(([k, l, icon]) => (
                   <TouchableOpacity
                     key={k}
-                    style={[s.chip, type === k && s.chipActive]}
+                    style={[s.typeChip, type === k && s.typeChipActive]}
                     onPress={() => setType(k)}
                     activeOpacity={0.8}
                   >
-                    <Text style={[s.chipText, type === k && s.chipTextActive]}>{l}</Text>
+                    <MaterialIcons name={icon as any} size={20} color={type === k ? premiumColors.brand : premiumColors.textMuted} />
+                    <Text style={[s.typeChipText, type === k && s.typeChipTextActive]}>{l}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
-              <Text style={s.label}>MỨC ĐỘ & CỘNG GIÂY PHẠT:</Text>
-              <View style={s.selectorRow}>
-                {[['minor', 'Nhẹ (+3s)'], ['major', 'Vừa (+6s)'], ['critical', 'Nặng (+12s)']].map(([k, l]) => (
+              <Text style={s.label}>3. MỨC ĐỘ & HÌNH PHẠT</Text>
+              <View style={s.selectorGrid}>
+                {[['minor', 'Nhẹ', '+3s'], ['major', 'Vừa', '+6s'], ['critical', 'Nặng', '+12s']].map(([k, label, penaltyText]) => (
                   <TouchableOpacity
                     key={k}
-                    style={[s.chip, severity === k && s.chipActive]}
+                    style={[s.severityChip, severity === k && s.severityChipActive]}
                     onPress={() => setSeverity(k)}
                     activeOpacity={0.8}
                   >
-                    <Text style={[s.chipText, severity === k && s.chipTextActive]}>{l}</Text>
+                    <Text style={[s.severityChipText, severity === k && s.severityChipTextActive]}>{label}</Text>
+                    <Text style={[s.severityChipPenalty, severity === k && s.severityChipPenaltyActive]}>{penaltyText}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
+              <Text style={s.label}>4. MÔ TẢ CHI TIẾT</Text>
               <TextInput
                 style={s.inputMultiline}
-                placeholder="Mô tả chi tiết vi phạm..."
+                placeholder="Nhập mô tả tình huống vi phạm (Bắt buộc)..."
                 placeholderTextColor={premiumColors.textMuted}
                 multiline
-                numberOfLines={3}
+                numberOfLines={4}
                 value={description}
                 onChangeText={setDescription}
               />
@@ -251,17 +263,31 @@ export default function RefereeViolations() {
                 disabled={submitting}
                 activeOpacity={0.9}
               >
-                <Text style={s.submitBtnText}>{submitting ? 'ĐANG GỬI...' : 'LẬP BIÊN BẢN VI PHẠM'}</Text>
+                <Text style={s.submitBtnText}>{submitting ? 'ĐANG GỬI...' : 'XÁC NHẬN LẬP BIÊN BẢN'}</Text>
               </TouchableOpacity>
             </View>
           }
           renderItem={({ item }) => {
             const horseName = item.horseId?.name || 'Chiến mã';
+            const horseAvatar = item.horseId?.image || item.horseId?.avatar;
             const isCritical = item.severity === 'critical';
             return (
               <View style={s.violationCard}>
                 <View style={s.cardHeader}>
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', flex: 1 }}>
+                    {horseAvatar ? (
+                       <Image source={{ uri: horseAvatar }} style={s.violationAvatar} resizeMode="cover" />
+                    ) : (
+                       <View style={s.violationAvatarPlaceholder}>
+                         <MaterialIcons name="pets" size={18} color={premiumColors.textMuted} />
+                       </View>
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.horseNameList} numberOfLines={1}>{horseName.toUpperCase()}</Text>
+                      <Text style={s.violationTypeTxt}>{item.type === 'track_violation' ? 'Đường đua' : item.type === 'false_start' ? 'Xuất phát sai' : item.type === 'dangerous_riding' ? 'Ép làn' : item.type}</Text>
+                    </View>
+                  </View>
+                  <View style={{ alignItems: 'flex-end', marginLeft: 8 }}>
                     <View style={[
                       s.badge, 
                       isCritical ? s.badgeCritical : s.badgeWarning
@@ -273,91 +299,54 @@ export default function RefereeViolations() {
                         {item.severity.toUpperCase()}
                       </Text>
                     </View>
-                    <Text style={s.horseNameList}>{horseName.toUpperCase()}</Text>
+                    <Text style={s.penaltyTxt}>{item.penalty === 'time_penalty' ? '+ Giây' : 'Khác'}</Text>
                   </View>
-                  <Text style={s.penaltyTxt}>{item.penalty === 'time_penalty' ? 'Cộng giây' : 'Khác'}</Text>
                 </View>
                 <Text style={s.descText}>{item.description}</Text>
               </View>
             );
           }}
         />
+            )}
+          </AppScreen>
+        </Animated.View>
       )}
-    </AppScreen>
+    </View>
   );
 }
 
-interface Styles {
-  content: ViewStyle;
-  listContent: ViewStyle;
-  header: ViewStyle;
-  backBtn: ViewStyle;
-  backTxt: TextStyle;
-  headerTitle: TextStyle;
-  assignmentCard: ViewStyle;
-  cardIconWrap: ViewStyle;
-  assignmentTitle: TextStyle;
-  assignmentSubtitle: TextStyle;
-  formCard: ViewStyle;
-  formTitle: TextStyle;
-  label: TextStyle;
-  selectorRow: ViewStyle;
-  chip: ViewStyle;
-  chipActive: ViewStyle;
-  chipText: TextStyle;
-  chipTextActive: TextStyle;
-  inputMultiline: TextStyle;
-  submitBtn: ViewStyle;
-  submitBtnText: TextStyle;
-  violationCard: ViewStyle;
-  cardHeader: ViewStyle;
-  horseNameList: TextStyle;
-  badge: ViewStyle;
-  badgeCritical: ViewStyle;
-  badgeWarning: ViewStyle;
-  badgeText: TextStyle;
-  badgeTextCritical: TextStyle;
-  badgeTextWarning: TextStyle;
-  penaltyTxt: TextStyle;
-  descText: TextStyle;
-  statusWarning: ViewStyle;
-  statusWarningText: TextStyle;
-}
-
-const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
+const getStyles = (premiumColors: any) => StyleSheet.create({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   listContent: {
     padding: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    padding: 16,
-    backgroundColor: premiumColors.headerBg,
-    borderBottomWidth: 1,
-    borderBottomColor: premiumColors.headerBorder,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    backgroundColor: 'transparent',
   },
   backBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: premiumColors.surface2,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: premiumRadius[8],
-    borderWidth: 1,
-    borderColor: premiumColors.borderSoft,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: premiumRadius[24],
   },
   backTxt: {
     color: premiumColors.textSecondary,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   headerTitle: {
     color: premiumColors.text,
@@ -396,101 +385,195 @@ const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
   },
   formCard: {
     backgroundColor: premiumColors.surface,
-    borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
+    borderRadius: premiumRadius[16],
     padding: 20,
     marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
   },
   statusWarning: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
-    backgroundColor: premiumColors.warning + '18',
+    gap: 12,
+    backgroundColor: 'rgba(234, 179, 8, 0.08)',
     borderWidth: 1,
-    borderColor: premiumColors.warning + '40',
-    borderRadius: premiumRadius[8],
-    padding: 12,
-    marginBottom: 16,
+    borderColor: 'rgba(234, 179, 8, 0.2)',
+    borderRadius: premiumRadius[12],
+    padding: 16,
+    marginBottom: 20,
   },
   statusWarningText: {
     flex: 1,
     color: premiumColors.warning,
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: '500',
   },
   formTitle: {
     color: premiumColors.text,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '900',
     letterSpacing: 0.5,
     marginBottom: 16,
+    textAlign: 'center',
   },
   label: {
-    color: premiumColors.textSecondary,
-    fontSize: 10,
-    fontWeight: '800',
-    marginTop: 16,
-    marginBottom: 8,
+    color: premiumColors.text,
+    fontSize: 11,
+    fontWeight: '900',
+    marginTop: 20,
+    marginBottom: 12,
+    letterSpacing: 0.5,
   },
   selectorRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: 10,
+  },
+  selectorGrid: {
+    flexDirection: 'row',
     gap: 8,
   },
-  chip: {
+  horseChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: premiumColors.surface2,
     borderWidth: 1,
     borderColor: premiumColors.border,
-    borderRadius: premiumRadius[16],
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: premiumRadius[24],
+    paddingRight: 16,
+    paddingLeft: 6,
+    paddingVertical: 6,
+    gap: 8,
   },
-  chipActive: {
-    backgroundColor: 'rgba(225, 6, 0, 0.15)',
+  horseChipActive: {
+    backgroundColor: 'rgba(225, 6, 0, 0.08)',
     borderColor: premiumColors.brand,
   },
-  chipText: {
+  horseChipAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+  },
+  horseChipAvatarPlaceholder: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: premiumColors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  horseChipText: {
     color: premiumColors.textSecondary,
-    fontSize: 11,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  horseChipTextActive: {
+    color: premiumColors.brand,
+  },
+  typeChip: {
+    flex: 1,
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  typeChipActive: {
+    backgroundColor: 'rgba(225, 6, 0, 0.08)',
+    borderColor: premiumColors.brand,
+  },
+  typeChipText: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  typeChipTextActive: {
+    color: premiumColors.brand,
+  },
+  severityChip: {
+    flex: 1,
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  severityChipActive: {
+    backgroundColor: 'rgba(225, 6, 0, 0.08)',
+    borderColor: premiumColors.brand,
+  },
+  severityChipText: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
     fontWeight: '700',
   },
-  chipTextActive: {
+  severityChipTextActive: {
     color: premiumColors.brand,
+  },
+  severityChipPenalty: {
+    color: premiumColors.textMuted,
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  severityChipPenaltyActive: {
+    color: premiumColors.warning,
   },
   inputMultiline: {
     backgroundColor: premiumColors.surface2,
     borderWidth: 1,
     borderColor: premiumColors.border,
     color: premiumColors.text,
-    borderRadius: premiumRadius[8],
+    borderRadius: premiumRadius[12],
     padding: 16,
-    fontSize: 13,
-    height: 100,
+    fontSize: 14,
+    height: 120,
     textAlignVertical: 'top',
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 4,
+    marginBottom: 24,
   },
   submitBtn: {
     backgroundColor: premiumColors.brand,
-    height: 48,
-    borderRadius: premiumRadius[8],
+    height: 52,
+    borderRadius: premiumRadius[12],
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: premiumColors.brand,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   submitBtnText: {
     color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '900',
     letterSpacing: 0.5,
   },
   violationCard: {
     backgroundColor: premiumColors.surface,
     borderWidth: 1,
     borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
+    borderRadius: premiumRadius[16],
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 1,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -498,18 +581,37 @@ const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: premiumColors.border,
-    paddingBottom: 10,
-    marginBottom: 10,
+    paddingBottom: 12,
+    marginBottom: 12,
+  },
+  violationAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  violationAvatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: premiumColors.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   horseNameList: {
     color: premiumColors.text,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
+    marginBottom: 2,
+  },
+  violationTypeTxt: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
   },
   badge: {
     borderRadius: premiumRadius[4],
-    paddingHorizontal: 6,
-    paddingVertical: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   badgeCritical: {
     backgroundColor: 'rgba(239, 68, 68, 0.15)',
@@ -518,7 +620,7 @@ const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
     backgroundColor: 'rgba(234, 179, 8, 0.15)',
   },
   badgeText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '900',
   },
   badgeTextCritical: {
@@ -529,12 +631,13 @@ const getStyles = (premiumColors: any) => StyleSheet.create<Styles>({
   },
   penaltyTxt: {
     color: premiumColors.warning,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '900',
+    marginTop: 6,
   },
   descText: {
     color: premiumColors.textSecondary,
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 20,
   },
 });

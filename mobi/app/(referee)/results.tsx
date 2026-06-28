@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutRight } from 'react-native-reanimated';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator, Image, ScrollView } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius , usePremiumColors } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState } from '@/components/ui/shared';
 import { refereeAssignmentsApi, raceChecksApi, raceResultsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -10,6 +11,7 @@ interface EntryRow {
   raceRegistrationId: string;
   horseId: string;
   horseName: string;
+  avatar: string;
   outcome: 'finished' | 'disqualified' | 'did_not_start' | 'did_not_finish';
   incident: string;
   finishTimeSecs: string;
@@ -17,7 +19,7 @@ interface EntryRow {
   note: string;
 }
 
-export default function RefereeResults() {
+export default function RefereeResults({ nested }: { nested?: boolean }) {
   const premiumColors = usePremiumColors();
   const styles = getStyles(premiumColors);
 
@@ -38,7 +40,7 @@ export default function RefereeResults() {
       const res = await refereeAssignmentsApi.myAssignments({ limit: 50 });
       const list = (res as any).data || res || [];
       setAssignments(list.filter((a: any) => a.status === 'accepted'));
-    } catch {} finally { setLoading(false); }
+    } catch { } finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
@@ -82,6 +84,7 @@ export default function RefereeResults() {
           raceRegistrationId: h.raceRegistrationId?._id || h.raceRegistrationId,
           horseId: h.horseId?._id,
           horseName: h.horseId?.name || 'Chiến mã',
+          avatar: h.horseId?.avatar || h.horseId?.image || '',
           outcome: existing?.outcome || 'finished',
           incident: existing?.incident || 'none',
           finishTimeSecs: existing?.finishTimeMs ? (existing.finishTimeMs / 1000).toString() : '',
@@ -169,10 +172,12 @@ export default function RefereeResults() {
 
   if (loading && !refreshing) return <LoadingState />;
 
-  if (!selectedRaceId) {
-    return (
-      <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={styles.content}>
+  return (
+    <View style={{ flex: 1 }}>
+      {!selectedRaceId ? (
+        <Animated.View style={{ flex: 1 }} entering={FadeIn} exiting={FadeOut}>
+          <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
+            <View style={styles.content}>
           <Section title="Chọn trận đua cần nhập kết quả">
             {assignments.length === 0 ? (
               <EmptyState icon="sports-score" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
@@ -201,13 +206,12 @@ export default function RefereeResults() {
             )}
           </Section>
         </View>
-      </AppScreen>
-    );
-  }
-
-  return (
-    <AppScreen refreshing={refreshing} onRefresh={onRefresh}>
-      <View style={styles.header}>
+          </AppScreen>
+        </Animated.View>
+      ) : (
+        <Animated.View style={{ flex: 1 }} entering={SlideInRight} exiting={SlideOutRight}>
+          <AppScreen refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
+            <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
           <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
           <Text style={styles.backTxt}>Quay lại</Text>
@@ -225,7 +229,7 @@ export default function RefereeResults() {
           </View>
         </View>
         {!isLocked && (
-          <View style={s.topActions}>
+          <View style={styles.topActions}>
             {/*
             <TouchableOpacity 
               style={[styles.topActionBtn, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: 'rgba(234, 179, 8, 0.3)' }]} 
@@ -236,9 +240,9 @@ export default function RefereeResults() {
               <Text style={[styles.topActionBtnText, { color: premiumColors.warning }]}>{simulating ? '...' : 'GIẢ LẬP'}</Text>
             </TouchableOpacity>
             */}
-            <TouchableOpacity 
-              style={styles.topActionBtnOutline} 
-              onPress={handleBulkSave} 
+            <TouchableOpacity
+              style={styles.topActionBtnOutline}
+              onPress={handleBulkSave}
               disabled={saving}
               activeOpacity={0.8}
             >
@@ -248,77 +252,179 @@ export default function RefereeResults() {
         )}
       </View>
 
-      {loadingDetails && !refreshing ? <LoadingState /> : (
-        <FlatList
-          data={entryRows}
-          keyExtractor={(item) => item.horseId}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <EmptyState icon="sports" title="Không có chiến mã" subtitle="Chưa có ngựa đua được xác nhận kiểm duyệt để nhập kết quả." />
-          }
-          renderItem={({ item, index }) => (
-            <View style={styles.resultCard}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.horseName}>{item.horseName.toUpperCase()}</Text>
-                {item.rank ? (
-                  <View style={styles.rankBadge}>
-                    <Text style={styles.rankText}>HẠNG {item.rank}</Text>
+      {loadingDetails && !refreshing ? <LoadingState /> : (() => {
+        const sortedRows = [...entryRows].sort((a, b) => {
+          const rankA = a.rank ? parseInt(a.rank, 10) : 999;
+          const rankB = b.rank ? parseInt(b.rank, 10) : 999;
+          return rankA - rankB;
+        });
+
+        if (isLocked) {
+          const top1 = sortedRows.find(r => r.rank === '1');
+          const top2 = sortedRows.find(r => r.rank === '2');
+          const top3 = sortedRows.find(r => r.rank === '3');
+          const rest = sortedRows.filter(r => {
+            const rk = parseInt(r.rank, 10);
+            return !r.rank || isNaN(rk) || rk > 3;
+          });
+
+          return (
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+              <View style={styles.podiumContainer}>
+                {top2 ? (
+                  <View style={styles.podiumCol}>
+                    <View style={styles.podiumInfo}>
+                      {top2.avatar ? <Image source={{ uri: top2.avatar }} style={[styles.podiumAvatar, { borderColor: 'rgba(225,6,0,0.7)' }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: 'rgba(225,6,0,0.7)' }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
+                      <Text style={styles.podiumName} numberOfLines={1}>{top2.horseName.toUpperCase()}</Text>
+                      <Text style={styles.podiumTime}>{top2.finishTimeSecs}s</Text>
+                    </View>
+                    <View style={[styles.podiumBlock, { height: 110, backgroundColor: 'rgba(225,6,0,0.7)' }]}>
+                      <Text style={styles.podiumRankText}>2</Text>
+                    </View>
                   </View>
-                ) : null}
+                ) : <View style={styles.podiumCol} />}
+
+                {top1 ? (
+                  <View style={styles.podiumCol}>
+                    <View style={styles.podiumInfo}>
+                      {top1.avatar ? <Image source={{ uri: top1.avatar }} style={[styles.podiumAvatar, { borderColor: premiumColors.brand }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: premiumColors.brand }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
+                      <Text style={styles.podiumName} numberOfLines={1}>{top1.horseName.toUpperCase()}</Text>
+                      <Text style={styles.podiumTime}>{top1.finishTimeSecs}s</Text>
+                    </View>
+                    <View style={[styles.podiumBlock, { height: 150, backgroundColor: premiumColors.brand, zIndex: 10, shadowColor: premiumColors.brand, shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: -2 } }]}>
+                      <Text style={styles.podiumRankText}>1</Text>
+                    </View>
+                  </View>
+                ) : <View style={styles.podiumCol} />}
+
+                {top3 ? (
+                  <View style={styles.podiumCol}>
+                    <View style={styles.podiumInfo}>
+                      {top3.avatar ? <Image source={{ uri: top3.avatar }} style={[styles.podiumAvatar, { borderColor: 'rgba(225,6,0,0.4)' }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: 'rgba(225,6,0,0.4)' }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
+                      <Text style={styles.podiumName} numberOfLines={1}>{top3.horseName.toUpperCase()}</Text>
+                      <Text style={styles.podiumTime}>{top3.finishTimeSecs}s</Text>
+                    </View>
+                    <View style={[styles.podiumBlock, { height: 80, backgroundColor: 'rgba(225,6,0,0.4)' }]}>
+                      <Text style={styles.podiumRankText}>3</Text>
+                    </View>
+                  </View>
+                ) : <View style={styles.podiumCol} />}
               </View>
 
-              <View style={styles.formRow}>
-                <Text style={styles.label}>Thời gian (giây):</Text>
-                <TextInput
-                  style={[styles.timeInput, isLocked && styles.disabledInput]}
-                  value={item.finishTimeSecs}
-                  onChangeText={txt => handleRowChange(index, 'finishTimeSecs', txt)}
-                  placeholder="Ví dụ: 72.45"
-                  placeholderTextColor={premiumColors.textMuted}
-                  keyboardType="numeric"
-                  editable={!isLocked}
-                />
+              <View style={styles.leaderboardList}>
+                {rest.map((item) => (
+                  <View key={item.horseId} style={styles.leaderboardRow}>
+                    <Text style={styles.leaderboardRank}>{item.rank || '-'}</Text>
+                    {item.avatar ? (
+                      <Image source={{ uri: item.avatar }} style={styles.leaderboardAvatar} />
+                    ) : (
+                      <View style={styles.leaderboardAvatarPlaceholder}>
+                        <MaterialIcons name="pets" size={16} color={premiumColors.textMuted} />
+                      </View>
+                    )}
+                    <View style={styles.leaderboardInfo}>
+                      <Text style={styles.leaderboardHorseName}>{item.horseName.toUpperCase()}</Text>
+                      <Text style={styles.leaderboardStatus}>{item.outcome === 'finished' ? 'Về đích' : item.outcome === 'disqualified' ? 'Bị loại' : 'DNF'}</Text>
+                    </View>
+                    <Text style={styles.leaderboardTime}>{item.finishTimeSecs}s</Text>
+                  </View>
+                ))}
               </View>
+            </ScrollView>
+          );
+        }
 
-              <View style={styles.formRow}>
-                <Text style={styles.label}>Trạng thái:</Text>
-                <View style={styles.statusChips}>
-                  {['finished', 'disqualified', 'did_not_finish'].map(out => {
-                    const isActive = item.outcome === out;
-                    const label = out === 'finished' ? 'Về đích' : out === 'disqualified' ? 'Loại' : 'DNF';
-                    return (
-                      <TouchableOpacity
-                        key={out}
-                        style={[styles.chip, isActive && styles.chipActive, isLocked && styles.chipLocked]}
-                        onPress={() => !isLocked && handleRowChange(index, 'outcome', out)}
-                        disabled={isLocked}
-                        activeOpacity={0.8}
-                      >
-                        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{label}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+        return (
+          <FlatList
+            data={sortedRows}
+            keyExtractor={(item) => item.horseId}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <EmptyState icon="sports" title="Không có chiến mã" subtitle="Chưa có ngựa đua được xác nhận kiểm duyệt để nhập kết quả." />
+            }
+            renderItem={({ item }) => {
+              const originalIndex = entryRows.findIndex(r => r.horseId === item.horseId);
+              return (
+                <View style={styles.resultCard}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.avatarContainer}>
+                      {item.avatar ? (
+                        <View style={{ width: 48, height: 48, borderRadius: 24, overflow: 'hidden', backgroundColor: premiumColors.surface2 }}>
+                          <Image source={{ uri: item.avatar }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        </View>
+                      ) : (
+                        <View style={styles.avatarPlaceholder}>
+                          <MaterialIcons name="pets" size={24} color={premiumColors.textMuted} />
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.horseInfo}>
+                      <Text style={styles.horseName}>{item.horseName.toUpperCase()}</Text>
+                      {item.rank ? (
+                        <View style={styles.rankBadge}>
+                          <Text style={styles.rankText}>HẠNG {item.rank}</Text>
+                        </View>
+                      ) : null}
+                    </View>
+                  </View>
+
+                  <View style={styles.formRow}>
+                    <Text style={styles.label}>Thời gian (giây):</Text>
+                    <TextInput
+                      style={[styles.timeInput, isLocked && styles.disabledInput]}
+                      value={item.finishTimeSecs}
+                      onChangeText={txt => handleRowChange(originalIndex, 'finishTimeSecs', txt)}
+                      placeholder="Ví dụ: 72.45"
+                      placeholderTextColor={premiumColors.textMuted}
+                      keyboardType="numeric"
+                      editable={!isLocked}
+                    />
+                  </View>
+
+                  <View style={styles.formRow}>
+                    <Text style={styles.label}>Trạng thái:</Text>
+                    <View style={styles.statusChips}>
+                      {['finished', 'disqualified', 'did_not_finish'].map(out => {
+                        const isActive = item.outcome === out;
+                        const label = out === 'finished' ? 'Về đích' : out === 'disqualified' ? 'Loại' : 'DNF';
+                        return (
+                          <TouchableOpacity
+                            key={out}
+                            style={[styles.chip, isActive && styles.chipActive, isLocked && styles.chipLocked]}
+                            onPress={() => !isLocked && handleRowChange(originalIndex, 'outcome', out)}
+                            disabled={isLocked}
+                            activeOpacity={0.8}
+                          >
+                            <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{label}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
                 </View>
-              </View>
-            </View>
-          )}
-        />
-      )}
+              );
+            }}
+          />
+        );
+      })()}
 
       {!isLocked && entryRows.length > 0 && (
         <View style={styles.footer}>
-          <TouchableOpacity 
-            style={styles.confirmButton} 
-            onPress={handleConfirm} 
+          <TouchableOpacity
+            style={styles.confirmButton}
+            onPress={handleConfirm}
             disabled={confirming}
             activeOpacity={0.9}
           >
             <Text style={styles.confirmButtonText}>{confirming ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN KHÓA KẾT QUẢ'}</Text>
           </TouchableOpacity>
         </View>
+          )}
+        </AppScreen>
+      </Animated.View>
       )}
-    </AppScreen>
+    </View>
   );
 }
 
@@ -326,11 +432,11 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
   content: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   listContent: {
     padding: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
@@ -465,6 +571,25 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     paddingBottom: 12,
     marginBottom: 12,
   },
+  avatarContainer: {
+    marginRight: 12,
+  },
+  avatarPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: premiumColors.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+  },
+  horseInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   horseName: {
     color: premiumColors.text,
     fontSize: 14,
@@ -554,5 +679,116 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     fontSize: 14,
     fontWeight: '900',
     letterSpacing: 0.5,
+  },
+  podiumContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    marginTop: 32,
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+  podiumCol: {
+    alignItems: 'center',
+    width: '30%',
+    marginHorizontal: '1.5%',
+  },
+  podiumInfo: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  podiumAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 2,
+    marginBottom: 8,
+  },
+  podiumAvatarPlaceholder: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 2,
+    marginBottom: 8,
+    backgroundColor: premiumColors.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  podiumName: {
+    color: premiumColors.text,
+    fontSize: 11,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  podiumTime: {
+    color: premiumColors.brand,
+    fontSize: 11,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  podiumBlock: {
+    width: '100%',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    alignItems: 'center',
+    paddingTop: 12,
+  },
+  podiumRankText: {
+    color: '#FFFFFF',
+    fontSize: 32,
+    fontWeight: '900',
+  },
+  leaderboardList: {
+    paddingHorizontal: 16,
+  },
+  leaderboardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: premiumColors.surface,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+  },
+  leaderboardRank: {
+    width: 30,
+    color: premiumColors.textMuted,
+    fontSize: 16,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  leaderboardAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginHorizontal: 12,
+  },
+  leaderboardAvatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginHorizontal: 12,
+    backgroundColor: premiumColors.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  leaderboardInfo: {
+    flex: 1,
+  },
+  leaderboardHorseName: {
+    color: premiumColors.text,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  leaderboardStatus: {
+    color: premiumColors.textSecondary,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  leaderboardTime: {
+    color: premiumColors.brand,
+    fontSize: 14,
+    fontWeight: '800',
   },
 });

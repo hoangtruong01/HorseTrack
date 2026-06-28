@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, RefreshControl, Modal, Alert, TextInput, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, RefreshControl, Modal, Alert, TextInput, ActivityIndicator, useColorScheme } from 'react-native';
 import { AppScreen, Section } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { SleekHeader } from '@/components/ui/sleek-header';
+import { usePremiumColors, premiumSpacing, premiumRadius, premiumTypography, premiumShadows } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { tournamentsApi, racesApi, horsesApi, registrationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -10,7 +11,20 @@ import RaceResultsModal from '@/components/ui/race-results-modal';
 type TabState = 'browse' | 'requests';
 type ViewState = 'tournaments' | 'races';
 
+const GridBackground = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{ flex: 1, backgroundColor: isDark ? '#09090B' : '#F4F4F5' }} />
+    </View>
+  );
+};
+
 export default function OwnerTournamentsAndRegistrations() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, colors), [isDark, colors]);
+
   const [activeTab, setActiveTab] = useState<TabState>('browse');
   const [viewState, setViewState] = useState<ViewState>('tournaments');
   
@@ -212,51 +226,55 @@ export default function OwnerTournamentsAndRegistrations() {
   if (loading && !refreshing) return <LoadingState />;
 
   return (
-    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
-      <View style={s.content}>
+    <AppScreen refreshing={refreshing} onRefresh={onRefresh} safeArea={false}>
+      <SleekHeader title="GIẢI ĐẤU & GHI DANH" showWallet={true} />
+      <GridBackground isDark={isDark} />
+
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
+      >
         {/* Segment tabs */}
-        <View style={s.segmentContainer}>
+        <View style={styles.segmentContainer}>
           <TouchableOpacity
-            style={[s.segmentBtn, activeTab === 'browse' && s.segmentBtnActive]}
+            style={[styles.segmentBtn, activeTab === 'browse' && styles.segmentBtnActive]}
             onPress={() => {
               setActiveTab('browse');
               setViewState('tournaments');
             }}
             activeOpacity={0.8}
           >
-            <Text style={[s.segmentText, activeTab === 'browse' && s.segmentTextActive]}>Duyệt Giải Đấu</Text>
+            <Text style={[styles.segmentText, activeTab === 'browse' && styles.segmentTextActive]}>Duyệt Giải Đấu</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[s.segmentBtn, activeTab === 'requests' && s.segmentBtnActive]}
+            style={[styles.segmentBtn, activeTab === 'requests' && styles.segmentBtnActive]}
             onPress={() => setActiveTab('requests')}
             activeOpacity={0.8}
           >
-            <Text style={[s.segmentText, activeTab === 'requests' && s.segmentTextActive]}>Yêu Cầu Gửi Đi</Text>
+            <Text style={[styles.segmentText, activeTab === 'requests' && styles.segmentTextActive]}>Yêu Cầu Gửi Đi</Text>
           </TouchableOpacity>
         </View>
 
         {/* Main Content Area */}
         {activeTab === 'browse' ? (
-          // Browse & Register Tournament View
           <>
             {viewState === 'races' && (
-              <TouchableOpacity style={s.backBtn} onPress={goBackToTournaments} activeOpacity={0.8}>
-                <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
-                <Text style={s.backText}>Quay lại danh sách giải đấu</Text>
+              <TouchableOpacity style={styles.backBtn} onPress={goBackToTournaments} activeOpacity={0.8}>
+                <MaterialIcons name="arrow-back" size={20} color={colors.textSecondary} />
+                <Text style={styles.backText}>Quay lại danh sách giải đấu</Text>
               </TouchableOpacity>
             )}
 
             {error ? (
               <ErrorState message={error} onRetry={loadInitialData} />
             ) : viewState === 'tournaments' ? (
-              // Tournament List Tab 
               <Section title="Chọn giải đấu đang mở">
-                <View style={s.searchContainer}>
-                  <MaterialIcons name="search" size={20} color={premiumColors.textMuted} style={s.searchIcon} />
+                <View style={styles.searchContainer}>
+                  <MaterialIcons name="search" size={20} color={colors.textMuted} style={styles.searchIcon} />
                   <TextInput
-                    style={s.searchInput}
-                    placeholder="Tìm giải đấu..."
-                    placeholderTextColor={premiumColors.textMuted}
+                    style={styles.searchInput}
+                    placeholder="Tìm kiếm giải đấu..."
+                    placeholderTextColor={colors.textMuted}
                     value={search}
                     onChangeText={setSearch}
                   />
@@ -270,36 +288,42 @@ export default function OwnerTournamentsAndRegistrations() {
                     const ts = statusLabel(t.status);
                     const isOpen = t.status === 'OPEN_REGISTRATION';
                     return (
-                      <TouchableOpacity key={id} style={[s.tCard, isOpen && s.tCardOpen]} onPress={() => selectTournament(t)} activeOpacity={0.9}>
+                      <TouchableOpacity 
+                        key={id} 
+                        style={[styles.tCard, isOpen && styles.tCardOpen]} 
+                        onPress={() => selectTournament(t)} 
+                        activeOpacity={0.9}
+                      >
                         <View style={{ flex: 1 }}>
-                          <Text style={s.tName} numberOfLines={1}>{t.name}</Text>
-                          <Text style={s.tDate}>{formatDateTime(t.startDate)} — {formatDateTime(t.endDate)}</Text>
+                          <Text style={styles.tName} numberOfLines={1}>{t.name}</Text>
+                          <Text style={styles.tDate}>{formatDateTime(t.startDate)} — {formatDateTime(t.endDate)}</Text>
                           {t.prize != null && (
-                            <Text style={s.tPrize}>🏆 Quỹ thưởng: <Text style={{ color: premiumColors.success, fontWeight: '700' }}>{t.prize.toLocaleString()} Pts</Text></Text>
+                            <Text style={styles.tPrize}>
+                              🏆 Quỹ thưởng: <Text style={{ color: colors.success, fontWeight: '800' }}>{t.prize.toLocaleString()} Pts</Text>
+                            </Text>
                           )}
                         </View>
-                        <View style={[s.badge, { backgroundColor: ts.color + '15', borderColor: ts.color + '40' }]}>
-                          <Text style={[s.badgeText, { color: ts.color }]}>{ts.label}</Text>
+                        <View style={[styles.badge, { backgroundColor: ts.color + '15', borderColor: ts.color + '40' }]}>
+                          <Text style={[styles.badgeText, { color: ts.color }]}>{ts.label}</Text>
                         </View>
-                        <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
+                        <MaterialIcons name="chevron-right" size={20} color={colors.textMuted} />
                       </TouchableOpacity>
                     );
                   })
                 )}
               </Section>
             ) : (
-              // Races List Tab
               <>
-                <View style={s.tHero}>
-                  <Text style={s.eyebrow}>GIẢI ĐẤU ĐANG XEM</Text>
-                  <Text style={s.pageTitle}>{selectedTournament?.name}</Text>
+                <View style={styles.tHero}>
+                  <Text style={styles.eyebrow}>GIẢI ĐẤU ĐANG XEM</Text>
+                  <Text style={styles.pageTitle}>{selectedTournament?.name}</Text>
                   {selectedTournament?.description && (
-                    <Text style={s.pageDesc}>{selectedTournament.description}</Text>
+                    <Text style={styles.pageDesc}>{selectedTournament.description}</Text>
                   )}
-                  <View style={s.tDetailsRow}>
-                    <Text style={s.tDetailText}>📅 {formatDateTime(selectedTournament?.startDate)} — {formatDateTime(selectedTournament?.endDate)}</Text>
+                  <View style={styles.tDetailsRow}>
+                    <Text style={styles.tDetailText}>📅 {formatDateTime(selectedTournament?.startDate)} — {formatDateTime(selectedTournament?.endDate)}</Text>
                     {selectedTournament?.prize != null && (
-                      <Text style={s.tDetailText}>💰 Quỹ: {selectedTournament.prize.toLocaleString()} Pts</Text>
+                      <Text style={styles.tDetailText}>💰 Quỹ: {selectedTournament.prize.toLocaleString()} Pts</Text>
                     )}
                   </View>
                 </View>
@@ -314,39 +338,45 @@ export default function OwnerTournamentsAndRegistrations() {
                       const isRegistrationOpen = selectedTournament?.status === 'OPEN_REGISTRATION';
 
                       return (
-                        <View key={id} style={s.raceCard}>
-                          <View style={s.raceHeader}>
-                            <MaterialIcons name="flag" size={20} color={premiumColors.brand} />
-                            <Text style={s.raceName} numberOfLines={1}>{race.name}</Text>
+                        <View key={id} style={styles.raceCard}>
+                          <View style={styles.raceHeader}>
+                            <MaterialIcons name="flag" size={20} color={colors.brand} />
+                            <Text style={styles.raceName} numberOfLines={1}>{race.name}</Text>
                           </View>
 
-                          <View style={s.raceStats}>
-                            <Text style={s.statText}>📏 Cự ly: {race.distanceMeters}m</Text>
-                            <Text style={s.statText}>📅 Khởi tranh: {formatDateTime(race.startTime)}</Text>
-                            <Text style={s.statText}>🐴 Chiến mã: {race.participantsCount || 0}/{race.maxParticipants || 20}</Text>
+                          <View style={styles.raceStats}>
+                            <Text style={styles.statText}>📏 Cự ly: {race.distanceMeters} m</Text>
+                            <Text style={styles.statText}>📅 Khởi tranh: {formatDateTime(race.startTime)}</Text>
+                            <Text style={styles.statText}>🐴 Chiến mã: {race.participantsCount || 0}/{race.maxParticipants || 20}</Text>
                             {race.prize != null && (
-                              <Text style={s.statText}>🏆 Giải thưởng: <Text style={{ color: premiumColors.success, fontWeight: '700' }}>{race.prize.toLocaleString()} Pts</Text></Text>
+                              <Text style={styles.statText}>
+                                🏆 Giải thưởng: <Text style={{ color: colors.success, fontWeight: '800' }}>{race.prize.toLocaleString()} Pts</Text>
+                              </Text>
                             )}
                           </View>
 
-                          <View style={s.raceActions}>
+                          <View style={styles.raceActions}>
                             {race.status === 'FINISHED' || race.status === 'RESULT_PUBLISHED' ? (
-                              <TouchableOpacity style={[s.btnPrimary, { backgroundColor: premiumColors.success }]} onPress={() => openResultsModal(race)}>
-                                <Text style={s.btnPrimaryText}>Xem kết quả</Text>
+                              <TouchableOpacity 
+                                style={[styles.btnPrimary, { backgroundColor: colors.success }]} 
+                                onPress={() => openResultsModal(race)}
+                                activeOpacity={0.8}
+                              >
+                                <Text style={styles.btnPrimaryText}>Xem kết quả cuộc đua</Text>
                               </TouchableOpacity>
                             ) : isRegistrationOpen ? (
                               isFull ? (
-                                <TouchableOpacity style={[s.btnOutline, { opacity: 0.5 }]} disabled>
-                                  <Text style={s.btnOutlineText}>Trận đấu đã đầy</Text>
+                                <TouchableOpacity style={[styles.btnOutline, { opacity: 0.5 }]} disabled activeOpacity={0.8}>
+                                  <Text style={styles.btnOutlineText}>Trận đấu đã đầy</Text>
                                 </TouchableOpacity>
                               ) : (
-                                <TouchableOpacity style={s.btnPrimary} onPress={() => openRegModal(race)}>
-                                  <Text style={s.btnPrimaryText}>Ghi danh chiến mã</Text>
+                                <TouchableOpacity style={styles.btnPrimary} onPress={() => openRegModal(race)} activeOpacity={0.8}>
+                                  <Text style={styles.btnPrimaryText}>Ghi danh chiến mã</Text>
                                 </TouchableOpacity>
                               )
                             ) : (
-                              <TouchableOpacity style={s.btnOutline} onPress={() => openRaceDetailsModal(race)}>
-                                <Text style={s.btnOutlineText}>Xem chi tiết vòng đua</Text>
+                              <TouchableOpacity style={styles.btnOutline} onPress={() => openRaceDetailsModal(race)} activeOpacity={0.8}>
+                                <Text style={styles.btnOutlineText}>Xem chi tiết vòng đua</Text>
                               </TouchableOpacity>
                             )}
                           </View>
@@ -359,7 +389,6 @@ export default function OwnerTournamentsAndRegistrations() {
             )}
           </>
         ) : (
-          // Submitted Requests List View
           <>
             {error ? (
               <ErrorState message={error} onRetry={loadMyRegistrations} />
@@ -378,38 +407,38 @@ export default function OwnerTournamentsAndRegistrations() {
                     const isCancelling = cancelling === (r._id || r.id);
 
                     return (
-                      <View key={r._id || r.id} style={s.regCard}>
-                        <View style={s.regHeader}>
-                          <View style={s.regIconWrap}>
-                            <MaterialIcons name="emoji-events" size={20} color={premiumColors.brand} />
+                      <View key={r._id || r.id} style={styles.regCard}>
+                        <View style={styles.regHeader}>
+                          <View style={styles.regIconWrap}>
+                            <MaterialIcons name="emoji-events" size={22} color={colors.brand} />
                           </View>
                           <View style={{ flex: 1 }}>
-                            <Text style={s.regHorse} numberOfLines={1}>🐴 {horse}</Text>
-                            <Text style={s.regRace} numberOfLines={1}>🏁 {race}</Text>
-                            {tournament ? <Text style={s.regTournament} numberOfLines={1}>🏆 {tournament}</Text> : null}
+                            <Text style={styles.regHorse} numberOfLines={1}>🐴 {horse}</Text>
+                            <Text style={styles.regRace} numberOfLines={1}>🏁 {race}</Text>
+                            {tournament ? <Text style={styles.regTournament} numberOfLines={1}>🏆 {tournament}</Text> : null}
                           </View>
-                          <View style={[s.badge, { backgroundColor: st.color + '15', borderColor: st.color + '40' }]}>
-                            <Text style={[s.badgeText, { color: st.color }]}>{st.label}</Text>
+                          <View style={[styles.badge, { backgroundColor: st.color + '15', borderColor: st.color + '40' }]}>
+                            <Text style={[styles.badgeText, { color: st.color }]}>{st.label}</Text>
                           </View>
                         </View>
 
                         {r.rejectedReason && (
-                          <View style={s.reasonBox}>
-                            <Text style={s.reasonText}>Lý do từ chối: {r.rejectedReason}</Text>
+                          <View style={styles.reasonBox}>
+                            <Text style={styles.reasonText}>Lý do từ chối: {r.rejectedReason}</Text>
                           </View>
                         )}
 
-                        <View style={s.regFooter}>
-                          <Text style={s.regDate}>{formatDateTime(r.createdAt)}</Text>
+                        <View style={styles.regFooter}>
+                          <Text style={styles.regDate}>{formatDateTime(r.createdAt)}</Text>
                           {(canCancel || canWithdraw) && (
                             <TouchableOpacity
-                              style={s.cancelBtn}
+                              style={styles.cancelBtn}
                               onPress={() => handleCancelRegistration(r._id || r.id, r.status)}
                               disabled={isCancelling}
                               activeOpacity={0.8}
                             >
-                              <MaterialIcons name="cancel" size={14} color={premiumColors.danger} style={{ marginTop: -1 }} />
-                              <Text style={s.cancelText}>{isCancelling ? '...' : canCancel ? 'Hủy' : 'Rút tên'}</Text>
+                              <MaterialIcons name="cancel" size={14} color={colors.danger} />
+                              <Text style={styles.cancelText}>{isCancelling ? '...' : canCancel ? 'Hủy yêu cầu' : 'Rút tên'}</Text>
                             </TouchableOpacity>
                           )}
                         </View>
@@ -424,65 +453,71 @@ export default function OwnerTournamentsAndRegistrations() {
 
         {/* Registration Modal Form */}
         <Modal visible={showRegModal} animationType="slide" transparent>
-          <View style={s.modalOverlay}>
-            <View style={s.modalContent}>
-              <View style={s.modalHeader}>
-                <Text style={s.modalTitle}>Ghi Danh Chiến Mã</Text>
-                <TouchableOpacity onPress={() => setShowRegModal(false)} activeOpacity={0.8}>
-                  <MaterialIcons name="close" size={24} color={premiumColors.textSecondary} />
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Ghi Danh Chiến Mã</Text>
+                <TouchableOpacity onPress={() => setShowRegModal(false)} style={styles.closeIconBox} activeOpacity={0.8}>
+                  <MaterialIcons name="close" size={24} color={colors.textSecondary} />
                 </TouchableOpacity>
               </View>
 
               {selectedRace && (
-                <View style={s.raceSummary}>
-                  <MaterialIcons name="flag" size={20} color={premiumColors.brand} />
-                  <View>
-                    <Text style={s.summaryName}>{selectedTournament?.name} › {selectedRace.name}</Text>
-                    <Text style={s.summaryStats}>{selectedRace.distanceMeters}m · {formatDateTime(selectedRace.startTime)}</Text>
+                <View style={styles.raceSummary}>
+                  <View style={styles.raceSummaryIcon}>
+                    <MaterialIcons name="flag" size={20} color={colors.brand} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.summaryName} numberOfLines={1}>{selectedTournament?.name} › {selectedRace.name}</Text>
+                    <Text style={styles.summaryStats}>{selectedRace.distanceMeters}m · {formatDateTime(selectedRace.startTime)}</Text>
                   </View>
                 </View>
               )}
 
-              <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
-                <Text style={s.fieldLabel}>Chọn chiến mã của bạn *</Text>
+              <ScrollView style={{ maxHeight: 220 }} showsVerticalScrollIndicator={false}>
+                <Text style={styles.fieldLabel}>Chọn chiến mã của bạn *</Text>
                 {horses.map(h => {
                   const id = h._id || h.id;
                   const selected = selectedHorseId === id;
                   return (
                     <TouchableOpacity
                       key={id}
-                      style={[s.optionCard, selected && s.optionCardSelected]}
+                      style={[styles.optionCard, selected && styles.optionCardSelected]}
                       onPress={() => setSelectedHorseId(id)}
                       activeOpacity={0.9}
                     >
-                      <MaterialIcons name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} size={18} color={selected ? premiumColors.brand : premiumColors.textMuted} />
-                      <Text style={s.optionText}>🐴 {h.name} ({h.breed || 'Chưa rõ'})</Text>
+                      <MaterialIcons 
+                        name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} 
+                        size={18} 
+                        color={selected ? colors.brand : colors.textMuted} 
+                      />
+                      <Text style={styles.optionText} numberOfLines={1}>🐴 {h.name} ({h.breed || 'Chưa rõ'})</Text>
                     </TouchableOpacity>
                   );
                 })}
               </ScrollView>
 
-              <Text style={[s.fieldLabel, { marginTop: 16 }]}>Ghi chú thêm</Text>
+              <Text style={[styles.fieldLabel, { marginTop: 16 }]}>Ghi chú thêm</Text>
               <TextInput
-                style={[s.input, { height: 72, textAlignVertical: 'top', paddingTop: 12 }]}
+                style={[styles.input, { height: 72, textAlignVertical: 'top', paddingTop: 12 }]}
                 placeholder="Ví dụ: Mong ban tổ chức phê duyệt sớm..."
-                placeholderTextColor={premiumColors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 multiline
                 value={regNote}
                 onChangeText={setRegNote}
               />
 
-              <View style={s.modalActions}>
-                <TouchableOpacity style={s.btnOutlineModal} onPress={() => setShowRegModal(false)} activeOpacity={0.8}>
-                  <Text style={s.btnOutlineText}>Hủy</Text>
+              <View style={styles.modalActions}>
+                <TouchableOpacity style={styles.btnOutlineModal} onPress={() => setShowRegModal(false)} activeOpacity={0.8}>
+                  <Text style={styles.btnOutlineText}>Hủy</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[s.btnPrimaryModal, (!selectedHorseId || submitting) && s.btnDisabled]}
+                  style={[styles.btnPrimaryModal, (!selectedHorseId || submitting) && styles.btnDisabled]}
                   onPress={handleRegister}
                   disabled={!selectedHorseId || submitting}
                   activeOpacity={0.8}
                 >
-                  <Text style={s.btnPrimaryText}>{submitting ? 'Đang gửi...' : 'Nộp hồ sơ ghi danh'}</Text>
+                  <Text style={styles.btnPrimaryText}>{submitting ? 'Đang gửi...' : 'Nộp hồ sơ ghi danh'}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -497,48 +532,50 @@ export default function OwnerTournamentsAndRegistrations() {
         />
 
         <Modal visible={showRaceDetailsModal} animationType="slide" transparent>
-          <View style={s.modalOverlay}>
-            <View style={s.modalContent}>
-              <View style={s.modalHeader}>
-                <Text style={s.modalTitle}>Chi Tiết Vòng Đua</Text>
-                <TouchableOpacity onPress={() => setShowRaceDetailsModal(false)} activeOpacity={0.8}>
-                  <MaterialIcons name="close" size={24} color={premiumColors.textSecondary} />
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Chi Tiết Vòng Đua</Text>
+                <TouchableOpacity onPress={() => setShowRaceDetailsModal(false)} style={styles.closeIconBox} activeOpacity={0.8}>
+                  <MaterialIcons name="close" size={24} color={colors.textSecondary} />
                 </TouchableOpacity>
               </View>
 
               {detailsRace && (
-                <View style={s.raceSummary}>
-                  <MaterialIcons name="flag" size={20} color={premiumColors.brand} />
+                <View style={styles.raceSummary}>
+                  <View style={styles.raceSummaryIcon}>
+                    <MaterialIcons name="flag" size={20} color={colors.brand} />
+                  </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.summaryName}>{detailsRace.name}</Text>
-                    <Text style={s.summaryStats}>Cự ly: {detailsRace.distanceMeters}m · Khởi tranh: {formatDateTime(detailsRace.startTime)}</Text>
+                    <Text style={styles.summaryName}>{detailsRace.name}</Text>
+                    <Text style={styles.summaryStats}>Cự ly: {detailsRace.distanceMeters}m · Khởi tranh: {formatDateTime(detailsRace.startTime)}</Text>
                     {detailsRace.prize != null && (
-                      <Text style={s.summaryPrize}>🏆 Giải thưởng: {detailsRace.prize.toLocaleString()} Pts</Text>
+                      <Text style={styles.summaryPrize}>🏆 Giải thưởng: {detailsRace.prize.toLocaleString()} Pts</Text>
                     )}
                   </View>
                 </View>
               )}
 
-              <Text style={s.fieldLabel}>Danh sách chiến mã tham gia ({detailsRegistrations.length})</Text>
+              <Text style={styles.fieldLabel}>Danh sách chiến mã tham gia ({detailsRegistrations.length})</Text>
               {loadingDetails ? (
-                <ActivityIndicator size="small" color={premiumColors.brand} style={{ marginVertical: 20 }} />
+                <ActivityIndicator size="small" color={colors.brand} style={{ marginVertical: 20 }} />
               ) : detailsRegistrations.length === 0 ? (
-                <Text style={s.emptyDetailsText}>Chưa có chiến mã nào đăng ký thành công cho vòng đua này.</Text>
+                <Text style={styles.emptyDetailsText}>Chưa có chiến mã nào đăng ký thành công cho vòng đua này.</Text>
               ) : (
-                <ScrollView style={{ maxHeight: 250 }} showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ maxHeight: 220 }} showsVerticalScrollIndicator={false}>
                   {detailsRegistrations.map((reg, index) => {
                     const horseName = typeof reg.horseId === 'object' ? reg.horseId?.name : 'Chiến mã';
                     const breed = typeof reg.horseId === 'object' ? reg.horseId?.breed : 'Chưa rõ';
                     const jockeyName = typeof reg.jockeyUserId === 'object' ? reg.jockeyUserId?.fullName : 'Chưa đăng ký';
                     return (
-                      <View key={reg._id || reg.id} style={s.detailParticipantRow}>
-                        <Text style={s.participantIndex}>{index + 1}</Text>
+                      <View key={reg._id || reg.id} style={styles.detailParticipantRow}>
+                        <Text style={styles.participantIndex}>{index + 1}</Text>
                         <View style={{ flex: 1 }}>
-                          <Text style={s.participantHorse}>🐴 {horseName} ({breed})</Text>
-                          <Text style={s.participantJockey}>🏇 Nài: {jockeyName}</Text>
+                          <Text style={styles.participantHorse} numberOfLines={1}>🐴 {horseName} ({breed})</Text>
+                          <Text style={styles.participantJockey}>🏇 Nài: {jockeyName}</Text>
                         </View>
-                        <View style={s.approvedBadge}>
-                          <Text style={s.approvedBadgeText}>Đã duyệt</Text>
+                        <View style={styles.approvedBadge}>
+                          <Text style={styles.approvedBadgeText}>Đã duyệt</Text>
                         </View>
                       </View>
                     );
@@ -546,33 +583,33 @@ export default function OwnerTournamentsAndRegistrations() {
                 </ScrollView>
               )}
 
-              <View style={[s.modalActions, { marginTop: 20 }]}>
-                <TouchableOpacity style={s.btnOutlineModal} onPress={() => setShowRaceDetailsModal(false)} activeOpacity={0.8}>
-                  <Text style={s.btnOutlineText}>Đóng</Text>
+              <View style={[styles.modalActions, { marginTop: 20 }]}>
+                <TouchableOpacity style={styles.btnOutlineModal} onPress={() => setShowRaceDetailsModal(false)} activeOpacity={0.8}>
+                  <Text style={styles.btnOutlineText}>Đóng</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
         </Modal>
-      </View>
+      </ScrollView>
     </AppScreen>
   );
 }
 
-const s = StyleSheet.create({
-  content: {
+const getStyles = (isDark: boolean, colors: any) => StyleSheet.create({
+  scrollContent: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 100,
   },
   segmentContainer: {
     flexDirection: 'row',
-    backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[8],
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+    borderRadius: premiumRadius[12],
     padding: 4,
-    marginBottom: premiumSpacing[24],
+    marginBottom: premiumSpacing[20],
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: colors.border,
   },
   segmentBtn: {
     flex: 1,
@@ -582,18 +619,17 @@ const s = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   segmentBtnActive: {
-    backgroundColor: premiumColors.surface2,
-    borderWidth: 1,
-    borderColor: premiumColors.borderSoft,
+    backgroundColor: isDark ? colors.surface3 : '#FFFFFF',
+    ...premiumShadows.subtle,
   },
   segmentText: {
     fontSize: 13,
-    color: premiumColors.textSecondary,
-    fontWeight: '500',
+    color: colors.textSecondary,
+    fontWeight: '600',
   },
   segmentTextActive: {
-    color: premiumColors.text,
-    fontWeight: '700',
+    color: colors.text,
+    fontWeight: '800',
   },
   backBtn: {
     flexDirection: 'row',
@@ -601,34 +637,36 @@ const s = StyleSheet.create({
     gap: 6,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[8],
+    backgroundColor: colors.surface,
+    borderRadius: premiumRadius[12],
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    marginBottom: premiumSpacing[24],
+    borderColor: colors.border,
+    marginBottom: premiumSpacing[16],
+    ...premiumShadows.subtle,
   },
   backText: {
-    color: premiumColors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 12,
     fontWeight: '700',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
-    paddingHorizontal: 12,
+    borderColor: colors.border,
+    borderRadius: premiumRadius[24],
+    paddingHorizontal: 16,
     height: 48,
     marginBottom: 16,
+    ...premiumShadows.subtle,
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 14,
     height: '100%',
   },
@@ -636,30 +674,31 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: premiumColors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
-    padding: 14,
-    marginBottom: 12,
+    borderColor: colors.border,
+    borderRadius: premiumRadius[16],
+    padding: 16,
+    marginBottom: 16,
+    ...premiumShadows.subtle,
   },
   tCardOpen: {
-    borderColor: 'rgba(52, 211, 153, 0.4)',
+    borderColor: 'rgba(52, 211, 153, 0.35)',
     backgroundColor: 'rgba(52, 211, 153, 0.05)',
   },
   tName: {
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '800',
     textTransform: 'uppercase',
   },
   tDate: {
-    color: premiumColors.textMuted,
+    color: colors.textMuted,
     fontSize: 11,
     marginTop: 4,
   },
   tPrize: {
-    color: premiumColors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 11,
     marginTop: 4,
   },
@@ -676,28 +715,29 @@ const s = StyleSheet.create({
     letterSpacing: 0.5,
   },
   tHero: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
-    padding: 20,
-    marginBottom: 24,
+    borderColor: colors.border,
+    borderRadius: premiumRadius[16],
+    padding: 16,
+    marginBottom: 20,
+    ...premiumShadows.subtle,
   },
   eyebrow: {
-    color: premiumColors.brand,
+    color: colors.brand,
     fontSize: 10,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 1.5,
   },
   pageTitle: {
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '900',
-    marginTop: 4,
+    marginTop: 6,
   },
   pageDesc: {
-    color: premiumColors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 12,
     marginTop: 6,
     lineHeight: 18,
@@ -708,20 +748,21 @@ const s = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: premiumColors.border,
+    borderTopColor: colors.border,
   },
   tDetailText: {
-    color: premiumColors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 11,
     fontWeight: '700',
   },
   raceCard: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
+    borderColor: colors.border,
+    borderRadius: premiumRadius[16],
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 16,
+    ...premiumShadows.subtle,
   },
   raceHeader: {
     flexDirection: 'row',
@@ -730,7 +771,7 @@ const s = StyleSheet.create({
     marginBottom: 12,
   },
   raceName: {
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -740,7 +781,7 @@ const s = StyleSheet.create({
     marginBottom: 16,
   },
   statText: {
-    color: premiumColors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -748,12 +789,13 @@ const s = StyleSheet.create({
     marginTop: 4,
   },
   regCard: {
-    backgroundColor: premiumColors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
+    borderColor: colors.border,
+    borderRadius: premiumRadius[16],
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 16,
+    ...premiumShadows.subtle,
   },
   regHeader: {
     flexDirection: 'row',
@@ -763,38 +805,40 @@ const s = StyleSheet.create({
   regIconWrap: {
     width: 44,
     height: 44,
-    borderRadius: 12,
-    backgroundColor: 'rgba(225, 6, 0, 0.1)',
+    borderRadius: premiumRadius[12],
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.15)' : 'rgba(225, 6, 0, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(225, 6, 0, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   regHorse: {
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '800',
   },
   regRace: {
-    color: premiumColors.brand,
+    color: colors.brand,
     fontSize: 12,
     fontWeight: '700',
     marginTop: 4,
   },
   regTournament: {
-    color: premiumColors.success,
+    color: colors.success,
     fontSize: 11,
     fontWeight: '600',
     marginTop: 2,
   },
   reasonBox: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderColor: 'rgba(239, 68, 68, 0.2)',
     borderRadius: premiumRadius[8],
     padding: 10,
     marginTop: 12,
   },
   reasonText: {
-    color: premiumColors.danger,
+    color: colors.danger,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -805,10 +849,10 @@ const s = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: premiumColors.border,
+    borderTopColor: colors.border,
   },
   regDate: {
-    color: premiumColors.textMuted,
+    color: colors.textMuted,
     fontSize: 11,
   },
   cancelBtn: {
@@ -823,22 +867,22 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
   cancelText: {
-    color: premiumColors.danger,
+    color: colors.danger,
     fontSize: 12,
     fontWeight: '700',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.75)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: premiumColors.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
+    backgroundColor: isDark ? '#0F0F12' : '#FFFFFF',
+    borderTopLeftRadius: premiumRadius[28],
+    borderTopRightRadius: premiumRadius[28],
+    padding: premiumSpacing[24],
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: colors.border,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -847,7 +891,7 @@ const s = StyleSheet.create({
     marginBottom: 20,
   },
   modalTitle: {
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -856,64 +900,74 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: colors.border,
     borderRadius: premiumRadius[12],
-    padding: 16,
-    marginBottom: 20,
+    padding: 12,
+    marginBottom: 16,
+  },
+  raceSummaryIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.1)' : 'rgba(225, 6, 0, 0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(225, 6, 0, 0.15)',
   },
   summaryName: {
-    color: premiumColors.text,
-    fontSize: 14,
+    color: colors.text,
+    fontSize: 13,
     fontWeight: '800',
   },
   summaryStats: {
-    color: premiumColors.textMuted,
+    color: colors.textMuted,
     fontSize: 11,
-    marginTop: 4,
+    marginTop: 2,
   },
   summaryPrize: {
-    color: premiumColors.success,
+    color: colors.success,
     fontSize: 11,
     fontWeight: '700',
-    marginTop: 4,
+    marginTop: 2,
   },
   fieldLabel: {
-    color: premiumColors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   optionCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    padding: 16,
+    padding: 14,
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: colors.border,
     borderRadius: premiumRadius[12],
     marginBottom: 8,
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
   },
   optionCardSelected: {
-    borderColor: 'rgba(225, 6, 0, 0.4)',
+    borderColor: 'rgba(225, 6, 0, 0.35)',
     backgroundColor: 'rgba(225, 6, 0, 0.05)',
   },
   optionText: {
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
     flex: 1,
   },
   input: {
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    color: premiumColors.text,
-    borderRadius: premiumRadius[8],
+    borderColor: colors.border,
+    color: colors.text,
+    borderRadius: 10,
     height: 48,
     paddingHorizontal: 16,
     fontSize: 14,
@@ -925,44 +979,51 @@ const s = StyleSheet.create({
     marginTop: 16,
   },
   btnPrimary: {
-    backgroundColor: premiumColors.brand,
+    flexDirection: 'row',
+    backgroundColor: colors.brand,
     paddingVertical: 12,
-    borderRadius: premiumRadius[8],
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    ...premiumShadows.redGlow,
   },
   btnPrimaryText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   btnOutline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: premiumColors.borderStrong,
+    borderColor: colors.borderStrong,
     paddingVertical: 12,
-    borderRadius: premiumRadius[8],
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnOutlineText: {
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   btnOutlineModal: {
     flex: 1,
     borderWidth: 1,
-    borderColor: premiumColors.borderStrong,
-    borderRadius: premiumRadius[8],
+    borderColor: colors.borderStrong,
+    borderRadius: premiumRadius[12],
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
   },
+  btnOutlineTextModal: {
+    color: colors.text,
+    fontWeight: '700',
+    fontSize: 14,
+  },
   btnPrimaryModal: {
-    flex: 2,
-    backgroundColor: premiumColors.brand,
-    borderRadius: premiumRadius[8],
+    flex: 1.5,
+    backgroundColor: colors.brand,
+    borderRadius: premiumRadius[12],
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
@@ -971,7 +1032,7 @@ const s = StyleSheet.create({
     opacity: 0.5,
   },
   emptyDetailsText: {
-    color: premiumColors.textMuted,
+    color: colors.textMuted,
     fontSize: 13,
     textAlign: 'center',
     marginVertical: 16,
@@ -980,40 +1041,50 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: premiumColors.surface2,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
     borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderColor: colors.border,
     borderRadius: premiumRadius[12],
-    padding: 16,
+    padding: 12,
     marginBottom: 8,
   },
   participantIndex: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
-    color: premiumColors.brand,
-    width: 24,
+    color: colors.brand,
+    width: 20,
     textAlign: 'center',
   },
   participantHorse: {
-    color: premiumColors.text,
+    color: colors.text,
     fontSize: 13,
     fontWeight: '700',
   },
   participantJockey: {
-    color: premiumColors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 11,
-    marginTop: 4,
+    marginTop: 2,
   },
   approvedBadge: {
-    backgroundColor: 'rgba(52, 211, 153, 0.1)',
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
     borderRadius: premiumRadius[4],
     paddingHorizontal: 8,
     paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.2)',
   },
   approvedBadgeText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '800',
-    color: premiumColors.success,
+    color: colors.success,
     textTransform: 'uppercase',
+  },
+  closeIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: premiumRadius[8],
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

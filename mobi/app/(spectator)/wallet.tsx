@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppScreen, Section } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { EmptyState, ErrorState, LoadingState, formatDateTime, statusLabel } from '@/components/ui/shared';
-import { rewardPointLedgerApi, predictionsApi } from '@/lib/api-client';
+import { rewardPointLedgerApi, predictionsApi, walletApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function SpectatorWallet() {
@@ -12,22 +12,27 @@ export default function SpectatorWallet() {
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState<any[]>([]);
   const [predictions, setPredictions] = useState<any[]>([]);
+  const [cashouts, setCashouts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'transactions' | 'predictions'>('transactions');
+  const [redeemAmount, setRedeemAmount] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState<'transactions' | 'predictions' | 'cashouts'>('transactions');
 
   const loadData = useCallback(async () => {
     setError(null);
     try {
-      const [balanceRes, historyRes, predictionsRes] = await Promise.all([
+      const [balanceRes, historyRes, predictionsRes, cashoutsRes] = await Promise.all([
         rewardPointLedgerApi.myBalance(),
         rewardPointLedgerApi.myHistory({ limit: 50 }),
         predictionsApi.listMyPredictions({ limit: 50 }).catch(() => ({ data: [] })),
+        walletApi.myCashouts({ limit: 20 }).catch(() => ({ data: [] })),
       ]);
       setBalance(balanceRes.balance ?? 0);
       setHistory(historyRes.data || []);
       setPredictions((predictionsRes as any).data || []);
+      setCashouts((cashoutsRes as any).data || []);
     } catch (err: any) {
       setError(err.message || 'Không thể tải thông tin ví điểm. Vui lòng thử lại.');
     } finally {
@@ -44,6 +49,30 @@ export default function SpectatorWallet() {
     setRefreshing(true);
     loadData();
   }, [loadData]);
+
+  const handleRedeem = async () => {
+    const pts = parseInt(redeemAmount, 10);
+    if (!pts || pts <= 0) {
+      Alert.alert('Lỗi', 'Vui lòng nhập số điểm hợp lệ.');
+      return;
+    }
+    if (pts > balance) {
+      Alert.alert('Lỗi', 'Không đủ điểm để quy đổi.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await walletApi.requestCashout({ pointsToRedeem: pts });
+      Alert.alert('Thành công', `Yêu cầu rút ${pts.toLocaleString()} điểm đã được gửi.`);
+      setRedeemAmount('');
+      loadData();
+    } catch (err: any) {
+      Alert.alert('Lỗi', err.message || 'Không thể tạo yêu cầu rút điểm.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading && !refreshing) return <LoadingState />;
 
@@ -68,14 +97,21 @@ export default function SpectatorWallet() {
             onPress={() => setActiveTab('transactions')}
             activeOpacity={0.8}
           >
-            <Text style={[styles.segmentText, activeTab === 'transactions' && styles.segmentTextActive]}>Lịch sử giao dịch</Text>
+            <Text style={[styles.segmentText, activeTab === 'transactions' && styles.segmentTextActive]}>Giao dịch</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.segmentBtn, activeTab === 'predictions' && styles.segmentBtnActive]}
             onPress={() => setActiveTab('predictions')}
             activeOpacity={0.8}
           >
-            <Text style={[styles.segmentText, activeTab === 'predictions' && styles.segmentTextActive]}>Lịch sử dự đoán</Text>
+            <Text style={[styles.segmentText, activeTab === 'predictions' && styles.segmentTextActive]}>Dự đoán</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.segmentBtn, activeTab === 'cashouts' && styles.segmentBtnActive]}
+            onPress={() => setActiveTab('cashouts')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.segmentText, activeTab === 'cashouts' && styles.segmentTextActive]}>Quy đổi</Text>
           </TouchableOpacity>
         </View>
 
@@ -113,7 +149,7 @@ export default function SpectatorWallet() {
               </View>
             )}
           </Section>
-        ) : (
+        ) : activeTab === 'predictions' ? (
           <Section title={`Lịch sử dự đoán (${predictions.length})`}>
             {predictions.length === 0 ? (
               <View style={styles.emptyWrap}>
@@ -180,6 +216,62 @@ export default function SpectatorWallet() {
               </View>
             )}
           </Section>
+        ) : (
+          <View>
+            {/* ── Redeem Card ── */}
+            <View style={styles.redeemCard}>
+              <Text style={styles.redeemTitle}>Yêu cầu rút điểm / quy đổi</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nhập số điểm cần rút..."
+                placeholderTextColor={premiumColors.textMuted}
+                keyboardType="numeric"
+                value={redeemAmount}
+                onChangeText={setRedeemAmount}
+              />
+              <TouchableOpacity
+                style={[styles.btn, (balance <= 0 || submitting) && styles.btnDisabled]}
+                onPress={handleRedeem}
+                disabled={balance <= 0 || submitting}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.btnText}>{submitting ? 'Đang xử lý...' : 'Yêu cầu rút điểm'}</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* ── Cashout Requests History ── */}
+            <Section title={`Yêu cầu quy đổi đã gửi (${cashouts.length})`}>
+              {cashouts.length === 0 ? (
+                <EmptyState icon="receipt-long" title="Chưa có yêu cầu" subtitle="Bạn chưa gửi yêu cầu quy đổi điểm nào." />
+              ) : (
+                <View style={styles.listContainer}>
+                  {cashouts.map((c) => {
+                    const isPending = c.status === 'PENDING';
+                    const statusColor = isPending ? premiumColors.warning : premiumColors.success;
+                    const statusLabel = isPending ? 'Chờ xử lý' : c.status === 'COMPLETED' ? 'Hoàn thành' : c.status;
+                    return (
+                      <View key={c._id || c.id} style={styles.rowItem}>
+                        <View style={styles.rowAvatar}>
+                          <MaterialIcons name="swap-horiz" size={20} color={statusColor} />
+                        </View>
+                        <View style={styles.rowInfo}>
+                          <Text style={styles.rowTitle} numberOfLines={1}>
+                            Mã: {c.redemptionCode || c._id?.slice(-6)?.toUpperCase() || '---'}
+                          </Text>
+                          <Text style={styles.rowSubtitle} numberOfLines={1}>
+                            {c.pointsRedeemed?.toLocaleString() || 0} Điểm · {formatDateTime(c.createdAt)}
+                          </Text>
+                        </View>
+                        <View style={[styles.rowRight, { backgroundColor: statusColor + '18', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }]}>
+                          <Text style={[styles.deltaText, { color: statusColor, fontSize: 11 }]}>{statusLabel}</Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+            </Section>
+          </View>
         )}
 
       </View>
@@ -264,6 +356,50 @@ const styles = StyleSheet.create({
   segmentTextActive: {
     color: premiumColors.text,
     fontWeight: '700',
+  },
+
+  // ── Redeem Card ──
+  redeemCard: {
+    backgroundColor: premiumColors.surface,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    padding: premiumSpacing[16],
+    marginBottom: premiumSpacing[32],
+  },
+  redeemTitle: {
+    color: premiumColors.text,
+    fontSize: 13,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: premiumSpacing[12],
+  },
+  input: {
+    backgroundColor: premiumColors.surface2,
+    borderWidth: 1,
+    borderColor: premiumColors.borderSoft,
+    color: premiumColors.text,
+    borderRadius: premiumRadius[8],
+    height: 48,
+    paddingHorizontal: premiumSpacing[16],
+    fontSize: 14,
+    marginBottom: premiumSpacing[16],
+  },
+  btn: {
+    backgroundColor: premiumColors.brand,
+    height: 48,
+    borderRadius: premiumRadius[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnDisabled: {
+    opacity: 0.5,
+  },
+  btnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
 
   // ── Transaction List ──
