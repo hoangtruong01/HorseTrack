@@ -558,70 +558,58 @@ export class RaceResultsService {
     const prizeByRank: Record<number, number> = { 1: race.prize ?? 0 };
     const now = new Date();
 
-    const session = await this.connection.startSession();
     let notifyIntents: PayoutNotifyIntent[] = [];
-    try {
-      await session.withTransaction(async () => {
-        notifyIntents = [];
 
-        await Promise.all(
-          results.map((result) => {
-            const prizeAmount =
-              result.outcome === RaceResultOutcome.FINISHED && result.rank
-                ? (prizeByRank[result.rank] ?? 0)
-                : 0;
-            return this.resultModel.findByIdAndUpdate(
-              result._id,
-              {
-                $set: {
-                  status: RaceResultStatus.PUBLISHED,
-                  prizeAmount,
-                  publishedBy,
-                  publishedAt: now,
-                },
-              },
-              { session },
-            );
-          }),
+    // Execute sequentially without transaction (standalone MongoDB does not support multi-doc transactions)
+    await Promise.all(
+      results.map((result) => {
+        const prizeAmount =
+          result.outcome === RaceResultOutcome.FINISHED && result.rank
+            ? (prizeByRank[result.rank] ?? 0)
+            : 0;
+        return this.resultModel.findByIdAndUpdate(
+          result._id,
+          {
+            $set: {
+              status: RaceResultStatus.PUBLISHED,
+              prizeAmount,
+              publishedBy,
+              publishedAt: now,
+            },
+          },
         );
+      }),
+    );
 
-        await this.racesService.setStatus(
-          raceId,
-          RaceStatus.RESULT_PUBLISHED,
-          session,
+    await this.racesService.setStatus(
+      raceId,
+      RaceStatus.RESULT_PUBLISHED,
+    );
+
+    await this.prizesService.createPrizesForRace(raceId);
+
+    notifyIntents = await this.predictionsService.payoutBetsForRace(
+      raceId,
+    );
+
+    for (const result of results) {
+      const pts = result.points ?? 0;
+      if (result.outcome === RaceResultOutcome.FINISHED && pts > 0) {
+        const alreadyCredited = await this.ledgerService.exists(
+          String(result.ownerId),
+          LedgerSourceType.RACE_WIN_REWARD,
+          String(result._id),
         );
-
-        await this.prizesService.createPrizesForRace(raceId, session);
-
-        notifyIntents = await this.predictionsService.payoutBetsForRace(
-          raceId,
-          session,
-        );
-
-        for (const result of results) {
-          const pts = result.points ?? 0;
-          if (result.outcome === RaceResultOutcome.FINISHED && pts > 0) {
-            const alreadyCredited = await this.ledgerService.exists(
-              String(result.ownerId),
-              LedgerSourceType.RACE_WIN_REWARD,
-              String(result._id),
-              session,
-            );
-            if (!alreadyCredited) {
-              await this.ledgerService.credit({
-                userId: String(result.ownerId),
-                points: pts,
-                sourceType: LedgerSourceType.RACE_WIN_REWARD,
-                sourceId: String(result._id),
-                note: `Điểm thưởng hạng ${result.rank} giải đua`,
-                session,
-              });
-            }
-          }
+        if (!alreadyCredited) {
+          await this.ledgerService.credit({
+            userId: String(result.ownerId),
+            points: pts,
+            sourceType: LedgerSourceType.RACE_WIN_REWARD,
+            sourceId: String(result._id),
+            note: `Điểm thưởng hạng ${result.rank} giải đua`,
+          });
         }
-      });
-    } finally {
-      await session.endSession();
+      }
     }
 
     // ── Sau commit: side-effect best-effort (không rollback tiền) ──
