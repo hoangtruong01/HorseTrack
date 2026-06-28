@@ -340,7 +340,7 @@ export default function RefereeResultEntryPage() {
   if (!race) {
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
-        <h2 className="text-xl font-bold text-white">Không tìm thấy cuộc đua</h2>
+        <h2 className="text-xl font-bold text-foreground">Không tìm thấy cuộc đua</h2>
         <Button onClick={() => router.back()}>Quay lại</Button>
       </main>
     );
@@ -366,35 +366,35 @@ export default function RefereeResultEntryPage() {
       <section className="space-y-4">
         {/* Info on Penalties */}
         {!isLocked && (
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 flex flex-col md:flex-row gap-4 text-xs">
+          <div className="rounded-2xl border border-amber-200 dark:border-amber-500/20 bg-amber-50/20 dark:bg-amber-500/5 p-5 flex flex-col md:flex-row gap-4 text-xs">
             <div className="flex items-start gap-3 w-full">
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
+              <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
                 <AlertTriangle className="size-5" />
               </div>
-              <div className="space-y-2 flex-1">
+              <div className="space-y-3 flex-1">
                 <div>
                   <h4 className="font-bold text-foreground uppercase text-xs tracking-wider flex items-center gap-1.5">
                     Hệ thống phạt tự động (Automatic Penalties)
                   </h4>
-                  <p className="text-muted-foreground mt-0.5">
+                  <p className="text-muted-foreground mt-1">
                     Các vi phạm có hình phạt <span className="font-bold text-foreground">Cộng giây phạt (time_penalty)</span> sẽ được tự động cộng trực tiếp vào thời gian hoàn thành của ngựa khi trọng tài thực hiện khóa kết quả.
                   </p>
                 </div>
-                <div className="grid gap-2.5 sm:grid-cols-2 md:grid-cols-4">
-                  <div className="rounded-xl border border-teal-500/20 bg-teal-500/5 p-2.5">
-                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-teal-500">Nhẹ (Minor)</span>
-                    <p className="text-xs font-black text-teal-300">+3.000ms (+3s)</p>
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+                  <div className="rounded-xl border border-teal-200 dark:border-teal-500/20 bg-teal-50/30 dark:bg-teal-500/5 p-3 space-y-1">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-teal-600 dark:text-teal-400">Nhẹ (Minor)</span>
+                    <p className="text-sm font-black text-teal-700 dark:text-teal-300">+3.000ms <span className="text-[10px] font-normal text-muted-foreground">(+3s)</span></p>
                   </div>
-                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-2.5">
-                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-500">Trung bình (Major)</span>
-                    <p className="text-xs font-black text-amber-300">+6.000ms (+6s)</p>
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-500/20 bg-amber-50/30 dark:bg-amber-500/5 p-3 space-y-1">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400">Trung bình (Major)</span>
+                    <p className="text-sm font-black text-amber-700 dark:text-amber-300">+6.000ms <span className="text-[10px] font-normal text-muted-foreground">(+6s)</span></p>
                   </div>
-                  <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-2.5">
-                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-red-500">Nghiêm trọng (Critical)</span>
-                    <p className="text-xs font-black text-red-300">+12.000ms (+12s)</p>
+                  <div className="rounded-xl border border-red-200 dark:border-red-500/20 bg-red-50/30 dark:bg-red-500/5 p-3 space-y-1">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-red-600 dark:text-red-400">Nghiêm trọng (Critical)</span>
+                    <p className="text-sm font-black text-red-700 dark:text-red-300">+12.000ms <span className="text-[10px] font-normal text-muted-foreground">(+12s)</span></p>
                   </div>
-                  <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-2.5">
-                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-red-500">Truất quyền (Disqualified)</span>
+                  <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-3 space-y-1">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-destructive">Truất quyền (Disqualified)</span>
                     <p className="text-[10px] text-muted-foreground leading-snug">Hủy xếp hạng, Điểm = 0, Thưởng = 0</p>
                   </div>
                 </div>
