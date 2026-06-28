@@ -2,31 +2,29 @@
 % LLNCS macro package for Springer Computer Science proceedings;
 % Version 2.20 of 2017/10/04
 %
-\documentclass[runningheads]{llncs}
+\documentclass{llncs}
 %
 \usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{color}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
-% If you use the hyperref package, please uncomment the following line
-% to display URLs in blue roman font according to Springer's eBook style:
-% \renewcommand\UrlFont{\color{blue}\rmfamily}
+\renewcommand\UrlFont{\color{blue}\rmfamily}
 
 \begin{document}
 %
-\title{Contribution Title\thanks{Supported by organization x.}}
+\title{HorseTrack: An AI-Driven Horse Racing Management System}
 %
-%\titlerunning{Abbreviated paper title}
-% If the paper title is too long for the running head, you can set
-% an abbreviated paper title here
+\titlerunning{HorseTrack: AI-Driven Horse Racing Management}
 %
 \author{First Author\inst{1}\orcidID{0000-1111-2222-3333} \and
 Second Author\inst{2,3}\orcidID{1111-2222-3333-4444} \and
 Third Author\inst{3}\orcidID{2222--3333-4444-5555}}
 %
 \authorrunning{F. Author et al.}
-% First names are abbreviated in the running head.
-% If there are more than two authors, 'et al.' is used.
 %
 \institute{Princeton University, Princeton NJ 08544, USA \and
 Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
@@ -35,116 +33,179 @@ Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
 ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
 \email{\{abc,lncs\}@uni-heidelberg.de}}
 %
-\maketitle              % typeset the header of the contribution
+\maketitle              
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
+Horse racing is a multifaceted sports and entertainment ecosystem that involves continuous interaction among various stakeholders, including horse owners, jockeys, race referees, tournament organizers, and spectators. Despite technological advancements in other sporting domains, the management of horse racing tournaments frequently relies on manual, disjointed processes. To address these critical issues, this paper introduces \textit{HorseTrack}, a comprehensive, intelligent web-based Tournament Management System. The proposed system digitizes the entire lifecycle of horse racing events, encompassing role-based access control, participant registration, race simulation, real-time tracking, and automated financial distributions via a virtual ledger. Developed using a modern stack (Next.js and NestJS), \textit{HorseTrack} distinguishes itself by integrating advanced Artificial Intelligence (AI) algorithms. We propose a Multilayer Feedforward Artificial Neural Network (ANN) to predict race outcomes, offered to users as premium VIP subscription packages. Additionally, a Position-based Crossover (POX) heuristic Genetic Algorithm (GA) is employed to automate and optimize tournament scheduling. This paper presents the architectural design, functional workflows, and implementation details of \textit{HorseTrack}, demonstrating its potential to revolutionize the management of horse racing tournaments.
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+\keywords{Sports Management System \and Horse Racing \and Artificial Neural Networks \and Genetic Algorithm \and VIP Subscriptions \and Web Application.}
 \end{abstract}
 %
 %
 %
-\section{First Section}
-\subsection{A Subsection Sample}
-Please note that the first paragraph of a section or subsection is
-not indented. The first paragraph that follows a table, figure,
-equation etc. does not need an indent, either.
+\section{Introduction}
+Horse racing is one of the oldest and most prestigious traditional sports, combining athletic performance, strategic breeding, and extensive spectator engagement. The operational management of a professional horse racing tournament involves a highly intricate series of tasks. These tasks range from the initial registration of participants (such as horse owners and professional jockeys) to pre-race health and equipment inspections, complex race scheduling, real-time violation tracking, and the final dissemination of race results and prize distributions. 
 
-Subsequent paragraphs, however, are indented.
+Despite the rapid digital transformation witnessed in various other sports management domains, many regional and emerging horse racing tournaments still heavily depend on manual data entry, paper-based referee reporting, and intuition-based scheduling. This lack of digital synchronization often leads to severe operational bottlenecks. Administrators struggle with scheduling conflicts, particularly when coordinating multiple races involving overlapping jockey availability. Referees face difficulties in accurately recording race-time violations without integrated digital tools, which can delay the confirmation of official results. Furthermore, spectators are often limited to viewing the physical race or static broadcasting, lacking interactive platforms that provide real-time outcome predictions based on historical performance data.
 
-\subsubsection{Sample Heading (Third Level)} Only two levels of
-headings should be numbered. Lower level headings remain unnumbered;
-they are formatted as run-in headings.
+To comprehensively address these challenges, we introduce \textit{HorseTrack}, an advanced, web-based management system tailored specifically for horse racing tournaments. \textit{HorseTrack} is designed to digitize the entire lifecycle of a race, facilitating seamless and transparent interaction among all primary actors. More importantly, the system transcends standard administrative software by incorporating AI-driven features. By integrating a heuristic Genetic Algorithm for optimal scheduling and a Multilayer Feedforward Neural Network for predicting race outcomes, \textit{HorseTrack} bridges the gap between traditional race management and modern intelligent sports technologies.
 
-\paragraph{Sample Heading (Fourth Level)}
-The contribution should contain no more than four levels of
-headings. Table~\ref{tab1} gives a summary of all heading levels.
+The main contributions of this paper are:
+\begin{enumerate}
+    \item The design of a comprehensive, centralized digital platform that maps and automates the complex workflows of a horse racing tournament.
+    \item The integration of a transparent, automated financial ledger system that handles dynamic prize splitting, betting, and virtual point cashouts.
+    \item The proposal of a POX-heuristic Genetic Algorithm tailored to resolve multi-constraint race scheduling problems.
+    \item The formulation of an 8-5-7-1 Multilayer Feedforward ANN intended to predict horse racing outcomes, monetized via VIP subscriptions to increase spectator engagement.
+\end{enumerate}
 
-\begin{table}
-\caption{Table captions should be placed above the
-tables.}\label{tab1}
-\begin{tabular}{|l|l|l|}
-\hline
-Heading level &  Example & Font size and style\\
-\hline
-Title (centered) &  {\Large\bfseries Lecture Notes} & 14 point, bold\\
-1st-level heading &  {\large\bfseries 1 Introduction} & 12 point, bold\\
-2nd-level heading & {\bfseries 2.1 Printing Area} & 10 point, bold\\
-3rd-level heading & {\bfseries Run-in Heading in Bold.} Text follows & 10 point, bold\\
-4th-level heading & {\itshape Lowest Level Heading.} Text follows & 10 point, italic\\
-\hline
-\end{tabular}
-\end{table}
+\section{Problem Statement and Research Gap}
+The current ecosystem of horse racing management exhibits several critical deficiencies that hinder operational efficiency and scalability. 
 
+Firstly, the manual scheduling of races is profoundly time-consuming and highly susceptible to conflicts. A single tournament may host dozens of independent races, and a jockey may be hired by multiple different horse owners for different races. Ensuring that no jockey is double-booked while maintaining optimal track utilization is an NP-hard problem that human administrators struggle to solve efficiently.
 
-\noindent Displayed equations are centered and set on a separate
-line.
-\begin{equation}
-x + y = z
-\end{equation}
-Please try to avoid rasterized images for line-art diagrams and
-schemas. Whenever possible, use vector graphics instead (see
-Fig.~\ref{fig1}).
+Secondly, the pre-race inspection (jockey roll-call, horse health, and equipment checks) and violation logging processes are predominantly paper-based. This analog approach makes real-time data synchronization across the organization nearly impossible. When a referee logs a violation, calculating the resulting time penalties and updating the final race rankings is often a slow, manual process prone to human error.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{fig1.eps}
-\caption{A figure caption is always placed below the illustration.
-Please note that short captions are centered, while long ones are
-justified by the macro package automatically.} \label{fig1}
-\end{figure}
+Thirdly, spectator engagement in traditional setups is relatively passive. Modern sports consumers expect interactive, data-driven experiences. The absence of integrated predictive models means that spectators cannot engage with data-backed predictions, which diminishes the overall entertainment value of the tournament and limits revenue generation opportunities such as premium analytics subscriptions.
 
-\begin{theorem}
-This is a sample theorem. The run-in heading is set in bold, while
-the following text appears in italics. Definitions, lemmas,
-propositions, and corollaries are styled the same way.
-\end{theorem}
-%
-% the environments 'definition', 'lemma', 'proposition', 'corollary',
-% 'remark', and 'example' are defined in the LLNCS documentclass as well.
-%
-\begin{proof}
-Proofs, examples, and remarks have the initial word in italics,
-while the following text appears in normal font.
-\end{proof}
-For citations of references, we prefer the use of square brackets
-and consecutive numbers. Citations using labels or the author/year
-convention are also acceptable. The following bibliography provides
-a sample reference list with entries for journal
-articles~\cite{ref_article1}, an LNCS chapter~\cite{ref_lncs1}, a
-book~\cite{ref_book1}, proceedings without editors~\cite{ref_proc1},
-and a homepage~\cite{ref_url1}. Multiple citations are grouped
-\cite{ref_article1,ref_lncs1,ref_book1},
-\cite{ref_article1,ref_book1,ref_proc1,ref_url1}.
-%
-% ---- Bibliography ----
-%
-% BibTeX users should specify bibliography style 'splncs04'.
-% References will then be sorted and formatted in the correct style.
-%
-% \bibliographystyle{splncs04}
-% \bibliography{mybibliography}
-%
+While various intelligent sports management systems exist \cite{ref_isms,ref_wiley}, they are rarely customized for the unique constraints of horse racing (e.g., dynamic jockey-horse assignments, specific time-penalty structures). Furthermore, while academic literature is rich with models predicting horse racing outcomes \cite{ref_benter,ref_doi_1,ref_nyc_blog,ref_pmc_predict}, these models are typically developed as standalone theoretical exercises rather than being integrated as microservices within a holistic tournament management platform. \textit{HorseTrack} fills this research gap by unifying robust administrative workflows with predictive AI within a single real-time ecosystem.
+
+\section{Related Work}
+The integration of information systems and artificial intelligence in sports management has been widely explored in recent literature.
+
+\subsection{Intelligent Sports Management Systems}
+Recent research emphasizes the shift from manual administrative tasks to automated, data-driven platforms. Studies on the design and implementation of intelligent sports management systems (ISMS) often highlight the utilization of sensor networks and centralized databases for real-time tracking and participant management \cite{ref_isms}. Similarly, generalized sports management architectures have been proposed to handle ticketing, scheduling, and result broadcasting \cite{ref_wiley}. However, these generalized systems lack the specialized entities required for horse racing, such as dynamic jockey assignments and pre-race veterinary checks.
+
+\subsection{Tournament Scheduling via Heuristics}
+In the context of scheduling, sports tournament scheduling is recognized as a highly constrained combinatorial optimization problem. Annotated bibliographies on sports scheduling emphasize the effectiveness of heuristic approaches in generating conflict-free schedules \cite{ref_scheduling_bib}. Genetic Algorithms (GA), which simulate the process of natural selection, have proven particularly effective in environments where multiple constraints (e.g., track availability, participant rest periods, avoiding overlapping assignments) must be satisfied simultaneously.
+
+\subsection{Predicting Horse Racing Outcomes}
+Predicting the outcome of horse races has garnered significant academic and practical interest due to the wealth of available statistical data. Early foundational work by Benter \cite{ref_benter} demonstrated the viability of computer-based handicapping and wagering systems using fundamental statistical models and multinomial logit formulations. 
+
+Recent advancements have leveraged modern machine learning techniques to improve prediction accuracy dramatically. Studies have successfully applied Multilayer Perceptron (MLP) Neural Networks, Support Vector Machines (SVM), and other ensemble methods to predict horse racing outcomes \cite{ref_doi_1,ref_nyc_blog,ref_pmc_predict}. These models analyze complex, non-linear variables such as horse weight, weather conditions, track surface status, and jockey experience. These studies demonstrate that environmental and physiological factors can be captured effectively to forecast race times. \textit{HorseTrack} builds upon these predictive concepts by integrating an ANN directly into the spectator portal.
+
+\section{System Architecture and Functional Design}
+
+\subsection{System Overview and Core Entities}
+\textit{HorseTrack} is designed around a modular philosophy: a \textit{Tournament} acts as a macro-container for multiple independent \textit{Races}. This approach simplifies the architecture by avoiding overly complex multi-stage knockout brackets, which are less common in standard horse racing, while fulfilling the primary requirements of a large-scale event.
+
+The system relies on a robust relational data model comprising several main entities:
+\begin{itemize}
+    \item \textbf{Tournament \& Race:} The core events. A race contains specific attributes such as distance, scheduled time, weather conditions, and a prize pool.
+    \item \textbf{Horse, Horse Owner \& Jockey:} The primary participants. Horses have distinct physical attributes (base speed, stamina, weight) critical for system simulation.
+    \item \textbf{Registration \& Jockey Invitation:} The transitional records mapping a horse to a race and managing a jockey's acceptance to ride for an owner.
+    \item \textbf{Race Check \& Violation:} Entities used by referees to record pre-race conditions and in-race infractions.
+    \item \textbf{Race Result \& Simulation:} The definitive outcome of a race. The system features a simulation engine that generates draft results based on parameters, which are later confirmed by referees.
+    \item \textbf{Reward Point Ledger, Wallet \& Cashout:} Financial entities that manage fiat deposits, virtual wallet balances, prize distributions, and real-world currency conversions.
+    \item \textbf{Bet (Prediction) \& VIP Subscriptions:} Spectator interactions predicting race winners, alongside premium AI prediction packages (AIPredictionPackage).
+    \item \textbf{Audit Logs:} Immutable records of critical system actions to ensure transparency and accountability.
+\end{itemize}
+
+\subsection{Role-Based Functional Modules}
+The platform enforces strict Role-Based Access Control (RBAC) across five distinct user roles, ensuring secure and streamlined operations.
+
+\subsubsection{1. Admin}
+The Administrator acts as the supreme overseer of the system. Their functionalities include:
+\begin{itemize}
+    \item \textbf{User and Authorization Management:} Creating accounts, assigning roles, and managing banning statuses.
+    \item \textbf{Tournament and Race Management:} Creating tournaments, defining individual races, and inputting environmental conditions.
+    \item \textbf{Financial and Audit Oversight:} Approving or rejecting Cashout Requests submitted by users attempting to convert reward points to fiat currency, and reviewing Audit Logs for system integrity.
+    \item \textbf{Result Publication:} Officially publishing race results, which triggers automated prize distributions and betting payouts.
+\end{itemize}
+
+\subsubsection{2. Horse Owner}
+The Horse Owner manages the equine athletes. Their workflows include:
+\begin{itemize}
+    \item \textbf{Horse Portfolio Management:} Registering new horses, uploading documentation, and updating physical metrics.
+    \item \textbf{Race Registration:} Browsing available tournaments and submitting horses for specific races.
+    \item \textbf{Jockey Assignment:} Browsing the roster of available jockeys and sending invitations to ride their horses.
+    \item \textbf{Financial Tracking:} Monitoring wallet balances, viewing prize histories, and submitting Cashout Requests.
+\end{itemize}
+
+\subsubsection{3. Jockey}
+The Jockey is the professional rider. Their application interface is focused on scheduling and performance tracking:
+\begin{itemize}
+    \item \textbf{Assignment Inbox:} Receiving, accepting, or declining ride invitations from Horse Owners.
+    \item \textbf{Schedule Tracking:} Viewing a personalized calendar of confirmed races to avoid logistical overlaps.
+    \item \textbf{Performance and Wallet Dashboard:} Tracking historical race results, monitoring accumulated reward points, and requesting cashouts.
+\end{itemize}
+
+\subsubsection{4. Race Referee}
+The Referee is responsible for the integrity of the race. They are provided with a mobile-responsive interface to be used on the field:
+\begin{itemize}
+    \item \textbf{Pre-Race Checks:} Conducting digital roll-calls for jockeys, and logging the health and equipment status of the horses.
+    \item \textbf{Violation Logging:} Recording infractions during the race. Violations are categorized by severity, which the system automatically translates into time penalties.
+    \item \textbf{Race Simulation and Result Confirmation:} Triggering the race simulation engine which calculates draft completion times based on horse attributes, jockey skills, and weather. The referee then applies violations to update the final rankings.
+\end{itemize}
+
+\subsubsection{5. Spectator}
+The Spectator interface focuses on engagement and entertainment:
+\begin{itemize}
+    \item \textbf{Live Tracking:} Viewing live updates of race statuses via WebSockets.
+    \item \textbf{Predictive Engagement (Betting):} Submitting predictions on race outcomes before a system-enforced lock time, using virtual reward points.
+    \item \textbf{VIP AI Insights:} Purchasing premium subscription packages (using fiat or wallet points) to view AI-generated predictions and recommendations to make informed betting decisions.
+\end{itemize}
+
+\subsection{Automated Workflows and Implementation Details}
+\textit{HorseTrack} implements business logic to handle complex calculations automatically. 
+\paragraph{Race Simulation and Penalties:} Rather than relying solely on physical tracking, the system features a virtual simulation engine. The referee initiates a simulation where the system calculates base times utilizing horse stats, jockey profiles, and weather conditions. It subsequently adds predefined penalty seconds (e.g., +3, +6, or +12 seconds) for logged violations. The final leaderboard is generated by sorting these adjusted times.
+\paragraph{Financial Ledger and Prize Distribution:} Upon the Admin publishing a race result, the system processes payouts. Spectators who bet correctly receive multiplied reward points. Furthermore, the total prize pool of the race is distributed to the high-ranking Horse Owners and officiating Referees via a secure Reward Point Ledger. Users can deposit fiat currency or request cashouts through the integrated Wallet service.
+\paragraph{Implementation Stack:} The system operates on a Mono-repo architecture. The backend is built with NestJS and MongoDB (Mongoose), providing robust REST APIs. The frontend utilizes Next.js App Router (React + TypeScript) for a responsive UI. Real-time updates, such as live race status changes and betting lockouts, are broadcasted using Socket.IO.
+
+\section{Artificial Intelligence Integration}
+To elevate the system from a standard CRUD application to an intelligent platform, \textit{HorseTrack} incorporates two primary AI modules designed to solve specific operational and engagement challenges.
+
+\subsection{POX-Heuristic Genetic Algorithm for Scheduling}
+Scheduling multiple races while accommodating the constraints of jockey availability, horse rest periods, and track maintenance is highly complex. We propose a Genetic Algorithm utilizing a Position-based Crossover (POX) heuristic.
+
+\begin{itemize}
+    \item \textbf{Chromosome Representation:} A schedule is represented as a chromosome, where genes correspond to individual races and their allocated time slots.
+    \item \textbf{Fitness Function:} The fitness score penalizes overlaps (e.g., a jockey assigned to two races occurring within 30 minutes of each other) and rewards optimal spacing and track utilization.
+    \item \textbf{Crossover and Mutation:} The POX method is particularly effective for scheduling problems because it preserves the relative ordering of non-conflicting assignments while swapping sub-schedules between parent chromosomes to explore better configurations.
+\end{itemize}
+This AI module acts as an intelligent assistant for the Admin, suggesting conflict-free tournament schedules in seconds.
+
+\subsection{Multilayer Feedforward ANN for VIP Outcome Prediction}
+To enhance spectator engagement and generate revenue, \textit{HorseTrack} features a predictive model to forecast race completion times and rankings, monetized via VIP subscription packages. We utilize a Multilayer Feedforward Artificial Neural Network characterized by an 8-5-7-1 architecture.
+
+\begin{itemize}
+    \item \textbf{Input Layer (8 Nodes):} The network ingests eight critical features: Horse Weight, Tournament Type, Trainer History, Jockey Experience Level, Horse Number (Starting Position), Race Distance, Track Surface Condition (e.g., Dry, Muddy), and Weather (Sunny, Rainy, Stormy).
+    \item \textbf{Hidden Layers (5 and 7 Nodes):} Two hidden layers employing ReLU (Rectified Linear Unit) activation functions map the non-linear physiological and environmental interactions.
+    \item \textbf{Output Layer (1 Node):} A single continuous output representing the predicted completion time in seconds.
+\end{itemize}
+By sorting the predicted completion times, the system generates a predicted ranking for the spectators. This model is intended to be trained on historical race data and exposed via a REST API (e.g., hosted on a NestJS backend) to provide low-latency predictions to the frontend client.
+
+\section{Expected Results and Evaluation Strategy}
+The deployment of \textit{HorseTrack} is expected to yield significant improvements over traditional management methods. 
+Administratively, the automated scheduling GA is expected to reduce the time required to draft a conflict-free tournament schedule by over 80\% compared to manual methods. The digital pre-race checks and automated time-penalty calculations will drastically reduce human tabulation errors and ensure fair play.
+From an AI perspective, the 8-5-7-1 ANN model aims to achieve a baseline prediction accuracy of approximately 75-80\% for predicting the top-3 placements, which is competitive with existing literature standards. The integration of WebSocket technology (e.g., Socket.IO) will ensure that spectators receive live updates and prediction lock-outs with sub-second latency.
+
+\section{Conclusion and Future Work}
+The \textit{HorseTrack} system provides a modern, scalable, and intelligent solution to the traditional challenges of horse racing management. By combining a robust, role-based web architecture with advanced AI modules for heuristic scheduling and outcome prediction, the platform not only digitizes tedious administrative tasks but also adds significant analytical value. It bridges the gap between disparate actors—owners, jockeys, referees, and spectators—into a unified digital ecosystem.
+
+Future research and development may involve expanding the system to handle complex multi-stage, seasonal tournament brackets. Furthermore, integrating Internet of Things (IoT) biometric sensors on horses and jockeys could feed real-time physiological data (e.g., heart rate, speed) directly into the ANN, transitioning the prediction model from a pre-race static forecast to a dynamic, live-updating prediction engine.
+
 \begin{thebibliography}{8}
-\bibitem{ref_article1}
-Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
 
-\bibitem{ref_lncs1}
-Author, F., Author, S.: Title of a proceedings paper. In: Editor,
-F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
-Springer, Heidelberg (2016). \doi{10.10007/1234567890}
+\bibitem{ref_isms}
+Author, A., et al.: Design and implementation of an intelligent sports management system (ISMS) using wireless sensor networks. ResearchGate (2025).
 
-\bibitem{ref_book1}
-Author, F., Author, S., Author, T.: Book title. 2nd edn. Publisher,
-Location (1999)
+\bibitem{ref_wiley}
+Author, B., et al.: Design and Implementation of Sports Management System. Wireless Communications and Mobile Computing, Hindawi (2022). \doi{10.1155/2022/4240244}
 
-\bibitem{ref_proc1}
-Author, A.-B.: Contribution title. In: 9th International Proceedings
-on Proceedings, pp. 1--2. Publisher, Location (2010)
+\bibitem{ref_scheduling_bib}
+Kendall, G., Knust, S., Ribeiro, C.C., Urrutia, S.: Scheduling in sports: An annotated bibliography. Computers \& Operations Research \textbf{37}(1), 1--19 (2010).
 
-\bibitem{ref_url1}
-LNCS Homepage, \url{http://www.springer.com/lncs}. Last accessed 4
-Oct 2017
+\bibitem{ref_benter}
+Benter, W.: Computer Based Horse Race Handicapping and Wagering Systems: A Report. In: Efficiency of Racetrack Betting Markets, pp. 183--198 (1994).
+
+\bibitem{ref_doi_1}
+Author, C., et al.: Predicting Horse Racing Outcomes. Journal of Knowledge and Science \textbf{30}(11) (2025). \doi{10.1142/S0219622025500221}
+
+\bibitem{ref_nyc_blog}
+NYC Data Science Academy: Predicting Horse Racing Outcomes. Capstone Project Blog (2023).
+
+\bibitem{ref_pmc_predict}
+Author, D., et al.: Prediction of Horse Racing results using machine learning. PMC \textbf{10654610} (2023).
+
 \end{thebibliography}
 \end{document}
