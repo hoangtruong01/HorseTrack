@@ -113,10 +113,10 @@ export default function JockeyWalletPage() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                Điểm khả dụng
+                Điểm
               </p>
               <p className="mt-1 font-mono text-xl font-black text-amber-500">
-                {balance.toLocaleString("vi-VN")} PTS
+                {balance.toLocaleString("vi-VN")} điểm
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -124,7 +124,7 @@ export default function JockeyWalletPage() {
                 Tổng thưởng nài ngựa
               </p>
               <p className="mt-1 font-mono text-xl font-black text-emerald-400">
-                {(stats?.totalPoints ?? 0).toLocaleString("vi-VN")} PTS
+                {(stats?.totalPoints ?? 0).toLocaleString("vi-VN")} điểm
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">

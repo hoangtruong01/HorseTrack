@@ -72,8 +72,8 @@ export default function RefereeWalletPage() {
           {/* Hàng thẻ KPI nghiệp vụ thực tế */}
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Điểm khả dụng</p>
-              <p className="mt-1 font-mono text-xl font-black text-amber-500">{balance.toLocaleString("vi-VN")} PTS</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Điểm</p>
+              <p className="mt-1 font-mono text-xl font-black text-amber-500">{balance.toLocaleString("vi-VN")} điểm</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Trận được phân công</p>

@@ -110,22 +110,52 @@ export class PredictionsService {
       }
     }
 
-    const session = await this.connection.startSession();
     let prediction: PredictionDocument;
+    // Try with transaction; fall back to non-transactional for standalone MongoDB
     try {
-      await session.withTransaction(async () => {
-        [prediction] = await this.predictionModel.create(
-          [
-            {
-              raceId: new Types.ObjectId(dto.raceId),
-              userId: new Types.ObjectId(userId),
-              predictedHorseId: new Types.ObjectId(dto.predictedHorseId),
-              status: PredictionStatus.PENDING,
-              betPoints: betAmount,
-            },
-          ],
-          { session },
-        );
+      const session = await this.connection.startSession();
+      try {
+        await session.withTransaction(async () => {
+          [prediction] = await this.predictionModel.create(
+            [
+              {
+                raceId: new Types.ObjectId(dto.raceId),
+                userId: new Types.ObjectId(userId),
+                predictedHorseId: new Types.ObjectId(dto.predictedHorseId),
+                status: PredictionStatus.PENDING,
+                betPoints: betAmount,
+              },
+            ],
+            { session },
+          );
+          if (betAmount >= 2) {
+            await this.ledgerService.debit({
+              userId,
+              points: betAmount,
+              sourceType: LedgerSourceType.PREDICTION_REWARD,
+              sourceId: String(prediction!._id),
+              note: `Đặt cược dự đoán ${betAmount} điểm cho trận đấu ${race.name}`,
+              session,
+            });
+          }
+        });
+      } finally {
+        await session.endSession();
+      }
+    } catch (err) {
+      // Standalone MongoDB: fall back to non-transactional
+      if (
+        err instanceof Error &&
+        (err.message.includes('sharded cluster') ||
+          err.message.includes('transaction'))
+      ) {
+        prediction = await this.predictionModel.create({
+          raceId: new Types.ObjectId(dto.raceId),
+          userId: new Types.ObjectId(userId),
+          predictedHorseId: new Types.ObjectId(dto.predictedHorseId),
+          status: PredictionStatus.PENDING,
+          betPoints: betAmount,
+        });
         if (betAmount >= 2) {
           await this.ledgerService.debit({
             userId,
@@ -133,12 +163,11 @@ export class PredictionsService {
             sourceType: LedgerSourceType.PREDICTION_REWARD,
             sourceId: String(prediction!._id),
             note: `Đặt cược dự đoán ${betAmount} điểm cho trận đấu ${race.name}`,
-            session,
           });
         }
-      });
-    } finally {
-      await session.endSession();
+      } else {
+        throw err;
+      }
     }
     return prediction!;
   }

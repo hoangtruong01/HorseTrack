@@ -89,18 +89,54 @@ export class RewardPointLedgerService {
     if (params.session) {
       return this.creditCore(params, params.session);
     }
-    const session = await this.connection.startSession();
+    // Try with transaction; fall back to non-transactional for standalone MongoDB
+    let session: import('mongoose').ClientSession | undefined;
     try {
+      session = await this.connection.startSession();
       session.startTransaction();
       const entry = await this.creditCore(params, session);
       await session.commitTransaction();
       return entry;
     } catch (err) {
-      if (session.inTransaction()) await session.abortTransaction();
+      if (session && session.inTransaction()) await session.abortTransaction();
+      // Standalone MongoDB: fall back to non-transactional
+      if (
+        err instanceof Error &&
+        (err.message.includes('sharded cluster') ||
+          err.message.includes('transaction') ||
+          err.name === 'MongoServerError')
+      ) {
+        return this.creditCoreNoSession(params);
+      }
       throw err;
     } finally {
-      await session.endSession();
+      if (session) await session.endSession();
     }
+  }
+
+  private async creditCoreNoSession(
+    params: LedgerParams,
+  ): Promise<RewardPointLedgerDocument> {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        params.userId,
+        { $inc: { points: params.points } },
+        { new: true },
+      )
+      .exec();
+
+    const balanceAfter = updatedUser?.points ?? params.points;
+
+    const entry = await this.ledgerModel.create({
+      userId: new Types.ObjectId(params.userId),
+      sourceType: params.sourceType,
+      sourceId: params.sourceId,
+      pointsDelta: params.points,
+      balanceAfter,
+      note: params.note,
+      createdBy: params.createdBy,
+    });
+    return entry;
   }
 
   async updateNote(
@@ -157,18 +193,62 @@ export class RewardPointLedgerService {
     if (params.session) {
       return this.debitCore(params, params.session);
     }
-    const session = await this.connection.startSession();
+    // Try with transaction; fall back to non-transactional for standalone MongoDB
+    let session: import('mongoose').ClientSession | undefined;
     try {
+      session = await this.connection.startSession();
       session.startTransaction();
       const entry = await this.debitCore(params, session);
       await session.commitTransaction();
       return entry;
     } catch (err) {
-      if (session.inTransaction()) await session.abortTransaction();
+      if (session && session.inTransaction()) await session.abortTransaction();
+      // Standalone MongoDB: fall back to non-transactional
+      if (
+        err instanceof Error &&
+        (err.message.includes('sharded cluster') ||
+          err.message.includes('transaction') ||
+          err.name === 'MongoServerError')
+      ) {
+        return this.debitCoreNoSession(params);
+      }
       throw err;
     } finally {
-      await session.endSession();
+      if (session) await session.endSession();
     }
+  }
+
+  private async debitCoreNoSession(
+    params: LedgerParams,
+  ): Promise<RewardPointLedgerDocument> {
+    const updatedUser = await this.userModel
+      .findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(params.userId),
+          points: { $gte: params.points },
+        },
+        { $inc: { points: -params.points } },
+        { new: true },
+      )
+      .exec();
+
+    if (!updatedUser) {
+      const currentBalance = await this.getBalance(params.userId);
+      throw new BadRequestException(
+        `Insufficient points. Current balance: ${currentBalance}, required: ${params.points}`,
+      );
+    }
+
+    const entry = await this.ledgerModel.create({
+      userId: new Types.ObjectId(params.userId),
+      sourceType: params.sourceType,
+      sourceId: params.sourceId,
+      pointsDelta: -params.points,
+      balanceAfter: updatedUser.points,
+      note: params.note,
+      createdBy: params.createdBy,
+    });
+    return entry;
   }
 
   async findByUser(userId: string, page = 1, limit = 20) {
