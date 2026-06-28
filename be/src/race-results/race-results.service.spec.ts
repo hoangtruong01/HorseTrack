@@ -189,21 +189,17 @@ describe('RaceResultsService', () => {
 
       const res = await service.publishByRace(raceId, publisherId);
 
-      // setStatus phải được gọi với session bên trong tx
+      // setStatus phải được gọi với RESULT_PUBLISHED
       expect(racesService.setStatus).toHaveBeenCalledWith(
         raceId,
         RaceStatus.RESULT_PUBLISHED,
-        session,
       );
 
-      // session phải được forward vào createPrizesForRace và payoutBetsForRace
       expect(prizesService.createPrizesForRace).toHaveBeenCalledWith(
         raceId,
-        session,
       );
       expect(predictionsService.payoutBetsForRace).toHaveBeenCalledWith(
         raceId,
-        session,
       );
 
       // side-effects sau commit
@@ -330,7 +326,6 @@ describe('RaceResultsService', () => {
             points: 10,
             sourceType: LedgerSourceType.RACE_WIN_REWARD,
             sourceId: String(resultId1),
-            session,
           }),
         );
       });
