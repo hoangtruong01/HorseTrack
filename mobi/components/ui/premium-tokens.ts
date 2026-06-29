@@ -62,6 +62,11 @@ export const premiumSpacing = {
   32: 32,
   40: 40,
   48: 48,
+  56: 56,
+  64: 64,
+  80: 80,
+  96: 96,
+  120: 120,
 };
 
 export const premiumRadius = {

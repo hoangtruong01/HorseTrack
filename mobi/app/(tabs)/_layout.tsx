@@ -30,14 +30,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="wallet"
-        options={{
-          title: 'Dự Đoán',
-          headerTitle: 'VÍ ĐIỂM & DỰ ĐOÁN',
-          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-balance-wallet" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           title: 'Cá Nhân',

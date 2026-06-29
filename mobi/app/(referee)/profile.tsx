@@ -123,11 +123,27 @@ export default function RefereeProfile() {
 
     let formattedDobInput = '';
     if (user?.dob) {
-      const match = user.dob.match(/^(\d{4}-\d{2}-\d{2})/);
-      formattedDobInput = match ? match[1] : user.dob;
+      const parts = user.dob.split('T')[0].split('-');
+      if (parts.length === 3) {
+        formattedDobInput = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      } else {
+        formattedDobInput = user.dob;
+      }
     }
     setEditDob(formattedDobInput);
     setIsEditModalVisible(true);
+  };
+
+  const handleDobChange = (text: string) => {
+    let cleaned = text.replace(/\D/g, '');
+    let formatted = cleaned;
+    if (cleaned.length > 2) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    }
+    if (cleaned.length > 4) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+    }
+    setEditDob(formatted);
   };
 
   const handleSaveProfile = async () => {
@@ -138,16 +154,16 @@ export default function RefereeProfile() {
 
     let dobToSave = editDob.trim();
     if (dobToSave) {
-      const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
+      const dobRegex = /^\d{2}\/\d{2}\/\d{4}$/;
       if (!dobRegex.test(dobToSave)) {
-        Alert.alert('Lỗi', 'Ngày sinh phải có định dạng YYYY-MM-DD (ví dụ: 1995-08-20)');
+        Alert.alert('Lỗi', 'Ngày sinh phải có định dạng DD/MM/YYYY (ví dụ: 20/08/1995)');
         return;
       }
 
-      const parts = dobToSave.split('-');
-      const year = parseInt(parts[0], 10);
+      const parts = dobToSave.split('/');
+      const day = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10);
-      const day = parseInt(parts[2], 10);
+      const year = parseInt(parts[2], 10);
 
       const date = new Date(year, month - 1, day);
       if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
@@ -159,6 +175,8 @@ export default function RefereeProfile() {
         Alert.alert('Lỗi', 'Ngày sinh không thể ở tương lai');
         return;
       }
+
+      dobToSave = `${year}-${parts[1]}-${parts[0]}`;
     }
 
     setIsSaving(true);
@@ -504,13 +522,15 @@ export default function RefereeProfile() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Ngày sinh (YYYY-MM-DD)</Text>
+                <Text style={styles.inputLabel}>Ngày sinh (DD/MM/YYYY)</Text>
                 <TextInput
                   style={styles.textInput}
                   value={editDob}
-                  onChangeText={setEditDob}
-                  placeholder="Ví dụ: 1995-08-20"
+                  onChangeText={handleDobChange}
+                  placeholder="Ví dụ: 20/08/1995"
                   placeholderTextColor={theme.textMuted}
+                  keyboardType="numeric"
+                  maxLength={10}
                 />
               </View>
 

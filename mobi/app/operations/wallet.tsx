@@ -2,12 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, RefreshControl } from 'react-native';
 import { Section } from '@/components/ui/premium';
 import { premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
-import { EmptyState, ErrorState, LoadingState, formatDateTime, useThemeColors } from '@/components/ui/shared';
-import { rewardPointLedgerApi, walletApi } from '@/lib/api-client';
+import { EmptyState, ErrorState, LoadingState, formatDateTime, statusLabel, useThemeColors } from '@/components/ui/shared';
+import { rewardPointLedgerApi, predictionsApi, walletApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAuth } from '@/providers/auth-provider';
 
 // Background Pattern
 const GridBackground = ({ isDark }: { isDark: boolean }) => {
@@ -18,7 +19,7 @@ const GridBackground = ({ isDark }: { isDark: boolean }) => {
   );
 };
 
-export default function OwnerWallet() {
+export default function SharedWallet() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const theme = useThemeColors();
@@ -26,35 +27,49 @@ export default function OwnerWallet() {
   const isDark = colorScheme === 'dark';
   const premiumColors = usePremiumColors();
   const styles = React.useMemo(() => getStyles(premiumColors, isDark, theme, insets), [premiumColors, isDark, theme, insets]);
+  const { user } = useAuth();
+  
+  const isSpectator = user?.roles?.includes('spectator') || user?.roles?.[0] === 'spectator';
 
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState<any[]>([]);
   const [cashouts, setCashouts] = useState<any[]>([]);
+  const [predictions, setPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [redeemAmount, setRedeemAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<'transactions' | 'cashouts'>('transactions');
+  const [activeTab, setActiveTab] = useState<'transactions' | 'predictions' | 'cashouts'>('transactions');
 
   const loadData = useCallback(async () => {
     setError(null);
     try {
-      const [balanceRes, historyRes, cashoutsRes] = await Promise.all([
+      const apiCalls: Promise<any>[] = [
         rewardPointLedgerApi.myBalance(),
         rewardPointLedgerApi.myHistory({ limit: 50 }),
         walletApi.myCashouts({ limit: 20 }).catch(() => ({ data: [] })),
-      ]);
+      ];
+      
+      if (isSpectator) {
+        apiCalls.push(predictionsApi.listMyPredictions({ limit: 50 }).catch(() => ({ data: [] })));
+      } else {
+        apiCalls.push(Promise.resolve({ data: [] })); // Dummy for non-spectators
+      }
+
+      const [balanceRes, historyRes, cashoutsRes, predictionsRes] = await Promise.all(apiCalls);
+      
       setBalance(balanceRes.balance ?? 0);
       setHistory(historyRes.data || []);
       setCashouts((cashoutsRes as any).data || []);
+      setPredictions((predictionsRes as any).data || []);
     } catch (err: any) {
       setError(err.message || 'Không thể tải ví thưởng. Vui lòng thử lại.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [isSpectator]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -87,7 +102,14 @@ export default function OwnerWallet() {
     }
   };
 
-  if (loading && !refreshing) return <LoadingState />;
+  if (loading && !refreshing) {
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <LoadingState />
+      </>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -98,7 +120,7 @@ export default function OwnerWallet() {
       <View style={styles.customHeader}>
         <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.headerTitle}>VÍ CHỦ NGỰA</Text>
+            <Text style={styles.headerTitle}>VÍ ĐIỂM & GIAO DỊCH</Text>
           </View>
         </View>
         <View style={styles.headerLeft}>
@@ -129,6 +151,9 @@ export default function OwnerWallet() {
             <Text style={styles.balanceValue}>{balance.toLocaleString()}</Text>
             <Text style={styles.balanceUnit}> Pts</Text>
           </View>
+          {isSpectator && (
+             <Text style={styles.balanceHint}>Dự đoán đúng nhận thưởng điểm, sai trừ điểm theo cấu hình hệ thống.</Text>
+          )}
         </View>
 
         {/* ── Segments Options ── */}
@@ -138,14 +163,23 @@ export default function OwnerWallet() {
             onPress={() => setActiveTab('transactions')}
             activeOpacity={0.8}
           >
-            <Text style={[styles.segmentText, activeTab === 'transactions' && styles.segmentTextActive]}>Lịch sử giao dịch</Text>
+            <Text style={[styles.segmentText, activeTab === 'transactions' && styles.segmentTextActive]}>Giao dịch</Text>
           </TouchableOpacity>
+          {isSpectator && (
+            <TouchableOpacity
+              style={[styles.segmentBtn, activeTab === 'predictions' && styles.segmentBtnActive]}
+              onPress={() => setActiveTab('predictions')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.segmentText, activeTab === 'predictions' && styles.segmentTextActive]}>Dự đoán</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={[styles.segmentBtn, activeTab === 'cashouts' && styles.segmentBtnActive]}
             onPress={() => setActiveTab('cashouts')}
             activeOpacity={0.8}
           >
-            <Text style={[styles.segmentText, activeTab === 'cashouts' && styles.segmentTextActive]}>Yêu cầu quy đổi</Text>
+            <Text style={[styles.segmentText, activeTab === 'cashouts' && styles.segmentTextActive]}>Quy đổi</Text>
           </TouchableOpacity>
         </View>
 
@@ -164,7 +198,7 @@ export default function OwnerWallet() {
                   return (
                     <View key={item._id || item.id} style={styles.rowItem}>
                       <View style={styles.rowAvatar}>
-                        <MaterialIcons name="payment" size={20} color={premiumColors.textSecondary} />
+                        <MaterialIcons name="swap-vert" size={20} color={premiumColors.textSecondary} />
                       </View>
                       <View style={styles.rowInfo}>
                         <Text style={styles.rowTitle} numberOfLines={1}>{item.note || 'Giao dịch điểm thưởng'}</Text>
@@ -178,6 +212,73 @@ export default function OwnerWallet() {
                         </Text>
                       </View>
                     </View>
+                  );
+                })}
+              </View>
+            )}
+          </Section>
+        ) : activeTab === 'predictions' && isSpectator ? (
+          <Section title={`Lịch sử dự đoán (${predictions.length})`}>
+            {predictions.length === 0 ? (
+              <View style={styles.emptyWrap}>
+                <EmptyState icon="psychology" title="Chưa có dự đoán" subtitle="Bạn chưa đặt dự đoán cho trận đua nào. Hãy vào Giải đấu để bắt đầu!" />
+                <TouchableOpacity
+                  style={styles.emptyBtn}
+                  onPress={() => router.push('/(spectator)/tournaments' as any)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.emptyBtnText}>Tạo dự đoán đầu tiên</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.listContainer}>
+                {predictions.map((p) => {
+                  const st = statusLabel(p.status);
+                  const horse = typeof p.predictedHorseId === 'object' ? p.predictedHorseId?.name : 'Ngựa';
+                  const race = typeof p.raceId === 'object' ? p.raceId?.name : 'Trận đua';
+                  const rId = typeof p.raceId === 'object' ? p.raceId?._id : p.raceId;
+                  
+                  // Calculate points gain/loss display
+                  let rewardDisplay = '';
+                  let rewardColor = premiumColors.textSecondary;
+                  if (p.status === 'WON') {
+                    rewardDisplay = `+${p.rewardPoints || 0} Pts`;
+                    rewardColor = premiumColors.success;
+                  } else if (p.status === 'LOST') {
+                    rewardDisplay = `-${p.betPoints || 0} Pts`;
+                    rewardColor = premiumColors.danger;
+                  } else if (p.status === 'PENDING') {
+                    rewardDisplay = 'Đang chờ';
+                    rewardColor = premiumColors.warning;
+                  } else {
+                    rewardDisplay = st.label;
+                  }
+
+                  return (
+                    <TouchableOpacity
+                      key={p._id || p.id}
+                      style={styles.rowItem}
+                      onPress={rId ? () => router.push(`/(spectator)/race/${rId}` as any) : undefined}
+                      activeOpacity={rId ? 0.7 : 1}
+                    >
+                      <View style={styles.rowAvatar}>
+                        <MaterialIcons name="psychology" size={20} color={premiumColors.textSecondary} />
+                      </View>
+                      <View style={styles.rowInfo}>
+                        <Text style={styles.rowTitle} numberOfLines={1}>{horse}</Text>
+                        <Text style={styles.rowSubtitle} numberOfLines={1}>
+                          {`Trận: ${race} · ${formatDateTime(p.createdAt)}`}
+                        </Text>
+                      </View>
+                      <View style={styles.rowRight}>
+                        <Text style={[styles.deltaText, { color: rewardColor }]}>
+                          {rewardDisplay}
+                        </Text>
+                      </View>
+                      {rId && (
+                        <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} style={{ marginLeft: 4 }} />
+                      )}
+                    </TouchableOpacity>
                   );
                 })}
               </View>
@@ -308,6 +409,7 @@ const getStyles = (premiumColors: any, isDark: boolean, theme: any, insets: any)
   balanceRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    marginBottom: premiumSpacing[4],
   },
   balanceValue: {
     fontSize: 48,
@@ -319,6 +421,13 @@ const getStyles = (premiumColors: any, isDark: boolean, theme: any, insets: any)
     fontWeight: '700',
     color: premiumColors.textSecondary,
     marginLeft: 4,
+  },
+  balanceHint: {
+    fontSize: 12,
+    color: premiumColors.textMuted,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginTop: premiumSpacing[8],
   },
 
   // ── Segments ──
@@ -445,5 +554,24 @@ const getStyles = (premiumColors: any, isDark: boolean, theme: any, insets: any)
   deltaText: {
     fontSize: 14,
     fontWeight: '700',
+  },
+
+  // ── Empty State ──
+  emptyWrap: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  emptyBtn: {
+    backgroundColor: premiumColors.brand,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 22,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  emptyBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
   },
 });

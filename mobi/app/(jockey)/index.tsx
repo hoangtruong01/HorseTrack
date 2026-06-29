@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { jockeyInvitationsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -60,7 +61,8 @@ export default function JockeyHome() {
   const totalCount = invitations.length;
 
   return (
-    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh}>
+    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={false}>
+      <SleekHeader title="TRANG CHỦ" showWallet={true} />
       {/* ── Hero – flat athlete operations ── */}
       <View style={styles.hero}>
         <Text style={styles.heroEyebrow}>RACE JOCKEY</Text>

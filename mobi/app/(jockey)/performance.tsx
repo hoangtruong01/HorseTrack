@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { AppScreen } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/shared';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { jockeyInvitationsApi } from '@/lib/api-client';
 
 export default function JockeyPerformance() {
@@ -28,7 +29,8 @@ export default function JockeyPerformance() {
   if (loading) return <LoadingState />;
 
   return (
-    <AppScreen scroll>
+    <AppScreen scroll safeArea={false}>
+      <SleekHeader title="THÀNH TÍCH" showWallet={true} />
       <View style={styles.content}>
         
         {/* ── Summary Card ── */}
