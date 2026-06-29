@@ -63,7 +63,7 @@ export function RaceRegistrationForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 bg-[#15151E] border border-border/10 rounded-2xl p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)] max-w-2xl mx-auto"
+      className="space-y-6 bg-card border border-border rounded-2xl p-6 md:p-8 shadow-[0_18px_56px_rgba(0,0,0,0.28)] max-w-2xl mx-auto"
     >
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
@@ -75,25 +75,25 @@ export function RaceRegistrationForm({
       </div>
 
       {errorMsg && (
-        <div className="rounded-xl border border-[#E10600] bg-[#E10600]/10 p-4 text-sm text-[#E0DEDC]">
-          <span className="font-bold text-[#E10600] uppercase block mb-1">Lỗi đăng ký</span>
+        <div className="rounded-xl border border-destructive bg-destructive/10 p-4 text-sm text-foreground">
+          <span className="font-bold text-destructive uppercase block mb-1">Lỗi đăng ký</span>
           {errorMsg}
         </div>
       )}
 
       {/* Race Overview Card */}
-      <div className="rounded-xl border border-border/5 bg-muted/[0.01] p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-3">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-black text-lg text-foreground uppercase">{race.name}</h3>
             <p className="text-xs text-muted-foreground/60 uppercase tracking-widest">{race.tournamentName || "Giải tự do"}</p>
           </div>
-          <span className="text-xs font-mono text-muted-foreground bg-muted/5 border border-border/10 px-2 py-1 rounded">
+          <span className="text-xs font-mono text-muted-foreground bg-muted border border-border px-2 py-1 rounded">
             {race.distance} · {race.surface}
           </span>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground pt-2 border-t border-border/5">
+        <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
           <div>
             <span className="text-muted-foreground/60 block uppercase tracking-widest text-[9px] mb-0.5">Thời gian</span>
             <p className="text-foreground font-mono font-bold">{race.date} · {race.startTime}</p>
@@ -107,12 +107,12 @@ export function RaceRegistrationForm({
 
       {/* Horse Selection Section */}
       <div className="space-y-3">
-        <label className="text-xs font-black uppercase tracking-[0.16em] text-white/55">
+        <label className="text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">
           Lựa chọn Chiến Mã Đăng Ký
         </label>
         
         {horses.length === 0 ? (
-          <div className="rounded-xl border border-border/5 bg-muted/[0.01] p-6 text-center text-sm text-muted-foreground/60">
+          <div className="rounded-xl border border-border bg-muted/40 p-6 text-center text-sm text-muted-foreground">
             Bạn chưa đăng ký chiến mã nào trong hệ thống. Vui lòng thêm chiến mã vào chuồng trước khi đăng ký trận đua.
           </div>
         ) : (
@@ -120,13 +120,13 @@ export function RaceRegistrationForm({
             <select
               value={selectedHorseId}
               onChange={(e) => setSelectedHorseId(e.target.value)}
-              className="h-11 w-full rounded-xl border border-border/10 bg-muted/[0.04] px-4 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15"
+              className="h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
             >
-              <option value="" className="bg-[#15151E]">-- Chọn chiến mã khỏe mạnh --</option>
-              
+              <option value="" className="bg-popover text-popover-foreground">-- Chọn chiến mã khỏe mạnh --</option>
+
               {/* Eligible Horses group */}
               {eligibleHorses.length > 0 && (
-                <optgroup label="ĐỦ ĐIỀU KIỆN ĐĂNG KÝ" className="bg-[#15151E] text-green-400 font-bold">
+                <optgroup label="ĐỦ ĐIỀU KIỆN ĐĂNG KÝ" className="bg-popover text-green-400 font-bold">
                   {eligibleHorses.map((h) => (
                     <option key={h.id} value={h.id} className="text-foreground">
                       {h.name} ({h.breed || "Không rõ giống"}) - Tốc độ: {h.baseSpeed} km/h
@@ -137,7 +137,7 @@ export function RaceRegistrationForm({
 
               {/* Ineligible Horses group */}
               {ineligibleHorses.length > 0 && (
-                <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHƯA DUYỆT/CHẤN THƯƠNG/GIẢI NGHỆ)" className="bg-[#15151E] text-red-500 font-bold" disabled>
+                <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHƯA DUYỆT/CHẤN THƯƠNG/GIẢI NGHỆ)" className="bg-popover text-red-500 font-bold" disabled>
                   {ineligibleHorses.map((h) => (
                     <option key={h.id} value={h.id} disabled className="text-muted-foreground/60">
                       {h.name} - {
@@ -161,7 +161,7 @@ export function RaceRegistrationForm({
                   <p className="text-muted-foreground">
                     Chiến mã ở trạng thái thể lực rất tốt. Đủ điều kiện kỹ thuật để ghi danh thi đấu.
                   </p>
-                  <div className="grid grid-cols-2 gap-4 mt-2 pt-2 border-t border-border/5 text-muted-foreground">
+                  <div className="grid grid-cols-2 gap-4 mt-2 pt-2 border-t border-border text-muted-foreground">
                     <p>Tốc độ nền: <span className="text-foreground font-bold">{selectedHorse.baseSpeed} km/h</span></p>
                     <p>Thể lực: <span className="text-foreground font-bold">{selectedHorse.staminaScore}/100</span></p>
                   </div>
@@ -173,19 +173,19 @@ export function RaceRegistrationForm({
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-border/5">
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
         <Button
           type="button"
           onClick={onCancel}
           variant="outline"
-          className="rounded-xl px-5 h-11 border border-border/10 hover:bg-muted/5 text-foreground"
+          className="rounded-xl px-5 h-11 border border-border hover:bg-muted text-foreground"
         >
           Hủy bỏ
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting || !selectedHorseId}
-          className="rounded-xl px-6 h-11 bg-[#E10600] hover:bg-[#B80500] text-foreground flex items-center gap-2 font-bold uppercase text-xs tracking-wider disabled:opacity-40"
+          className="rounded-xl px-6 h-11 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2 font-bold uppercase text-xs tracking-wider disabled:opacity-40"
         >
           {isSubmitting ? (
             <>

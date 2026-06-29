@@ -81,4 +81,17 @@ export class NotificationsService {
     );
     return { modifiedCount: result.modifiedCount };
   }
+
+  async remove(id: string, userId: string): Promise<{ deleted: boolean }> {
+    const result = await this.notificationModel.deleteOne({ _id: id, userId });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('Notification not found');
+    }
+    return { deleted: true };
+  }
+
+  async removeAll(userId: string): Promise<{ deletedCount: number }> {
+    const result = await this.notificationModel.deleteMany({ userId });
+    return { deletedCount: result.deletedCount };
+  }
 }

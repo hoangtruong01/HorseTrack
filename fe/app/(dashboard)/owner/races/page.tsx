@@ -332,7 +332,7 @@ export default function OwnerRacesBrowserPage() {
                       return (
                         <article
                           key={raceId}
-                          className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 hover:bg-[#1C1C25] flex flex-col justify-between min-h-[260px]"
+                          className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 hover:bg-muted/50 flex flex-col justify-between min-h-[260px]"
                         >
                           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-white/20 to-transparent" />
                           <div className="absolute -right-12 -top-12 size-36 rounded-full bg-primary/5 blur-3xl transition group-hover:bg-primary/15" />
@@ -392,7 +392,7 @@ export default function OwnerRacesBrowserPage() {
                                   Trận đấu đã đầy
                                 </Button>
                               ) : (
-                                <Button asChild className="rounded-xl flex-1 text-xs py-2 h-9 bg-[#E10600] hover:bg-[#B80500] text-foreground font-bold uppercase tracking-wider">
+                                <Button asChild className="rounded-xl flex-1 text-xs py-2 h-9 bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider">
                                   <Link href={`/owner/races/${raceId}/register`}>
                                     Ghi danh ngay <ArrowRight className="size-3.5 ml-1" />
                                   </Link>
@@ -424,7 +424,7 @@ export default function OwnerRacesBrowserPage() {
               onClick={fetchRegistrations}
               variant="outline"
               size="sm"
-              className="rounded-xl bg-muted hover:bg-white/10 border-border h-8"
+              className="rounded-xl bg-muted hover:bg-muted/60 border-border h-8"
               disabled={loadingRegistrations}
             >
               {loadingRegistrations ? (
