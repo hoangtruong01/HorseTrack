@@ -14,15 +14,31 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ email và mật khẩu.');
-      return;
+    let hasError = false;
+    
+    if (!email.trim()) {
+      setEmailError('Vui lòng nhập email');
+      hasError = true;
+    } else {
+      setEmailError('');
     }
+
+    if (!password) {
+      setPasswordError('Vui lòng nhập mật khẩu');
+      hasError = true;
+    } else {
+      setPasswordError('');
+    }
+
+    if (hasError) return;
+
     setLoading(true);
     try {
       await login(email, password);
@@ -81,26 +97,33 @@ export default function LoginScreen() {
 
               <View style={styles.formContainer}>
                 <Text style={styles.label}>EMAIL ĐĂNG NHẬP</Text>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="mail-outline" size={20} color={colors.textMuted} style={styles.inputIcon} />
+                <View style={[styles.inputWrapper, emailError ? styles.inputWrapperError : null]}>
+                  <Ionicons name="mail-outline" size={20} color={emailError ? (colors.danger || '#ef4444') : colors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      if (emailError) setEmailError('');
+                    }}
                     placeholder="email@example.com"
                     placeholderTextColor={colors.textMuted}
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
                 </View>
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
                 <Text style={styles.label}>MẬT KHẨU</Text>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="lock-closed-outline" size={20} color={colors.textMuted} style={styles.inputIcon} />
+                <View style={[styles.inputWrapper, passwordError ? styles.inputWrapperError : null]}>
+                  <Ionicons name="lock-closed-outline" size={20} color={passwordError ? (colors.danger || '#ef4444') : colors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (passwordError) setPasswordError('');
+                    }}
                     placeholder="nhập mật khẩu"
                     placeholderTextColor={colors.textMuted}
                     secureTextEntry={!showPassword}
@@ -118,6 +141,7 @@ export default function LoginScreen() {
                     />
                   </TouchableOpacity>
                 </View>
+                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
                 <TouchableOpacity
                   onPress={() => Alert.alert('Quên mật khẩu', 'Vui lòng liên hệ quản trị viên hoặc kiểm tra email của bạn để thiết lập lại mật khẩu.')}
@@ -315,6 +339,16 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     height: '100%',
+  },
+  inputWrapperError: {
+    borderColor: colors.danger || '#ef4444',
+    marginBottom: 4,
+  },
+  errorText: {
+    color: colors.danger || '#ef4444',
+    fontSize: 11,
+    marginBottom: premiumSpacing[16],
+    marginLeft: 4,
   },
   eyeButton: {
     padding: 6,

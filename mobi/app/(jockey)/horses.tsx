@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
 import { AppScreen } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/shared';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { jockeyInvitationsApi } from '@/lib/api-client';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -105,12 +106,8 @@ export default function JockeyHorsesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>CHIẾN MÃ ĐƯỢC PHÂN CÔNG</Text>
-        <Text style={styles.title}>Danh sách chiến mã</Text>
-        <View style={styles.accentLine} />
-      </View>
+    <AppScreen safeArea={false} style={styles.container}>
+      <SleekHeader title="CHIẾN MÃ" showWallet={true} />
 
       <FlatList
         data={horsesData}
@@ -134,7 +131,7 @@ export default function JockeyHorsesScreen() {
           )
         }
       />
-    </SafeAreaView>
+    </AppScreen>
   );
 }
 

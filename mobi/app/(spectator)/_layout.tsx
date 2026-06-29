@@ -44,7 +44,7 @@ export default function SpectatorLayout() {
   return (
     <Tabs 
       tabBar={(props) => <DockTabBar {...props} />}
-      screenOptions={{ ...dockOptions }}
+      screenOptions={{ ...dockOptions, headerShown: false }}
     >
       <Tabs.Screen name="index" options={{ title: 'Trang chủ', headerShown: false, tabBarIcon: ({ color }) => <MaterialIcons size={24} name="home" color={color} /> }} />
       <Tabs.Screen name="tournaments" options={{ title: 'Giải đấu', headerShown: false, tabBarIcon: ({ color }) => <MaterialIcons size={24} name="emoji-events" color={color} /> }} />

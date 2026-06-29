@@ -324,20 +324,20 @@ export default function RegisterScreen() {
                     </View>
                     <View style={styles.reqList}>
                       <View style={styles.reqItem}>
-                        <Ionicons name={hasUpperCase ? "checkmark-circle" : "ellipse-outline"} size={14} color={hasUpperCase ? '#34C759' : colors.textMuted} />
-                        <Text style={[styles.reqText, { color: hasUpperCase ? '#34C759' : colors.textMuted }]}>ít nhất 1 chữ in hoa</Text>
+                        <Ionicons name={hasMinLength ? "checkmark-circle" : "ellipse-outline"} size={14} color={hasMinLength ? '#34C759' : colors.textMuted} />
+                        <Text style={[styles.reqText, { color: hasMinLength ? '#34C759' : colors.textMuted }]}>Ít nhất 8 ký tự</Text>
                       </View>
                       <View style={styles.reqItem}>
                         <Ionicons name={hasLowerCase ? "checkmark-circle" : "ellipse-outline"} size={14} color={hasLowerCase ? '#34C759' : colors.textMuted} />
-                        <Text style={[styles.reqText, { color: hasLowerCase ? '#34C759' : colors.textMuted }]}>ít nhất 1 chữ thường</Text>
+                        <Text style={[styles.reqText, { color: hasLowerCase ? '#34C759' : colors.textMuted }]}>1 chữ viết thường</Text>
+                      </View>
+                      <View style={styles.reqItem}>
+                        <Ionicons name={hasUpperCase ? "checkmark-circle" : "ellipse-outline"} size={14} color={hasUpperCase ? '#34C759' : colors.textMuted} />
+                        <Text style={[styles.reqText, { color: hasUpperCase ? '#34C759' : colors.textMuted }]}>1 chữ viết hoa</Text>
                       </View>
                       <View style={styles.reqItem}>
                         <Ionicons name={hasNumber ? "checkmark-circle" : "ellipse-outline"} size={14} color={hasNumber ? '#34C759' : colors.textMuted} />
-                        <Text style={[styles.reqText, { color: hasNumber ? '#34C759' : colors.textMuted }]}>ít nhất 1 số</Text>
-                      </View>
-                      <View style={styles.reqItem}>
-                        <Ionicons name={hasMinLength ? "checkmark-circle" : "ellipse-outline"} size={14} color={hasMinLength ? '#34C759' : colors.textMuted} />
-                        <Text style={[styles.reqText, { color: hasMinLength ? '#34C759' : colors.textMuted }]}>ít nhất 8 kí tự</Text>
+                        <Text style={[styles.reqText, { color: hasNumber ? '#34C759' : colors.textMuted }]}>1 chữ số</Text>
                       </View>
                     </View>
                   </View>

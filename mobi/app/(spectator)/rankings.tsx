@@ -186,7 +186,7 @@ export default function SpectatorRankings() {
         </View>
         <View style={styles.headerLeft} />
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/(spectator)/profile')}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/wallet')}>
             <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
             <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
           </TouchableOpacity>

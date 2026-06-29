@@ -3,8 +3,8 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { jockeyInvitationsApi } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { AppScreen } from '@/components/ui/premium';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function InvitationInboxScreen() {
   const [invitations, setInvitations] = useState<any[]>([]);
@@ -137,12 +137,8 @@ export default function InvitationInboxScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>HOẠT ĐỘNG THI ĐẤU</Text>
-        <Text style={styles.title}>Hòm thư lời mời</Text>
-        <View style={styles.accentLine} />
-      </View>
+    <AppScreen safeArea={false} style={styles.container}>
+      <SleekHeader title="HÒM THƯ LỜI MỜI" showWallet={true} />
 
       <FlatList
         data={invitations}
@@ -166,7 +162,7 @@ export default function InvitationInboxScreen() {
           )
         }
       />
-    </SafeAreaView>
+    </AppScreen>
   );
 }
 

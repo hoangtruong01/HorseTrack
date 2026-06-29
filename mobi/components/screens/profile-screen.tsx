@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Image, ActivityIndicator, Modal, Dimensions } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Image, ActivityIndicator, Modal, Dimensions, TextInput, Keyboard, TouchableWithoutFeedback, Animated, PanResponder } from 'react-native';
 import { useRouter, Stack, Tabs, useSegments } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { usersApi, uploadsApi, rewardPointLedgerApi } from '@/lib/api-client';
+import { usersApi, uploadsApi, rewardPointLedgerApi, jockeyInvitationsApi } from '@/lib/api-client';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useThemeColors } from '@/components/ui/shared';
+import { useThemeColors, formatDate } from '@/components/ui/shared';
 
 const { width } = Dimensions.get('window');
 
@@ -34,9 +34,185 @@ export default function ProfileScreen() {
   const [isUploading, setIsUploading] = useState(false);
   const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
 
+  // Edit Profile modal state
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editFullName, setEditFullName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editDob, setEditDob] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const translateY = useRef(new Animated.Value(0)).current;
+  const keyboardHeight = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (isEditModalVisible) {
+      translateY.setValue(0);
+      keyboardHeight.setValue(0);
+    }
+  }, [isEditModalVisible]);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        Animated.timing(keyboardHeight, {
+          toValue: e.endCoordinates.height,
+          duration: e.duration || 250,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+    const hideSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      (e) => {
+        Animated.timing(keyboardHeight, {
+          toValue: 0,
+          duration: e.duration || 250,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  const combinedTranslateY = Animated.add(translateY, Animated.multiply(keyboardHeight, -1));
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        if (gestureState.dy > 5) {
+          Keyboard.dismiss();
+          return true;
+        }
+        return false;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          translateY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+          Animated.timing(translateY, {
+            toValue: Dimensions.get('window').height,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => {
+            setIsEditModalVisible(false);
+          });
+        } else {
+          Animated.spring(translateY, {
+            toValue: 0,
+            friction: 5,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const openEditModal = () => {
+    setEditFullName(user?.fullName || '');
+    setEditPhone(user?.phone || '');
+    setEditAddress(user?.address || '');
+
+    let formattedDobInput = '';
+    if (user?.dob) {
+      const parts = user.dob.split('T')[0].split('-');
+      if (parts.length === 3) {
+        formattedDobInput = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      } else {
+        formattedDobInput = user.dob;
+      }
+    }
+    setEditDob(formattedDobInput);
+    setIsEditModalVisible(true);
+  };
+
+  const handleDobChange = (text: string) => {
+    let cleaned = text.replace(/\D/g, '');
+    let formatted = cleaned;
+    if (cleaned.length > 2) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    }
+    if (cleaned.length > 4) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+    }
+    setEditDob(formatted);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editFullName.trim()) {
+      Alert.alert('Lỗi', 'Họ và tên không được để trống');
+      return;
+    }
+
+    let dobToSave = editDob.trim();
+    if (dobToSave) {
+      const dobRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+      if (!dobRegex.test(dobToSave)) {
+        Alert.alert('Lỗi', 'Ngày sinh phải có định dạng DD/MM/YYYY (ví dụ: 20/08/1995)');
+        return;
+      }
+
+      const parts = dobToSave.split('/');
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const year = parseInt(parts[2], 10);
+
+      const date = new Date(year, month - 1, day);
+      if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+        Alert.alert('Lỗi', 'Ngày sinh không hợp lệ');
+        return;
+      }
+
+      if (date > new Date()) {
+        Alert.alert('Lỗi', 'Ngày sinh không thể ở tương lai');
+        return;
+      }
+      
+      dobToSave = `${year}-${parts[1]}-${parts[0]}`;
+    }
+
+    setIsSaving(true);
+    try {
+      const userId = (user as any)?._id || (user as any)?.id;
+      if (!userId) throw new Error('Không tìm thấy ID người dùng');
+
+      const updatedData = {
+        fullName: editFullName.trim(),
+        phone: editPhone.trim(),
+        address: editAddress.trim(),
+        dob: dobToSave || undefined,
+      };
+
+      await usersApi.update(userId, updatedData);
+
+      if (updateUser) {
+        updateUser(updatedData);
+      }
+
+      Alert.alert('Thành công', 'Cập nhật thông tin cá nhân thành công');
+      setIsEditModalVisible(false);
+    } catch (error: any) {
+      Alert.alert('Lỗi', error.message || 'Không thể cập nhật thông tin');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Wallet state
   const [balance, setBalance] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
+
+  // Jockey performance state
+  const [jockeyData, setJockeyData] = useState<any[]>([]);
 
   const hasNotification = true;
 
@@ -46,16 +222,31 @@ export default function ProfileScreen() {
   
   useEffect(() => {
     if (showWallet) {
-      rewardPointLedgerApi.myBalance()
-        .then((balRes: any) => {
-          setBalance(balRes.balance || 0);
-        })
-        .catch(() => { })
-        .finally(() => setLoadingStats(false));
+      if (currentGroup === '(jockey)') {
+        Promise.all([
+          rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
+          jockeyInvitationsApi.listReceived({ limit: 50 }).catch(() => ({ data: [] }))
+        ])
+          .then(([balRes, invRes]) => {
+            setBalance((balRes as any).balance || 0);
+            const list = (invRes as any).data || [];
+            const accepted = list.filter((i: any) => i.status === 'ACCEPTED');
+            setJockeyData(accepted);
+          })
+          .catch(() => { })
+          .finally(() => setLoadingStats(false));
+      } else {
+        rewardPointLedgerApi.myBalance()
+          .then((balRes: any) => {
+            setBalance(balRes.balance || 0);
+          })
+          .catch(() => { })
+          .finally(() => setLoadingStats(false));
+      }
     } else {
       setLoadingStats(false);
     }
-  }, [showWallet]);
+  }, [showWallet, currentGroup]);
 
   const performLogout = async () => {
     setIsLoggingOut(true);
@@ -135,8 +326,10 @@ export default function ProfileScreen() {
   const displayRole = roleMap[primaryRole] || primaryRole;
 
   const handleWalletPress = () => {
-    if (['(owner)', '(spectator)', '(jockey)', '(referee)'].includes(currentGroup)) {
-      router.push(`/${currentGroup}/wallet` as any);
+    if (['(owner)', '(spectator)', '(jockey)'].includes(currentGroup)) {
+      router.push('/operations/wallet');
+    } else if (currentGroup === '(referee)') {
+      router.push('/operations/referee/wallet');
     }
   };
 
@@ -222,13 +415,13 @@ export default function ProfileScreen() {
             
             <View style={styles.infoRow}>
               <MaterialIcons name="cake" size={18} color={theme.textMuted} />
-              <Text style={styles.infoText}>Ngày sinh: <Text style={styles.infoValue}>{user?.dob || 'Nhấn để cập nhật'}</Text></Text>
+              <Text style={styles.infoText}>Ngày sinh: <Text style={styles.infoValue}>{user?.dob ? formatDate(user.dob) : 'Chưa cập nhật'}</Text></Text>
             </View>
 
             <TouchableOpacity 
               style={styles.editBtn} 
               activeOpacity={0.8}
-              onPress={() => Alert.alert('Thông báo', 'Tính năng sửa hồ sơ đang được cập nhật.')}
+              onPress={openEditModal}
             >
               <Text style={styles.editBtnText}>SỬA HỒ SƠ</Text>
             </TouchableOpacity>
@@ -256,6 +449,29 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           )}
 
+          {/* Jockey Performance Report */}
+          {currentGroup === '(jockey)' && (
+            <View style={styles.perfCard}>
+              <Text style={styles.perfSub}>BÁO CÁO VẬN ĐỘNG VIÊN</Text>
+              <Text style={styles.perfTitle}>Thành Tích Thi Đấu</Text>
+              
+              <View style={styles.perfGrid}>
+                <View style={styles.perfItem}>
+                  <View style={styles.perfIconWrap}>
+                    <MaterialIcons name="emoji-events" size={16} color="#000" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.perfLabel}>LỜI MỜI ĐÃ NHẬN:</Text>
+                    <Text style={styles.perfValue}>{loadingStats ? '-' : jockeyData.length}</Text>
+                  </View>
+                </View>
+              </View>
+              <Text style={{ color: theme.textMuted, fontSize: 11, marginTop: 12, fontStyle: 'italic' }}>
+                * Chưa có dữ liệu thành tích chính thức từ ban tổ chức.
+              </Text>
+            </View>
+          )}
+
           {/* Logout */}
           <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} disabled={isLoggingOut} activeOpacity={0.7}>
             <MaterialIcons name="logout" size={20} color="#EF4444" />
@@ -279,6 +495,113 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </View>
+      </Modal>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={isEditModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => {
+          Keyboard.dismiss();
+          setIsEditModalVisible(false);
+        }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalEditOverlay}>
+            <TouchableOpacity
+              style={StyleSheet.absoluteFillObject}
+              activeOpacity={1}
+              onPress={() => {
+                Keyboard.dismiss();
+                setIsEditModalVisible(false);
+              }}
+            />
+            <Animated.View
+              style={[
+                styles.modalEditContent,
+                { transform: [{ translateY: combinedTranslateY }] }
+              ]}
+            >
+              <View {...panResponder.panHandlers} style={styles.dragIndicatorWrap}>
+                <View style={styles.dragIndicator} />
+              </View>
+
+              <Text style={styles.modalTitle}>CẬP NHẬT HỒ SƠ</Text>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Họ và tên *</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={editFullName}
+                  onChangeText={setEditFullName}
+                  placeholder="Nhập họ và tên đầy đủ"
+                  placeholderTextColor={theme.textMuted}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Số điện thoại</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={editPhone}
+                  onChangeText={setEditPhone}
+                  placeholder="Nhập số điện thoại"
+                  placeholderTextColor={theme.textMuted}
+                  keyboardType="phone-pad"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Địa chỉ</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={editAddress}
+                  onChangeText={setEditAddress}
+                  placeholder="Nhập địa chỉ"
+                  placeholderTextColor={theme.textMuted}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Ngày sinh (DD/MM/YYYY)</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={editDob}
+                  onChangeText={handleDobChange}
+                  placeholder="Ví dụ: 20/08/1995"
+                  placeholderTextColor={theme.textMuted}
+                  keyboardType="numeric"
+                  maxLength={10}
+                />
+              </View>
+
+              <View style={styles.modalActionRow}>
+                <TouchableOpacity
+                  style={styles.cancelBtn}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setIsEditModalVisible(false);
+                  }}
+                  disabled={isSaving}
+                >
+                  <Text style={styles.cancelBtnText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.saveBtn}
+                  onPress={handleSaveProfile}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <ActivityIndicator size="small" color="#FFF" />
+                  ) : (
+                    <Text style={styles.saveBtnText}>Lưu thay đổi</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
     </View>
@@ -527,6 +850,57 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     fontWeight: '800',
   },
 
+  // Perf Card
+  perfCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+  },
+  perfSub: {
+    color: '#52525B',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  perfTitle: {
+    color: '#09090B',
+    fontSize: 20,
+    fontWeight: '900',
+    marginBottom: 16,
+    marginTop: 4,
+  },
+  perfGrid: {
+    flexDirection: 'column',
+    gap: 16,
+  },
+  perfItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  perfIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  perfLabel: {
+    color: '#71717A',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  perfValue: {
+    color: '#09090B',
+    fontSize: 24,
+    fontWeight: '900',
+  },
+
   // Logout
   logoutBtn: {
     flexDirection: 'row',
@@ -580,5 +954,92 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     backgroundColor: 'rgba(0,0,0,0.6)', 
     borderRadius: 20, 
     padding: 6 
+  },
+  modalEditOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalEditContent: {
+    backgroundColor: isDark ? '#18181B' : '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    maxHeight: '90%',
+  },
+  dragIndicatorWrap: {
+    position: 'absolute',
+    top: 12,
+    left: 0,
+    right: 0,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  dragIndicator: {
+    width: 40,
+    height: 4,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+    borderRadius: 2,
+  },
+  modalTitle: {
+    color: theme.textPrimary,
+    fontSize: 18,
+    fontWeight: '900',
+    marginBottom: 24,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    color: theme.textMuted,
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: isDark ? '#121214' : '#F4F4F5',
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    color: theme.textPrimary,
+    fontSize: 14,
+  },
+  modalActionRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelBtnText: {
+    color: theme.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  saveBtn: {
+    flex: 1,
+    backgroundColor: '#E10600',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  saveBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

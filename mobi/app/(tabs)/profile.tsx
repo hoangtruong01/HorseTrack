@@ -146,7 +146,7 @@ export default function ProfileScreen() {
         {/* Account Details */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>THÔNG TIN TÀI KHOẢN</Text>
-          
+
           <View style={styles.infoField}>
             <Text style={styles.infoLabel}>SỐ ĐIỆN THOẠI</Text>
             <Text style={styles.infoValue}>{user.phone || 'Chưa thiết lập'}</Text>

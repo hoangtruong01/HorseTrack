@@ -102,7 +102,7 @@ export default function SpectatorHome() {
         </View>
         <View style={styles.headerLeft} />
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/(spectator)/profile')}>
+          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/wallet')}>
             <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
             <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
           </TouchableOpacity>
@@ -192,7 +192,7 @@ export default function SpectatorHome() {
                 { title: 'Giải Đấu', subtitle: 'Xem giải đang mở', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/tournaments') },
                 { title: 'Trận Đua', subtitle: 'Theo dõi trận sắp tới', icon: 'flag', tone: 'brand', onPress: () => router.push('/(spectator)/tournaments') },
                 { title: 'Dự Đoán', subtitle: 'Quản lý lựa chọn', icon: 'online-prediction', tone: 'brand', onPress: () => router.push('/predictions') },
-                { title: 'Ví Điểm', subtitle: 'Theo dõi phần thưởng', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/(spectator)/profile') },
+                { title: 'Ví Điểm', subtitle: 'Theo dõi phần thưởng', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/wallet') },
               ]}
             />
           </Section>
