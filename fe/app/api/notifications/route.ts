@@ -95,3 +95,54 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("access_token")?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { message: "Chưa đăng nhập" },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const all = searchParams.get("all");
+
+    if (all === "true") {
+      // Xóa tất cả thông báo
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/all`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        return NextResponse.json({ success: true });
+      }
+    } else if (id) {
+      // Xóa một thông báo
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        return NextResponse.json({ success: true });
+      }
+    }
+
+    return NextResponse.json({ message: "Yêu cầu không hợp lệ" }, { status: 400 });
+  } catch (err) {
+    return NextResponse.json(
+      { message: (err as Error).message || "Thao tác thất bại" },
+      { status: 500 }
+    );
+  }
+}

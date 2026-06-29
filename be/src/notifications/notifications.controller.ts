@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -40,5 +41,17 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Mark all notifications as read' })
   markAllAsRead(@CurrentUser() user: JwtUser) {
     return this.notificationsService.markAllAsRead(user.id);
+  }
+
+  @Delete('all')
+  @ApiOperation({ summary: 'Delete all my notifications' })
+  removeAll(@CurrentUser() user: JwtUser) {
+    return this.notificationsService.removeAll(user.id);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a single notification' })
+  remove(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+    return this.notificationsService.remove(id, user.id);
   }
 }
