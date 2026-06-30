@@ -220,7 +220,9 @@ export class RacesService {
       const [agg] = await this.raceModel.aggregate<{ total: number }>([
         {
           $match: {
-            tournamentId: race.tournamentId,
+            tournamentId: new Types.ObjectId(
+              this.getTournamentIdString(race.tournamentId),
+            ),
             deletedAt: { $exists: false },
             _id: { $ne: race._id },
           },

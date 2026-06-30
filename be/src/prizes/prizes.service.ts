@@ -236,7 +236,7 @@ export class PrizesService {
   }
 
   async findMyPrizes(ownerId: string, page = 1, limit = 20) {
-    const filter = { ownerId };
+    const filter = { ownerId: new Types.ObjectId(ownerId) };
     const [data, total] = await Promise.all([
       this.prizeModel
         .find(filter)

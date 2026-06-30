@@ -200,7 +200,7 @@ export class PayosService {
     const durationMs = pkg.durationDays * 24 * 60 * 60 * 1000;
 
     const existing = await this.subscriptionModel.findOne({
-      userId,
+      userId: new Types.ObjectId(userId),
       status: SubscriptionStatus.ACTIVE,
       endDate: { $gt: now },
     });

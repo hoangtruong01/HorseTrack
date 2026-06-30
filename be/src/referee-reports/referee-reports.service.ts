@@ -30,8 +30,8 @@ export class RefereeReportsService {
     // Verify race exists and referee has an accepted assignment
     await this.racesService.findOne(dto.raceId);
     const assignment = await this.assignmentModel.findOne({
-      raceId: dto.raceId,
-      refereeUserId: refereeId,
+      raceId: new Types.ObjectId(dto.raceId),
+      refereeUserId: new Types.ObjectId(refereeId),
       status: RefereeAssignmentStatus.ACCEPTED,
     });
     if (!assignment) {
