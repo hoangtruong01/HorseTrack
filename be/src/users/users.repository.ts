@@ -54,6 +54,8 @@ export class UsersRepository {
     }
     if (status) {
       filter.status = status;
+    } else {
+      filter.status = { $ne: UserStatus.DELETED };
     }
 
     const [data, total] = await Promise.all([

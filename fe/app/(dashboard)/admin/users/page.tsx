@@ -1,24 +1,24 @@
 "use client";
 import Image from "next/image";
 
-import { useEffect, useState, useCallback } from "react";
-import { Users, Ban, Trash2, Search, ChevronLeft, ChevronRight, UserCog, X } from "lucide-react";
-import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { usersApi, type UserItem } from "@/lib/api-client";
+import { Ban, ChevronLeft, ChevronRight, Search, Trash2, UserCog, Users, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const ROLES = ["admin", "owner", "jockey", "referee", "spectator", "counter_staff"];
-const STATUSES = ["active", "inactive", "banned", "deleted"];
+const STATUSES = ["active", "inactive", "banned"];
 
 const statusColors: Record<string, string> = {
   active: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
