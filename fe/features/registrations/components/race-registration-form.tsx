@@ -17,6 +17,8 @@ type RaceRegistrationFormProps = {
     location?: string;
     capacity?: number;
     participantsCount?: number;
+    minWeightKg?: number;
+    maxWeightKg?: number;
   };
   horses: Horse[];
   onSubmit: (horseId: string) => Promise<void>;
@@ -34,13 +36,44 @@ export function RaceRegistrationForm({
   const [selectedHorseId, setSelectedHorseId] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const eligibleHorses = horses.filter(
-    (h) => h.healthStatus === "HEALTHY" && h.approvalStatus === "APPROVED"
-  );
-  
-  const ineligibleHorses = horses.filter(
-    (h) => h.healthStatus !== "HEALTHY" || h.approvalStatus !== "APPROVED"
-  );
+  const hasWeightClass = race.minWeightKg != null || race.maxWeightKg != null;
+
+  // Returns a reason string if the horse fails the race weight class, else null.
+  const weightReason = (h: Horse): string | null => {
+    if (!hasWeightClass) return null;
+    if (h.weightKg == null) return "chưa có cân nặng";
+    if (race.minWeightKg != null && h.weightKg < race.minWeightKg)
+      return `nhẹ quá (${h.weightKg} kg < ${race.minWeightKg} kg)`;
+    if (race.maxWeightKg != null && h.weightKg > race.maxWeightKg)
+      return `nặng quá (${h.weightKg} kg > ${race.maxWeightKg} kg)`;
+    return null;
+  };
+
+  const isEligible = (h: Horse) =>
+    h.healthStatus === "HEALTHY" &&
+    h.approvalStatus === "APPROVED" &&
+    weightReason(h) === null;
+
+  const eligibleHorses = horses.filter(isEligible);
+  const ineligibleHorses = horses.filter((h) => !isEligible(h));
+
+  // Health/approval reasons take priority, then weight class.
+  const ineligibleReason = (h: Horse): string => {
+    if (h.approvalStatus === "PENDING") return "Đang chờ duyệt";
+    if (h.approvalStatus === "REJECTED") return "Bị từ chối duyệt";
+    if (h.healthStatus === "INJURED") return "Chấn thương";
+    if (h.healthStatus === "RECOVERING") return "Đang hồi phục";
+    if (h.healthStatus !== "HEALTHY") return "Giải nghệ";
+    return weightReason(h) ?? "Không đủ điều kiện";
+  };
+
+  const weightClassLabel = !hasWeightClass
+    ? null
+    : race.minWeightKg != null && race.maxWeightKg != null
+      ? `${race.minWeightKg}–${race.maxWeightKg} kg`
+      : race.minWeightKg != null
+        ? `≥ ${race.minWeightKg} kg`
+        : `≤ ${race.maxWeightKg} kg`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +135,12 @@ export function RaceRegistrationForm({
             <span className="text-muted-foreground/60 block uppercase tracking-widest text-[9px] mb-0.5">Số lượng tham gia</span>
             <p className="text-foreground font-mono font-bold">{race.participantsCount || 0}/{race.capacity || 20} chiến mã</p>
           </div>
+          {weightClassLabel && (
+            <div>
+              <span className="text-muted-foreground/60 block uppercase tracking-widest text-[9px] mb-0.5">Hạng cân</span>
+              <p className="text-foreground font-mono font-bold">{weightClassLabel}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -137,15 +176,10 @@ export function RaceRegistrationForm({
 
               {/* Ineligible Horses group */}
               {ineligibleHorses.length > 0 && (
-                <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHƯA DUYỆT/CHẤN THƯƠNG/GIẢI NGHỆ)" className="bg-popover text-red-500 font-bold" disabled>
+                <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHƯA DUYỆT/CHẤN THƯƠNG/GIẢI NGHỆ/HẠNG CÂN)" className="bg-popover text-red-500 font-bold" disabled>
                   {ineligibleHorses.map((h) => (
                     <option key={h.id} value={h.id} disabled className="text-muted-foreground/60">
-                      {h.name} - {
-                        h.approvalStatus === "PENDING" ? "Đang chờ duyệt" :
-                        h.approvalStatus === "REJECTED" ? "Bị từ chối duyệt" :
-                        h.healthStatus === "INJURED" ? "Chấn thương" :
-                        h.healthStatus === "RECOVERING" ? "Đang hồi phục" : "Giải nghệ"
-                      }
+                      {h.name} - {ineligibleReason(h)}
                     </option>
                   ))}
                 </optgroup>

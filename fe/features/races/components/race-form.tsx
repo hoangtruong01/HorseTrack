@@ -1,9 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
-import { CalendarClock, Flag, Milestone, Trophy, Loader2, Users, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +10,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { racesApi, tournamentsApi, type TournamentItem } from "@/lib/api-client";
+import {
+  racesApi,
+  tournamentsApi,
+  type TournamentItem,
+} from "@/lib/api-client";
+import {
+  CalendarClock,
+  Flag,
+  Loader2,
+  Milestone,
+  Trophy,
+  Upload,
+  Users,
+} from "lucide-react";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export function RaceForm() {
@@ -33,6 +45,8 @@ export function RaceForm() {
   const lapCount = 1;
   const [maxParticipants, setMaxParticipants] = useState(8);
   const [prize, setPrize] = useState(0);
+  const [minWeightKg, setMinWeightKg] = useState("");
+  const [maxWeightKg, setMaxWeightKg] = useState("");
   const [description, setDescription] = useState("");
 
   const [imageUrl, setImageUrl] = useState("");
@@ -64,7 +78,9 @@ export function RaceForm() {
     async function loadRaces() {
       setLoadingRaces(true);
       try {
-        const res = await racesApi.listByTournament(tournamentId, { limit: 100 });
+        const res = await racesApi.listByTournament(tournamentId, {
+          limit: 100,
+        });
         setExistingRaces(res.data || []);
       } catch (err) {
         console.error("Failed to load existing races:", err);
@@ -141,31 +157,50 @@ export function RaceForm() {
 
     if (selectedTournament) {
       const raceStart = new Date(startTime);
-      const tStart = selectedTournament.startDate ? new Date(selectedTournament.startDate) : null;
-      const tEnd = selectedTournament.endDate ? new Date(selectedTournament.endDate) : null;
+      const tStart = selectedTournament.startDate
+        ? new Date(selectedTournament.startDate)
+        : null;
+      const tEnd = selectedTournament.endDate
+        ? new Date(selectedTournament.endDate)
+        : null;
 
       if (tStart && tEnd) {
         const startLimit = new Date(tStart.getTime() - 12 * 60 * 60 * 1000);
         const endLimit = new Date(tEnd.getTime() + 36 * 60 * 60 * 1000);
 
         if (raceStart < startLimit) {
-          toast.error(`Thời gian xuất phát vòng đua nằm trước ngày bắt đầu giải đấu! (Cho phép tối đa từ ${startLimit.toLocaleString("vi-VN")})`);
+          toast.error(
+            `Thời gian xuất phát vòng đua nằm trước ngày bắt đầu giải đấu! (Cho phép tối đa từ ${startLimit.toLocaleString("vi-VN")})`,
+          );
           return;
         }
         if (raceStart > endLimit) {
-          toast.error(`Thời gian xuất phát vòng đua nằm sau ngày kết thúc giải đấu! (Cho phép tối đa đến ${endLimit.toLocaleString("vi-VN")})`);
+          toast.error(
+            `Thời gian xuất phát vòng đua nằm sau ngày kết thúc giải đấu! (Cho phép tối đa đến ${endLimit.toLocaleString("vi-VN")})`,
+          );
           return;
         }
       }
 
-      const totalPrizePool = selectedTournament.prizePool || selectedTournament.prize || 0;
-      const usedPrize = existingRaces.reduce((sum, r) => sum + (r.prize || 0), 0);
+      const totalPrizePool =
+        selectedTournament.prizePool || selectedTournament.prize || 0;
+      const usedPrize = existingRaces.reduce(
+        (sum, r) => sum + (r.prize || 0),
+        0,
+      );
       if (usedPrize + prize > totalPrizePool) {
         toast.error(
           `Tổng giải thưởng các vòng đua (${(usedPrize + prize).toLocaleString()} pts) vượt quá quỹ thưởng của giải đấu chính (${totalPrizePool.toLocaleString()} pts). Còn lại khả dụng: ${(totalPrizePool - usedPrize).toLocaleString()} pts.`,
         );
         return;
       }
+    }
+
+    const minW = minWeightKg.trim() === "" ? undefined : Number(minWeightKg);
+    const maxW = maxWeightKg.trim() === "" ? undefined : Number(maxWeightKg);
+    if (minW !== undefined && maxW !== undefined && minW > maxW) {
+      toast.error("Cân nặng tối thiểu không được lớn hơn cân nặng tối đa.");
+      return;
     }
 
     setSubmitting(true);
@@ -179,10 +214,16 @@ export function RaceForm() {
         lapCount,
         maxParticipants,
         prize,
+        minWeightKg: minW,
+        maxWeightKg: maxW,
         imageUrl: imageUrl || undefined,
       });
       toast.success(`Đã tạo trận đua "${name}" thành công!`);
-      router.push(presetTournamentId ? `/admin/tournaments/${presetTournamentId}` : "/admin/races");
+      router.push(
+        presetTournamentId
+          ? `/admin/tournaments/${presetTournamentId}`
+          : "/admin/races",
+      );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Tạo trận đua thất bại");
     } finally {
@@ -190,7 +231,9 @@ export function RaceForm() {
     }
   };
 
-  const totalPrizePool = selectedTournament ? (selectedTournament.prizePool || selectedTournament.prize || 0) : 0;
+  const totalPrizePool = selectedTournament
+    ? selectedTournament.prizePool || selectedTournament.prize || 0
+    : 0;
   const usedPrize = existingRaces.reduce((sum, r) => sum + (r.prize || 0), 0);
   const remainingPrize = totalPrizePool - usedPrize;
 
@@ -201,12 +244,15 @@ export function RaceForm() {
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">Race Setup</p>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
+            Race Setup
+          </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-foreground">
             Tạo Trận Đua Mới
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Điền đầy đủ thông tin để khởi tạo lịch trình vòng đua thuộc một giải đấu chính.
+            Điền đầy đủ thông tin để khởi tạo lịch trình vòng đua thuộc một giải
+            đấu chính.
           </p>
         </div>
         <Button
@@ -215,7 +261,9 @@ export function RaceForm() {
           className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-foreground font-bold uppercase tracking-wider text-xs h-10 px-5"
         >
           {submitting ? (
-            <><Loader2 className="size-4 animate-spin mr-1" /> Đang xử lý...</>
+            <>
+              <Loader2 className="size-4 animate-spin mr-1" /> Đang xử lý...
+            </>
           ) : (
             "Lưu trận đua"
           )}
@@ -255,10 +303,36 @@ export function RaceForm() {
           {selectedTournament && (
             <div className="mt-1 flex flex-col gap-0.5 text-[10px] text-muted-foreground font-normal">
               <span>
-                Thời gian giải đấu: <strong className="text-foreground">{selectedTournament.startDate ? new Date(selectedTournament.startDate).toLocaleDateString("vi-VN") : "?"}</strong> – <strong className="text-foreground">{selectedTournament.endDate ? new Date(selectedTournament.endDate).toLocaleDateString("vi-VN") : "?"}</strong>
+                Thời gian giải đấu:{" "}
+                <strong className="text-foreground">
+                  {selectedTournament.startDate
+                    ? new Date(selectedTournament.startDate).toLocaleDateString(
+                        "vi-VN",
+                      )
+                    : "?"}
+                </strong>{" "}
+                –{" "}
+                <strong className="text-foreground">
+                  {selectedTournament.endDate
+                    ? new Date(selectedTournament.endDate).toLocaleDateString(
+                        "vi-VN",
+                      )
+                    : "?"}
+                </strong>
               </span>
               <span>
-                Quỹ thưởng giải đấu: <strong className="text-foreground">{totalPrizePool.toLocaleString()} pts</strong> · Đã sử dụng: <strong className="text-foreground">{usedPrize.toLocaleString()} pts</strong> · Còn lại: <strong className="text-teal-400 font-bold">{remainingPrize.toLocaleString()} pts</strong>
+                Quỹ thưởng giải đấu:{" "}
+                <strong className="text-foreground">
+                  {totalPrizePool.toLocaleString()} pts
+                </strong>{" "}
+                · Đã sử dụng:{" "}
+                <strong className="text-foreground">
+                  {usedPrize.toLocaleString()} pts
+                </strong>{" "}
+                · Còn lại:{" "}
+                <strong className="text-teal-400 font-bold">
+                  {remainingPrize.toLocaleString()} pts
+                </strong>
               </span>
             </div>
           )}
@@ -344,6 +418,36 @@ export function RaceForm() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Mô tả thêm về trận đua..."
+          />
+        </div>
+      </div>
+
+      {/* Weight class row */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-2">
+          <Label className="inline-flex items-center gap-2">
+            Cân nặng tối thiểu (kg)
+          </Label>
+          <Input
+            type="number"
+            min={0}
+            value={minWeightKg}
+            onChange={(e) => setMinWeightKg(e.target.value)}
+            placeholder="Để trống nếu không giới hạn"
+            className="font-mono"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label className="inline-flex items-center gap-2">
+            Cân nặng tối đa (kg)
+          </Label>
+          <Input
+            type="number"
+            min={0}
+            value={maxWeightKg}
+            onChange={(e) => setMaxWeightKg(e.target.value)}
+            placeholder="Để trống nếu không giới hạn"
+            className="font-mono"
           />
         </div>
       </div>

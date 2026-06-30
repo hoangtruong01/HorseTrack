@@ -60,6 +60,12 @@ export class Race {
   @Prop({ default: 20, min: 2 })
   maxParticipants!: number;
 
+  @Prop({ type: Number, min: 0 })
+  minWeightKg?: number;
+
+  @Prop({ type: Number, min: 0 })
+  maxWeightKg?: number;
+
   @Prop({ default: 0 })
   prize?: number;
 
