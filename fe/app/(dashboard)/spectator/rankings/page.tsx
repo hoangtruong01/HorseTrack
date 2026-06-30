@@ -9,7 +9,7 @@ function PointsCell({ value }: { value: number }) {
   return (
     <td className="p-4 text-right text-sm">
       <span className="font-black text-teal-600 dark:text-teal-400">{value}</span>{" "}
-      <span className="font-bold text-muted-foreground">Pts</span>
+      <span className="font-bold text-muted-foreground">điểm</span>
     </td>
   );
 }

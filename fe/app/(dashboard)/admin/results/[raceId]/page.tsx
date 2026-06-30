@@ -271,7 +271,7 @@ export default function AdminResultDetailPage({
                       {res.note || (res.incident !== "none" && res.incident !== "NONE" ? res.incident : "Không")}
                     </td>
                     <td className="p-4 text-right font-black text-teal-400 text-sm">
-                      +{res.points || 0} Pts
+                      +{res.points || 0} điểm
                     </td>
                   </tr>
                 ))}

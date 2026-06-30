@@ -301,7 +301,7 @@ export default function AdminRaceDetailPage() {
             <p className="text-[10px] text-muted-foreground/60">
               Giải thưởng:{" "}
               <span className="font-bold text-teal-400">
-                {(race.prize || 0).toLocaleString()} pts
+                {(race.prize || 0).toLocaleString()} điểm
               </span>
             </p>
           </div>

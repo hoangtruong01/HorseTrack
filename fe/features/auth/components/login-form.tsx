@@ -389,7 +389,7 @@ export function LoginForm() {
             >
               <Tv className="size-4 shrink-0" />
               <span className="text-[8px] font-black uppercase tracking-wide leading-none">
-                Spec
+                Spectator
               </span>
             </button>
 

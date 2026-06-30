@@ -188,7 +188,7 @@ export default function SpectatorDashboardPage() {
                       <span className="text-2xl font-bold text-foreground">
                         {balance.toLocaleString("vi-VN")}
                       </span>
-                      <span className="text-xs text-muted-foreground">Pts</span>
+                      <span className="text-xs text-muted-foreground">điểm</span>
                     </>
                   )}
                 </div>
@@ -359,7 +359,7 @@ export default function SpectatorDashboardPage() {
                           <span className="font-bold text-muted-foreground w-5">{idx + 1}</span>
                           <span className="text-foreground font-semibold truncate">{horse.horseName || "—"}</span>
                         </div>
-                        <span className="text-primary font-bold">{horse.totalPoints || 0} Pts</span>
+                        <span className="text-primary font-bold">{horse.totalPoints || 0} điểm</span>
                       </div>
                     ))}
                   </div>
@@ -378,7 +378,7 @@ export default function SpectatorDashboardPage() {
                           <span className="font-bold text-muted-foreground w-5">{idx + 1}</span>
                           <span className="text-foreground font-semibold truncate">{jockey.jockeyName || "—"}</span>
                         </div>
-                        <span className="text-primary font-bold">{jockey.totalPoints || 0} Pts</span>
+                        <span className="text-primary font-bold">{jockey.totalPoints || 0} điểm</span>
                       </div>
                     ))}
                   </div>

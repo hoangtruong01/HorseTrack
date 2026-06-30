@@ -332,13 +332,13 @@ export default function AdminTournamentDetailPage() {
                     tournament.prize ||
                     0
                   ).toLocaleString()}{" "}
-                  pts
+                  điểm
                 </span>
               </div>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Đã phân bổ:</span>
                 <span className="font-bold text-foreground">
-                  {totalPrizeAllocated.toLocaleString()} pts
+                  {totalPrizeAllocated.toLocaleString()} điểm
                 </span>
               </div>
 
@@ -355,7 +355,7 @@ export default function AdminTournamentDetailPage() {
                 <span
                   className={`font-bold ${remainingBudget < 0 ? "text-red-400" : "text-teal-400"}`}
                 >
-                  {remainingBudget.toLocaleString()} pts
+                  {remainingBudget.toLocaleString()} điểm
                 </span>
               </div>
             </div>
@@ -477,7 +477,7 @@ export default function AdminTournamentDetailPage() {
                           /{race.maxParticipants || 8} chiến mã
                         </td>
                         <td className="p-4 font-mono font-bold text-teal-400">
-                          {(race.prize || 0).toLocaleString()} pts
+                          {(race.prize || 0).toLocaleString()} điểm
                         </td>
                         <td className="p-4">
                           <select
@@ -599,7 +599,7 @@ export default function AdminTournamentDetailPage() {
                   Quỹ giải thưởng
                 </span>
                 <span className="text-sm font-black text-teal-400">
-                  {(selectedRace.prize || 0).toLocaleString()} pts
+                  {(selectedRace.prize || 0).toLocaleString()} điểm
                 </span>
               </div>
               <div className="bg-white/[0.02] border border-border rounded-xl p-3">
