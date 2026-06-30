@@ -77,8 +77,8 @@ export class RefereeAssignmentsService {
 
     // 4. Check for schedule conflict (another active assignment within 4-hour window)
     const activeAssignments = await this.assignmentModel.find({
-      refereeUserId: dto.refereeUserId,
-      raceId: { $ne: dto.raceId },
+      refereeUserId: new Types.ObjectId(dto.refereeUserId),
+      raceId: { $ne: new Types.ObjectId(dto.raceId) },
       status: {
         $in: [
           RefereeAssignmentStatus.ASSIGNED,
@@ -111,8 +111,8 @@ export class RefereeAssignmentsService {
 
     // 5. No duplicate (raceId, refereeUserId)
     const existing = await this.assignmentModel.findOne({
-      raceId: dto.raceId,
-      refereeUserId: dto.refereeUserId,
+      raceId: new Types.ObjectId(dto.raceId),
+      refereeUserId: new Types.ObjectId(dto.refereeUserId),
       status: { $ne: RefereeAssignmentStatus.REMOVED },
     });
     if (existing) {
@@ -286,7 +286,7 @@ export class RefereeAssignmentsService {
   /** Used by races.service to verify READY precondition */
   async hasAcceptedReferee(raceId: string): Promise<boolean> {
     const assignment = await this.assignmentModel.findOne({
-      raceId,
+      raceId: new Types.ObjectId(raceId),
       status: RefereeAssignmentStatus.ACCEPTED,
     });
     return !!assignment;

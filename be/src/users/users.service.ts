@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -178,7 +178,9 @@ export class UsersService {
   }
 
   private async ensureJockeyProfile(userId: string): Promise<void> {
-    const existing = await this.jockeyModel.findOne({ userId });
+    const existing = await this.jockeyModel.findOne({
+      userId: new Types.ObjectId(userId),
+    });
     if (!existing) {
       await this.jockeyModel.create({
         userId,
@@ -193,7 +195,9 @@ export class UsersService {
   }
 
   private async ensureRefereeProfile(userId: string): Promise<void> {
-    const existing = await this.refereeProfileModel.findOne({ userId });
+    const existing = await this.refereeProfileModel.findOne({
+      userId: new Types.ObjectId(userId),
+    });
     if (!existing) {
       await this.refereeProfileModel.create({
         userId,

@@ -145,7 +145,10 @@ export class RewardPointLedgerService {
     newNote: string,
   ): Promise<void> {
     await this.ledgerModel
-      .findOneAndUpdate({ sourceId, sourceType }, { $set: { note: newNote } })
+      .findOneAndUpdate(
+        { sourceId: new Types.ObjectId(sourceId), sourceType },
+        { $set: { note: newNote } },
+      )
       .exec();
   }
 

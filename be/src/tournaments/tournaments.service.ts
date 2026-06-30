@@ -218,7 +218,7 @@ export class TournamentsService {
     tournamentName: string,
   ): Promise<void> {
     const races = await this.raceModel.find({
-      tournamentId,
+      tournamentId: new Types.ObjectId(tournamentId),
       status: { $nin: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED] },
     });
     const raceIds = races.map((r) => r._id);
@@ -285,7 +285,7 @@ export class TournamentsService {
     }
 
     const ownerIds = await this.registrationModel.distinct('ownerId', {
-      tournamentId,
+      tournamentId: new Types.ObjectId(tournamentId),
     });
     if (ownerIds.length > 0) {
       await Promise.all(

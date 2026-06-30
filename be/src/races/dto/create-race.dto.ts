@@ -69,6 +69,18 @@ export class CreateRaceDto {
   @Min(0)
   prize?: number;
 
+  @ApiPropertyOptional({ example: 400, description: 'Minimum horse weight (kg)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  minWeightKg?: number;
+
+  @ApiPropertyOptional({ example: 450, description: 'Maximum horse weight (kg)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  maxWeightKg?: number;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

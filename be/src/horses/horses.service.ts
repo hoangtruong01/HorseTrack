@@ -204,7 +204,7 @@ export class HorsesService {
     // Prevent changing healthStatus while horse has an active approved registration
     if (dto.healthStatus !== undefined) {
       const activeReg = await this.registrationModel.findOne({
-        horseId: id,
+        horseId: new Types.ObjectId(id),
         status: RegistrationStatus.APPROVED,
       });
       if (activeReg) {
@@ -341,7 +341,7 @@ export class HorsesService {
 
     // Prevent deleting horse with an active approved registration
     const activeReg = await this.registrationModel.findOne({
-      horseId: id,
+      horseId: new Types.ObjectId(id),
       status: RegistrationStatus.APPROVED,
     });
     if (activeReg) {

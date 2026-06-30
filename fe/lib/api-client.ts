@@ -275,6 +275,8 @@ export interface RaceItem {
   maxParticipants?: number;
   participantsCount?: number;
   prize?: number;
+  minWeightKg?: number;
+  maxWeightKg?: number;
   imageUrl?: string;
   status: string;
   trackCondition?: string;
@@ -306,6 +308,8 @@ export const racesApi = {
     lapCount?: number;
     maxParticipants?: number;
     prize?: number;
+    minWeightKg?: number;
+    maxWeightKg?: number;
     imageUrl?: string;
   }) => apiFetch<RaceItem>("/races", { method: "POST", body: JSON.stringify(dto) }),
   updateStatus: (id: string, status: string) =>
