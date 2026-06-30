@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Calendar, ArrowLeft, Siren, Timer, Search, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { tournamentsApi, raceResultsApi } from "@/lib/api-client";
 
 interface Tournament {
   id: string;
@@ -65,14 +66,13 @@ export default function SpectatorResultsPage() {
     async function loadTournaments() {
       try {
         setIsLoadingTournaments(true);
-        const res = await fetch("/api/spectator/results");
-        const resData = await res.json();
-        if (res.ok && resData.success) {
-          const fetchedTournaments = resData.data.tournaments || resData.data || [];
-          setTournaments(fetchedTournaments);
-        } else {
-          setError(resData.message || "Không thể tải danh sách giải đấu.");
-        }
+        const res = await tournamentsApi.list({ limit: 100 });
+        const fetchedTournaments = (res.data || []).filter((t: any) => t.status !== "DRAFT");
+        const mapped = fetchedTournaments.map((t: any) => ({
+          ...t,
+          id: t.id || t._id,
+        }));
+        setTournaments(mapped);
       } catch (err) {
         console.error(err);
         setError("Lỗi kết nối mạng.");
@@ -92,51 +92,49 @@ export default function SpectatorResultsPage() {
       return;
     }
 
-    const tId = selectedTournament.id;
+    const tId = selectedTournament.id || (selectedTournament as any)._id;
 
     async function loadResults() {
       try {
         setIsLoadingResults(true);
         setError(null);
-        const res = await fetch(`/api/spectator/results?tournamentId=${tId}`);
-        const resData = await res.json();
-        if (res.ok && resData.success) {
-          const rawResults: RaceResultItem[] = resData.data || [];
-          setResults(rawResults);
+        const data = await raceResultsApi.listByTournament(tId);
+        const rawResults: RaceResultItem[] = (data || []).map((item: any) => ({
+          ...item,
+          id: item.id || item._id,
+        }));
+        setResults(rawResults);
 
-          // Group by raceId
-          const groups: Record<string, RaceGroup> = {};
-          rawResults.forEach((item) => {
-            const raceObj = item.raceId;
-            if (!raceObj) return;
-            const rId = raceObj.id || raceObj._id;
-            if (!groups[rId]) {
-              groups[rId] = {
-                raceId: rId,
-                name: raceObj.name,
-                raceNumber: raceObj.raceNumber,
-                results: [],
-              };
-            }
-            groups[rId].results.push(item);
+        // Group by raceId
+        const groups: Record<string, RaceGroup> = {};
+        rawResults.forEach((item) => {
+          const raceObj = item.raceId;
+          if (!raceObj) return;
+          const rId = raceObj.id || raceObj._id;
+          if (!groups[rId]) {
+            groups[rId] = {
+              raceId: rId,
+              name: raceObj.name,
+              raceNumber: raceObj.raceNumber,
+              results: [],
+            };
+          }
+          groups[rId].results.push(item);
+        });
+
+        // Sort groups by raceNumber
+        const sortedGroups = Object.values(groups).sort((a, b) => a.raceNumber - b.raceNumber);
+        
+        // Sort results within each group by rank
+        sortedGroups.forEach((group) => {
+          group.results.sort((a, b) => {
+            const rA = a.rank ?? 999;
+            const rB = b.rank ?? 999;
+            return rA - rB;
           });
+        });
 
-          // Sort groups by raceNumber
-          const sortedGroups = Object.values(groups).sort((a, b) => a.raceNumber - b.raceNumber);
-          
-          // Sort results within each group by rank
-          sortedGroups.forEach((group) => {
-            group.results.sort((a, b) => {
-              const rA = a.rank ?? 999;
-              const rB = b.rank ?? 999;
-              return rA - rB;
-            });
-          });
-
-          setRaceGroups(sortedGroups);
-        } else {
-          setError(resData.message || "Không thể tải kết quả thi đấu.");
-        }
+        setRaceGroups(sortedGroups);
       } catch (err) {
         console.error(err);
         setError("Lỗi kết nối mạng.");
@@ -401,7 +399,7 @@ export default function SpectatorResultsPage() {
                         {res.note || (res.incident !== "NONE" ? res.incident : "Không")}
                       </td>
                       <td className="p-4 text-right font-black text-teal-600 dark:text-teal-400 text-sm">
-                        +{res.points || 0} Pts
+                        +{res.points || 0} điểm
                       </td>
                     </tr>
                   ))}

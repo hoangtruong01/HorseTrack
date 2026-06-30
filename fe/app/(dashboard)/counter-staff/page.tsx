@@ -20,7 +20,7 @@ export default function CounterStaffDashboard() {
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await walletApi.allCashouts({ page: 1, limit: 100, status: "PAID,REJECTED" });
+        const res = await walletApi.allCashouts({ page: 1, limit: 100, status: "PENDING,PAID,REJECTED" });
         if (res && res.data) {
           const list = res.data;
           const totalCount = res.meta?.total ?? list.length;

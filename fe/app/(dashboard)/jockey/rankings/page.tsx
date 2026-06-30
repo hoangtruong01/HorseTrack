@@ -307,7 +307,7 @@ export default function JockeyRankingsPage() {
                         <td className="p-4 text-center text-primary font-black text-sm">{jockey.wins}</td>
                         <td className="p-4 text-right text-sm">
                           <span className="font-black text-teal-700">{jockey.totalPoints}</span>{" "}
-                          <span className="font-bold text-muted-foreground">Pts</span>
+                          <span className="font-bold text-muted-foreground">điểm</span>
                         </td>
                       </tr>
                     );
@@ -382,7 +382,7 @@ export default function JockeyRankingsPage() {
                       </td>
                       <td className="p-4 text-right text-sm">
                         <span className="font-black text-teal-700">{horse.totalPoints}</span>{" "}
-                        <span className="font-bold text-muted-foreground">Pts</span>
+                        <span className="font-bold text-muted-foreground">điểm</span>
                       </td>
                     </tr>
                   ))

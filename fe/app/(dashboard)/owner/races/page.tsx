@@ -249,7 +249,7 @@ export default function OwnerRacesBrowserPage() {
                       </div>
                       {t.prize != null && (
                         <div className="mt-2 text-[10px] text-muted-foreground/60">
-                          🏆 Quỹ thưởng: <strong className="text-teal-400 font-mono">{t.prize.toLocaleString()} pts</strong>
+                          🏆 Quỹ thưởng: <strong className="text-teal-400 font-mono">{t.prize.toLocaleString()} điểm</strong>
                         </div>
                       )}
                     </button>
@@ -297,7 +297,7 @@ export default function OwnerRacesBrowserPage() {
                       </div>
                       <div>
                         <span className="block text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-0.5">Quỹ thưởng</span>
-                        <span className="font-bold text-teal-400 font-mono text-[11px]">{selectedTournament.prize?.toLocaleString() || 0} pts</span>
+                        <span className="font-bold text-teal-400 font-mono text-[11px]">{selectedTournament.prize?.toLocaleString() || 0} điểm</span>
                       </div>
                       <div>
                         <span className="block text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-0.5">Trạng thái</span>
@@ -379,7 +379,7 @@ export default function OwnerRacesBrowserPage() {
                               {race.prize != null && (
                                 <span className="inline-flex items-center gap-2">
                                   <Award className="size-4 text-teal-400 shrink-0" />
-                                  Giải thưởng: <strong className="text-teal-400 font-mono">{race.prize.toLocaleString()} pts</strong>
+                                  Giải thưởng: <strong className="text-teal-400 font-mono">{race.prize.toLocaleString()} điểm</strong>
                                 </span>
                               )}
                             </div>

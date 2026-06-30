@@ -9,14 +9,14 @@ export default function ForbiddenPage() {
     <main className="f1-container flex min-h-screen items-center py-10">
       <EmptyState
         icon={<ShieldAlert className="size-8" aria-hidden="true" />}
-        title="Forbidden placeholder"
-        description="Real RBAC is intentionally deferred. This route documents the future 403 destination."
+        title="Truy cập bị từ chối"
+        description="Bạn không có quyền truy cập trang này. Vui lòng đăng nhập bằng tài khoản có quyền phù hợp."
         action={
           <Button
             asChild
             className="rounded-full bg-primary font-bold hover:bg-[#B80500]"
           >
-            <Link href="/login">Go to mock login</Link>
+            <Link href="/login">Quay lại trang đăng nhập</Link>
           </Button>
         }
       />

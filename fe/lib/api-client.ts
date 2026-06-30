@@ -687,6 +687,8 @@ export interface RaceResultItem {
 export const raceResultsApi = {
   listByRace: (raceId: string) =>
     apiFetch<RaceResultItem[]>(`/race-results/race/${raceId}`),
+  listByTournament: (tournamentId: string) =>
+    apiFetch<any[]>(`/race-results/tournament/${tournamentId}`),
 };
 
 // ─── AI Packages ─────────────────────────────────────────────────────────────

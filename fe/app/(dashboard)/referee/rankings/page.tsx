@@ -200,7 +200,7 @@ export default function RefereeRankingsPage() {
                       </td>
                       <td className="p-4 text-right font-black text-teal-400 text-sm">
                         <span className="text-teal-700">{horse.totalPoints}</span>{" "}
-                        <span className="text-muted-foreground">Pts</span>
+                        <span className="text-muted-foreground">điểm</span>
                       </td>
                     </tr>
                   ))
@@ -271,7 +271,7 @@ export default function RefereeRankingsPage() {
                       <td className="p-4 text-center text-primary font-black text-sm">{jockey.wins}</td>
                       <td className="p-4 text-right font-black text-teal-400 text-sm">
                         <span className="text-teal-700">{jockey.totalPoints}</span>{" "}
-                        <span className="text-muted-foreground">Pts</span>
+                        <span className="text-muted-foreground">điểm</span>
                       </td>
                     </tr>
                   ))
