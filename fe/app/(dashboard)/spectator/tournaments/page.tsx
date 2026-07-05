@@ -944,20 +944,20 @@ export default function SpectatorTournamentsPage() {
                           <button
                             type="button"
                             onClick={() => { void handleToggleAiPrediction(); }}
-                            className="w-full flex items-center justify-between px-3 py-2.5 bg-purple-500/5 hover:bg-purple-500/10 transition-colors text-left"
+                            className="w-full flex items-center justify-between px-3 py-2.5 bg-primary/5 hover:bg-primary/10 transition-colors text-left"
                           >
                             <div className="flex items-center gap-2">
-                              <Brain className="size-3.5 text-purple-400" />
-                              <span className="text-[10px] font-black uppercase tracking-wider text-purple-400">Gợi ý AI</span>
+                              <Brain className="size-3.5 text-[#E10600]" />
+                              <span className="text-[10px] font-black uppercase tracking-wider text-[#E10600]">Gợi ý AI</span>
                               {aiPrediction && (
-                                <span className="text-[9px] font-mono text-purple-300/70">{aiPrediction.confidenceLevel}% tin cậy</span>
+                                <span className="text-[9px] font-mono text-muted-foreground">{aiPrediction.confidenceLevel}% tin cậy</span>
                               )}
                             </div>
-                            <ChevronDown className={`size-3.5 text-purple-400 transition-transform ${aiPredictionExpanded ? "rotate-180" : ""}`} />
+                            <ChevronDown className={`size-3.5 text-[#E10600] transition-transform ${aiPredictionExpanded ? "rotate-180" : ""}`} />
                           </button>
 
                           {aiPredictionExpanded && (
-                            <div className="border-t border-border px-3 py-2.5 bg-white/[0.01]">
+                            <div className="border-t border-border px-3 py-2.5">
                               {loadingAiPrediction ? (
                                 <div className="flex items-center justify-center gap-2 py-3 text-muted-foreground">
                                   <Loader2 className="size-3.5 animate-spin" />
@@ -965,14 +965,14 @@ export default function SpectatorTournamentsPage() {
                                 </div>
                               ) : aiNoSubscription ? (
                                 <div className="flex items-center gap-3 py-2">
-                                  <Lock className="size-4 text-yellow-400 shrink-0" />
+                                  <Lock className="size-4 text-amber-500 shrink-0" />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-[10px] font-bold text-foreground">Yêu cầu gói AI</p>
                                     <p className="text-[9px] text-muted-foreground">Đăng ký để xem dự đoán xác suất thắng.</p>
                                   </div>
                                   <a
                                     href="/spectator/ai-packages"
-                                    className="shrink-0 text-[9px] font-black uppercase tracking-wider text-purple-400 hover:text-purple-300 transition-colors"
+                                    className="shrink-0 text-[9px] font-black uppercase tracking-wider text-[#E10600] hover:text-foreground transition-colors"
                                   >
                                     Mua gói
                                   </a>
@@ -993,15 +993,15 @@ export default function SpectatorTournamentsPage() {
                                           <span className="text-[10px] font-medium text-foreground flex-1 truncate">{name}</span>
                                           <div className="flex items-center gap-1.5 shrink-0">
                                             <div className="w-12 h-1 rounded-full bg-muted overflow-hidden">
-                                              <div className="h-full rounded-full bg-purple-400" style={{ width: `${r.winProbability * 100}%` }} />
+                                              <div className="h-full rounded-full bg-[#E10600]" style={{ width: `${r.winProbability * 100}%` }} />
                                             </div>
-                                            <span className="text-[9px] font-mono text-purple-300 w-8 text-right">{(r.winProbability * 100).toFixed(0)}%</span>
+                                            <span className="text-[9px] font-mono text-muted-foreground w-8 text-right">{(r.winProbability * 100).toFixed(0)}%</span>
                                           </div>
                                         </div>
                                       );
                                     })}
                                   {aiPrediction.reasoning && (
-                                    <p className="text-[9px] text-muted-foreground italic border-t border-border pt-1.5 mt-1 leading-relaxed line-clamp-2">
+                                    <p className="text-[9px] text-muted-foreground italic border-t border-border pt-1.5 mt-1 leading-relaxed">
                                       {aiPrediction.reasoning}
                                     </p>
                                   )}
