@@ -15,6 +15,7 @@ import { Registration } from '../registrations/schemas/registration.schema';
 import { RefereeAssignment } from '../referee-assignments/schemas/referee-assignment.schema';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
+import { NotificationsService } from '../notifications/notifications.service';
 import { Types } from 'mongoose';
 
 /** Helper: tạo mock query object hỗ trợ .session() chainable */
@@ -57,6 +58,10 @@ describe('PrizesService', () => {
     exists: jest.fn(),
   };
 
+  const mockNotificationsService = {
+    send: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -88,6 +93,10 @@ describe('PrizesService', () => {
         {
           provide: RewardPointLedgerService,
           useValue: mockLedgerService,
+        },
+        {
+          provide: NotificationsService,
+          useValue: mockNotificationsService,
         },
       ],
     }).compile();
