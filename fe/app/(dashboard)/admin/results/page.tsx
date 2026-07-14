@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Calendar, ArrowLeft, Search, ChevronRight, Trophy } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ArrowLeft, Calendar, ChevronRight, Search } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface Tournament {
   id: string;
@@ -57,7 +57,8 @@ interface RaceGroup {
 
 export default function AdminResultsPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
+  const [selectedTournament, setSelectedTournament] =
+    useState<Tournament | null>(null);
   const [raceGroups, setRaceGroups] = useState<RaceGroup[]>([]);
   const [isLoadingTournaments, setIsLoadingTournaments] = useState(true);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
@@ -72,7 +73,8 @@ export default function AdminResultsPage() {
         const res = await fetch("/api/admin/results");
         const resData = await res.json();
         if (res.ok && resData.success) {
-          const fetchedTournaments = resData.data.tournaments || resData.data || [];
+          const fetchedTournaments =
+            resData.data.tournaments || resData.data || [];
           setTournaments(fetchedTournaments);
         } else {
           setError(resData.message || "Không thể tải danh sách giải đấu.");
@@ -125,8 +127,10 @@ export default function AdminResultsPage() {
           });
 
           // Sort groups by raceNumber
-          const sortedGroups = Object.values(groups).sort((a, b) => a.raceNumber - b.raceNumber);
-          
+          const sortedGroups = Object.values(groups).sort(
+            (a, b) => a.raceNumber - b.raceNumber,
+          );
+
           // Sort results within each group by rank
           sortedGroups.forEach((group) => {
             group.results.sort((a, b) => {
@@ -151,12 +155,16 @@ export default function AdminResultsPage() {
   }, [selectedTournament]);
 
   const filteredTournaments = tournaments.filter((t) =>
-    t.name.toLowerCase().includes(searchTerm.toLowerCase())
+    t.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Calculate counts of races with results in different statuses across the loaded race groups
-  const confirmedCount = raceGroups.filter((g) => g.resultsStatus === "CONFIRMED").length;
-  const publishedCount = raceGroups.filter((g) => g.resultsStatus === "PUBLISHED").length;
+  const confirmedCount = raceGroups.filter(
+    (g) => g.resultsStatus === "CONFIRMED",
+  ).length;
+  const publishedCount = raceGroups.filter(
+    (g) => g.resultsStatus === "PUBLISHED",
+  ).length;
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12 px-4 sm:px-6">
@@ -190,12 +198,17 @@ export default function AdminResultsPage() {
           {isLoadingTournaments ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((n) => (
-                <div key={n} className="h-40 rounded-2xl border border-border bg-card animate-pulse" />
+                <div
+                  key={n}
+                  className="h-40 rounded-2xl border border-border bg-card animate-pulse"
+                />
               ))}
             </div>
           ) : filteredTournaments.length === 0 ? (
             <div className="text-center py-12 border border-border bg-card rounded-2xl">
-              <p className="text-muted-foreground text-sm">Không tìm thấy giải đấu nào phù hợp.</p>
+              <p className="text-muted-foreground text-sm">
+                Không tìm thấy giải đấu nào phù hợp.
+              </p>
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -221,7 +234,9 @@ export default function AdminResultsPage() {
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-[10px] font-mono text-muted-foreground/60 flex items-center gap-1">
                       <Calendar className="size-3.5" />
-                      {t.startDate ? new Date(t.startDate).toLocaleDateString("vi-VN") : "N/A"}
+                      {t.startDate
+                        ? new Date(t.startDate).toLocaleDateString("vi-VN")
+                        : "N/A"}
                     </span>
                     <button
                       onClick={() => setSelectedTournament(t)}
@@ -255,8 +270,7 @@ export default function AdminResultsPage() {
           {/* Quick Stats */}
           <section className="grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-border bg-card p-5">
-              <Trophy className="size-5 text-primary" />
-              <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-primary">
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
                 Chờ công bố (Referee Confirmed)
               </p>
               <p className="mt-2 font-mono text-4xl font-black text-foreground">
@@ -289,19 +303,26 @@ export default function AdminResultsPage() {
           {isLoadingResults ? (
             <div className="grid gap-6 sm:grid-cols-2">
               {[1, 2].map((n) => (
-                <div key={n} className="h-48 rounded-2xl border border-border bg-card animate-pulse" />
+                <div
+                  key={n}
+                  className="h-48 rounded-2xl border border-border bg-card animate-pulse"
+                />
               ))}
             </div>
           ) : raceGroups.length === 0 ? (
             <div className="text-center py-12 border border-border bg-card rounded-2xl">
-              <p className="text-muted-foreground text-sm">Chưa có lượt đua nào có kết quả được lập trong giải đấu này.</p>
+              <p className="text-muted-foreground text-sm">
+                Chưa có lượt đua nào có kết quả được lập trong giải đấu này.
+              </p>
             </div>
           ) : (
             <div className="grid gap-6">
               {raceGroups.map((group) => {
                 const isConfirmed = group.resultsStatus === "CONFIRMED";
-                const isPublished = group.resultsStatus === "PUBLISHED" || group.status === "RESULT_PUBLISHED";
-                
+                const isPublished =
+                  group.resultsStatus === "PUBLISHED" ||
+                  group.status === "RESULT_PUBLISHED";
+
                 return (
                   <article
                     key={group.raceId}
@@ -317,11 +338,7 @@ export default function AdminResultsPage() {
                               : "Draft"
                         }
                         tone={
-                          isPublished
-                            ? "teal"
-                            : isConfirmed
-                              ? "green"
-                              : "slate"
+                          isPublished ? "teal" : isConfirmed ? "green" : "slate"
                         }
                         pulse={isConfirmed}
                       />
@@ -329,7 +346,8 @@ export default function AdminResultsPage() {
                         {group.name}
                       </h2>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Trận #{group.raceNumber} · {group.results.length} chiến mã tham dự
+                        Trận #{group.raceNumber} · {group.results.length} chiến
+                        mã tham dự
                       </p>
                     </div>
                     <Button
