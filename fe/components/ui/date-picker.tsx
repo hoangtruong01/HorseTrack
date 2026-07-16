@@ -42,11 +42,11 @@ export function DatePicker({
           type="button"
           disabled={disabled}
           className={cn(
-            "h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm outline-none transition",
+            "h-12 w-full rounded-xl border border-border bg-muted/40 dark:bg-black/35 px-4 text-sm outline-none transition",
             "flex items-center justify-between gap-2",
             "focus:border-primary focus:ring-2 focus:ring-primary/20",
             "disabled:opacity-50 disabled:cursor-not-allowed",
-            selected ? "text-foreground" : "text-white/30",
+            selected ? "text-foreground" : "text-muted-foreground/50",
             className,
           )}
         >

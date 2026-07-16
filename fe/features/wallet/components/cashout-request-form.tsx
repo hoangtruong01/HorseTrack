@@ -86,9 +86,20 @@ export function CashoutRequestForm({
               max={availablePoints}
               value={pointsStr}
               onChange={(e) => {
-                const val =
-                  e.target.value === "" ? 0 : parseInt(e.target.value, 10);
-                setPoints(Number.isNaN(val) ? 0 : val);
+                const val = e.target.value;
+                if (val === "") {
+                  setPoints(0);
+                  e.target.value = "";
+                  return;
+                }
+                const parsed = parseInt(val, 10);
+                if (Number.isNaN(parsed)) {
+                  setPoints(0);
+                  e.target.value = "0";
+                } else {
+                  setPoints(parsed);
+                  e.target.value = parsed.toString();
+                }
               }}
               required
               className="h-12 w-full rounded-xl border border-border bg-muted px-4 font-mono font-black text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"

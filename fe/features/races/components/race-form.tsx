@@ -303,7 +303,22 @@ export function RaceForm() {
             min={100}
             required
             value={distanceMeters}
-            onChange={(e) => setDistanceMeters(parseInt(e.target.value) || 0)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "") {
+                setDistanceMeters(0);
+                e.target.value = "";
+                return;
+              }
+              const parsed = parseInt(val, 10);
+              if (isNaN(parsed)) {
+                setDistanceMeters(0);
+                e.target.value = "0";
+              } else {
+                setDistanceMeters(parsed);
+                e.target.value = parsed.toString();
+              }
+            }}
             className="font-mono"
           />
         </div>
@@ -320,7 +335,22 @@ export function RaceForm() {
             type="number"
             min={2}
             value={maxParticipants}
-            onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 8)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "") {
+                setMaxParticipants(0);
+                e.target.value = "";
+                return;
+              }
+              const parsed = parseInt(val, 10);
+              if (isNaN(parsed)) {
+                setMaxParticipants(0);
+                e.target.value = "0";
+              } else {
+                setMaxParticipants(parsed);
+                e.target.value = parsed.toString();
+              }
+            }}
             className="font-mono"
           />
         </div>
@@ -332,7 +362,22 @@ export function RaceForm() {
             type="number"
             min={0}
             value={prize}
-            onChange={(e) => setPrize(parseInt(e.target.value) || 0)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "") {
+                setPrize(0);
+                e.target.value = "";
+                return;
+              }
+              const parsed = parseInt(val, 10);
+              if (isNaN(parsed)) {
+                setPrize(0);
+                e.target.value = "0";
+              } else {
+                setPrize(parsed);
+                e.target.value = parsed.toString();
+              }
+            }}
             className="font-mono"
           />
         </div>
@@ -355,7 +400,7 @@ export function RaceForm() {
           Hình ảnh trận đua
         </Label>
         <div
-          className={`relative border border-dashed border-border/25 hover:border-primary/50 bg-black/20 rounded-xl min-h-[160px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${uploading ? "pointer-events-none opacity-60" : ""}`}
+          className={`relative border border-dashed border-border hover:border-primary/50 bg-muted/40 dark:bg-black/20 rounded-xl min-h-[160px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${uploading ? "pointer-events-none opacity-60" : ""}`}
         >
           {imagePreview ? (
             <div className="relative w-full h-[140px] rounded-lg overflow-hidden">
@@ -376,12 +421,12 @@ export function RaceForm() {
               {uploading ? (
                 <Loader2 className="size-8 text-primary mx-auto animate-spin" />
               ) : (
-                <Upload className="size-8 text-white/35 mx-auto group-hover:text-primary transition" />
+                <Upload className="size-8 text-muted-foreground/40 mx-auto group-hover:text-primary transition" />
               )}
               <p className="text-xs font-bold text-foreground">
                 {uploading ? "Đang tải lên..." : "Tải lên hình ảnh trận đua"}
               </p>
-              <p className="text-[10px] text-white/45">
+              <p className="text-[10px] text-muted-foreground/50">
                 Cho phép định dạng PNG, JPG, WEBP tối đa 5MB
               </p>
             </div>

@@ -181,7 +181,7 @@ export default function AdminTournamentDetailPage() {
         </h3>
         <Button
           asChild
-          className="rounded-full bg-white/5 text-foreground mt-4"
+          className="rounded-full bg-muted hover:bg-muted/80 text-foreground mt-4"
         >
           <Link href="/admin/tournaments">Quay lại danh sách giải đấu</Link>
         </Button>
@@ -245,8 +245,8 @@ export default function AdminTournamentDetailPage() {
               <span
                 className={`inline-flex rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase ${
                   tournament.status === "OPEN_REGISTRATION"
-                    ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
-                    : "text-muted-foreground border-border bg-white/5"
+                    ? "text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
+                    : "text-muted-foreground border-border bg-muted/50"
                 }`}
               >
                 {tournament.status}
@@ -343,7 +343,7 @@ export default function AdminTournamentDetailPage() {
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden my-2 border border-border">
+              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden my-2 border border-border">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${remainingBudget < 0 ? "bg-red-500" : "bg-teal-500"}`}
                   style={{ width: `${budgetPercent}%` }}
@@ -380,12 +380,12 @@ export default function AdminTournamentDetailPage() {
               </Link>
             </Button>
             <Button
-              onClick={loadDetails}
-              variant="ghost"
-              className="size-8 p-0 rounded-full hover:bg-white/5 text-muted-foreground hover:text-foreground"
-            >
-              <RefreshCw className="size-4" />
-            </Button>
+               onClick={loadDetails}
+               variant="ghost"
+               className="size-8 p-0 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+             >
+               <RefreshCw className="size-4" />
+             </Button>
           </div>
         </div>
 
@@ -404,7 +404,7 @@ export default function AdminTournamentDetailPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-border bg-white/[0.02] text-muted-foreground font-black uppercase tracking-wider">
+                  <tr className="border-b border-border bg-muted/30 text-muted-foreground font-black uppercase tracking-wider">
                     <th className="p-4 w-12">#</th>
                     <th className="p-4">Tên vòng đua</th>
                     <th className="p-4">Cự ly / Mặt sân</th>
@@ -415,7 +415,7 @@ export default function AdminTournamentDetailPage() {
                     <th className="p-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-foreground/70">
+                <tbody className="divide-y divide-border text-foreground/70">
                   {races.map((race, index) => {
                     const isLocked = [
                       "LIVE",
@@ -434,7 +434,7 @@ export default function AdminTournamentDetailPage() {
                             return;
                           void handleOpenRaceDetails(race);
                         }}
-                        className="hover:bg-white/[0.03] cursor-pointer transition duration-200"
+                        className="hover:bg-muted/40 cursor-pointer transition duration-200"
                         title="Click to view detailed race information"
                       >
                         <td className="p-4 font-mono font-bold text-muted-foreground/70">
@@ -534,7 +534,7 @@ export default function AdminTournamentDetailPage() {
             <div className="flex justify-between items-start border-b border-border pb-4">
               <div>
                 <span
-                  className={`inline-flex rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${raceStatusColors[selectedRace.status] || "text-muted-foreground border-border bg-white/5"}`}
+                  className={`inline-flex rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${raceStatusColors[selectedRace.status] || "text-muted-foreground border-border bg-muted/50"}`}
                 >
                   {selectedRace.status}
                 </span>
@@ -547,7 +547,7 @@ export default function AdminTournamentDetailPage() {
                   setSelectedRace(null);
                   setRaceRegistrations([]);
                 }}
-                className="text-muted-foreground/70 hover:text-foreground text-lg font-bold bg-white/5 hover:bg-white/10 rounded-lg size-8 flex items-center justify-center transition"
+                className="text-muted-foreground/70 hover:text-foreground text-lg font-bold bg-muted hover:bg-muted/80 rounded-lg size-8 flex items-center justify-center transition"
               >
                 &times;
               </button>
@@ -555,7 +555,7 @@ export default function AdminTournamentDetailPage() {
 
             {/* General Info Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
-              <div className="bg-white/[0.02] border border-border rounded-xl p-3">
+              <div className="bg-muted/30 border border-border rounded-xl p-3">
                 <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
                   Cự ly thi đấu
                 </span>
@@ -564,7 +564,7 @@ export default function AdminTournamentDetailPage() {
                 </span>
               </div>
               {selectedRace.imageUrl && (
-                <div className="bg-white/[0.02] border border-border rounded-xl p-3 flex flex-col justify-between">
+                <div className="bg-muted/30 border border-border rounded-xl p-3 flex flex-col justify-between">
                   <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
                     Hình ảnh trận đua
                   </span>
@@ -578,7 +578,7 @@ export default function AdminTournamentDetailPage() {
                   </div>
                 </div>
               )}
-              <div className="bg-white/[0.02] border border-border rounded-xl p-3">
+              <div className="bg-muted/30 border border-border rounded-xl p-3">
                 <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
                   Mặt sân đua
                 </span>
@@ -586,7 +586,7 @@ export default function AdminTournamentDetailPage() {
                   {selectedRace.trackCondition || "Dry turf"}
                 </span>
               </div>
-              <div className="bg-white/[0.02] border border-border rounded-xl p-3">
+              <div className="bg-muted/30 border border-border rounded-xl p-3">
                 <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
                   Dự báo thời tiết
                 </span>
@@ -594,15 +594,15 @@ export default function AdminTournamentDetailPage() {
                   {selectedRace.weatherSnapshot || "Sunny"}
                 </span>
               </div>
-              <div className="bg-white/[0.02] border border-border rounded-xl p-3">
+              <div className="bg-muted/30 border border-border rounded-xl p-3">
                 <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
                   Quỹ giải thưởng
                 </span>
-                <span className="text-sm font-black text-teal-400">
+                <span className="text-sm font-black text-teal-600 dark:text-teal-400">
                   {(selectedRace.prize || 0).toLocaleString()} pts
                 </span>
               </div>
-              <div className="bg-white/[0.02] border border-border rounded-xl p-3">
+              <div className="bg-muted/30 border border-border rounded-xl p-3">
                 <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
                   Giới hạn số ngựa
                 </span>
@@ -615,7 +615,7 @@ export default function AdminTournamentDetailPage() {
 
             {/* Conditions Form — editable when not LIVE/FINISHED/RESULT_PUBLISHED */}
             {!["LIVE", "FINISHED", "RESULT_PUBLISHED"].includes(selectedRace.status) && (
-              <div className="border border-border rounded-xl p-4 space-y-3 bg-white/[0.01]">
+              <div className="border border-border rounded-xl p-4 space-y-3 bg-muted/10">
                 <div className="flex items-center justify-between">
                   <h4 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5">
                     <CloudSun className="size-3.5 text-amber-400" /> Điều Kiện Thực Địa
@@ -678,7 +678,7 @@ export default function AdminTournamentDetailPage() {
             )}
 
             {selectedRace.description && (
-              <div className="bg-white/[0.01] border border-border rounded-xl p-4 text-xs text-foreground/70 space-y-1">
+              <div className="bg-muted/10 border border-border rounded-xl p-4 text-xs text-foreground/70 space-y-1">
                 <span className="block text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
                   Thông tin mô tả
                 </span>
@@ -701,14 +701,14 @@ export default function AdminTournamentDetailPage() {
                   </p>
                 </div>
               ) : raceRegistrations.length === 0 ? (
-                <div className="text-center py-8 border border-dashed border-border rounded-xl bg-white/[0.01] text-xs text-muted-foreground/70">
+                <div className="text-center py-8 border border-dashed border-border rounded-xl bg-muted/10 text-xs text-muted-foreground/70">
                   Chưa có chiến mã nào được ghi danh tham gia vòng đua này.
                 </div>
               ) : (
                 <div className="rounded-xl border border-border overflow-hidden bg-muted max-h-48 overflow-y-auto">
                   <table className="w-full text-left border-collapse text-[11px]">
                     <thead>
-                      <tr className="bg-white/[0.03] border-b border-border text-muted-foreground font-bold uppercase tracking-wider">
+                      <tr className="bg-muted/40 border-b border-border text-muted-foreground font-bold uppercase tracking-wider">
                         <th className="p-2.5 w-10">Cổng</th>
                         <th className="p-2.5">Chiến mã</th>
                         <th className="p-2.5">Chủ ngựa (Owner)</th>
@@ -716,9 +716,9 @@ export default function AdminTournamentDetailPage() {
                         <th className="p-2.5 text-right">Trạng thái</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-foreground/70">
+                    <tbody className="divide-y divide-border text-foreground/70">
                       {raceRegistrations.map((reg, idx) => (
-                        <tr key={reg._id} className="hover:bg-white/[0.01]">
+                        <tr key={reg._id} className="hover:bg-muted/20">
                           <td className="p-2.5 font-mono font-bold text-muted-foreground/70">
                             #{idx + 1}
                           </td>
@@ -777,7 +777,7 @@ export default function AdminTournamentDetailPage() {
                   setSelectedRace(null);
                   setRaceRegistrations([]);
                 }}
-                className="rounded-xl px-5 h-10 bg-white/5 hover:bg-white/10 text-foreground font-bold uppercase tracking-wider text-xs border border-border"
+                className="rounded-xl px-5 h-10 bg-muted hover:bg-muted/80 text-foreground font-bold uppercase tracking-wider text-xs border border-border"
               >
                 Đóng
               </Button>

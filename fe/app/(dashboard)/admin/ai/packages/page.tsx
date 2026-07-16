@@ -8,8 +8,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { aiApi, type AiPackageItem } from "@/lib/api-client";
 
 const statusColors: Record<string, string> = {
-  ACTIVE: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  INACTIVE: "text-slate-400 bg-slate-400/10 border-slate-400/20",
+  ACTIVE: "text-emerald-600 dark:text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+  INACTIVE: "text-slate-500 dark:text-slate-400 bg-slate-400/10 border-slate-400/20",
 };
 
 const defaultForm = { name: "", description: "", price: "", durationDays: "", accuracyRate: "" };
@@ -20,6 +20,12 @@ export default function AdminAiPackagesPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(defaultForm);
   const [submitting, setSubmitting] = useState(false);
+
+  const cleanNumberString = (val: string) => {
+    if (val === "") return "";
+    const num = parseInt(val, 10);
+    return isNaN(num) ? "" : num.toString();
+  };
 
   const fetchPackages = useCallback(async () => {
     setLoading(true);
@@ -97,7 +103,7 @@ export default function AdminAiPackagesPage() {
                 type="number"
                 min="0"
                 value={form.price}
-                onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                onChange={(e) => setForm((f) => ({ ...f, price: cleanNumberString(e.target.value) }))}
                 placeholder="50000"
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
@@ -108,7 +114,7 @@ export default function AdminAiPackagesPage() {
                 type="number"
                 min="1"
                 value={form.durationDays}
-                onChange={(e) => setForm((f) => ({ ...f, durationDays: e.target.value }))}
+                onChange={(e) => setForm((f) => ({ ...f, durationDays: cleanNumberString(e.target.value) }))}
                 placeholder="30"
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
@@ -120,7 +126,7 @@ export default function AdminAiPackagesPage() {
                 min="0"
                 max="100"
                 value={form.accuracyRate}
-                onChange={(e) => setForm((f) => ({ ...f, accuracyRate: e.target.value }))}
+                onChange={(e) => setForm((f) => ({ ...f, accuracyRate: cleanNumberString(e.target.value) }))}
                 placeholder="75"
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
@@ -180,7 +186,7 @@ export default function AdminAiPackagesPage() {
                   <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Trạng thái</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {packages.map((pkg) => (
                   <tr key={pkg._id} className="hover:bg-muted transition-colors">
                     <td className="px-5 py-4 text-sm font-medium text-foreground">{pkg.name}</td>

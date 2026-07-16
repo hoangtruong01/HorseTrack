@@ -183,7 +183,7 @@ export function TournamentForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative overflow-hidden rounded-2xl border border-border/10 bg-[#15151E]/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6 lg:p-8"
+      className="relative overflow-hidden rounded-2xl border border-border bg-card dark:bg-[#15151E]/85 p-5 shadow-lg sm:p-6 lg:p-8"
     >
       {/* Decorative Gradients */}
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(225,6,0,0.12),transparent_35%),radial-gradient(circle_at_85%_15%,rgba(6,126,106,0.1),transparent_30rem)]" />
@@ -220,7 +220,7 @@ export function TournamentForm() {
               onChange={(e) => setName(e.target.value)}
               required
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition placeholder:text-white/20 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-12 w-full rounded-xl border border-border bg-muted/40 dark:bg-black/35 px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="Ví dụ: Spring Velocity Cup 2026"
             />
           </label>
@@ -235,7 +235,7 @@ export function TournamentForm() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 text-sm text-foreground outline-none transition placeholder:text-white/20 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-12 w-full rounded-xl border border-border bg-muted/40 dark:bg-black/35 px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="Ví dụ: Trường đua Phú Thọ, TPHCM"
             />
           </label>
@@ -322,9 +322,24 @@ export function TournamentForm() {
               type="number"
               min={2}
               value={maxHorses}
-              onChange={(e) => setMaxHorses(parseInt(e.target.value) || 0)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "") {
+                  setMaxHorses(0);
+                  e.target.value = "";
+                  return;
+                }
+                const parsed = parseInt(val, 10);
+                if (isNaN(parsed)) {
+                  setMaxHorses(0);
+                  e.target.value = "0";
+                } else {
+                  setMaxHorses(parsed);
+                  e.target.value = parsed.toString();
+                }
+              }}
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 font-mono text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-12 w-full rounded-xl border border-border bg-muted/40 dark:bg-black/35 px-4 font-mono text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="Mặc định: 20"
             />
           </label>
@@ -338,9 +353,24 @@ export function TournamentForm() {
               type="number"
               min={0}
               value={prizePool}
-              onChange={(e) => setPrizePool(parseInt(e.target.value) || 0)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "") {
+                  setPrizePool(0);
+                  e.target.value = "";
+                  return;
+                }
+                const parsed = parseInt(val, 10);
+                if (isNaN(parsed)) {
+                  setPrizePool(0);
+                  e.target.value = "0";
+                } else {
+                  setPrizePool(parsed);
+                  e.target.value = parsed.toString();
+                }
+              }}
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border/10 bg-black/35 px-4 font-mono text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-12 w-full rounded-xl border border-border bg-muted/40 dark:bg-black/35 px-4 font-mono text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="Mặc định: 0"
             />
           </label>
@@ -355,7 +385,7 @@ export function TournamentForm() {
               onChange={(e) => setDescription(e.target.value)}
               disabled={isLoading}
               rows={8}
-              className="w-full rounded-xl border border-border/10 bg-black/35 p-4 text-sm text-foreground outline-none transition placeholder:text-white/20 focus:border-primary focus:ring-2 focus:ring-primary/20 resize-y"
+              className="w-full rounded-xl border border-border bg-muted/40 dark:bg-black/35 p-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 resize-y"
               placeholder="Mô tả tóm tắt về thể lệ giải đấu, giải thưởng hoặc thông tin ban tổ chức..."
             />
           </label>
@@ -363,7 +393,7 @@ export function TournamentForm() {
           <div className="grid gap-2 text-sm font-bold text-foreground">
             <span>Hình ảnh giải đấu</span>
             <div
-              className={`relative border border-dashed border-border/10 hover:border-primary/50 bg-black/35 rounded-xl min-h-[192px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${uploading ? "pointer-events-none opacity-60" : ""}`}
+              className={`relative border border-dashed border-border hover:border-primary/50 bg-muted/40 dark:bg-black/35 rounded-xl min-h-[192px] flex flex-col items-center justify-center p-4 transition group cursor-pointer ${uploading ? "pointer-events-none opacity-60" : ""}`}
             >
               {imagePreview ? (
                 <div className="relative w-full h-[160px] rounded-lg overflow-hidden">
@@ -384,12 +414,12 @@ export function TournamentForm() {
                   {uploading ? (
                     <Loader2 className="size-10 text-primary mx-auto animate-spin" />
                   ) : (
-                    <Upload className="size-10 text-white/35 mx-auto group-hover:text-primary transition" />
+                    <Upload className="size-10 text-muted-foreground/40 mx-auto group-hover:text-primary transition" />
                   )}
                   <p className="text-sm font-bold text-foreground">
                     {uploading ? "Đang tải lên..." : "Tải lên hình ảnh"}
                   </p>
-                  <p className="text-xs text-white/45">
+                  <p className="text-xs text-muted-foreground/50">
                     Cho phép định dạng PNG, JPG, WEBP tối đa 5MB
                   </p>
                 </div>

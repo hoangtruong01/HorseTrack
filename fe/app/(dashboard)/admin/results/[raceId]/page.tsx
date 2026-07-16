@@ -136,7 +136,7 @@ export default function AdminResultDetailPage({
   if (error || !race) {
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
-        <h2 className="text-xl font-bold text-white">{error || "Không tìm thấy lượt đua"}</h2>
+        <h2 className="text-xl font-bold text-foreground">{error || "Không tìm thấy lượt đua"}</h2>
         <Button onClick={() => router.back()}>Quay lại</Button>
       </main>
     );
@@ -148,7 +148,7 @@ export default function AdminResultDetailPage({
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12 px-4 sm:px-6">
-      <Link href="/admin/results" className="inline-flex items-center text-xs text-white/50 hover:text-white transition">
+      <Link href="/admin/results" className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground transition">
         <ArrowLeft className="size-3.5 mr-1" /> Quay lại danh sách kết quả
       </Link>
 
@@ -158,18 +158,18 @@ export default function AdminResultDetailPage({
         description="Xem bảng xếp hạng, giây phạt vi phạm và thực hiện công bố kết quả chính thức."
         actions={
           <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-11 rounded-full border-white/10 hover:bg-white/5 text-white hover:text-white">
+            <Button asChild variant="outline" className="h-11 rounded-full border-border hover:bg-muted text-foreground hover:text-foreground">
               <Link href="/admin/results">Xem tất cả</Link>
             </Button>
           </div>
         }
       />
 
-      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151E] p-5 shadow-lg">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(225,6,0,0.1),transparent_25rem)]" />
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-lg">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(225,6,0,0.06),transparent_25rem)]" />
         <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="space-y-1">
-            <span className="text-[9px] font-black uppercase tracking-wider text-teal-400">TRẠNG THÁI BIÊN BẢN KẾT QUẢ</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-teal-500 dark:text-teal-400">TRẠNG THÁI BIÊN BẢN KẾT QUẢ</span>
             <div className="flex items-center gap-2 mt-1">
               <StatusBadge
                 label={
@@ -182,9 +182,9 @@ export default function AdminResultDetailPage({
                 }
                 pulse={resultsStatus === "CONFIRMED"}
               />
-              <span className="text-sm font-bold text-white uppercase">{race.name}</span>
+              <span className="text-sm font-bold text-foreground uppercase">{race.name}</span>
             </div>
-            <p className="text-xs text-white/40 leading-relaxed">
+            <p className="text-xs text-muted-foreground/80 leading-relaxed">
               {isPublished 
                 ? "Biên bản kết quả đã được công bố chính thức. Hệ thống đã tự động cộng điểm xếp hạng và chia thưởng điểm."
                 : "Biên bản kết quả đang chờ admin duyệt và công bố chính thức."}
@@ -196,7 +196,7 @@ export default function AdminResultDetailPage({
               <Button
                 onClick={handlePublish}
                 disabled={isPublishing || !canPublish}
-                className="h-10 px-5 rounded-full bg-primary hover:bg-primary/95 text-white text-xs font-black uppercase flex items-center gap-1.5"
+                className="h-10 px-5 rounded-full bg-primary hover:bg-[#B80500] text-primary-foreground text-xs font-black uppercase flex items-center gap-1.5"
               >
                 <ShieldCheck className="size-3.5" /> {isPublishing ? "Đang công bố..." : "Phê duyệt & Công bố kết quả"}
               </Button>
@@ -213,19 +213,19 @@ export default function AdminResultDetailPage({
 
       {/* Results Table */}
       <section className="space-y-4">
-        <h3 className="text-sm font-black uppercase tracking-wider text-white">
+        <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
           Bảng xếp hạng lượt đua chi tiết
         </h3>
 
         {results.length === 0 ? (
-          <div className="text-center py-12 rounded-2xl border border-dashed border-white/10 bg-[#15151E]/40 text-white/40 text-xs">
+          <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/40 text-muted-foreground/50 text-xs">
             Chưa có kết quả nào cho lượt đua này.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#15151E] shadow-xl">
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-xl">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-black/40 text-[10px] font-black uppercase tracking-widest text-white/50">
+                <tr className="border-b border-border bg-muted/50 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   <th className="p-4 w-16 text-center">Hạng</th>
                   <th className="p-4">Chiến mã (Horse)</th>
                   <th className="p-4">Giống ngựa</th>
@@ -243,9 +243,9 @@ export default function AdminResultDetailPage({
                   <th className="p-4 text-right">Điểm thưởng</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {results.map((res, index) => (
-                  <tr key={res.id || res._id || index} className="hover:bg-white/5 transition">
+                  <tr key={res.id || res._id || index} className="hover:bg-muted/40 transition">
                     <td className="p-4 text-center">
                       <span
                         className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
@@ -261,16 +261,16 @@ export default function AdminResultDetailPage({
                         {res.rank || "—"}
                       </span>
                     </td>
-                    <td className="p-4 font-bold text-white uppercase">{res.horseId?.name || "Chiến mã ẩn"}</td>
-                    <td className="p-4 text-white/60">{res.horseId?.breed || "Chưa xác định"}</td>
-                    <td className="p-4 text-white">{res.jockeyUserId?.fullName || "Nài ngựa ẩn"}</td>
-                    <td className="p-4 font-mono font-black text-white text-sm">
+                    <td className="p-4 font-bold text-foreground uppercase">{res.horseId?.name || "Chiến mã ẩn"}</td>
+                    <td className="p-4 text-muted-foreground">{res.horseId?.breed || "Chưa xác định"}</td>
+                    <td className="p-4 text-foreground">{res.jockeyUserId?.fullName || "Nài ngựa ẩn"}</td>
+                    <td className="p-4 font-mono font-black text-foreground text-sm">
                       {res.outcome === "finished" ? formatTime(res.finishTimeMs) : "Không hoàn thành"}
                     </td>
-                    <td className={`p-4 ${res.incident !== "none" && res.incident !== "NONE" ? "text-primary font-bold" : "text-white/40"}`}>
+                    <td className={`p-4 ${res.incident !== "none" && res.incident !== "NONE" ? "text-primary font-bold" : "text-muted-foreground/60"}`}>
                       {res.note || (res.incident !== "none" && res.incident !== "NONE" ? res.incident : "Không")}
                     </td>
-                    <td className="p-4 text-right font-black text-teal-400 text-sm">
+                    <td className="p-4 text-right font-black text-teal-500 dark:text-teal-400 text-sm">
                       +{res.points || 0} Pts
                     </td>
                   </tr>

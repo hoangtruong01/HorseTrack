@@ -38,6 +38,12 @@ export function HorseForm({
   const [baseSpeed, setBaseSpeed] = useState(initialData?.baseSpeed?.toString() || "60");
   const [staminaScore, setStaminaScore] = useState(initialData?.staminaScore?.toString() || "70");
 
+  const cleanNumberString = (val: string) => {
+    if (val === "") return "";
+    const num = parseInt(val, 10);
+    return isNaN(num) ? "" : num.toString();
+  };
+
   // Support multiple images
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>(
@@ -206,7 +212,7 @@ export function HorseForm({
                 min="1"
                 max="30"
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
+                onChange={(e) => setAge(cleanNumberString(e.target.value))}
                 className={fieldClass}
                 placeholder="5"
               />
@@ -218,7 +224,7 @@ export function HorseForm({
                 min="100"
                 max="1000"
                 value={weightKg}
-                onChange={(e) => setWeightKg(e.target.value)}
+                onChange={(e) => setWeightKg(cleanNumberString(e.target.value))}
                 className={fieldClass}
                 placeholder="450"
               />
@@ -230,7 +236,7 @@ export function HorseForm({
                 min="50"
                 max="250"
                 value={heightCm}
-                onChange={(e) => setHeightCm(e.target.value)}
+                onChange={(e) => setHeightCm(cleanNumberString(e.target.value))}
                 className={fieldClass}
                 placeholder="165"
               />
@@ -246,7 +252,7 @@ export function HorseForm({
                 max="100"
                 required
                 value={baseSpeed}
-                onChange={(e) => setBaseSpeed(e.target.value)}
+                onChange={(e) => setBaseSpeed(cleanNumberString(e.target.value))}
                 className={fieldClass}
                 placeholder="60"
               />
@@ -259,7 +265,7 @@ export function HorseForm({
                 max="100"
                 required
                 value={staminaScore}
-                onChange={(e) => setStaminaScore(e.target.value)}
+                onChange={(e) => setStaminaScore(cleanNumberString(e.target.value))}
                 className={fieldClass}
                 placeholder="70"
               />
