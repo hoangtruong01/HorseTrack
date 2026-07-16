@@ -62,7 +62,7 @@ export function SleekHeader({ title, showWallet = true }: SleekHeaderProps) {
                 styles.walletBtn,
                 { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }
               ]} 
-              onPress={() => router.push('/(owner)/wallet')}
+              onPress={() => router.push('/operations/wallet')}
               activeOpacity={0.8}
             >
               <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />

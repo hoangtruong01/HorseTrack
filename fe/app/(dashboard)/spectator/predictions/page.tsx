@@ -85,7 +85,7 @@ export default function SpectatorPredictionsPage() {
             ) : (
               <p className="text-xl font-black text-foreground">
                 {balance.toLocaleString("vi-VN")}{" "}
-                <span className="text-base font-bold text-muted-foreground">Pts</span>
+                <span className="text-base font-bold text-muted-foreground">điểm</span>
               </p>
             )}
           </div>
@@ -245,7 +245,7 @@ export default function SpectatorPredictionsPage() {
                         </span>
                         {p.betPoints !== undefined && p.betPoints > 0 && (
                           <span className="text-[9px] text-muted-foreground block font-mono">
-                            Cược: {p.betPoints.toLocaleString("vi-VN")} Pts
+                            Cược: {p.betPoints.toLocaleString("vi-VN")} điểm
                           </span>
                         )}
                       </div>

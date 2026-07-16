@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell } from "lucide-react";
+import { Bell, Trash2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
@@ -114,6 +114,38 @@ export function NotificationsBell() {
     }
   };
 
+  const handleDelete = async (id: string, isRead: boolean) => {
+    try {
+      const res = await fetch(`/api/notifications?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setNotifications((prev) =>
+          prev.filter((n) => (n._id || n.id) !== id)
+        );
+        if (!isRead) {
+          setNotificationCount((prev) => Math.max(0, prev - 1));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete notification:", err);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    try {
+      const res = await fetch("/api/notifications?all=true", {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setNotifications([]);
+        setNotificationCount(0);
+      }
+    } catch (err) {
+      console.error("Failed to delete all notifications:", err);
+    }
+  };
+
   const hasNotifications = notificationCount > 0;
 
   return (
@@ -139,14 +171,24 @@ export function NotificationsBell() {
             <h3 className="text-xs font-black uppercase tracking-wider text-foreground">
               Thông báo
             </h3>
-            {hasNotifications && (
-              <button
-                onClick={handleMarkAllAsRead}
-                className="text-[10px] font-black uppercase tracking-wider text-primary hover:text-primary/80 transition cursor-pointer"
-              >
-                Đọc tất cả
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {hasNotifications && (
+                <button
+                  onClick={handleMarkAllAsRead}
+                  className="text-[10px] font-black uppercase tracking-wider text-primary hover:text-primary/80 transition cursor-pointer"
+                >
+                  Đọc tất cả
+                </button>
+              )}
+              {notifications.length > 0 && (
+                <button
+                  onClick={handleDeleteAll}
+                  className="text-[10px] font-black uppercase tracking-wider text-destructive hover:text-destructive/80 transition cursor-pointer"
+                >
+                  Xóa tất cả
+                </button>
+              )}
+            </div>
           </div>
 
           {/* List */}
@@ -160,18 +202,21 @@ export function NotificationsBell() {
               notifications.map((notif, index) => {
                 const notifId = notif._id || notif.id || `notif-${index}`;
                 return (
-                  <button
+                  <div
                     key={notifId}
-                    onClick={() => handleMarkAsRead(notifId, notif.isRead ?? false)}
                     className={cn(
-                      "w-full flex gap-3 p-4 text-left transition hover:bg-secondary/50 cursor-pointer relative items-start",
+                      "w-full flex gap-3 p-4 transition hover:bg-secondary/50 relative items-start",
                       !notif.isRead && "bg-primary/5"
                     )}
                   >
                     {!notif.isRead && (
-                      <span className="absolute right-4 top-5 size-2 rounded-full bg-primary" />
+                      <span className="absolute right-11 top-5 size-2 rounded-full bg-primary" />
                     )}
-                    <div className="flex-1 min-w-0 pr-4">
+                    <button
+                      type="button"
+                      onClick={() => handleMarkAsRead(notifId, notif.isRead ?? false)}
+                      className="flex-1 min-w-0 pr-4 text-left cursor-pointer"
+                    >
                       <p className={cn(
                         "text-xs font-semibold text-foreground truncate",
                         !notif.isRead && "font-bold"
@@ -184,8 +229,16 @@ export function NotificationsBell() {
                       <p className="mt-1.5 text-[9px] font-medium text-muted-foreground/60 uppercase tracking-wider">
                         {formatTime(notif.createdAt ?? "")}
                       </p>
-                    </div>
-                  </button>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(notifId, notif.isRead ?? false)}
+                      className="shrink-0 self-start mt-0.5 flex size-6 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+                      aria-label="Xóa thông báo"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 );
               })
             )}

@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, SectionList, RefreshControl, TouchableOpacity }
 import { AppScreen } from '@/components/ui/premium';
 import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { jockeyInvitationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import RaceResultsModal from '@/components/ui/race-results-modal';
@@ -118,12 +119,8 @@ export default function JockeySchedule() {
   const isEmpty = pendingData.length === 0 && acceptedData.length === 0;
 
   return (
-    <AppScreen scroll={false}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>LỊCH TRÌNH VẬN ĐỘNG VIÊN</Text>
-        <Text style={styles.title}>Lịch thi đấu</Text>
-        <View style={styles.accentLine} />
-      </View>
+    <AppScreen scroll={false} safeArea={false}>
+      <SleekHeader title="LỊCH THI ĐẤU" showWallet={true} />
 
       {error ? (
         <View style={{ paddingHorizontal: premiumSpacing[16], marginTop: premiumSpacing[16] }}>

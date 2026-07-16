@@ -202,7 +202,7 @@ export default function OwnerRankingsPage() {
                         {formatAvgTime(horse.totalFinishTimeMs, horse.totalRaces)}
                       </td>
                       <td className="p-4 text-right font-black text-teal-400 text-sm">
-                        {horse.totalPoints} Pts
+                        {horse.totalPoints} điểm
                       </td>
                     </tr>
                   ))
@@ -273,7 +273,7 @@ export default function OwnerRankingsPage() {
                       <td className="p-4 text-center font-bold text-foreground">{jockey.totalRaces}</td>
                       <td className="p-4 text-center text-primary font-black text-sm">{jockey.wins}</td>
                       <td className="p-4 text-right font-black text-teal-400 text-sm">
-                        {jockey.totalPoints} Pts
+                        {jockey.totalPoints} điểm
                       </td>
                     </tr>
                   ))

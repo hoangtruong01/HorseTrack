@@ -19,6 +19,8 @@ type RaceDetail = {
   startTime: string;
   maxParticipants?: number;
   participantsCount?: number;
+  minWeightKg?: number;
+  maxWeightKg?: number;
   tournamentId?: {
     id: string;
     name: string;
@@ -140,6 +142,8 @@ export default function RaceRegisterPage() {
     }),
     capacity: race.maxParticipants || 20,
     participantsCount: race.participantsCount || 0,
+    minWeightKg: race.minWeightKg,
+    maxWeightKg: race.maxWeightKg,
   };
 
   return (

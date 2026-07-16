@@ -87,7 +87,14 @@ export default function RefereeWallet() {
     }
   };
 
-  if (loading && !refreshing) return <LoadingState />;
+  if (loading && !refreshing) {
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <LoadingState />
+      </>
+    );
+  }
 
   return (
     <View style={styles.container}>

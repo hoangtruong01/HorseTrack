@@ -5,7 +5,7 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   Notification,
   NotificationDocument,
@@ -48,7 +48,7 @@ export class NotificationsService {
   }
 
   async findMyNotifications(userId: string, page = 1, limit = 20) {
-    const filter = { userId };
+    const filter = { userId: new Types.ObjectId(userId) };
     const [data, total] = await Promise.all([
       this.notificationModel
         .find(filter)
@@ -65,7 +65,10 @@ export class NotificationsService {
   }
 
   async markAsRead(id: string, userId: string): Promise<NotificationDocument> {
-    const notif = await this.notificationModel.findOne({ _id: id, userId });
+    const notif = await this.notificationModel.findOne({
+      _id: new Types.ObjectId(id),
+      userId: new Types.ObjectId(userId),
+    });
     if (!notif) {
       throw new NotFoundException('Notification not found');
     }
@@ -76,9 +79,27 @@ export class NotificationsService {
 
   async markAllAsRead(userId: string): Promise<{ modifiedCount: number }> {
     const result = await this.notificationModel.updateMany(
-      { userId, isRead: false },
+      { userId: new Types.ObjectId(userId), isRead: false },
       { $set: { isRead: true } },
     );
     return { modifiedCount: result.modifiedCount };
+  }
+
+  async remove(id: string, userId: string): Promise<{ deleted: boolean }> {
+    const result = await this.notificationModel.deleteOne({
+      _id: new Types.ObjectId(id),
+      userId: new Types.ObjectId(userId),
+    });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('Notification not found');
+    }
+    return { deleted: true };
+  }
+
+  async removeAll(userId: string): Promise<{ deletedCount: number }> {
+    const result = await this.notificationModel.deleteMany({
+      userId: new Types.ObjectId(userId),
+    });
+    return { deletedCount: result.deletedCount };
   }
 }

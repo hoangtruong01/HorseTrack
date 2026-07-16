@@ -92,10 +92,35 @@ export class RegistrationsService {
       );
     }
 
+    // 4b. Horse weight must fall within the race weight class (if any)
+    if (race.minWeightKg != null || race.maxWeightKg != null) {
+      if (horse.weightKg == null) {
+        throw new BadRequestException(
+          'Ngựa cần có cân nặng để đăng ký race có giới hạn hạng cân',
+        );
+      }
+      const range = `${race.minWeightKg ?? '—'}–${race.maxWeightKg ?? '—'} kg`;
+      if (race.minWeightKg != null && horse.weightKg < race.minWeightKg) {
+        throw new BadRequestException(
+          `Cân nặng ngựa (${horse.weightKg} kg) không nằm trong khoảng cho phép của race (${range})`,
+        );
+      }
+      if (race.maxWeightKg != null && horse.weightKg > race.maxWeightKg) {
+        throw new BadRequestException(
+          `Cân nặng ngựa (${horse.weightKg} kg) không nằm trong khoảng cho phép của race (${range})`,
+        );
+      }
+    }
+
+    // Mongoose 9 does not auto-cast string hex ids to ObjectId in filters here,
+    // so guard queries must cast explicitly (same convention as the insert below).
+    const raceObjectId = new Types.ObjectId(dto.raceId);
+    const ownerObjectId = new Types.ObjectId(ownerId);
+
     // 5. No duplicate registration for the same race
     const existing = await this.registrationModel.findOne({
-      raceId: dto.raceId,
-      horseId: dto.horseId,
+      raceId: raceObjectId,
+      horseId: new Types.ObjectId(dto.horseId),
       status: { $ne: RegistrationStatus.CANCELLED },
     });
     if (existing) {
@@ -104,10 +129,24 @@ export class RegistrationsService {
       );
     }
 
+    // 5b. An owner may only have one horse registered per race
+    const ownerExisting = await this.registrationModel.findOne({
+      raceId: raceObjectId,
+      ownerId: ownerObjectId,
+      status: {
+        $in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED],
+      },
+    });
+    if (ownerExisting) {
+      throw new ConflictException(
+        'You already have a horse registered for this race',
+      );
+    }
+
     // 6a. Per-race slot check: pending + approved for this race
     const raceSlot = race.maxParticipants ?? 20;
     const perRaceCount = await this.registrationModel.countDocuments({
-      raceId: dto.raceId,
+      raceId: raceObjectId,
       status: {
         $in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED],
       },
@@ -121,7 +160,7 @@ export class RegistrationsService {
     // 6b. Tournament-wide slot check: total entries across all races in this tournament
     if (tournament.maxHorses) {
       const totalCount = await this.registrationModel.countDocuments({
-        tournamentId,
+        tournamentId: new Types.ObjectId(tournamentId),
         status: {
           $in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED],
         },

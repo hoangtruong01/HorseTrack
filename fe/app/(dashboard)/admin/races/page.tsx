@@ -261,7 +261,7 @@ export default function AdminRacesPage() {
                         {race.maxParticipants}
                       </td>
                       <td className="p-4 font-mono font-bold text-teal-400">
-                        {(race.prize || 0).toLocaleString()} pts
+                        {(race.prize || 0).toLocaleString()} điểm
                       </td>
                       <td className="p-4">
                         <select

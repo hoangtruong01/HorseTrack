@@ -54,6 +54,14 @@ export default function OperationsLayout() {
         }}
       />
 
+      {/* Shared Operations */}
+      <Stack.Screen
+        name="wallet"
+        options={{
+          title: 'VÍ ĐIỂM & GIAO DỊCH',
+          headerBackTitle: 'Cá nhân',
+        }}
+      />
     </Stack>
   );
 }

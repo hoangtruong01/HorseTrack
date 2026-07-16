@@ -18,6 +18,7 @@ import {
 import { PrizesController } from './prizes.controller';
 import { PrizesService } from './prizes.service';
 import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-led
       { name: RefereeAssignment.name, schema: RefereeAssignmentSchema },
     ]),
     RewardPointLedgerModule,
+    NotificationsModule,
   ],
   controllers: [PrizesController],
   providers: [PrizesService],

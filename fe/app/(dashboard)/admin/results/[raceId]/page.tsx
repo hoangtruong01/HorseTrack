@@ -1,13 +1,19 @@
 "use client";
 import Image from "next/image";
 
-import { useEffect, useState, use } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Siren, Timer, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ShieldCheck,
+  Siren,
+  Timer,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface Race {
@@ -73,7 +79,7 @@ export default function AdminResultDetailPage({
       const resultsRes = await fetch(`/api/admin/race-results/race/${raceId}`);
       if (!resultsRes.ok) throw new Error("Không thể tải kết quả lượt đua");
       const resultsData = await resultsRes.json();
-      
+
       const rawResults: RaceResultItem[] = resultsData.data || [];
       // Sort by rank
       rawResults.sort((a, b) => {
@@ -93,22 +99,27 @@ export default function AdminResultDetailPage({
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
-      const res = await fetch(`/api/admin/race-results/race/${raceId}/publish`, {
-        method: "PATCH",
-      });
+      const res = await fetch(
+        `/api/admin/race-results/race/${raceId}/publish`,
+        {
+          method: "PATCH",
+        },
+      );
 
       const resData = await res.json();
       if (!res.ok) {
         throw new Error(resData.message || "Công bố kết quả thất bại");
       }
 
-      toast.success("Công bố kết quả thành công! Hệ thống đã chia thưởng và cập nhật bảng xếp hạng.");
+      toast.success(
+        "Công bố kết quả thành công! Hệ thống đã chia thưởng và cập nhật bảng xếp hạng.",
+      );
       await fetchData();
     } catch (err) {
       toast.error((err as Error).message || "Lỗi khi công bố kết quả.");
@@ -128,7 +139,14 @@ export default function AdminResultDetailPage({
   if (isLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
+        <Image
+          src="/skeletonHorse.gif"
+          alt="Đang tải..."
+          width={80}
+          height={80}
+          unoptimized
+          className="object-contain mx-auto"
+        />
       </div>
     );
   }
@@ -143,7 +161,8 @@ export default function AdminResultDetailPage({
   }
 
   const resultsStatus = results[0]?.status || "DRAFT";
-  const isPublished = resultsStatus === "PUBLISHED" || race.status === "RESULT_PUBLISHED";
+  const isPublished =
+    resultsStatus === "PUBLISHED" || race.status === "RESULT_PUBLISHED";
   const canPublish = resultsStatus === "CONFIRMED";
 
   return (
@@ -173,19 +192,25 @@ export default function AdminResultDetailPage({
             <div className="flex items-center gap-2 mt-1">
               <StatusBadge
                 label={
-                  isPublished ? "Đã Công Bố (Published)" :
-                  resultsStatus === "CONFIRMED" ? "Chờ Công Bố (Confirmed)" : "Bản Nháp (Draft)"
+                  isPublished
+                    ? "Đã Công Bố (Published)"
+                    : resultsStatus === "CONFIRMED"
+                      ? "Chờ Công Bố (Confirmed)"
+                      : "Bản Nháp (Draft)"
                 }
                 tone={
-                  isPublished ? "teal" :
-                  resultsStatus === "CONFIRMED" ? "green" : "yellow"
+                  isPublished
+                    ? "teal"
+                    : resultsStatus === "CONFIRMED"
+                      ? "green"
+                      : "yellow"
                 }
                 pulse={resultsStatus === "CONFIRMED"}
               />
               <span className="text-sm font-bold text-foreground uppercase">{race.name}</span>
             </div>
             <p className="text-xs text-muted-foreground/80 leading-relaxed">
-              {isPublished 
+              {isPublished
                 ? "Biên bản kết quả đã được công bố chính thức. Hệ thống đã tự động cộng điểm xếp hạng và chia thưởng điểm."
                 : "Biên bản kết quả đang chờ admin duyệt và công bố chính thức."}
             </p>
@@ -198,7 +223,10 @@ export default function AdminResultDetailPage({
                 disabled={isPublishing || !canPublish}
                 className="h-10 px-5 rounded-full bg-primary hover:bg-[#B80500] text-primary-foreground text-xs font-black uppercase flex items-center gap-1.5"
               >
-                <ShieldCheck className="size-3.5" /> {isPublishing ? "Đang công bố..." : "Phê duyệt & Công bố kết quả"}
+                <ShieldCheck className="size-3.5" />{" "}
+                {isPublishing
+                  ? "Đang công bố..."
+                  : "Phê duyệt & Công bố kết quả"}
               </Button>
             </div>
           )}
@@ -240,7 +268,7 @@ export default function AdminResultDetailPage({
                       <Siren className="size-3.5 text-primary" /> Lỗi / Sự cố
                     </span>
                   </th>
-                  <th className="p-4 text-right">Điểm thưởng</th>
+                  {/* <th className="p-4 text-right">Điểm thưởng</th> */}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -252,10 +280,10 @@ export default function AdminResultDetailPage({
                           res.rank === 1
                             ? "bg-yellow-500 text-black shadow-[0_0_12px_rgba(234,179,8,0.3)]"
                             : res.rank === 2
-                            ? "bg-slate-300 text-black"
-                            : res.rank === 3
-                            ? "bg-[#CD7F32] text-foreground"
-                            : "bg-muted border border-border text-muted-foreground"
+                              ? "bg-slate-300 text-black"
+                              : res.rank === 3
+                                ? "bg-[#CD7F32] text-foreground"
+                                : "bg-muted border border-border text-muted-foreground"
                         }`}
                       >
                         {res.rank || "—"}
@@ -270,9 +298,9 @@ export default function AdminResultDetailPage({
                     <td className={`p-4 ${res.incident !== "none" && res.incident !== "NONE" ? "text-primary font-bold" : "text-muted-foreground/60"}`}>
                       {res.note || (res.incident !== "none" && res.incident !== "NONE" ? res.incident : "Không")}
                     </td>
-                    <td className="p-4 text-right font-black text-teal-500 dark:text-teal-400 text-sm">
-                      +{res.points || 0} Pts
-                    </td>
+                    {/* <td className="p-4 text-right font-black text-teal-400 text-sm">
+                      +{res.points || 0} điểm
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

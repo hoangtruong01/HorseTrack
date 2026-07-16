@@ -371,8 +371,8 @@ export class RaceResultsService {
 
     // Duplicate horse check
     const existingHorse = await this.resultModel.findOne({
-      raceId: dto.raceId,
-      horseId: dto.horseId,
+      raceId: new Types.ObjectId(dto.raceId),
+      horseId: new Types.ObjectId(dto.horseId),
     });
     if (existingHorse) {
       throw new ConflictException(
@@ -383,7 +383,7 @@ export class RaceResultsService {
     // Rank duplicate check (only for FINISHED outcome)
     if (dto.outcome === RaceResultOutcome.FINISHED && dto.rank) {
       const existingRank = await this.resultModel.findOne({
-        raceId: dto.raceId,
+        raceId: new Types.ObjectId(dto.raceId),
         rank: dto.rank,
         outcome: RaceResultOutcome.FINISHED,
       });

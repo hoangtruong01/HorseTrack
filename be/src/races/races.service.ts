@@ -71,6 +71,17 @@ export class RacesService {
       );
     }
 
+    // Validate weight class range
+    if (
+      dto.minWeightKg !== undefined &&
+      dto.maxWeightKg !== undefined &&
+      dto.minWeightKg > dto.maxWeightKg
+    ) {
+      throw new BadRequestException(
+        'Cân tối thiểu không được lớn hơn cân tối đa',
+      );
+    }
+
     // Validate prize does not exceed tournament budget
     if (dto.prize !== undefined) {
       const [agg] = await this.raceModel.aggregate<{ total: number }>([
@@ -209,7 +220,9 @@ export class RacesService {
       const [agg] = await this.raceModel.aggregate<{ total: number }>([
         {
           $match: {
-            tournamentId: race.tournamentId,
+            tournamentId: new Types.ObjectId(
+              this.getTournamentIdString(race.tournamentId),
+            ),
             deletedAt: { $exists: false },
             _id: { $ne: race._id },
           },

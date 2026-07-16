@@ -202,16 +202,16 @@ export default function SpectatorTournamentsPage() {
 
     if (balance === 0) {
       if (betPoints !== 1) {
-        toast.error("Bạn chưa có điểm, chỉ có thể đặt cược miễn phí (1 Pts)!");
+        toast.error("Bạn chưa có điểm, chỉ có thể đặt cược miễn phí (1 điểm)!");
         return;
       }
     } else {
       if (betPoints < 2) {
-        toast.error("Điểm cược không hợp lệ. Bạn đang có điểm, vui lòng cược từ 2 Pts trở lên!");
+        toast.error("Điểm cược không hợp lệ. Bạn đang có điểm, vui lòng cược từ 2 điểm trở lên!");
         return;
       }
       if (betPoints > balance) {
-        toast.error(`Số dư điểm không đủ (cần ${betPoints} Pts, hiện có ${balance} Pts)!`);
+        toast.error(`Số dư điểm không đủ (cần ${betPoints} điểm, hiện có ${balance} điểm)!`);
         return;
       }
     }
@@ -563,7 +563,7 @@ export default function SpectatorTournamentsPage() {
                         <div className="flex justify-between font-bold text-foreground border-t border-border pt-2">
                           <span>Quỹ Giải Thưởng:</span>
                           <span className="text-[#E10600] text-xs font-black">
-                            {(tour.prizePool || tour.prize || 0).toLocaleString("vi-VN")} Pts
+                            {(tour.prizePool || tour.prize || 0).toLocaleString("vi-VN")} điểm
                           </span>
                         </div>
                       </div>
@@ -735,7 +735,7 @@ export default function SpectatorTournamentsPage() {
                   <div className="space-y-1">
                     <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Tổng quỹ thưởng giải</span>
                     <p className="text-xl font-black text-[#E10600] leading-none">
-                      {(selectedTour.prizePool || selectedTour.prize || 0).toLocaleString("vi-VN")} Pts
+                      {(selectedTour.prizePool || selectedTour.prize || 0).toLocaleString("vi-VN")} điểm
                     </p>
                   </div>
                   <Award className="size-8 text-[#E10600]" />
@@ -916,16 +916,16 @@ export default function SpectatorTournamentsPage() {
                               : "bg-muted border border-border text-muted-foreground"
                           }`}>
                             {currentRacePrediction.status === "WON" 
-                              ? `+${currentRacePrediction.rewardPoints || 1} Pts` 
+                              ? `+${currentRacePrediction.rewardPoints || 1} điểm` 
                               : currentRacePrediction.status === "LOST" 
-                              ? `${currentRacePrediction.rewardPoints || -1} Pts` 
+                              ? `${currentRacePrediction.rewardPoints || -1} điểm` 
                               : currentRacePrediction.status === "PENDING" 
                               ? "Chờ kết quả" 
                               : "Đã hủy"}
                           </span>
                           {currentRacePrediction.betPoints !== undefined && currentRacePrediction.betPoints > 0 && (
                             <span className="text-[8px] text-muted-foreground mt-1 font-mono block">
-                              Cược: {currentRacePrediction.betPoints.toLocaleString("vi-VN")} Pts
+                              Cược: {currentRacePrediction.betPoints.toLocaleString("vi-VN")} điểm
                             </span>
                           )}
                         </div>
@@ -944,20 +944,20 @@ export default function SpectatorTournamentsPage() {
                           <button
                             type="button"
                             onClick={() => { void handleToggleAiPrediction(); }}
-                            className="w-full flex items-center justify-between px-3 py-2.5 bg-purple-500/5 hover:bg-purple-500/10 transition-colors text-left"
+                            className="w-full flex items-center justify-between px-3 py-2.5 bg-primary/5 hover:bg-primary/10 transition-colors text-left"
                           >
                             <div className="flex items-center gap-2">
-                              <Brain className="size-3.5 text-purple-400" />
-                              <span className="text-[10px] font-black uppercase tracking-wider text-purple-400">Gợi ý AI</span>
+                              <Brain className="size-3.5 text-[#E10600]" />
+                              <span className="text-[10px] font-black uppercase tracking-wider text-[#E10600]">Gợi ý AI</span>
                               {aiPrediction && (
-                                <span className="text-[9px] font-mono text-purple-300/70">{aiPrediction.confidenceLevel}% tin cậy</span>
+                                <span className="text-[9px] font-mono text-muted-foreground">{aiPrediction.confidenceLevel}% tin cậy</span>
                               )}
                             </div>
-                            <ChevronDown className={`size-3.5 text-purple-400 transition-transform ${aiPredictionExpanded ? "rotate-180" : ""}`} />
+                            <ChevronDown className={`size-3.5 text-[#E10600] transition-transform ${aiPredictionExpanded ? "rotate-180" : ""}`} />
                           </button>
 
                           {aiPredictionExpanded && (
-                            <div className="border-t border-border px-3 py-2.5 bg-white/[0.01]">
+                            <div className="border-t border-border px-3 py-2.5">
                               {loadingAiPrediction ? (
                                 <div className="flex items-center justify-center gap-2 py-3 text-muted-foreground">
                                   <Loader2 className="size-3.5 animate-spin" />
@@ -965,14 +965,14 @@ export default function SpectatorTournamentsPage() {
                                 </div>
                               ) : aiNoSubscription ? (
                                 <div className="flex items-center gap-3 py-2">
-                                  <Lock className="size-4 text-yellow-400 shrink-0" />
+                                  <Lock className="size-4 text-amber-500 shrink-0" />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-[10px] font-bold text-foreground">Yêu cầu gói AI</p>
                                     <p className="text-[9px] text-muted-foreground">Đăng ký để xem dự đoán xác suất thắng.</p>
                                   </div>
                                   <a
                                     href="/spectator/ai-packages"
-                                    className="shrink-0 text-[9px] font-black uppercase tracking-wider text-purple-400 hover:text-purple-300 transition-colors"
+                                    className="shrink-0 text-[9px] font-black uppercase tracking-wider text-[#E10600] hover:text-foreground transition-colors"
                                   >
                                     Mua gói
                                   </a>
@@ -993,15 +993,15 @@ export default function SpectatorTournamentsPage() {
                                           <span className="text-[10px] font-medium text-foreground flex-1 truncate">{name}</span>
                                           <div className="flex items-center gap-1.5 shrink-0">
                                             <div className="w-12 h-1 rounded-full bg-muted overflow-hidden">
-                                              <div className="h-full rounded-full bg-purple-400" style={{ width: `${r.winProbability * 100}%` }} />
+                                              <div className="h-full rounded-full bg-[#E10600]" style={{ width: `${r.winProbability * 100}%` }} />
                                             </div>
-                                            <span className="text-[9px] font-mono text-purple-300 w-8 text-right">{(r.winProbability * 100).toFixed(0)}%</span>
+                                            <span className="text-[9px] font-mono text-muted-foreground w-8 text-right">{(r.winProbability * 100).toFixed(0)}%</span>
                                           </div>
                                         </div>
                                       );
                                     })}
                                   {aiPrediction.reasoning && (
-                                    <p className="text-[9px] text-muted-foreground italic border-t border-border pt-1.5 mt-1 leading-relaxed line-clamp-2">
+                                    <p className="text-[9px] text-muted-foreground italic border-t border-border pt-1.5 mt-1 leading-relaxed">
                                       {aiPrediction.reasoning}
                                     </p>
                                   )}
@@ -1039,7 +1039,7 @@ export default function SpectatorTournamentsPage() {
                               <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-wider text-muted-foreground">
                                 <span>Số điểm cược</span>
                                 <span className="text-teal-600 dark:text-teal-400 font-mono">
-                                  Số dư: {loadingBalance ? "..." : `${balance.toLocaleString("vi-VN")} Pts`}
+                                  Số dư: {loadingBalance ? "..." : `${balance.toLocaleString("vi-VN")} điểm`}
                                 </span>
                               </div>
                               <div className="relative">
@@ -1069,10 +1069,10 @@ export default function SpectatorTournamentsPage() {
                                     }
                                   }}
                                   className="w-full h-11 rounded-xl border border-border bg-muted pl-3 pr-12 text-xs text-foreground outline-none focus:border-primary font-mono font-bold disabled:opacity-75"
-                                  placeholder={balance === 0 ? "Đặt cược miễn phí (1 Pts)" : "Nhập số điểm cược (tối thiểu 2 Pts)"}
+                                  placeholder={balance === 0 ? "Đặt cược miễn phí (1 điểm)" : "Nhập số điểm cược (tối thiểu 2 điểm)"}
                                   disabled={balance === 0}
                                 />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-muted-foreground font-mono">Pts</span>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-muted-foreground font-mono">điểm</span>
                               </div>
 
                               {/* Quick Bet Buttons */}
@@ -1123,7 +1123,7 @@ export default function SpectatorTournamentsPage() {
                                 <div className="text-[10px] text-red-400 bg-red-500/5 border border-red-500/10 rounded-xl p-2.5 mt-2">
                                   <span className="font-black uppercase tracking-wider block text-[#E10600]">⚠️ Không đủ số dư</span>
                                   <p className="italic font-medium leading-relaxed mt-0.5">
-                                    Bạn cần cược <strong className="text-foreground font-mono font-bold">{parseInt(betPointsInput).toLocaleString("vi-VN")} Pts</strong> nhưng chỉ có <strong className="text-foreground font-mono font-bold">{balance.toLocaleString("vi-VN")} Pts</strong>.
+                                    Bạn cần cược <strong className="text-foreground font-mono font-bold">{parseInt(betPointsInput).toLocaleString("vi-VN")} điểm</strong> nhưng chỉ có <strong className="text-foreground font-mono font-bold">{balance.toLocaleString("vi-VN")} điểm</strong>.
                                   </p>
                                 </div>
                               )}
@@ -1157,7 +1157,7 @@ export default function SpectatorTournamentsPage() {
                       <span className="text-[9px] font-black uppercase tracking-wider">Cơ cấu điểm thưởng</span>
                     </div>
                     <p className="text-[9px] leading-relaxed text-muted-foreground">
-                      Người chưa có điểm được dự đoán miễn phí (1 Pts): Đúng được <strong className="text-foreground">+1 điểm</strong>, sai không bị trừ điểm. Người đã có điểm phải cược từ <strong className="text-foreground">2 Pts trở lên</strong>: Thắng nhận lại cược x2, thua mất toàn bộ điểm cược.
+                      Người chưa có điểm được dự đoán miễn phí (1 điểm): Đúng được <strong className="text-foreground">+1 điểm</strong>, sai không bị trừ điểm. Người đã có điểm phải cược từ <strong className="text-foreground">2 điểm trở lên</strong>: Thắng nhận lại cược x2, thua mất toàn bộ điểm cược.
                     </p>
                   </div>
                 </div>

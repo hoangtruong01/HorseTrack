@@ -1,0 +1,151 @@
+\documentclass{llncs}
+%
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+% Khuyến nghị biên dịch bằng pdflatex (đã thêm T5) hoặc XeLaTeX để hỗ trợ tốt nhất tiếng Việt
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{color}
+%
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\begin{document}
+%
+\title{HorseTrack: Hệ Thống Quản Lý Giải Đua Ngựa Thông Minh Tích Hợp AI}
+%
+\titlerunning{HorseTrack: Quản Lý Đua Ngựa Thông Minh}
+%
+\author{Tác giả 1\inst{1}\orcidID{0000-1111-2222-3333} \and
+Tác giả 2\inst{2,3}\orcidID{1111-2222-3333-4444} \and
+Tác giả 3\inst{3}\orcidID{2222--3333-4444-5555}}
+%
+\authorrunning{Tác giả 1 và cộng sự.}
+%
+\institute{Đại học FPT, Việt Nam}
+%
+\maketitle              
+%
+\begin{abstract}
+Đua ngựa là một hệ sinh thái thể thao và giải trí phức tạp với sự tham gia của nhiều đối tượng như chủ ngựa, nài ngựa, trọng tài, ban tổ chức và khán giả. Mặc dù công nghệ đã phát triển mạnh mẽ trong các lĩnh vực thể thao khác, việc quản lý các giải đua ngựa hiện nay vẫn phụ thuộc nhiều vào các quy trình thủ công và thiếu đồng bộ. Sự hạn chế này dẫn đến sự kém hiệu quả trong vận hành, xung đột lịch trình và dữ liệu không nhất quán. Để giải quyết những vấn đề trên, bài báo này giới thiệu \textit{HorseTrack}, một Hệ thống Quản lý Giải đấu trên nền tảng web thông minh và toàn diện. Hệ thống số hóa toàn bộ vòng đời của một giải đua ngựa, bao gồm phân quyền người dùng, đăng ký tham gia, giả lập cuộc đua, theo dõi thời gian thực và tự động phân bổ tài chính thông qua sổ cái ảo (virtual ledger). Được phát triển bằng các công nghệ hiện đại (Next.js và NestJS), \textit{HorseTrack} tạo nên sự khác biệt nhờ tích hợp các thuật toán Trí tuệ Nhân tạo (AI) tiên tiến. Chúng tôi đề xuất sử dụng Mạng nơ-ron nhân tạo truyền thẳng nhiều lớp (Multilayer Feedforward ANN) để dự đoán kết quả cuộc đua, được cung cấp dưới dạng các gói đăng ký VIP. Ngoài ra, thuật toán Di truyền (GA) sử dụng phương pháp lai ghép dựa trên vị trí (POX) được áp dụng để tự động hóa và tối ưu hóa việc xếp lịch thi đấu, đảm bảo không xảy ra xung đột. Bài báo trình bày thiết kế kiến trúc, luồng chức năng và chi tiết triển khai của \textit{HorseTrack}, qua đó chứng minh tiềm năng của hệ thống trong việc thay đổi hoàn toàn cách thức quản lý các giải đua ngựa.
+
+\keywords{Hệ Thống Quản Lý Thể Thao \and Đua Ngựa \and Mạng Nơ-ron Nhân Tạo \and Thuật Toán Di Truyền \and Gói Đăng Ký VIP \and Ứng Dụng Web.}
+\end{abstract}
+%
+%
+%
+\section{Giới thiệu}
+Đua ngựa là một trong những môn thể thao truyền thống lâu đời nhất, kết hợp giữa hiệu suất thể thao, chiến lược lai tạo và sự tham gia đông đảo của khán giả. Việc quản lý vận hành một giải đua ngựa chuyên nghiệp đòi hỏi một chuỗi các tác vụ cực kỳ phức tạp. Các tác vụ này trải dài từ việc đăng ký ban đầu (chủ ngựa và nài ngựa) đến việc kiểm tra sức khỏe và trang bị trước cuộc đua, xếp lịch thi đấu phức tạp, theo dõi vi phạm theo thời gian thực, và cuối cùng là công bố kết quả cùng với việc phân chia giải thưởng.
+
+Mặc dù quá trình chuyển đổi số đang diễn ra mạnh mẽ trong các lĩnh vực quản lý thể thao khác, nhiều giải đua ngựa khu vực và mới nổi vẫn phụ thuộc nhiều vào việc nhập liệu thủ công, biên bản trọng tài bằng giấy và xếp lịch dựa trên trực giác. Sự thiếu đồng bộ kỹ thuật số này thường dẫn đến những ách tắc nghiêm trọng trong vận hành. Ban tổ chức gặp khó khăn với các xung đột lịch trình, đặc biệt khi phải điều phối nhiều cuộc đua có sự trùng lặp về thời gian của các nài ngựa. Trọng tài gặp khó khăn trong việc ghi nhận chính xác các vi phạm trong cuộc đua mà không có công cụ kỹ thuật số, làm chậm trễ việc xác nhận kết quả chính thức. Hơn nữa, khán giả thường chỉ giới hạn ở việc xem đua trực tiếp hoặc qua sóng truyền hình tĩnh, thiếu các nền tảng tương tác cung cấp dự đoán kết quả theo thời gian thực dựa trên dữ liệu lịch sử.
+
+Để giải quyết toàn diện những thách thức này, chúng tôi giới thiệu \textit{HorseTrack}, một hệ thống quản lý web tiên tiến được thiết kế riêng cho các giải đua ngựa. \textit{HorseTrack} số hóa toàn bộ vòng đời của một cuộc đua, tạo điều kiện tương tác liền mạch và minh bạch giữa tất cả các chủ thể tham gia. Quan trọng hơn, hệ thống vượt xa các phần mềm quản trị thông thường bằng cách kết hợp các tính năng AI. Bằng cách tích hợp thuật toán Di truyền Heuristic để xếp lịch tối ưu và Mạng nơ-ron truyền thẳng nhiều lớp để dự đoán kết quả, \textit{HorseTrack} thu hẹp khoảng cách giữa quản lý đường đua truyền thống và các công nghệ thể thao thông minh hiện đại.
+
+Những đóng góp chính của bài báo bao gồm:
+\begin{enumerate}
+    \item Thiết kế một nền tảng kỹ thuật số tập trung, toàn diện nhằm số hóa và tự động hóa các quy trình phức tạp của một giải đua ngựa.
+    \item Tích hợp một hệ thống sổ cái tài chính tự động, minh bạch để xử lý việc chia giải thưởng động, đặt cược và yêu cầu rút điểm thưởng.
+    \item Đề xuất thuật toán Di truyền POX-heuristic được tùy chỉnh để giải quyết các bài toán xếp lịch có nhiều ràng buộc.
+    \item Xây dựng mô hình Mạng nơ-ron ANN 8-5-7-1 nhằm dự đoán kết quả đua ngựa, thương mại hóa qua các gói đăng ký VIP để tăng mức độ tương tác của khán giả.
+\end{enumerate}
+
+\section{Đặt vấn đề và Khoảng trống Nghiên cứu}
+Hệ sinh thái quản lý đua ngựa hiện tại bộc lộ nhiều hạn chế nghiêm trọng cản trở hiệu quả vận hành và khả năng mở rộng.
+
+Thứ nhất, việc xếp lịch thủ công cực kỳ tốn thời gian và dễ xảy ra xung đột. Một giải đấu có thể tổ chức hàng chục cuộc đua độc lập, và một nài ngựa có thể được nhiều chủ ngựa khác nhau thuê cho các cuộc đua khác nhau. Đảm bảo không có nài ngựa nào bị trùng lịch trong khi vẫn duy trì mức độ sử dụng đường đua tối ưu là một bài toán NP-khó mà con người khó có thể giải quyết hiệu quả.
+
+Thứ hai, các quy trình kiểm tra trước cuộc đua (điểm danh nài ngựa, kiểm tra sức khỏe ngựa và trang bị) và ghi nhận vi phạm chủ yếu dựa trên giấy tờ. Cách tiếp cận thủ công này khiến cho việc đồng bộ dữ liệu theo thời gian thực trên toàn tổ chức gần như bất khả thi. Khi trọng tài ghi nhận vi phạm, việc tính toán thời gian phạt tương ứng và cập nhật bảng xếp hạng cuối cùng thường chậm chạp và dễ xảy ra lỗi do con người.
+
+Thứ ba, sự tham gia của khán giả trong các thiết lập truyền thống khá thụ động. Người hâm mộ thể thao hiện đại kỳ vọng vào các trải nghiệm tương tác dựa trên dữ liệu. Việc thiếu các mô hình dự đoán tích hợp đồng nghĩa với việc khán giả không thể tương tác với các dự đoán dựa trên dữ liệu, làm giảm giá trị giải trí tổng thể của giải đấu và hạn chế các cơ hội tạo doanh thu như các gói đăng ký phân tích cao cấp.
+
+Mặc dù đã có nhiều hệ thống quản lý thể thao thông minh \cite{ref_isms,ref_wiley}, chúng hiếm khi được tùy biến cho những ràng buộc đặc thù của môn đua ngựa (ví dụ: phân công nài ngựa linh hoạt, cấu trúc thời gian phạt cụ thể). Hơn nữa, mặc dù các tài liệu học thuật rất phong phú về các mô hình dự đoán kết quả đua ngựa \cite{ref_benter,ref_doi_1,ref_nyc_blog,ref_pmc_predict}, các mô hình này thường được phát triển dưới dạng các bài tập lý thuyết độc lập thay vì được tích hợp như các microservices trong một nền tảng quản lý giải đấu tổng thể. \textit{HorseTrack} lấp đầy khoảng trống nghiên cứu này bằng cách hợp nhất các quy trình quản trị mạnh mẽ với AI dự đoán trong cùng một hệ sinh thái thời gian thực.
+
+\section{Nghiên cứu Liên quan}
+Sự tích hợp giữa hệ thống thông tin và trí tuệ nhân tạo trong quản lý thể thao đã được khám phá rộng rãi trong các tài liệu gần đây.
+
+\subsection{Hệ thống Quản lý Thể thao Thông minh}
+Các nghiên cứu gần đây nhấn mạnh sự chuyển dịch từ các tác vụ quản trị thủ công sang các nền tảng tự động, hướng dữ liệu. Các nghiên cứu về thiết kế và triển khai hệ thống quản lý thể thao thông minh (ISMS) thường nhấn mạnh việc sử dụng mạng cảm biến và cơ sở dữ liệu tập trung để theo dõi và quản lý người tham gia theo thời gian thực \cite{ref_isms}. Tương tự, các kiến trúc quản lý thể thao tổng quát đã được đề xuất để xử lý bán vé, xếp lịch và phát sóng kết quả \cite{ref_wiley}. Tuy nhiên, các hệ thống tổng quát này thiếu các thực thể chuyên biệt cần thiết cho đua ngựa.
+
+\subsection{Xếp Lịch Giải Đấu qua Heuristics}
+Trong bối cảnh xếp lịch, xếp lịch giải đấu thể thao được công nhận là một bài toán tối ưu hóa tổ hợp có nhiều ràng buộc. Các tài liệu chú giải về xếp lịch thể thao nhấn mạnh tính hiệu quả của các phương pháp heuristic trong việc tạo ra các lịch trình không xung đột \cite{ref_scheduling_bib}. Thuật toán Di truyền (GA), mô phỏng quá trình chọn lọc tự nhiên, đã tỏ ra đặc biệt hiệu quả trong các môi trường nơi nhiều ràng buộc phải được thỏa mãn đồng thời.
+
+\subsection{Dự Đoán Kết Quả Đua Ngựa}
+Việc dự đoán kết quả các cuộc đua ngựa đã thu hút sự quan tâm lớn từ giới học thuật và thực tiễn nhờ lượng dữ liệu thống kê khổng lồ sẵn có. Nghiên cứu nền tảng ban đầu của Benter \cite{ref_benter} đã chứng minh tính khả thi của các hệ thống đánh giá và đặt cược dựa trên máy tính. Các tiến bộ gần đây đã tận dụng các kỹ thuật học máy hiện đại để cải thiện đáng kể độ chính xác của dự đoán \cite{ref_doi_1,ref_nyc_blog,ref_pmc_predict}. \textit{HorseTrack} xây dựng dựa trên các khái niệm dự đoán này bằng cách tích hợp trực tiếp một mạng ANN vào cổng thông tin dành cho khán giả.
+
+\section{Kiến trúc Hệ thống và Thiết kế Chức năng}
+
+\subsection{Tổng Quan Hệ Thống và Các Thực Thể Cốt Lõi}
+\textit{HorseTrack} được thiết kế theo triết lý mô-đun: một \textit{Giải đấu (Tournament)} đóng vai trò như một container chứa nhiều \textit{Cuộc đua (Races)} độc lập. Hệ thống dựa trên một mô hình dữ liệu quan hệ mạnh mẽ bao gồm một số thực thể chính:
+\begin{itemize}
+    \item \textbf{Tournament \& Race:} Các sự kiện cốt lõi. Một cuộc đua chứa các thuộc tính cụ thể như khoảng cách, thời gian dự kiến, điều kiện thời tiết và tổng giải thưởng.
+    \item \textbf{Horse, Horse Owner \& Jockey:} Những đối tượng tham gia chính. 
+    \item \textbf{Registration \& Jockey Invitation:} Các bản ghi trung gian ánh xạ một con ngựa vào một cuộc đua và quản lý sự chấp nhận cưỡi ngựa của nài ngựa.
+    \item \textbf{Race Check \& Violation:} Các thực thể được trọng tài sử dụng để ghi nhận điều kiện trước cuộc đua và các vi phạm trong cuộc đua.
+    \item \textbf{Race Result \& Simulation:} Kết quả cuối cùng của một cuộc đua. Hệ thống có cơ chế giả lập dựa trên tham số và tự động cộng dồn thời gian phạt.
+    \item \textbf{Reward Point Ledger, Wallet \& Cashout:} Các thực thể tài chính quản lý việc nạp tiền mặt, số dư ví ảo, phân chia giải thưởng và quy đổi thành tiền thật.
+    \item \textbf{Bet (Prediction) \& VIP Subscriptions:} Các tương tác của khán giả dự đoán chiến thắng, cùng với các gói dự đoán AI cao cấp (AIPredictionPackage).
+    \item \textbf{Audit Logs:} Các bản ghi bất biến về các hành động quan trọng của hệ thống để đảm bảo tính minh bạch.
+\end{itemize}
+
+\subsection{Các Mô-đun Chức Năng Dựa Trên Phân Quyền}
+Nền tảng thực thi Kiểm soát Truy cập Dựa trên Vai trò (RBAC) nghiêm ngặt trên năm vai trò người dùng riêng biệt.
+\begin{itemize}
+    \item \textbf{Admin:} Quản lý tài khoản, tạo giải đấu, phê duyệt rút tiền, xem Audit Logs và công bố kết quả chung cuộc.
+    \item \textbf{Horse Owner (Chủ ngựa):} Đăng ký ngựa tham gia giải, thuê nài ngựa, theo dõi ví và nhận giải thưởng.
+    \item \textbf{Jockey (Nài ngựa):} Chấp nhận lời mời cưỡi ngựa, xem lịch trình cá nhân và thành tích.
+    \item \textbf{Race Referee (Trọng tài):} Điểm danh nài ngựa, kiểm tra sức khỏe ngựa, ghi nhận vi phạm, kích hoạt bộ máy chạy giả lập (Simulation) để tạo kết quả nháp, và xác nhận bảng xếp hạng cuối cùng.
+    \item \textbf{Spectator (Khán giả):} Xem trực tiếp trạng thái cuộc đua qua WebSockets, đặt cược dự đoán bằng điểm thưởng, mua các gói AI VIP để xem các gợi ý đặt cược được tính toán bởi trí tuệ nhân tạo.
+\end{itemize}
+
+\subsection{Luồng Tự Động và Chi Tiết Triển Khai}
+\paragraph{Giả Lập Cuộc Đua và Hình Phạt:} Thay vì chỉ dựa vào hệ thống phần cứng theo dõi vật lý, bản MVP của hệ thống hoạt động như một nền tảng quản lý giả lập. Trọng tài khởi tạo quá trình mô phỏng, hệ thống tính toán thời gian cơ bản dựa trên các chỉ số của ngựa, kỹ năng nài ngựa và thời tiết. Sau đó, hệ thống tự động cộng thêm số giây phạt (ví dụ: +3, +6, hoặc +12 giây) cho các vi phạm được ghi nhận bởi trọng tài. Bảng xếp hạng cuối cùng được chốt dựa trên tổng thời gian đã điều chỉnh này.
+\paragraph{Sổ Cái Tài Chính và Phân Chia Giải Thưởng:} Khi Admin công bố kết quả cuộc đua, hệ thống sẽ thực hiện thanh toán tự động. Khán giả dự đoán đúng sẽ nhận được điểm thưởng nhân hệ số. Đặc biệt, tổng giải thưởng của cuộc đua được hệ thống tính toán và tự động phân bổ vào ví ảo của các Chủ ngựa có ngựa đạt thứ hạng cao và trả phí cho các Trọng tài điều hành. Mọi biến động đều được ghi lại trong Sổ cái (Reward Point Ledger) chống giả mạo.
+\paragraph{Ngăn Xếp Công Nghệ (Tech Stack):} Dự án vận hành trên kiến trúc Mono-repo. Backend sử dụng NestJS và cơ sở dữ liệu NoSQL MongoDB (Mongoose), cung cấp các REST API bảo mật cao. Frontend được xây dựng trên Next.js App Router (React + TypeScript) cho giao diện linh hoạt. Mọi thông báo thay đổi trạng thái và khóa đặt cược được phát sóng theo thời gian thực qua giao thức Socket.IO.
+
+\section{Tích Hợp Trí Tuệ Nhân Tạo}
+
+\subsection{Thuật Toán Di Truyền POX-Heuristic Cho Xếp Lịch}
+Việc xếp lịch cho nhiều cuộc đua trong khi phải đáp ứng hàng loạt các ràng buộc (tránh trùng lịch nài ngựa, đảm bảo sức khỏe ngựa, thời gian chuẩn bị đường đua) là một bài toán tối ưu hóa phức tạp. Hệ thống đề xuất một Thuật toán Di truyền (Genetic Algorithm) kết hợp phương pháp Crossover dựa trên Vị trí (POX).
+\begin{itemize}
+    \item \textbf{Nhiễm sắc thể (Chromosome):} Một lịch trình hoàn chỉnh được mã hóa thành một nhiễm sắc thể, trong đó các gen tương ứng với các cuộc đua và các khung giờ được phân bổ của chúng.
+    \item \textbf{Hàm Thích nghi (Fitness Function):} Hàm này tính toán điểm đánh giá bằng cách trừ điểm nặng nề (penalize) đối với các sự trùng lặp (ví dụ: một nài ngựa phải thi đấu 2 trận cách nhau dưới 30 phút) và thưởng điểm cho các lịch trình có khoảng cách tối ưu.
+    \item \textbf{Lai ghép và Đột biến (Crossover/Mutation):} Kỹ thuật POX đặc biệt hiệu quả trong bài toán xếp lịch do nó có khả năng bảo toàn trật tự tương đối của các phân công đang không bị xung đột, đồng thời hoán đổi các cụm lịch trình giữa hai nhiễm sắc thể cha mẹ để tìm ra cấu hình tốt hơn. Mô-đun AI này hoạt động như một trợ lý cho Admin, gợi ý các lịch trình hoàn hảo chỉ trong vài giây.
+\end{itemize}
+
+\subsection{Mạng Nơ-ron ANN 8-5-7-1 Cho Gói Dự Đoán VIP}
+Để tăng mức độ tương tác của khán giả và tạo doanh thu thông minh, \textit{HorseTrack} tích hợp một mô hình AI tiên tiến dự báo thời gian hoàn thành cuộc đua. Dịch vụ này được thương mại hóa dưới dạng các gói đăng ký VIP (AIPredictionPackage). Chúng tôi sử dụng Mạng nơ-ron nhân tạo truyền thẳng (Feedforward ANN) với cấu trúc 8-5-7-1.
+\begin{itemize}
+    \item \textbf{Lớp Đầu Vào (8 Node):} Mạng tiếp nhận 8 nhóm đặc trưng then chốt: Cân nặng của ngựa, Loại giải đấu, Lịch sử huấn luyện viên, Cấp độ kinh nghiệm của nài ngựa, Vị trí xuất phát, Khoảng cách đua, Tình trạng mặt sân (Khô/Bùn) và Thời tiết (Nắng/Mưa/Bão).
+    \item \textbf{Lớp Ẩn (5 và 7 Node):} Hai lớp ẩn ứng dụng hàm kích hoạt ReLU (Rectified Linear Unit) giúp mô hình dễ dàng học được các tương tác phi tuyến tính giữa sinh lý ngựa và môi trường bên ngoài.
+    \item \textbf{Lớp Đầu Ra (1 Node):} Một giá trị liên tục dự đoán thời gian hoàn thành cuộc đua (tính bằng giây). Bằng cách so sánh và sắp xếp thời gian dự đoán của các con ngựa, hệ thống sẽ đưa ra bảng xếp hạng dự kiến cực kỳ sắc bén cho người mua gói VIP.
+\end{itemize}
+
+\section{Kết Quả Dự Kiến và Kết Luận}
+Việc triển khai nền tảng \textit{HorseTrack} được kỳ vọng sẽ tự động hóa sâu rộng và giảm đến 80\% thời gian lập lịch so với thao tác thủ công. Công cụ giả lập ảo và tự động cộng dồn thời gian phạt hứa hẹn loại bỏ hoàn toàn các sai sót tính toán của con người, đảm bảo tính công bằng tuyệt đối. Ở góc độ học máy, mô hình ANN 8-5-7-1 nhắm đến mục tiêu đạt độ chính xác từ 75-80\% trong việc dự đoán 3 vị trí dẫn đầu. Tóm lại, \textit{HorseTrack} cung cấp một giải pháp phần mềm hiện đại, ứng dụng sâu Trí tuệ Nhân tạo để thay đổi cách thức quản lý đua ngựa truyền thống, kết nối mượt mà tất cả các thực thể - từ chủ ngựa, nài ngựa đến khán giả - vào một hệ sinh thái kỹ thuật số đồng nhất và bảo mật.
+
+\begin{thebibliography}{8}
+
+\bibitem{ref_isms}
+Author, A., et al.: Design and implementation of an intelligent sports management system (ISMS) using wireless sensor networks. ResearchGate (2025).
+
+\bibitem{ref_wiley}
+Author, B., et al.: Design and Implementation of Sports Management System. Wireless Communications and Mobile Computing, Hindawi (2022). \doi{10.1155/2022/4240244}
+
+\bibitem{ref_scheduling_bib}
+Kendall, G., Knust, S., Ribeiro, C.C., Urrutia, S.: Scheduling in sports: An annotated bibliography. Computers \& Operations Research \textbf{37}(1), 1--19 (2010).
+
+\bibitem{ref_benter}
+Benter, W.: Computer Based Horse Race Handicapping and Wagering Systems: A Report. In: Efficiency of Racetrack Betting Markets, pp. 183--198 (1994).
+
+\bibitem{ref_doi_1}
+Author, C., et al.: Predicting Horse Racing Outcomes. Journal of Knowledge and Science \textbf{30}(11) (2025). \doi{10.1142/S0219622025500221}
+
+\bibitem{ref_nyc_blog}
+NYC Data Science Academy: Predicting Horse Racing Outcomes. Capstone Project Blog (2023).
+
+\bibitem{ref_pmc_predict}
+Author, D., et al.: Prediction of Horse Racing results using machine learning. PMC \textbf{10654610} (2023).
+
+\end{thebibliography}
+\end{document}

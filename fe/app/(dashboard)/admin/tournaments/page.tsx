@@ -178,7 +178,7 @@ export default function AdminTournamentsPage() {
                     <span>
                       🏆 Prize:{" "}
                       <strong className="text-foreground font-semibold">
-                        {(t.prizePool || t.prize || 0).toLocaleString()} pts
+                        {(t.prizePool || t.prize || 0).toLocaleString()} điểm
                       </strong>
                     </span>
                     <span>

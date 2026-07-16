@@ -25,6 +25,8 @@ import {
 } from './schemas/prize.schema';
 import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/schemas/notification.schema';
 
 @Injectable()
 export class PrizesService {
@@ -39,7 +41,26 @@ export class PrizesService {
     @InjectModel(RefereeAssignment.name)
     private assignmentModel: Model<RefereeAssignmentDocument>,
     private ledgerService: RewardPointLedgerService,
+    private notificationsService: NotificationsService,
   ) {}
+
+  /** Best-effort: gửi thông báo tiền thưởng, lỗi noti không được làm hỏng việc chia tiền */
+  private async notifyReward(
+    userId: string,
+    title: string,
+    body: string,
+  ): Promise<void> {
+    try {
+      await this.notificationsService.send(
+        userId,
+        title,
+        body,
+        NotificationType.REWARD,
+      );
+    } catch (err) {
+      console.error('Failed to send prize notification:', err);
+    }
+  }
 
   /** Generate prize for the race winner when results are published and credit wallets */
   async createPrizesForRace(
@@ -99,6 +120,12 @@ export class PrizesService {
                 note: `Received ${ownerSharePct}% winner reward for race "${race.name}" (Horse: ${horse.name})`,
                 session,
               });
+
+              await this.notifyReward(
+                String(horse.ownerId),
+                'Tiền thưởng chiến thắng',
+                `Bạn nhận được ${ownerAmount} điểm tiền thưởng (${ownerSharePct}%) cho chiến thắng của ngựa "${horse.name}" tại cuộc đua "${race.name}".`,
+              );
             }
 
             const existingOwnerPrize = await this.prizeModel
@@ -145,6 +172,12 @@ export class PrizesService {
                 note: `Received ${jockeySharePct}% winner reward for race "${race.name}" (Jockey share)`,
                 session,
               });
+
+              await this.notifyReward(
+                String(winnerResult.jockeyUserId),
+                'Tiền thưởng nài ngựa',
+                `Bạn nhận được ${jockeyAmount} điểm tiền thưởng (${jockeySharePct}%) với vai trò nài ngựa chiến thắng "${horse.name}" tại cuộc đua "${race.name}".`,
+              );
             }
 
             const existingJockeyPrize = await this.prizeModel
@@ -208,6 +241,16 @@ export class PrizesService {
             }`,
             session,
           });
+
+          await this.notifyReward(
+            String(ass.refereeUserId),
+            'Lương điều hành cuộc đua',
+            `Bạn nhận được ${ass.salary} điểm lương điều hành cuộc đua "${race.name}" với vai trò ${
+              ass.role === RefereeRole.MAIN
+                ? 'Trọng tài chính'
+                : 'Trọng tài phụ'
+            }.`,
+          );
         }
       }
     }
@@ -236,7 +279,7 @@ export class PrizesService {
   }
 
   async findMyPrizes(ownerId: string, page = 1, limit = 20) {
-    const filter = { ownerId };
+    const filter = { ownerId: new Types.ObjectId(ownerId) };
     const [data, total] = await Promise.all([
       this.prizeModel
         .find(filter)

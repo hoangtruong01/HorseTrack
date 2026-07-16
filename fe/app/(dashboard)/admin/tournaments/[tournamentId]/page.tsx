@@ -7,8 +7,8 @@ import {
   racesApi,
   tournamentsApi,
   type RaceItem,
-  type TournamentItem,
   type RegistrationItem,
+  type TournamentItem,
 } from "@/lib/api-client";
 import {
   AlertCircle,
@@ -64,9 +64,14 @@ export default function AdminTournamentDetailPage() {
 
   // Race Details Modal State
   const [selectedRace, setSelectedRace] = useState<RaceItem | null>(null);
-  const [raceRegistrations, setRaceRegistrations] = useState<RegistrationItem[]>([]);
+  const [raceRegistrations, setRaceRegistrations] = useState<
+    RegistrationItem[]
+  >([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
-  const [conditionsForm, setConditionsForm] = useState({ trackCondition: "", weatherSnapshot: "" });
+  const [conditionsForm, setConditionsForm] = useState({
+    trackCondition: "",
+    weatherSnapshot: "",
+  });
   const [savingConditions, setSavingConditions] = useState(false);
 
   const handleOpenRaceDetails = async (race: RaceItem) => {
@@ -134,12 +139,19 @@ export default function AdminTournamentDetailPage() {
     if (!selectedRace) return;
     setSavingConditions(true);
     try {
-      const updated = await racesApi.updateConditions(selectedRace._id, conditionsForm);
+      const updated = await racesApi.updateConditions(
+        selectedRace._id,
+        conditionsForm,
+      );
       setSelectedRace(updated);
-      setRaces((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
+      setRaces((prev) =>
+        prev.map((r) => (r._id === updated._id ? updated : r)),
+      );
       toast.success("Đã cập nhật điều kiện thực địa");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Cập nhật điều kiện thất bại");
+      toast.error(
+        e instanceof Error ? e.message : "Cập nhật điều kiện thất bại",
+      );
     } finally {
       setSavingConditions(false);
     }
@@ -164,7 +176,14 @@ export default function AdminTournamentDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
+        <Image
+          src="/skeletonHorse.gif"
+          alt="Đang tải..."
+          width={80}
+          height={80}
+          unoptimized
+          className="object-contain mx-auto"
+        />
         <p className="mt-4 text-xs font-mono uppercase tracking-widest">
           Đang tải thông tin chi tiết giải đấu...
         </p>
@@ -332,13 +351,13 @@ export default function AdminTournamentDetailPage() {
                     tournament.prize ||
                     0
                   ).toLocaleString()}{" "}
-                  pts
+                  điểm
                 </span>
               </div>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Đã phân bổ:</span>
                 <span className="font-bold text-foreground">
-                  {totalPrizeAllocated.toLocaleString()} pts
+                  {totalPrizeAllocated.toLocaleString()} điểm
                 </span>
               </div>
 
@@ -355,7 +374,7 @@ export default function AdminTournamentDetailPage() {
                 <span
                   className={`font-bold ${remainingBudget < 0 ? "text-red-400" : "text-teal-400"}`}
                 >
-                  {remainingBudget.toLocaleString()} pts
+                  {remainingBudget.toLocaleString()} điểm
                 </span>
               </div>
             </div>
@@ -374,8 +393,14 @@ export default function AdminTournamentDetailPage() {
             Danh sách vòng đua nhỏ ({races.length})
           </h3>
           <div className="flex items-center gap-3">
-            <Button asChild className="rounded-full bg-primary hover:bg-primary/90 text-foreground font-bold uppercase tracking-wider text-xs h-9 px-4">
-              <Link href={`/admin/races/new?tournamentId=${tournamentId}`} className="flex items-center gap-1.5">
+            <Button
+              asChild
+              className="rounded-full bg-primary hover:bg-primary/90 text-foreground font-bold uppercase tracking-wider text-xs h-9 px-4"
+            >
+              <Link
+                href={`/admin/races/new?tournamentId=${tournamentId}`}
+                className="flex items-center gap-1.5"
+              >
                 <Plus className="size-3.5" /> Tạo vòng đua mới
               </Link>
             </Button>
@@ -409,7 +434,6 @@ export default function AdminTournamentDetailPage() {
                     <th className="p-4">Tên vòng đua</th>
                     <th className="p-4">Cự ly / Mặt sân</th>
                     <th className="p-4">Thời gian xuất phát</th>
-                    <th className="p-4">Số lượng</th>
                     <th className="p-4">Giải thưởng</th>
                     <th className="p-4">Trạng thái</th>
                     <th className="p-4 text-right">Thao tác</th>
@@ -447,11 +471,13 @@ export default function AdminTournamentDetailPage() {
                               {race.description}
                             </span>
                           )}
-                          {race.status === "CHECKING" && (!race.trackCondition || !race.weatherSnapshot) && (
-                            <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase text-amber-400">
-                              <AlertTriangle className="size-3" /> Chưa có điều kiện thực địa
-                            </span>
-                          )}
+                          {race.status === "CHECKING" &&
+                            (!race.trackCondition || !race.weatherSnapshot) && (
+                              <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase text-amber-400">
+                                <AlertTriangle className="size-3" /> Chưa có
+                                điều kiện thực địa
+                              </span>
+                            )}
                         </td>
                         <td className="p-4">
                           <span className="block font-bold">
@@ -470,14 +496,8 @@ export default function AdminTournamentDetailPage() {
                             minute: "2-digit",
                           })}
                         </td>
-                        <td className="p-4">
-                          <span className="font-mono font-bold">
-                            {race.participantsCount || 0}
-                          </span>
-                          /{race.maxParticipants || 8} chiến mã
-                        </td>
                         <td className="p-4 font-mono font-bold text-teal-400">
-                          {(race.prize || 0).toLocaleString()} pts
+                          {(race.prize || 0).toLocaleString()} điểm
                         </td>
                         <td className="p-4">
                           <select
@@ -599,7 +619,7 @@ export default function AdminTournamentDetailPage() {
                   Quỹ giải thưởng
                 </span>
                 <span className="text-sm font-black text-teal-600 dark:text-teal-400">
-                  {(selectedRace.prize || 0).toLocaleString()} pts
+                  {(selectedRace.prize || 0).toLocaleString()} điểm
                 </span>
               </div>
               <div className="bg-muted/30 border border-border rounded-xl p-3">
@@ -614,17 +634,23 @@ export default function AdminTournamentDetailPage() {
             </div>
 
             {/* Conditions Form — editable when not LIVE/FINISHED/RESULT_PUBLISHED */}
-            {!["LIVE", "FINISHED", "RESULT_PUBLISHED"].includes(selectedRace.status) && (
+            {!["LIVE", "FINISHED", "RESULT_PUBLISHED"].includes(
+              selectedRace.status,
+            ) && (
               <div className="border border-border rounded-xl p-4 space-y-3 bg-muted/10">
                 <div className="flex items-center justify-between">
                   <h4 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5">
-                    <CloudSun className="size-3.5 text-amber-400" /> Điều Kiện Thực Địa
+                    <CloudSun className="size-3.5 text-amber-400" /> Điều Kiện
+                    Thực Địa
                   </h4>
-                  {selectedRace.status === "CHECKING" && (!selectedRace.trackCondition || !selectedRace.weatherSnapshot) && (
-                    <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase text-amber-400 border border-amber-500/30 bg-amber-500/10 rounded-full px-2 py-0.5">
-                      <AlertTriangle className="size-3" /> Cần điền trước khi chuyển READY
-                    </span>
-                  )}
+                  {selectedRace.status === "CHECKING" &&
+                    (!selectedRace.trackCondition ||
+                      !selectedRace.weatherSnapshot) && (
+                      <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase text-amber-400 border border-amber-500/30 bg-amber-500/10 rounded-full px-2 py-0.5">
+                        <AlertTriangle className="size-3" /> Cần điền trước khi
+                        chuyển READY
+                      </span>
+                    )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
@@ -633,7 +659,12 @@ export default function AdminTournamentDetailPage() {
                     </label>
                     <select
                       value={conditionsForm.trackCondition}
-                      onChange={(e) => setConditionsForm((f) => ({ ...f, trackCondition: e.target.value }))}
+                      onChange={(e) =>
+                        setConditionsForm((f) => ({
+                          ...f,
+                          trackCondition: e.target.value,
+                        }))
+                      }
                       className="w-full rounded-lg border border-border bg-muted px-2.5 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
                     >
                       <option value="">-- Chưa xác định --</option>
@@ -649,7 +680,12 @@ export default function AdminTournamentDetailPage() {
                     </label>
                     <select
                       value={conditionsForm.weatherSnapshot}
-                      onChange={(e) => setConditionsForm((f) => ({ ...f, weatherSnapshot: e.target.value }))}
+                      onChange={(e) =>
+                        setConditionsForm((f) => ({
+                          ...f,
+                          weatherSnapshot: e.target.value,
+                        }))
+                      }
                       className="w-full rounded-lg border border-border bg-muted px-2.5 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
                     >
                       <option value="">-- Chưa xác định --</option>
@@ -668,9 +704,14 @@ export default function AdminTournamentDetailPage() {
                     className="rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold uppercase tracking-wider text-[10px] h-8 px-3"
                   >
                     {savingConditions ? (
-                      <><Loader2 className="size-3 animate-spin mr-1" /> Đang lưu...</>
+                      <>
+                        <Loader2 className="size-3 animate-spin mr-1" /> Đang
+                        lưu...
+                      </>
                     ) : (
-                      <><Save className="size-3 mr-1" /> Lưu điều kiện</>
+                      <>
+                        <Save className="size-3 mr-1" /> Lưu điều kiện
+                      </>
                     )}
                   </Button>
                 </div>
@@ -695,7 +736,14 @@ export default function AdminTournamentDetailPage() {
 
               {loadingRegistrations ? (
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                  <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
+                  <Image
+                    src="/skeletonHorse.gif"
+                    alt="Đang tải..."
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="object-contain mx-auto"
+                  />
                   <p className="mt-2 text-[10px] uppercase tracking-wider font-mono">
                     Đang tải danh sách chiến mã...
                   </p>
@@ -723,28 +771,37 @@ export default function AdminTournamentDetailPage() {
                             #{idx + 1}
                           </td>
                           <td className="p-2.5 font-bold text-foreground">
-                            {(typeof reg.horseId === "object" ? reg.horseId?.name : null) || "Chiến mã ẩn"}
-                            {typeof reg.horseId === "object" && reg.horseId?.breed && (
-                              <span className="block text-[9px] text-muted-foreground/60 font-normal">
-                                {reg.horseId.breed}
-                              </span>
-                            )}
+                            {(typeof reg.horseId === "object"
+                              ? reg.horseId?.name
+                              : null) || "Chiến mã ẩn"}
+                            {typeof reg.horseId === "object" &&
+                              reg.horseId?.breed && (
+                                <span className="block text-[9px] text-muted-foreground/60 font-normal">
+                                  {reg.horseId.breed}
+                                </span>
+                              )}
                           </td>
                           <td className="p-2.5">
-                            {(typeof reg.ownerId === "object" ? reg.ownerId?.fullName : null) || "N/A"}
-                            {typeof reg.ownerId === "object" && reg.ownerId?.email && (
-                              <span className="block text-[9px] text-muted-foreground/60">
-                                {reg.ownerId.email}
-                              </span>
-                            )}
+                            {(typeof reg.ownerId === "object"
+                              ? reg.ownerId?.fullName
+                              : null) || "N/A"}
+                            {typeof reg.ownerId === "object" &&
+                              reg.ownerId?.email && (
+                                <span className="block text-[9px] text-muted-foreground/60">
+                                  {reg.ownerId.email}
+                                </span>
+                              )}
                           </td>
                           <td className="p-2.5">
-                            {(typeof reg.jockeyUserId === "object" ? reg.jockeyUserId?.fullName : null) || "Chưa gán"}
-                            {typeof reg.jockeyUserId === "object" && reg.jockeyUserId?.email && (
-                              <span className="block text-[9px] text-muted-foreground/60">
-                                {reg.jockeyUserId.email}
-                              </span>
-                            )}
+                            {(typeof reg.jockeyUserId === "object"
+                              ? reg.jockeyUserId?.fullName
+                              : null) || "Chưa gán"}
+                            {typeof reg.jockeyUserId === "object" &&
+                              reg.jockeyUserId?.email && (
+                                <span className="block text-[9px] text-muted-foreground/60">
+                                  {reg.jockeyUserId.email}
+                                </span>
+                              )}
                           </td>
                           <td className="p-2.5 text-right">
                             <span

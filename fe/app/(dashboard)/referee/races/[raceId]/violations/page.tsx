@@ -149,7 +149,7 @@ export default function RefereeViolationsPage() {
   if (!race) {
     return (
       <main className="max-w-4xl mx-auto p-8 space-y-4 text-center">
-        <h2 className="text-xl font-bold text-white">Không tìm thấy cuộc đua</h2>
+        <h2 className="text-xl font-bold text-foreground">Không tìm thấy cuộc đua</h2>
         <Button onClick={() => router.back()}>Quay lại</Button>
       </main>
     );

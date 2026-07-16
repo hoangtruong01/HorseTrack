@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X, LogOut, Wallet, User } from "lucide-react";
+import { Menu, X, LogOut, Wallet, User, Sun, Moon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "next-themes";
 
 import { publicNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ export type AppHeaderProps = {
 
 export function AppHeader({ className }: AppHeaderProps) {
   const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const [points, setPoints] = useState<number | null>(null);
@@ -116,6 +118,18 @@ export function AppHeader({ className }: AppHeaderProps) {
 
         <div className="hidden items-center gap-3 lg:flex">
           <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="flex items-center justify-center rounded-xl border border-border bg-card/40 hover:bg-card px-3.5 py-2 text-foreground transition duration-150 cursor-pointer h-[38px] min-w-[42px]"
+            title="Toggle theme / Đổi giao diện"
+            aria-label="Toggle theme"
+          >
+            {!mounted || theme === "dark" ? (
+              <Sun className="size-4" aria-hidden="true" />
+            ) : (
+              <Moon className="size-4" aria-hidden="true" />
+            )}
+          </button>
+          <button
             onClick={() =>
               i18n.changeLanguage(i18n.language === "vi" ? "en" : "vi")
             }
@@ -161,6 +175,18 @@ export function AppHeader({ className }: AppHeaderProps) {
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="flex items-center justify-center rounded-xl border border-border bg-card/40 hover:bg-card px-2.5 py-1.5 text-foreground transition duration-150 cursor-pointer h-10 min-w-[38px]"
+            title="Toggle theme / Đổi giao diện"
+            aria-label="Toggle theme"
+          >
+            {!mounted || theme === "dark" ? (
+              <Sun className="size-4" aria-hidden="true" />
+            ) : (
+              <Moon className="size-4" aria-hidden="true" />
+            )}
+          </button>
           <button
             onClick={() =>
               i18n.changeLanguage(i18n.language === "vi" ? "en" : "vi")

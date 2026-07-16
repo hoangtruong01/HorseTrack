@@ -17,6 +17,8 @@ type RaceRegistrationFormProps = {
     location?: string;
     capacity?: number;
     participantsCount?: number;
+    minWeightKg?: number;
+    maxWeightKg?: number;
   };
   horses: Horse[];
   onSubmit: (horseId: string) => Promise<void>;
@@ -34,13 +36,44 @@ export function RaceRegistrationForm({
   const [selectedHorseId, setSelectedHorseId] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const eligibleHorses = horses.filter(
-    (h) => h.healthStatus === "HEALTHY" && h.approvalStatus === "APPROVED"
-  );
-  
-  const ineligibleHorses = horses.filter(
-    (h) => h.healthStatus !== "HEALTHY" || h.approvalStatus !== "APPROVED"
-  );
+  const hasWeightClass = race.minWeightKg != null || race.maxWeightKg != null;
+
+  // Returns a reason string if the horse fails the race weight class, else null.
+  const weightReason = (h: Horse): string | null => {
+    if (!hasWeightClass) return null;
+    if (h.weightKg == null) return "chưa có cân nặng";
+    if (race.minWeightKg != null && h.weightKg < race.minWeightKg)
+      return `nhẹ quá (${h.weightKg} kg < ${race.minWeightKg} kg)`;
+    if (race.maxWeightKg != null && h.weightKg > race.maxWeightKg)
+      return `nặng quá (${h.weightKg} kg > ${race.maxWeightKg} kg)`;
+    return null;
+  };
+
+  const isEligible = (h: Horse) =>
+    h.healthStatus === "HEALTHY" &&
+    h.approvalStatus === "APPROVED" &&
+    weightReason(h) === null;
+
+  const eligibleHorses = horses.filter(isEligible);
+  const ineligibleHorses = horses.filter((h) => !isEligible(h));
+
+  // Health/approval reasons take priority, then weight class.
+  const ineligibleReason = (h: Horse): string => {
+    if (h.approvalStatus === "PENDING") return "Đang chờ duyệt";
+    if (h.approvalStatus === "REJECTED") return "Bị từ chối duyệt";
+    if (h.healthStatus === "INJURED") return "Chấn thương";
+    if (h.healthStatus === "RECOVERING") return "Đang hồi phục";
+    if (h.healthStatus !== "HEALTHY") return "Giải nghệ";
+    return weightReason(h) ?? "Không đủ điều kiện";
+  };
+
+  const weightClassLabel = !hasWeightClass
+    ? null
+    : race.minWeightKg != null && race.maxWeightKg != null
+      ? `${race.minWeightKg}–${race.maxWeightKg} kg`
+      : race.minWeightKg != null
+        ? `≥ ${race.minWeightKg} kg`
+        : `≤ ${race.maxWeightKg} kg`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,25 +108,25 @@ export function RaceRegistrationForm({
       </div>
 
       {errorMsg && (
-        <div className="rounded-xl border border-primary bg-primary/10 p-4 text-sm text-foreground">
-          <span className="font-bold text-primary uppercase block mb-1">Lỗi đăng ký</span>
+        <div className="rounded-xl border border-destructive bg-destructive/10 p-4 text-sm text-foreground">
+          <span className="font-bold text-destructive uppercase block mb-1">Lỗi đăng ký</span>
           {errorMsg}
         </div>
       )}
 
       {/* Race Overview Card */}
-      <div className="rounded-xl border border-border/5 bg-muted/[0.01] p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-3">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-black text-lg text-foreground uppercase">{race.name}</h3>
             <p className="text-xs text-muted-foreground/60 uppercase tracking-widest">{race.tournamentName || "Giải tự do"}</p>
           </div>
-          <span className="text-xs font-mono text-muted-foreground bg-muted/5 border border-border/10 px-2 py-1 rounded">
+          <span className="text-xs font-mono text-muted-foreground bg-muted border border-border px-2 py-1 rounded">
             {race.distance} · {race.surface}
           </span>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground pt-2 border-t border-border/5">
+        <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
           <div>
             <span className="text-muted-foreground/60 block uppercase tracking-widest text-[9px] mb-0.5">Thời gian</span>
             <p className="text-foreground font-mono font-bold">{race.date} · {race.startTime}</p>
@@ -102,6 +135,12 @@ export function RaceRegistrationForm({
             <span className="text-muted-foreground/60 block uppercase tracking-widest text-[9px] mb-0.5">Số lượng tham gia</span>
             <p className="text-foreground font-mono font-bold">{race.participantsCount || 0}/{race.capacity || 20} chiến mã</p>
           </div>
+          {weightClassLabel && (
+            <div>
+              <span className="text-muted-foreground/60 block uppercase tracking-widest text-[9px] mb-0.5">Hạng cân</span>
+              <p className="text-foreground font-mono font-bold">{weightClassLabel}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -112,7 +151,7 @@ export function RaceRegistrationForm({
         </label>
         
         {horses.length === 0 ? (
-          <div className="rounded-xl border border-border/5 bg-muted/[0.01] p-6 text-center text-sm text-muted-foreground/60">
+          <div className="rounded-xl border border-border bg-muted/40 p-6 text-center text-sm text-muted-foreground">
             Bạn chưa đăng ký chiến mã nào trong hệ thống. Vui lòng thêm chiến mã vào chuồng trước khi đăng ký trận đua.
           </div>
         ) : (
@@ -137,15 +176,10 @@ export function RaceRegistrationForm({
 
               {/* Ineligible Horses group */}
               {ineligibleHorses.length > 0 && (
-                <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHƯA DUYỆT/CHẤN THƯƠNG/GIẢI NGHỆ)" className="bg-card text-red-600 dark:text-red-500 font-bold" disabled>
+                <optgroup label="KHÔNG ĐỦ ĐIỀU KIỆN (CHƯA DUYỆT/CHẤN THƯƠNG/GIẢI NGHỆ/HẠNG CÂN)" className="bg-card text-red-600 dark:text-red-500 font-bold" disabled>
                   {ineligibleHorses.map((h) => (
                     <option key={h.id} value={h.id} disabled className="text-muted-foreground/60">
-                      {h.name} - {
-                        h.approvalStatus === "PENDING" ? "Đang chờ duyệt" :
-                        h.approvalStatus === "REJECTED" ? "Bị từ chối duyệt" :
-                        h.healthStatus === "INJURED" ? "Chấn thương" :
-                        h.healthStatus === "RECOVERING" ? "Đang hồi phục" : "Giải nghệ"
-                      }
+                      {h.name} - {ineligibleReason(h)}
                     </option>
                   ))}
                 </optgroup>
@@ -161,7 +195,7 @@ export function RaceRegistrationForm({
                   <p className="text-muted-foreground">
                     Chiến mã ở trạng thái thể lực rất tốt. Đủ điều kiện kỹ thuật để ghi danh thi đấu.
                   </p>
-                  <div className="grid grid-cols-2 gap-4 mt-2 pt-2 border-t border-border/5 text-muted-foreground">
+                  <div className="grid grid-cols-2 gap-4 mt-2 pt-2 border-t border-border text-muted-foreground">
                     <p>Tốc độ nền: <span className="text-foreground font-bold">{selectedHorse.baseSpeed} km/h</span></p>
                     <p>Thể lực: <span className="text-foreground font-bold">{selectedHorse.staminaScore}/100</span></p>
                   </div>
@@ -173,7 +207,7 @@ export function RaceRegistrationForm({
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-border/5">
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
         <Button
           type="button"
           onClick={onCancel}
@@ -185,7 +219,7 @@ export function RaceRegistrationForm({
         <Button
           type="submit"
           disabled={isSubmitting || !selectedHorseId}
-          className="rounded-xl px-6 h-11 bg-primary hover:bg-[#B80500] text-foreground flex items-center gap-2 font-bold uppercase text-xs tracking-wider disabled:opacity-40"
+          className="rounded-xl px-6 h-11 bg-primary hover:bg-[#B80500] text-primary-foreground flex items-center gap-2 font-bold uppercase text-xs tracking-wider disabled:opacity-40"
         >
           {isSubmitting ? (
             <>
