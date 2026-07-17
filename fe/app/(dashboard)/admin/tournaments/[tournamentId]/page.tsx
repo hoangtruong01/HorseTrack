@@ -173,6 +173,12 @@ export default function AdminTournamentDetailPage() {
     }
   };
 
+  const modalApprovedCount = selectedRace
+    ? (loadingRegistrations
+      ? (selectedRace.participantsCount || 0)
+      : raceRegistrations.filter((r) => r.status === "APPROVED").length)
+    : 0;
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
@@ -626,9 +632,12 @@ export default function AdminTournamentDetailPage() {
                 <span className="block text-[10px] uppercase text-muted-foreground/70 font-bold mb-1">
                   Giới hạn số ngựa
                 </span>
-                <span className="text-sm font-black text-foreground">
-                  {selectedRace.participantsCount || 0} /{" "}
+                <span className="text-sm font-black text-foreground block">
+                  {modalApprovedCount} /{" "}
                   {selectedRace.maxParticipants || 8} chiến mã
+                </span>
+                <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 mt-1 block">
+                  Còn {Math.max(0, (selectedRace.maxParticipants || 8) - modalApprovedCount)} slot
                 </span>
               </div>
             </div>

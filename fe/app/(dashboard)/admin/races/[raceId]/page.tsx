@@ -60,6 +60,10 @@ export default function AdminRaceDetailPage() {
   });
   const [savingConditions, setSavingConditions] = useState(false);
 
+  const approvedCount = loading
+    ? (race?.participantsCount || 0)
+    : registrations.filter((r) => r.status === "APPROVED").length;
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -261,7 +265,10 @@ export default function AdminRaceDetailPage() {
               </span>
               <span className="font-bold text-foreground flex items-center gap-1.5">
                 <Users className="size-3.5 text-primary" />
-                {race.participantsCount || 0} / {race.maxParticipants || 8}
+                {approvedCount} / {race.maxParticipants || 8}
+              </span>
+              <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 mt-0.5 block">
+                Còn {Math.max(0, (race.maxParticipants || 8) - approvedCount)} slot
               </span>
             </div>
           </div>

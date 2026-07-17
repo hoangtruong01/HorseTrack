@@ -89,7 +89,7 @@ export default function AdminRaceParticipantsPage() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground flex items-center gap-2">
             <Users className="size-4 text-primary" />
-            Chiến mã đăng ký ({registrations.length} / {race.maxParticipants || 8})
+            Chiến mã đăng ký ({registrations.filter(r => r.status === "APPROVED").length} / {race.maxParticipants || 8} đã duyệt · Còn {Math.max(0, (race.maxParticipants || 8) - registrations.filter(r => r.status === "APPROVED").length)} slot)
           </h3>
           <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
             race.status === "LIVE" ? "text-rose-400 bg-rose-400/10 border-rose-400/20 animate-pulse" :
