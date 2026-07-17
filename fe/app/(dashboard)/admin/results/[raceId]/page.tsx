@@ -188,7 +188,7 @@ export default function AdminResultDetailPage({
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(225,6,0,0.06),transparent_25rem)]" />
         <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="space-y-1">
-            <span className="text-[9px] font-black uppercase tracking-wider text-teal-500 dark:text-teal-400">TRẠNG THÁI BIÊN BẢN KẾT QUẢ</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-teal-600 dark:text-teal-400">TRẠNG THÁI BIÊN BẢN KẾT QUẢ</span>
             <div className="flex items-center gap-2 mt-1">
               <StatusBadge
                 label={
@@ -298,7 +298,7 @@ export default function AdminResultDetailPage({
                     <td className={`p-4 ${res.incident !== "none" && res.incident !== "NONE" ? "text-primary font-bold" : "text-muted-foreground/60"}`}>
                       {res.note || (res.incident !== "none" && res.incident !== "NONE" ? res.incident : "Không")}
                     </td>
-                    {/* <td className="p-4 text-right font-black text-teal-400 text-sm">
+                    {/* <td className="p-4 text-right font-black text-teal-600 dark:text-teal-400 text-sm">
                       +{res.points || 0} điểm
                     </td> */}
                   </tr>

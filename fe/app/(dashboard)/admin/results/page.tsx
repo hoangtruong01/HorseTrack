@@ -184,12 +184,12 @@ export default function AdminResultsPage() {
               placeholder="Tìm kiếm giải đấu..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-xl border border-border bg-black/25 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
+              className="h-10 w-full rounded-xl border border-border bg-muted/40 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
             />
           </div>
 
           {error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
@@ -215,7 +215,7 @@ export default function AdminResultsPage() {
               {filteredTournaments.map((t) => (
                 <div
                   key={t.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44"
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-muted/30 dark:hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
                   <div>
@@ -295,7 +295,7 @@ export default function AdminResultsPage() {
           </section>
 
           {error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
