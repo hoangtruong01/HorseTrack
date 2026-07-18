@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, RefreshCw, AlertCircle, Info } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, RefreshCw, AlertCircle, Info, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
@@ -65,6 +65,12 @@ function SortIcon({
 export function RaceOpsTable({ races, isLoading, error, onRefresh }: RaceOpsTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [races.length]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -73,6 +79,7 @@ export function RaceOpsTable({ races, isLoading, error, onRefresh }: RaceOpsTabl
       setSortKey(key);
       setSortDir("asc");
     }
+    setCurrentPage(1);
   };
 
   const sorted = [...races].sort((a, b) => {
@@ -88,6 +95,11 @@ export function RaceOpsTable({ races, isLoading, error, onRefresh }: RaceOpsTabl
     }
     return sortDir === "asc" ? cmp : -cmp;
   });
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / itemsPerPage));
+  const validCurrentPage = currentPage > totalPages ? totalPages : currentPage;
+  const startIndex = (validCurrentPage - 1) * itemsPerPage;
+  const paginatedItems = sorted.slice(startIndex, startIndex + itemsPerPage);
 
   const thClass =
     "px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wide text-muted-foreground select-none";
@@ -168,7 +180,7 @@ export function RaceOpsTable({ races, isLoading, error, onRefresh }: RaceOpsTabl
                   </td>
                 </tr>
               ) : (
-                sorted.map((race) => {
+                paginatedItems.map((race) => {
                   const badge = getStatusBadge(race.status);
                   const isLive = race.status.toUpperCase() === "LIVE";
                   const tournamentName =
@@ -236,6 +248,36 @@ export function RaceOpsTable({ races, isLoading, error, onRefresh }: RaceOpsTabl
           </table>
         )}
       </div>
+
+      {/* Pagination Footer */}
+      {!error && sorted.length > 0 && !isLoading && (
+        <div className="flex items-center justify-between border-t border-border px-4 py-3 bg-muted/10 shrink-0">
+          <div className="text-xs text-muted-foreground">
+            Hiển thị <span className="font-semibold text-foreground">{Math.min(startIndex + 1, sorted.length)}</span> - <span className="font-semibold text-foreground">{Math.min(startIndex + itemsPerPage, sorted.length)}</span> trong số <span className="font-semibold text-foreground">{sorted.length}</span> cuộc đua
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={validCurrentPage === 1}
+              className="inline-flex h-8 w-8 items-center justify-center rounded border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Trang trước"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <span className="text-xs text-muted-foreground px-2">
+              Trang {validCurrentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={validCurrentPage === totalPages}
+              className="inline-flex h-8 w-8 items-center justify-center rounded border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Trang sau"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
