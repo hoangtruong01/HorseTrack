@@ -11,7 +11,6 @@ import {
   Sparkles,
   Trophy,
   Upload,
-  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -32,7 +31,6 @@ export function TournamentForm() {
   const [endDate, setEndDate] = useState("");
   const [registrationStartDate, setRegistrationStartDate] = useState("");
   const [registrationEndDate, setRegistrationEndDate] = useState("");
-  const [maxHorses, setMaxHorses] = useState<number>(20);
   const [prizePool, setPrizePool] = useState<number>(0);
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState("");
@@ -123,11 +121,6 @@ export function TournamentForm() {
       }
     }
 
-    if (maxHorses < 2) {
-      toast.error("Số lượng ngựa tối đa tham gia phải ít nhất là 2.");
-      return;
-    }
-
     if (prizePool < 0) {
       toast.error("Tổng giải thưởng (Prize Pool) không được âm.");
       return;
@@ -144,7 +137,6 @@ export function TournamentForm() {
         endDate,
         registrationStartDate: registrationStartDate || undefined,
         registrationEndDate: registrationEndDate || undefined,
-        maxHorses,
         prizePool,
         imageUrl: imageUrl || undefined,
       };
@@ -311,39 +303,8 @@ export function TournamentForm() {
           </div>
         </div>
 
-        {/* Row 4: Sức chứa & Giải thưởng */}
+        {/* Row 4: Giải thưởng */}
         <div className="grid gap-6 md:grid-cols-2">
-          <label className="grid gap-2 text-sm font-bold text-foreground">
-            <span className="inline-flex items-center gap-2">
-              <Users className="size-4 text-primary" />
-              Số ngựa tối đa tham gia giải
-            </span>
-            <input
-              type="number"
-              min={2}
-              value={maxHorses}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (val === "") {
-                  setMaxHorses(0);
-                  e.target.value = "";
-                  return;
-                }
-                const parsed = parseInt(val, 10);
-                if (isNaN(parsed)) {
-                  setMaxHorses(0);
-                  e.target.value = "0";
-                } else {
-                  setMaxHorses(parsed);
-                  e.target.value = parsed.toString();
-                }
-              }}
-              disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-border bg-muted/40 dark:bg-black/35 px-4 font-mono text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Mặc định: 20"
-            />
-          </label>
-
           <label className="grid gap-2 text-sm font-bold text-foreground">
             <span className="inline-flex items-center gap-2">
               <Award className="size-4 text-primary" />
