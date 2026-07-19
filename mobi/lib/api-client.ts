@@ -461,4 +461,5 @@ export const notificationsApi = {
   list: () => apiFetch<any>('/notifications/my-notifications'),
   markAsRead: (id: string) => apiFetch<any>(`/notifications/${id}/read`, { method: 'PATCH' }),
   readAll: () => apiFetch<any>('/notifications/read-all', { method: 'PATCH' }),
+  delete: (id: string) => apiFetch<any>(`/notifications/${id}`, { method: 'DELETE' }),
 };

@@ -178,59 +178,59 @@ export default function RefereeResults({ nested }: { nested?: boolean }) {
         <Animated.View style={{ flex: 1 }} entering={FadeIn} exiting={FadeOut}>
           <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
             <View style={styles.content}>
-          <Section title="Chọn trận đua cần nhập kết quả">
-            {assignments.length === 0 ? (
-              <EmptyState icon="sports-score" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
-            ) : (
-              assignments.map(a => {
-                const race = a.raceId;
-                if (!race) return null;
-                return (
-                  <TouchableOpacity
-                    key={a._id || a.id}
-                    style={styles.assignmentCard}
-                    onPress={() => selectRace(race._id || race.id, race.name)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.cardIconWrap}>
-                      <MaterialIcons name="sports-score" size={20} color={premiumColors.brand} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.assignmentTitle} numberOfLines={1}>{race.name}</Text>
-                      <Text style={styles.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
-                    </View>
-                    <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
-                  </TouchableOpacity>
-                );
-              })
-            )}
-          </Section>
-        </View>
+              <Section title="Chọn trận đua cần nhập kết quả">
+                {assignments.length === 0 ? (
+                  <EmptyState icon="sports-score" title="Chưa có nhiệm vụ đã nhận" subtitle="Vui lòng nhận phân công ở tab Phân công trước." />
+                ) : (
+                  assignments.map(a => {
+                    const race = a.raceId;
+                    if (!race) return null;
+                    return (
+                      <TouchableOpacity
+                        key={a._id || a.id}
+                        style={styles.assignmentCard}
+                        onPress={() => selectRace(race._id || race.id, race.name)}
+                        activeOpacity={0.8}
+                      >
+                        <View style={styles.cardIconWrap}>
+                          <MaterialIcons name="sports-score" size={20} color={premiumColors.brand} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.assignmentTitle} numberOfLines={1}>{race.name}</Text>
+                          <Text style={styles.assignmentSubtitle} numberOfLines={1}>Trạng thái: {race.status}</Text>
+                        </View>
+                        <MaterialIcons name="chevron-right" size={20} color={premiumColors.textMuted} />
+                      </TouchableOpacity>
+                    );
+                  })
+                )}
+              </Section>
+            </View>
           </AppScreen>
         </Animated.View>
       ) : (
         <Animated.View style={{ flex: 1 }} entering={SlideInRight} exiting={SlideOutRight}>
           <AppScreen refreshing={refreshing} onRefresh={onRefresh} safeArea={!nested}>
             <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
-          <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
-          <Text style={styles.backTxt}>Quay lại</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
-      </View>
+              <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
+                <MaterialIcons name="arrow-back" size={20} color={premiumColors.textSecondary} />
+                <Text style={styles.backTxt}>Quay lại</Text>
+              </TouchableOpacity>
+              <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
+            </View>
 
-      <View style={styles.statusCard}>
-        <View>
-          <Text style={styles.statusLabel}>TRẠNG THÁI BIÊN BẢN</Text>
-          <View style={[styles.statusBadge, { backgroundColor: isLocked ? 'rgba(52, 211, 153, 0.15)' : 'rgba(234, 179, 8, 0.15)' }]}>
-            <Text style={[styles.statusBadgeText, { color: isLocked ? premiumColors.success : premiumColors.warning }]}>
-              {isLocked ? 'ĐÃ XÁC NHẬN (LOCKED)' : 'BẢN NHÁP (DRAFT)'}
-            </Text>
-          </View>
-        </View>
-        {!isLocked && (
-          <View style={styles.topActions}>
-            {/*
+            <View style={styles.statusCard}>
+              <View>
+                <Text style={styles.statusLabel}>TRẠNG THÁI BIÊN BẢN</Text>
+                <View style={[styles.statusBadge, { backgroundColor: isLocked ? 'rgba(52, 211, 153, 0.15)' : 'rgba(234, 179, 8, 0.15)' }]}>
+                  <Text style={[styles.statusBadgeText, { color: isLocked ? premiumColors.success : premiumColors.warning }]}>
+                    {isLocked ? 'ĐÃ XÁC NHẬN (LOCKED)' : 'BẢN NHÁP (DRAFT)'}
+                  </Text>
+                </View>
+              </View>
+              {!isLocked && (
+                <View style={styles.topActions}>
+                  {/*
             <TouchableOpacity 
               style={[styles.topActionBtn, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: 'rgba(234, 179, 8, 0.3)' }]} 
               onPress={handleSimulate} 
@@ -240,189 +240,189 @@ export default function RefereeResults({ nested }: { nested?: boolean }) {
               <Text style={[styles.topActionBtnText, { color: premiumColors.warning }]}>{simulating ? '...' : 'GIẢ LẬP'}</Text>
             </TouchableOpacity>
             */}
-            <TouchableOpacity
-              style={styles.topActionBtnOutline}
-              onPress={handleBulkSave}
-              disabled={saving}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.topActionBtnOutlineText}>{saving ? '...' : 'LƯU NHÁP'}</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-
-      {loadingDetails && !refreshing ? <LoadingState /> : (() => {
-        const sortedRows = [...entryRows].sort((a, b) => {
-          const rankA = a.rank ? parseInt(a.rank, 10) : 999;
-          const rankB = b.rank ? parseInt(b.rank, 10) : 999;
-          return rankA - rankB;
-        });
-
-        if (isLocked) {
-          const top1 = sortedRows.find(r => r.rank === '1');
-          const top2 = sortedRows.find(r => r.rank === '2');
-          const top3 = sortedRows.find(r => r.rank === '3');
-          const rest = sortedRows.filter(r => {
-            const rk = parseInt(r.rank, 10);
-            return !r.rank || isNaN(rk) || rk > 3;
-          });
-
-          return (
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-              <View style={styles.podiumContainer}>
-                {top2 ? (
-                  <View style={styles.podiumCol}>
-                    <View style={styles.podiumInfo}>
-                      {top2.avatar ? <Image source={{ uri: top2.avatar }} style={[styles.podiumAvatar, { borderColor: 'rgba(225,6,0,0.7)' }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: 'rgba(225,6,0,0.7)' }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
-                      <Text style={styles.podiumName} numberOfLines={1}>{top2.horseName.toUpperCase()}</Text>
-                      <Text style={styles.podiumTime}>{top2.finishTimeSecs}s</Text>
-                    </View>
-                    <View style={[styles.podiumBlock, { height: 110, backgroundColor: 'rgba(225,6,0,0.7)' }]}>
-                      <Text style={styles.podiumRankText}>2</Text>
-                    </View>
-                  </View>
-                ) : <View style={styles.podiumCol} />}
-
-                {top1 ? (
-                  <View style={styles.podiumCol}>
-                    <View style={styles.podiumInfo}>
-                      {top1.avatar ? <Image source={{ uri: top1.avatar }} style={[styles.podiumAvatar, { borderColor: premiumColors.brand }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: premiumColors.brand }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
-                      <Text style={styles.podiumName} numberOfLines={1}>{top1.horseName.toUpperCase()}</Text>
-                      <Text style={styles.podiumTime}>{top1.finishTimeSecs}s</Text>
-                    </View>
-                    <View style={[styles.podiumBlock, { height: 150, backgroundColor: premiumColors.brand, zIndex: 10, shadowColor: premiumColors.brand, shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: -2 } }]}>
-                      <Text style={styles.podiumRankText}>1</Text>
-                    </View>
-                  </View>
-                ) : <View style={styles.podiumCol} />}
-
-                {top3 ? (
-                  <View style={styles.podiumCol}>
-                    <View style={styles.podiumInfo}>
-                      {top3.avatar ? <Image source={{ uri: top3.avatar }} style={[styles.podiumAvatar, { borderColor: 'rgba(225,6,0,0.4)' }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: 'rgba(225,6,0,0.4)' }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
-                      <Text style={styles.podiumName} numberOfLines={1}>{top3.horseName.toUpperCase()}</Text>
-                      <Text style={styles.podiumTime}>{top3.finishTimeSecs}s</Text>
-                    </View>
-                    <View style={[styles.podiumBlock, { height: 80, backgroundColor: 'rgba(225,6,0,0.4)' }]}>
-                      <Text style={styles.podiumRankText}>3</Text>
-                    </View>
-                  </View>
-                ) : <View style={styles.podiumCol} />}
-              </View>
-
-              <View style={styles.leaderboardList}>
-                {rest.map((item) => (
-                  <View key={item.horseId} style={styles.leaderboardRow}>
-                    <Text style={styles.leaderboardRank}>{item.rank || '-'}</Text>
-                    {item.avatar ? (
-                      <Image source={{ uri: item.avatar }} style={styles.leaderboardAvatar} />
-                    ) : (
-                      <View style={styles.leaderboardAvatarPlaceholder}>
-                        <MaterialIcons name="pets" size={16} color={premiumColors.textMuted} />
-                      </View>
-                    )}
-                    <View style={styles.leaderboardInfo}>
-                      <Text style={styles.leaderboardHorseName}>{item.horseName.toUpperCase()}</Text>
-                      <Text style={styles.leaderboardStatus}>{item.outcome === 'finished' ? 'Về đích' : item.outcome === 'disqualified' ? 'Bị loại' : 'DNF'}</Text>
-                    </View>
-                    <Text style={styles.leaderboardTime}>{item.finishTimeSecs}s</Text>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-          );
-        }
-
-        return (
-          <FlatList
-            data={sortedRows}
-            keyExtractor={(item) => item.horseId}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <EmptyState icon="sports" title="Không có chiến mã" subtitle="Chưa có ngựa đua được xác nhận kiểm duyệt để nhập kết quả." />
-            }
-            renderItem={({ item }) => {
-              const originalIndex = entryRows.findIndex(r => r.horseId === item.horseId);
-              return (
-                <View style={styles.resultCard}>
-                  <View style={styles.cardHeader}>
-                    <View style={styles.avatarContainer}>
-                      {item.avatar ? (
-                        <View style={{ width: 48, height: 48, borderRadius: 24, overflow: 'hidden', backgroundColor: premiumColors.surface2 }}>
-                          <Image source={{ uri: item.avatar }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                        </View>
-                      ) : (
-                        <View style={styles.avatarPlaceholder}>
-                          <MaterialIcons name="pets" size={24} color={premiumColors.textMuted} />
-                        </View>
-                      )}
-                    </View>
-                    <View style={styles.horseInfo}>
-                      <Text style={styles.horseName}>{item.horseName.toUpperCase()}</Text>
-                      {item.rank ? (
-                        <View style={styles.rankBadge}>
-                          <Text style={styles.rankText}>HẠNG {item.rank}</Text>
-                        </View>
-                      ) : null}
-                    </View>
-                  </View>
-
-                  <View style={styles.formRow}>
-                    <Text style={styles.label}>Thời gian (giây):</Text>
-                    <TextInput
-                      style={[styles.timeInput, isLocked && styles.disabledInput]}
-                      value={item.finishTimeSecs}
-                      onChangeText={txt => handleRowChange(originalIndex, 'finishTimeSecs', txt)}
-                      placeholder="Ví dụ: 72.45"
-                      placeholderTextColor={premiumColors.textMuted}
-                      keyboardType="numeric"
-                      editable={!isLocked}
-                    />
-                  </View>
-
-                  <View style={styles.formRow}>
-                    <Text style={styles.label}>Trạng thái:</Text>
-                    <View style={styles.statusChips}>
-                      {['finished', 'disqualified', 'did_not_finish'].map(out => {
-                        const isActive = item.outcome === out;
-                        const label = out === 'finished' ? 'Về đích' : out === 'disqualified' ? 'Loại' : 'DNF';
-                        return (
-                          <TouchableOpacity
-                            key={out}
-                            style={[styles.chip, isActive && styles.chipActive, isLocked && styles.chipLocked]}
-                            onPress={() => !isLocked && handleRowChange(originalIndex, 'outcome', out)}
-                            disabled={isLocked}
-                            activeOpacity={0.8}
-                          >
-                            <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{label}</Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                  </View>
+                  <TouchableOpacity
+                    style={styles.topActionBtnOutline}
+                    onPress={handleBulkSave}
+                    disabled={saving}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.topActionBtnOutlineText}>{saving ? '...' : 'LƯU NHÁP'}</Text>
+                  </TouchableOpacity>
                 </View>
-              );
-            }}
-          />
-        );
-      })()}
+              )}
+            </View>
 
-      {!isLocked && entryRows.length > 0 && (
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.confirmButton}
-            onPress={handleConfirm}
-            disabled={confirming}
-            activeOpacity={0.9}
-          >
-            <Text style={styles.confirmButtonText}>{confirming ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN KHÓA KẾT QUẢ'}</Text>
-          </TouchableOpacity>
-        </View>
-          )}
-        </AppScreen>
-      </Animated.View>
+            {loadingDetails && !refreshing ? <LoadingState /> : (() => {
+              const sortedRows = [...entryRows].sort((a, b) => {
+                const rankA = a.rank ? parseInt(a.rank, 10) : 999;
+                const rankB = b.rank ? parseInt(b.rank, 10) : 999;
+                return rankA - rankB;
+              });
+
+              if (isLocked) {
+                const top1 = sortedRows.find(r => r.rank === '1');
+                const top2 = sortedRows.find(r => r.rank === '2');
+                const top3 = sortedRows.find(r => r.rank === '3');
+                const rest = sortedRows.filter(r => {
+                  const rk = parseInt(r.rank, 10);
+                  return !r.rank || isNaN(rk) || rk > 3;
+                });
+
+                return (
+                  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+                    <View style={styles.podiumContainer}>
+                      {top2 ? (
+                        <View style={styles.podiumCol}>
+                          <View style={styles.podiumInfo}>
+                            {top2.avatar ? <Image source={{ uri: top2.avatar }} style={[styles.podiumAvatar, { borderColor: 'rgba(225,6,0,0.7)' }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: 'rgba(225,6,0,0.7)' }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
+                            <Text style={styles.podiumName} numberOfLines={1}>{top2.horseName.toUpperCase()}</Text>
+                            <Text style={styles.podiumTime}>{top2.finishTimeSecs}s</Text>
+                          </View>
+                          <View style={[styles.podiumBlock, { height: 110, backgroundColor: 'rgba(225,6,0,0.7)' }]}>
+                            <Text style={styles.podiumRankText}>2</Text>
+                          </View>
+                        </View>
+                      ) : <View style={styles.podiumCol} />}
+
+                      {top1 ? (
+                        <View style={styles.podiumCol}>
+                          <View style={styles.podiumInfo}>
+                            {top1.avatar ? <Image source={{ uri: top1.avatar }} style={[styles.podiumAvatar, { borderColor: premiumColors.brand }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: premiumColors.brand }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
+                            <Text style={styles.podiumName} numberOfLines={1}>{top1.horseName.toUpperCase()}</Text>
+                            <Text style={styles.podiumTime}>{top1.finishTimeSecs}s</Text>
+                          </View>
+                          <View style={[styles.podiumBlock, { height: 150, backgroundColor: premiumColors.brand, zIndex: 10, shadowColor: premiumColors.brand, shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: -2 } }]}>
+                            <Text style={styles.podiumRankText}>1</Text>
+                          </View>
+                        </View>
+                      ) : <View style={styles.podiumCol} />}
+
+                      {top3 ? (
+                        <View style={styles.podiumCol}>
+                          <View style={styles.podiumInfo}>
+                            {top3.avatar ? <Image source={{ uri: top3.avatar }} style={[styles.podiumAvatar, { borderColor: 'rgba(225,6,0,0.4)' }]} /> : <View style={[styles.podiumAvatarPlaceholder, { borderColor: 'rgba(225,6,0,0.4)' }]}><MaterialIcons name="pets" size={24} color={premiumColors.textMuted} /></View>}
+                            <Text style={styles.podiumName} numberOfLines={1}>{top3.horseName.toUpperCase()}</Text>
+                            <Text style={styles.podiumTime}>{top3.finishTimeSecs}s</Text>
+                          </View>
+                          <View style={[styles.podiumBlock, { height: 80, backgroundColor: 'rgba(225,6,0,0.4)' }]}>
+                            <Text style={styles.podiumRankText}>3</Text>
+                          </View>
+                        </View>
+                      ) : <View style={styles.podiumCol} />}
+                    </View>
+
+                    <View style={styles.leaderboardList}>
+                      {rest.map((item) => (
+                        <View key={item.horseId} style={styles.leaderboardRow}>
+                          <Text style={styles.leaderboardRank}>{item.rank || '-'}</Text>
+                          {item.avatar ? (
+                            <Image source={{ uri: item.avatar }} style={styles.leaderboardAvatar} />
+                          ) : (
+                            <View style={styles.leaderboardAvatarPlaceholder}>
+                              <MaterialIcons name="pets" size={16} color={premiumColors.textMuted} />
+                            </View>
+                          )}
+                          <View style={styles.leaderboardInfo}>
+                            <Text style={styles.leaderboardHorseName}>{item.horseName.toUpperCase()}</Text>
+                            <Text style={styles.leaderboardStatus}>{item.outcome === 'finished' ? 'Về đích' : item.outcome === 'disqualified' ? 'Bị loại' : 'DNF'}</Text>
+                          </View>
+                          <Text style={styles.leaderboardTime}>{item.finishTimeSecs}s</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </ScrollView>
+                );
+              }
+
+              return (
+                <FlatList
+                  data={sortedRows}
+                  keyExtractor={(item) => item.horseId}
+                  contentContainerStyle={styles.listContent}
+                  showsVerticalScrollIndicator={false}
+                  ListEmptyComponent={
+                    <EmptyState icon="sports" title="Không có chiến mã" subtitle="Chưa có ngựa đua được xác nhận kiểm duyệt để nhập kết quả." />
+                  }
+                  renderItem={({ item }) => {
+                    const originalIndex = entryRows.findIndex(r => r.horseId === item.horseId);
+                    return (
+                      <View style={styles.resultCard}>
+                        <View style={styles.cardHeader}>
+                          <View style={styles.avatarContainer}>
+                            {item.avatar ? (
+                              <View style={{ width: 48, height: 48, borderRadius: 24, overflow: 'hidden', backgroundColor: premiumColors.surface2 }}>
+                                <Image source={{ uri: item.avatar }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                              </View>
+                            ) : (
+                              <View style={styles.avatarPlaceholder}>
+                                <MaterialIcons name="pets" size={24} color={premiumColors.textMuted} />
+                              </View>
+                            )}
+                          </View>
+                          <View style={styles.horseInfo}>
+                            <Text style={styles.horseName}>{item.horseName.toUpperCase()}</Text>
+                            {item.rank ? (
+                              <View style={styles.rankBadge}>
+                                <Text style={styles.rankText}>HẠNG {item.rank}</Text>
+                              </View>
+                            ) : null}
+                          </View>
+                        </View>
+
+                        <View style={styles.formRow}>
+                          <Text style={styles.label}>Thời gian (giây):</Text>
+                          <TextInput
+                            style={[styles.timeInput, isLocked && styles.disabledInput]}
+                            value={item.finishTimeSecs}
+                            onChangeText={txt => handleRowChange(originalIndex, 'finishTimeSecs', txt)}
+                            placeholder="Ví dụ: 72.45"
+                            placeholderTextColor={premiumColors.textMuted}
+                            keyboardType="numeric"
+                            editable={!isLocked}
+                          />
+                        </View>
+
+                        <View style={styles.formRow}>
+                          <Text style={styles.label}>Trạng thái:</Text>
+                          <View style={styles.statusChips}>
+                            {['finished', 'disqualified', 'did_not_finish'].map(out => {
+                              const isActive = item.outcome === out;
+                              const label = out === 'finished' ? 'Về đích' : out === 'disqualified' ? 'Loại' : 'DNF';
+                              return (
+                                <TouchableOpacity
+                                  key={out}
+                                  style={[styles.chip, isActive && styles.chipActive, isLocked && styles.chipLocked]}
+                                  onPress={() => !isLocked && handleRowChange(originalIndex, 'outcome', out)}
+                                  disabled={isLocked}
+                                  activeOpacity={0.8}
+                                >
+                                  <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{label}</Text>
+                                </TouchableOpacity>
+                              );
+                            })}
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  }}
+                />
+              );
+            })()}
+
+            {!isLocked && entryRows.length > 0 && (
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={handleConfirm}
+                  disabled={confirming}
+                  activeOpacity={0.9}
+                >
+                  <Text style={styles.confirmButtonText}>{confirming ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN KHÓA KẾT QUẢ'}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </AppScreen>
+        </Animated.View>
       )}
     </View>
   );

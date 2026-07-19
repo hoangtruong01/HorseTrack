@@ -53,7 +53,7 @@ export default function RefereeLayout() {
     
     fetchUnreadCount();
     
-    const interval = setInterval(fetchUnreadCount, 30000);
+    const interval = setInterval(fetchUnreadCount, 5000);
     return () => clearInterval(interval);
   }, [pathname]);
 

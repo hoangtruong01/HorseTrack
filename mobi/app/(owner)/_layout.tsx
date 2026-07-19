@@ -1,4 +1,4 @@
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs, useRouter, usePathname } from 'expo-router';
 import React from 'react';
 import { View, TouchableOpacity, Image, Alert } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -6,7 +6,8 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { premiumColors } from '@/components/ui/premium-tokens';
 import { useAuth } from '@/providers/auth-provider';
-import { DockTabBar, useDockScreenOptions, DockAvatarIcon } from '@/components/ui/dock-tab-bar';
+import { DockTabBar, useDockScreenOptions, DockAvatarIcon, DockNotificationIcon } from '@/components/ui/dock-tab-bar';
+import { notificationsApi } from '@/lib/api-client';
 
 export default function OwnerLayout() {
   const colorScheme = useColorScheme();
@@ -14,7 +15,28 @@ export default function OwnerLayout() {
   const t = Colors[colorScheme ?? 'dark'];
   const { user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const dockOptions = useDockScreenOptions();
+
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await notificationsApi.list();
+        const data = (res as any).data || res || [];
+        const count = data.filter((n: any) => !n.isRead).length;
+        setUnreadCount(count);
+      } catch (err) {
+        // ignore
+      }
+    };
+    
+    fetchUnreadCount();
+    
+    const interval = setInterval(fetchUnreadCount, 5000);
+    return () => clearInterval(interval);
+  }, [pathname]);
 
   const renderHeaderRight = () => (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingRight: 16 }}>
@@ -52,7 +74,7 @@ export default function OwnerLayout() {
       <Tabs.Screen name="horses" options={{ title: 'Chiến mã', headerTitle: 'CHIẾN MÃ', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="pets" color={color} /> }} />
       <Tabs.Screen name="registrations" options={{ title: 'Giải đấu', headerTitle: 'GIẢI ĐẤU', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="emoji-events" color={color} /> }} />
       <Tabs.Screen name="invitations" options={{ title: 'Mời Jockey', headerTitle: 'MỜI JOCKEY', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person-add" color={color} /> }} />
-      <Tabs.Screen name="notifications" options={{ title: 'Thông báo', headerTitle: 'THÔNG BÁO', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="notifications" color={color} /> }} />
+      <Tabs.Screen name="notifications" options={{ title: 'Thông báo', headerTitle: 'THÔNG BÁO', tabBarIcon: ({ focused }) => <DockNotificationIcon focused={focused} count={unreadCount} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} /> }} />
       <Tabs.Screen name="results" options={{ href: null, title: 'Kết quả', headerTitle: 'KẾT QUẢ THI ĐẤU' }} />
       <Tabs.Screen name="rankings" options={{ href: null, title: 'Bảng xếp hạng', headerTitle: 'BẢNG XẾP HẠNG' }} />
