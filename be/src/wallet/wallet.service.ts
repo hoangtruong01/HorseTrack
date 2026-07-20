@@ -179,11 +179,6 @@ export class WalletService {
 
         if (status === CashoutStatus.APPROVED) {
           request.approvedBy = new Types.ObjectId(handlerId);
-          await this.transactionModel.findOneAndUpdate(
-            { cashoutRequestId: request._id },
-            { status: TransactionStatus.SUCCESS },
-            { session },
-          );
         } else if (status === CashoutStatus.PAID) {
           request.paidBy = new Types.ObjectId(handlerId);
           request.paidAt = new Date();
