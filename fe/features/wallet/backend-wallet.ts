@@ -89,9 +89,31 @@ export function mapLedgerTransaction(ledger: LedgerEntryItem): WalletUiTransacti
       type = "withdrawal_refund";
     } else {
       type = "withdrawal_requested";
-      if (ledger.note?.toLowerCase().includes("thành công") || ledger.note?.toLowerCase().includes("thanh cong") || ledger.note?.toLowerCase().includes("paid")) {
-        type = "withdrawal_paid";
-      } else if (ledger.note?.toLowerCase().includes("từ chối") || ledger.note?.toLowerCase().includes("tu choi")) {
+      const noteLower = ledger.note?.toLowerCase() || "";
+      if (
+        noteLower.includes("thành công") ||
+        noteLower.includes("thanh cong") ||
+        noteLower.includes("paid") ||
+        noteLower.includes("đã thanh toán") ||
+        noteLower.includes("da thanh toan") ||
+        noteLower.includes("đã phê duyệt") ||
+        noteLower.includes("da phe duyet") ||
+        noteLower.includes("đã duyệt") ||
+        noteLower.includes("da duyet") ||
+        noteLower.includes("approved")
+      ) {
+        type =
+          noteLower.includes("phê duyệt") || noteLower.includes("phe duyet") || noteLower.includes("approved")
+            ? "withdrawal_approved"
+            : "withdrawal_paid";
+      } else if (
+        noteLower.includes("từ chối") ||
+        noteLower.includes("tu choi") ||
+        noteLower.includes("rejected") ||
+        noteLower.includes("thất bại") ||
+        noteLower.includes("that bai") ||
+        noteLower.includes("failed")
+      ) {
         type = "withdrawal_rejected";
       }
     }

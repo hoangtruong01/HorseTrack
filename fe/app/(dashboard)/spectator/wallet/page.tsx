@@ -21,8 +21,8 @@ export default function SpectatorWalletPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCashoutForm, setShowCashoutForm] = useState(false);
 
-  const fetchWalletData = useCallback(async () => {
-    setIsLoading(true);
+  const fetchWalletData = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true);
     try {
       const [historyRes, balanceRes, statsRes] = await Promise.all([
         rewardPointLedgerApi.myHistory({ page: 1, limit: 100 }),
@@ -33,14 +33,20 @@ export default function SpectatorWalletPage() {
       setTransactions(mapLedgerTransactions(historyRes.data || []));
       setStats(statsRes);
     } catch (err) {
-      toast.error((err as Error).message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
+      if (!silent) {
+        toast.error((err as Error).message || t("wallet.errors.fetchFailed", "Không thể tải thông tin ví từ hệ thống."));
+      }
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, [t]);
 
   useEffect(() => {
     void fetchWalletData();
+    const interval = setInterval(() => {
+      void fetchWalletData(true);
+    }, 5000);
+    return () => clearInterval(interval);
   }, [fetchWalletData]);
 
   const handleCashoutSubmit = async (points: number) => {

@@ -144,9 +144,15 @@ export class RewardPointLedgerService {
     sourceType: LedgerSourceType,
     newNote: string,
   ): Promise<void> {
+    const objectId = Types.ObjectId.isValid(sourceId)
+      ? new Types.ObjectId(sourceId)
+      : sourceId;
     await this.ledgerModel
       .findOneAndUpdate(
-        { sourceId: new Types.ObjectId(sourceId), sourceType },
+        {
+          sourceId: { $in: [sourceId, objectId] },
+          sourceType,
+        },
         { $set: { note: newNote } },
       )
       .exec();
@@ -254,6 +260,61 @@ export class RewardPointLedgerService {
     return entry;
   }
 
+  private async syncRedemptionNotes(entries: RewardPointLedgerDocument[]) {
+    const redemptionEntries = entries.filter(
+      (e) => e.sourceType === LedgerSourceType.REDEMPTION && e.sourceId,
+    );
+    if (redemptionEntries.length === 0) return;
+
+    try {
+      const CashoutModel = this.connection.models['CashoutRequest'];
+      if (!CashoutModel) return;
+
+      for (const entry of redemptionEntries) {
+        const cashout = await CashoutModel.findById(entry.sourceId).exec();
+        if (!cashout) continue;
+
+        let newNote: string | null = null;
+        const noteLower = entry.note?.toLowerCase() || '';
+
+        if (
+          cashout.status === 'PAID' &&
+          !noteLower.includes('thành công') &&
+          !noteLower.includes('paid')
+        ) {
+          newNote = `Yêu cầu quy đổi ${cashout.pointsRedeemed} điểm thưởng (Mã: ${cashout.redemptionCode}) - Đã thanh toán thành công.`;
+        } else if (
+          cashout.status === 'APPROVED' &&
+          !noteLower.includes('phê duyệt') &&
+          !noteLower.includes('approved')
+        ) {
+          newNote = `Yêu cầu quy đổi ${cashout.pointsRedeemed} điểm thưởng (Mã: ${cashout.redemptionCode}) - Đã phê duyệt.`;
+        } else if (
+          cashout.status === 'REJECTED' &&
+          !noteLower.includes('từ chối') &&
+          !noteLower.includes('rejected')
+        ) {
+          newNote = `Yêu cầu quy đổi ${cashout.pointsRedeemed} điểm thưởng (Mã: ${cashout.redemptionCode}) - Bị từ chối.`;
+        } else if (
+          cashout.status === 'FAILED' &&
+          !noteLower.includes('thất bại') &&
+          !noteLower.includes('failed')
+        ) {
+          newNote = `Yêu cầu quy đổi ${cashout.pointsRedeemed} điểm thưởng (Mã: ${cashout.redemptionCode}) - Thất bại/Lỗi.`;
+        }
+
+        if (newNote) {
+          entry.note = newNote;
+          await this.ledgerModel
+            .updateOne({ _id: entry._id }, { $set: { note: newNote } })
+            .exec();
+        }
+      }
+    } catch {
+      // Bỏ qua lỗi trong quá trình tự đồng bộ dữ liệu cũ
+    }
+  }
+
   async findByUser(userId: string, page = 1, limit = 20) {
     const filter = { userId: this.buildUserIdFilter(userId) };
     const [data, total] = await Promise.all([
@@ -265,6 +326,9 @@ export class RewardPointLedgerService {
         .exec(),
       this.ledgerModel.countDocuments(filter),
     ]);
+
+    await this.syncRedemptionNotes(data);
+
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
@@ -282,6 +346,9 @@ export class RewardPointLedgerService {
         .exec(),
       this.ledgerModel.countDocuments(),
     ]);
+
+    await this.syncRedemptionNotes(data);
+
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },

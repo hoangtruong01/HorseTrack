@@ -134,6 +134,12 @@ export class WalletService {
             LedgerSourceType.REDEMPTION,
             `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã thanh toán thành công.`,
           );
+        } else if (status === CashoutStatus.APPROVED) {
+          await this.ledgerService.updateNote(
+            String(request._id),
+            LedgerSourceType.REDEMPTION,
+            `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã phê duyệt.`,
+          );
         } else if (status === CashoutStatus.REJECTED) {
           await this.ledgerService.updateNote(
             String(request._id),
@@ -173,6 +179,11 @@ export class WalletService {
 
         if (status === CashoutStatus.APPROVED) {
           request.approvedBy = new Types.ObjectId(handlerId);
+          await this.transactionModel.findOneAndUpdate(
+            { cashoutRequestId: request._id },
+            { status: TransactionStatus.SUCCESS },
+            { session },
+          );
         } else if (status === CashoutStatus.PAID) {
           request.paidBy = new Types.ObjectId(handlerId);
           request.paidAt = new Date();
