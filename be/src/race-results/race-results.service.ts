@@ -417,7 +417,9 @@ export class RaceResultsService {
     });
 
     await this.applyViolationsToResults(dto.raceId);
-    return this.resultModel.findById(result._id).exec() as unknown as RaceResultDocument;
+    return this.resultModel
+      .findById(result._id)
+      .exec() as unknown as RaceResultDocument;
   }
 
   async findByRace(raceId: string, user?: JwtUser) {
@@ -567,30 +569,22 @@ export class RaceResultsService {
           result.outcome === RaceResultOutcome.FINISHED && result.rank
             ? (prizeByRank[result.rank] ?? 0)
             : 0;
-        return this.resultModel.findByIdAndUpdate(
-          result._id,
-          {
-            $set: {
-              status: RaceResultStatus.PUBLISHED,
-              prizeAmount,
-              publishedBy,
-              publishedAt: now,
-            },
+        return this.resultModel.findByIdAndUpdate(result._id, {
+          $set: {
+            status: RaceResultStatus.PUBLISHED,
+            prizeAmount,
+            publishedBy,
+            publishedAt: now,
           },
-        );
+        });
       }),
     );
 
-    await this.racesService.setStatus(
-      raceId,
-      RaceStatus.RESULT_PUBLISHED,
-    );
+    await this.racesService.setStatus(raceId, RaceStatus.RESULT_PUBLISHED);
 
     await this.prizesService.createPrizesForRace(raceId);
 
-    notifyIntents = await this.predictionsService.payoutBetsForRace(
-      raceId,
-    );
+    notifyIntents = await this.predictionsService.payoutBetsForRace(raceId);
 
     for (const result of results) {
       const pts = result.points ?? 0;
@@ -849,7 +843,9 @@ export class RaceResultsService {
 
     const saved = await result.save();
     await this.applyViolationsToResults(String(saved.raceId));
-    return this.resultModel.findById(id).exec() as unknown as RaceResultDocument;
+    return this.resultModel
+      .findById(id)
+      .exec() as unknown as RaceResultDocument;
   }
 
   async bulkSave(

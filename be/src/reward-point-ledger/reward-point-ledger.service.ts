@@ -18,6 +18,12 @@ export interface LedgerParams {
   session?: ClientSession;
 }
 
+interface CashoutLookupDoc {
+  status?: string;
+  pointsRedeemed?: number;
+  redemptionCode?: string;
+}
+
 @Injectable()
 export class RewardPointLedgerService {
   constructor(
@@ -267,40 +273,49 @@ export class RewardPointLedgerService {
     if (redemptionEntries.length === 0) return;
 
     try {
-      const CashoutModel = this.connection.models['CashoutRequest'];
+      const CashoutModel = this.connection.models[
+        'CashoutRequest'
+      ] as unknown as Model<CashoutLookupDoc> | undefined;
       if (!CashoutModel) return;
 
       for (const entry of redemptionEntries) {
-        const cashout = await CashoutModel.findById(entry.sourceId).exec();
+        const cashout: CashoutLookupDoc | null = await CashoutModel.findById(
+          entry.sourceId,
+        )
+          .lean()
+          .exec();
         if (!cashout) continue;
 
         let newNote: string | null = null;
         const noteLower = entry.note?.toLowerCase() || '';
+        const status = cashout.status;
+        const pointsRedeemed = cashout.pointsRedeemed ?? 0;
+        const redemptionCode = cashout.redemptionCode ?? '';
 
         if (
-          cashout.status === 'PAID' &&
+          status === 'PAID' &&
           !noteLower.includes('thành công') &&
           !noteLower.includes('paid')
         ) {
-          newNote = `Yêu cầu quy đổi ${cashout.pointsRedeemed} điểm thưởng (Mã: ${cashout.redemptionCode}) - Đã thanh toán thành công.`;
+          newNote = `Yêu cầu quy đổi ${pointsRedeemed} điểm thưởng (Mã: ${redemptionCode}) - Đã thanh toán thành công.`;
         } else if (
-          cashout.status === 'APPROVED' &&
+          status === 'APPROVED' &&
           !noteLower.includes('phê duyệt') &&
           !noteLower.includes('approved')
         ) {
-          newNote = `Yêu cầu quy đổi ${cashout.pointsRedeemed} điểm thưởng (Mã: ${cashout.redemptionCode}) - Đã phê duyệt.`;
+          newNote = `Yêu cầu quy đổi ${pointsRedeemed} điểm thưởng (Mã: ${redemptionCode}) - Đã phê duyệt.`;
         } else if (
-          cashout.status === 'REJECTED' &&
+          status === 'REJECTED' &&
           !noteLower.includes('từ chối') &&
           !noteLower.includes('rejected')
         ) {
-          newNote = `Yêu cầu quy đổi ${cashout.pointsRedeemed} điểm thưởng (Mã: ${cashout.redemptionCode}) - Bị từ chối.`;
+          newNote = `Yêu cầu quy đổi ${pointsRedeemed} điểm thưởng (Mã: ${redemptionCode}) - Bị từ chối.`;
         } else if (
-          cashout.status === 'FAILED' &&
+          status === 'FAILED' &&
           !noteLower.includes('thất bại') &&
           !noteLower.includes('failed')
         ) {
-          newNote = `Yêu cầu quy đổi ${cashout.pointsRedeemed} điểm thưởng (Mã: ${cashout.redemptionCode}) - Thất bại/Lỗi.`;
+          newNote = `Yêu cầu quy đổi ${pointsRedeemed} điểm thưởng (Mã: ${redemptionCode}) - Thất bại/Lỗi.`;
         }
 
         if (newNote) {

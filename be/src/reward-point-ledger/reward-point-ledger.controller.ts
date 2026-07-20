@@ -25,11 +25,11 @@ export class RewardPointLedgerController {
 
   @Get('my-history')
   @ApiOperation({ summary: 'Get my point ledger history' })
-  getMyHistory(
+  async getMyHistory(
     @CurrentUser() user: JwtUser,
     @Query() pagination: PaginationDto,
   ) {
-    return this.ledgerService.findByUser(
+    return await this.ledgerService.findByUser(
       user.id,
       pagination.page,
       pagination.limit,
@@ -40,7 +40,7 @@ export class RewardPointLedgerController {
   @UseGuards(RolesGuard)
   @Roles(RoleName.ADMIN)
   @ApiOperation({ summary: 'List all ledger entries (Admin)' })
-  findAll(@Query() pagination: PaginationDto) {
-    return this.ledgerService.findAll(pagination.page, pagination.limit);
+  async findAll(@Query() pagination: PaginationDto) {
+    return await this.ledgerService.findAll(pagination.page, pagination.limit);
   }
 }

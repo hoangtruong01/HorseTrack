@@ -195,12 +195,8 @@ describe('RaceResultsService', () => {
         RaceStatus.RESULT_PUBLISHED,
       );
 
-      expect(prizesService.createPrizesForRace).toHaveBeenCalledWith(
-        raceId,
-      );
-      expect(predictionsService.payoutBetsForRace).toHaveBeenCalledWith(
-        raceId,
-      );
+      expect(prizesService.createPrizesForRace).toHaveBeenCalledWith(raceId);
+      expect(predictionsService.payoutBetsForRace).toHaveBeenCalledWith(raceId);
 
       // side-effects sau commit
       expect(racesService.syncTournamentStatus).toHaveBeenCalledWith(raceId);

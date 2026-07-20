@@ -50,10 +50,7 @@ export class StrengthScoreService {
 
       // Tổng thang ~0–98 (attr tối đa 0.8 nên chỉ đạt 8/10).
       let score =
-        winRate * 40 +
-        recentForm * 40 +
-        jockeyScore * 10 +
-        horseAttrScore * 10;
+        winRate * 40 + recentForm * 40 + jockeyScore * 10 + horseAttrScore * 10;
 
       // Phạt: đang hồi phục và/hoặc nghỉ chưa đủ; có thể cộng dồn.
       if (hasHealthRisk) score *= 0.85;
