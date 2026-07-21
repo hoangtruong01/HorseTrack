@@ -63,7 +63,8 @@ export class RegisterDto {
   @IsArray()
   @IsIn(SELF_REGISTER_ROLES, {
     each: true,
-    message: 'Self-registration only allows spectator, owner, jockey, or referee roles',
+    message:
+      'Self-registration only allows spectator, owner, jockey, or referee roles',
   })
   roles?: RoleName[];
 }

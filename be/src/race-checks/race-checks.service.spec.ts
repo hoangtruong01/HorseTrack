@@ -26,7 +26,9 @@ describe('RaceChecksService', () => {
 
   beforeEach(async () => {
     checkModel = { findById: jest.fn() };
-    assignmentModel = { findOne: jest.fn().mockResolvedValue({ _id: 'assignmentId' }) };
+    assignmentModel = {
+      findOne: jest.fn().mockResolvedValue({ _id: 'assignmentId' }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

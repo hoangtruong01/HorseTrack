@@ -140,7 +140,7 @@ export class RacesService {
         .populate('createdBy', 'fullName')
         .skip((page - 1) * limit)
         .limit(limit)
-        .sort({ startTime: 1 })
+        .sort({ startTime: -1, createdAt: -1 })
         .exec(),
       this.raceModel.countDocuments(filter),
     ]);
@@ -162,7 +162,7 @@ export class RacesService {
         .populate('createdBy', 'fullName')
         .skip((page - 1) * limit)
         .limit(limit)
-        .sort({ startTime: 1 })
+        .sort({ startTime: -1, createdAt: -1 })
         .exec(),
       this.raceModel.countDocuments(filter),
     ]);

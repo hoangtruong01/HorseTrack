@@ -134,6 +134,12 @@ export class WalletService {
             LedgerSourceType.REDEMPTION,
             `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã thanh toán thành công.`,
           );
+        } else if (status === CashoutStatus.APPROVED) {
+          await this.ledgerService.updateNote(
+            String(request._id),
+            LedgerSourceType.REDEMPTION,
+            `Yêu cầu quy đổi ${request.pointsRedeemed} điểm thưởng (Mã: ${request.redemptionCode}) - Đã phê duyệt.`,
+          );
         } else if (status === CashoutStatus.REJECTED) {
           await this.ledgerService.updateNote(
             String(request._id),

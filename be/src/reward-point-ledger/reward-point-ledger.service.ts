@@ -18,6 +18,12 @@ export interface LedgerParams {
   session?: ClientSession;
 }
 
+interface CashoutLookupDoc {
+  status?: string;
+  pointsRedeemed?: number;
+  redemptionCode?: string;
+}
+
 @Injectable()
 export class RewardPointLedgerService {
   constructor(
@@ -144,9 +150,15 @@ export class RewardPointLedgerService {
     sourceType: LedgerSourceType,
     newNote: string,
   ): Promise<void> {
+    const objectId = Types.ObjectId.isValid(sourceId)
+      ? new Types.ObjectId(sourceId)
+      : sourceId;
     await this.ledgerModel
       .findOneAndUpdate(
-        { sourceId: new Types.ObjectId(sourceId), sourceType },
+        {
+          sourceId: { $in: [sourceId, objectId] },
+          sourceType,
+        },
         { $set: { note: newNote } },
       )
       .exec();
@@ -254,6 +266,70 @@ export class RewardPointLedgerService {
     return entry;
   }
 
+  private async syncRedemptionNotes(entries: RewardPointLedgerDocument[]) {
+    const redemptionEntries = entries.filter(
+      (e) => e.sourceType === LedgerSourceType.REDEMPTION && e.sourceId,
+    );
+    if (redemptionEntries.length === 0) return;
+
+    try {
+      const CashoutModel = this.connection.models[
+        'CashoutRequest'
+      ] as unknown as Model<CashoutLookupDoc> | undefined;
+      if (!CashoutModel) return;
+
+      for (const entry of redemptionEntries) {
+        const cashout: CashoutLookupDoc | null = await CashoutModel.findById(
+          entry.sourceId,
+        )
+          .lean()
+          .exec();
+        if (!cashout) continue;
+
+        let newNote: string | null = null;
+        const noteLower = entry.note?.toLowerCase() || '';
+        const status = cashout.status;
+        const pointsRedeemed = cashout.pointsRedeemed ?? 0;
+        const redemptionCode = cashout.redemptionCode ?? '';
+
+        if (
+          status === 'PAID' &&
+          !noteLower.includes('thành công') &&
+          !noteLower.includes('paid')
+        ) {
+          newNote = `Yêu cầu quy đổi ${pointsRedeemed} điểm thưởng (Mã: ${redemptionCode}) - Đã thanh toán thành công.`;
+        } else if (
+          status === 'APPROVED' &&
+          !noteLower.includes('phê duyệt') &&
+          !noteLower.includes('approved')
+        ) {
+          newNote = `Yêu cầu quy đổi ${pointsRedeemed} điểm thưởng (Mã: ${redemptionCode}) - Đã phê duyệt.`;
+        } else if (
+          status === 'REJECTED' &&
+          !noteLower.includes('từ chối') &&
+          !noteLower.includes('rejected')
+        ) {
+          newNote = `Yêu cầu quy đổi ${pointsRedeemed} điểm thưởng (Mã: ${redemptionCode}) - Bị từ chối.`;
+        } else if (
+          status === 'FAILED' &&
+          !noteLower.includes('thất bại') &&
+          !noteLower.includes('failed')
+        ) {
+          newNote = `Yêu cầu quy đổi ${pointsRedeemed} điểm thưởng (Mã: ${redemptionCode}) - Thất bại/Lỗi.`;
+        }
+
+        if (newNote) {
+          entry.note = newNote;
+          await this.ledgerModel
+            .updateOne({ _id: entry._id }, { $set: { note: newNote } })
+            .exec();
+        }
+      }
+    } catch {
+      // Bỏ qua lỗi trong quá trình tự đồng bộ dữ liệu cũ
+    }
+  }
+
   async findByUser(userId: string, page = 1, limit = 20) {
     const filter = { userId: this.buildUserIdFilter(userId) };
     const [data, total] = await Promise.all([
@@ -265,6 +341,9 @@ export class RewardPointLedgerService {
         .exec(),
       this.ledgerModel.countDocuments(filter),
     ]);
+
+    await this.syncRedemptionNotes(data);
+
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
@@ -282,6 +361,9 @@ export class RewardPointLedgerService {
         .exec(),
       this.ledgerModel.countDocuments(),
     ]);
+
+    await this.syncRedemptionNotes(data);
+
     return {
       data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
