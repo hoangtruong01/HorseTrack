@@ -532,6 +532,61 @@ export class RaceResultsService {
     return { message: 'Results confirmed by referee' };
   }
 
+  async rejectResultsForRace(raceId: string, rejectedBy: string) {
+    const race = await this.racesService.findOne(raceId);
+
+    if (race.status !== RaceStatus.FINISHED) {
+      throw new BadRequestException(
+        'Chỉ có thể từ chối kết quả khi cuộc đua ở trạng thái FINISHED',
+      );
+    }
+
+    const results = await this.resultModel.find({
+      raceId: new Types.ObjectId(raceId),
+    });
+
+    if (results.length === 0) {
+      throw new BadRequestException(
+        'Không có kết quả nào để từ chối cho cuộc đua này',
+      );
+    }
+
+    // Không cho reject nếu đã PUBLISHED
+    const hasPublished = results.some(
+      (r) => r.status === RaceResultStatus.PUBLISHED,
+    );
+    if (hasPublished) {
+      throw new BadRequestException(
+        'Không thể từ chối kết quả đã được công bố (PUBLISHED)',
+      );
+    }
+
+    // Xóa tất cả kết quả (DRAFT hoặc CONFIRMED)
+    await this.resultModel.deleteMany({
+      raceId: new Types.ObjectId(raceId),
+    });
+
+    // Chuyển race về READY (sẵn sàng) để trọng tài có thể chạy lại
+    await this.racesService.updateStatus(raceId, RaceStatus.READY);
+
+    await this.auditLogsService.log({
+      actorId: rejectedBy,
+      action: 'race_result.reject',
+      entityType: 'Race',
+      entityId: raceId,
+      after: {
+        status: 'READY',
+        deletedResults: results.length,
+        reason: 'Admin rejected results for re-run',
+      },
+    });
+
+    return {
+      message: `Đã từ chối ${results.length} kết quả. Cuộc đua đã chuyển về trạng thái READY (sẵn sàng) để chạy lại.`,
+      deletedCount: results.length,
+    };
+  }
+
   async publishByRace(raceId: string, publishedBy: string) {
     const race = await this.racesService.findOne(raceId);
 

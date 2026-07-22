@@ -97,6 +97,21 @@ export class RaceResultsController {
     return this.raceResultsService.publishByRace(raceId, user.id);
   }
 
+  @Patch('race/:raceId/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Reject results for a race and revert to LIVE for re-run (Admin)',
+  })
+  reject(
+    @Param('raceId', ParseObjectIdPipe) raceId: string,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.raceResultsService.rejectResultsForRace(raceId, user.id);
+  }
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.REFEREE, RoleName.ADMIN)
