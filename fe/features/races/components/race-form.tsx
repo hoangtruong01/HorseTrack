@@ -370,7 +370,7 @@ export function RaceForm() {
         <div className="grid gap-2">
           <Label className="inline-flex items-center gap-2">
             <Milestone className="size-4 text-primary" />
-            Cự ly thi đấu (mét) <span className="text-primary">*</span>
+            Cự ly thi đấu (m) <span className="text-primary">*</span>
           </Label>
           <Input
             type="number"

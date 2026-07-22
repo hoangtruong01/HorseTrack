@@ -20,6 +20,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { racesApi, raceChecksApi, raceResultsApi, raceViolationsApi, type RaceResultItem, type ViolationItem } from "@/lib/api-client";
+import { RaceSimulationModal } from "@/components/race-simulation-modal";
 
 // Types
 type Race = {
@@ -248,6 +249,8 @@ export default function RefereeResultEntryPage() {
         throw new Error(resData.message || "Lỗi chạy giả lập");
       }
 
+      // Delay nhẹ để animation kết thúc mượt trước khi đóng modal
+      await new Promise(resolve => setTimeout(resolve, 800));
       toast.success("Giả lập cuộc đua thành công! Ranks và chỉ số đã tự động kết xuất.");
       await fetchData();
     } catch (err) {
@@ -825,6 +828,15 @@ export default function RefereeResultEntryPage() {
           </div>
         )}
       </section>
+      {/* Horse Racing Animation Modal */}
+      <RaceSimulationModal
+        isOpen={isSimulating}
+        horses={horses.map((h) => ({
+          id: h.horseId?._id || "",
+          name: h.horseId?.name || "Chiến mã",
+          breed: h.horseId?.breed,
+        }))}
+      />
     </main>
   );
 }
