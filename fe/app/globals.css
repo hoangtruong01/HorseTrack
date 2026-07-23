@@ -366,3 +366,71 @@
 .animate-spin-slow {
   animation: spinSlow 20s linear infinite;
 }
+
+/* ═══════════════════════════════════════════════════════
+   HORSE RACING SIMULATION MODAL ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes raceModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes raceModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Hiệu ứng nảy nhẹ khi ngựa phi */
+@keyframes horseGallop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Ngựa chạy từ trái → phải */
+@keyframes horseRun {
+  0% { left: 0%; }
+  15% { left: 5%; }
+  85% { left: calc(100% - 56px); }
+  100% { left: calc(100% - 40px); }
+}
+
+/* Vệt chạy phía sau ngựa */
+@keyframes horseTrailExpand {
+  0% { width: 0%; }
+  100% { width: calc(100% - 40px); }
+}
+
+/* Bụi phía sau ngựa */
+@keyframes horseDustParticle {
+  0% { opacity: 0.6; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-12px, -4px) scale(0.3); }
+}
+
+.race-modal-backdrop {
+  animation: raceModalFadeIn 0.3s ease-out;
+}
+
+.race-modal-content {
+  animation: raceModalSlideUp 0.4s ease-out;
+}
+
+.horse-sprite-anim {
+  animation:
+    horseGallop 0.3s ease-in-out infinite,
+    horseRun var(--horse-duration) ease-in-out forwards;
+}
+
+.horse-trail-anim {
+  animation: horseTrailExpand var(--horse-duration) ease-in-out forwards;
+}
+
+.horse-dust-anim {
+  animation: horseDustParticle 0.8s ease-out infinite;
+}

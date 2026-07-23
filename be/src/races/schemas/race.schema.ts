@@ -23,7 +23,7 @@ export const RACE_STATUS_FLOW: Record<RaceStatus, RaceStatus[]> = {
     RaceStatus.CANCELLED,
   ],
   [RaceStatus.LIVE]: [RaceStatus.FINISHED, RaceStatus.CANCELLED],
-  [RaceStatus.FINISHED]: [RaceStatus.RESULT_PUBLISHED, RaceStatus.CANCELLED],
+  [RaceStatus.FINISHED]: [RaceStatus.RESULT_PUBLISHED, RaceStatus.READY, RaceStatus.CANCELLED],
   [RaceStatus.RESULT_PUBLISHED]: [],
   [RaceStatus.CANCELLED]: [],
 };
