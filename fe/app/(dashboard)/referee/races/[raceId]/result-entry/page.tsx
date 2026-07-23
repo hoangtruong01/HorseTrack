@@ -558,7 +558,7 @@ export default function RefereeResultEntryPage() {
                           </strong>
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">"{v.description}"</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">&quot;{v.description}&quot;</p>
                     </div>
 
                     <div className="h-px bg-border" />

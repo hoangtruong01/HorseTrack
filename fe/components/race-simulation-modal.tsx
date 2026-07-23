@@ -61,13 +61,12 @@ export function RaceSimulationModal({
 
   // Generate random race durations for each horse (visual only)
   const horseDurations = useMemo(() => {
-    return horses.map(() => {
+    return horses.map((_, index) => {
       const base = 3.5;
-      const variance = Math.random() * 2;
-      return base + variance; // 3.5s – 5.5s
+      const pseudoRandom = ((index * 37 + 13) % 100) / 100;
+      return base + pseudoRandom * 2; // 3.5s – 5.5s
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [horses.length, isOpen]);
+  }, [horses]);
 
   // Fake progress bar
   useEffect(() => {

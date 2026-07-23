@@ -67,8 +67,8 @@ export default function SpectatorResultsPage() {
       try {
         setIsLoadingTournaments(true);
         const res = await tournamentsApi.list({ limit: 100 });
-        const fetchedTournaments = (res.data || []).filter((t: any) => t.status !== "DRAFT");
-        const mapped = fetchedTournaments.map((t: any) => ({
+        const fetchedTournaments = (res.data || []).filter((t: { status?: string }) => t.status !== "DRAFT");
+        const mapped = fetchedTournaments.map((t: { id?: string; _id?: string }) => ({
           ...t,
           id: t.id || t._id,
         }));
@@ -92,14 +92,14 @@ export default function SpectatorResultsPage() {
       return;
     }
 
-    const tId = selectedTournament.id || (selectedTournament as any)._id;
+    const tId = selectedTournament.id || (selectedTournament as { _id?: string })._id || '';
 
     async function loadResults() {
       try {
         setIsLoadingResults(true);
         setError(null);
         const data = await raceResultsApi.listByTournament(tId);
-        const rawResults: RaceResultItem[] = (data || []).map((item: any) => ({
+        const rawResults: RaceResultItem[] = (data || []).map((item: { id?: string; _id?: string }) => ({
           ...item,
           id: item.id || item._id,
         }));
