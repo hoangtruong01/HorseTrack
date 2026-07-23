@@ -63,14 +63,6 @@ export default function RefereeJudging() {
       {/* Segmented Control */}
       <View style={styles.segmentContainer}>
         <TouchableOpacity
-          style={[styles.segmentBtn, activeTab === 'results' && styles.segmentBtnActive]}
-          onPress={() => setActiveTab('results')}
-        >
-          <Text style={[styles.segmentTxt, activeTab === 'results' && styles.segmentTxtActive]}>
-            KẾT QUẢ TRẬN ĐUA
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
           style={[styles.segmentBtn, activeTab === 'violations' && styles.segmentBtnActive]}
           onPress={() => setActiveTab('violations')}
         >
@@ -78,8 +70,15 @@ export default function RefereeJudging() {
             GHI NHẬN VI PHẠM
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.segmentBtn, activeTab === 'results' && styles.segmentBtnActive]}
+          onPress={() => setActiveTab('results')}
+        >
+          <Text style={[styles.segmentTxt, activeTab === 'results' && styles.segmentTxtActive]}>
+            KẾT QUẢ TRẬN ĐUA
+          </Text>
+        </TouchableOpacity>
       </View>
-
       {/* Main Content */}
       <View style={styles.content}>
         {activeTab === 'results' ? <RefereeResults nested /> : <RefereeViolations nested />}

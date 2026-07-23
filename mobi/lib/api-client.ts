@@ -284,6 +284,8 @@ export const racesApi = {
   get: (id: string) => apiFetch<RaceItem>(`/races/${id}`),
   updateStatus: (id: string, status: string) =>
     apiFetch(`/races/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  updateConditions: (id: string, dto: { trackCondition?: string; weatherSnapshot?: string }) =>
+    apiFetch(`/races/${id}/conditions`, { method: 'PATCH', body: JSON.stringify(dto) }),
 };
 
 export const refereeAssignmentsApi = {
@@ -388,6 +390,7 @@ export const raceResultsApi = {
 
 export const raceChecksApi = {
   listByRace: (raceId: string) => apiFetch<any>(`/race-checks/race/${raceId}`),
+  initialize: (raceId: string) => apiFetch<any>(`/race-checks/race/${raceId}/initialize`, { method: 'POST' }),
   update: (
     checkId: string,
     dto: {
