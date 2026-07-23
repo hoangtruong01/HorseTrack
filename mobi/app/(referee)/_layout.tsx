@@ -30,56 +30,53 @@ export default function RefereeLayout() {
       pathname === '/profile' ||
       pathname.startsWith('/notifications') ||
       pathname.startsWith('/assignments') ||
-      pathname.startsWith('/pre-race') ||
-      pathname.startsWith('/judging') ||
-      pathname.startsWith('/violations') ||
-      pathname.startsWith('/results')
+      pathname.startsWith('/leaderboard')
     ) {
       setLocalPath(pathname);
     }
   }, [pathname]);
 
   React.useEffect(() => {
+    let isMounted = true;
     const fetchUnreadCount = async () => {
       try {
         const res = await notificationsApi.list();
         const data = (res as any).data || res || [];
         const count = data.filter((n: any) => !n.isRead).length;
-        setUnreadCount(count);
+        if (isMounted) {
+          setUnreadCount(count);
+        }
       } catch (err) {
         // ignore
       }
     };
-    
+
     fetchUnreadCount();
-    
+
     const interval = setInterval(fetchUnreadCount, 5000);
-    return () => clearInterval(interval);
-  }, [pathname]);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Tính toán headerTitle dựa vào localPath thay vì pathname
   let headerTitle = 'REFEREE DASHBOARD';
   if (localPath.includes('/assignments')) headerTitle = 'NHIỆM VỤ PHÂN CÔNG';
-  else if (localPath.includes('/pre-race')) headerTitle = 'KIỂM TRA TRẬN ĐUA';
-  else if (localPath.includes('/judging')) headerTitle = 'THẨM ĐỊNH KẾT QUẢ';
+  else if (localPath.includes('/leaderboard')) headerTitle = 'KẾT QUẢ XẾP HẠNG';
   else if (localPath.includes('/wallet')) headerTitle = 'VÍ ĐIỆN TỬ';
   else if (localPath.includes('/profile')) headerTitle = 'CÁ NHÂN';
 
   return (
     <Tabs
       tabBar={(props) => <DockTabBar {...props} />}
-      screenOptions={{ ...dockOptions }}
+      screenOptions={{ ...dockOptions, headerShown: false }}
     >
       <Tabs.Screen name="index" options={{ title: 'Trang chủ', headerTitle: 'REFEREE DASHBOARD', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="home" color={color} /> }} />
       <Tabs.Screen name="assignments" options={{ title: 'Phân công', headerTitle: 'NHIỆM VỤ PHÂN CÔNG', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="assignment-turned-in" color={color} /> }} />
-      <Tabs.Screen name="judging" options={{ title: 'Thẩm định', headerTitle: 'THẨM ĐỊNH KẾT QUẢ', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="gavel" color={color} /> }} />
-      <Tabs.Screen name="pre-race" options={{ title: 'Kiểm tra', headerTitle: 'KIỂM TRA TRẬN ĐUA', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="checklist" color={color} /> }} />
+      <Tabs.Screen name="leaderboard" options={{ title: 'Kết quả', headerTitle: 'KẾT QUẢ XẾP HẠNG', tabBarIcon: ({ color }) => <MaterialIcons size={24} name="emoji-events" color={color} /> }} />
       <Tabs.Screen name="notifications" options={{ title: 'Thông báo', headerTitle: 'THÔNG BÁO', tabBarIcon: ({ focused }) => <DockNotificationIcon focused={focused} count={unreadCount} /> }} />
-      <Tabs.Screen name="profile" options={{ headerShown: false, title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} /> }} />
-
-      {/* Ẩn các trang không hiện trong tab bar */}
-      <Tabs.Screen name="violations" options={{ href: null, tabBarItemStyle: { display: 'none' }, title: 'Vi phạm', headerTitle: 'GHI NHẬN VI PHẠM' }} />
-      <Tabs.Screen name="results" options={{ href: null, tabBarItemStyle: { display: 'none' }, title: 'Kết quả', headerTitle: 'KẾT QUẢ TRẬN ĐUA' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerTitle: 'CÁ NHÂN', tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} /> }} />
     </Tabs>
   );
 }
