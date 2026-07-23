@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, master ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     name: Backend CI
@@ -27,6 +31,9 @@ jobs:
       - name: Test
         working-directory: be
         run: npm run test
+      - name: Build
+        working-directory: be
+        run: npm run build
 
   frontend:
     name: Frontend CI
@@ -42,6 +49,9 @@ jobs:
       - name: Install dependencies
         working-directory: fe
         run: npm ci
+      - name: Lint
+        working-directory: fe
+        run: npm run lint
       - name: Build
         working-directory: fe
         run: npm run build
@@ -63,3 +73,6 @@ jobs:
       - name: Lint
         working-directory: mobi
         run: npm run lint
+      - name: Typecheck
+        working-directory: mobi
+        run: npx tsc --noEmit
