@@ -22,25 +22,11 @@ interface RaceResultItem {
   outcome: string;
   incident: string;
   points?: number;
-  prizeAmount: number;
+  prizeAmount?: number;
   note?: string;
-  horseId?: {
-    id: string;
-    _id: string;
-    name: string;
-    breed?: string;
-  };
-  jockeyUserId?: {
-    id: string;
-    _id: string;
-    fullName: string;
-  };
-  raceId: {
-    id: string;
-    _id: string;
-    name: string;
-    raceNumber: number;
-  };
+  horseId?: any;
+  jockeyUserId?: any;
+  raceId?: any;
 }
 
 interface RaceGroup {
@@ -67,10 +53,10 @@ export default function SpectatorResultsPage() {
       try {
         setIsLoadingTournaments(true);
         const res = await tournamentsApi.list({ limit: 100 });
-        const fetchedTournaments = (res.data || []).filter((t: { status?: string }) => t.status !== "DRAFT");
-        const mapped = fetchedTournaments.map((t: { id?: string; _id?: string }) => ({
+        const fetchedTournaments = (res.data || []).filter((t) => t.status !== "DRAFT");
+        const mapped: Tournament[] = fetchedTournaments.map((t) => ({
           ...t,
-          id: t.id || t._id,
+          id: t._id,
         }));
         setTournaments(mapped);
       } catch (err) {
@@ -92,16 +78,16 @@ export default function SpectatorResultsPage() {
       return;
     }
 
-    const tId = selectedTournament.id || (selectedTournament as { _id?: string })._id || '';
+    const tId = selectedTournament.id || (selectedTournament as unknown as { _id?: string })._id || '';
 
     async function loadResults() {
       try {
         setIsLoadingResults(true);
         setError(null);
         const data = await raceResultsApi.listByTournament(tId);
-        const rawResults: RaceResultItem[] = (data || []).map((item: { id?: string; _id?: string }) => ({
+        const rawResults: RaceResultItem[] = (data || []).map((item) => ({
           ...item,
-          id: item.id || item._id,
+          id: (item as any).id || item._id || "",
         }));
         setResults(rawResults);
 

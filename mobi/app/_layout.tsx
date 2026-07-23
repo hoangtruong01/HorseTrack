@@ -55,8 +55,9 @@ function RootLayoutContent() {
   useEffect(() => {
     if (!isMounted || isLoading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
-    const topSegment = segments[0];
+    const segs = segments as string[];
+    const inAuthGroup = segs[0] === '(auth)';
+    const topSegment = segs[0];
 
     const timer = setTimeout(() => {
       if (!user && !inAuthGroup) {
@@ -77,7 +78,7 @@ function RootLayoutContent() {
           } else if (requiredRole === 'owner') {
             hasAccess = userRoles.includes('owner') || userRoles.includes('horse_owner');
           } else if (requiredRole === 'spectator' || requiredRole === 'tabs') {
-            const isProfileRoute = segments.length > 1 && segments[1] === 'profile';
+            const isProfileRoute = segs.length > 1 && segs[1] === 'profile';
             if (isProfileRoute) {
               hasAccess = true;
             } else {
