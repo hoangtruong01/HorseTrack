@@ -24,9 +24,23 @@ interface RaceResultItem {
   points?: number;
   prizeAmount?: number;
   note?: string;
-  horseId?: unknown;
-  jockeyUserId?: unknown;
-  raceId?: unknown;
+  horseId?: {
+    id?: string;
+    _id?: string;
+    name?: string;
+    breed?: string;
+  };
+  jockeyUserId?: {
+    id?: string;
+    _id?: string;
+    fullName?: string;
+  };
+  raceId?: {
+    id?: string;
+    _id?: string;
+    name?: string;
+    raceNumber?: number;
+  };
 }
 
 interface RaceGroup {
@@ -39,7 +53,7 @@ interface RaceGroup {
 export default function SpectatorResultsPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
-  const [, setResults] = useState<RaceResultItem[]>([]);
+  const [results, setResults] = useState<RaceResultItem[]>([]);
   const [raceGroups, setRaceGroups] = useState<RaceGroup[]>([]);
   const [selectedRaceGroup, setSelectedRaceGroup] = useState<RaceGroup | null>(null);
   const [isLoadingTournaments, setIsLoadingTournaments] = useState(true);
@@ -85,10 +99,13 @@ export default function SpectatorResultsPage() {
         setIsLoadingResults(true);
         setError(null);
         const data = await raceResultsApi.listByTournament(tId);
-        const rawResults: RaceResultItem[] = (data || []).map((item) => ({
-          ...item,
-          id: (item as unknown as { id?: string; _id: string }).id || item._id || "",
-        }));
+        const rawResults: RaceResultItem[] = (data as unknown as RaceResultItem[] || []).map((item) => {
+          const obj = item as unknown as { id?: string; _id?: string };
+          return {
+            ...item,
+            id: obj.id || obj._id || "",
+          };
+        });
         setResults(rawResults);
 
         // Group by raceId
@@ -97,11 +114,12 @@ export default function SpectatorResultsPage() {
           const raceObj = item.raceId;
           if (!raceObj) return;
           const rId = raceObj.id || raceObj._id;
+          if (!rId) return;
           if (!groups[rId]) {
             groups[rId] = {
               raceId: rId,
-              name: raceObj.name,
-              raceNumber: raceObj.raceNumber,
+              name: raceObj.name || "",
+              raceNumber: raceObj.raceNumber || 0,
               results: [],
             };
           }
