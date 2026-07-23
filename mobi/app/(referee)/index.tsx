@@ -8,7 +8,6 @@ import { refereeAssignmentsApi, rankingsApi, rewardPointLedgerApi } from '@/lib/
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Stack, Tabs } from 'expo-router';
 
 // Background Pattern
 const GridBackground = ({ isDark }: { isDark: boolean }) => {
@@ -78,9 +77,6 @@ export default function RefereeHome() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }} />
-      <Tabs.Screen options={{ headerShown: false }} />
-
       <GridBackground isDark={isDark} />
 
       {/* Custom Sleek Header */}
@@ -155,10 +151,10 @@ export default function RefereeHome() {
             <ActionGrid
               columns={2}
               actions={[
-                { title: 'Phân công', subtitle: 'Xem phân công', icon: 'assignment', tone: 'brand', onPress: () => router.push('/assignments') },
-                { title: 'Kiểm tra', subtitle: 'Điểm danh ngựa', icon: 'fact-check', tone: 'brand', onPress: () => router.push('/pre-race') },
-                { title: 'Vi phạm', subtitle: 'Ghi nhận lỗi', icon: 'gavel', tone: 'brand', onPress: () => router.push('/violations') },
-                { title: 'Kết quả', subtitle: 'Công bố kết quả', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/results') },
+                { title: 'Nhiệm vụ', subtitle: 'Xem phân công', icon: 'assignment', tone: 'brand', onPress: () => router.push('/assignments') },
+                { title: 'Xếp hạng', subtitle: 'Top chiến mã', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/leaderboard') },
+                { title: 'Ví điện tử', subtitle: 'Thu nhập', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/referee/wallet') },
+                { title: 'Cá nhân', subtitle: 'Hồ sơ', icon: 'person', tone: 'brand', onPress: () => router.push('/profile') },
               ]}
             />
           </Section>

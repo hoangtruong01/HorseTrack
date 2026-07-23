@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Platform } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Platform, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { raceChecksApi, racesApi, type RaceItem } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -37,13 +37,24 @@ export default function PreRaceChecksScreen() {
   const [failNotes, setFailNotes] = useState<Record<string, string>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
+  // Conditions and status state
+  const [trackCondition, setTrackCondition] = useState('');
+  const [weatherSnapshot, setWeatherSnapshot] = useState('');
+  const [isSubmittingConditions, setIsSubmittingConditions] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
+
   const loadData = React.useCallback(async () => {
     if (!raceId) return;
     setError(null);
     try {
       // 1. Load race detail
       const raceRes = await racesApi.get(raceId);
-      if (raceRes) setRace(raceRes);
+      if (raceRes) {
+        setRace(raceRes);
+        setTrackCondition(raceRes.trackCondition || '');
+        setWeatherSnapshot(raceRes.weatherSnapshot || '');
+      }
 
       // 2. Load pre-race check items
       const checksRes = await raceChecksApi.listByRace(raceId);
@@ -78,9 +89,48 @@ export default function PreRaceChecksScreen() {
     loadData();
   };
 
+  const handleUpdateRaceStatus = async (newStatus: string) => {
+    setIsUpdatingStatus(true);
+    try {
+      await racesApi.updateStatus(raceId, newStatus);
+      Alert.alert('Thành công', `Chuyển trạng thái sang ${newStatus} thành công!`);
+      loadData();
+    } catch (err: any) {
+      Alert.alert('Lỗi', err.message || 'Không thể cập nhật trạng thái');
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleUpdateConditions = async () => {
+    setIsSubmittingConditions(true);
+    try {
+      await racesApi.updateConditions(raceId, { trackCondition, weatherSnapshot });
+      Alert.alert('Thành công', 'Cập nhật điều kiện đường đua thành công!');
+      loadData();
+    } catch (err: any) {
+      Alert.alert('Lỗi', err.message || 'Không thể cập nhật điều kiện');
+    } finally {
+      setIsSubmittingConditions(false);
+    }
+  };
+
+  const handleInitializeChecks = async () => {
+    setIsInitializing(true);
+    try {
+      await raceChecksApi.initialize(raceId);
+      Alert.alert('Thành công', 'Khởi tạo danh sách kiểm duyệt thành công!');
+      loadData();
+    } catch (err: any) {
+      Alert.alert('Lỗi', err.message || 'Lỗi khởi tạo');
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
   const handleUpdateCheck = async (checkId: string, status: 'passed' | 'failed') => {
     const notes = status === 'failed' ? failNotes[checkId] || 'Không đạt chuẩn sức khỏe' : undefined;
-    
+
     setUpdatingId(checkId);
     try {
       await raceChecksApi.update(checkId, { status, healthNote: notes, jockeyCheckedIn: true });
@@ -133,7 +183,7 @@ export default function PreRaceChecksScreen() {
         ) : (
           <View style={styles.actionsBox}>
             {item.status !== 'passed' && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.actionButton, styles.passedButton]}
                 onPress={() => handleUpdateCheck(item._id, 'passed')}
                 activeOpacity={0.8}
@@ -152,7 +202,7 @@ export default function PreRaceChecksScreen() {
                   placeholder="Lý do loại..."
                   placeholderTextColor={premiumColors.textMuted}
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.actionButton, styles.failedButton]}
                   onPress={() => handleUpdateCheck(item._id, 'failed')}
                   activeOpacity={0.8}
@@ -164,6 +214,148 @@ export default function PreRaceChecksScreen() {
             )}
           </View>
         )}
+      </View>
+    );
+  };
+
+  const renderHeader = () => {
+    if (!race) return null;
+    const allPassed = checks.length > 0 && checks.every(c => c.status === 'passed');
+
+    return (
+      <View style={{ marginBottom: 20, gap: 16 }}>
+        {/* Race Status Control Panel */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>TRẠNG THÁI CUỘC ĐUA HIỆN TẠI</Text>
+          <View style={styles.statusRow}>
+            <View style={styles.statusBadgeWrapper}>
+              <Text style={styles.statusBadgeText}>{race.status}</Text>
+            </View>
+            <Text style={styles.statusRaceName}>{race.name.toUpperCase()}</Text>
+          </View>
+
+          <View style={styles.statusActions}>
+            {race.status === 'SCHEDULED' && (
+              <TouchableOpacity
+                style={[styles.btnAction, { backgroundColor: '#EAB308' }]}
+                onPress={() => handleUpdateRaceStatus('CHECKING')}
+                disabled={isUpdatingStatus}
+              >
+                <Text style={styles.btnActionText}>MỞ ĐỢT KIỂM DUYỆT NGỰA</Text>
+              </TouchableOpacity>
+            )}
+
+            {race.status === 'CHECKING' && (
+              <TouchableOpacity
+                style={[styles.btnAction, allPassed ? { backgroundColor: premiumColors.success } : { backgroundColor: premiumColors.border }]}
+                onPress={() => handleUpdateRaceStatus('READY')}
+                disabled={isUpdatingStatus || !allPassed}
+              >
+                <Text style={[styles.btnActionText, !allPassed && { color: premiumColors.textMuted }]}>{allPassed ? 'THIẾT LẬP SẴN SÀNG' : 'CHỜ DUYỆT TẤT CẢ NGỰA'}</Text>
+              </TouchableOpacity>
+            )}
+
+            {race.status === 'READY' && (
+              <TouchableOpacity
+                style={[styles.btnAction, { backgroundColor: '#DC2626' }]}
+                onPress={() => handleUpdateRaceStatus('LIVE')}
+                disabled={isUpdatingStatus}
+              >
+                <Text style={styles.btnActionText}>XUẤT PHÁT TRẬN ĐẤU!</Text>
+              </TouchableOpacity>
+            )}
+
+            {race.status === 'LIVE' && (
+              <Text style={{ color: premiumColors.brand, fontSize: 12, fontWeight: '700' }}>
+                TRẬN ĐẤU ĐANG DIỄN RA TRỰC TIẾP.
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* Race Conditions */}
+        {race.status !== 'LIVE' && race.status !== 'FINISHED' && race.status !== 'RESULT_PUBLISHED' && race.status !== 'CANCELLED' && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>ĐIỀU KIỆN ĐƯỜNG ĐUA</Text>
+            <Text style={styles.sectionSub}>Ghi nhận tình trạng mặt đường và thời tiết trước khi xuất phát.</Text>
+
+            <View style={{ gap: 12, marginTop: 12 }}>
+              <View>
+                <Text style={styles.inputLabel}>Tình trạng mặt đường</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginTop: 4 }}>
+                  {[
+                    { label: 'Cỏ khô', value: 'Dry turf' },
+                    { label: 'Cỏ ướt', value: 'Wet turf' },
+                    { label: 'Bùn đất', value: 'Muddy' },
+                    { label: 'Nhân tạo', value: 'Synthetic' },
+                  ].map(opt => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[
+                        styles.chipButton,
+                        trackCondition === opt.value && { backgroundColor: premiumColors.brand, borderColor: premiumColors.brand }
+                      ]}
+                      onPress={() => setTrackCondition(opt.value)}
+                    >
+                      <Text style={[
+                        styles.chipText,
+                        trackCondition === opt.value && { color: '#000', fontWeight: '800' }
+                      ]}>{opt.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              <View>
+                <Text style={styles.inputLabel}>Thời tiết</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginTop: 4 }}>
+                  {[
+                    { label: 'Nắng', value: 'Sunny' },
+                    { label: 'Mây', value: 'Cloudy' },
+                    { label: 'Mưa', value: 'Rainy' },
+                    { label: 'Gió', value: 'Windy' },
+                  ].map(opt => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[
+                        styles.chipButton,
+                        weatherSnapshot === opt.value && { backgroundColor: premiumColors.brand, borderColor: premiumColors.brand }
+                      ]}
+                      onPress={() => setWeatherSnapshot(opt.value)}
+                    >
+                      <Text style={[
+                        styles.chipText,
+                        weatherSnapshot === opt.value && { color: '#000', fontWeight: '800' }
+                      ]}>{opt.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              <TouchableOpacity
+                style={[styles.btnAction, { backgroundColor: premiumColors.brand, alignSelf: 'flex-end', paddingHorizontal: 20 }]}
+                onPress={handleUpdateConditions}
+                disabled={isSubmittingConditions}
+              >
+                <Text style={[styles.btnActionText, { color: '#000' }]}>{isSubmittingConditions ? 'ĐANG LƯU...' : 'LƯU ĐIỀU KIỆN'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Checklist Header */}
+        <View style={styles.checklistHeaderRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.sectionTitle}>BÁO CÁO KIỂM DUYỆT</Text>
+          </View>
+          {checks.length === 0 && race.status === 'CHECKING' && (
+            <TouchableOpacity
+              style={[styles.btnAction, { backgroundColor: premiumColors.brand, paddingHorizontal: 12 }]}
+              onPress={handleInitializeChecks}
+              disabled={isInitializing}
+            >
+              <Text style={[styles.btnActionText, { color: '#000', fontSize: 10 }]}>{isInitializing ? 'ĐANG XỬ LÝ...' : 'KHỞI TẠO KIỂM DUYỆT'}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     );
   };
@@ -207,6 +399,7 @@ export default function PreRaceChecksScreen() {
         <FlatList
           data={checks}
           renderItem={renderItem}
+          ListHeaderComponent={renderHeader}
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContent}
           onRefresh={onRefresh}
@@ -221,7 +414,11 @@ export default function PreRaceChecksScreen() {
             ) : (
               <View style={styles.emptyCard}>
                 <MaterialIcons name="pets" size={40} color={premiumColors.textMuted} />
-                <Text style={styles.emptyText}>Chưa chốt danh sách chiến mã cho cuộc đua này.</Text>
+                <Text style={styles.emptyText}>
+                  {race?.status === 'SCHEDULED'
+                    ? "Cuộc đua chưa mở đợt kiểm duyệt.\nVui lòng bấm 'MỞ ĐỢT KIỂM DUYỆT NGỰA'."
+                    : "Danh sách kiểm duyệt chưa được khởi tạo.\nVui lòng bấm 'KHỞI TẠO KIỂM DUYỆT'."}
+                </Text>
               </View>
             )
           }
@@ -284,7 +481,104 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     fontSize: 14,
     marginTop: 12,
   },
-  
+
+  // Section and Action Styles
+  sectionCard: {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: premiumRadius[16],
+    padding: premiumSpacing[16],
+  },
+  sectionTitle: {
+    color: premiumColors.brand,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  sectionSub: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  statusBadgeWrapper: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+  },
+  statusBadgeText: {
+    color: premiumColors.text,
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  statusRaceName: {
+    color: premiumColors.text,
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  statusActions: {
+    marginTop: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  btnAction: {
+    height: 36,
+    paddingHorizontal: 16,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  btnActionText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  inputLabel: {
+    color: premiumColors.textMuted,
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  inputField: {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F9FAFB',
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    height: 40,
+    paddingHorizontal: 12,
+    color: premiumColors.text,
+    fontSize: 13,
+  },
+  chipButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFF',
+  },
+  chipText: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  checklistHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+
   // Race Header
   raceHeaderCard: {
     backgroundColor: isDark ? 'rgba(225, 6, 0, 0.05)' : '#FFFFFF',
@@ -361,7 +655,7 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     marginTop: 4,
   },
   badge: {
-    borderRadius: premiumRadius[6],
+    borderRadius: premiumRadius[8],
     paddingHorizontal: 8,
     paddingVertical: 4,
     backgroundColor: premiumColors.surface2,
