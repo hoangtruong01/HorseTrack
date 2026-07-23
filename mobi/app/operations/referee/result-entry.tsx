@@ -7,6 +7,7 @@ import { ErrorState, useThemeColors } from '../../../components/ui/shared';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { premiumColors as defaultPremiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { RaceSimulationModal } from '@/components/ui/race-simulation-modal';
 
 // Background Pattern
 const GridBackground = ({ isDark }: { isDark: boolean }) => {
@@ -120,6 +121,7 @@ export default function ResultEntryScreen() {
     setSimulating(true);
     try {
       await raceResultsApi.simulate(raceId!);
+      await new Promise(resolve => setTimeout(resolve, 800));
       Alert.alert('Thành công', 'Đã giả lập cuộc đua và xếp hạng tự động.');
       await loadData();
     } catch (err: any) {
@@ -357,6 +359,12 @@ export default function ResultEntryScreen() {
           )}
         </View>
       )}
+
+      {/* Race Simulation Modal */}
+      <RaceSimulationModal 
+        isOpen={simulating} 
+        horses={entryRows.map(r => ({ id: r.horseId, name: r.horseName }))}
+      />
     </View>
   );
 }

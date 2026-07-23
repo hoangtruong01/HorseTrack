@@ -72,14 +72,9 @@ export default function RefereeViolations({ nested }: { nested?: boolean }) {
   };
 
   const handleSubmit = async () => {
-    // Guard: chỉ cho phép ghi violation khi race đang ONGOING
-    if (selectedRaceStatus !== 'ONGOING') {
-      Alert.alert(
-        'Không thể ghi vi phạm',
-        `Trận đua đang ở trạng thái "${selectedRaceStatus || 'Chưa xác định'}". Chỉ có thể ghi biên bản vi phạm khi trận đua đang diễn ra (ONGOING).`
-      );
-      return;
-    }
+    // Guard: allow writing violations when race is LIVE (or any state before finished if needed, but violation-log doesn't check this)
+    // We remove the ONGOING check here to make it functional like violation-log.tsx
+
     if (!selectedHorseId) {
       Alert.alert('Lỗi', 'Vui lòng chọn chiến mã vi phạm.');
       return;
@@ -179,92 +174,131 @@ export default function RefereeViolations({ nested }: { nested?: boolean }) {
           contentContainerStyle={s.listContent}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
-            <View style={s.formCard}>
-              <Text style={s.formTitle}>LẬP BIÊN BẢN VI PHẠM</Text>
-              {selectedRaceStatus !== 'ONGOING' && (
-                <View style={s.statusWarning}>
-                  <MaterialIcons name="info-outline" size={20} color={premiumColors.warning} style={{ marginTop: 2 }} />
-                  <Text style={s.statusWarningText}>
-                    {`Trận đua đang ở trạng thái "${selectedRaceStatus || 'Chưa xác định'}". Chỉ có thể ghi vi phạm khi race đang diễn ra (ONGOING).`}
-                  </Text>
+            <View>
+              <View style={s.formCard}>
+                <Text style={s.sectionTitle}>BÁO CÁO VI PHẠM MỚI</Text>
+
+                {/* Horse Selector */}
+                <Text style={s.label}>CHIẾN MÃ VI PHẠM:</Text>
+                <View style={s.selectorsRow}>
+                  {horses.map((item) => {
+                    const horse = item.horseId;
+                    if (!horse) return null;
+                    const isSelected = selectedHorseId === horse._id;
+                    return (
+                      <TouchableOpacity
+                        key={horse._id}
+                        style={[s.selectorChip, isSelected && s.selectorChipActive]}
+                        onPress={() => setSelectedHorseId(horse._id)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[s.selectorChipText, isSelected && s.selectorChipTextActive]}>
+                          {horse.name.toUpperCase()}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
-              )}
-              
-              <Text style={s.label}>1. CHIẾN MÃ VI PHẠM</Text>
-              <View style={s.selectorRow}>
-                {horses.map(h => {
-                  const horse = h.horseId;
-                  if (!horse) return null;
-                  const isSelected = selectedHorseId === horse._id;
-                  return (
-                    <TouchableOpacity
-                      key={horse._id}
-                      style={[s.horseChip, isSelected && s.horseChipActive]}
-                      onPress={() => setSelectedHorseId(horse._id)}
-                      activeOpacity={0.8}
-                    >
-                      {horse.image || horse.avatar ? (
-                        <Image source={{ uri: horse.image || horse.avatar }} style={s.horseChipAvatar} resizeMode="cover" />
-                      ) : (
-                        <View style={s.horseChipAvatarPlaceholder}>
-                          <MaterialIcons name="pets" size={14} color={isSelected ? premiumColors.brand : premiumColors.textMuted} />
-                        </View>
-                      )}
-                      <Text style={[s.horseChipText, isSelected && s.horseChipTextActive]}>{horse.name.toUpperCase()}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
+
+                {/* Violation Type Selector */}
+                <Text style={s.label}>LOẠI VI PHẠM:</Text>
+                <View style={s.selectorsRow}>
+                  {[
+                    { key: 'track_violation', label: 'Đường đua' },
+                    { key: 'false_start', label: 'Xuất phát sai' },
+                    { key: 'dangerous_riding', label: 'Ép làn' },
+                    { key: 'other', label: 'Lỗi khác' }
+                  ].map((t) => {
+                    const isSelected = type === t.key;
+                    return (
+                      <TouchableOpacity
+                        key={t.key}
+                        style={[s.selectorChip, isSelected && s.selectorChipActive]}
+                        onPress={() => setType(t.key)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[s.selectorChipText, isSelected && s.selectorChipTextActive]}>
+                          {t.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Severity Selector */}
+                <Text style={s.label}>MỨC ĐỘ NẶNG NHẸ:</Text>
+                <View style={s.selectorsRow}>
+                  {[
+                    { key: 'minor', label: 'Nhẹ (+3s)' },
+                    { key: 'major', label: 'Vừa (+6s)' },
+                    { key: 'critical', label: 'Nặng (+12s)' }
+                  ].map((sev) => {
+                    const isSelected = severity === sev.key;
+                    return (
+                      <TouchableOpacity
+                        key={sev.key}
+                        style={[s.selectorChip, isSelected && s.selectorChipActive]}
+                        onPress={() => setSeverity(sev.key)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[s.selectorChipText, isSelected && s.selectorChipTextActive]}>
+                          {sev.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Penalty Option */}
+                <Text style={s.label}>HÌNH PHẠT:</Text>
+                <View style={s.selectorsRow}>
+                  {[
+                    { key: 'time_penalty', label: 'Cộng giây' },
+                    { key: 'warning', label: 'Cảnh cáo' },
+                    { key: 'disqualified', label: 'Bị loại' }
+                  ].map((p) => {
+                    const isSelected = penalty === p.key;
+                    return (
+                      <TouchableOpacity
+                        key={p.key}
+                        style={[s.selectorChip, isSelected && s.selectorChipActive]}
+                        onPress={() => setPenalty(p.key)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[s.selectorChipText, isSelected && s.selectorChipTextActive]}>
+                          {p.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Description Text Input */}
+                <Text style={s.label}>MÔ TẢ BIÊN BẢN CHI TIẾT:</Text>
+                <TextInput
+                  style={s.textInput}
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Ghi rõ chi tiết vi phạm đường đua..."
+                  placeholderTextColor={premiumColors.textMuted}
+                  multiline
+                  numberOfLines={3}
+                />
+
+                <TouchableOpacity 
+                  style={[s.submitButton, submitting && s.disabledButton]}
+                  onPress={handleSubmit}
+                  disabled={submitting}
+                  activeOpacity={0.9}
+                >
+                  {submitting ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <Text style={s.submitButtonText}>LẬP BIÊN BẢN VI PHẠM</Text>
+                  )}
+                </TouchableOpacity>
               </View>
 
-              <Text style={s.label}>2. LỖI VI PHẠM</Text>
-              <View style={s.selectorGrid}>
-                {[['track_violation', 'Đường đua', 'add-road'], ['false_start', 'Xuất phát sai', 'timer-off'], ['dangerous_riding', 'Ép làn', 'warning']].map(([k, l, icon]) => (
-                  <TouchableOpacity
-                    key={k}
-                    style={[s.typeChip, type === k && s.typeChipActive]}
-                    onPress={() => setType(k)}
-                    activeOpacity={0.8}
-                  >
-                    <MaterialIcons name={icon as any} size={20} color={type === k ? premiumColors.brand : premiumColors.textMuted} />
-                    <Text style={[s.typeChipText, type === k && s.typeChipTextActive]}>{l}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={s.label}>3. MỨC ĐỘ & HÌNH PHẠT</Text>
-              <View style={s.selectorGrid}>
-                {[['minor', 'Nhẹ', '+3s'], ['major', 'Vừa', '+6s'], ['critical', 'Nặng', '+12s']].map(([k, label, penaltyText]) => (
-                  <TouchableOpacity
-                    key={k}
-                    style={[s.severityChip, severity === k && s.severityChipActive]}
-                    onPress={() => setSeverity(k)}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={[s.severityChipText, severity === k && s.severityChipTextActive]}>{label}</Text>
-                    <Text style={[s.severityChipPenalty, severity === k && s.severityChipPenaltyActive]}>{penaltyText}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={s.label}>4. MÔ TẢ CHI TIẾT</Text>
-              <TextInput
-                style={s.inputMultiline}
-                placeholder="Nhập mô tả tình huống vi phạm (Bắt buộc)..."
-                placeholderTextColor={premiumColors.textMuted}
-                multiline
-                numberOfLines={4}
-                value={description}
-                onChangeText={setDescription}
-              />
-
-              <TouchableOpacity 
-                style={[s.submitBtn, submitting && { opacity: 0.7 }]} 
-                onPress={handleSubmit}
-                disabled={submitting}
-                activeOpacity={0.9}
-              >
-                <Text style={s.submitBtnText}>{submitting ? 'ĐANG GỬI...' : 'XÁC NHẬN LẬP BIÊN BẢN'}</Text>
-              </TouchableOpacity>
             </View>
           }
           renderItem={({ item }) => {
@@ -373,6 +407,16 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sectionTitle: {
+    color: premiumColors.text,
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: premiumColors.brand,
+    paddingLeft: 8,
+  },
   assignmentTitle: {
     color: premiumColors.text,
     fontSize: 14,
@@ -423,131 +467,55 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     textAlign: 'center',
   },
   label: {
-    color: premiumColors.text,
+    color: premiumColors.textSecondary,
     fontSize: 11,
-    fontWeight: '900',
-    marginTop: 20,
-    marginBottom: 12,
+    fontWeight: '800',
+    marginBottom: 8,
     letterSpacing: 0.5,
   },
-  selectorRow: {
+  selectorsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
-  },
-  selectorGrid: {
-    flexDirection: 'row',
     gap: 8,
+    marginBottom: 16,
   },
-  horseChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  selectorChip: {
     backgroundColor: premiumColors.surface2,
     borderWidth: 1,
     borderColor: premiumColors.border,
-    borderRadius: premiumRadius[24],
-    paddingRight: 16,
-    paddingLeft: 6,
-    paddingVertical: 6,
-    gap: 8,
+    borderRadius: premiumRadius[16],
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
-  horseChipActive: {
+  selectorChipActive: {
     backgroundColor: 'rgba(225, 6, 0, 0.08)',
     borderColor: premiumColors.brand,
   },
-  horseChipAvatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-  },
-  horseChipAvatarPlaceholder: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: premiumColors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  horseChipText: {
+  selectorChipText: {
     color: premiumColors.textSecondary,
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  selectorChipTextActive: {
+    color: premiumColors.brand,
     fontWeight: '800',
   },
-  horseChipTextActive: {
-    color: premiumColors.brand,
-  },
-  typeChip: {
-    flex: 1,
+  textInput: {
     backgroundColor: premiumColors.surface2,
     borderWidth: 1,
     borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  typeChipActive: {
-    backgroundColor: 'rgba(225, 6, 0, 0.08)',
-    borderColor: premiumColors.brand,
-  },
-  typeChipText: {
-    color: premiumColors.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  typeChipTextActive: {
-    color: premiumColors.brand,
-  },
-  severityChip: {
-    flex: 1,
-    backgroundColor: premiumColors.surface2,
-    borderWidth: 1,
-    borderColor: premiumColors.border,
-    borderRadius: premiumRadius[12],
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  severityChipActive: {
-    backgroundColor: 'rgba(225, 6, 0, 0.08)',
-    borderColor: premiumColors.brand,
-  },
-  severityChipText: {
-    color: premiumColors.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  severityChipTextActive: {
-    color: premiumColors.brand,
-  },
-  severityChipPenalty: {
-    color: premiumColors.textMuted,
-    fontSize: 11,
-    fontWeight: '900',
-  },
-  severityChipPenaltyActive: {
-    color: premiumColors.warning,
-  },
-  inputMultiline: {
-    backgroundColor: premiumColors.surface2,
-    borderWidth: 1,
-    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[8],
+    padding: 12,
     color: premiumColors.text,
-    borderRadius: premiumRadius[12],
-    padding: 16,
-    fontSize: 14,
-    height: 120,
+    fontSize: 13,
     textAlignVertical: 'top',
-    marginTop: 4,
-    marginBottom: 24,
+    height: 80,
+    marginBottom: 20,
   },
-  submitBtn: {
+  submitButton: {
     backgroundColor: premiumColors.brand,
-    height: 52,
     borderRadius: premiumRadius[12],
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: premiumColors.brand,
@@ -556,9 +524,12 @@ const getStyles = (premiumColors: any) => StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  submitBtnText: {
+  disabledButton: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '900',
     letterSpacing: 0.5,
   },
