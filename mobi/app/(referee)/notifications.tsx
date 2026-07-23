@@ -61,7 +61,7 @@ const RightAction = ({ dragX, item, onDelete, swipeableRef, styles }: any) => {
   );
 };
 
-const NotificationItem = React.memo(({ item, onMarkAsRead, onDelete, onSwipeStart, styles, premiumColors, theme }: any) => {
+const NotificationItem = React.memo(function NotificationItem({ item, onMarkAsRead, onDelete, onSwipeStart, styles, premiumColors, theme }: any) {
   const swipeableRef = useRef<Swipeable>(null);
 
   const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
@@ -81,9 +81,9 @@ const NotificationItem = React.memo(({ item, onMarkAsRead, onDelete, onSwipeStar
       <Swipeable
         ref={swipeableRef}
         renderRightActions={renderRightActions}
-        rightThreshold={60}
+        rightThreshold={40}
         friction={2}
-        overshootRight={true}
+        overshootRight={false}
         onSwipeableWillOpen={() => {
           if (onSwipeStart) onSwipeStart(swipeableRef.current);
         }}
@@ -118,6 +118,7 @@ const NotificationItem = React.memo(({ item, onMarkAsRead, onDelete, onSwipeStar
     </View>
   );
 });
+NotificationItem.displayName = 'NotificationItem';
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
