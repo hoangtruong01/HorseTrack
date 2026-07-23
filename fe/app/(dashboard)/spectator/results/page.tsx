@@ -24,9 +24,9 @@ interface RaceResultItem {
   points?: number;
   prizeAmount?: number;
   note?: string;
-  horseId?: any;
-  jockeyUserId?: any;
-  raceId?: any;
+  horseId?: unknown;
+  jockeyUserId?: unknown;
+  raceId?: unknown;
 }
 
 interface RaceGroup {
@@ -87,7 +87,7 @@ export default function SpectatorResultsPage() {
         const data = await raceResultsApi.listByTournament(tId);
         const rawResults: RaceResultItem[] = (data || []).map((item) => ({
           ...item,
-          id: (item as any).id || item._id || "",
+          id: (item as unknown as { id?: string; _id: string }).id || item._id || "",
         }));
         setResults(rawResults);
 
