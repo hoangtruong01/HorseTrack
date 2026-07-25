@@ -94,8 +94,20 @@ export default function InvitationInboxScreen() {
     // Tính toán thời gian tương đối
     const createdAt = item.createdAt ? new Date(item.createdAt) : new Date();
     const diffMs = new Date().getTime() - createdAt.getTime();
+
+    const diffMins = Math.floor(diffMs / (1000 * 60));
     const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    const timeText = diffHrs > 0 ? `${diffHrs} giờ` : 'Vừa xong';
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    let timeText = '';
+
+    if (diffMins < 1) {
+      timeText = 'Vừa xong';
+    } else if (diffHrs < 24) {
+      timeText = `${diffHrs} giờ trước`;
+    } else {
+      timeText = `${diffDays} ngày trước`;
+    }
 
     const tourShort = tourName.split(' ')[0].toUpperCase();
 

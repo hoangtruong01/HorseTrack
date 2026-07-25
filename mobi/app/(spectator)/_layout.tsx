@@ -73,7 +73,6 @@ export default function SpectatorLayout() {
       <Tabs.Screen name="races" options={{ href: null }} />
       <Tabs.Screen name="predictions" options={{ href: null }} />
       <Tabs.Screen name="rankings" options={{ title: 'Xếp hạng', headerShown: false, tabBarIcon: ({ color }) => <MaterialIcons size={24} name="military-tech" color={color} /> }} />
-      <Tabs.Screen name="wallet" options={{ href: null, title: 'Ví điểm', headerShown: false }} />
       <Tabs.Screen name="notifications" options={{ title: 'Thông báo', headerShown: false, tabBarIcon: ({ focused }) => <DockNotificationIcon focused={focused} count={unreadCount} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Cá nhân', headerShown: false, tabBarIcon: ({ focused }) => <DockAvatarIcon focused={focused} avatarUri={user?.avatar} /> }} />
       <Tabs.Screen name="race/[id]" options={{ href: null, headerShown: false }} />

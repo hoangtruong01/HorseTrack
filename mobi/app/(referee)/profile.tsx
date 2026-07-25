@@ -8,6 +8,7 @@ import { refereeAssignmentsApi, usersApi, uploadsApi, rewardPointLedgerApi } fro
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColors, formatDate } from '@/components/ui/shared';
+import { SleekHeader } from '@/components/ui/sleek-header';
 
 const { width } = Dimensions.get('window');
 
@@ -292,7 +293,7 @@ export default function RefereeProfile() {
     }
   };
 
-  const completedCount = assignments.filter(a => a.status === 'completed' || a.status === 'confirmed').length;
+  const acceptedCount = assignments.filter(a => a.status === 'accepted').length;
 
   return (
     <View style={styles.container}>
@@ -303,18 +304,13 @@ export default function RefereeProfile() {
       <GridBackground isDark={isDark} />
 
       {/* Custom Sleek Header */}
-      <View style={styles.customHeader}>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>CÁ NHÂN</Text>
-        <TouchableOpacity
-          style={styles.settingsBtn}
-          onPress={() => router.push('/settings')}
-          activeOpacity={0.8}
-        >
-          <MaterialIcons name="settings" size={22} color={theme.textPrimary} />
-          {hasNotification && <View style={styles.notificationBadge} />}
-        </TouchableOpacity>
-      </View>
+      <SleekHeader
+        title="CÁ NHÂN"
+        showWallet={false}
+        rightIcon="settings"
+        onRightPress={() => router.push('/settings')}
+        hasNotification={hasNotification}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -382,7 +378,7 @@ export default function RefereeProfile() {
           <TouchableOpacity
             style={styles.walletCard}
             activeOpacity={0.9}
-            onPress={() => router.push('/operations/referee/wallet')}
+            onPress={() => router.push('/operations/wallet')}
           >
             <Text style={styles.cardHeader}>VÍ TRỌNG TÀI</Text>
             <View style={styles.walletInner}>
@@ -422,7 +418,7 @@ export default function RefereeProfile() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.perfLabel}>TRẬN ĐẤU ĐÃ ĐIỀU HÀNH:</Text>
-                  <Text style={styles.perfValue}>{loadingStats ? '-' : completedCount}</Text>
+                  <Text style={styles.perfValue}>{loadingStats ? '-' : acceptedCount}</Text>
                 </View>
               </View>
             </View>
@@ -570,46 +566,6 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
   container: {
     flex: 1,
     backgroundColor: isDark ? '#09090B' : '#F4F4F5',
-  },
-
-  // Custom Header
-  customHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Math.max(insets.top, 16),
-    paddingBottom: 12,
-    zIndex: 10,
-    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
-  },
-  headerSpacer: {
-    width: 36, // To balance the gear icon
-  },
-  headerTitle: {
-    color: theme.textPrimary,
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  settingsBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12, // Squircle-ish
-    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 6,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#E10600',
-    borderWidth: 1.5,
-    borderColor: isDark ? '#09090B' : '#F4F4F5',
   },
 
   scrollContent: {

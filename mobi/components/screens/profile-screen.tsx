@@ -329,7 +329,7 @@ export default function ProfileScreen() {
     if (['(owner)', '(spectator)', '(jockey)'].includes(currentGroup)) {
       router.push('/operations/wallet');
     } else if (currentGroup === '(referee)') {
-      router.push('/operations/referee/wallet');
+      router.push('/operations/wallet');
     }
   };
 

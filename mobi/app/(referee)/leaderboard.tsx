@@ -5,6 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, ScrollView, 
 import { AppScreen, Section } from '@/components/ui/premium';
 import { premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, useThemeColors } from '@/components/ui/shared';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { refereeAssignmentsApi, raceResultsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,7 +41,7 @@ export default function RefereeLeaderboardScreen({ nested }: { nested?: boolean 
   useEffect(() => {
     rewardPointLedgerApi.myBalance().then((res: any) => {
       setBalance(res?.data?.balance || res?.balance || 0);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const loadAssignments = useCallback(async () => {
@@ -112,22 +113,7 @@ export default function RefereeLeaderboardScreen({ nested }: { nested?: boolean 
 
           {/* Custom Sleek Header cho màn hình List */}
           {!nested && (
-            <View style={styles.customHeader}>
-              <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                  <Text style={styles.headerTitle}>KẾT QUẢ XẾP HẠNG</Text>
-                </View>
-              </View>
-              <View style={styles.headerLeft}>
-                <View style={{ height: 44 }} />
-              </View>
-              <View style={styles.headerRight}>
-                <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-                  <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-                  <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <SleekHeader title="KẾT QUẢ XẾP HẠNG" showWallet={true} />
           )}
 
           <FlatList
@@ -165,19 +151,7 @@ export default function RefereeLeaderboardScreen({ nested }: { nested?: boolean 
       ) : (
         <Animated.View style={{ flex: 1 }} entering={SlideInRight} exiting={SlideOutRight}>
           <GridBackground isDark={isDark} />
-          <View style={styles.customHeader}>
-            <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={styles.headerTitle} numberOfLines={1}>{selectedRaceName.toUpperCase()}</Text>
-              </View>
-            </View>
-            <View style={styles.headerLeft}>
-              <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedRaceId(null)} activeOpacity={0.8}>
-                <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.headerRight} />
-          </View>
+          <SleekHeader title={selectedRaceName.toUpperCase()} showWallet={true} showBack={true} onBack={() => setSelectedRaceId(null)} />
 
           {loadingDetails && !refreshing ? <LoadingState /> : (() => {
             if (resultsData.length === 0 || !isLocked) {
@@ -294,52 +268,7 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     paddingBottom: 100,
     paddingTop: 0,
   },
-  customHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Math.max(insets.top, 16),
-    paddingBottom: 12,
-    zIndex: 10,
-    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
-  },
-  headerLeft: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  headerRight: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  headerWallet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  headerWalletText: {
-    color: theme.textPrimary,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  headerTitle: {
-    color: theme.textPrimary,
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
   assignmentCard: {
     flexDirection: 'row',
     alignItems: 'center',

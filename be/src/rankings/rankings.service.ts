@@ -17,6 +17,7 @@ export interface RankingEntry {
   wins: number;
   totalFinishTimeMs: number;
   rank?: number;
+  avatar?: string;
 }
 
 export interface JockeyRankingEntry {
@@ -29,6 +30,7 @@ export interface JockeyRankingEntry {
   wins: number;
   totalFinishTimeMs: number;
   rank?: number;
+  avatar?: string;
 }
 
 @Injectable()
@@ -70,6 +72,7 @@ export class RankingsService {
           horseId: '$_id',
           horseName: '$horse.name',
           breed: '$horse.breed',
+          avatar: { $arrayElemAt: ['$horse.images', 0] },
           totalPoints: 1,
           totalRaces: 1,
           wins: 1,
@@ -85,6 +88,7 @@ export class RankingsService {
         horseId: String(entry.horseId),
         horseName: entry.horseName,
         breed: entry.breed,
+        avatar: entry.avatar,
         totalPoints: entry.totalPoints,
         totalRaces: entry.totalRaces,
         wins: entry.wins,
@@ -126,6 +130,7 @@ export class RankingsService {
         $project: {
           jockeyUserId: '$_id',
           jockeyName: '$jockey.fullName',
+          avatar: '$jockey.avatar',
           totalPoints: 1,
           totalRaces: 1,
           wins: 1,
@@ -142,6 +147,7 @@ export class RankingsService {
       (entry, index): JockeyRankingEntry => ({
         jockeyUserId: String(entry.jockeyUserId),
         jockeyName: entry.jockeyName,
+        avatar: entry.avatar,
         totalPoints: entry.totalPoints,
         totalRaces: entry.totalRaces,
         wins: entry.wins,
@@ -197,6 +203,7 @@ export class RankingsService {
           horseId: '$_id',
           horseName: '$horse.name',
           breed: '$horse.breed',
+          avatar: { $arrayElemAt: ['$horse.images', 0] },
           ownerName: '$owner.fullName',
           totalPoints: 1,
           totalRaces: 1,
@@ -213,6 +220,7 @@ export class RankingsService {
         horseId: String(entry.horseId),
         horseName: entry.horseName,
         breed: entry.breed,
+        avatar: entry.avatar,
         ownerName: entry.ownerName,
         totalPoints: entry.totalPoints,
         totalRaces: entry.totalRaces,
@@ -269,6 +277,7 @@ export class RankingsService {
         $project: {
           jockeyUserId: '$_id',
           jockeyName: '$user.fullName',
+          avatar: '$user.avatar',
           experienceYears: '$jockeyProfile.experienceYears',
           skillLevel: '$jockeyProfile.skillLevel',
           totalPoints: 1,
@@ -287,6 +296,7 @@ export class RankingsService {
       (entry, index): JockeyRankingEntry => ({
         jockeyUserId: String(entry.jockeyUserId),
         jockeyName: entry.jockeyName,
+        avatar: entry.avatar,
         experienceYears: entry.experienceYears,
         skillLevel: entry.skillLevel,
         totalPoints: entry.totalPoints,

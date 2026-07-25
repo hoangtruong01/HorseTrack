@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } 
 import { useRouter } from 'expo-router';
 import { SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel, useThemeColors } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { refereeAssignmentsApi, rankingsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -37,7 +38,7 @@ export default function RefereeHome() {
   const loadData = useCallback(async () => {
     setError(null);
     Promise.all([
-      refereeAssignmentsApi.myAssignments({ limit: 3 }).catch(() => []),
+      refereeAssignmentsApi.myAssignments().catch(() => []),
       rankingsApi.globalHorses().catch(() => []),
       rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 }))
     ])
@@ -80,24 +81,8 @@ export default function RefereeHome() {
       <GridBackground isDark={isDark} />
 
       {/* Custom Sleek Header */}
-      <View style={styles.customHeader}>
-        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.headerTitle}>TRANG CHỦ</Text>
-          </View>
-        </View>
-        <View style={styles.headerLeft}>
-          <View style={styles.profileBadge}>
-            <MaterialIcons name="sports" size={18} color={premiumColors.brand} />
-          </View>
-        </View>
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* Custom Sleek Header */}
+      <SleekHeader title="TRANG CHỦ" showWallet={true} />
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 120 }}
@@ -153,7 +138,7 @@ export default function RefereeHome() {
               actions={[
                 { title: 'Nhiệm vụ', subtitle: 'Xem phân công', icon: 'assignment', tone: 'brand', onPress: () => router.push('/assignments' as any) },
                 { title: 'Xếp hạng', subtitle: 'Top chiến mã', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/(referee)/leaderboard' as any) },
-                { title: 'Ví điện tử', subtitle: 'Thu nhập', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/referee/wallet') },
+                { title: 'Ví điện tử', subtitle: 'Thu nhập', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/wallet') },
                 { title: 'Cá nhân', subtitle: 'Hồ sơ', icon: 'person', tone: 'brand', onPress: () => router.push('/profile') },
               ]}
             />
@@ -199,7 +184,7 @@ export default function RefereeHome() {
                 <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
               </View>
             ) : (
-              topHorses.slice(0, 5).map((horse, idx) => (
+              topHorses.slice(0, 3).map((horse, idx) => (
                 <ListItemCard
                   key={horse.horseId || idx}
                   title={`${idx + 1}. ${(horse.horseName || 'Chiến mã').toUpperCase()}`}
@@ -223,58 +208,13 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
   // Custom Header
-  customHeader: {
+  sectionHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Math.max(insets.top, 16),
-    paddingBottom: 12,
-    zIndex: 10,
-    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
-  },
-  headerLeft: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  headerRight: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  headerTitle: {
-    color: theme.textPrimary,
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  profileBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.15)' : 'rgba(225, 6, 0, 0.08)',
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: premiumSpacing[4],
   },
-  headerWallet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#FFFFFF',
-    shadowColor: 'rgba(0,0,0,0.05)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: isDark ? 0 : 0.8,
-    shadowRadius: 4,
-    elevation: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
-    justifyContent: 'center',
-  },
-  headerWalletText: {
-    color: theme.textPrimary,
-    fontSize: 13,
-    fontWeight: '800',
-  },
+
 
   // ── Hero ──
   heroContainer: {
@@ -373,13 +313,6 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     color: premiumColors.textSecondary,
   },
 
-  // ── Layout Helpers ──
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: premiumSpacing[4], // SectionHeader has its own margin
-  },
   viewAllText: {
     fontSize: 13,
     fontWeight: '600',
