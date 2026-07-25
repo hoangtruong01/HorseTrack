@@ -919,13 +919,23 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     marginTop: 4,
   },
   perfGrid: {
-    flexDirection: 'column',
-    gap: 16,
-  },
-  perfItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(0,0,0,0.1)' : '#E4E4E7',
+    borderRadius: 12,
+  },
+  perfItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
     gap: 12,
+  },
+  perfDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: isDark ? 'rgba(0,0,0,0.1)' : '#E4E4E7',
   },
   perfIconWrap: {
     width: 32,
