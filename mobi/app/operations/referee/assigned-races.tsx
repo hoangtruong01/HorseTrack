@@ -6,6 +6,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColors } from '@/components/ui/shared';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { Stack, Tabs, useRouter } from 'expo-router';
 
 // Background Pattern
@@ -199,20 +200,7 @@ export default function AssignedRacesScreen() {
       <GridBackground isDark={isDark} />
 
       {/* Custom Sleek Header */}
-      <View style={styles.customHeader}>
-        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.headerTitle}>NHIỆM VỤ</Text>
-          </View>
-        </View>
-        <View style={styles.headerLeft} />
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <SleekHeader title="NHIỆM VỤ" showWallet={true} showBack={true} />
 
       <FlatList
         data={assignments}
@@ -245,47 +233,7 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     flex: 1,
     backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
-  // Custom Header
-  customHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Math.max(insets.top, 16),
-    paddingBottom: 12,
-    zIndex: 10,
-    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
-  },
-  headerLeft: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  headerRight: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  headerTitle: {
-    color: theme.textPrimary,
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  headerWallet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
-    minWidth: 36,
-    justifyContent: 'center',
-  },
-  headerWalletText: {
-    color: theme.textPrimary,
-    fontSize: 13,
-    fontWeight: '800',
-  },
+
   listContent: {
     padding: premiumSpacing[16],
     paddingBottom: 110,

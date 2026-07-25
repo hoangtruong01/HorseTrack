@@ -4,7 +4,7 @@ import { useRouter, Stack, Tabs, useSegments } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { usersApi, uploadsApi, rewardPointLedgerApi, jockeyInvitationsApi } from '@/lib/api-client';
+import { usersApi, uploadsApi, rewardPointLedgerApi, jockeyInvitationsApi, refereeAssignmentsApi } from '@/lib/api-client';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColors, formatDate } from '@/components/ui/shared';
@@ -214,11 +214,14 @@ export default function ProfileScreen() {
   // Jockey performance state
   const [jockeyData, setJockeyData] = useState<any[]>([]);
 
+  // Referee performance state
+  const [refereeAssignments, setRefereeAssignments] = useState<any[]>([]);
+
   const hasNotification = true;
 
-  // Check if current layout is owner or spectator to show wallet
+  // Check if current layout is owner, spectator, jockey, or referee to show wallet
   const currentGroup = segments[0] as string;
-  const showWallet = currentGroup === '(owner)' || currentGroup === '(spectator)' || currentGroup === '(jockey)';
+  const showWallet = currentGroup === '(owner)' || currentGroup === '(spectator)' || currentGroup === '(jockey)' || currentGroup === '(referee)';
   
   useEffect(() => {
     if (showWallet) {
@@ -232,6 +235,17 @@ export default function ProfileScreen() {
             const list = (invRes as any).data || [];
             const accepted = list.filter((i: any) => i.status === 'ACCEPTED');
             setJockeyData(accepted);
+          })
+          .catch(() => { })
+          .finally(() => setLoadingStats(false));
+      } else if (currentGroup === '(referee)') {
+        Promise.all([
+          rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
+          refereeAssignmentsApi.myAssignments({ limit: 100 }).catch(() => ({ data: [] }))
+        ])
+          .then(([balRes, assRes]) => {
+            setBalance((balRes as any).balance || 0);
+            setRefereeAssignments((assRes as any).data || []);
           })
           .catch(() => { })
           .finally(() => setLoadingStats(false));
@@ -329,7 +343,7 @@ export default function ProfileScreen() {
     if (['(owner)', '(spectator)', '(jockey)'].includes(currentGroup)) {
       router.push('/operations/wallet');
     } else if (currentGroup === '(referee)') {
-      router.push('/operations/referee/wallet');
+      router.push('/operations/wallet');
     }
   };
 
@@ -469,6 +483,38 @@ export default function ProfileScreen() {
               <Text style={{ color: theme.textMuted, fontSize: 11, marginTop: 12, fontStyle: 'italic' }}>
                 * Chưa có dữ liệu thành tích chính thức từ ban tổ chức.
               </Text>
+            </View>
+          )}
+
+          {/* Referee Performance Report */}
+          {currentGroup === '(referee)' && (
+            <View style={styles.perfCard}>
+              <Text style={styles.perfSub}>BÁO CÁO HIỆU SUẤT</Text>
+              <Text style={styles.perfTitle}>Thành Tích Điều Hành</Text>
+
+              <View style={styles.perfGrid}>
+                <View style={styles.perfItem}>
+                  <View style={styles.perfIconWrap}>
+                    <MaterialIcons name="assignment-turned-in" size={16} color="#000" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.perfLabel}>NHIỆM VỤ ĐƯỢC GIAO:</Text>
+                    <Text style={styles.perfValue}>{loadingStats ? '-' : refereeAssignments.length}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.perfDivider} />
+
+                <View style={styles.perfItem}>
+                  <View style={styles.perfIconWrap}>
+                    <MaterialIcons name="gavel" size={16} color="#000" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.perfLabel}>ĐÃ CHẤP NHẬN:</Text>
+                    <Text style={styles.perfValue}>{loadingStats ? '-' : refereeAssignments.filter(a => a.status === 'accepted').length}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
           )}
 
@@ -873,13 +919,23 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     marginTop: 4,
   },
   perfGrid: {
-    flexDirection: 'column',
-    gap: 16,
-  },
-  perfItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(0,0,0,0.1)' : '#E4E4E7',
+    borderRadius: 12,
+  },
+  perfItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
     gap: 12,
+  },
+  perfDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: isDark ? 'rgba(0,0,0,0.1)' : '#E4E4E7',
   },
   perfIconWrap: {
     width: 32,

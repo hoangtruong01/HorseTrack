@@ -75,7 +75,7 @@ export default function JockeyHorsesScreen() {
     const speedColor = '#0EA5E9'; // Sky blue
     const staminaColor = '#F59E0B'; // Amber
     const ageColor = '#8B5CF6'; // Violet
-    const trackColor = 'rgba(255,255,255,0.1)';
+    const trackColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
 
     return (
       <View style={styles.card}>
@@ -233,7 +233,7 @@ const getStyles = (isDark: boolean, theme: any, premiumColors: any) => StyleShee
   },
   // ── Card Root ──
   card: {
-    backgroundColor: '#1E1D23', // Dark slate bg directly matching design
+    backgroundColor: isDark ? '#1E1D23' : premiumColors.surface,
     borderRadius: 16,
     marginBottom: premiumSpacing[16],
     shadowColor: '#000',
@@ -247,7 +247,7 @@ const getStyles = (isDark: boolean, theme: any, premiumColors: any) => StyleShee
   },
   // ── Banner Section ──
   banner: {
-    backgroundColor: '#3F1A22', // Dark burgundy
+    backgroundColor: isDark ? '#3F1A22' : 'rgba(225, 6, 0, 0.05)',
     padding: 16,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
@@ -277,13 +277,13 @@ const getStyles = (isDark: boolean, theme: any, premiumColors: any) => StyleShee
     zIndex: 2,
   },
   codeBadge: {
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.05)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   codeBadgeText: {
-    color: '#FFFFFF',
+    color: isDark ? '#FFFFFF' : premiumColors.text,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.5,
@@ -310,14 +310,14 @@ const getStyles = (isDark: boolean, theme: any, premiumColors: any) => StyleShee
     zIndex: 2,
   },
   eyebrowText: {
-    color: 'rgba(255,255,255,0.7)',
+    color: isDark ? 'rgba(255,255,255,0.7)' : premiumColors.textSecondary,
     fontSize: 10,
     fontWeight: '600',
     letterSpacing: 1.5,
     marginBottom: 4,
   },
   horseName: {
-    color: '#FFFFFF',
+    color: isDark ? '#FFFFFF' : premiumColors.text,
     fontSize: 26,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -353,7 +353,7 @@ const getStyles = (isDark: boolean, theme: any, premiumColors: any) => StyleShee
     marginBottom: 2,
   },
   statValue: {
-    color: '#FFFFFF',
+    color: isDark ? '#FFFFFF' : premiumColors.text,
     fontSize: 14,
     fontWeight: '800',
   },
@@ -373,9 +373,9 @@ const getStyles = (isDark: boolean, theme: any, premiumColors: any) => StyleShee
   infoPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -386,7 +386,7 @@ const getStyles = (isDark: boolean, theme: any, premiumColors: any) => StyleShee
     fontSize: 12,
   },
   infoPillValue: {
-    color: '#FFFFFF',
+    color: isDark ? '#FFFFFF' : premiumColors.text,
     fontSize: 12,
     fontWeight: '700',
   },

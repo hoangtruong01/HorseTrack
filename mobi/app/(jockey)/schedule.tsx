@@ -1,14 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, Text, SectionList, RefreshControl, TouchableOpacity } from 'react-native';
 import { AppScreen } from '@/components/ui/premium';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { SleekHeader } from '@/components/ui/sleek-header';
 import { jockeyInvitationsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import RaceResultsModal from '@/components/ui/race-results-modal';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function JockeySchedule() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const premiumColorsDynamic = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, premiumColorsDynamic), [isDark, premiumColorsDynamic]);
+
   const [pendingData, setPendingData] = useState<any[]>([]);
   const [acceptedData, setAcceptedData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,7 +171,7 @@ export default function JockeySchedule() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (isDark: boolean, premiumColors: any) => StyleSheet.create({
   header: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[24],

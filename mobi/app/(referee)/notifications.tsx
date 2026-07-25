@@ -8,6 +8,7 @@ import { useThemeColors, EmptyState, LoadingState } from '@/components/ui/shared
 import { Stack, Tabs } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { notificationsApi } from '@/lib/api-client';
+import { SleekHeader } from '@/components/ui/sleek-header';
 
 const GridBackground = ({ isDark }: { isDark: boolean }) => {
   return (
@@ -213,11 +214,7 @@ export default function NotificationsScreen() {
         <Stack.Screen options={{ headerShown: false }} />
         <Tabs.Screen options={{ headerShown: false }} />
         <GridBackground isDark={isDark} />
-        <View style={styles.customHeader}>
-          <View style={styles.headerSpacer} />
-          <Text style={styles.headerTitle}>THÔNG BÁO</Text>
-          <View style={styles.headerSpacer} />
-        </View>
+        <SleekHeader title="THÔNG BÁO" showWallet={false} />
         <LoadingState />
       </View>
     );
@@ -230,11 +227,7 @@ export default function NotificationsScreen() {
       <GridBackground isDark={isDark} />
 
       {/* Custom Sleek Header */}
-      <View style={styles.customHeader}>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>THÔNG BÁO</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <SleekHeader title="THÔNG BÁO" showWallet={false} />
 
       <View style={styles.actionsBar}>
         <TouchableOpacity style={styles.readAllAction} onPress={handleReadAll} activeOpacity={0.8}>
@@ -266,25 +259,7 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     flex: 1,
     backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
-  customHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Math.max(insets.top, 16),
-    paddingBottom: 12,
-    zIndex: 10,
-    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
-  },
-  headerSpacer: {
-    width: 36,
-  },
-  headerTitle: {
-    color: theme.textPrimary,
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
+
   actionsBar: {
     flexDirection: 'row',
     justifyContent: 'flex-end',

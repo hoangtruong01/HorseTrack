@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, ScrollView, 
 import { useRouter, Stack, Tabs } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel, formatDateTime } from '@/components/ui/shared';
 import { ActionGrid, Section } from '@/components/ui/premium';
+import { SleekHeader } from '@/components/ui/sleek-header';
+import { WalletCard } from '@/components/ui/wallet-card';
 import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { tournamentsApi, racesApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -23,7 +25,7 @@ const GridBackground = ({ isDark }: { isDark: boolean }) => {
 export default function SpectatorHome() {
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -93,31 +95,17 @@ export default function SpectatorHome() {
       <Tabs.Screen options={{ headerShown: false }} />
       <GridBackground isDark={isDark} />
 
-      {/* Custom Sleek Header */}
-      <View style={styles.customHeader}>
-        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.headerTitleText}>HORSETRACK</Text>
-          </View>
-        </View>
-        <View style={styles.headerLeft} />
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/wallet')}>
-            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <SleekHeader title="HORSETRACK" showWallet={false} />
 
-      <ScrollView 
+      <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} />}
         showsVerticalScrollIndicator={false}
       >
         {/* ── Hero – flat racing viewer ── */}
         <View style={styles.heroContainer}>
           <View style={styles.heroCard}>
-            <Image 
-              source={require('../../assets/images/hero_horse_racing.png')} 
+            <Image
+              source={require('../../assets/images/hero_horse_racing.png')}
               style={styles.heroImage}
               resizeMode="cover"
             />
@@ -132,8 +120,8 @@ export default function SpectatorHome() {
         </View>
 
         {/* ── Overview Card ── */}
-        <TouchableOpacity 
-          style={styles.overviewCard} 
+        <TouchableOpacity
+          style={styles.overviewCard}
           onPress={() => router.push('/(spectator)/tournaments')}
           activeOpacity={0.8}
         >
@@ -150,49 +138,16 @@ export default function SpectatorHome() {
         </TouchableOpacity>
 
         <View style={styles.content}>
-          {/* ── Metrics 2×2 grid – telemetry style ── */}
-          <View style={styles.metricsContainer}>
-            <View style={[styles.metricCell, styles.cellBorderRight, styles.cellBorderBottom]}>
-              <Text style={styles.metricLabel}>VÍ ĐIỂM</Text>
-              <View style={styles.metricValueRow}>
-                <Text style={styles.metricValue}>{formatCompact(balance)}</Text>
-                <Text style={styles.metricUnit}> điểm</Text>
-              </View>
-            </View>
-            <View style={[styles.metricCell, styles.cellBorderBottom]}>
-              <Text style={styles.metricLabel}>GIẢI ĐANG DIỄN RA</Text>
-              <View style={styles.metricValueRow}>
-                <Text style={styles.metricValue}>
-                  {tournaments.filter(t => t.status === 'ONGOING').length}
-                </Text>
-                <Text style={styles.metricUnit}> giải</Text>
-              </View>
-            </View>
-            <View style={[styles.metricCell, styles.cellBorderRight]}>
-              <Text style={styles.metricLabel}>GIẢI ĐẤU NỔI BẬT</Text>
-              <View style={styles.metricValueRow}>
-                <Text style={styles.metricValue}>{tournaments.length}</Text>
-                <Text style={styles.metricUnit}> giải</Text>
-              </View>
-            </View>
-            <View style={styles.metricCell}>
-              <Text style={styles.metricLabel}>TRẬN ĐUA SẮP TỚI</Text>
-              <View style={styles.metricValueRow}>
-                <Text style={[styles.metricValue, styles.metricValueAccent]}>{races.length}</Text>
-                <Text style={[styles.metricUnit, styles.metricUnitAccent]}> trận</Text>
-              </View>
-            </View>
-          </View>
+          <WalletCard balance={balance} />
 
           {/* ── Quick Actions ── */}
           <Section title="Tiện ích">
             <ActionGrid
-              columns={2}
+              columns={3}
               actions={[
-                { title: 'Giải Đấu', subtitle: 'Xem giải đang mở', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/tournaments') },
-                { title: 'Trận Đua', subtitle: 'Theo dõi trận sắp tới', icon: 'flag', tone: 'brand', onPress: () => router.push('/(spectator)/tournaments') },
-                { title: 'Dự Đoán', subtitle: 'Quản lý lựa chọn', icon: 'online-prediction', tone: 'brand', onPress: () => router.push('/predictions') },
-                { title: 'Ví Điểm', subtitle: 'Theo dõi phần thưởng', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/wallet') },
+                { title: 'Giải Đấu', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/tournaments') },
+                { title: 'Dự Đoán', icon: 'online-prediction', tone: 'brand', onPress: () => router.push('/predictions') },
+                { title: 'Xếp hạng', icon: 'leaderboard', tone: 'brand', onPress: () => router.push('/(spectator)/rankings' as any) },
               ]}
             />
           </Section>

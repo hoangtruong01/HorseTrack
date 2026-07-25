@@ -10,9 +10,14 @@ import { rewardPointLedgerApi } from '@/lib/api-client';
 interface SleekHeaderProps {
   title: string;
   showWallet?: boolean;
+  rightIcon?: keyof typeof MaterialIcons.glyphMap;
+  onRightPress?: () => void;
+  hasNotification?: boolean;
+  showBack?: boolean;
+  onBack?: () => void;
 }
 
-export function SleekHeader({ title, showWallet = true }: SleekHeaderProps) {
+export function SleekHeader({ title, showWallet = true, rightIcon, onRightPress, hasNotification, showBack, onBack }: SleekHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
@@ -36,7 +41,7 @@ export function SleekHeader({ title, showWallet = true }: SleekHeaderProps) {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <Tabs.Screen options={{ headerShown: false }} />
-      
+
       <View style={[
         styles.customHeader,
         {
@@ -53,15 +58,38 @@ export function SleekHeader({ title, showWallet = true }: SleekHeaderProps) {
           </View>
         </View>
 
-        <View style={styles.headerLeft} />
-        
+        <View style={styles.headerLeft}>
+          {showBack && (
+            <TouchableOpacity
+              style={[
+                styles.backBtn,
+                { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }
+              ]}
+              onPress={() => onBack ? onBack() : router.back()}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="arrow-back" size={20} color={theme.textPrimary} />
+            </TouchableOpacity>
+          )}
+        </View>
+
         <View style={styles.headerRight}>
+          {rightIcon && (
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={onRightPress}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name={rightIcon} size={22} color={theme.textPrimary} />
+              {hasNotification && <View style={styles.notificationBadge} />}
+            </TouchableOpacity>
+          )}
           {showWallet && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
                 styles.walletBtn,
                 { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }
-              ]} 
+              ]}
               onPress={() => router.push('/operations/wallet')}
               activeOpacity={0.8}
             >
@@ -100,7 +128,7 @@ const styles = StyleSheet.create({
   },
   headerTitleText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: 'bold',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
@@ -116,5 +144,31 @@ const styles = StyleSheet.create({
   walletText: {
     fontSize: 13,
     fontWeight: '800',
+  },
+  actionBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
+    borderColor: '#FFF',
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } 
 import { useRouter } from 'expo-router';
 import { SectionHeader, ListItemCard, LoadingState, ErrorState, statusLabel, useThemeColors } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
+import { SleekHeader } from '@/components/ui/sleek-header';
 import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { refereeAssignmentsApi, rankingsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -37,7 +38,7 @@ export default function RefereeHome() {
   const loadData = useCallback(async () => {
     setError(null);
     Promise.all([
-      refereeAssignmentsApi.myAssignments({ limit: 10 }).catch(() => []),
+      refereeAssignmentsApi.myAssignments().catch(() => []),
       rankingsApi.globalHorses().catch(() => []),
       rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 }))
     ])
@@ -80,24 +81,8 @@ export default function RefereeHome() {
       <GridBackground isDark={isDark} />
 
       {/* Custom Sleek Header */}
-      <View style={styles.customHeader}>
-        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.headerTitle}>Trang chủ</Text>
-          </View>
-        </View>
-        <View style={styles.headerLeft}>
-          <View style={styles.profileBadge}>
-            <MaterialIcons name="sports" size={18} color={premiumColors.brand} />
-          </View>
-        </View>
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerWallet} activeOpacity={0.8} onPress={() => router.push('/operations/referee/wallet')}>
-            <MaterialIcons name="account-balance-wallet" size={16} color={theme.textPrimary} />
-            <Text style={styles.headerWalletText}>{balance.toLocaleString()}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* Custom Sleek Header */}
+      <SleekHeader title="TRANG CHỦ" showWallet={true} />
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 120 }}
@@ -119,29 +104,38 @@ export default function RefereeHome() {
         <View style={styles.content}>
           {/* ── Sleek Metrics Grid ── */}
           <Section title="Tổng quan nhiệm vụ">
-            <View style={styles.statsGrid}>
-              <View style={[styles.statCard, pendingCount > 0 && styles.statCardActive]}>
-                <View style={[styles.statIconWrapper, pendingCount > 0 && styles.statIconWrapperActive]}>
-                  <MaterialIcons name="fiber-new" size={20} color={pendingCount > 0 ? premiumColors.brand : premiumColors.textSecondary} />
+            <View style={{ gap: premiumSpacing[12] }}>
+              <TouchableOpacity 
+                activeOpacity={0.8}
+                onPress={() => router.push('/assignments' as any)}
+                style={[styles.statCard, { flexDirection: 'row', alignItems: 'center' }, pendingCount > 0 && styles.statCardActive]}
+              >
+                <View style={[styles.statIconWrapper, { marginBottom: 0, marginRight: 16 }, pendingCount > 0 && styles.statIconWrapperActive]}>
+                  <MaterialIcons name="fiber-new" size={24} color={pendingCount > 0 ? premiumColors.brand : premiumColors.textSecondary} />
                 </View>
-                <Text style={[styles.statValue, pendingCount > 0 && { color: premiumColors.brand }]}>{pendingCount}</Text>
-                <Text style={styles.statLabel}>Phân công mới</Text>
-              </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.statLabel, pendingCount > 0 && { color: premiumColors.brand }]}>Phân công mới</Text>
+                  <Text style={[styles.statValue, { fontSize: 28 }, pendingCount > 0 && { color: premiumColors.brand }]}>{pendingCount}</Text>
+                </View>
+                {pendingCount > 0 && <MaterialIcons name="chevron-right" size={24} color={premiumColors.brand} />}
+              </TouchableOpacity>
 
-              <View style={styles.statCard}>
-                <View style={styles.statIconWrapper}>
-                  <MaterialIcons name="assignment-turned-in" size={20} color={premiumColors.textSecondary} />
+              <View style={{ flexDirection: 'row', gap: premiumSpacing[12] }}>
+                <View style={styles.statCard}>
+                  <View style={styles.statIconWrapper}>
+                    <MaterialIcons name="assignment-turned-in" size={20} color={premiumColors.textSecondary} />
+                  </View>
+                  <Text style={styles.statValue}>{acceptedCount}</Text>
+                  <Text style={styles.statLabel}>Đã tiếp nhận</Text>
                 </View>
-                <Text style={styles.statValue}>{acceptedCount}</Text>
-                <Text style={styles.statLabel}>Đã tiếp nhận</Text>
-              </View>
 
-              <View style={styles.statCard}>
-                <View style={styles.statIconWrapper}>
-                  <MaterialIcons name="fact-check" size={20} color={premiumColors.textSecondary} />
+                <View style={styles.statCard}>
+                  <View style={styles.statIconWrapper}>
+                    <MaterialIcons name="fact-check" size={20} color={premiumColors.textSecondary} />
+                  </View>
+                  <Text style={styles.statValue}>{totalCount}</Text>
+                  <Text style={styles.statLabel}>Tổng nhiệm vụ</Text>
                 </View>
-                <Text style={styles.statValue}>{totalCount}</Text>
-                <Text style={styles.statLabel}>Tổng nhiệm vụ</Text>
               </View>
             </View>
           </Section>
@@ -149,12 +143,12 @@ export default function RefereeHome() {
           {/* ── Quick Actions ── */}
           <Section title="Điều hành">
             <ActionGrid
-              columns={2}
+              columns={4}
               actions={[
-                { title: 'Nhiệm vụ', subtitle: 'Xem phân công', icon: 'assignment', tone: 'brand', onPress: () => router.push('/assignments' as any) },
-                { title: 'Xếp hạng', subtitle: 'Top chiến mã', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/(referee)/leaderboard' as any) },
-                { title: 'Ví điện tử', subtitle: 'Thu nhập', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/referee/wallet') },
-                { title: 'Cá nhân', subtitle: 'Hồ sơ', icon: 'person', tone: 'brand', onPress: () => router.push('/profile') },
+                { title: 'Nhiệm vụ', icon: 'assignment', tone: 'brand', onPress: () => router.push('/assignments' as any) },
+                { title: 'Xếp hạng', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/(referee)/leaderboard' as any) },
+                { title: 'Ví điện tử', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/wallet') },
+                { title: 'Cá nhân', icon: 'person', tone: 'brand', onPress: () => router.push('/profile') },
               ]}
             />
           </Section>
@@ -199,7 +193,7 @@ export default function RefereeHome() {
                 <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
               </View>
             ) : (
-              topHorses.slice(0, 5).map((horse, idx) => (
+              topHorses.slice(0, 3).map((horse, idx) => (
                 <ListItemCard
                   key={horse.horseId || idx}
                   title={`${idx + 1}. ${(horse.horseName || 'Chiến mã').toUpperCase()}`}
@@ -223,55 +217,13 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
   // Custom Header
-  customHeader: {
+  sectionHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Math.max(insets.top, 16),
-    paddingBottom: 12,
-    zIndex: 10,
-    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(244, 244, 245, 0.85)',
-  },
-  headerLeft: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  headerRight: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  headerTitle: {
-    color: theme.textPrimary,
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  profileBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.1)' : 'rgba(225, 6, 0, 0.05)',
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(225, 6, 0, 0.2)' : 'rgba(225, 6, 0, 0.1)',
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: premiumSpacing[4],
   },
-  headerWallet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
-    justifyContent: 'center',
-  },
-  headerWalletText: {
-    color: theme.textPrimary,
-    fontSize: 13,
-    fontWeight: '800',
-  },
+
 
   // ── Hero ──
   heroContainer: {
@@ -280,16 +232,14 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     paddingBottom: premiumSpacing[24],
   },
   heroCard: {
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.08)' : '#FFFFFF',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.1)' : '#FFFFFF',
     borderRadius: premiumRadius[16],
     padding: premiumSpacing[24],
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(225, 6, 0, 0.2)' : 'rgba(0,0,0,0.05)',
-    shadowColor: isDark ? '#E10600' : '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: isDark ? 0.2 : 0.05,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowColor: isDark ? '#E10600' : 'rgba(0,0,0,0.08)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: isDark ? 0.2 : 1,
+    shadowRadius: 24,
+    elevation: 8,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -335,28 +285,30 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
   },
   statCard: {
     flex: 1,
-    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF',
     borderRadius: premiumRadius[12],
     padding: premiumSpacing[16],
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    shadowColor: 'rgba(0,0,0,0.04)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0 : 1,
+    shadowRadius: 12,
+    elevation: 2,
     alignItems: 'flex-start',
   },
   statCardActive: {
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.08)' : 'rgba(225, 6, 0, 0.03)',
-    borderColor: isDark ? 'rgba(225, 6, 0, 0.2)' : 'rgba(225, 6, 0, 0.1)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.1)' : '#FFF0F0',
   },
   statIconWrapper: {
     width: 32,
     height: 32,
     borderRadius: premiumRadius[8],
-    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F4F4F5',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: premiumSpacing[12],
   },
   statIconWrapperActive: {
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.15)' : 'rgba(225, 6, 0, 0.08)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.15)' : 'rgba(225, 6, 0, 0.1)',
   },
   statValue: {
     fontSize: 22,
@@ -370,13 +322,6 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     color: premiumColors.textSecondary,
   },
 
-  // ── Layout Helpers ──
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: premiumSpacing[4], // SectionHeader has its own margin
-  },
   viewAllText: {
     fontSize: 13,
     fontWeight: '600',
@@ -389,11 +334,14 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
 
   // ── Empty state ──
   emptyCard: {
-    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
     borderRadius: premiumRadius[12],
     padding: premiumSpacing[24],
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    shadowColor: 'rgba(0,0,0,0.03)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: isDark ? 0 : 1,
+    shadowRadius: 8,
+    elevation: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: premiumSpacing[12],

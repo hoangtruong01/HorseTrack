@@ -1,15 +1,22 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
 import { SleekHeader } from '@/components/ui/sleek-header';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { WalletCard } from '@/components/ui/wallet-card';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { jockeyInvitationsApi, rewardPointLedgerApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function JockeyHome() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const premiumColorsDynamic = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, premiumColorsDynamic), [isDark, premiumColorsDynamic]);
+
   const [balance, setBalance] = useState(0);
 
   const [invitations, setInvitations] = useState<any[]>([]);
@@ -61,15 +68,29 @@ export default function JockeyHome() {
   const totalCount = invitations.length;
 
   return (
-    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={false}>
-      <SleekHeader title="TRANG CHỦ" showWallet={true} />
-      {/* ── Hero – flat athlete operations ── */}
-      <View style={styles.hero}>
-        <Text style={styles.heroEyebrow}>RACE JOCKEY</Text>
-        <Text style={styles.heroTitle}>Sẵn sàng vào đường đua</Text>
-        <View style={styles.heroAccentLine} />
-        <Text style={styles.heroSubtitle}>Theo dõi lịch thi đấu, lời mời và ví thưởng.</Text>
-      </View>
+    <View style={styles.container}>
+      <SleekHeader title="TRANG CHỦ" showWallet={false} />
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColorsDynamic.brand} />}
+        showsVerticalScrollIndicator={false}
+      >
+      
+      {pendingCount > 0 && (
+        <TouchableOpacity 
+          style={[styles.alertCard, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2', borderColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#FEE2E2' }]}
+          onPress={() => router.push('/inbox')}
+          activeOpacity={0.8}
+        >
+          <View style={[styles.alertIcon, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#FECACA' }]}>
+            <MaterialIcons name="notifications-active" size={24} color="#EF4444" />
+          </View>
+          <View style={styles.alertContent}>
+            <Text style={[styles.alertTitle, { color: isDark ? '#FCA5A5' : '#991B1B' }]}>Bạn có {pendingCount} lời mời mới</Text>
+            <Text style={[styles.alertSubtitle, { color: isDark ? '#FECACA' : '#DC2626' }]}>Nhấn vào đây để xem chi tiết và phản hồi ngay.</Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color="#EF4444" />
+        </TouchableOpacity>
+      )}
 
       {/* ── Overview Card ── */}
       <TouchableOpacity 
@@ -83,53 +104,24 @@ export default function JockeyHome() {
         <View style={styles.overviewContent}>
           <Text style={styles.overviewTitle}>Tổng quan hôm nay</Text>
           <Text style={styles.overviewSubtitle}>
-            {pendingCount} lời mời mới · {acceptedCount} lịch đã nhận
+            {acceptedCount} lịch đã nhận · {totalCount} tổng lời mời
           </Text>
         </View>
-        <MaterialIcons name="chevron-right" size={20} color={premiumColors.textSecondary} />
+        <MaterialIcons name="chevron-right" size={20} color={premiumColorsDynamic.textSecondary} />
       </TouchableOpacity>
 
       <View style={styles.content}>
-        {/* ── Metrics 2×2 grid – telemetry style ── */}
-        <View style={styles.metricsContainer}>
-          <View style={[styles.metricCell, styles.cellBorderRight, styles.cellBorderBottom]}>
-            <Text style={styles.metricLabel}>LỜI MỜI MỚI</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{pendingCount}</Text>
-            </View>
-          </View>
-          <View style={[styles.metricCell, styles.cellBorderBottom]}>
-            <Text style={styles.metricLabel}>LỊCH ĐÃ NHẬN</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{acceptedCount}</Text>
-            </View>
-          </View>
-          <View style={[styles.metricCell, styles.cellBorderRight]}>
-            <Text style={styles.metricLabel}>TỔNG LỜI MỜI</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{totalCount}</Text>
-            </View>
-          </View>
-          <View style={styles.metricCell}>
-            <Text style={styles.metricLabel}>VÍ THƯỞNG</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={[styles.metricValue, styles.metricValueAccent]}>
-                {new Intl.NumberFormat('vi-VN').format(balance)}
-              </Text>
-              <Text style={[styles.metricUnit, styles.metricUnitAccent]}> điểm</Text>
-            </View>
-          </View>
-        </View>
+        <WalletCard balance={balance} />
 
         {/* ── Quick Actions ── */}
         <Section title="Tiện ích">
           <ActionGrid
-            columns={2}
+            columns={4}
             actions={[
-              { title: 'Hòm thư', subtitle: 'Xem lời mời mới', icon: 'mail', tone: 'brand', onPress: () => router.push('/inbox') },
-              { title: 'Lịch đua', subtitle: 'Theo dõi lịch nhận', icon: 'event', tone: 'brand', onPress: () => router.push('/schedule') },
-              { title: 'Thành tích', subtitle: 'Theo dõi hiệu suất', icon: 'trending-up', tone: 'brand', onPress: () => router.push('/performance') },
-              { title: 'Chiến mã', subtitle: 'Ngựa đã nhận', icon: 'pets', tone: 'brand', onPress: () => router.push('/horses') },
+              { title: 'Hòm thư', icon: 'mail', tone: 'brand', onPress: () => router.push('/inbox') },
+              { title: 'Lịch đua', icon: 'event', tone: 'brand', onPress: () => router.push('/schedule') },
+              { title: 'Thành tích', icon: 'trending-up', tone: 'brand', onPress: () => router.push('/performance') },
+              { title: 'Chiến mã', icon: 'pets', tone: 'brand', onPress: () => router.push('/horses') },
             ]}
           />
         </Section>
@@ -179,41 +171,46 @@ export default function JockeyHome() {
           )}
         </Section>
       </View>
-    </AppScreen>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  // ── Hero ──
-  hero: {
-    paddingHorizontal: premiumSpacing[16],
-    paddingTop: premiumSpacing[24],
-    paddingBottom: premiumSpacing[20],
+const getStyles = (isDark: boolean, premiumColors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
-  heroEyebrow: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: premiumColors.brand,
-    letterSpacing: 1,
+  alertCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: premiumSpacing[16],
+    marginTop: premiumSpacing[16],
     marginBottom: premiumSpacing[8],
+    padding: premiumSpacing[16],
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
   },
-  heroTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: premiumColors.text,
-    marginBottom: premiumSpacing[8],
+  alertIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  heroAccentLine: {
-    width: 36,
-    height: 3,
-    backgroundColor: premiumColors.brand,
-    borderRadius: 2,
-    marginBottom: premiumSpacing[12],
+  alertContent: {
+    flex: 1,
+    paddingHorizontal: premiumSpacing[12],
   },
-  heroSubtitle: {
-    fontSize: 14,
-    color: premiumColors.textSecondary,
-    lineHeight: 20,
+  alertTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  alertSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+    lineHeight: 18,
   },
 
   overviewCard: {
@@ -247,12 +244,12 @@ const styles = StyleSheet.create({
   overviewTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginBottom: 4,
   },
   overviewSubtitle: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
 
   // ── Content wrapper ──

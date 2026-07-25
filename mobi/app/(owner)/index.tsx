@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
 import { SleekHeader } from '@/components/ui/sleek-header';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { WalletCard } from '@/components/ui/wallet-card';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { horsesApi, registrationsApi, rewardPointLedgerApi, dashboardApi, tournamentsApi, racesApi, rankingsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useAuth } from '@/providers/auth-provider';
@@ -12,6 +14,10 @@ import { useAuth } from '@/providers/auth-provider';
 export default function OwnerHome() {
   const router = useRouter();
   const { user } = useAuth();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const premiumColorsDynamic = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, premiumColorsDynamic), [isDark, premiumColorsDynamic]);
   const [balance, setBalance] = useState(0);
   const [horsesCount, setHorsesCount] = useState(0);
   const [regCount, setRegCount] = useState(0);
@@ -36,7 +42,7 @@ export default function OwnerHome() {
         tournamentsApi.list({ limit: 10 }).catch(() => ({ data: [] })),
         rankingsApi.globalHorses().catch(() => []),
       ]);
-      
+
       setHorsesCount((horsesRes as any).meta?.total || 0);
       setRecentRegistrations((regRes as any).data || []);
       setRegCount((regRes as any).meta?.total || 0);
@@ -79,184 +85,151 @@ export default function OwnerHome() {
   }
 
   return (
-    <AppScreen scroll refreshing={refreshing} onRefresh={onRefresh} safeArea={false}>
-      <SleekHeader title="TRANG CHỦ" showWallet={true} />
+    <View style={styles.container}>
+      <SleekHeader title="TRANG CHỦ" showWallet={false} />
 
-      {/* ── Hero – flat racing viewer ── */}
-      <View style={styles.hero}>
-        <Image 
-          source={require('../../assets/images/hero_horse_racing.png')} 
-          style={styles.heroImage}
-          resizeMode="cover"
-        />
-        <View style={styles.heroContent}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColorsDynamic.brand} />}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Hero – flat athlete operations ── */}
+        <View style={styles.hero}>
           <Text style={styles.heroEyebrow}>OWNER PORTAL</Text>
           <Text style={styles.heroTitle}>Bảng điều khiển</Text>
+          <View style={styles.heroAccentLine} />
           <Text style={styles.heroSubtitle}>Quản lý chiến mã, ghi danh giải đua và theo dõi kết quả.</Text>
         </View>
-      </View>
 
-      {/* ── Overview Card ── */}
-      <TouchableOpacity 
-        style={styles.overviewCard} 
-        onPress={() => router.push('/(owner)/registrations' as any)}
-        activeOpacity={0.8}
-      >
-        <View style={styles.overviewIconContainer}>
-          <MaterialIcons name="calendar-today" size={20} color="#FFFFFF" />
-        </View>
-        <View style={styles.overviewContent}>
-          <Text style={styles.overviewTitle}>Tổng quan hôm nay</Text>
-          <Text style={styles.overviewSubtitle}>
-            {upcomingRacesCount} trận sắp tới · {openTournamentsCount} giải đấu đang mở
-          </Text>
-        </View>
-        <MaterialIcons name="chevron-right" size={20} color={premiumColors.textSecondary} />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        {/* ── Metrics 2×2 grid – divider style ── */}
-        <View style={styles.metricsContainer}>
-          <View style={[styles.metricCell, styles.cellBorderRight, styles.cellBorderBottom]}>
-            <Text style={styles.metricLabel}>CHIẾN MÃ</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{horsesCount}</Text>
-            </View>
-          </View>
-          <View style={[styles.metricCell, styles.cellBorderBottom]}>
-            <Text style={styles.metricLabel}>GHI DANH</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{regCount}</Text>
-            </View>
-          </View>
-          <View style={[styles.metricCell, styles.cellBorderRight]}>
-            <Text style={styles.metricLabel}>VÍ THƯỞNG</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{formatCompact(balance)}</Text>
-              <Text style={styles.metricUnit}> điểm</Text>
-            </View>
-          </View>
-          <View style={styles.metricCell}>
-            <Text style={styles.metricLabel}>TIỀN THẮNG</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={[styles.metricValue, styles.metricValueAccent]}>{formatCompact(winnings)}</Text>
-              <Text style={[styles.metricUnit, styles.metricUnitAccent]}> điểm</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Quick Actions ── */}
-        <Section title="Tiện ích">
-          <ActionGrid
-            columns={2}
-            actions={[
-              { title: 'Chuồng ngựa', subtitle: 'Quản lý hồ sơ', icon: 'pets', tone: 'brand', onPress: () => router.push('/horses' as any) },
-              { title: 'Đăng ký đua', subtitle: 'Chọn giải phù hợp', icon: 'flag', tone: 'brand', onPress: () => router.push('/(owner)/registrations' as any) },
-              { title: 'Lời mời', subtitle: 'Mời nài ngựa', icon: 'person-add', tone: 'brand', onPress: () => router.push('/invitations' as any) },
-              { title: 'Ví thưởng', subtitle: 'Theo dõi điểm', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/wallet' as any) },
-            ]}
-          />
-        </Section>
-
-        {/* ── Recent registrations ── */}
-        <Section
-          title="Ghi danh gần đây"
-          actionLabel="Xem tất cả"
-          onAction={() => router.push('/registrations')}
+        {/* ── Overview Card ── */}
+        <TouchableOpacity
+          style={styles.overviewCard}
+          onPress={() => router.push('/(owner)/registrations' as any)}
+          activeOpacity={0.8}
         >
-          {recentRegistrations.length === 0 ? (
-            <Text style={styles.empty}>Chưa có lượt đăng ký đua nào.</Text>
-          ) : (
-            recentRegistrations.slice(0, 3).map(r => {
-              const s = statusLabel(r.status);
-              const horseName = typeof r.horseId === 'object' ? r.horseId?.name : 'Ngựa';
-              const raceName = typeof r.raceId === 'object' ? r.raceId?.name : 'Trận đua';
-              return (
-                <TouchableOpacity
-                  key={r._id || r.id}
-                  style={styles.regRow}
-                  onPress={() => router.push('/registrations')}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.regAvatar}>
-                    <MaterialIcons name="pets" size={18} color={premiumColors.textSecondary} />
-                  </View>
-                  <View style={styles.regInfo}>
-                    <Text style={styles.regTitle} numberOfLines={1}>{horseName}</Text>
-                    <Text style={styles.regSubtitle} numberOfLines={1}>Trận: {raceName}</Text>
-                  </View>
-                  <View style={[styles.regBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
-                    <Text style={[styles.regBadgeText, { color: s.color }]}>{s.label}</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
-                </TouchableOpacity>
-              );
-            })
-          )}
-        </Section>
+          <View style={styles.overviewIconContainer}>
+            <MaterialIcons name="calendar-today" size={20} color="#FFFFFF" />
+          </View>
+          <View style={styles.overviewContent}>
+            <Text style={styles.overviewTitle}>Tổng quan hôm nay</Text>
+            <Text style={styles.overviewSubtitle}>
+              {upcomingRacesCount} trận tới · {horsesCount} chiến mã · {regCount} ghi danh
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={premiumColorsDynamic.textSecondary} />
+        </TouchableOpacity>
 
-        {/* ── Bảng xếp hạng chiến mã ── */}
-        <Section
-          title="Bảng xếp hạng"
-          actionLabel="Xem tất cả"
-          onAction={() => router.push('/(owner)/rankings' as any)}
-        >
-          {topHorses.length === 0 ? (
-            <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
-          ) : (
-            topHorses.map((h, idx) => {
-              const rank = h.rank || idx + 1;
-              const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
-              return (
-                <TouchableOpacity
-                  key={h.horseId || idx}
-                  style={styles.rankRow}
-                  onPress={() => router.push('/(owner)/rankings' as any)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.rankMedal}>{medal}</Text>
-                  <View style={styles.rankInfo}>
-                    <Text style={styles.rankTitle} numberOfLines={1}>{h.horseName || 'Chiến mã ẩn danh'}</Text>
-                    <Text style={styles.rankSubtitle} numberOfLines={1}>Chủ: {h.ownerName || '—'} · Thắng: {h.wins || 0}</Text>
-                  </View>
-                  <Text style={styles.rankPoints}>{h.totalPoints?.toLocaleString()} Pts</Text>
-                  <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
-                </TouchableOpacity>
-              );
-            })
-          )}
-        </Section>
-      </View>
-    </AppScreen>
+        <View style={styles.content}>
+          <WalletCard balance={balance} />
+
+          {/* ── Quick Actions ── */}
+          <Section title="Tiện ích">
+            <ActionGrid
+              columns={3}
+              actions={[
+                { title: 'Chuồng ngựa', icon: 'pets', tone: 'brand', onPress: () => router.push('/horses' as any) },
+                { title: 'Đăng ký đua', icon: 'flag', tone: 'brand', onPress: () => router.push('/(owner)/registrations' as any) },
+                { title: 'Lời mời', icon: 'person-add', tone: 'brand', onPress: () => router.push('/invitations' as any) },
+              ]}
+            />
+          </Section>
+
+          {/* ── Recent registrations ── */}
+          <Section
+            title="Ghi danh gần đây"
+            actionLabel="Xem tất cả"
+            onAction={() => router.push('/registrations')}
+          >
+            {recentRegistrations.length === 0 ? (
+              <Text style={styles.empty}>Chưa có lượt đăng ký đua nào.</Text>
+            ) : (
+              recentRegistrations.slice(0, 3).map(r => {
+                const s = statusLabel(r.status);
+                const horseName = typeof r.horseId === 'object' ? r.horseId?.name : 'Ngựa';
+                const raceName = typeof r.raceId === 'object' ? r.raceId?.name : 'Trận đua';
+                return (
+                  <TouchableOpacity
+                    key={r._id || r.id}
+                    style={styles.regRow}
+                    onPress={() => router.push('/registrations')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.regAvatar}>
+                      <MaterialIcons name="pets" size={18} color={premiumColors.textSecondary} />
+                    </View>
+                    <View style={styles.regInfo}>
+                      <Text style={styles.regTitle} numberOfLines={1}>{horseName}</Text>
+                      <Text style={styles.regSubtitle} numberOfLines={1}>Trận: {raceName}</Text>
+                    </View>
+                    <View style={[styles.regBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
+                      <Text style={[styles.regBadgeText, { color: s.color }]}>{s.label}</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </Section>
+
+          {/* ── Bảng xếp hạng chiến mã ── */}
+          <Section
+            title="Bảng xếp hạng"
+            actionLabel="Xem tất cả"
+            onAction={() => router.push('/(owner)/rankings' as any)}
+          >
+            {topHorses.length === 0 ? (
+              <Text style={styles.empty}>Chưa có dữ liệu xếp hạng.</Text>
+            ) : (
+              topHorses.map((h, idx) => {
+                const rank = h.rank || idx + 1;
+                return (
+                  <TouchableOpacity
+                    key={h.horseId || idx}
+                    style={styles.rankCard}
+                    onPress={() => router.push('/(owner)/rankings' as any)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.rankBadge, rank === 1 ? {backgroundColor: '#F59E0B'} : rank === 2 ? {backgroundColor: '#94A3B8'} : rank === 3 ? {backgroundColor: '#B45309'} : {backgroundColor: premiumColorsDynamic.surface2}]}>
+                      <Text style={[styles.rankBadgeText, {color: rank <= 3 ? '#FFF' : premiumColorsDynamic.textSecondary}]}>{rank}</Text>
+                    </View>
+
+                    {h.avatar ? (
+                      <Image source={{ uri: h.avatar }} style={styles.rankAvatar} />
+                    ) : (
+                      <View style={styles.rankAvatarPlaceholder}>
+                        <MaterialIcons name="pets" size={16} color={premiumColorsDynamic.textMuted} />
+                      </View>
+                    )}
+
+                    <View style={styles.rankInfo}>
+                      <Text style={styles.rankTitle} numberOfLines={1}>{h.horseName || 'Chiến mã ẩn danh'}</Text>
+                      <Text style={styles.rankSubtitle} numberOfLines={1}>Chủ: {h.ownerName || '—'}</Text>
+                    </View>
+                    
+                    <View style={styles.rankPointsCol}>
+                      <Text style={styles.rankPoints}>{h.totalPoints?.toLocaleString()}</Text>
+                      <Text style={styles.rankPointsLabel}>Pts</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </Section>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-
+const getStyles = (isDark: boolean, premiumColors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: isDark ? '#09090B' : '#F4F4F5',
+  },
   // ── Hero ──
   hero: {
     paddingHorizontal: premiumSpacing[16],
     paddingTop: premiumSpacing[24],
-    paddingBottom: premiumSpacing[24],
-    position: 'relative',
-    overflow: 'hidden',
-    backgroundColor: '#000000',
-    minHeight: 180,
-    justifyContent: 'center',
-  },
-  heroImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-    opacity: 0.35,
-  },
-  heroContent: {
-    width: '85%',
-    zIndex: 2,
+    paddingBottom: premiumSpacing[20],
   },
   heroEyebrow: {
     fontSize: 11,
@@ -270,6 +243,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: premiumColors.text,
     marginBottom: premiumSpacing[8],
+  },
+  heroAccentLine: {
+    width: 36,
+    height: 3,
+    backgroundColor: premiumColors.brand,
+    borderRadius: 2,
+    marginBottom: premiumSpacing[12],
   },
   heroSubtitle: {
     fontSize: 14,
@@ -307,12 +287,12 @@ const styles = StyleSheet.create({
   overviewTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginBottom: 4,
   },
   overviewSubtitle: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
 
   // ── Content wrapper ──
@@ -429,38 +409,67 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: premiumSpacing[16],
   },
-  rankRow: {
+  rankCard: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: premiumSpacing[12],
     borderBottomWidth: 1,
     borderBottomColor: premiumColors.border,
-    gap: premiumSpacing[12],
+    marginBottom: premiumSpacing[4],
   },
-  rankMedal: {
-    fontSize: 16,
-    fontWeight: '800',
-    width: 32,
-    textAlign: 'center',
+  rankBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  rankBadgeText: {
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  rankAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 12,
+  },
+  rankAvatarPlaceholder: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 12,
+    backgroundColor: premiumColors.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: premiumColors.border,
   },
   rankInfo: {
     flex: 1,
-    minWidth: 0,
   },
   rankTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: premiumColors.text,
     marginBottom: 2,
   },
   rankSubtitle: {
-    fontSize: 12,
-    color: premiumColors.textMuted,
+    fontSize: 11,
+    color: premiumColors.textSecondary,
+  },
+  rankPointsCol: {
+    alignItems: 'flex-end',
   },
   rankPoints: {
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: '800',
+    color: premiumColors.brand,
+  },
+  rankPointsLabel: {
+    fontSize: 9,
+    color: premiumColors.textMuted,
     fontWeight: '700',
-    color: '#F59E0B',
-    flexShrink: 0,
   },
 });
