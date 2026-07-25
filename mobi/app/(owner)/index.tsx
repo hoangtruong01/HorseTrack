@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 import { LoadingState, ErrorState, statusLabel } from '@/components/ui/shared';
 import { AppScreen, ActionGrid, Section } from '@/components/ui/premium';
 import { SleekHeader } from '@/components/ui/sleek-header';
-import { premiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
+import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { horsesApi, registrationsApi, rewardPointLedgerApi, dashboardApi, tournamentsApi, racesApi, rankingsApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useAuth } from '@/providers/auth-provider';
@@ -12,6 +13,10 @@ import { useAuth } from '@/providers/auth-provider';
 export default function OwnerHome() {
   const router = useRouter();
   const { user } = useAuth();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const premiumColorsDynamic = usePremiumColors();
+  const styles = React.useMemo(() => getStyles(isDark, premiumColorsDynamic), [isDark, premiumColorsDynamic]);
   const [balance, setBalance] = useState(0);
   const [horsesCount, setHorsesCount] = useState(0);
   const [regCount, setRegCount] = useState(0);
@@ -231,7 +236,7 @@ export default function OwnerHome() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (isDark: boolean, premiumColors: any) => StyleSheet.create({
 
   // ── Hero ──
   hero: {
@@ -240,7 +245,7 @@ const styles = StyleSheet.create({
     paddingBottom: premiumSpacing[24],
     position: 'relative',
     overflow: 'hidden',
-    backgroundColor: '#000000',
+    backgroundColor: isDark ? '#000000' : premiumColors.surface,
     minHeight: 180,
     justifyContent: 'center',
   },
@@ -307,12 +312,12 @@ const styles = StyleSheet.create({
   overviewTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: premiumColors.text,
     marginBottom: 4,
   },
   overviewSubtitle: {
     fontSize: 12,
-    color: '#AEB6C2',
+    color: premiumColors.textSecondary,
   },
 
   // ── Content wrapper ──

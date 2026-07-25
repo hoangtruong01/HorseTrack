@@ -37,7 +37,7 @@ export default function RefereeHome() {
   const loadData = useCallback(async () => {
     setError(null);
     Promise.all([
-      refereeAssignmentsApi.myAssignments({ limit: 10 }).catch(() => []),
+      refereeAssignmentsApi.myAssignments({ limit: 3 }).catch(() => []),
       rankingsApi.globalHorses().catch(() => []),
       rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 }))
     ])
@@ -83,7 +83,7 @@ export default function RefereeHome() {
       <View style={styles.customHeader}>
         <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.headerTitle}>Trang chủ</Text>
+            <Text style={styles.headerTitle}>TRANG CHỦ</Text>
           </View>
         </View>
         <View style={styles.headerLeft}>
@@ -251,16 +251,19 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.1)' : 'rgba(225, 6, 0, 0.05)',
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(225, 6, 0, 0.2)' : 'rgba(225, 6, 0, 0.1)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.15)' : 'rgba(225, 6, 0, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerWallet: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#FFFFFF',
+    shadowColor: 'rgba(0,0,0,0.05)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: isDark ? 0 : 0.8,
+    shadowRadius: 4,
+    elevation: 1,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -280,16 +283,14 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     paddingBottom: premiumSpacing[24],
   },
   heroCard: {
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.08)' : '#FFFFFF',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.1)' : '#FFFFFF',
     borderRadius: premiumRadius[16],
     padding: premiumSpacing[24],
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(225, 6, 0, 0.2)' : 'rgba(0,0,0,0.05)',
-    shadowColor: isDark ? '#E10600' : '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: isDark ? 0.2 : 0.05,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowColor: isDark ? '#E10600' : 'rgba(0,0,0,0.08)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: isDark ? 0.2 : 1,
+    shadowRadius: 24,
+    elevation: 8,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -335,28 +336,30 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
   },
   statCard: {
     flex: 1,
-    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF',
     borderRadius: premiumRadius[12],
     padding: premiumSpacing[16],
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    shadowColor: 'rgba(0,0,0,0.04)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0 : 1,
+    shadowRadius: 12,
+    elevation: 2,
     alignItems: 'flex-start',
   },
   statCardActive: {
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.08)' : 'rgba(225, 6, 0, 0.03)',
-    borderColor: isDark ? 'rgba(225, 6, 0, 0.2)' : 'rgba(225, 6, 0, 0.1)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.1)' : '#FFF0F0',
   },
   statIconWrapper: {
     width: 32,
     height: 32,
     borderRadius: premiumRadius[8],
-    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F4F4F5',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: premiumSpacing[12],
   },
   statIconWrapperActive: {
-    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.15)' : 'rgba(225, 6, 0, 0.08)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.15)' : 'rgba(225, 6, 0, 0.1)',
   },
   statValue: {
     fontSize: 22,
@@ -389,11 +392,14 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
 
   // ── Empty state ──
   emptyCard: {
-    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
     borderRadius: premiumRadius[12],
     padding: premiumSpacing[24],
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    shadowColor: 'rgba(0,0,0,0.03)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: isDark ? 0 : 1,
+    shadowRadius: 8,
+    elevation: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: premiumSpacing[12],

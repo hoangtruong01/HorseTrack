@@ -146,10 +146,14 @@ export default function SharedWallet() {
         
         {/* ── Balance Card ── */}
         <View style={styles.balanceCard}>
-          <Text style={styles.balanceEyebrow}>ĐIỂM HIỆN TẠI</Text>
+          <MaterialIcons name="account-balance-wallet" size={140} color={isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"} style={styles.balanceWatermark} />
+          <View style={styles.balanceHeader}>
+            <MaterialIcons name="stars" size={16} color={premiumColors.brand} />
+            <Text style={styles.balanceEyebrow}>SỐ DƯ HIỆN TẠI</Text>
+          </View>
           <View style={styles.balanceRow}>
             <Text style={styles.balanceValue}>{balance.toLocaleString()}</Text>
-            <Text style={styles.balanceUnit}> Pts</Text>
+            <Text style={styles.balanceUnit}>Pts</Text>
           </View>
           {isSpectator && (
              <Text style={styles.balanceHint}>Dự đoán đúng nhận thưởng điểm, sai trừ điểm theo cấu hình hệ thống.</Text>
@@ -197,13 +201,13 @@ export default function SharedWallet() {
                   
                   return (
                     <View key={item._id || item.id} style={styles.rowItem}>
-                      <View style={styles.rowAvatar}>
-                        <MaterialIcons name="swap-vert" size={20} color={premiumColors.textSecondary} />
+                      <View style={[styles.rowAvatar, { backgroundColor: isPositive ? premiumColors.success + '15' : premiumColors.danger + '15', borderColor: isPositive ? premiumColors.success + '30' : premiumColors.danger + '30' }]}>
+                        <MaterialIcons name={isPositive ? "arrow-downward" : "arrow-upward"} size={20} color={isPositive ? premiumColors.success : premiumColors.danger} />
                       </View>
                       <View style={styles.rowInfo}>
                         <Text style={styles.rowTitle} numberOfLines={1}>{item.note || 'Giao dịch điểm thưởng'}</Text>
                         <Text style={styles.rowSubtitle} numberOfLines={1}>
-                          {`${formatDateTime(item.createdAt)} · Số dư sau: ${(item.balanceAfter ?? 0).toLocaleString()} Pts`}
+                          {`${formatDateTime(item.createdAt)} · Dư: ${(item.balanceAfter ?? 0).toLocaleString()}`}
                         </Text>
                       </View>
                       <View style={styles.rowRight}>
@@ -261,8 +265,8 @@ export default function SharedWallet() {
                       onPress={rId ? () => router.push(`/(spectator)/race/${rId}` as any) : undefined}
                       activeOpacity={rId ? 0.7 : 1}
                     >
-                      <View style={styles.rowAvatar}>
-                        <MaterialIcons name="psychology" size={20} color={premiumColors.textSecondary} />
+                      <View style={[styles.rowAvatar, { backgroundColor: rewardColor + '15', borderColor: rewardColor + '30' }]}>
+                        <MaterialIcons name="psychology" size={20} color={rewardColor} />
                       </View>
                       <View style={styles.rowInfo}>
                         <Text style={styles.rowTitle} numberOfLines={1}>{horse}</Text>
@@ -319,7 +323,7 @@ export default function SharedWallet() {
                     const statusLabel = isPending ? 'Chờ xử lý' : c.status === 'COMPLETED' ? 'Hoàn thành' : c.status;
                     return (
                       <View key={c._id || c.id} style={styles.rowItem}>
-                        <View style={styles.rowAvatar}>
+                        <View style={[styles.rowAvatar, { backgroundColor: statusColor + '15', borderColor: statusColor + '30' }]}>
                           <MaterialIcons name="swap-horiz" size={20} color={statusColor} />
                         </View>
                         <View style={styles.rowInfo}>
@@ -330,8 +334,8 @@ export default function SharedWallet() {
                             {c.pointsRedeemed?.toLocaleString() || 0} Điểm · {formatDateTime(c.createdAt)}
                           </Text>
                         </View>
-                        <View style={[styles.rowRight, { backgroundColor: statusColor + '18', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }]}>
-                          <Text style={[styles.deltaText, { color: statusColor, fontSize: 11 }]}>{statusLabel}</Text>
+                        <View style={[styles.rowRight, { backgroundColor: statusColor + '18', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 }]}>
+                          <Text style={[styles.deltaText, { color: statusColor, fontSize: 12 }]}>{statusLabel}</Text>
                         </View>
                       </View>
                     );
@@ -391,20 +395,37 @@ const getStyles = (premiumColors: any, isDark: boolean, theme: any, insets: any)
   
   // ── Balance Card ──
   balanceCard: {
-    backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[12],
+    backgroundColor: isDark ? '#1E1D23' : premiumColors.surface,
+    borderRadius: 24,
+    padding: premiumSpacing[24],
+    marginBottom: premiumSpacing[32],
+    shadowColor: premiumColors.brand,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 10,
+    overflow: 'hidden',
+    position: 'relative',
     borderWidth: 1,
-    borderColor: premiumColors.border,
-    padding: premiumSpacing[20],
-    marginBottom: premiumSpacing[24],
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+  },
+  balanceWatermark: {
+    position: 'absolute',
+    right: -20,
+    bottom: -20,
+    transform: [{ rotate: '-15deg' }]
+  },
+  balanceHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    marginBottom: premiumSpacing[12],
   },
   balanceEyebrow: {
     fontSize: 11,
     fontWeight: '800',
-    color: premiumColors.brand,
+    color: isDark ? '#9CA3AF' : premiumColors.textSecondary,
     letterSpacing: 1.5,
-    marginBottom: premiumSpacing[12],
   },
   balanceRow: {
     flexDirection: 'row',
@@ -414,61 +435,62 @@ const getStyles = (premiumColors: any, isDark: boolean, theme: any, insets: any)
   balanceValue: {
     fontSize: 48,
     fontWeight: '900',
-    color: premiumColors.text,
+    color: isDark ? '#FFFFFF' : premiumColors.text,
+    letterSpacing: -1,
   },
   balanceUnit: {
     fontSize: 20,
     fontWeight: '700',
-    color: premiumColors.textSecondary,
-    marginLeft: 4,
+    color: premiumColors.brand,
+    marginLeft: 8,
   },
   balanceHint: {
     fontSize: 12,
-    color: premiumColors.textMuted,
-    textAlign: 'center',
+    color: isDark ? 'rgba(255,255,255,0.6)' : premiumColors.textMuted,
     lineHeight: 18,
-    marginTop: premiumSpacing[8],
+    marginTop: premiumSpacing[12],
   },
 
   // ── Segments ──
   segmentContainer: {
     flexDirection: 'row',
-    backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[8],
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: 30,
     padding: 4,
     marginBottom: premiumSpacing[24],
-    borderWidth: 1,
-    borderColor: premiumColors.border,
   },
   segmentBtn: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 12,
     alignItems: 'center',
-    borderRadius: premiumRadius[8],
+    borderRadius: 26,
     backgroundColor: 'transparent',
   },
   segmentBtnActive: {
-    backgroundColor: premiumColors.surface2,
-    borderWidth: 1,
-    borderColor: premiumColors.borderSoft,
+    backgroundColor: premiumColors.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   segmentText: {
     fontSize: 13,
     color: premiumColors.textSecondary,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   segmentTextActive: {
     color: premiumColors.text,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   // ── Redeem Card ──
   redeemCard: {
     backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[12],
+    borderRadius: premiumRadius[16],
     borderWidth: 1,
     borderColor: premiumColors.border,
-    padding: premiumSpacing[16],
+    padding: premiumSpacing[20],
     marginBottom: premiumSpacing[32],
   },
   redeemTitle: {
@@ -477,55 +499,59 @@ const getStyles = (premiumColors: any, isDark: boolean, theme: any, insets: any)
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: premiumSpacing[12],
+    marginBottom: premiumSpacing[16],
   },
   input: {
     backgroundColor: premiumColors.surface2,
     borderWidth: 1,
     borderColor: premiumColors.borderSoft,
     color: premiumColors.text,
-    borderRadius: premiumRadius[8],
-    height: 48,
+    borderRadius: premiumRadius[12],
+    height: 52,
     paddingHorizontal: premiumSpacing[16],
-    fontSize: 14,
+    fontSize: 15,
     marginBottom: premiumSpacing[16],
   },
   btn: {
     backgroundColor: premiumColors.brand,
-    height: 48,
-    borderRadius: premiumRadius[8],
+    height: 52,
+    borderRadius: premiumRadius[12],
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: premiumColors.brand,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   btnDisabled: {
     opacity: 0.5,
+    shadowOpacity: 0,
   },
   btnText: {
     color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14,
+    fontWeight: '800',
+    fontSize: 15,
   },
 
   // ── Transaction List ──
   listContainer: {
-    backgroundColor: premiumColors.surface,
-    borderRadius: premiumRadius[12],
-    borderWidth: 1,
-    borderColor: premiumColors.border,
-    overflow: 'hidden',
+    gap: premiumSpacing[12],
   },
   rowItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: premiumColors.surface,
     padding: premiumSpacing[16],
-    borderBottomWidth: 1,
-    borderBottomColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     gap: premiumSpacing[12],
   },
   rowAvatar: {
     width: 44,
     height: 44,
-    borderRadius: premiumRadius[8],
+    borderRadius: premiumRadius[12],
     backgroundColor: premiumColors.surface2,
     borderWidth: 1,
     borderColor: premiumColors.border,
@@ -538,22 +564,22 @@ const getStyles = (premiumColors: any, isDark: boolean, theme: any, insets: any)
     minWidth: 0,
   },
   rowTitle: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: premiumColors.text,
     marginBottom: 4,
   },
   rowSubtitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: premiumColors.textMuted,
   },
   rowRight: {
     flexShrink: 0,
-    marginLeft: premiumSpacing[8],
+    alignItems: 'flex-end',
   },
   deltaText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
   },
 
   // ── Empty State ──
