@@ -104,29 +104,38 @@ export default function RefereeHome() {
         <View style={styles.content}>
           {/* ── Sleek Metrics Grid ── */}
           <Section title="Tổng quan nhiệm vụ">
-            <View style={styles.statsGrid}>
-              <View style={[styles.statCard, pendingCount > 0 && styles.statCardActive]}>
-                <View style={[styles.statIconWrapper, pendingCount > 0 && styles.statIconWrapperActive]}>
-                  <MaterialIcons name="fiber-new" size={20} color={pendingCount > 0 ? premiumColors.brand : premiumColors.textSecondary} />
+            <View style={{ gap: premiumSpacing[12] }}>
+              <TouchableOpacity 
+                activeOpacity={0.8}
+                onPress={() => router.push('/assignments' as any)}
+                style={[styles.statCard, { flexDirection: 'row', alignItems: 'center' }, pendingCount > 0 && styles.statCardActive]}
+              >
+                <View style={[styles.statIconWrapper, { marginBottom: 0, marginRight: 16 }, pendingCount > 0 && styles.statIconWrapperActive]}>
+                  <MaterialIcons name="fiber-new" size={24} color={pendingCount > 0 ? premiumColors.brand : premiumColors.textSecondary} />
                 </View>
-                <Text style={[styles.statValue, pendingCount > 0 && { color: premiumColors.brand }]}>{pendingCount}</Text>
-                <Text style={styles.statLabel}>Phân công mới</Text>
-              </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.statLabel, pendingCount > 0 && { color: premiumColors.brand }]}>Phân công mới</Text>
+                  <Text style={[styles.statValue, { fontSize: 28 }, pendingCount > 0 && { color: premiumColors.brand }]}>{pendingCount}</Text>
+                </View>
+                {pendingCount > 0 && <MaterialIcons name="chevron-right" size={24} color={premiumColors.brand} />}
+              </TouchableOpacity>
 
-              <View style={styles.statCard}>
-                <View style={styles.statIconWrapper}>
-                  <MaterialIcons name="assignment-turned-in" size={20} color={premiumColors.textSecondary} />
+              <View style={{ flexDirection: 'row', gap: premiumSpacing[12] }}>
+                <View style={styles.statCard}>
+                  <View style={styles.statIconWrapper}>
+                    <MaterialIcons name="assignment-turned-in" size={20} color={premiumColors.textSecondary} />
+                  </View>
+                  <Text style={styles.statValue}>{acceptedCount}</Text>
+                  <Text style={styles.statLabel}>Đã tiếp nhận</Text>
                 </View>
-                <Text style={styles.statValue}>{acceptedCount}</Text>
-                <Text style={styles.statLabel}>Đã tiếp nhận</Text>
-              </View>
 
-              <View style={styles.statCard}>
-                <View style={styles.statIconWrapper}>
-                  <MaterialIcons name="fact-check" size={20} color={premiumColors.textSecondary} />
+                <View style={styles.statCard}>
+                  <View style={styles.statIconWrapper}>
+                    <MaterialIcons name="fact-check" size={20} color={premiumColors.textSecondary} />
+                  </View>
+                  <Text style={styles.statValue}>{totalCount}</Text>
+                  <Text style={styles.statLabel}>Tổng nhiệm vụ</Text>
                 </View>
-                <Text style={styles.statValue}>{totalCount}</Text>
-                <Text style={styles.statLabel}>Tổng nhiệm vụ</Text>
               </View>
             </View>
           </Section>
@@ -134,12 +143,12 @@ export default function RefereeHome() {
           {/* ── Quick Actions ── */}
           <Section title="Điều hành">
             <ActionGrid
-              columns={2}
+              columns={4}
               actions={[
-                { title: 'Nhiệm vụ', subtitle: 'Xem phân công', icon: 'assignment', tone: 'brand', onPress: () => router.push('/assignments' as any) },
-                { title: 'Xếp hạng', subtitle: 'Top chiến mã', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/(referee)/leaderboard' as any) },
-                { title: 'Ví điện tử', subtitle: 'Thu nhập', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/wallet') },
-                { title: 'Cá nhân', subtitle: 'Hồ sơ', icon: 'person', tone: 'brand', onPress: () => router.push('/profile') },
+                { title: 'Nhiệm vụ', icon: 'assignment', tone: 'brand', onPress: () => router.push('/assignments' as any) },
+                { title: 'Xếp hạng', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/(referee)/leaderboard' as any) },
+                { title: 'Ví điện tử', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/wallet') },
+                { title: 'Cá nhân', icon: 'person', tone: 'brand', onPress: () => router.push('/profile') },
               ]}
             />
           </Section>
