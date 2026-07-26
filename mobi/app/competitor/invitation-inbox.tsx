@@ -378,7 +378,7 @@ export default function InvitationInboxScreen() {
                       <View style={styles.messageBox}>
                         <Text style={styles.messageBoxTitle}>Lời nhắn từ chủ ngựa:</Text>
                         <Text style={styles.messageBoxText}>
-                          "{selectedInvitation.message}"
+                          &quot;{selectedInvitation.message}&quot;
                         </Text>
                       </View>
                     ) : null}
