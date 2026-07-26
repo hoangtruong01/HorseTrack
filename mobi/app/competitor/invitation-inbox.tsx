@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl, Modal, ScrollView } from 'react-native';
 import { jockeyInvitationsApi } from '../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { AppScreen } from '@/components/ui/premium';
@@ -13,6 +13,8 @@ export default function InvitationInboxScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedInvitation, setSelectedInvitation] = useState<any | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -112,7 +114,14 @@ export default function InvitationInboxScreen() {
     const tourShort = tourName.split(' ')[0].toUpperCase();
 
     return (
-      <View style={styles.card}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => {
+          setSelectedInvitation(item);
+          setShowModal(true);
+        }}
+        activeOpacity={0.9}
+      >
         {/* Ticket Edge with Perforations */}
         <View style={styles.ticketEdge}>
           {[...Array(6)].map((_, i) => (
@@ -182,7 +191,7 @@ export default function InvitationInboxScreen() {
             </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -222,6 +231,212 @@ export default function InvitationInboxScreen() {
           )
         }
       />
+
+      {/* Modal chi tiết lời mời */}
+      <Modal
+        visible={showModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalHeaderTitle}>CHI TIẾT LỜI MỜI</Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowModal(false)}
+                activeOpacity={0.7}
+              >
+                <MaterialIcons name="close" size={22} color={theme.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            {selectedInvitation && (
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.modalScrollContent}
+              >
+                {/* ── TOURNAMENT & RACE INFO ── */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Giải đấu & Trận đấu</Text>
+                  
+                  <View style={styles.infoBlock}>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="emoji-events" size={16} color={premiumColors.brand} />
+                      <Text style={styles.infoLabel}>Giải đấu:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.tournamentId?.name || 'Chưa rõ'}
+                      </Text>
+                    </View>
+                    
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="directions-run" size={16} color={premiumColors.brand} />
+                      <Text style={styles.infoLabel}>Trận đấu:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.raceId?.name || 'Chưa rõ'}
+                      </Text>
+                    </View>
+                    
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="schedule" size={16} color={premiumColors.brand} />
+                      <Text style={styles.infoLabel}>Thời gian:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.raceId?.startTime
+                          ? new Date(selectedInvitation.raceId.startTime).toLocaleString('vi-VN')
+                          : 'Chưa rõ'}
+                      </Text>
+                    </View>
+                    
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="place" size={16} color={premiumColors.brand} />
+                      <Text style={styles.infoLabel}>Địa điểm:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.raceId?.location || 'Trường đua chính'}
+                      </Text>
+                    </View>
+
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="straighten" size={16} color={premiumColors.brand} />
+                      <Text style={styles.infoLabel}>Cự ly:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.raceId?.distanceMeters || 0}m 
+                        {selectedInvitation.raceId?.lapCount ? ` (${selectedInvitation.raceId.lapCount} vòng)` : ''}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* ── HORSE INFO ── */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Thông số Chiến mã</Text>
+                  
+                  <View style={styles.infoBlock}>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="pets" size={16} color={premiumColors.success} />
+                      <Text style={styles.infoLabel}>Tên ngựa:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.horseId?.name || 'Chưa rõ'}
+                      </Text>
+                    </View>
+                    
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="info" size={16} color={premiumColors.success} />
+                      <Text style={styles.infoLabel}>Giống & Tuổi:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.horseId?.breed || 'Thường'} · {selectedInvitation.horseId?.age || '?'} tuổi
+                      </Text>
+                    </View>
+
+                    {/* Stats Grid */}
+                    <View style={styles.statsGrid}>
+                      <View style={styles.statCard}>
+                        <Text style={styles.statLabel}>Tốc độ</Text>
+                        <Text style={styles.statVal}>
+                          {selectedInvitation.horseId?.baseSpeed || 50}
+                        </Text>
+                      </View>
+                      <View style={styles.statCard}>
+                        <Text style={styles.statLabel}>Thể lực</Text>
+                        <Text style={styles.statVal}>
+                          {selectedInvitation.horseId?.staminaScore || 50}
+                        </Text>
+                      </View>
+                      <View style={styles.statCard}>
+                        <Text style={styles.statLabel}>Sức khỏe</Text>
+                        <Text style={[styles.statVal, { color: selectedInvitation.horseId?.healthStatus === 'HEALTHY' ? premiumColors.success : premiumColors.warning }]}>
+                          {selectedInvitation.horseId?.healthStatus === 'HEALTHY' ? 'Tốt' : 'Tạm ổn'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* ── PARTNERSHIP INFO ── */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Đề nghị hợp tác</Text>
+                  
+                  <View style={styles.infoBlock}>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="person" size={16} color="#3B82F6" />
+                      <Text style={styles.infoLabel}>Chủ ngựa:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.ownerId?.fullName || 'Chủ trại'}
+                      </Text>
+                    </View>
+                    
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="monetization-on" size={16} color="#F59E0B" />
+                      <Text style={styles.infoLabel}>Chia thưởng:</Text>
+                      <Text style={[styles.infoValue, { color: '#F59E0B', fontWeight: '900' }]}>
+                        {selectedInvitation.jockeySharePercent || 30}% giải thưởng
+                      </Text>
+                    </View>
+
+                    {selectedInvitation.message ? (
+                      <View style={styles.messageBox}>
+                        <Text style={styles.messageBoxTitle}>Lời nhắn từ chủ ngựa:</Text>
+                        <Text style={styles.messageBoxText}>
+                          "{selectedInvitation.message}"
+                        </Text>
+                      </View>
+                    ) : null}
+
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="event" size={16} color="#9CA3AF" />
+                      <Text style={styles.infoLabel}>Ngày gửi:</Text>
+                      <Text style={styles.infoValue}>
+                        {selectedInvitation.createdAt 
+                          ? new Date(selectedInvitation.createdAt).toLocaleDateString('vi-VN')
+                          : 'Chưa rõ'}
+                      </Text>
+                    </View>
+
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="info-outline" size={16} color="#9CA3AF" />
+                      <Text style={styles.infoLabel}>Trạng thái:</Text>
+                      <View style={[styles.statusBadgeInline, { backgroundColor: getStatusColor(selectedInvitation.status) + '15', borderColor: getStatusColor(selectedInvitation.status) + '40' }]}>
+                        <Text style={[styles.statusBadgeInlineText, { color: getStatusColor(selectedInvitation.status) }]}>
+                          {getStatusText(selectedInvitation.status)}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              </ScrollView>
+            )}
+
+            {/* Modal Actions */}
+            {selectedInvitation && selectedInvitation.status === 'PENDING' && (
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalBtnReject}
+                  onPress={() => {
+                    setShowModal(false);
+                    handleRespond(selectedInvitation._id, 'REJECTED');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.modalBtnRejectText}>Từ chối</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={styles.modalBtnAccept}
+                  onPress={() => {
+                    setShowModal(false);
+                    handleRespond(selectedInvitation._id, 'ACCEPTED');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="check" size={18} color="#FFFFFF" style={{ marginRight: 4 }} />
+                  <Text style={styles.modalBtnAcceptText}>Chấp nhận</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </AppScreen>
   );
 }
@@ -432,6 +647,166 @@ const getStyles = (isDark: boolean, theme: any, premiumColors: any) => {
       color: theme.textPrimary,
       fontSize: 13,
       fontWeight: '700',
-    }
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      justifyContent: 'flex-end',
+    },
+    modalContent: {
+      backgroundColor: cardBgColor,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      maxHeight: '85%',
+      minHeight: '50%',
+      paddingBottom: premiumSpacing[24],
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 18,
+      borderBottomWidth: 1,
+      borderBottomColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    },
+    modalHeaderTitle: {
+      fontSize: 16,
+      fontWeight: '800',
+      color: theme.textPrimary,
+      letterSpacing: 1,
+    },
+    modalCloseButton: {
+      padding: 4,
+    },
+    modalScrollContent: {
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 32,
+    },
+    modalSection: {
+      marginBottom: 20,
+    },
+    modalSectionTitle: {
+      fontSize: 12,
+      fontWeight: '800',
+      color: '#9CA3AF',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 8,
+    },
+    infoBlock: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+      borderRadius: 12,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    infoLabel: {
+      width: 80,
+      fontSize: 12,
+      color: '#9CA3AF',
+      marginLeft: 8,
+    },
+    infoValue: {
+      flex: 1,
+      fontSize: 13,
+      fontWeight: '700',
+      color: theme.textPrimary,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 8,
+      gap: 8,
+    },
+    statCard: {
+      flex: 1,
+      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+      borderRadius: 8,
+      padding: 10,
+      alignItems: 'center',
+    },
+    statLabel: {
+      fontSize: 10,
+      color: '#9CA3AF',
+      marginBottom: 2,
+    },
+    statVal: {
+      fontSize: 14,
+      fontWeight: '900',
+      color: theme.textPrimary,
+    },
+    messageBox: {
+      backgroundColor: 'rgba(245, 158, 11, 0.08)',
+      borderLeftWidth: 3,
+      borderLeftColor: '#F59E0B',
+      padding: 10,
+      borderRadius: 6,
+      marginVertical: 10,
+    },
+    messageBoxTitle: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: '#F59E0B',
+      marginBottom: 2,
+    },
+    messageBoxText: {
+      fontSize: 12,
+      color: theme.textPrimary,
+      fontStyle: 'italic',
+    },
+    statusBadgeInline: {
+      borderWidth: 1,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 8,
+    },
+    statusBadgeInlineText: {
+      fontSize: 10,
+      fontWeight: '700',
+    },
+    modalActions: {
+      flexDirection: 'row',
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+      gap: 12,
+    },
+    modalBtnReject: {
+      flex: 1,
+      height: 44,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: '#EF4444',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(239, 68, 68, 0.05)',
+    },
+    modalBtnRejectText: {
+      color: '#EF4444',
+      fontSize: 14,
+      fontWeight: '700',
+    },
+    modalBtnAccept: {
+      flex: 2,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: '#10B981',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    modalBtnAcceptText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '700',
+    },
   });
 };

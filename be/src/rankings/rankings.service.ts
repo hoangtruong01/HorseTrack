@@ -215,20 +215,22 @@ export class RankingsService {
 
     const raw =
       await this.resultModel.aggregate<Omit<RankingEntry, 'rank'>>(pipeline);
-    return raw.map(
-      (entry, index): RankingEntry => ({
-        horseId: String(entry.horseId),
-        horseName: entry.horseName,
-        breed: entry.breed,
-        avatar: entry.avatar,
-        ownerName: entry.ownerName,
-        totalPoints: entry.totalPoints,
-        totalRaces: entry.totalRaces,
-        wins: entry.wins,
-        totalFinishTimeMs: entry.totalFinishTimeMs,
-        rank: index + 1,
-      }),
-    );
+    return raw
+      .map(
+        (entry, index): RankingEntry => ({
+          horseId: String(entry.horseId),
+          horseName: entry.horseName,
+          breed: entry.breed,
+          avatar: entry.avatar,
+          ownerName: entry.ownerName,
+          totalPoints: entry.totalPoints,
+          totalRaces: entry.totalRaces,
+          wins: entry.wins,
+          totalFinishTimeMs: entry.totalFinishTimeMs,
+          rank: index + 1,
+        }),
+      )
+      .slice(0, 10);
   }
 
   async getGlobalJockeyRankings(): Promise<JockeyRankingEntry[]> {
@@ -292,19 +294,21 @@ export class RankingsService {
       await this.resultModel.aggregate<Omit<JockeyRankingEntry, 'rank'>>(
         pipeline,
       );
-    return raw.map(
-      (entry, index): JockeyRankingEntry => ({
-        jockeyUserId: String(entry.jockeyUserId),
-        jockeyName: entry.jockeyName,
-        avatar: entry.avatar,
-        experienceYears: entry.experienceYears,
-        skillLevel: entry.skillLevel,
-        totalPoints: entry.totalPoints,
-        totalRaces: entry.totalRaces,
-        wins: entry.wins,
-        totalFinishTimeMs: entry.totalFinishTimeMs,
-        rank: index + 1,
-      }),
-    );
+    return raw
+      .map(
+        (entry, index): JockeyRankingEntry => ({
+          jockeyUserId: String(entry.jockeyUserId),
+          jockeyName: entry.jockeyName,
+          avatar: entry.avatar,
+          experienceYears: entry.experienceYears,
+          skillLevel: entry.skillLevel,
+          totalPoints: entry.totalPoints,
+          totalRaces: entry.totalRaces,
+          wins: entry.wins,
+          totalFinishTimeMs: entry.totalFinishTimeMs,
+          rank: index + 1,
+        }),
+      )
+      .slice(0, 10);
   }
 }
