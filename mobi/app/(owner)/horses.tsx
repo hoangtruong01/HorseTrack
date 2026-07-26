@@ -30,6 +30,8 @@ export default function OwnerHorses() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>('approved');
   const [showCreate, setShowCreate] = useState(false);
+  const [selectedHorse, setSelectedHorse] = useState<any | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ name: '', breed: '', age: '', color: '', weightKg: '', heightCm: '', description: '' });
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -191,7 +193,15 @@ export default function OwnerHorses() {
           currentHorses.map(h => {
             const st = statusLabel(h.approvalStatus || h.status);
             return (
-              <View key={h._id || h.id} style={styles.horseCard}>
+              <TouchableOpacity
+                key={h._id || h.id}
+                style={styles.horseCard}
+                activeOpacity={0.8}
+                onPress={() => {
+                  setSelectedHorse(h);
+                  setShowDetail(true);
+                }}
+              >
                 {/* Badge Trạng thái ở góc phải */}
                 <View style={styles.cardHeaderRow}>
                   <View style={[styles.statusBadge, { backgroundColor: st.color + '15', borderColor: st.color + '40' }]}>
@@ -258,7 +268,7 @@ export default function OwnerHorses() {
                     </Text>
                   </View>
                 )}
-              </View>
+              </TouchableOpacity>
             );
           })
         )}
@@ -381,6 +391,102 @@ export default function OwnerHorses() {
                 activeOpacity={0.8}
               >
                 <Text style={styles.btnPrimaryText}>{creating ? 'Đang thêm...' : 'Thêm mới'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Detail Horse Modal */}
+      <Modal visible={showDetail && !!selectedHorse} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Chi Tiết Chiến Mã</Text>
+              <TouchableOpacity onPress={() => { setShowDetail(false); setSelectedHorse(null); }} style={styles.closeIconBox} activeOpacity={0.8}>
+                <MaterialIcons name="close" size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            {selectedHorse && (
+              <ScrollView style={{ maxHeight: 480 }} showsVerticalScrollIndicator={false}>
+                {/* Image Section */}
+                <View style={styles.detailImageContainer}>
+                  {selectedHorse.image ? (
+                    <Image source={{ uri: selectedHorse.image }} style={styles.detailImage} />
+                  ) : (
+                    <View style={styles.detailImagePlaceholder}>
+                      <MaterialIcons name="pets" size={64} color={colors.brand} />
+                      <Text style={{ color: colors.textMuted, marginTop: 8, fontSize: 13, fontWeight: '600' }}>Không có hình ảnh</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Name */}
+                <Text style={styles.detailName}>{selectedHorse.name}</Text>
+                
+                {/* Rejection Reason if any */}
+                {selectedHorse.approvalStatus === 'REJECTED' && selectedHorse.rejectionReason && (
+                  <View style={styles.rejectionBox}>
+                    <Text style={styles.rejectionTitle}>LÝ DO TỪ CHỐI TỪ ADMIN:</Text>
+                    <Text style={styles.rejectionText}>{selectedHorse.rejectionReason}</Text>
+                  </View>
+                )}
+
+                {/* Stats Grid */}
+                <Text style={styles.sectionLabel}>Thông số kỹ thuật</Text>
+                <View style={styles.detailGrid}>
+                  <View style={styles.detailGridItem}>
+                    <Text style={styles.gridLabel}>Tốc độ cơ bản</Text>
+                    <Text style={styles.gridValue}>{selectedHorse.baseSpeed || 50} km/h</Text>
+                  </View>
+                  <View style={styles.detailGridItem}>
+                    <Text style={styles.gridLabel}>Thể lực</Text>
+                    <Text style={styles.gridValue}>{selectedHorse.staminaScore || 70}/100</Text>
+                  </View>
+                  <View style={styles.detailGridItem}>
+                    <Text style={styles.gridLabel}>Trạng thái</Text>
+                    <Text style={[styles.gridValue, { color: selectedHorse.healthStatus === 'healthy' ? colors.success : colors.danger }]}>
+                      {selectedHorse.healthStatus === 'healthy' ? 'Khỏe mạnh' : 'Chấn thương'}
+                    </Text>
+                  </View>
+                  <View style={styles.detailGridItem}>
+                    <Text style={styles.gridLabel}>Giống</Text>
+                    <Text style={styles.gridValue}>{selectedHorse.breed || 'Chưa rõ'}</Text>
+                  </View>
+                  <View style={styles.detailGridItem}>
+                    <Text style={styles.gridLabel}>Tuổi</Text>
+                    <Text style={styles.gridValue}>{selectedHorse.age ? `${selectedHorse.age} tuổi` : 'Chưa rõ'}</Text>
+                  </View>
+                  <View style={styles.detailGridItem}>
+                    <Text style={styles.gridLabel}>Màu lông</Text>
+                    <Text style={styles.gridValue}>{selectedHorse.color || 'Chưa rõ'}</Text>
+                  </View>
+                  <View style={styles.detailGridItem}>
+                    <Text style={styles.gridLabel}>Cân nặng</Text>
+                    <Text style={styles.gridValue}>{selectedHorse.weightKg ? `${selectedHorse.weightKg} kg` : 'Chưa rõ'}</Text>
+                  </View>
+                  <View style={styles.detailGridItem}>
+                    <Text style={styles.gridLabel}>Chiều cao</Text>
+                    <Text style={styles.gridValue}>{selectedHorse.heightCm ? `${selectedHorse.heightCm} cm` : 'Chưa rõ'}</Text>
+                  </View>
+                </View>
+
+                {/* Description */}
+                {selectedHorse.description && (
+                  <View style={{ marginTop: 16 }}>
+                    <Text style={styles.sectionLabel}>Mô tả</Text>
+                    <View style={styles.detailDescBox}>
+                      <Text style={styles.detailDescText}>{selectedHorse.description}</Text>
+                    </View>
+                  </View>
+                )}
+              </ScrollView>
+            )}
+
+            <View style={{ marginTop: 16 }}>
+              <TouchableOpacity style={styles.btnOutlineModal} onPress={() => { setShowDetail(false); setSelectedHorse(null); }} activeOpacity={0.8}>
+                <Text style={styles.btnOutlineText}>Đóng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -660,5 +766,99 @@ const getStyles = (isDark: boolean, colors: any) => StyleSheet.create({
   },
   btnDisabled: {
     opacity: 0.5,
+  },
+  detailImageContainer: {
+    width: '100%',
+    height: 180,
+    borderRadius: premiumRadius[16],
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+    marginBottom: 16,
+  },
+  detailImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  detailImagePlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  detailName: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  rejectionBox: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderWidth: 1,
+    borderColor: colors.danger,
+    borderRadius: premiumRadius[12],
+    padding: 12,
+    marginBottom: 16,
+  },
+  rejectionTitle: {
+    color: colors.danger,
+    fontSize: 10,
+    fontWeight: '900',
+    marginBottom: 4,
+  },
+  rejectionText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  sectionLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  detailGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  detailGridItem: {
+    width: '48%',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F4F4F5',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: premiumRadius[12],
+    padding: 10,
+  },
+  gridLabel: {
+    color: colors.textMuted,
+    fontSize: 9,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  gridValue: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  detailDescBox: {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#F9F9FB',
+    borderRadius: premiumRadius[12],
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  detailDescText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 20,
+    fontStyle: 'italic',
   },
 });

@@ -39,6 +39,8 @@ export default function OwnerInvitations() {
   const [invMessage, setInvMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [selectedJockeyForDetail, setSelectedJockeyForDetail] = useState<any | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -200,56 +202,64 @@ export default function OwnerInvitations() {
                 const winRate = j.totalRaces > 0 ? ((j.wins / j.totalRaces) * 100).toFixed(1) : '0';
                 return (
                   <View key={j._id} style={styles.jockeyCard}>
-                    {/* TOP ROW: Info & Badge */}
-                    <View style={styles.jcTopRow}>
-                      <View style={styles.jcAvatarWrap}>
-                        {avatar ? (
-                          <Image source={{ uri: avatar }} style={{ width: 56, height: 56, borderRadius: 28 }} resizeMode="cover" />
-                        ) : (
-                          <Text style={styles.jcAvatarInitial}>{name.charAt(0).toUpperCase()}</Text>
-                        )}
-                      </View>
-                      <View style={styles.jcInfoWrap}>
-                        <Text style={styles.jcName} numberOfLines={1}>{name}</Text>
-                        <Text style={styles.jcEmail} numberOfLines={1}>{email}</Text>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        setSelectedJockeyForDetail(j);
+                        setShowDetailModal(true);
+                      }}
+                    >
+                      {/* TOP ROW: Info & Badge */}
+                      <View style={styles.jcTopRow}>
+                        <View style={styles.jcAvatarWrap}>
+                          {avatar ? (
+                            <Image source={{ uri: avatar }} style={{ width: 56, height: 56, borderRadius: 28 }} resizeMode="cover" />
+                          ) : (
+                            <Text style={styles.jcAvatarInitial}>{name.charAt(0).toUpperCase()}</Text>
+                          )}
+                        </View>
+                        <View style={styles.jcInfoWrap}>
+                          <Text style={styles.jcName} numberOfLines={1}>{name}</Text>
+                          <Text style={styles.jcEmail} numberOfLines={1}>{email}</Text>
 
-                        <View style={styles.jcTagsRow}>
-                          {j.heightCm > 0 && <Text style={styles.jcTagText}>{j.heightCm}cm</Text>}
-                          {j.heightCm > 0 && j.weightKg > 0 && <Text style={styles.jcTagDot}>•</Text>}
-                          {j.weightKg > 0 && <Text style={styles.jcTagText}>{j.weightKg}kg</Text>}
+                          <View style={styles.jcTagsRow}>
+                            {j.heightCm > 0 && <Text style={styles.jcTagText}>{j.heightCm}cm</Text>}
+                            {j.heightCm > 0 && j.weightKg > 0 && <Text style={styles.jcTagDot}>•</Text>}
+                            {j.weightKg > 0 && <Text style={styles.jcTagText}>{j.weightKg}kg</Text>}
+                          </View>
+                        </View>
+                        {j.specialty ? (
+                          <View style={styles.jcSpecialtyBadge}>
+                            <Text style={styles.jcSpecialtyText}>⭐ {j.specialty}</Text>
+                          </View>
+                        ) : null}
+                      </View>
+
+                      {/* STATS BANNER */}
+                      <View style={styles.jcStatsBanner}>
+                        <View style={styles.jcStatItem}>
+                          <Text style={styles.jcStatValue}>{j.experienceYears || 0}</Text>
+                          <Text style={styles.jcStatLabel}>NĂM KN</Text>
+                        </View>
+                        <View style={styles.jcStatDivider} />
+                        <View style={styles.jcStatItem}>
+                          <Text style={styles.jcStatValue}>{j.totalRaces || 0}</Text>
+                          <Text style={styles.jcStatLabel}>TRẬN</Text>
+                        </View>
+                        <View style={styles.jcStatDivider} />
+                        <View style={styles.jcStatItem}>
+                          <Text style={[styles.jcStatValue, { color: colors.success }]}>{winRate}%</Text>
+                          <Text style={styles.jcStatLabel}>TỶ LỆ THẮNG</Text>
                         </View>
                       </View>
-                      {j.specialty ? (
-                        <View style={styles.jcSpecialtyBadge}>
-                          <Text style={styles.jcSpecialtyText}>⭐ {j.specialty}</Text>
-                        </View>
-                      ) : null}
-                    </View>
 
-                    {/* STATS BANNER */}
-                    <View style={styles.jcStatsBanner}>
-                      <View style={styles.jcStatItem}>
-                        <Text style={styles.jcStatValue}>{j.experienceYears || 0}</Text>
-                        <Text style={styles.jcStatLabel}>NĂM KN</Text>
-                      </View>
-                      <View style={styles.jcStatDivider} />
-                      <View style={styles.jcStatItem}>
-                        <Text style={styles.jcStatValue}>{j.totalRaces || 0}</Text>
-                        <Text style={styles.jcStatLabel}>TRẬN</Text>
-                      </View>
-                      <View style={styles.jcStatDivider} />
-                      <View style={styles.jcStatItem}>
-                        <Text style={[styles.jcStatValue, { color: colors.success }]}>{winRate}%</Text>
-                        <Text style={styles.jcStatLabel}>TỶ LỆ THẮNG</Text>
-                      </View>
-                    </View>
-
-                    {/* BIO */}
-                    {j.bio && (
-                      <Text style={styles.jcBio} numberOfLines={2}>
-                        &quot;{j.bio}&quot;
-                      </Text>
-                    )}
+                      {/* BIO */}
+                      {j.bio && (
+                        <Text style={styles.jcBio} numberOfLines={2}>
+                          &quot;{j.bio}&quot;
+                        </Text>
+                      )}
+                    </TouchableOpacity>
 
                     <TouchableOpacity
                       style={styles.jcActionBtn}
@@ -422,6 +432,129 @@ export default function OwnerInvitations() {
                 activeOpacity={0.8}
               >
                 <Text style={styles.btnPrimaryText}>{submitting ? 'Đang xử lý...' : 'Gửi lời mời'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Detail Jockey Modal */}
+      <Modal visible={showDetailModal && !!selectedJockeyForDetail} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Hồ Sơ Chi Tiết Jockey</Text>
+              <TouchableOpacity onPress={() => { setShowDetailModal(false); setSelectedJockeyForDetail(null); }} style={styles.closeIconBox} activeOpacity={0.8}>
+                <MaterialIcons name="close" size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            {selectedJockeyForDetail && (
+              <ScrollView style={{ maxHeight: 450 }} showsVerticalScrollIndicator={false}>
+                {/* Large Profile Header */}
+                <View style={styles.detailProfileHeader}>
+                  <View style={styles.detailAvatarWrap}>
+                    {selectedJockeyForDetail.userId?.avatar || selectedJockeyForDetail.userId?.avatarUrl || selectedJockeyForDetail.userId?.imageUrl || selectedJockeyForDetail.userId?.profilePicture ? (
+                      <Image 
+                        source={{ uri: selectedJockeyForDetail.userId.avatar || selectedJockeyForDetail.userId.avatarUrl || selectedJockeyForDetail.userId.imageUrl || selectedJockeyForDetail.userId.profilePicture }} 
+                        style={{ width: 80, height: 80, borderRadius: 40 }} 
+                        resizeMode="cover" 
+                      />
+                    ) : (
+                      <Text style={styles.detailAvatarInitial}>
+                        {(selectedJockeyForDetail.userId?.fullName || 'J').charAt(0).toUpperCase()}
+                      </Text>
+                    )}
+                  </View>
+                  <Text style={styles.detailFullName}>{selectedJockeyForDetail.userId?.fullName || 'Nài ngựa ẩn danh'}</Text>
+                  <Text style={styles.detailEmail}>{selectedJockeyForDetail.userId?.email}</Text>
+                  {selectedJockeyForDetail.userId?.phone && (
+                    <Text style={styles.detailPhone}>📞 {selectedJockeyForDetail.userId.phone}</Text>
+                  )}
+                </View>
+
+                {/* Stats Grid */}
+                <Text style={styles.fieldLabel}>Thông số & Hiệu suất thi đấu</Text>
+                <View style={styles.statsGrid}>
+                  <View style={styles.statsGridItem}>
+                    <Text style={styles.statsGridLabel}>Kinh nghiệm</Text>
+                    <Text style={styles.statsGridValue}>{selectedJockeyForDetail.experienceYears || 0} năm</Text>
+                  </View>
+                  <View style={styles.statsGridItem}>
+                    <Text style={styles.statsGridLabel}>Số trận đấu</Text>
+                    <Text style={styles.statsGridValue}>{selectedJockeyForDetail.totalRaces || 0} trận</Text>
+                  </View>
+                  <View style={styles.statsGridItem}>
+                    <Text style={styles.statsGridLabel}>Số trận thắng</Text>
+                    <Text style={styles.statsGridValue}>{selectedJockeyForDetail.wins || selectedJockeyForDetail.winCount || 0} trận</Text>
+                  </View>
+                  <View style={styles.statsGridItem}>
+                    <Text style={styles.statsGridLabel}>Tỷ lệ thắng</Text>
+                    <Text style={[styles.statsGridValue, { color: colors.success }]}>
+                      {selectedJockeyForDetail.totalRaces > 0 ? ((selectedJockeyForDetail.wins / selectedJockeyForDetail.totalRaces) * 100).toFixed(1) : '0'}%
+                    </Text>
+                  </View>
+                  <View style={styles.statsGridItem}>
+                    <Text style={styles.statsGridLabel}>Chiều cao</Text>
+                    <Text style={styles.statsGridValue}>{selectedJockeyForDetail.heightCm || '--'} cm</Text>
+                  </View>
+                  <View style={styles.statsGridItem}>
+                    <Text style={styles.statsGridLabel}>Cân nặng</Text>
+                    <Text style={styles.statsGridValue}>{selectedJockeyForDetail.weightKg || '--'} kg</Text>
+                  </View>
+                  <View style={styles.statsGridItem}>
+                    <Text style={styles.statsGridLabel}>Giấy phép</Text>
+                    <Text style={styles.statsGridValue} numberOfLines={1}>{selectedJockeyForDetail.licenseNumber || 'Chưa cấp'}</Text>
+                  </View>
+                  <View style={styles.statsGridItem}>
+                    <Text style={styles.statsGridLabel}>Cấp độ</Text>
+                    <Text style={styles.statsGridValue}>{selectedJockeyForDetail.skillLevel || 'Chưa rõ'}</Text>
+                  </View>
+                </View>
+
+                {/* Specialty */}
+                {selectedJockeyForDetail.specialty && (
+                  <View style={{ marginTop: 12 }}>
+                    <Text style={styles.fieldLabel}>Sở trường</Text>
+                    <View style={styles.specialtyBox}>
+                      <Text style={styles.specialtyText}>⭐ {selectedJockeyForDetail.specialty}</Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Bio Description */}
+                {selectedJockeyForDetail.bio && (
+                  <View style={{ marginTop: 12 }}>
+                    <Text style={styles.fieldLabel}>Tiểu sử bản thân</Text>
+                    <View style={styles.bioBox}>
+                      <Text style={styles.bioText}>{selectedJockeyForDetail.bio}</Text>
+                    </View>
+                  </View>
+                )}
+              </ScrollView>
+            )}
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity 
+                style={styles.btnOutlineModal} 
+                onPress={() => { setShowDetailModal(false); setSelectedJockeyForDetail(null); }} 
+                activeOpacity={0.8}
+              >
+                <Text style={styles.btnOutlineText}>Đóng</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.btnPrimaryModal}
+                onPress={() => {
+                  const j = selectedJockeyForDetail;
+                  setShowDetailModal(false);
+                  setSelectedJockeyForDetail(null);
+                  setTimeout(() => {
+                    openInviteModal(j);
+                  }, 300);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.btnPrimaryText}>Mời Hợp Tác</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -882,5 +1015,91 @@ const getStyles = (isDark: boolean, colors: any) => StyleSheet.create({
     backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  detailProfileHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  detailAvatarWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.brand,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    ...premiumShadows.redGlow,
+  },
+  detailAvatarInitial: {
+    color: '#FFFFFF',
+    fontSize: 32,
+    fontWeight: '900',
+  },
+  detailFullName: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  detailEmail: {
+    color: colors.textMuted,
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  detailPhone: {
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  statsGridItem: {
+    width: '48%',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F4F4F5',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: premiumRadius[12],
+    padding: 10,
+  },
+  statsGridLabel: {
+    color: colors.textMuted,
+    fontSize: 9,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  statsGridValue: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  specialtyBox: {
+    backgroundColor: 'rgba(214, 168, 79, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(214, 168, 79, 0.3)',
+    borderRadius: premiumRadius[12],
+    padding: 12,
+  },
+  specialtyText: {
+    color: colors.gold,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  bioBox: {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#F9F9FB',
+    borderRadius: premiumRadius[12],
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  bioText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 20,
+    fontStyle: 'italic',
   },
 });
