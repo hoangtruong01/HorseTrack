@@ -29,6 +29,8 @@ export default function SpectatorTournaments() {
 
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'open' | 'upcoming' | 'draft'>('all');
   const scrollViewRef = useRef<ScrollView>(null);
@@ -83,10 +85,27 @@ export default function SpectatorTournaments() {
 
 
   const filteredData = data.filter((t) => {
-    if (selectedFilter === 'all') return true;
-    if (selectedFilter === 'open') return t.status === 'ONGOING' || t.status === 'OPEN_REGISTRATION';
-    if (selectedFilter === 'upcoming') return t.status === 'UPCOMING' || t.status === 'CLOSED_REGISTRATION' || t.status === 'SCHEDULED';
-    if (selectedFilter === 'draft') return t.status === 'DRAFT';
+    // 1. Filter by status tabs
+    let matchFilter = true;
+    if (selectedFilter === 'open') {
+      matchFilter = t.status === 'ONGOING' || t.status === 'OPEN_REGISTRATION';
+    } else if (selectedFilter === 'upcoming') {
+      matchFilter = t.status === 'UPCOMING' || t.status === 'CLOSED_REGISTRATION' || t.status === 'SCHEDULED';
+    } else if (selectedFilter === 'draft') {
+      matchFilter = t.status === 'DRAFT';
+    }
+
+    if (!matchFilter) return false;
+
+    // 2. Filter by search query
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase().trim();
+      const name = (t.name || '').toLowerCase();
+      const desc = (t.description || '').toLowerCase();
+      const loc = (t.location || '').toLowerCase();
+      return name.includes(q) || desc.includes(q) || loc.includes(q);
+    }
+
     return true;
   });
 
@@ -571,20 +590,43 @@ export default function SpectatorTournaments() {
 
       {/* Custom Sleek Header */}
       <View style={s.customHeader}>
-        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={s.headerTitleText}>GIẢI ĐẤU</Text>
+        {!showSearch ? (
+          <>
+            <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={s.headerTitleText}>GIẢI ĐẤU</Text>
+              </View>
+            </View>
+            <View style={s.headerLeft} />
+            <View style={s.headerRight}>
+              <TouchableOpacity style={s.iconButton} onPress={() => setShowSearch(true)} activeOpacity={0.7}>
+                <MaterialIcons name="search" size={22} color={theme.textPrimary} />
+              </TouchableOpacity>
+              <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
+                <MaterialIcons name="filter-list" size={22} color={theme.textPrimary} />
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <View style={s.headerSearchContainer}>
+            <TouchableOpacity style={s.backIconButton} onPress={() => { setShowSearch(false); setSearchQuery(''); }} activeOpacity={0.7}>
+              <MaterialIcons name="arrow-back" size={22} color={theme.textPrimary} />
+            </TouchableOpacity>
+            <TextInput
+              style={s.headerSearchInput}
+              placeholder="Tìm kiếm giải đấu..."
+              placeholderTextColor={isDark ? '#6F7785' : '#8A8A8E'}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity style={s.clearSearchButton} onPress={() => setSearchQuery('')} activeOpacity={0.7}>
+                <MaterialIcons name="close" size={20} color={theme.textPrimary} />
+              </TouchableOpacity>
+            )}
           </View>
-        </View>
-        <View style={s.headerLeft} />
-        <View style={s.headerRight}>
-          <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
-            <MaterialIcons name="search" size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-          <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
-            <MaterialIcons name="filter-list" size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-        </View>
+        )}
       </View>
 
       {/* ── Filters Row ── */}
@@ -1435,5 +1477,23 @@ const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSh
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',
+  },
+  headerSearchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerSearchInput: {
+    flex: 1,
+    height: 38,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    borderRadius: premiumRadius[12],
+    paddingHorizontal: 12,
+    color: theme.textPrimary,
+    fontSize: 14,
+  },
+  clearSearchButton: {
+    padding: 4,
   },
 });
