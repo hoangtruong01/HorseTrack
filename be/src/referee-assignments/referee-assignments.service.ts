@@ -252,7 +252,14 @@ export class RefereeAssignmentsService {
     const [data, total] = await Promise.all([
       this.assignmentModel
         .find(filter)
-        .populate('raceId', 'name startTime status')
+        .populate({
+          path: 'raceId',
+          select: 'name startTime status distanceMeters location lapCount tournamentId',
+          populate: {
+            path: 'tournamentId',
+            select: 'name',
+          },
+        })
         .populate('assignedBy', 'fullName')
         .skip((page - 1) * limit)
         .limit(limit)

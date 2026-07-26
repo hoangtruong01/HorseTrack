@@ -1,6 +1,6 @@
 import { usePremiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Platform, Modal, ScrollView } from 'react-native';
 import { refereeAssignmentsApi, rewardPointLedgerApi } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +31,8 @@ export default function AssignedRacesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
+  const [selectedAssignment, setSelectedAssignment] = useState<any | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
   const router = useRouter();
 
   const loadAssignments = React.useCallback(async () => {
@@ -113,7 +115,14 @@ export default function AssignedRacesScreen() {
     });
 
     return (
-      <View style={styles.card}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => {
+          setSelectedAssignment(item);
+          setShowDetail(true);
+        }}
+        activeOpacity={0.9}
+      >
         <View style={styles.cardHeader}>
           <View>
             <Text style={styles.raceName}>{race.name.toUpperCase()}</Text>
@@ -179,7 +188,7 @@ export default function AssignedRacesScreen() {
             </TouchableOpacity>
           </View>
         )}
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -224,6 +233,152 @@ export default function AssignedRacesScreen() {
           )
         }
       />
+
+      {/* Modal Chi tiết nhiệm vụ */}
+      <Modal visible={showDetail && !!selectedAssignment} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Chi Tiết Nhiệm Vụ</Text>
+              <TouchableOpacity
+                onPress={() => { setShowDetail(false); setSelectedAssignment(null); }}
+                style={styles.closeIconBox}
+                activeOpacity={0.8}
+              >
+                <MaterialIcons name="close" size={24} color={theme.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            {selectedAssignment && selectedAssignment.raceId && (
+              <ScrollView style={{ maxHeight: 480 }} showsVerticalScrollIndicator={false}>
+                {/* ── SECTION 1: RACE & TOURNAMENT ── */}
+                <Text style={styles.sectionLabel}>Giải đấu & Trận đấu</Text>
+                <View style={styles.infoBlock}>
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="emoji-events" size={16} color={premiumColors.brand} />
+                    <Text style={styles.infoLabelText}>Giải đấu:</Text>
+                    <Text style={styles.infoValueText}>
+                      {selectedAssignment.raceId.tournamentId?.name || 'Giải đấu kịch tính'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="directions-run" size={16} color={premiumColors.brand} />
+                    <Text style={styles.infoLabelText}>Trận đấu:</Text>
+                    <Text style={styles.infoValueText}>
+                      {selectedAssignment.raceId.name || 'Chưa rõ'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="schedule" size={16} color={premiumColors.brand} />
+                    <Text style={styles.infoLabelText}>Bắt đầu:</Text>
+                    <Text style={styles.infoValueText}>
+                      {new Date(selectedAssignment.raceId.startTime).toLocaleString('vi-VN')}
+                    </Text>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="place" size={16} color={premiumColors.brand} />
+                    <Text style={styles.infoLabelText}>Địa điểm:</Text>
+                    <Text style={styles.infoValueText}>
+                      {selectedAssignment.raceId.location || 'Trường đua chính'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="straighten" size={16} color={premiumColors.brand} />
+                    <Text style={styles.infoLabelText}>Cự ly:</Text>
+                    <Text style={styles.infoValueText}>
+                      {selectedAssignment.raceId.distanceMeters || 0}m 
+                      {selectedAssignment.raceId.lapCount ? ` (${selectedAssignment.raceId.lapCount} vòng)` : ''}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* ── SECTION 2: ASSIGNMENT INFO ── */}
+                <Text style={[styles.sectionLabel, { marginTop: 16 }]}>Thông tin phân công</Text>
+                <View style={styles.infoBlock}>
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="security" size={16} color="#3B82F6" />
+                    <Text style={styles.infoLabelText}>Vai trò:</Text>
+                    <Text style={styles.infoValueText}>
+                      {selectedAssignment.role === 'main' ? 'TRỌNG TÀI CHÍNH' : 'TRỢ LÝ TRỌNG TÀI'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="monetization-on" size={16} color="#F59E0B" />
+                    <Text style={styles.infoLabelText}>Thù lao:</Text>
+                    <Text style={[styles.infoValueText, { color: '#F59E0B', fontWeight: '900' }]}>
+                      {(selectedAssignment.salary || 0).toLocaleString('vi-VN')} Pts
+                    </Text>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="person" size={16} color="#10B981" />
+                    <Text style={styles.infoLabelText}>Người giao:</Text>
+                    <Text style={styles.infoValueText}>
+                      {selectedAssignment.assignedBy?.fullName || 'Hệ thống'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <MaterialIcons name="info" size={16} color="#9CA3AF" />
+                    <Text style={styles.infoLabelText}>Trạng thái:</Text>
+                    <View style={[styles.statusBadgeInline, { backgroundColor: getStatusColor(selectedAssignment.status) + '15', borderColor: getStatusColor(selectedAssignment.status) + '40' }]}>
+                      <Text style={[styles.statusBadgeInlineText, { color: getStatusColor(selectedAssignment.status) }]}>
+                        {getStatusText(selectedAssignment.status)}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </ScrollView>
+            )}
+
+            {/* Modal Actions */}
+            {selectedAssignment && selectedAssignment.status === 'assigned' && (
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalBtnReject}
+                  onPress={() => {
+                    setShowDetail(false);
+                    handleRespond(selectedAssignment._id, 'declined');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.modalBtnRejectText}>Từ chối</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.modalBtnAccept}
+                  onPress={() => {
+                    setShowDetail(false);
+                    handleRespond(selectedAssignment._id, 'accepted');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="check" size={18} color="#FFFFFF" style={{ marginRight: 4 }} />
+                  <Text style={styles.modalBtnAcceptText}>Chấp nhận</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {selectedAssignment && selectedAssignment.status !== 'assigned' && (
+              <View style={{ marginTop: 16 }}>
+                <TouchableOpacity
+                  style={styles.btnOutlineModal}
+                  onPress={() => { setShowDetail(false); setSelectedAssignment(null); }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.btnOutlineText}>Đóng</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -373,5 +528,128 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
     fontSize: 13,
     marginTop: 12,
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: isDark ? '#0F0F12' : '#FFFFFF',
+    borderTopLeftRadius: premiumRadius[24],
+    borderTopRightRadius: premiumRadius[24],
+    padding: premiumSpacing[24],
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    color: theme.textPrimary,
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  closeIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: premiumRadius[8],
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionLabel: {
+    color: premiumColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  infoBlock: {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+    borderRadius: premiumRadius[12],
+    padding: 14,
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    marginBottom: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  infoLabelText: {
+    width: 85,
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginLeft: 8,
+  },
+  infoValueText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.textPrimary,
+  },
+  statusBadgeInline: {
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  statusBadgeInlineText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    marginTop: 16,
+    gap: 12,
+  },
+  modalBtnReject: {
+    flex: 1,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.05)',
+  },
+  modalBtnRejectText: {
+    color: '#EF4444',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  modalBtnAccept: {
+    flex: 2,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#10B981',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBtnAcceptText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  btnOutlineModal: {
+    borderWidth: 1,
+    borderColor: premiumColors.border,
+    borderRadius: premiumRadius[12],
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+  },
+  btnOutlineText: {
+    color: theme.textPrimary,
+    fontWeight: '700',
+    fontSize: 14,
   },
 });
