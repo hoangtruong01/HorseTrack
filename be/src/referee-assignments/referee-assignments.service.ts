@@ -254,7 +254,8 @@ export class RefereeAssignmentsService {
         .find(filter)
         .populate({
           path: 'raceId',
-          select: 'name startTime status distanceMeters location lapCount tournamentId',
+          select:
+            'name startTime status distanceMeters location lapCount tournamentId',
           populate: {
             path: 'tournamentId',
             select: 'name',

@@ -1,0 +1,17 @@
+{
+  "name": "horsetrack-e2e",
+  "version": "1.0.0",
+  "description": "E2E testing suite for HorseTrack using Playwright",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:fe": "playwright test tests/fe.spec.ts",
+    "test:mobi": "playwright test tests/mobi.spec.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}

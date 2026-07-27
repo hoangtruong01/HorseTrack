@@ -102,8 +102,7 @@ export class RaceResultsController {
   @Roles(RoleName.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({
-    summary:
-      'Reject results for a race and revert to LIVE for re-run (Admin)',
+    summary: 'Reject results for a race and revert to LIVE for re-run (Admin)',
   })
   reject(
     @Param('raceId', ParseObjectIdPipe) raceId: string,

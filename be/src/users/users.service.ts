@@ -117,8 +117,9 @@ export class UsersService {
     if (dto.phone !== undefined) updateData.phone = dto.phone;
     if (dto.avatar !== undefined) updateData.avatar = dto.avatar;
     if (dto.address !== undefined) updateData.address = dto.address;
-    if (dto.dob !== undefined) updateData.dob = dto.dob ? new Date(dto.dob) : undefined;
-    
+    if (dto.dob !== undefined)
+      updateData.dob = dto.dob ? new Date(dto.dob) : undefined;
+
     const updated = await this.usersRepository.update(id, updateData);
     if (!updated) throw new NotFoundException('User not found');
     return updated;
