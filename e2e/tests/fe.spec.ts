@@ -19,7 +19,7 @@ test.describe('HorseTrack FE Web App E2E Tests', () => {
     await page.goto('/register');
     
     // Verify signup form is visible
-    await expect(page.locator('input[placeholder*="full name"]')).toBeVisible();
+    await expect(page.locator('input[name="fullName"]')).toBeVisible();
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]').first()).toBeVisible();
   });
