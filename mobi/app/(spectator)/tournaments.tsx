@@ -29,6 +29,8 @@ export default function SpectatorTournaments() {
 
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'open' | 'upcoming' | 'draft'>('all');
   const scrollViewRef = useRef<ScrollView>(null);
@@ -73,7 +75,7 @@ export default function SpectatorTournaments() {
     tournamentsApi
       .list({ limit: 50 })
       .then((r) => setData((r as any).data || []))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => { setLoading(false); setRefreshing(false); });
   }, []);
 
@@ -89,10 +91,27 @@ export default function SpectatorTournaments() {
 
 
   const filteredData = data.filter((t) => {
-    if (selectedFilter === 'all') return true;
-    if (selectedFilter === 'open') return t.status === 'ONGOING' || t.status === 'OPEN_REGISTRATION';
-    if (selectedFilter === 'upcoming') return t.status === 'UPCOMING' || t.status === 'CLOSED_REGISTRATION' || t.status === 'SCHEDULED';
-    if (selectedFilter === 'draft') return t.status === 'DRAFT';
+    // 1. Filter by status tabs
+    let matchFilter = true;
+    if (selectedFilter === 'open') {
+      matchFilter = t.status === 'ONGOING' || t.status === 'OPEN_REGISTRATION';
+    } else if (selectedFilter === 'upcoming') {
+      matchFilter = t.status === 'UPCOMING' || t.status === 'CLOSED_REGISTRATION' || t.status === 'SCHEDULED';
+    } else if (selectedFilter === 'draft') {
+      matchFilter = t.status === 'DRAFT';
+    }
+
+    if (!matchFilter) return false;
+
+    // 2. Filter by search query
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase().trim();
+      const name = (t.name || '').toLowerCase();
+      const desc = (t.description || '').toLowerCase();
+      const loc = (t.location || '').toLowerCase();
+      return name.includes(q) || desc.includes(q) || loc.includes(q);
+    }
+
     return true;
   });
 
@@ -196,7 +215,7 @@ export default function SpectatorTournaments() {
         betPoints: betPoints,
       });
       Alert.alert('Thành công', 'Đặt dự đoán thành công!');
-      
+
       // Reload predictions & balance
       const predRes = await predictionsApi.listMyPredictions({ limit: 100 }).catch(() => ({ data: [] }));
       setMyPredictions(predRes.data || []);
@@ -301,15 +320,15 @@ export default function SpectatorTournaments() {
                     <Text style={s.predictedStatus}>
                       Kết quả: {
                         currentPrediction.status === 'WON' ? 'Thắng cược' :
-                        currentPrediction.status === 'LOST' ? 'Thua cược' :
-                        currentPrediction.status === 'PENDING' ? 'Chờ kết quả' : 'Đã hủy'
+                          currentPrediction.status === 'LOST' ? 'Thua cược' :
+                            currentPrediction.status === 'PENDING' ? 'Chờ kết quả' : 'Đã hủy'
                       }
                     </Text>
                   </View>
                   <View style={s.predictedReward}>
                     <Text style={[s.predictedRewardText, { color: currentPrediction.status === 'WON' ? premiumColors.success : premiumColors.brand }]}>
                       {currentPrediction.status === 'WON' ? `+${currentPrediction.rewardPoints || 0} Pts` :
-                       currentPrediction.status === 'LOST' ? `-${currentPrediction.betPoints || 0} Pts` : 'Chờ kết quả'}
+                        currentPrediction.status === 'LOST' ? `-${currentPrediction.betPoints || 0} Pts` : 'Chờ kết quả'}
                     </Text>
                     {currentPrediction.betPoints > 0 && (
                       <Text style={s.predictedBetText}>Cược: {currentPrediction.betPoints} Pts</Text>
@@ -350,7 +369,7 @@ export default function SpectatorTournaments() {
                               <Text style={s.aiSubscriptionTitle}>Yêu cầu gói AI</Text>
                               <Text style={s.aiSubscriptionDesc}>Đăng ký để xem dự đoán xác suất thắng.</Text>
                             </View>
-                            <TouchableOpacity onPress={() => {/* TODO: navigate to AI package */}}>
+                            <TouchableOpacity onPress={() => {/* TODO: navigate to AI package */ }}>
                               <Text style={s.aiSubscriptionAction}>Mua gói</Text>
                             </TouchableOpacity>
                           </View>
@@ -378,7 +397,7 @@ export default function SpectatorTournaments() {
                                         <Text style={s.aiResultProbability}>{(r.winProbability * 100).toFixed(0)}%</Text>
                                       </View>
                                     </View>
-                                    <TouchableOpacity 
+                                    <TouchableOpacity
                                       style={[s.aiSelectBtn, isSelected && s.aiSelectBtnActive]}
                                       onPress={() => setSelectedHorseId(horseId)}
                                       activeOpacity={0.8}
@@ -685,20 +704,43 @@ export default function SpectatorTournaments() {
 
       {/* Custom Sleek Header */}
       <View style={s.customHeader}>
-        <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={s.headerTitleText}>GIẢI ĐẤU</Text>
+        {!showSearch ? (
+          <>
+            <View style={[StyleSheet.absoluteFill, { paddingTop: Math.max(insets.top, 16), paddingBottom: 12 }]} pointerEvents="none">
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={s.headerTitleText}>GIẢI ĐẤU</Text>
+              </View>
+            </View>
+            <View style={s.headerLeft} />
+            <View style={s.headerRight}>
+              <TouchableOpacity style={s.iconButton} onPress={() => setShowSearch(true)} activeOpacity={0.7}>
+                <MaterialIcons name="search" size={22} color={theme.textPrimary} />
+              </TouchableOpacity>
+              <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
+                <MaterialIcons name="filter-list" size={22} color={theme.textPrimary} />
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <View style={s.headerSearchContainer}>
+            <TouchableOpacity style={s.backIconButton} onPress={() => { setShowSearch(false); setSearchQuery(''); }} activeOpacity={0.7}>
+              <MaterialIcons name="arrow-back" size={22} color={theme.textPrimary} />
+            </TouchableOpacity>
+            <TextInput
+              style={s.headerSearchInput}
+              placeholder="Tìm kiếm giải đấu..."
+              placeholderTextColor={isDark ? '#6F7785' : '#8A8A8E'}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity style={s.clearSearchButton} onPress={() => setSearchQuery('')} activeOpacity={0.7}>
+                <MaterialIcons name="close" size={20} color={theme.textPrimary} />
+              </TouchableOpacity>
+            )}
           </View>
-        </View>
-        <View style={s.headerLeft} />
-        <View style={s.headerRight}>
-          <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
-            <MaterialIcons name="search" size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-          <TouchableOpacity style={s.iconButton} activeOpacity={0.7}>
-            <MaterialIcons name="filter-list" size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-        </View>
+        )}
       </View>
 
       {/* ── Filters Row ── */}
@@ -1694,5 +1736,23 @@ const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSh
   },
   aiSelectBtnTextActive: {
     color: pc.bg,
+  },
+  headerSearchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerSearchInput: {
+    flex: 1,
+    height: 38,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    borderRadius: premiumRadius[12],
+    paddingHorizontal: 12,
+    color: theme.textPrimary,
+    fontSize: 14,
+  },
+  clearSearchButton: {
+    padding: 4,
   },
 });
