@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
 import { LoadingState, EmptyState, statusLabel, useThemeColors } from '@/components/ui/shared';
-import { tournamentsApi, racesApi, registrationsApi, predictionsApi, rewardPointLedgerApi } from '@/lib/api-client';
+import { tournamentsApi, racesApi, registrationsApi, predictionsApi, rewardPointLedgerApi, aiApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import RaceResultsModal from '@/components/ui/race-results-modal';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -49,6 +49,12 @@ export default function SpectatorTournaments() {
   const [selectedHorseId, setSelectedHorseId] = useState('');
   const [betPointsInput, setBetPointsInput] = useState('1');
   const [submittingPrediction, setSubmittingPrediction] = useState(false);
+
+  // AI prediction states
+  const [aiPrediction, setAiPrediction] = useState<any | null>(null);
+  const [loadingAiPrediction, setLoadingAiPrediction] = useState(false);
+  const [aiPredictionExpanded, setAiPredictionExpanded] = useState(false);
+  const [aiNoSubscription, setAiNoSubscription] = useState(false);
 
   // Results Modal State
   const [showResultsModal, setShowResultsModal] = useState(false);
@@ -111,6 +117,28 @@ export default function SpectatorTournaments() {
     }
   };
 
+  const handleToggleAiPrediction = async () => {
+    if (aiPredictionExpanded) {
+      setAiPredictionExpanded(false);
+      return;
+    }
+    setAiPredictionExpanded(true);
+    if (aiPrediction || aiNoSubscription) return;
+    if (!selectedRace) return;
+    setLoadingAiPrediction(true);
+    try {
+      const data = await aiApi.generatePrediction(selectedRace._id);
+      setAiPrediction(data);
+    } catch (e: any) {
+      const msg = e.message ?? '';
+      if (msg.toLowerCase().includes('subscription') || msg.toLowerCase().includes('forbidden') || msg.includes('403')) {
+        setAiNoSubscription(true);
+      }
+    } finally {
+      setLoadingAiPrediction(false);
+    }
+  };
+
   const handleSelectRace = async (race: any) => {
     setSelectedRace(race);
     setLoadingRaceDetails(true);
@@ -130,6 +158,11 @@ export default function SpectatorTournaments() {
       // Reset selection
       setSelectedHorseId('');
       setBetPointsInput(balRes.balance === 0 ? '1' : '2');
+
+      // Reset AI Prediction
+      setAiPrediction(null);
+      setAiPredictionExpanded(false);
+      setAiNoSubscription(false);
     } catch (e) {
       console.error(e);
     } finally {
@@ -287,6 +320,87 @@ export default function SpectatorTournaments() {
             ) : (
               ['SCHEDULED', 'CHECKING', 'READY'].includes(selectedRace.status) ? (
                 <View style={s.predictionForm}>
+                  {/* AI Prediction Toggle */}
+                  <View style={s.aiPredictionContainer}>
+                    <TouchableOpacity
+                      style={s.aiPredictionHeader}
+                      onPress={handleToggleAiPrediction}
+                      activeOpacity={0.8}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <MaterialIcons name="psychology" size={18} color={pc.brand} />
+                        <Text style={s.aiPredictionTitle}>Gợi ý AI</Text>
+                        {aiPrediction && (
+                          <Text style={s.aiPredictionConfidence}>{aiPrediction.confidenceLevel}% tin cậy</Text>
+                        )}
+                      </View>
+                      <MaterialIcons name={aiPredictionExpanded ? 'expand-less' : 'expand-more'} size={20} color={pc.brand} />
+                    </TouchableOpacity>
+
+                    {aiPredictionExpanded && (
+                      <View style={s.aiPredictionBody}>
+                        {loadingAiPrediction ? (
+                          <View style={s.aiLoadingContainer}>
+                            <Text style={s.aiLoadingText}>Đang tải dự đoán AI...</Text>
+                          </View>
+                        ) : aiNoSubscription ? (
+                          <View style={s.aiSubscriptionContainer}>
+                            <MaterialIcons name="lock" size={20} color={pc.warning} />
+                            <View style={{ flex: 1, marginLeft: 8 }}>
+                              <Text style={s.aiSubscriptionTitle}>Yêu cầu gói AI</Text>
+                              <Text style={s.aiSubscriptionDesc}>Đăng ký để xem dự đoán xác suất thắng.</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => {/* TODO: navigate to AI package */}}>
+                              <Text style={s.aiSubscriptionAction}>Mua gói</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ) : !aiPrediction ? (
+                          <Text style={s.aiEmptyText}>Chưa có dự đoán AI cho cuộc đua này.</Text>
+                        ) : (
+                          <View style={s.aiResultsContainer}>
+                            {[...aiPrediction.rankings]
+                              .sort((a: any, b: any) => a.predictedRank - b.predictedRank)
+                              .slice(0, 3)
+                              .map((r: any) => {
+                                const horseId = typeof r.horseId === 'object' ? r.horseId._id : String(r.horseId);
+                                const name = typeof r.horseId === 'object' ? r.horseId.name : String(r.horseId);
+                                const medal = r.predictedRank === 1 ? '🥇' : r.predictedRank === 2 ? '🥈' : '🥉';
+                                const isSelected = selectedHorseId === horseId;
+                                return (
+                                  <View key={r.predictedRank} style={s.aiResultRow}>
+                                    <Text style={s.aiResultMedal}>{medal}</Text>
+                                    <View style={{ flex: 1 }}>
+                                      <Text style={s.aiResultName} numberOfLines={1}>{name}</Text>
+                                      <View style={s.aiResultProgressContainer}>
+                                        <View style={s.aiResultProgressBar}>
+                                          <View style={[s.aiResultProgressFill, { width: `${r.winProbability * 100}%` }]} />
+                                        </View>
+                                        <Text style={s.aiResultProbability}>{(r.winProbability * 100).toFixed(0)}%</Text>
+                                      </View>
+                                    </View>
+                                    <TouchableOpacity 
+                                      style={[s.aiSelectBtn, isSelected && s.aiSelectBtnActive]}
+                                      onPress={() => setSelectedHorseId(horseId)}
+                                      activeOpacity={0.8}
+                                    >
+                                      <Text style={[s.aiSelectBtnText, isSelected && s.aiSelectBtnTextActive]}>
+                                        {isSelected ? 'Đã chọn' : 'Chọn'}
+                                      </Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                );
+                              })}
+                            {aiPrediction.reasoning && (
+                              <View style={s.aiReasoningContainer}>
+                                <Text style={s.aiReasoningText}>{aiPrediction.reasoning}</Text>
+                              </View>
+                            )}
+                          </View>
+                        )}
+                      </View>
+                    )}
+                  </View>
+
                   <Text style={s.formLabel}>Chọn chiến mã bạn dự kiến sẽ về nhất:</Text>
                   {selectedRaceRegistrations.length === 0 ? (
                     <Text style={s.emptyFormText}>Chưa có danh sách chiến mã chính thức tham gia.</Text>
@@ -1435,5 +1549,150 @@ const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSh
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',
+  },
+  aiPredictionContainer: {
+    marginBottom: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    backgroundColor: isDark ? 'rgba(225,6,0,0.05)' : 'rgba(225,6,0,0.02)',
+    overflow: 'hidden',
+  },
+  aiPredictionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  aiPredictionTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    color: pc.brand,
+    letterSpacing: 0.5,
+  },
+  aiPredictionConfidence: {
+    fontSize: 10,
+    color: pc.textMuted,
+    fontFamily: 'monospace',
+  },
+  aiPredictionBody: {
+    borderTopWidth: 1,
+    borderTopColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    padding: 12,
+  },
+  aiLoadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  aiLoadingText: {
+    fontSize: 10,
+    color: pc.textMuted,
+  },
+  aiSubscriptionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  aiSubscriptionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: pc.text,
+  },
+  aiSubscriptionDesc: {
+    fontSize: 10,
+    color: pc.textMuted,
+  },
+  aiSubscriptionAction: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: pc.brand,
+    textTransform: 'uppercase',
+  },
+  aiEmptyText: {
+    fontSize: 10,
+    color: pc.textMuted,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 8,
+  },
+  aiResultsContainer: {
+    gap: 8,
+  },
+  aiResultRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  aiResultMedal: {
+    fontSize: 14,
+    width: 20,
+    textAlign: 'center',
+  },
+  aiResultName: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: '500',
+    color: pc.text,
+  },
+  aiResultProgressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    width: 100,
+  },
+  aiResultProgressBar: {
+    flex: 1,
+    height: 4,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  aiResultProgressFill: {
+    height: '100%',
+    backgroundColor: pc.brand,
+    borderRadius: 2,
+  },
+  aiResultProbability: {
+    fontSize: 10,
+    fontFamily: 'monospace',
+    color: pc.textMuted,
+    width: 28,
+    textAlign: 'right',
+  },
+  aiReasoningContainer: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+  },
+  aiReasoningText: {
+    fontSize: 10,
+    color: pc.textMuted,
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+  aiSelectBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+  },
+  aiSelectBtnActive: {
+    backgroundColor: pc.brand,
+    borderColor: pc.brand,
+  },
+  aiSelectBtnText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: pc.textMuted,
+    textTransform: 'uppercase',
+  },
+  aiSelectBtnTextActive: {
+    color: pc.bg,
   },
 });

@@ -466,3 +466,12 @@ export const notificationsApi = {
   readAll: () => apiFetch<any>('/notifications/read-all', { method: 'PATCH' }),
   delete: (id: string) => apiFetch<any>(`/notifications/${id}`, { method: 'DELETE' }),
 };
+
+export const aiApi = {
+  generatePrediction: (raceId: string) =>
+    apiFetch<any>(`/ai/predictions/generate/${raceId}`, {
+      method: 'POST',
+    }),
+  getPrediction: (raceId: string) =>
+    apiFetch<any>(`/ai/predictions/${raceId}`),
+};
