@@ -110,7 +110,7 @@ export class RacesService {
 
   private async attachParticipantsCounts(
     races: RaceDocument[],
-  ): Promise<(RaceDocument & { participantsCount: number })[]> {
+  ): Promise<(Record<string, unknown> & { participantsCount: number })[]> {
     if (races.length === 0) return [];
     const raceIds = races.map((r) => r._id);
     const counts = await this.registrationModel.aggregate<{
@@ -126,9 +126,15 @@ export class RacesService {
       { $group: { _id: '$raceId', count: { $sum: 1 } } },
     ]);
     const countMap = new Map(counts.map((c) => [String(c._id), c.count]));
-    return races.map((r) =>
-      Object.assign(r, { participantsCount: countMap.get(String(r._id)) ?? 0 }),
-    );
+    // Trả plain object (toObject) thay vì gán trực tiếp lên Mongoose document:
+    // property không thuộc schema/virtual sẽ bị toJSON() loại bỏ khi serialize response.
+    return races.map((r) => {
+      const obj = r.toObject() as Record<string, unknown>;
+      return {
+        ...obj,
+        participantsCount: countMap.get(String(r._id)) ?? 0,
+      };
+    });
   }
 
   async findAll(page = 1, limit = 20) {
@@ -183,6 +189,13 @@ export class RacesService {
       throw new NotFoundException('Race not found');
     }
     return race;
+  }
+
+  /** Chi tiết race kèm participantsCount cho endpoint public (không dùng cho luồng ghi). */
+  async findOneWithParticipants(id: string) {
+    const race = await this.findOne(id);
+    const [withCount] = await this.attachParticipantsCounts([race]);
+    return withCount;
   }
 
   async update(id: string, dto: UpdateRaceDto): Promise<RaceDocument> {
@@ -254,6 +267,18 @@ export class RacesService {
       throw new BadRequestException(
         `Invalid status transition from ${race.status} to ${status}`,
       );
+    }
+
+    // Guard: SCHEDULED → CHECKING chỉ được phép khi đã tới ngày bắt đầu giải đấu.
+    if (status === RaceStatus.CHECKING) {
+      const tournament = await this.tournamentsService.findOne(
+        this.getTournamentIdString(race.tournamentId),
+      );
+      if (new Date() < tournament.startDate) {
+        throw new BadRequestException(
+          'Chưa thể bắt đầu kiểm tra: giải đấu chưa tới ngày bắt đầu',
+        );
+      }
     }
 
     // Guard: CHECKING → READY requires all checks passed + at least 1 referee accepted
