@@ -375,9 +375,13 @@ export default function OwnerTournamentsAndRegistrations() {
                                 </TouchableOpacity>
                               )
                             ) : (
-                              <TouchableOpacity style={styles.btnOutline} onPress={() => openRaceDetailsModal(race)} activeOpacity={0.8}>
-                                <Text style={styles.btnOutlineText}>Xem chi tiết vòng đua</Text>
-                              </TouchableOpacity>
+                              <>
+                                {/*
+                                <TouchableOpacity style={styles.btnOutline} onPress={() => openRaceDetailsModal(race)} activeOpacity={0.8}>
+                                  <Text style={styles.btnOutlineText}>Xem chi tiết vòng đua</Text>
+                                </TouchableOpacity>
+                                */}
+                              </>
                             )}
                           </View>
                         </View>
