@@ -128,10 +128,13 @@ export class RacesService {
     const countMap = new Map(counts.map((c) => [String(c._id), c.count]));
     // Trả plain object (toObject) thay vì gán trực tiếp lên Mongoose document:
     // property không thuộc schema/virtual sẽ bị toJSON() loại bỏ khi serialize response.
-    return races.map((r) => ({
-      ...r.toObject(),
-      participantsCount: countMap.get(String(r._id)) ?? 0,
-    }));
+    return races.map((r) => {
+      const obj = r.toObject() as Record<string, unknown>;
+      return {
+        ...obj,
+        participantsCount: countMap.get(String(r._id)) ?? 0,
+      };
+    });
   }
 
   async findAll(page = 1, limit = 20) {
