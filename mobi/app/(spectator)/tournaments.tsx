@@ -25,7 +25,7 @@ export default function SpectatorTournaments() {
   const isDark = colorScheme === 'dark';
   const theme = useThemeColors();
   const pc = usePremiumColors();
-  const s = React.useMemo(() => getStyles(isDark, theme, insets, pc), [isDark, theme, insets, pc]);
+  const s = React.useMemo(() => getStyles(isDark, theme, insets, pc), [isDark, theme, insets, pc, getStyles]);
 
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1017,12 +1017,12 @@ const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSh
   featuredTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: pc.text,
+    color: '#FFFFFF',
     marginBottom: 6,
   },
   featuredSubtitle: {
     fontSize: 12,
-    color: pc.textSecondary,
+    color: 'rgba(255, 255, 255, 0.8)',
     lineHeight: 16,
   },
   featuredChevronContainer: {
@@ -1032,7 +1032,7 @@ const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSh
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: pc.border,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
@@ -1153,13 +1153,13 @@ const getStyles = (isDark: boolean, theme: any, insets: any, pc: any) => StyleSh
   tourDetailName: {
     fontSize: 22,
     fontWeight: '800',
-    color: pc.text,
+    color: '#FFFFFF',
     marginTop: 8,
     marginBottom: 4,
   },
   tourDetailDesc: {
     fontSize: 12,
-    color: pc.textSecondary,
+    color: 'rgba(255, 255, 255, 0.8)',
     lineHeight: 16,
   },
   infoSection: {

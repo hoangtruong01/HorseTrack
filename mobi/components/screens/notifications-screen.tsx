@@ -54,7 +54,7 @@ export default function NotificationsScreen() {
     if (item.isRead) return;
     try {
       await notificationsApi.markAsRead(item._id || item.id);
-      setNotifications(prev => prev.map(n => 
+      setNotifications(prev => prev.map(n =>
         (n._id || n.id) === (item._id || item.id) ? { ...n, isRead: true } : n
       ));
     } catch (err: any) {
@@ -88,11 +88,11 @@ export default function NotificationsScreen() {
       outputRange: [0, 80],
       extrapolate: 'clamp',
     });
-    
+
     return (
       <View style={styles.deleteActionContainer}>
         <Animated.View style={[styles.deleteAction, { transform: [{ translateX: trans }] }]}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.deleteActionButton}
             onPress={() => handleDelete(item)}
             activeOpacity={0.8}
@@ -109,16 +109,16 @@ export default function NotificationsScreen() {
       renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item)}
       rightThreshold={40}
     >
-      <TouchableOpacity 
-        style={[styles.notificationCard, !item.isRead && styles.notificationCardUnread]} 
+      <TouchableOpacity
+        style={[styles.notificationCard, !item.isRead && styles.notificationCardUnread]}
         onPress={() => handleMarkAsRead(item)}
         activeOpacity={0.8}
       >
         <View style={styles.iconContainer}>
-          <MaterialIcons 
-            name={!item.isRead ? "notifications-active" : "notifications"} 
-            size={24} 
-            color={!item.isRead ? premiumColors.brand : premiumColors.textMuted} 
+          <MaterialIcons
+            name={!item.isRead ? "notifications-active" : "notifications"}
+            size={24}
+            color={!item.isRead ? premiumColors.brand : premiumColors.textMuted}
           />
         </View>
         <View style={styles.cardContent}>
@@ -167,10 +167,10 @@ export default function NotificationsScreen() {
         renderItem={renderItem}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColors.brand} />}
         ListEmptyComponent={
-          <EmptyState 
-            icon="notifications-none" 
-            title="Không có thông báo mới" 
-            subtitle="Tất cả thông báo mới sẽ xuất hiện tại đây." 
+          <EmptyState
+            icon="notifications-none"
+            title="Không có thông báo mới"
+            subtitle="Tất cả thông báo mới sẽ xuất hiện tại đây."
           />
         }
       />
