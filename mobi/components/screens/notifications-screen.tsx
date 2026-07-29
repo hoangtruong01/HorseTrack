@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, RefreshControl, Alert, Animated } from 'react-native';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { usePremiumColors, premiumSpacing, premiumRadius } from '@/components/ui/premium-tokens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -72,33 +73,69 @@ export default function NotificationsScreen() {
     }
   };
 
+  const handleDelete = async (item: any) => {
+    try {
+      await notificationsApi.delete(item._id || item.id);
+      setNotifications(prev => prev.filter(n => (n._id || n.id) !== (item._id || item.id)));
+    } catch (err: any) {
+      Alert.alert('Lỗi', 'Không thể xóa thông báo.');
+    }
+  };
+
+  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>, item: any) => {
+    const trans = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [0, 80],
+      extrapolate: 'clamp',
+    });
+    
+    return (
+      <View style={styles.deleteActionContainer}>
+        <Animated.View style={[styles.deleteAction, { transform: [{ translateX: trans }] }]}>
+          <TouchableOpacity 
+            style={styles.deleteActionButton}
+            onPress={() => handleDelete(item)}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="delete-outline" size={28} color="#FFF" />
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    );
+  };
+
   const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity 
-      style={[styles.notificationCard, !item.isRead && styles.notificationCardUnread]} 
-      onPress={() => handleMarkAsRead(item)}
-      activeOpacity={0.8}
+    <Swipeable
+      renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item)}
+      rightThreshold={40}
     >
-      <View style={styles.iconContainer}>
-        <MaterialIcons 
-          name={!item.isRead ? "notifications-active" : "notifications"} 
-          size={24} 
-          color={!item.isRead ? premiumColors.brand : premiumColors.textMuted} 
-        />
-      </View>
-      <View style={styles.cardContent}>
-        <Text style={[styles.cardTitle, !item.isRead && styles.cardTitleUnread]}>
-          {item.title || 'Thông báo'}
-        </Text>
-        <Text style={styles.cardMessage} numberOfLines={2}>
-          {item.message || item.body || ''}
-        </Text>
-        {item.createdAt && (
-          <Text style={styles.cardTime}>
-            {new Date(item.createdAt).toLocaleString('vi-VN')}
+      <TouchableOpacity 
+        style={[styles.notificationCard, !item.isRead && styles.notificationCardUnread]} 
+        onPress={() => handleMarkAsRead(item)}
+        activeOpacity={0.8}
+      >
+        <View style={styles.iconContainer}>
+          <MaterialIcons 
+            name={!item.isRead ? "notifications-active" : "notifications"} 
+            size={24} 
+            color={!item.isRead ? premiumColors.brand : premiumColors.textMuted} 
+          />
+        </View>
+        <View style={styles.cardContent}>
+          <Text style={[styles.cardTitle, !item.isRead && styles.cardTitleUnread]}>
+            {item.title || 'Thông báo'}
           </Text>
-        )}
-      </View>
-    </TouchableOpacity>
+          <Text style={styles.cardMessage} numberOfLines={2}>
+            {item.message || item.body || ''}
+          </Text>
+          {item.createdAt && (
+            <Text style={styles.cardTime}>
+              {new Date(item.createdAt).toLocaleString('vi-VN')}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    </Swipeable>
   );
 
   if (loading && !refreshing) {
@@ -220,5 +257,23 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
   cardTime: {
     fontSize: 11,
     color: premiumColors.textMuted,
+  },
+  deleteActionContainer: {
+    width: 80,
+    marginBottom: 12,
+  },
+  deleteAction: {
+    flex: 1,
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopRightRadius: premiumRadius[12],
+    borderBottomRightRadius: premiumRadius[12],
+  },
+  deleteActionButton: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

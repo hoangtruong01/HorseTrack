@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document, SchemaTypes, Types } from 'mongoose';
 
 export type NotificationDocument = Notification & Document;
 
@@ -14,8 +14,8 @@ export enum NotificationType {
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class Notification {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  userId!: Types.ObjectId;
+  @Prop({ type: SchemaTypes.Mixed, ref: 'User', required: true })
+  userId!: Types.ObjectId | string;
 
   @Prop({ required: true })
   title!: string;

@@ -1,11 +1,3 @@
-/**
- * Shared Floating Dock Tab Bar - Dark Facebook-style
- * Dùng chung cho tất cả phân hệ: admin, jockey, owner, referee, counter, spectator, tabs
- */
-/**
- * Shared Floating Dock Tab Bar - Dark Facebook-style
- * Dùng chung cho tất cả phân hệ: admin, jockey, owner, referee, counter, spectator, tabs
- */
 import React from 'react';
 import { View, Text, Image, StyleSheet, Platform, TouchableOpacity, Animated } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -224,6 +216,22 @@ export const getDockStyles = (isDark: boolean) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  toggleButton: {
+    width: 48,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: isDark ? '#242526' : '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: isDark ? '#3a3b3c' : '#E5E7EB',
+  },
 });
 
 // Shared Custom Animated Bottom Tab Bar
@@ -257,66 +265,115 @@ export function DockTabBar({ state, descriptors, navigation }: BottomTabBarProps
     }
   }, [currentVisibleIndex, slideAnim]);
 
+  const [isVisible, setIsVisible] = React.useState(true);
+  const hideAnim = React.useRef(new Animated.Value(0)).current;
+
+  const toggleVisibility = () => {
+    const nextVisible = !isVisible;
+    setIsVisible(nextVisible);
+    Animated.spring(hideAnim, {
+      toValue: nextVisible ? 0 : 1,
+      useNativeDriver: true,
+      tension: 60,
+      friction: 8,
+    }).start();
+  };
+
+  const toggleTranslateY = hideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 68],
+  });
+
+  const tabBarTranslateY = hideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, paddingBottom + 90], // Push the tab bar completely off screen
+  });
+
   return (
-    <View style={[dockStyles.tabBarContainer, { bottom: paddingBottom, width: visibleRoutes.length * TAB_WIDTH + 16 }]}>
-      <Animated.View
-        style={[
-          dockStyles.iconWrapperActive,
-          {
-            position: 'absolute',
-            width: TAB_WIDTH,
-            height: 44,
-            borderRadius: 22,
-            left: 8,
-            transform: [{ translateX: slideAnim }],
-          }
-        ]}
-      />
+    <View
+      pointerEvents="box-none"
+      style={{
+        position: 'absolute',
+        alignSelf: 'center',
+        bottom: paddingBottom,
+        alignItems: 'center',
+        zIndex: 10,
+      }}
+    >
+      <Animated.View style={{ transform: [{ translateY: toggleTranslateY }] }}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={toggleVisibility}
+          style={dockStyles.toggleButton}
+        >
+          <MaterialIcons
+            name={isVisible ? "keyboard-arrow-down" : "keyboard-arrow-up"}
+            size={20}
+            color={isDark ? '#b0b3b8' : '#1e293b'}
+          />
+        </TouchableOpacity>
+      </Animated.View>
 
-      {visibleRoutes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        const isFocused = currentVisibleIndex === index;
+      <Animated.View style={[dockStyles.tabBarContainer, { position: 'relative', bottom: 0, width: visibleRoutes.length * TAB_WIDTH + 16, transform: [{ translateY: tabBarTranslateY }] }]}>
+        <Animated.View
+          style={[
+            dockStyles.iconWrapperActive,
+            {
+              position: 'absolute',
+              width: TAB_WIDTH,
+              height: 44,
+              borderRadius: 22,
+              left: 8,
+              transform: [{ translateX: slideAnim }],
+            }
+          ]}
+        />
 
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
+        {visibleRoutes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const isFocused = currentVisibleIndex === index;
 
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
-          }
-        };
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
 
-        const onLongPress = () => {
-          navigation.emit({
-            type: 'tabLongPress',
-            target: route.key,
-          });
-        };
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name, route.params);
+            }
+          };
 
-        return (
-          <TouchableOpacity
-            key={route.key}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={(options as any).tabBarTestID}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            style={dockStyles.tabItem}
-          >
-            {options.tabBarIcon
-              ? options.tabBarIcon({
-                focused: isFocused,
-                color: isFocused ? activeColor : inactiveColor,
-                size: 24,
-              })
-              : <Text style={{ color: isFocused ? activeColor : inactiveColor }}>{options.title}</Text>}
-          </TouchableOpacity>
-        );
-      })}
+          const onLongPress = () => {
+            navigation.emit({
+              type: 'tabLongPress',
+              target: route.key,
+            });
+          };
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={(options as any).tabBarTestID}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={dockStyles.tabItem}
+            >
+              {options.tabBarIcon
+                ? options.tabBarIcon({
+                  focused: isFocused,
+                  color: isFocused ? activeColor : inactiveColor,
+                  size: 24,
+                })
+                : <Text style={{ color: isFocused ? activeColor : inactiveColor }}>{options.title}</Text>}
+            </TouchableOpacity>
+          );
+        })}
+      </Animated.View>
     </View>
   );
 }

@@ -22,6 +22,16 @@ export class NotificationsService {
     private gateway: NotificationsGateway,
   ) {}
 
+  private getUserFilter(userId: string) {
+    const isObjId = Types.ObjectId.isValid(userId);
+    return {
+      $or: [
+        { userId: String(userId) },
+        ...(isObjId ? [{ userId: new Types.ObjectId(userId) }] : []),
+      ],
+    };
+  }
+
   /** Programmatic method to send inside other services */
   async send(
     userId: string,
@@ -48,7 +58,7 @@ export class NotificationsService {
   }
 
   async findMyNotifications(userId: string, page = 1, limit = 20) {
-    const filter = { userId: new Types.ObjectId(userId) };
+    const filter = this.getUserFilter(userId);
     const [data, total] = await Promise.all([
       this.notificationModel
         .find(filter)
@@ -65,9 +75,10 @@ export class NotificationsService {
   }
 
   async markAsRead(id: string, userId: string): Promise<NotificationDocument> {
+    const userFilter = this.getUserFilter(userId);
     const notif = await this.notificationModel.findOne({
-      _id: new Types.ObjectId(id),
-      userId: new Types.ObjectId(userId),
+      _id: Types.ObjectId.isValid(id) ? new Types.ObjectId(id) : id,
+      ...userFilter,
     });
     if (!notif) {
       throw new NotFoundException('Notification not found');
@@ -78,17 +89,22 @@ export class NotificationsService {
   }
 
   async markAllAsRead(userId: string): Promise<{ modifiedCount: number }> {
+    const userFilter = this.getUserFilter(userId);
     const result = await this.notificationModel.updateMany(
-      { userId: new Types.ObjectId(userId), isRead: false },
+      {
+        ...userFilter,
+        isRead: false,
+      },
       { $set: { isRead: true } },
     );
     return { modifiedCount: result.modifiedCount };
   }
 
   async remove(id: string, userId: string): Promise<{ deleted: boolean }> {
+    const userFilter = this.getUserFilter(userId);
     const result = await this.notificationModel.deleteOne({
-      _id: new Types.ObjectId(id),
-      userId: new Types.ObjectId(userId),
+      _id: Types.ObjectId.isValid(id) ? new Types.ObjectId(id) : id,
+      ...userFilter,
     });
     if (result.deletedCount === 0) {
       throw new NotFoundException('Notification not found');
@@ -97,9 +113,8 @@ export class NotificationsService {
   }
 
   async removeAll(userId: string): Promise<{ deletedCount: number }> {
-    const result = await this.notificationModel.deleteMany({
-      userId: new Types.ObjectId(userId),
-    });
+    const userFilter = this.getUserFilter(userId);
+    const result = await this.notificationModel.deleteMany(userFilter);
     return { deletedCount: result.deletedCount };
   }
 }
