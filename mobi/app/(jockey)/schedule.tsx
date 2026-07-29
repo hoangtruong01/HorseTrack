@@ -13,7 +13,7 @@ export default function JockeySchedule() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const premiumColorsDynamic = usePremiumColors();
-  const styles = React.useMemo(() => getStyles(isDark, premiumColorsDynamic), [isDark, premiumColorsDynamic]);
+  const styles = React.useMemo(() => getStyles(isDark, premiumColorsDynamic), [isDark, premiumColorsDynamic, getStyles]);
 
   const [pendingData, setPendingData] = useState<any[]>([]);
   const [acceptedData, setAcceptedData] = useState<any[]>([]);
@@ -62,7 +62,7 @@ export default function JockeySchedule() {
     const horseName = typeof item.horseId === 'object' ? item.horseId?.name : 'Ngựa';
     const startTime = typeof item.raceId === 'object' ? item.raceId?.startTime : undefined;
     const raceStatus = typeof item.raceId === 'object' ? item.raceId?.status : undefined;
-    const isFinished = raceStatus === 'FINISHED';
+    const isFinished = raceStatus === 'RESULT_PUBLISHED';
 
     if (isFinished) {
       return (
@@ -198,7 +198,7 @@ const getStyles = (isDark: boolean, premiumColors: any) => StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: premiumSpacing[16],
-    paddingBottom: premiumSpacing[48],
+    paddingBottom: 120,
   },
   emptyWrap: {
     marginTop: premiumSpacing[24],

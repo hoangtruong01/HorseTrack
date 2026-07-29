@@ -105,7 +105,7 @@ export default function RefereeHome() {
           {/* ── Sleek Metrics Grid ── */}
           <Section title="Tổng quan nhiệm vụ">
             <View style={{ gap: premiumSpacing[12] }}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => router.push('/assignments' as any)}
                 style={[styles.statCard, { flexDirection: 'row', alignItems: 'center' }, pendingCount > 0 && styles.statCardActive]}
@@ -143,11 +143,10 @@ export default function RefereeHome() {
           {/* ── Quick Actions ── */}
           <Section title="Điều hành">
             <ActionGrid
-              columns={4}
+              columns={3}
               actions={[
                 { title: 'Nhiệm vụ', icon: 'assignment', tone: 'brand', onPress: () => router.push('/assignments' as any) },
                 { title: 'Xếp hạng', icon: 'emoji-events', tone: 'brand', onPress: () => router.push('/(referee)/leaderboard' as any) },
-                { title: 'Ví điện tử', icon: 'account-balance-wallet', tone: 'brand', onPress: () => router.push('/operations/wallet') },
                 { title: 'Cá nhân', icon: 'person', tone: 'brand', onPress: () => router.push('/profile') },
               ]}
             />
