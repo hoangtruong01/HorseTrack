@@ -324,14 +324,6 @@ export function RaceForm() {
                 Quỹ thưởng giải đấu:{" "}
                 <strong className="text-foreground">
                   {totalPrizePool.toLocaleString()} pts
-                </strong>{" "}
-                · Đã sử dụng:{" "}
-                <strong className="text-foreground">
-                  {usedPrize.toLocaleString()} pts
-                </strong>{" "}
-                · Còn lại:{" "}
-                <strong className="text-teal-400 font-bold">
-                  {remainingPrize.toLocaleString()} pts
                 </strong>
               </span>
             </div>

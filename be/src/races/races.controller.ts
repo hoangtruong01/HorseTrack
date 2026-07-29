@@ -62,7 +62,7 @@ export class RacesController {
   @Get(':id')
   @ApiOperation({ summary: 'Get race detail (public)' })
   findOne(@Param('id', ParseObjectIdPipe) id: string) {
-    return this.racesService.findOne(id);
+    return this.racesService.findOneWithParticipants(id);
   }
 
   @Patch(':id')
