@@ -239,6 +239,7 @@ export default function RefereeResultEntryPage() {
 
   const handleSimulate = async () => {
     setIsSimulating(true);
+    const startTime = Date.now();
     try {
       const res = await fetch(`/api/referee/race-results/race/${raceId}/simulate`, {
         method: "POST",
@@ -249,8 +250,13 @@ export default function RefereeResultEntryPage() {
         throw new Error(resData.message || "Lỗi chạy giả lập");
       }
 
-      // Delay nhẹ để animation kết thúc mượt trước khi đóng modal
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Đảm bảo thời gian hiển thị giả lập kéo dài ít nhất 8 giây (8000ms)
+      const elapsedTime = Date.now() - startTime;
+      const minDuration = 8000;
+      if (elapsedTime < minDuration) {
+        await new Promise((resolve) => setTimeout(resolve, minDuration - elapsedTime));
+      }
+
       toast.success("Giả lập cuộc đua thành công! Ranks và chỉ số đã tự động kết xuất.");
       await fetchData();
     } catch (err) {

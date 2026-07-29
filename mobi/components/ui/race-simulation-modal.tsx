@@ -48,9 +48,9 @@ function HorseLane({ horse, index, isOpen, accentColor }: { horse: any, index: n
   const pos = useSharedValue(0);
   
   const duration = useMemo(() => {
-    const base = 3500;
-    const variance = Math.random() * 2000;
-    return base + variance;
+    const base = 6200;
+    const variance = Math.random() * 1500;
+    return base + variance; // 6.2s - 7.7s
   }, [isOpen]);
 
   useEffect(() => {
@@ -125,13 +125,18 @@ export function RaceSimulationModal({ isOpen, horses }: RaceSimulationModalProps
       setIsFinished(false);
       progressAnim.value = 0;
 
+      const startTime = Date.now();
+      const totalTargetMs = 8000;
+
       const interval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + Math.random() * 12 + 3, 90));
-      }, 400);
+        const elapsed = Date.now() - startTime;
+        const ratio = Math.min(elapsed / totalTargetMs, 1);
+        setProgress(Math.min(ratio * 95, 95));
+      }, 100);
 
       const msgInterval = setInterval(() => {
         setMessageIndex((prev) => (prev + 1) % RACE_MESSAGES.length);
-      }, 1500);
+      }, 1200);
 
       return () => {
         clearInterval(interval);

@@ -62,13 +62,13 @@ export function RaceSimulationModal({
   // Generate random race durations for each horse (visual only)
   const horseDurations = useMemo(() => {
     return horses.map((_, index) => {
-      const base = 3.5;
+      const base = 6.2;
       const pseudoRandom = ((index * 37 + 13) % 100) / 100;
-      return base + pseudoRandom * 2; // 3.5s – 5.5s
+      return base + pseudoRandom * 1.5; // 6.2s – 7.7s
     });
   }, [horses]);
 
-  // Fake progress bar
+  // Fake progress bar (smooth 8s progression)
   useEffect(() => {
     if (!isOpen) {
       setProgress(0);
@@ -76,14 +76,15 @@ export function RaceSimulationModal({
       return;
     }
 
+    const startTime = Date.now();
+    const targetMs = 8000;
+
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        const increment = Math.random() * 12 + 3;
-        const next = prev + increment;
-        if (next >= 90) return 90;
-        return next;
-      });
-    }, 400);
+      const elapsed = Date.now() - startTime;
+      const ratio = Math.min(elapsed / targetMs, 1);
+      const currentProgress = Math.min(ratio * 95, 95);
+      setProgress(currentProgress);
+    }, 100);
 
     return () => clearInterval(interval);
   }, [isOpen]);
@@ -97,7 +98,7 @@ export function RaceSimulationModal({
 
     const interval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % RACE_MESSAGES.length);
-    }, 1500);
+    }, 1200);
 
     return () => clearInterval(interval);
   }, [isOpen]);

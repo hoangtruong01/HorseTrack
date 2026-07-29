@@ -119,9 +119,14 @@ export default function ResultEntryScreen() {
 
   const handleSimulate = async () => {
     setSimulating(true);
+    const startTime = Date.now();
     try {
       await raceResultsApi.simulate(raceId!);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const elapsedTime = Date.now() - startTime;
+      const minDuration = 8000;
+      if (elapsedTime < minDuration) {
+        await new Promise(resolve => setTimeout(resolve, minDuration - elapsedTime));
+      }
       Alert.alert('Thành công', 'Đã giả lập cuộc đua và xếp hạng tự động.');
       await loadData();
     } catch (err: any) {
