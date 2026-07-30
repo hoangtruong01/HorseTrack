@@ -74,103 +74,103 @@ export default function JockeyHome() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={premiumColorsDynamic.brand} />}
         showsVerticalScrollIndicator={false}
       >
-      
-      {pendingCount > 0 && (
-        <TouchableOpacity 
-          style={[styles.alertCard, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2', borderColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#FEE2E2' }]}
-          onPress={() => router.push('/inbox')}
+
+        {pendingCount > 0 && (
+          <TouchableOpacity
+            style={[styles.alertCard, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2', borderColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#FEE2E2' }]}
+            onPress={() => router.push('/inbox')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.alertIcon, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#FECACA' }]}>
+              <MaterialIcons name="notifications-active" size={24} color="#EF4444" />
+            </View>
+            <View style={styles.alertContent}>
+              <Text style={[styles.alertTitle, { color: isDark ? '#FCA5A5' : '#991B1B' }]}>Bạn có {pendingCount} lời mời mới</Text>
+              <Text style={[styles.alertSubtitle, { color: isDark ? '#FECACA' : '#DC2626' }]}>Nhấn vào đây để xem chi tiết và phản hồi ngay.</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={20} color="#EF4444" />
+          </TouchableOpacity>
+        )}
+
+        {/* ── Overview Card ── */}
+        <TouchableOpacity
+          style={styles.overviewCard}
+          onPress={() => router.push('/schedule')}
           activeOpacity={0.8}
         >
-          <View style={[styles.alertIcon, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#FECACA' }]}>
-            <MaterialIcons name="notifications-active" size={24} color="#EF4444" />
+          <View style={styles.overviewIconContainer}>
+            <MaterialIcons name="calendar-today" size={20} color="#FFFFFF" />
           </View>
-          <View style={styles.alertContent}>
-            <Text style={[styles.alertTitle, { color: isDark ? '#FCA5A5' : '#991B1B' }]}>Bạn có {pendingCount} lời mời mới</Text>
-            <Text style={[styles.alertSubtitle, { color: isDark ? '#FECACA' : '#DC2626' }]}>Nhấn vào đây để xem chi tiết và phản hồi ngay.</Text>
+          <View style={styles.overviewContent}>
+            <Text style={styles.overviewTitle}>Tổng quan hôm nay</Text>
+            <Text style={styles.overviewSubtitle}>
+              {acceptedCount} lịch đã nhận · {totalCount} tổng lời mời
+            </Text>
           </View>
-          <MaterialIcons name="chevron-right" size={20} color="#EF4444" />
+          <MaterialIcons name="chevron-right" size={20} color={premiumColorsDynamic.textSecondary} />
         </TouchableOpacity>
-      )}
 
-      {/* ── Overview Card ── */}
-      <TouchableOpacity 
-        style={styles.overviewCard} 
-        onPress={() => router.push('/schedule')}
-        activeOpacity={0.8}
-      >
-        <View style={styles.overviewIconContainer}>
-          <MaterialIcons name="calendar-today" size={20} color="#FFFFFF" />
+        <View style={styles.content}>
+          <WalletCard balance={balance} />
+
+          {/* ── Quick Actions ── */}
+          <Section title="Tiện ích">
+            <ActionGrid
+              columns={4}
+              actions={[
+                { title: 'Hòm thư', icon: 'mail', tone: 'brand', onPress: () => router.push('/inbox') },
+                { title: 'Lịch đua', icon: 'event', tone: 'brand', onPress: () => router.push('/schedule') },
+                { title: 'Thành tích', icon: 'trending-up', tone: 'brand', onPress: () => router.push('/performance') },
+                { title: 'Chiến mã', icon: 'pets', tone: 'brand', onPress: () => router.push('/horses') },
+              ]}
+            />
+          </Section>
+
+          {/* ── Recent Invitations ── */}
+          <Section
+            title="Lời mời gần đây"
+            actionLabel="Xem tất cả"
+            onAction={() => router.push('/inbox')}
+          >
+            {invitations.length === 0 ? (
+              <Text style={styles.empty}>Chưa có lời mời thi đấu nào gần đây.</Text>
+            ) : (
+              invitations.slice(0, 3).map(i => {
+                const s = statusLabel(i.status);
+                // Fallback an toàn như yêu cầu
+                const itemTitle = i.horseId?.name || i.raceId?.name || i.tournamentId?.name || 'Lời mời thi đấu';
+                const ownerName = typeof i.ownerId === 'object' ? i.ownerId?.fullName : 'Chủ ngựa';
+
+                let subtitleParts = [];
+                if (ownerName) subtitleParts.push(`Từ: ${ownerName}`);
+                const sharePercent = i.jockeySharePercent ?? i.prizeSharePercentage;
+                if (sharePercent !== undefined && sharePercent !== null) subtitleParts.push(`Thưởng: ${sharePercent}%`);
+                const finalSubtitle = subtitleParts.join(' · ');
+
+                return (
+                  <TouchableOpacity
+                    key={i._id || i.id}
+                    style={styles.rowItem}
+                    onPress={() => router.push('/inbox')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.rowAvatar}>
+                      <MaterialIcons name="mail" size={18} color={premiumColors.textSecondary} />
+                    </View>
+                    <View style={styles.rowInfo}>
+                      <Text style={styles.rowTitle} numberOfLines={1}>{itemTitle}</Text>
+                      <Text style={styles.rowSubtitle} numberOfLines={1}>{finalSubtitle}</Text>
+                    </View>
+                    <View style={[styles.rowBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
+                      <Text style={[styles.rowBadgeText, { color: s.color }]}>{s.label}</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </Section>
         </View>
-        <View style={styles.overviewContent}>
-          <Text style={styles.overviewTitle}>Tổng quan hôm nay</Text>
-          <Text style={styles.overviewSubtitle}>
-            {acceptedCount} lịch đã nhận · {totalCount} tổng lời mời
-          </Text>
-        </View>
-        <MaterialIcons name="chevron-right" size={20} color={premiumColorsDynamic.textSecondary} />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        <WalletCard balance={balance} />
-
-        {/* ── Quick Actions ── */}
-        <Section title="Tiện ích">
-          <ActionGrid
-            columns={4}
-            actions={[
-              { title: 'Hòm thư', icon: 'mail', tone: 'brand', onPress: () => router.push('/inbox') },
-              { title: 'Lịch đua', icon: 'event', tone: 'brand', onPress: () => router.push('/schedule') },
-              { title: 'Thành tích', icon: 'trending-up', tone: 'brand', onPress: () => router.push('/performance') },
-              { title: 'Chiến mã', icon: 'pets', tone: 'brand', onPress: () => router.push('/horses') },
-            ]}
-          />
-        </Section>
-
-        {/* ── Recent Invitations ── */}
-        <Section
-          title="Lời mời gần đây"
-          actionLabel="Xem tất cả"
-          onAction={() => router.push('/inbox')}
-        >
-          {invitations.length === 0 ? (
-            <Text style={styles.empty}>Chưa có lời mời thi đấu nào gần đây.</Text>
-          ) : (
-            invitations.slice(0, 3).map(i => {
-              const s = statusLabel(i.status);
-              // Fallback an toàn như yêu cầu
-              const itemTitle = i.horseId?.name || i.raceId?.name || i.tournamentId?.name || 'Lời mời thi đấu';
-              const ownerName = typeof i.ownerId === 'object' ? i.ownerId?.fullName : 'Chủ ngựa';
-              
-              let subtitleParts = [];
-              if (ownerName) subtitleParts.push(`Từ: ${ownerName}`);
-              const sharePercent = i.jockeySharePercent ?? i.prizeSharePercentage;
-              if (sharePercent !== undefined && sharePercent !== null) subtitleParts.push(`Thưởng: ${sharePercent}%`);
-              const finalSubtitle = subtitleParts.join(' · ');
-
-              return (
-                <TouchableOpacity
-                  key={i._id || i.id}
-                  style={styles.rowItem}
-                  onPress={() => router.push('/inbox')}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.rowAvatar}>
-                    <MaterialIcons name="mail" size={18} color={premiumColors.textSecondary} />
-                  </View>
-                  <View style={styles.rowInfo}>
-                    <Text style={styles.rowTitle} numberOfLines={1}>{itemTitle}</Text>
-                    <Text style={styles.rowSubtitle} numberOfLines={1}>{finalSubtitle}</Text>
-                  </View>
-                  <View style={[styles.rowBadge, { borderColor: s.color + '40', backgroundColor: s.color + '18' }]}>
-                    <Text style={[styles.rowBadgeText, { color: s.color }]}>{s.label}</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={16} color={premiumColors.textMuted} />
-                </TouchableOpacity>
-              );
-            })
-          )}
-        </Section>
-      </View>
       </ScrollView>
     </View>
   );
@@ -216,9 +216,9 @@ const getStyles = (isDark: boolean, premiumColors: any) => StyleSheet.create({
   overviewCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(225, 6, 0, 0.05)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.05)' : '#FEF2F2',
     borderWidth: 1,
-    borderColor: 'rgba(225, 6, 0, 0.15)',
+    borderColor: isDark ? 'rgba(225, 6, 0, 0.15)' : '#FEF2F2',
     marginHorizontal: premiumSpacing[16],
     marginBottom: premiumSpacing[24],
     borderRadius: premiumRadius[12],

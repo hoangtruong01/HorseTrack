@@ -629,11 +629,11 @@ const getStyles = (isDark: boolean, theme: any, insets: any, premiumColors: any)
   },
   cardPassed: {
     borderColor: isDark ? 'rgba(52, 211, 153, 0.3)' : 'rgba(52, 211, 153, 0.5)',
-    backgroundColor: isDark ? 'rgba(52, 211, 153, 0.05)' : 'rgba(52, 211, 153, 0.02)',
+    backgroundColor: isDark ? 'rgba(52, 211, 153, 0.05)' : '#F0FDF4',
   },
   cardFailed: {
     borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)',
-    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.05)' : 'rgba(239, 68, 68, 0.02)',
+    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.05)' : '#FEF2F2',
   },
   cardHeader: {
     flexDirection: 'row',
