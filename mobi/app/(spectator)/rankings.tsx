@@ -122,7 +122,7 @@ export default function SpectatorRankings() {
     const top3 = list.find((i: any) => i.rank === 3);
 
     const getName = (item: any) => isHorse ? (item.horseName || 'Chiến mã ẩn danh') : (item.jockeyName || 'Nài ẩn danh');
-    const getSubtext = (item: any) => isHorse ? `${item.wins} thắng` : `${item.totalPoints?.toLocaleString()} pts`;
+    const getSubtext = (item: any) => isHorse ? `${item.wins} thắng` : `${item.wins} thắng`;
     const getIcon = () => isHorse ? "pets" : "person";
 
     return (

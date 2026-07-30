@@ -6,23 +6,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-// Component icon bọc hiệu ứng Squircle khi active
-export function DockTabIcon({
-  focused,
-  children,
-}: {
-  focused: boolean;
-  children: React.ReactNode;
-}) {
-  const isDark = useColorScheme() === 'dark';
-  const dockStyles = getDockStyles(isDark);
-  return (
-    <View style={[dockStyles.iconWrapper, focused && dockStyles.iconWrapperActive]}>
-      {children}
-    </View>
-  );
-}
-
 // Component tab Avatar cho profile
 export function DockAvatarIcon({
   focused,
@@ -34,7 +17,7 @@ export function DockAvatarIcon({
   const isDark = useColorScheme() === 'dark';
   const dockStyles = getDockStyles(isDark);
   return (
-    <DockTabIcon focused={focused}>
+    <View style={dockStyles.container}>
       {avatarUri ? (
         <Image
           source={{ uri: avatarUri }}
@@ -45,7 +28,7 @@ export function DockAvatarIcon({
           <MaterialIcons size={20} name="person" color="#555" />
         </View>
       )}
-    </DockTabIcon>
+    </View>
   );
 }
 
@@ -62,7 +45,7 @@ export function DockNotificationIcon({
   const inactiveColor = isDark ? '#b0b3b8' : '#65676B';
   const activeColor = isDark ? '#ffffff' : '#E10600';
   return (
-    <DockTabIcon focused={focused}>
+    <View style={dockStyles.container}>
       <View>
         <MaterialIcons size={26} name="notifications" color={focused ? activeColor : inactiveColor} />
         {count != null && count > 0 && (
@@ -71,7 +54,7 @@ export function DockNotificationIcon({
           </View>
         )}
       </View>
-    </DockTabIcon>
+    </View>
   );
 }
 

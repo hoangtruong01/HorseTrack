@@ -683,8 +683,8 @@ const getStyles = (isDark: boolean, colors: any) => StyleSheet.create({
     ...premiumShadows.subtle,
   },
   tCardOpen: {
-    borderColor: 'rgba(52, 211, 153, 0.35)',
-    backgroundColor: 'rgba(52, 211, 153, 0.05)',
+    borderColor: isDark ? 'rgba(52, 211, 153, 0.35)' : 'rgba(52, 211, 153, 0.5)',
+    backgroundColor: isDark ? 'rgba(52, 211, 153, 0.05)' : '#F0FDF4',
   },
   tName: {
     color: colors.text,

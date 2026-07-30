@@ -188,8 +188,8 @@ export default function OwnerHome() {
                     onPress={() => router.push('/(owner)/rankings' as any)}
                     activeOpacity={0.7}
                   >
-                    <View style={[styles.rankBadge, rank === 1 ? {backgroundColor: '#F59E0B'} : rank === 2 ? {backgroundColor: '#94A3B8'} : rank === 3 ? {backgroundColor: '#B45309'} : {backgroundColor: premiumColorsDynamic.surface2}]}>
-                      <Text style={[styles.rankBadgeText, {color: rank <= 3 ? '#FFF' : premiumColorsDynamic.textSecondary}]}>{rank}</Text>
+                    <View style={[styles.rankBadge, rank === 1 ? { backgroundColor: '#F59E0B' } : rank === 2 ? { backgroundColor: '#94A3B8' } : rank === 3 ? { backgroundColor: '#B45309' } : { backgroundColor: premiumColorsDynamic.surface2 }]}>
+                      <Text style={[styles.rankBadgeText, { color: rank <= 3 ? '#FFF' : premiumColorsDynamic.textSecondary }]}>{rank}</Text>
                     </View>
 
                     {h.avatar ? (
@@ -204,7 +204,7 @@ export default function OwnerHome() {
                       <Text style={styles.rankTitle} numberOfLines={1}>{h.horseName || 'Chiến mã ẩn danh'}</Text>
                       <Text style={styles.rankSubtitle} numberOfLines={1}>Chủ: {h.ownerName || '—'}</Text>
                     </View>
-                    
+
                     <View style={styles.rankPointsCol}>
                       <Text style={styles.rankPoints}>{h.totalPoints?.toLocaleString()}</Text>
                       <Text style={styles.rankPointsLabel}>Pts</Text>
@@ -259,9 +259,9 @@ const getStyles = (isDark: boolean, premiumColors: any) => StyleSheet.create({
   overviewCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(225, 6, 0, 0.05)',
+    backgroundColor: isDark ? 'rgba(225, 6, 0, 0.05)' : '#FEF2F2',
     borderWidth: 1,
-    borderColor: 'rgba(225, 6, 0, 0.15)',
+    borderColor: isDark ? 'rgba(225, 6, 0, 0.15)' : 'rgba(225, 6, 0, 0.15)',
     marginHorizontal: premiumSpacing[16],
     marginBottom: premiumSpacing[24],
     borderRadius: premiumRadius[12],
