@@ -46,6 +46,7 @@ export default function AdminRefereeAssignmentsPage() {
   const [formRace, setFormRace] = useState("");
   const [formReferee, setFormReferee] = useState("");
   const [formRole, setFormRole] = useState<"main" | "assistant">("main");
+  const [takenRoles, setTakenRoles] = useState<{ main: boolean; assistant: boolean }>({ main: false, assistant: false });
   const [formSalary, setFormSalary] = useState("0");
   const [submitting, setSubmitting] = useState(false);
   const [searchRef, setSearchRef] = useState("");
@@ -112,7 +113,7 @@ export default function AdminRefereeAssignmentsPage() {
 
   /* ── fetch available referees dynamically based on selected formRace ── */
   useEffect(() => {
-    if (!formRace) {
+    if (!showModal || !formRace) {
       setReferees([]);
       setFormReferee("");
       return;
@@ -129,7 +130,34 @@ export default function AdminRefereeAssignmentsPage() {
         setRefereesLoading(false);
       }
     })();
-  }, [formRace]);
+  }, [formRace, showModal]);
+
+  /* ── determine which roles are already filled for the selected formRace ── */
+  useEffect(() => {
+    if (!showModal || !formRace) { setTakenRoles({ main: false, assistant: false }); return; }
+    (async () => {
+      try {
+        const res = await refereeAssignmentsApi.listByRace(formRace, { limit: 100 });
+        const active = (res.data ?? []).filter(
+          (a) => a.status === "assigned" || a.status === "accepted",
+        );
+        const taken = {
+          main: active.some((a) => a.role === "main"),
+          assistant: active.some((a) => a.role === "assistant"),
+        };
+        setTakenRoles(taken);
+        // Keep current role if still free, otherwise switch to the free one
+        setFormRole((prev) => {
+          if (!taken[prev]) return prev;
+          if (!taken.main) return "main";
+          if (!taken.assistant) return "assistant";
+          return prev;
+        });
+      } catch {
+        setTakenRoles({ main: false, assistant: false });
+      }
+    })();
+  }, [formRace, showModal]);
 
   const openModal = () => {
     setShowModal(true);
@@ -418,22 +446,29 @@ export default function AdminRefereeAssignmentsPage() {
               <fieldset className="space-y-2">
                 <legend className="text-xs font-bold text-foreground">Vai trò</legend>
                 <div className="flex gap-3">
-                  {(["main", "assistant"] as const).map(r => (
-                    <label key={r}
-                      className={`flex-1 flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition text-xs font-bold ${
-                        formRole === r
-                          ? "border-primary/50 bg-primary/10 text-foreground"
-                          : "border-border bg-muted text-muted-foreground hover:border-primary"
-                      }`}
-                    >
-                      <input type="radio" name="role" value={r} checked={formRole === r}
-                        onChange={() => setFormRole(r)} className="sr-only" />
-                      {r === "main"
-                        ? <><Award className="size-4 text-amber-400" /> Trọng tài chính</>
-                        : <><UserCheck className="size-4 text-blue-400" /> Trọng tài phụ</>
-                      }
-                    </label>
-                  ))}
+                  {(["main", "assistant"] as const).map(r => {
+                    const disabled = takenRoles[r];
+                    return (
+                      <label key={r}
+                        className={`flex-1 flex items-center gap-2 rounded-xl border p-3 transition text-xs font-bold ${
+                          disabled
+                            ? "border-border bg-muted/50 text-muted-foreground/40 cursor-not-allowed"
+                            : formRole === r
+                              ? "border-primary/50 bg-primary/10 text-foreground cursor-pointer"
+                              : "border-border bg-muted text-muted-foreground hover:border-primary cursor-pointer"
+                        }`}
+                      >
+                        <input type="radio" name="role" value={r} checked={formRole === r}
+                          disabled={disabled}
+                          onChange={() => setFormRole(r)} className="sr-only" />
+                        {r === "main"
+                          ? <><Award className="size-4 text-amber-400" /> Trọng tài chính</>
+                          : <><UserCheck className="size-4 text-blue-400" /> Trọng tài phụ</>
+                        }
+                        {disabled && <span className="ml-auto text-[10px] font-black uppercase text-yellow-400">Đã đủ</span>}
+                      </label>
+                    );
+                  })}
                 </div>
               </fieldset>
 
@@ -442,7 +477,7 @@ export default function AdminRefereeAssignmentsPage() {
                   className="rounded-xl px-4 h-10 border-border hover:bg-muted text-foreground">
                   Hủy
                 </Button>
-                <Button type="submit" disabled={submitting || !formRace || !formReferee}
+                <Button type="submit" disabled={submitting || !formRace || !formReferee || takenRoles[formRole]}
                   className="rounded-xl px-5 h-10 bg-[#E10600] hover:bg-primary text-foreground font-bold uppercase tracking-wider text-xs disabled:opacity-40">
                   {submitting ? <><Loader2 className="size-3.5 animate-spin mr-1" /> Đang xử lý...</> : "Phân Công"}
                 </Button>

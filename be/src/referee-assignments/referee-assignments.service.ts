@@ -7,11 +7,12 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { UsersService } from '../users/users.service';
-import { RoleName } from '../users/schemas/user.schema';
-import { RefereeProfilesService } from '../referee-profiles/referee-profiles.service';
 import { RacesService } from '../races/races.service';
 import { Race, RaceDocument, RaceStatus } from '../races/schemas/race.schema';
+import { RefereeProfilesService } from '../referee-profiles/referee-profiles.service';
+import { RefereeApprovalStatus } from '../referee-profiles/schemas/referee-profile.schema';
+import { RoleName } from '../users/schemas/user.schema';
+import { UsersService } from '../users/users.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import {
   RespondAssignmentDto,
@@ -21,9 +22,7 @@ import {
   RefereeAssignment,
   RefereeAssignmentDocument,
   RefereeAssignmentStatus,
-  RefereeRole,
 } from './schemas/referee-assignment.schema';
-import { RefereeApprovalStatus } from '../referee-profiles/schemas/referee-profile.schema';
 
 /** Races within this window (ms) are considered conflicting */
 const CONFLICT_WINDOW_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -121,11 +120,28 @@ export class RefereeAssignmentsService {
       );
     }
 
+    // 6. Each role (MAIN / ASSISTANT) can only have one active invitation per race.
+    const roleTaken = await this.assignmentModel.findOne({
+      raceId: new Types.ObjectId(dto.raceId),
+      role: dto.role,
+      status: {
+        $in: [
+          RefereeAssignmentStatus.ASSIGNED,
+          RefereeAssignmentStatus.ACCEPTED,
+        ],
+      },
+    });
+    if (roleTaken) {
+      throw new ConflictException(
+        `This race already has an active ${dto.role} referee`,
+      );
+    }
+
     return this.assignmentModel.create({
       raceId: new Types.ObjectId(dto.raceId),
       refereeUserId: new Types.ObjectId(dto.refereeUserId),
       assignedBy: new Types.ObjectId(assignedBy),
-      role: dto.role ?? RefereeRole.MAIN,
+      role: dto.role,
       salary: dto.salary ?? 0,
     });
   }
@@ -223,10 +239,12 @@ export class RefereeAssignmentsService {
   async removeAssignment(id: string): Promise<RefereeAssignmentDocument> {
     const assignment = await this.assignmentModel.findById(id);
     if (!assignment) throw new NotFoundException('Assignment not found');
-    assignment.status = RefereeAssignmentStatus.REMOVED;
-    const saved = await assignment.save();
-    await this.revertRaceIfNoAcceptedReferee(String(assignment.raceId));
-    return saved;
+    const raceId = String(assignment.raceId);
+    // Hard delete so the (raceId, refereeUserId) unique index is freed,
+    // allowing this referee/role to be invited again for the same race.
+    await this.assignmentModel.deleteOne({ _id: assignment._id });
+    await this.revertRaceIfNoAcceptedReferee(raceId);
+    return assignment;
   }
 
   async findByRace(raceId: string, page = 1, limit = 20) {
