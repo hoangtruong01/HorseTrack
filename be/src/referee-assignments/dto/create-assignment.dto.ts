@@ -20,10 +20,10 @@ export class CreateAssignmentDto {
   @IsMongoId()
   refereeUserId!: string;
 
-  @ApiPropertyOptional({ enum: RefereeRole, default: RefereeRole.MAIN })
-  @IsOptional()
+  @ApiProperty({ enum: RefereeRole })
+  @IsNotEmpty()
   @IsEnum(RefereeRole)
-  role?: RefereeRole;
+  role!: RefereeRole;
 
   @ApiPropertyOptional({ default: 0 })
   @IsOptional()
