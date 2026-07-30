@@ -42,7 +42,7 @@ export class RegistrationsController {
   }
 
   @Get()
-  @Roles(RoleName.ADMIN, RoleName.SPECTATOR)
+  @Roles(RoleName.ADMIN, RoleName.SPECTATOR, RoleName.OWNER)
   @ApiOperation({
     summary: 'List all registrations (Admin / Spectators)',
   })
