@@ -12,8 +12,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { usersApi, type UserItem } from "@/lib/api-client";
-import { Ban, Calendar, ChevronLeft, ChevronRight, Eye, Mail, MapPin, Phone, Search, Shield, Trash2, UserCog, Users, X } from "lucide-react";
+import {
+  usersApi,
+  jockeysApi,
+  refereeProfilesApi,
+  horsesApi,
+  type UserItem,
+  type JockeyItem,
+  type RefereeProfileItem,
+  type HorseItem,
+} from "@/lib/api-client";
+import {
+  Ban,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Mail,
+  MapPin,
+  Phone,
+  Search,
+  Shield,
+  Trash2,
+  UserCog,
+  Users,
+  X,
+  Award,
+  Trophy,
+  CheckCircle,
+  FileText,
+  Camera,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -36,6 +65,25 @@ const roleColors: Record<string, string> = {
   counter_staff: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
 };
 
+const formatCertificatesList = (raw?: string): string[] => {
+  if (!raw) return [];
+  return raw
+    .split("\n")
+    .map((item) => item.replace(/^(Bằng cấp|Giấy phép|Chứng chỉ)\s*\d*[:\s-]*/i, "").trim())
+    .filter(Boolean);
+};
+
+const getJockeyCertPhotos = (j: JockeyItem) => {
+  if (j.certificateImages && j.certificateImages.length > 0) return j.certificateImages;
+  return j.licenseImage ? [j.licenseImage] : [];
+};
+
+const getRefereeCertPhotos = (r: RefereeProfileItem) => {
+  if (r.certificateImages && r.certificateImages.length > 0) return r.certificateImages;
+  const single = r.certificateImage || r.licenseImage;
+  return single ? [single] : [];
+};
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
@@ -48,6 +96,74 @@ export default function AdminUsersPage() {
   const [selectedUserForRoles, setSelectedUserForRoles] = useState<UserItem | null>(null);
   const [selectedUserDetail, setSelectedUserDetail] = useState<UserItem | null>(null);
   const [rolesActionLoading, setRolesActionLoading] = useState<string | null>(null);
+
+  const [loadingSubProfiles, setLoadingSubProfiles] = useState(false);
+  const [jockeyProfile, setJockeyProfile] = useState<JockeyItem | null>(null);
+  const [refereeProfile, setRefereeProfile] = useState<RefereeProfileItem | null>(null);
+  const [ownerHorses, setOwnerHorses] = useState<HorseItem[]>([]);
+
+  const handleOpenUserDetail = useCallback(async (u: UserItem) => {
+    setSelectedUserDetail(u);
+    setLoadingSubProfiles(true);
+    setJockeyProfile(null);
+    setRefereeProfile(null);
+    setOwnerHorses([]);
+
+    try {
+      const promises: Promise<void>[] = [];
+
+      if (u.roles.includes("jockey")) {
+        promises.push(
+          jockeysApi
+            .listAdmin({ limit: 100 })
+            .then((res) => {
+              const found = res.data.find((j) => {
+                const uid = typeof j.userId === "object" ? j.userId?._id : j.userId;
+                return uid === u.id;
+              });
+              if (found) setJockeyProfile(found);
+            })
+            .catch(() => {})
+        );
+      }
+
+      if (u.roles.includes("referee")) {
+        promises.push(
+          refereeProfilesApi
+            .listAdmin({ limit: 100 })
+            .then((res) => {
+              const found = res.data.find((r) => {
+                const uid = typeof r.userId === "object" ? r.userId?._id : r.userId;
+                return uid === u.id;
+              });
+              if (found) setRefereeProfile(found);
+            })
+            .catch(() => {})
+        );
+      }
+
+      if (u.roles.includes("owner")) {
+        promises.push(
+          horsesApi
+            .list({ limit: 100 })
+            .then((res) => {
+              const found = res.data.filter((h) => {
+                const oid = typeof h.ownerId === "object" ? h.ownerId?._id : h.ownerId;
+                return oid === u.id;
+              });
+              setOwnerHorses(found);
+            })
+            .catch(() => {})
+        );
+      }
+
+      await Promise.all(promises);
+    } catch (e) {
+      console.error("Error loading sub profiles", e);
+    } finally {
+      setLoadingSubProfiles(false);
+    }
+  }, []);
 
   const fetchUsers = useCallback(async (page = 1) => {
     setLoading(true);
@@ -217,7 +333,7 @@ export default function AdminUsersPage() {
                 {users.map((u) => (
                   <tr
                     key={u.id}
-                    onClick={() => setSelectedUserDetail(u)}
+                    onClick={() => void handleOpenUserDetail(u)}
                     className="group hover:bg-muted/80 transition-colors cursor-pointer"
                   >
                     <td className="px-5 py-4">
@@ -252,7 +368,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedUserDetail(u);
+                            void handleOpenUserDetail(u);
                           }}
                           className="flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-400 transition hover:scale-105 hover:bg-sky-500/20"
                         >
@@ -344,7 +460,7 @@ export default function AdminUsersPage() {
           onClick={() => setSelectedUserDetail(null)}
         >
           <div
-            className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200"
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -375,7 +491,7 @@ export default function AdminUsersPage() {
               <div className="grid grid-cols-2 gap-4 bg-muted/40 p-4 rounded-xl border border-border/50">
                 <div>
                   <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px] flex items-center gap-1">
-                    <Shield className="size-3" /> Trạng thái
+                    <Shield className="size-3" /> Trạng thái tài khoản
                   </p>
                   <span className={`inline-flex mt-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${statusColors[selectedUserDetail.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                     {selectedUserDetail.status}
@@ -383,7 +499,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div>
                   <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px] flex items-center gap-1">
-                    <Phone className="size-3" /> Số điện thoại
+                    <Phone className="size-3 text-emerald-400" /> Số điện thoại
                   </p>
                   <p className="text-foreground font-semibold mt-1">
                     {selectedUserDetail.phone || "Chưa cập nhật"}
@@ -423,6 +539,221 @@ export default function AdminUsersPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Sub-Profiles Loading State */}
+              {loadingSubProfiles && (
+                <div className="flex items-center justify-center p-4 bg-muted/20 rounded-xl border border-dashed border-border text-muted-foreground text-xs gap-2">
+                  <div className="size-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Đang tải thông tin hồ sơ chuyên môn (Nài ngựa / Trọng tài / Chủ ngựa)...</span>
+                </div>
+              )}
+
+              {/* JOCKEY PROFILE CARD */}
+              {!loadingSubProfiles && jockeyProfile && (
+                <div className="bg-muted/40 p-4 rounded-xl border border-orange-500/20 space-y-4">
+                  <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+                      <Award className="size-4" /> Hồ Sơ Nài Ngựa Chuyên Nghiệp
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        jockeyProfile.approvalStatus === "PENDING" ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" :
+                        jockeyProfile.approvalStatus === "APPROVED" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" :
+                        "text-red-400 bg-red-400/10 border-red-400/20"
+                      }`}>
+                        {jockeyProfile.approvalStatus === "PENDING" ? "Chờ duyệt" : jockeyProfile.approvalStatus === "APPROVED" ? "Đã duyệt" : "Từ chối"}
+                      </span>
+                      <span className="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-emerald-400">
+                        {jockeyProfile.status === "available" || jockeyProfile.status === "ACTIVE" ? "Sẵn sàng" : jockeyProfile.status === "unavailable" ? "Bận" : "Tạm đình chỉ"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {jockeyProfile.approvalStatus === "REJECTED" && jockeyProfile.rejectionReason && (
+                    <div className="text-[11px] text-red-400 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
+                      <strong className="uppercase block text-[9px] font-bold">Lý do từ chối kiểm duyệt:</strong>
+                      <p className="mt-0.5">{jockeyProfile.rejectionReason}</p>
+                    </div>
+                  )}
+
+                  {/* Grid Info */}
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="bg-background/50 p-3 rounded-lg border border-border/40 space-y-1.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Thông tin chuyên môn</span>
+                      <div><span className="text-muted-foreground">Giấy phép:</span> <span className="font-mono font-semibold text-foreground">{jockeyProfile.licenseNumber || "—"}</span></div>
+                      <div><span className="text-muted-foreground">Kinh nghiệm:</span> <span className="font-semibold text-foreground">{jockeyProfile.experienceYears ?? 0} năm</span></div>
+                      <div><span className="text-muted-foreground">Thể chất:</span> <span className="font-semibold text-foreground">{jockeyProfile.heightCm ?? "?"}cm / {jockeyProfile.weightKg ?? "?"}kg</span></div>
+                      {jockeyProfile.specialty && <div><span className="text-muted-foreground">Trình độ:</span> <span className="font-semibold text-foreground">{jockeyProfile.specialty}</span></div>}
+                    </div>
+
+                    <div className="bg-background/50 p-3 rounded-lg border border-border/40 space-y-1.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Thành tích thi đấu</span>
+                      <div><span className="text-muted-foreground">Tổng số trận:</span> <span className="font-semibold text-foreground">{jockeyProfile.totalRaces ?? 0} trận</span></div>
+                      <div><span className="text-muted-foreground">Số trận thắng:</span> <span className="font-semibold text-emerald-400">{jockeyProfile.wins ?? 0} trận</span></div>
+                      <div><span className="text-muted-foreground">Tỷ lệ thắng:</span> <span className="font-semibold text-emerald-400">{jockeyProfile.totalRaces ? Math.round(((jockeyProfile.wins ?? 0) / jockeyProfile.totalRaces) * 100) : 0}%</span></div>
+                    </div>
+                  </div>
+
+                  {/* Certificates List */}
+                  <div className="space-y-1.5">
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold flex items-center gap-1">
+                      <FileText className="size-3.5 text-teal-400" /> Bằng cấp & Chứng chỉ chuyên môn
+                    </span>
+                    {formatCertificatesList(jockeyProfile.certificates).length > 0 ? (
+                      <div className="space-y-1 bg-background/50 p-2.5 rounded-lg border border-border/40">
+                        {formatCertificatesList(jockeyProfile.certificates).map((cert, i) => (
+                          <div key={i} className="flex items-center gap-2 text-[11px] text-teal-300 font-medium">
+                            <CheckCircle className="size-3 text-teal-400 shrink-0" />
+                            <span>{cert}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground/60 italic">Chưa cập nhật danh sách bằng cấp</p>
+                    )}
+                  </div>
+
+                  {/* Personal Bio */}
+                  {jockeyProfile.bio && (
+                    <div className="space-y-1">
+                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Tiểu sử & Quá trình</span>
+                      <p className="text-[11px] text-foreground/80 bg-background/50 p-2.5 rounded-lg border border-border/40 whitespace-pre-line">{jockeyProfile.bio}</p>
+                    </div>
+                  )}
+
+                  {/* Cert photos */}
+                  {getJockeyCertPhotos(jockeyProfile).length > 0 && (
+                    <div className="space-y-1.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase font-bold flex items-center gap-1">
+                        <Camera className="size-3 text-teal-400" /> Ảnh Giấy phép & Bằng cấp ({getJockeyCertPhotos(jockeyProfile).length})
+                      </span>
+                      <div className="grid grid-cols-4 gap-2">
+                        {getJockeyCertPhotos(jockeyProfile).map((img, i) => (
+                          <a key={i} href={img} target="_blank" rel="noreferrer" className="group relative aspect-video rounded-lg overflow-hidden border border-border/60 bg-black">
+                            <img src={img} alt={`Bằng cấp ${i+1}`} className="w-full h-full object-cover group-hover:scale-105 transition" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* REFEREE PROFILE CARD */}
+              {!loadingSubProfiles && refereeProfile && (
+                <div className="bg-muted/40 p-4 rounded-xl border border-cyan-500/20 space-y-4">
+                  <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                      <Shield className="size-4" /> Hồ Sơ Trọng Tài Điều Hành
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        refereeProfile.approvalStatus === "PENDING" ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" :
+                        refereeProfile.approvalStatus === "APPROVED" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" :
+                        "text-red-400 bg-red-400/10 border-red-400/20"
+                      }`}>
+                        {refereeProfile.approvalStatus === "PENDING" ? "Chờ duyệt" : refereeProfile.approvalStatus === "APPROVED" ? "Đã duyệt" : "Từ chối"}
+                      </span>
+                      <span className="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-emerald-400">
+                        {refereeProfile.status === "available" ? "Sẵn sàng" : refereeProfile.status === "unavailable" ? "Bận" : "Tạm đình chỉ"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {refereeProfile.approvalStatus === "REJECTED" && refereeProfile.rejectionReason && (
+                    <div className="text-[11px] text-red-400 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
+                      <strong className="uppercase block text-[9px] font-bold">Lý do từ chối kiểm duyệt:</strong>
+                      <p className="mt-0.5">{refereeProfile.rejectionReason}</p>
+                    </div>
+                  )}
+
+                  {/* Grid Info */}
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="bg-background/50 p-3 rounded-lg border border-border/40 space-y-1.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Mã số giấy phép</span>
+                      <span className="font-mono font-bold text-foreground text-sm">{refereeProfile.licenseNo || "—"}</span>
+                    </div>
+
+                    <div className="bg-background/50 p-3 rounded-lg border border-border/40 space-y-1.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Kinh nghiệm công tác</span>
+                      <span className="font-semibold text-foreground text-sm">{refereeProfile.experienceYears ?? 0} năm</span>
+                    </div>
+                  </div>
+
+                  {/* Certificates List */}
+                  <div className="space-y-1.5">
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold flex items-center gap-1">
+                      <FileText className="size-3.5 text-teal-400" /> Bằng cấp & Chứng chỉ chuyên môn
+                    </span>
+                    {formatCertificatesList(refereeProfile.certificates).length > 0 ? (
+                      <div className="space-y-1 bg-background/50 p-2.5 rounded-lg border border-border/40">
+                        {formatCertificatesList(refereeProfile.certificates).map((cert, i) => (
+                          <div key={i} className="flex items-center gap-2 text-[11px] text-teal-300 font-medium">
+                            <CheckCircle className="size-3 text-teal-400 shrink-0" />
+                            <span>{cert}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground/60 italic">Chưa cập nhật danh sách bằng cấp</p>
+                    )}
+                  </div>
+
+                  {/* Bio */}
+                  {refereeProfile.bio && (
+                    <div className="space-y-1">
+                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Tiểu sử & Quá trình công tác</span>
+                      <p className="text-[11px] text-foreground/80 bg-background/50 p-2.5 rounded-lg border border-border/40 whitespace-pre-line">{refereeProfile.bio}</p>
+                    </div>
+                  )}
+
+                  {/* Cert photos */}
+                  {getRefereeCertPhotos(refereeProfile).length > 0 && (
+                    <div className="space-y-1.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase font-bold flex items-center gap-1">
+                        <Camera className="size-3 text-teal-400" /> Ảnh Giấy phép & Bằng cấp ({getRefereeCertPhotos(refereeProfile).length})
+                      </span>
+                      <div className="grid grid-cols-4 gap-2">
+                        {getRefereeCertPhotos(refereeProfile).map((img, i) => (
+                          <a key={i} href={img} target="_blank" rel="noreferrer" className="group relative aspect-video rounded-lg overflow-hidden border border-border/60 bg-black">
+                            <img src={img} alt={`Bằng cấp ${i+1}`} className="w-full h-full object-cover group-hover:scale-105 transition" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* OWNER HORSES CARD */}
+              {!loadingSubProfiles && (ownerHorses.length > 0 || selectedUserDetail.roles.includes("owner")) && (
+                <div className="bg-muted/40 p-4 rounded-xl border border-blue-500/20 space-y-3">
+                  <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                      <Trophy className="size-4" /> Danh Sách Chiến Mã Sở Hữu ({ownerHorses.length})
+                    </h4>
+                  </div>
+
+                  {ownerHorses.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {ownerHorses.map((h) => (
+                        <div key={h._id} className="bg-background/60 p-3 rounded-lg border border-border/50 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <h5 className="font-bold text-sm text-foreground">{h.name}</h5>
+                            <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${h.approvalStatus === "approved" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"}`}>
+                              {h.approvalStatus === "approved" ? "Đã duyệt" : "Chờ duyệt"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground">Giống: <strong className="text-foreground">{h.breed || "Chưa rõ"}</strong> • Giới tính: <strong className="text-foreground">{h.gender || "—"}</strong> • Tuổi: <strong className="text-foreground">{h.age ?? "?"}</strong></p>
+                          <p className="text-[11px] text-muted-foreground">Tốc độ ban đầu: <strong className="text-emerald-400">{h.baseSpeed ?? 0} km/h</strong> • Thể lực: <strong className="text-sky-400">{h.staminaScore ?? 0}/100</strong></p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground/60 italic">Chưa sở hữu chiến mã nào trên hệ thống.</p>
+                  )}
+                </div>
+              )}
 
               {/* Metadata */}
               <div className="grid grid-cols-2 gap-4 text-[11px] text-muted-foreground pt-2 border-t border-border/50">
