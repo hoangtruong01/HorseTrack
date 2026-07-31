@@ -149,6 +149,57 @@ function ExplorerItemAvatar({ image, name }: { image?: string; name: string }) {
   );
 }
 
+function getRaceStatusConfig(status?: string, isVi: boolean = true) {
+  const upper = (status || "").toUpperCase();
+  switch (upper) {
+    case "SCHEDULED":
+    case "PENDING":
+      return {
+        label: isVi ? "Đã lên lịch" : "Scheduled",
+        tone: "blue" as const,
+      };
+    case "READY":
+      return {
+        label: isVi ? "Sẵn sàng" : "Ready",
+        tone: "green" as const,
+      };
+    case "LIVE":
+    case "IN_PROGRESS":
+      return {
+        label: isVi ? "ĐANG CHẠY" : "LIVE",
+        tone: "red" as const,
+        pulse: true,
+      };
+    case "FINISHED":
+    case "COMPLETED":
+      return {
+        label: isVi ? "Hoàn thành" : "Finished",
+        tone: "purple" as const,
+      };
+    case "RESULT_PUBLISHED":
+      return {
+        label: isVi ? "Kết quả công bố" : "Results Published",
+        tone: "amber" as const,
+      };
+    case "CANCELLED":
+    case "CANCELED":
+      return {
+        label: isVi ? "Đã hủy" : "Cancelled",
+        tone: "rose" as const,
+      };
+    case "POSTPONED":
+      return {
+        label: isVi ? "Hoãn đua" : "Postponed",
+        tone: "orange" as const,
+      };
+    default:
+      return {
+        label: status || "—",
+        tone: "slate" as const,
+      };
+  }
+}
+
 export function JockeyAssignPage() {
   const { t, i18n } = useTranslation();
   const isVi = i18n.language?.startsWith("vi") ?? true;
@@ -356,6 +407,7 @@ export function JockeyAssignPage() {
                     <div className="space-y-1 pl-2">
                       {groupItems.map((inv) => {
                         const formattedDate = formatDateDDMMYYYY(inv.raceId?.startTime || inv.createdAt);
+                        const statusConfig = getRaceStatusConfig(inv.raceId?.status, isVi);
 
                         return (
                           <div
@@ -375,8 +427,9 @@ export function JockeyAssignPage() {
                                     {inv.raceId?.name || t("jockey.assign.unnamedRace", "Cuộc đua chưa đặt tên")}
                                   </p>
                                   <StatusBadge
-                                    label={inv.raceId?.status === "LIVE" ? "LIVE" : inv.raceId?.status}
-                                    tone={inv.raceId?.status === "LIVE" ? "red" : "green"}
+                                    label={statusConfig.label}
+                                    tone={statusConfig.tone}
+                                    pulse={statusConfig.pulse}
                                     className="text-[9px] px-1.5 py-0"
                                   />
                                 </div>
@@ -390,7 +443,7 @@ export function JockeyAssignPage() {
                             <div className="flex items-center gap-6 shrink-0 text-right text-[11px]">
                               <div className="hidden sm:block text-muted-foreground/80">
                                 <span className="block text-[10px] text-muted-foreground/60">
-                                  {t("jockey.assign.dateModified", isVi ? "Ngày sửa đổi:" : "Date modified:")}
+                                  {t("jockey.assign.dateModified", isVi ? "Ngày:" : "Date modified:")}
                                 </span>
                                 <span className="font-mono text-foreground font-semibold">{formattedDate}</span>
                               </div>
@@ -429,110 +482,109 @@ export function JockeyAssignPage() {
         ) : viewMode === "list" ? (
           /* OPTION LAYOUT: Compact List View */
           <div className="divide-y divide-border rounded-2xl border border-border bg-card overflow-hidden shadow-lg">
-            {acceptedInvs.map((inv) => (
-              <div
-                key={inv.id || inv._id}
-                onClick={() => handleViewHorseDetail(inv.horseId.id)}
-                className="flex items-center justify-between px-4 py-3 hover:bg-muted/60 transition cursor-pointer text-xs"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <Clock className="size-4 text-teal-400 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-bold text-foreground truncate">{inv.raceId?.name}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{inv.tournamentId?.name} • Chủ: {inv.ownerId?.fullName} • Mã ngựa: {inv.horseId?.name}</p>
+            {acceptedInvs.map((inv) => {
+              const statusConfig = getRaceStatusConfig(inv.raceId?.status, isVi);
+              return (
+                <div
+                  key={inv.id || inv._id}
+                  onClick={() => handleViewHorseDetail(inv.horseId.id)}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-muted/60 transition cursor-pointer text-xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Clock className="size-4 text-teal-400 shrink-0" />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-foreground truncate">{inv.raceId?.name}</p>
+                        <StatusBadge label={statusConfig.label} tone={statusConfig.tone} pulse={statusConfig.pulse} className="text-[9px] px-1.5 py-0" />
+                      </div>
+                      <p className="text-[11px] text-muted-foreground truncate">{inv.tournamentId?.name} • Chủ: {inv.ownerId?.fullName} • Mã ngựa: {inv.horseId?.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span className="text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">Thưởng {inv.jockeySharePercent}%</span>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewHorseDetail(inv.horseId.id);
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                    >
+                      <Eye className="size-3 mr-1" /> Chi tiết
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
-                  <span className="text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">Thưởng {inv.jockeySharePercent}%</span>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleViewHorseDetail(inv.horseId.id);
-                    }}
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs"
-                  >
-                    <Eye className="size-3 mr-1" /> Chi tiết
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* OPTION LAYOUT: Standard Grid Cards View */
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {acceptedInvs.map((inv) => (
-              <div key={inv.id || inv._id} className="relative rounded-xl border border-border bg-card p-4 hover:border-teal-500/30 transition shadow-sm overflow-hidden flex flex-col justify-between h-full">
-                {/* Status accent line */}
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${inv.raceId?.status === "LIVE" ? "bg-red-500" : "bg-teal-500"}`} />
-                
-                <div className="pl-3 space-y-3 flex-1">
-                  <div className="flex justify-between items-start gap-3">
-                    <div className="flex-1">
-                      <h4 className="text-sm font-black uppercase text-foreground line-clamp-2" title={inv.raceId?.name}>{inv.raceId?.name}</h4>
-                      <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1.5" title="Giờ chạy">
-                          <Clock className="size-3.5 text-teal-400" />
-                          <span className="font-medium">{formatDateDDMMYYYY(inv.raceId?.startTime)}</span>
+            {acceptedInvs.map((inv) => {
+              const statusConfig = getRaceStatusConfig(inv.raceId?.status, isVi);
+              return (
+                <div key={inv.id || inv._id} className="relative rounded-xl border border-border bg-card p-4 hover:border-teal-500/30 transition shadow-sm overflow-hidden flex flex-col justify-between h-full">
+                  {/* Status accent line */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${inv.raceId?.status === "LIVE" ? "bg-red-500" : inv.raceId?.status === "RESULT_PUBLISHED" ? "bg-amber-500" : inv.raceId?.status === "CANCELLED" ? "bg-rose-500" : "bg-blue-500"}`} />
+                  
+                  <div className="pl-3 space-y-3 flex-1">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1">
+                        <h4 className="text-sm font-black uppercase text-foreground line-clamp-2" title={inv.raceId?.name}>{inv.raceId?.name}</h4>
+                        <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1.5" title="Giờ chạy">
+                            <Clock className="size-3.5 text-teal-400" />
+                            <span className="font-medium">{formatDateDDMMYYYY(inv.raceId?.startTime)}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <StatusBadge
+                        label={statusConfig.label}
+                        tone={statusConfig.tone}
+                        pulse={statusConfig.pulse}
+                        className="shrink-0"
+                      />
+                    </div>
+
+                    {inv.tournamentId?.name && (
+                      <div className="text-xs text-muted-foreground flex items-center gap-1.5 pt-1">
+                        <Flag className="size-3 shrink-0" /> {inv.tournamentId.name}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-2 pt-3 border-t border-border/50">
+                      {/* Owner & Share */}
+                      <div className="flex items-center justify-between text-xs" title={`Chủ chuồng: ${inv.ownerId?.fullName}`}>
+                        <div className="flex items-center gap-2">
+                          <User className="size-3.5 text-muted-foreground" />
+                          <span className="truncate max-w-[120px] font-medium">{inv.ownerId?.fullName}</span>
+                        </div>
+                        <span className="text-teal-400 font-bold bg-teal-500/10 px-1.5 py-0.5 rounded">
+                          Thưởng {inv.jockeySharePercent}%
                         </span>
                       </div>
-                    </div>
-                    <StatusBadge
-                      label={
-                        inv.raceId?.status === "PENDING" ? "Sắp tới" : 
-                        inv.raceId?.status === "READY" ? "Sẵn sàng" : 
-                        inv.raceId?.status === "LIVE" ? "ĐANG CHẠY" : 
-                        inv.raceId?.status === "FINISHED" ? "Đã xong" : 
-                        inv.raceId?.status === "RESULT_PUBLISHED" ? "Kết quả" : inv.raceId?.status
-                      }
-                      tone={
-                        inv.raceId?.status === "LIVE" ? "red" :
-                        inv.raceId?.status === "READY" ? "green" :
-                        inv.raceId?.status === "PENDING" ? "yellow" : "slate"
-                      }
-                      pulse={inv.raceId?.status === "LIVE"}
-                      className="shrink-0"
-                    />
-                  </div>
 
-                  {inv.tournamentId?.name && (
-                    <div className="text-xs text-muted-foreground flex items-center gap-1.5 pt-1">
-                      <Flag className="size-3 shrink-0" /> {inv.tournamentId.name}
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-2 pt-3 border-t border-border/50">
-                    {/* Owner & Share */}
-                    <div className="flex items-center justify-between text-xs" title={`Chủ chuồng: ${inv.ownerId?.fullName}`}>
-                      <div className="flex items-center gap-2">
-                        <User className="size-3.5 text-muted-foreground" />
-                        <span className="truncate max-w-[120px] font-medium">{inv.ownerId?.fullName}</span>
+                      {/* Horse Action */}
+                      <div className="flex justify-between items-center bg-muted/30 p-2 rounded-lg border border-border mt-1">
+                         <span className="text-xs font-bold flex items-center gap-1.5 truncate pr-2">
+                            <Sparkles className="size-3 text-primary" /> {inv.horseId?.name}
+                         </span>
+                         <Button
+                          onClick={() => handleViewHorseDetail(inv.horseId.id)}
+                          variant="ghost" size="sm"
+                          className="h-6 text-[10px] font-bold bg-background hover:bg-muted border border-border px-2"
+                          title="Xem thông số chiến mã"
+                        >
+                          <Eye className="size-3 mr-1" />
+                          Xem
+                        </Button>
                       </div>
-                      <span className="text-teal-400 font-bold bg-teal-500/10 px-1.5 py-0.5 rounded">
-                        Thưởng {inv.jockeySharePercent}%
-                      </span>
-                    </div>
-
-                    {/* Horse Action */}
-                    <div className="flex justify-between items-center bg-muted/30 p-2 rounded-lg border border-border mt-1">
-                       <span className="text-xs font-bold flex items-center gap-1.5 truncate pr-2">
-                          <Sparkles className="size-3 text-primary" /> {inv.horseId?.name}
-                       </span>
-                       <Button
-                        onClick={() => handleViewHorseDetail(inv.horseId.id)}
-                        variant="ghost" size="sm"
-                        className="h-6 text-[10px] font-bold bg-background hover:bg-muted border border-border px-2"
-                        title="Xem thông số chiến mã"
-                      >
-                        <Eye className="size-3 mr-1" />
-                        Xem
-                      </Button>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
