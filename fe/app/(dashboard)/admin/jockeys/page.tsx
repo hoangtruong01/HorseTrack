@@ -4,11 +4,16 @@ import Image from "next/image";
 import { PageHeader } from "@/components/layout/page-header";
 import { jockeysApi, type JockeyItem } from "@/lib/api-client";
 import {
+  Award,
+  Calendar,
   ChevronLeft,
   ChevronRight,
   Eye,
   FileText,
+  Mail,
+  Shield,
   ShieldAlert,
+  Trophy,
   User,
   X,
 } from "lucide-react";
@@ -48,6 +53,9 @@ export default function AdminJockeysPage() {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterApproval, setFilterApproval] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Detail Modal State
+  const [selectedJockeyDetail, setSelectedJockeyDetail] = useState<JockeyItem | null>(null);
 
   // Rejection Modal State
   const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -236,7 +244,8 @@ export default function AdminJockeysPage() {
                 {jockeys.map((j) => (
                   <tr
                     key={j._id}
-                    className="hover:bg-muted transition-colors group"
+                    onClick={() => setSelectedJockeyDetail(j)}
+                    className="hover:bg-muted/80 transition-colors group cursor-pointer"
                   >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
@@ -257,9 +266,10 @@ export default function AdminJockeysPage() {
                       {j.licenseImage ? (
                         <button
                           type="button"
-                          onClick={() =>
-                            setPreviewImage(j.licenseImage ?? null)
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewImage(j.licenseImage ?? null);
+                          }}
                           className="block relative h-12 w-20 rounded-md overflow-hidden border border-border group/img focus:outline-none"
                         >
                           <img
@@ -329,52 +339,73 @@ export default function AdminJockeysPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
-                      {j.approvalStatus === "PENDING" ? (
-                        <div className="flex gap-2 justify-end">
-                          <button
-                            disabled={actionLoading !== null}
-                            onClick={() => setRejectingId(j._id)}
-                            className="h-8 px-3 rounded-lg border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 text-[11px] font-bold uppercase text-red-400 transition"
-                          >
-                            Từ chối
-                          </button>
-                          <button
-                            disabled={actionLoading !== null}
-                            onClick={() => handleApprove(j._id)}
-                            className="h-8 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[11px] font-bold uppercase text-black transition"
-                          >
-                            Duyệt hồ sơ
-                          </button>
-                        </div>
-                      ) : (
-                        <select
-                          value={j.status}
-                          disabled={actionLoading !== null}
-                          onChange={(e) =>
-                            handleChangeStatus(j._id, e.target.value)
-                          }
-                          className="rounded-lg border border-border bg-muted px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedJockeyDetail(j);
+                          }}
+                          className="flex items-center gap-1 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-xs font-semibold text-sky-400 transition hover:scale-105 hover:bg-sky-500/20"
                         >
-                          <option
-                            value="available"
-                            className="bg-card text-foreground"
+                          <Eye className="size-3" />
+                          Chi tiết
+                        </button>
+                        {j.approvalStatus === "PENDING" ? (
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              disabled={actionLoading !== null}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRejectingId(j._id);
+                              }}
+                              className="h-8 px-3 rounded-lg border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 text-[11px] font-bold uppercase text-red-400 transition"
+                            >
+                              Từ chối
+                            </button>
+                            <button
+                              disabled={actionLoading !== null}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void handleApprove(j._id);
+                              }}
+                              className="h-8 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[11px] font-bold uppercase text-black transition"
+                            >
+                              Duyệt hồ sơ
+                            </button>
+                          </div>
+                        ) : (
+                          <select
+                            value={j.status}
+                            disabled={actionLoading !== null}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              void handleChangeStatus(j._id, e.target.value);
+                            }}
+                            className="rounded-lg border border-border bg-muted px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
                           >
-                            available
-                          </option>
-                          <option
-                            value="unavailable"
-                            className="bg-card text-foreground"
-                          >
-                            unavailable
-                          </option>
-                          <option
-                            value="suspended"
-                            className="bg-card text-foreground"
-                          >
-                            suspended
-                          </option>
-                        </select>
-                      )}
+                            <option
+                              value="available"
+                              className="bg-card text-foreground"
+                            >
+                              available
+                            </option>
+                            <option
+                              value="unavailable"
+                              className="bg-card text-foreground"
+                            >
+                              unavailable
+                            </option>
+                            <option
+                              value="suspended"
+                              className="bg-card text-foreground"
+                            >
+                              suspended
+                            </option>
+                          </select>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -403,6 +434,203 @@ export default function AdminJockeysPage() {
           >
             Sau <ChevronRight className="size-4" />
           </button>
+        </div>
+      )}
+
+      {/* Modal Xem Chi Tiết Jockey */}
+      {selectedJockeyDetail && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setSelectedJockeyDetail(null)}
+        >
+          <div
+            className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-border pb-4">
+              <div className="flex items-center gap-3">
+                <div className="size-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xl font-black">
+                  <User className="size-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-foreground">
+                    {getUserName(selectedJockeyDetail.userId)}
+                  </h3>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <Mail className="size-3" /> {getUserEmail(selectedJockeyDetail.userId) || "Chưa có email"}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedJockeyDetail(null)}
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Statuses summary */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-3.5 rounded-xl border border-border/50 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Kiểm duyệt:</span>
+                <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${approvalColors[selectedJockeyDetail.approvalStatus || "PENDING"]}`}>
+                  {selectedJockeyDetail.approvalStatus === "PENDING"
+                    ? "Chờ duyệt"
+                    : selectedJockeyDetail.approvalStatus === "APPROVED"
+                      ? "Đã duyệt"
+                      : "Từ chối"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Trạng thái:</span>
+                <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColors[selectedJockeyDetail.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
+                  {selectedJockeyDetail.status}
+                </span>
+              </div>
+            </div>
+
+            {selectedJockeyDetail.approvalStatus === "REJECTED" && selectedJockeyDetail.rejectionReason && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-xs text-red-400 space-y-1">
+                <p className="font-bold uppercase text-[10px]">Lý do từ chối:</p>
+                <p>{selectedJockeyDetail.rejectionReason}</p>
+              </div>
+            )}
+
+            {/* Main Info Grid */}
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="space-y-3 bg-muted/30 p-4 rounded-xl border border-border/50">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-1">
+                  <Award className="size-3" /> Thông tin chuyên môn
+                </p>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Mã giấy phép</span>
+                  <span className="font-semibold text-foreground">{selectedJockeyDetail.licenseNumber || "Chưa cập nhật"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Kinh nghiệm</span>
+                  <span className="font-semibold text-foreground">{selectedJockeyDetail.experienceYears ?? 0} năm</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Chiều cao & Cân nặng</span>
+                  <span className="font-semibold text-foreground">{selectedJockeyDetail.heightCm ?? "?"} cm / {selectedJockeyDetail.weightKg ?? "?"} kg</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Trình độ / Chuyên môn</span>
+                  <span className="font-semibold text-foreground">{selectedJockeyDetail.skillLevel || selectedJockeyDetail.specialty || "Tiêu chuẩn"}</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 bg-muted/30 p-4 rounded-xl border border-border/50">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                  <Trophy className="size-3" /> Thành tích thi đấu
+                </p>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Tổng số trận đua</span>
+                  <span className="font-semibold text-foreground">{selectedJockeyDetail.totalRaces ?? 0} trận</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Số trận thắng</span>
+                  <span className="font-semibold text-emerald-400">{selectedJockeyDetail.wins ?? 0} chiến thắng</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Tỷ lệ thắng</span>
+                  <span className="font-semibold text-amber-300">
+                    {selectedJockeyDetail.totalRaces && selectedJockeyDetail.totalRaces > 0
+                      ? ((selectedJockeyDetail.wins ?? 0) / selectedJockeyDetail.totalRaces * 100).toFixed(1)
+                      : "0"}%
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Bằng cấp & Chứng chỉ</span>
+                  <span className="font-semibold text-teal-300">{selectedJockeyDetail.certificates || "Chưa có"}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div className="space-y-1.5 text-xs">
+              <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Tiểu sử / Bio</p>
+              <p className="bg-muted/40 p-3 rounded-xl border border-border/50 text-foreground leading-relaxed">
+                {selectedJockeyDetail.bio || "Chưa điền tiểu sử cá nhân."}
+              </p>
+            </div>
+
+            {/* License Image Preview inside Modal */}
+            {selectedJockeyDetail.licenseImage && (
+              <div className="space-y-1.5 text-xs">
+                <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Ảnh giấy phép hành nghề</p>
+                <div
+                  onClick={() => setPreviewImage(selectedJockeyDetail.licenseImage ?? null)}
+                  className="relative h-40 w-full rounded-xl overflow-hidden border border-border cursor-pointer group"
+                >
+                  <img
+                    src={selectedJockeyDetail.licenseImage}
+                    alt="Giấy phép"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold gap-1">
+                    <Eye className="size-4" /> Xem ảnh phóng to
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between border-t border-border pt-4 text-xs">
+              {selectedJockeyDetail.approvalStatus === "PENDING" ? (
+                <div className="flex gap-2">
+                  <button
+                    disabled={actionLoading !== null}
+                    onClick={() => {
+                      const id = selectedJockeyDetail._id;
+                      setSelectedJockeyDetail(null);
+                      setRejectingId(id);
+                    }}
+                    className="h-9 px-4 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold uppercase transition"
+                  >
+                    Từ chối
+                  </button>
+                  <button
+                    disabled={actionLoading !== null}
+                    onClick={() => {
+                      const id = selectedJockeyDetail._id;
+                      setSelectedJockeyDetail(null);
+                      void handleApprove(id);
+                    }}
+                    className="h-9 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-bold uppercase text-black transition"
+                  >
+                    Duyệt hồ sơ
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-[11px]">Đổi trạng thái:</span>
+                  <select
+                    value={selectedJockeyDetail.status}
+                    disabled={actionLoading !== null}
+                    onChange={(e) => {
+                      const newSt = e.target.value;
+                      const id = selectedJockeyDetail._id;
+                      setSelectedJockeyDetail(null);
+                      void handleChangeStatus(id, newSt);
+                    }}
+                    className="rounded-lg border border-border bg-muted px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none cursor-pointer"
+                  >
+                    <option value="available" className="bg-card text-foreground">available</option>
+                    <option value="unavailable" className="bg-card text-foreground">unavailable</option>
+                    <option value="suspended" className="bg-card text-foreground">suspended</option>
+                  </select>
+                </div>
+              )}
+              <button
+                onClick={() => setSelectedJockeyDetail(null)}
+                className="rounded-xl border border-border bg-muted px-5 py-2 font-semibold text-foreground hover:bg-white/[0.08] transition"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

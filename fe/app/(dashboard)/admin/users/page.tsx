@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { usersApi, type UserItem } from "@/lib/api-client";
-import { Ban, ChevronLeft, ChevronRight, Search, Trash2, UserCog, Users, X } from "lucide-react";
+import { Ban, Calendar, ChevronLeft, ChevronRight, Eye, Mail, MapPin, Phone, Search, Shield, Trash2, UserCog, Users, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -46,6 +46,7 @@ export default function AdminUsersPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserItem | null>(null);
   const [selectedUserForRoles, setSelectedUserForRoles] = useState<UserItem | null>(null);
+  const [selectedUserDetail, setSelectedUserDetail] = useState<UserItem | null>(null);
   const [rolesActionLoading, setRolesActionLoading] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async (page = 1) => {
@@ -214,7 +215,11 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {users.map((u) => (
-                  <tr key={u.id} className="group hover:bg-muted transition-colors">
+                  <tr
+                    key={u.id}
+                    onClick={() => setSelectedUserDetail(u)}
+                    className="group hover:bg-muted/80 transition-colors cursor-pointer"
+                  >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-black">
@@ -245,7 +250,20 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => setSelectedUserForRoles(u)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedUserDetail(u);
+                          }}
+                          className="flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-400 transition hover:scale-105 hover:bg-sky-500/20"
+                        >
+                          <Eye className="size-3" />
+                          Xem
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedUserForRoles(u);
+                          }}
                           disabled={actionLoading === u.id || u.status === "deleted"}
                           className="flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition hover:scale-105 hover:bg-primary/20 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
@@ -253,7 +271,10 @@ export default function AdminUsersPage() {
                           Quyền
                         </button>
                         <button
-                          onClick={() => handleBan(u)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBan(u);
+                          }}
                           disabled={actionLoading === u.id || u.status === "deleted"}
                           className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed ${u.status === "banned" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/20"}`}
                         >
@@ -261,7 +282,10 @@ export default function AdminUsersPage() {
                           {u.status === "banned" ? "Unban" : "Ban"}
                         </button>
                         <button
-                          onClick={() => handleDelete(u)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(u);
+                          }}
                           disabled={actionLoading === u.id || u.status === "deleted"}
                           className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 transition hover:scale-105 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
@@ -312,6 +336,147 @@ export default function AdminUsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal Xem Chi Tiết User */}
+      {selectedUserDetail && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setSelectedUserDetail(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-border pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary text-xl font-black">
+                  {selectedUserDetail.fullName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-foreground">
+                    {selectedUserDetail.fullName}
+                  </h3>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <Mail className="size-3" /> {selectedUserDetail.email}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedUserDetail(null)}
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Modal Body Grid */}
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4 bg-muted/40 p-4 rounded-xl border border-border/50">
+                <div>
+                  <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px] flex items-center gap-1">
+                    <Shield className="size-3" /> Trạng thái
+                  </p>
+                  <span className={`inline-flex mt-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${statusColors[selectedUserDetail.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
+                    {selectedUserDetail.status}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px] flex items-center gap-1">
+                    <Phone className="size-3" /> Số điện thoại
+                  </p>
+                  <p className="text-foreground font-semibold mt-1">
+                    {selectedUserDetail.phone || "Chưa cập nhật"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px] flex items-center gap-1">
+                    <MapPin className="size-3" /> Địa chỉ
+                  </p>
+                  <p className="text-foreground font-semibold mt-1">
+                    {selectedUserDetail.address || "Chưa cập nhật"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px] flex items-center gap-1">
+                    <Calendar className="size-3" /> Ngày sinh
+                  </p>
+                  <p className="text-foreground font-semibold mt-1">
+                    {selectedUserDetail.dob ? new Date(selectedUserDetail.dob).toLocaleDateString("vi-VN") : "Chưa cập nhật"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Roles Section */}
+              <div className="space-y-1.5">
+                <p className="text-muted-foreground font-medium uppercase tracking-wider text-[10px] flex items-center gap-1">
+                  <UserCog className="size-3" /> Vai trò & Quyền hạn
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {selectedUserDetail.roles.map((r) => (
+                    <span
+                      key={r}
+                      className={`inline-flex rounded-lg border px-3 py-1 text-xs font-bold uppercase tracking-wider ${roleColors[r] ?? "bg-muted text-gray-400 border-border"}`}
+                    >
+                      {r}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Metadata */}
+              <div className="grid grid-cols-2 gap-4 text-[11px] text-muted-foreground pt-2 border-t border-border/50">
+                <div>
+                  <span className="block text-[10px] uppercase font-mono text-muted-foreground/70">Mã ID</span>
+                  <span className="font-mono text-foreground select-all">{selectedUserDetail.id}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] uppercase font-mono text-muted-foreground/70">Ngày đăng ký</span>
+                  <span className="text-foreground">
+                    {selectedUserDetail.createdAt ? new Date(selectedUserDetail.createdAt).toLocaleString("vi-VN") : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between border-t border-border pt-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const u = selectedUserDetail;
+                    setSelectedUserDetail(null);
+                    setSelectedUserForRoles(u);
+                  }}
+                  disabled={selectedUserDetail.status === "deleted"}
+                  className="flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3.5 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20 disabled:opacity-40"
+                >
+                  <UserCog className="size-3.5" />
+                  Phân Quyền
+                </button>
+                <button
+                  onClick={() => {
+                    const u = selectedUserDetail;
+                    setSelectedUserDetail(null);
+                    void handleBan(u);
+                  }}
+                  disabled={selectedUserDetail.status === "deleted"}
+                  className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold transition disabled:opacity-40 ${selectedUserDetail.status === "banned" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/20"}`}
+                >
+                  <Ban className="size-3.5" />
+                  {selectedUserDetail.status === "banned" ? "Unban" : "Ban"}
+                </button>
+              </div>
+              <button
+                onClick={() => setSelectedUserDetail(null)}
+                className="rounded-xl border border-border bg-muted px-5 py-2 text-xs font-semibold text-foreground hover:bg-white/[0.08] transition"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Phân Quyền */}
       {selectedUserForRoles && (
