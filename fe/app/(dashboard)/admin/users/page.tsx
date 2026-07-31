@@ -330,24 +330,30 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {users.map((u) => (
-                  <tr
-                    key={u.id}
-                    onClick={() => void handleOpenUserDetail(u)}
-                    className="group hover:bg-muted/80 transition-colors cursor-pointer"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-black">
-                          {u.fullName.charAt(0).toUpperCase()}
+                {users.map((u) => {
+                  const avatar = u.avatar;
+                  return (
+                    <tr
+                      key={u.id}
+                      onClick={() => void handleOpenUserDetail(u)}
+                      className="group hover:bg-muted/80 transition-colors cursor-pointer"
+                    >
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-black overflow-hidden shrink-0 shadow-sm">
+                            {avatar ? (
+                              <img src={avatar} alt={u.fullName} className="w-full h-full object-cover" />
+                            ) : (
+                              <span>{u.fullName.charAt(0).toUpperCase()}</span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{u.fullName}</p>
+                            <p className="text-xs text-muted-foreground">{u.email}</p>
+                            {u.phone && <p className="text-xs text-muted-foreground">{u.phone}</p>}
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">{u.fullName}</p>
-                          <p className="text-xs text-muted-foreground">{u.email}</p>
-                          {u.phone && <p className="text-xs text-muted-foreground">{u.phone}</p>}
-                        </div>
-                      </div>
-                    </td>
+                      </td>
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-1.5">
                         {u.roles.map(r => (
@@ -411,12 +417,13 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
 
       {/* Pagination */}
       {meta.totalPages > 1 && (
@@ -454,37 +461,44 @@ export default function AdminUsersPage() {
       </AlertDialog>
 
       {/* Modal Xem Chi Tiết User */}
-      {selectedUserDetail && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={() => setSelectedUserDetail(null)}
-        >
+      {selectedUserDetail && (() => {
+        const modalAvatar = jockeyProfile?.portraitImage || refereeProfile?.portraitImage || selectedUserDetail.avatar;
+
+        return (
           <div
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setSelectedUserDetail(null)}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary text-xl font-black">
-                  {selectedUserDetail.fullName.charAt(0).toUpperCase()}
+            <div
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary text-xl font-black overflow-hidden shrink-0 shadow-md">
+                    {modalAvatar ? (
+                      <img src={modalAvatar} alt={selectedUserDetail.fullName} className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{selectedUserDetail.fullName.charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground">
+                      {selectedUserDetail.fullName}
+                    </h3>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <Mail className="size-3" /> {selectedUserDetail.email}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">
-                    {selectedUserDetail.fullName}
-                  </h3>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                    <Mail className="size-3" /> {selectedUserDetail.email}
-                  </p>
-                </div>
+                <button
+                  onClick={() => setSelectedUserDetail(null)}
+                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+                >
+                  <X className="size-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setSelectedUserDetail(null)}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
 
             {/* Modal Body Grid */}
             <div className="space-y-4 text-xs">
@@ -807,7 +821,8 @@ export default function AdminUsersPage() {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Modal Phân Quyền */}
       {selectedUserForRoles && (
