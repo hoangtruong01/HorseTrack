@@ -43,8 +43,18 @@ export class RefereeProfilesService {
       );
     }
 
+    const { fullName, phone, ...profileDto } = dto;
+    if (fullName || phone || dto.portraitImage) {
+      await this.usersService.update(
+        userId,
+        { fullName, phone, avatar: dto.portraitImage },
+        userId,
+        [RoleName.REFEREE],
+      );
+    }
+
     return this.profileModel.create({
-      ...dto,
+      ...profileDto,
       userId: new Types.ObjectId(userId),
       approvalStatus: RefereeApprovalStatus.PENDING,
       status: RefereeProfileStatus.AVAILABLE,
@@ -54,7 +64,7 @@ export class RefereeProfilesService {
   async findByUserId(userId: string): Promise<RefereeProfileDocument> {
     const profile = await this.profileModel
       .findOne({ userId: new Types.ObjectId(userId) })
-      .populate('userId', 'fullName email phone')
+      .populate('userId', 'fullName email phone avatar')
       .exec();
     if (!profile || profile.deletedAt) {
       throw new NotFoundException('Referee profile not found');
@@ -81,7 +91,7 @@ export class RefereeProfilesService {
     const [data, total] = await Promise.all([
       this.profileModel
         .find(filter)
-        .populate('userId', 'fullName email phone')
+        .populate('userId', 'fullName email phone avatar')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -97,7 +107,7 @@ export class RefereeProfilesService {
   async findOne(id: string): Promise<RefereeProfileDocument> {
     const profile = await this.profileModel
       .findById(id)
-      .populate('userId', 'fullName email phone')
+      .populate('userId', 'fullName email phone avatar')
       .exec();
     if (!profile || profile.deletedAt) {
       throw new NotFoundException('Referee profile not found');
@@ -118,7 +128,17 @@ export class RefereeProfilesService {
     if (!isAdmin && profileUserId !== requestingUserId) {
       throw new ForbiddenException('You can only update your own profile');
     }
-    Object.assign(profile, dto);
+
+    const { fullName, phone, ...profileDto } = dto;
+    if (fullName || phone || dto.portraitImage) {
+      await this.usersService.update(
+        profileUserId,
+        { fullName, phone, avatar: dto.portraitImage },
+        requestingUserId,
+        isAdmin ? [RoleName.ADMIN] : [RoleName.REFEREE],
+      );
+    }
+    Object.assign(profile, profileDto);
 
     // If referee updates their own profile, reset approvalStatus to PENDING
     if (!isAdmin) {

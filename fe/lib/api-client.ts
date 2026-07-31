@@ -322,7 +322,7 @@ export const racesApi = {
 // ─── Referee Profiles ────────────────────────────────────────────────────────
 export interface RefereeProfileItem {
   _id: string;
-  userId?: { _id: string; fullName: string; email: string; phone?: string } | string;
+  userId?: { _id: string; fullName: string; email: string; phone?: string; avatar?: string } | string;
   licenseNo?: string;
   experienceYears?: number;
   status: "available" | "unavailable" | "suspended";
@@ -331,6 +331,9 @@ export interface RefereeProfileItem {
   certificates?: string;
   bio?: string;
   licenseImage?: string;
+  portraitImage?: string;
+  certificateImage?: string;
+  certificateImages?: string[];
   createdAt?: string;
 }
 
@@ -344,18 +347,28 @@ export const refereeProfilesApi = {
   },
   getMe: () => apiFetch<RefereeProfileItem>("/referee-profiles/me"),
   createProfile: (dto: {
+    fullName?: string;
+    phone?: string;
     licenseNo?: string;
     experienceYears?: number;
     certificates?: string;
     bio?: string;
     licenseImage?: string;
+    portraitImage?: string;
+    certificateImage?: string;
+    certificateImages?: string[];
   }) => apiFetch<RefereeProfileItem>("/referee-profiles", { method: "POST", body: JSON.stringify(dto) }),
   updateProfile: (id: string, dto: {
+    fullName?: string;
+    phone?: string;
     licenseNo?: string;
     experienceYears?: number;
     certificates?: string;
     bio?: string;
     licenseImage?: string;
+    portraitImage?: string;
+    certificateImage?: string;
+    certificateImages?: string[];
   }) => apiFetch<RefereeProfileItem>(`/referee-profiles/${id}`, { method: "PATCH", body: JSON.stringify(dto) }),
   changeApproval: (id: string, approvalStatus: "APPROVED" | "REJECTED", rejectionReason?: string) =>
     apiFetch(`/referee-profiles/${id}/approval`, {

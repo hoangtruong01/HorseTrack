@@ -10,6 +10,10 @@ import {
   ShieldAlert,
   AlertCircle,
   CheckCircle,
+  Upload,
+  Camera,
+  Image as ImageIcon,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -63,13 +67,18 @@ export default function RefereeDashboardPage() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   // Profile form state
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [experienceYears, setExperienceYears] = useState(1);
   const [bio, setBio] = useState("");
   const [certificates, setCertificates] = useState("");
   const [licenseImage, setLicenseImage] = useState("");
-  const [imagePreview, setImagePreview] = useState("");
-  const [uploading, setUploading] = useState(false);
+  const [portraitImage, setPortraitImage] = useState("");
+  const [certificateImage, setCertificateImage] = useState("");
+  const [certificateImages, setCertificateImages] = useState<string[]>([]);
+  const [uploadingPortrait, setUploadingPortrait] = useState(false);
+  const [uploadingCertificate, setUploadingCertificate] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -78,6 +87,8 @@ export default function RefereeDashboardPage() {
       if (!userRes.ok) throw new Error("Không thể tải thông tin cá nhân");
       const userData = await userRes.json();
       setUser(userData.user);
+      setFullName(userData.user?.fullName || "");
+      setPhone(userData.user?.phone || "");
 
       try {
         const profileData = await refereeProfilesApi.getMe();
@@ -87,7 +98,14 @@ export default function RefereeDashboardPage() {
         setBio(profileData.bio || "");
         setCertificates(profileData.certificates || "");
         setLicenseImage(profileData.licenseImage || "");
-        setImagePreview(profileData.licenseImage || "");
+        const userAvatar = typeof profileData.userId === "object" ? profileData.userId.avatar : "";
+        setPortraitImage(profileData.portraitImage || userAvatar || "");
+        setCertificateImage(profileData.certificateImage || "");
+
+        const existingImgs = profileData.certificateImages && profileData.certificateImages.length > 0
+          ? profileData.certificateImages
+          : ([profileData.certificateImage, profileData.licenseImage].filter(Boolean) as string[]);
+        setCertificateImages(existingImgs.slice(0, 7));
       } catch (err) {
         if ((err as Error).message?.toLowerCase().includes("not found")) {
           setProfile(null);
@@ -132,65 +150,95 @@ export default function RefereeDashboardPage() {
     fetchData();
   }, []);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleUploadPortrait = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Kích thước ảnh không được vượt quá 5MB.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-
-    setUploading(true);
+    setUploadingPortrait(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
-
-      const res = await fetch("/api/uploads", {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await fetch("/api/uploads", { method: "POST", body: formData });
       const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.message || "Tải lên ảnh thất bại.");
-      }
+      if (!res.ok) throw new Error(resData.message || "Tải lên ảnh thất bại.");
 
-      setLicenseImage(resData.url);
-      toast.success("Tải ảnh giấy phép thành công!");
+      setPortraitImage(resData.url);
+      toast.success("Tải ảnh chân dung thành công!");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Lỗi khi tải ảnh lên.");
-      setImagePreview("");
+      toast.error(err instanceof Error ? err.message : "Lỗi khi tải ảnh.");
     } finally {
-      setUploading(false);
+      setUploadingPortrait(false);
     }
+  };
+
+  const handleUploadCertificates = async (files: FileList) => {
+    const fileArray = Array.from(files);
+    if (certificateImages.length + fileArray.length > 7) {
+      toast.error(`Bạn chỉ có thể tải tối đa 7 hình ảnh bằng cấp/giấy phép. (Hiện đã có ${certificateImages.length} ảnh)`);
+      return;
+    }
+
+    setUploadingCertificate(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of fileArray) {
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`Ảnh ${file.name} vượt quá 5MB.`);
+          continue;
+        }
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/uploads", { method: "POST", body: formData });
+        const resData = await res.json();
+        if (res.ok && resData.url) {
+          uploadedUrls.push(resData.url);
+        }
+      }
+      if (uploadedUrls.length > 0) {
+        setCertificateImages((prev) => [...prev, ...uploadedUrls].slice(0, 7));
+        toast.success(`Đã tải thêm ${uploadedUrls.length} ảnh bằng cấp thành công!`);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Lỗi khi tải ảnh.");
+    } finally {
+      setUploadingCertificate(false);
+    }
+  };
+
+  const handleRemoveCertImage = (idx: number) => {
+    setCertificateImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleCreateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!fullName.trim()) {
+      toast.error("Vui lòng nhập họ và tên đầy đủ");
+      return;
+    }
     if (!licenseNumber.trim()) {
       toast.error("Vui lòng nhập số giấy phép trọng tài");
       return;
     }
     if (!certificates.trim()) {
-      toast.error("Vui lòng nhập đầy đủ thông tin hồ sơ bằng cấp chuyên môn");
+      toast.error("Vui lòng nhập đầy đủ thông tin bằng cấp chuyên môn");
       return;
     }
 
     setIsSubmittingProfile(true);
     try {
       const dto = {
-        licenseNo: licenseNumber,
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        licenseNo: licenseNumber.trim(),
         experienceYears: Number(experienceYears),
-        bio,
-        certificates,
-        licenseImage,
+        bio: bio.trim(),
+        certificates: certificates.trim(),
+        licenseImage: certificateImages[0] || licenseImage || "",
+        portraitImage,
+        certificateImage: certificateImages[0] || certificateImage || "",
+        certificateImages,
       };
       if (profile) {
         await refereeProfilesApi.updateProfile(profile._id, dto);
@@ -279,91 +327,207 @@ export default function RefereeDashboardPage() {
               Xin chào <span className="font-medium text-foreground">{user?.fullName}</span>, vui lòng hoàn thiện hồ sơ để bắt đầu tác nghiệp.
             </p>
 
-            <form onSubmit={handleCreateProfile} className="mt-4 grid gap-3 sm:grid-cols-2 bg-muted/30 p-4 rounded-lg border border-border">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground">Số giấy phép</label>
-                <input
-                  type="text"
-                  value={licenseNumber}
-                  onChange={(e) => setLicenseNumber(e.target.value)}
-                  placeholder="RF-7799"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                  required
-                />
+            <form onSubmit={handleCreateProfile} className="mt-4 grid gap-4 bg-muted/30 p-5 rounded-2xl border border-border">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Họ tên đầy đủ *</label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Nguyễn Văn A"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Số điện thoại *</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="0901234567"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Số giấy phép trọng tài *</label>
+                  <input
+                    type="text"
+                    value={licenseNumber}
+                    onChange={(e) => setLicenseNumber(e.target.value)}
+                    placeholder="RF-7799"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Kinh nghiệm (năm) *</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={experienceYears}
+                    onChange={(e) => setExperienceYears(Number(e.target.value))}
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    required
+                  />
+                </div>
               </div>
+
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground">Kinh nghiệm (năm)</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={experienceYears}
-                  onChange={(e) => setExperienceYears(Number(e.target.value))}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                  required
-                />
-              </div>
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground">Bằng cấp & Chứng chỉ</label>
+                <label className="text-xs font-semibold text-muted-foreground">Bằng cấp & Chứng chỉ chuyên môn *</label>
                 <textarea
                   value={certificates}
                   onChange={(e) => setCertificates(e.target.value)}
-                  placeholder="Bằng Trọng tài Quốc gia, Chứng nhận giám sát..."
+                  placeholder="Bằng Trọng tài Quốc gia, Chứng nhận giám sát đường đua chuyên nghiệp..."
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                   required
                 />
               </div>
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground">Tiểu sử (tùy chọn)</label>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground">Tiểu sử / Tóm tắt quá trình (tùy chọn)</label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Thêm thông tin về kinh nghiệm..."
+                  placeholder="Mô tả các giải đấu lớn đã từng tham gia điều hành..."
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                 />
               </div>
-              <div className="sm:col-span-2 flex justify-end">
+
+              {/* Upload Ảnh chân dung & Ảnh bằng cấp (tối đa 7 ảnh) */}
+              <div className="space-y-4 pt-2 border-t border-border/60">
+                {/* Ảnh chân dung */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <Camera className="size-3.5 text-primary" /> Ảnh chân dung trọng tài
+                  </label>
+                  <div className="flex items-center gap-3">
+                    {portraitImage ? (
+                      <div className="relative size-16 rounded-xl overflow-hidden border border-border shrink-0">
+                        <img src={portraitImage} alt="Ảnh chân dung" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="size-16 rounded-xl border border-dashed border-border bg-background/50 flex flex-col items-center justify-center text-muted-foreground text-xs shrink-0">
+                        <User className="size-6 text-muted-foreground/40" />
+                      </div>
+                    )}
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted transition">
+                      <Upload className="size-3.5" />
+                      {uploadingPortrait ? "Đang tải..." : portraitImage ? "Thay ảnh chân dung" : "Tải ảnh chân dung"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void handleUploadPortrait(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Ảnh bằng cấp & Giấy phép (Tối đa 7 hình) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <ImageIcon className="size-3.5 text-teal-400" /> Ảnh bằng cấp & Giấy phép (Tối đa 7 hình)
+                    </label>
+                    <span className="text-[11px] font-mono text-muted-foreground font-semibold">
+                      {certificateImages.length} / 7 hình
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    {certificateImages.map((imgUrl, idx) => (
+                      <div key={idx} className="relative size-20 rounded-xl overflow-hidden border border-border group bg-background shrink-0">
+                        <img src={imgUrl} alt={`Ảnh bằng cấp ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCertImage(idx)}
+                          className="absolute top-1 right-1 size-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-80 hover:opacity-100 hover:bg-red-600 transition"
+                          title="Xóa ảnh này"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </div>
+                    ))}
+
+                    {certificateImages.length < 7 && (
+                      <label className="cursor-pointer size-20 rounded-xl border border-dashed border-border bg-background/50 hover:bg-muted flex flex-col items-center justify-center text-muted-foreground text-xs transition p-2 text-center shrink-0">
+                        <Upload className="size-5 mb-1 text-teal-400" />
+                        <span className="text-[10px] font-semibold leading-tight">
+                          {uploadingCertificate ? "Đang tải..." : "Thêm ảnh"}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          disabled={uploadingCertificate}
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              void handleUploadCertificates(e.target.files);
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
                 <Button
                   type="submit"
-                  disabled={isSubmittingProfile}
-                  className="rounded-lg bg-primary hover:bg-primary/90 font-semibold text-sm h-9 px-6 text-primary-foreground transition-all"
+                  disabled={isSubmittingProfile || uploadingPortrait || uploadingCertificate}
+                  className="rounded-xl bg-primary hover:bg-primary/90 font-bold text-sm h-10 px-6 text-primary-foreground transition-all shadow-md"
                 >
-                  {isSubmittingProfile ? "Đang xử lý..." : "Gửi hồ sơ"}
+                  {isSubmittingProfile ? "Đang xử lý..." : "Gửi hồ sơ kiểm duyệt"}
                 </Button>
               </div>
             </form>
           </div>
         </section>
       ) : profile.approvalStatus === "PENDING" ? (
-        <section className="relative overflow-hidden rounded-lg border border-amber-500/20 bg-amber-500/5 p-5 shadow-sm">
+        <section className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 shadow-sm">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="inline-flex rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-500">
+              <span className="inline-flex rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-500 uppercase tracking-wider">
                 Đang chờ phê duyệt
               </span>
             </div>
             <h2 className="text-lg font-bold text-foreground">
-              Hồ sơ của bạn đang được kiểm duyệt
+              Hồ sơ của bạn đang được Ban Tổ Chức kiểm duyệt
             </h2>
             <p className="text-sm text-muted-foreground">
-              Cảm ơn <span className="font-medium text-foreground">{user?.fullName}</span>, hồ sơ của bạn đã được gửi thành công. Khi được phê duyệt, các tính năng sẽ được mở khóa.
+              Cảm ơn <span className="font-semibold text-foreground">{user?.fullName}</span>, hồ sơ đầy đủ thông tin và bằng cấp của bạn đã được gửi thành công. Admin sẽ sớm phê duyệt để kích hoạt quyền tác nghiệp.
             </p>
           </div>
         </section>
       ) : (
         <div className="space-y-6">
           {/* Welcome & Profile Summary */}
-          <section className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-lg border border-border bg-card p-5 shadow-sm">
+          <section className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-center gap-4">
-              <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-                <User className="size-5 text-primary" />
+              <div className="relative size-14 rounded-2xl bg-primary/10 overflow-hidden border border-primary/20 shrink-0 flex items-center justify-center">
+                {portraitImage ? (
+                  <img src={portraitImage} alt={user?.fullName} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="size-6 text-primary" />
+                )}
               </div>
               <div>
                 <h2 className="text-lg font-bold text-foreground">{user?.fullName}</h2>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
-                  License: <span className="text-primary font-semibold">{profile.licenseNo}</span>
+                  SĐT: <span className="text-foreground font-semibold">{user?.phone || "Chưa có"}</span>
+                  <span className="text-border">•</span>
+                  Giấy phép: <span className="text-primary font-semibold">{profile.licenseNo}</span>
                   <span className="text-border">•</span>
                   {profile.experienceYears} năm kinh nghiệm
                 </p>
@@ -373,47 +537,70 @@ export default function RefereeDashboardPage() {
             <Button
               variant="outline"
               onClick={() => setIsEditingProfile((v) => !v)}
-              className="rounded-lg border-border hover:bg-muted text-xs font-medium h-9 px-4 shrink-0"
+              className="rounded-xl border-border hover:bg-muted text-xs font-semibold h-9 px-4 shrink-0"
             >
-              {isEditingProfile ? "Hủy" : "Sửa"}
+              {isEditingProfile ? "Hủy chỉnh sửa" : "Chỉnh sửa hồ sơ"}
             </Button>
           </section>
 
           {isEditingProfile && (
-            <form onSubmit={handleCreateProfile} className="grid gap-3 bg-card p-4 rounded-lg border border-border shadow-sm">
-              <div className="grid gap-3 sm:grid-cols-2">
+            <form onSubmit={handleCreateProfile} className="grid gap-4 bg-card p-5 rounded-2xl border border-border shadow-sm">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Cập nhật lại thông tin hồ sơ</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground">Số giấy phép</label>
+                  <label className="text-xs font-semibold text-muted-foreground">Họ tên đầy đủ *</label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Nguyễn Văn A"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Số điện thoại *</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="0901234567"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Số giấy phép *</label>
                   <input
                     type="text"
                     value={licenseNumber}
                     onChange={(e) => setLicenseNumber(e.target.value)}
                     placeholder="RF-7799"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                     required
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground">Kinh nghiệm (năm)</label>
+                  <label className="text-xs font-semibold text-muted-foreground">Kinh nghiệm (năm) *</label>
                   <input
                     type="number"
                     min={1}
                     max={50}
                     value={experienceYears}
                     onChange={(e) => setExperienceYears(Number(e.target.value))}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                     required
                   />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground">Bằng cấp & Chứng chỉ</label>
+                <label className="text-xs font-semibold text-muted-foreground">Bằng cấp & Chứng chỉ *</label>
                 <textarea
                   value={certificates}
                   onChange={(e) => setCertificates(e.target.value)}
                   placeholder="Bằng Trọng tài Quốc gia..."
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                   required
                 />
               </div>
@@ -422,18 +609,102 @@ export default function RefereeDashboardPage() {
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Thêm thông tin..."
+                  placeholder="Thêm thông tin kinh nghiệm..."
                   rows={2}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                 />
               </div>
+
+              {/* Upload Ảnh chân dung & Ảnh bằng cấp (tối đa 7 ảnh) */}
+              <div className="space-y-4 pt-2 border-t border-border">
+                {/* Ảnh chân dung */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <Camera className="size-3.5 text-primary" /> Cập nhật Ảnh chân dung
+                  </label>
+                  <div className="flex items-center gap-3">
+                    {portraitImage ? (
+                      <div className="relative size-14 rounded-xl overflow-hidden border border-border shrink-0">
+                        <img src={portraitImage} alt="Ảnh chân dung" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="size-14 rounded-xl border border-dashed border-border bg-background/50 flex flex-col items-center justify-center text-muted-foreground text-xs shrink-0">
+                        <User className="size-5 text-muted-foreground/40" />
+                      </div>
+                    )}
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition">
+                      <Upload className="size-3.5" />
+                      {uploadingPortrait ? "Đang tải..." : portraitImage ? "Thay ảnh chân dung" : "Tải ảnh chân dung"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void handleUploadPortrait(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Ảnh bằng cấp & Giấy phép (Tối đa 7 hình) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <ImageIcon className="size-3.5 text-teal-400" /> Cập nhật Ảnh bằng cấp & Giấy phép (Tối đa 7 hình)
+                    </label>
+                    <span className="text-[11px] font-mono text-muted-foreground font-semibold">
+                      {certificateImages.length} / 7 hình
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    {certificateImages.map((imgUrl, idx) => (
+                      <div key={idx} className="relative size-20 rounded-xl overflow-hidden border border-border group bg-background shrink-0">
+                        <img src={imgUrl} alt={`Ảnh bằng cấp ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCertImage(idx)}
+                          className="absolute top-1 right-1 size-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-80 hover:opacity-100 hover:bg-red-600 transition"
+                          title="Xóa ảnh này"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </div>
+                    ))}
+
+                    {certificateImages.length < 7 && (
+                      <label className="cursor-pointer size-20 rounded-xl border border-dashed border-border bg-background/50 hover:bg-muted flex flex-col items-center justify-center text-muted-foreground text-xs transition p-2 text-center shrink-0">
+                        <Upload className="size-5 mb-1 text-teal-400" />
+                        <span className="text-[10px] font-semibold leading-tight">
+                          {uploadingCertificate ? "Đang tải..." : "Thêm ảnh"}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          disabled={uploadingCertificate}
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              void handleUploadCertificates(e.target.files);
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-2 pt-2">
                 <Button
                   type="submit"
-                  disabled={isSubmittingProfile}
-                  className="rounded-lg bg-primary hover:bg-primary/90 font-semibold text-xs h-8 px-4 text-primary-foreground transition-all"
+                  disabled={isSubmittingProfile || uploadingPortrait || uploadingCertificate}
+                  className="rounded-xl bg-primary hover:bg-primary/90 font-bold text-xs h-9 px-5 text-primary-foreground transition-all"
                 >
-                  {isSubmittingProfile ? "Đang..." : "Lưu"}
+                  {isSubmittingProfile ? "Đang xử lý..." : "Lưu thay đổi & gửi duyệt"}
                 </Button>
               </div>
             </form>

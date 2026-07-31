@@ -61,6 +61,15 @@ export class RefereeProfile {
   licenseImage?: string;
 
   @Prop()
+  portraitImage?: string;
+
+  @Prop()
+  certificateImage?: string;
+
+  @Prop({ type: [String], default: [] })
+  certificateImages?: string[];
+
+  @Prop()
   deletedAt?: Date;
 }
 
