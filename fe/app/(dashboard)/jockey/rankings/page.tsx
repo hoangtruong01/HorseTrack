@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Trophy, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { HorseDetailModal } from "@/components/horses/horse-detail-modal";
 
 interface HorseRanking {
   horseId: string;
@@ -39,6 +40,10 @@ export default function JockeyRankingsPage() {
   const [isLoadingJockeys, setIsLoadingJockeys] = useState(true);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Selected horse modal state
+  const [modalHorseId, setModalHorseId] = useState<string | null>(null);
+  const [modalHorseData, setModalHorseData] = useState<{ name?: string; breed?: string; ownerName?: string } | null>(null);
 
   // Pagination state (10 items per page)
   const [currentPage, setCurrentPage] = useState(1);
@@ -152,7 +157,7 @@ export default function JockeyRankingsPage() {
       <PageHeader
         eyebrow="Bảng Xếp Hạng & Điểm Số"
         title="Xếp Hạng Nài Ngựa & Chiến Mã"
-        description="Xem bảng xếp hạng điểm tích lũy, số lần vô địch và hiệu suất thi đấu thực tế được tổng hợp từ các giải đua."
+        description="Xem bảng xếp hạng điểm tích lũy, số lần vô địch và hiệu suất thi đấu thực tế được tổng hợp từ các giải đua. Bấm vào tên chiến mã để xem hồ sơ & bảng vàng vô địch."
       />
 
       {error && (
@@ -355,7 +360,14 @@ export default function JockeyRankingsPage() {
                   </tr>
                 ) : (
                   paginatedHorses.map((horse) => (
-                    <tr key={horse.horseId} className="hover:bg-white/[0.01] transition duration-200">
+                    <tr
+                      key={horse.horseId}
+                      onClick={() => {
+                        setModalHorseId(horse.horseId);
+                        setModalHorseData({ name: horse.horseName, breed: horse.breed, ownerName: horse.ownerName });
+                      }}
+                      className={`cursor-pointer hover:bg-white/[0.03] transition duration-200 ${horse.rank && horse.rank <= 3 ? "bg-primary/[0.03]" : ""}`}
+                    >
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
@@ -371,16 +383,17 @@ export default function JockeyRankingsPage() {
                           {horse.rank}
                         </span>
                       </td>
-                      <td className="flex items-center gap-2 p-4 font-black text-foreground">
+                      <td className="flex items-center gap-2 p-4 font-black text-foreground hover:text-primary transition">
                         {horse.horseName}
                         {horse.rank === 1 && (
                           <Flame className="size-3.5 text-primary animate-bounce" />
                         )}
+                        <span className="block text-[10px] text-muted-foreground font-normal">Bấm xem hồ sơ 🏆</span>
                       </td>
                       <td className="p-4 text-muted-foreground">{horse.breed || "Chưa rõ"}</td>
                       <td className="p-4 text-muted-foreground font-medium">{horse.ownerName || "—"}</td>
                       <td className="p-4 text-center font-bold text-foreground">{horse.totalRaces}</td>
-                      <td className="p-4 text-center text-primary font-black text-sm">{horse.wins}</td>
+                      <td className="p-4 text-center text-primary font-black text-sm">🏆 {horse.wins}</td>
                       <td className="p-4 text-center font-mono text-muted-foreground">
                         {formatAvgTime(horse.totalFinishTimeMs, horse.totalRaces)}
                       </td>
@@ -403,6 +416,14 @@ export default function JockeyRankingsPage() {
           />
         </div>
       )}
+
+      {/* Horse Detail Modal */}
+      <HorseDetailModal
+        horseId={modalHorseId}
+        horseData={modalHorseData}
+        isOpen={!!modalHorseId}
+        onClose={() => setModalHorseId(null)}
+      />
     </main>
   );
 }

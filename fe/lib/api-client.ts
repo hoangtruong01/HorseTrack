@@ -693,6 +693,8 @@ export const raceResultsApi = {
     apiFetch<RaceResultItem[]>(`/race-results/race/${raceId}`),
   listByTournament: (tournamentId: string) =>
     apiFetch<RaceResultItem[]>(`/race-results/tournament/${tournamentId}`),
+  getByHorse: (horseId: string) =>
+    apiFetch<HorseVictoriesSummary>(`/race-results/horse/${horseId}`),
 };
 
 // ─── AI Packages ─────────────────────────────────────────────────────────────
@@ -778,6 +780,39 @@ export const aiApi = {
 
   getPrediction: (raceId: string) =>
     apiFetch<AiPredictionItem>(`/ai/predictions/${raceId}`),
-
 };
+
+// ─── Race Results & Victories ───────────────────────────────────────────────
+export interface HorseVictoryResultItem {
+  id: string;
+  rank?: number;
+  finishTimeMs?: number;
+  outcome: string;
+  incident?: string;
+  points?: number;
+  prizeAmount?: number;
+  note?: string;
+  createdAt?: string;
+  horseId?: { _id?: string; id?: string; name?: string; breed?: string } | string;
+  jockeyUserId?: { _id?: string; id?: string; fullName?: string; email?: string } | string;
+  ownerId?: { _id?: string; id?: string; fullName?: string; email?: string } | string;
+  raceId?: {
+    _id?: string;
+    id?: string;
+    name?: string;
+    raceNumber?: number;
+    startTime?: string;
+    tournamentId?: { _id?: string; id?: string; name?: string; startDate?: string; endDate?: string } | string;
+  };
+}
+
+export interface HorseVictoriesSummary {
+  horseId: string;
+  totalRaces: number;
+  wins: number;
+  bestFinishTimeMs?: number;
+  totalPoints: number;
+  championships: HorseVictoryResultItem[];
+  allResults: HorseVictoryResultItem[];
+}
 

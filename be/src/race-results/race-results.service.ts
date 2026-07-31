@@ -1000,4 +1000,53 @@ export class RaceResultsService {
       .sort({ rank: 1 })
       .exec();
   }
+
+  async findByHorse(horseId: string) {
+    const rawResults = await this.resultModel
+      .find({
+        horseId: new Types.ObjectId(horseId),
+        status: { $in: [RaceResultStatus.CONFIRMED, RaceResultStatus.PUBLISHED] },
+      })
+      .populate({
+        path: 'raceId',
+        select: 'name raceNumber startTime tournamentId status',
+        populate: {
+          path: 'tournamentId',
+          select: 'name startDate endDate status',
+        },
+      })
+      .populate('jockeyUserId', 'fullName email')
+      .populate('ownerId', 'fullName email')
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const allResults = rawResults.map((item) => {
+      const json = item.toJSON();
+      return {
+        ...json,
+        id: String(item._id),
+      };
+    });
+
+    const totalRaces = allResults.length;
+    const wins = allResults.filter((r) => r.rank === 1).length;
+    const finishedTimes = allResults
+      .filter((r) => r.outcome === RaceResultOutcome.FINISHED && r.finishTimeMs)
+      .map((r) => r.finishTimeMs as number);
+
+    const bestFinishTimeMs =
+      finishedTimes.length > 0 ? Math.min(...finishedTimes) : undefined;
+    const totalPoints = allResults.reduce((acc, r) => acc + (r.points || 0), 0);
+    const championships = allResults.filter((r) => r.rank === 1);
+
+    return {
+      horseId,
+      totalRaces,
+      wins,
+      bestFinishTimeMs,
+      totalPoints,
+      championships,
+      allResults,
+    };
+  }
 }

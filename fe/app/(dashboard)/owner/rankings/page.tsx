@@ -29,6 +29,7 @@ interface JockeyRanking {
 }
 
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { HorseDetailModal } from "@/components/horses/horse-detail-modal";
 
 export default function OwnerRankingsPage() {
   const [activeTab, setActiveTab] = useState<"horses" | "jockeys">("horses");
@@ -40,6 +41,10 @@ export default function OwnerRankingsPage() {
 
   // Pagination state (10 items per page)
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Horse detail modal state
+  const [modalHorseId, setModalHorseId] = useState<string | null>(null);
+  const [modalHorseData, setModalHorseData] = useState<{ name?: string; breed?: string } | null>(null);
 
   // Load Horse Rankings
   useEffect(() => {
@@ -186,7 +191,14 @@ export default function OwnerRankingsPage() {
                   </tr>
                 ) : (
                   paginatedHorses.map((horse) => (
-                    <tr key={horse.horseId} className="transition duration-200 hover:bg-muted/40">
+                    <tr
+                      key={horse.horseId}
+                      onClick={() => {
+                        setModalHorseId(horse.horseId);
+                        setModalHorseData({ name: horse.horseName, breed: horse.breed });
+                      }}
+                      className="cursor-pointer transition duration-200 hover:bg-muted/40"
+                    >
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
@@ -202,11 +214,12 @@ export default function OwnerRankingsPage() {
                           {horse.rank}
                         </span>
                       </td>
-                      <td className="p-4 font-black text-foreground flex items-center gap-2">
+                      <td className="p-4 font-black text-foreground hover:text-primary transition flex items-center gap-2">
                         {horse.horseName}
                         {horse.rank === 1 && (
                           <Flame className="size-3.5 text-primary animate-bounce" />
                         )}
+                        <span className="block text-[10px] text-muted-foreground font-normal">Bấm xem hồ sơ 🏆</span>
                       </td>
                       <td className="p-4 text-muted-foreground">{horse.breed || "Chưa rõ"}</td>
                       <td className="p-4 text-muted-foreground font-medium">{horse.ownerName || "—"}</td>
@@ -311,6 +324,14 @@ export default function OwnerRankingsPage() {
           />
         </div>
       )}
+
+      {/* Horse Detail Modal */}
+      <HorseDetailModal
+        horseId={modalHorseId}
+        horseData={modalHorseData}
+        isOpen={!!modalHorseId}
+        onClose={() => setModalHorseId(null)}
+      />
     </main>
   );
 }

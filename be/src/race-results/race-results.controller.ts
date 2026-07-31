@@ -73,6 +73,15 @@ export class RaceResultsController {
     return this.raceResultsService.findByTournament(tournamentId, user);
   }
 
+  @Get('horse/:horseId')
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get race results and championship victories for a horse',
+  })
+  findByHorse(@Param('horseId', ParseObjectIdPipe) horseId: string) {
+    return this.raceResultsService.findByHorse(horseId);
+  }
+
   @Patch('race/:raceId/confirm')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.REFEREE)

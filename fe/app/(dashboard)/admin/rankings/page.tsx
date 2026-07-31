@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { rankingsApi, tournamentsApi, type RankingEntry, type JockeyRankingEntry, type TournamentItem } from "@/lib/api-client";
+import { HorseDetailModal } from "@/components/horses/horse-detail-modal";
 
 export default function AdminRankingsPage() {
   const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
@@ -13,6 +14,10 @@ export default function AdminRankingsPage() {
   const [jockeyRankings, setJockeyRankings] = useState<JockeyRankingEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"horses" | "jockeys">("horses");
+
+  // Selected horse modal state
+  const [modalHorseId, setModalHorseId] = useState<string | null>(null);
+  const [modalHorseData, setModalHorseData] = useState<{ name?: string; breed?: string } | null>(null);
 
   // Pagination state (10 items per page)
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +62,7 @@ export default function AdminRankingsPage() {
       <PageHeader
         eyebrow="Ranking Management"
         title="Xem/Cập Nhật Ranking"
-        description="Ranking được tính realtime từ race results đã PUBLISHED. Chọn giải đấu để xem bảng xếp hạng."
+        description="Ranking được tính realtime từ race results đã PUBLISHED. Bấm vào tên chiến mã để xem hồ sơ và bảng vàng vô địch."
       />
 
       <div className="flex flex-wrap gap-3 items-center">
@@ -115,12 +120,22 @@ export default function AdminRankingsPage() {
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {paginatedHorses.map((r) => (
-                      <tr key={r.horseId} className={`hover:bg-muted transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
+                      <tr
+                        key={r.horseId}
+                        onClick={() => {
+                          setModalHorseId(r.horseId);
+                          setModalHorseData({ name: r.horseName, breed: r.breed });
+                        }}
+                        className={`cursor-pointer hover:bg-muted transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}
+                      >
                         <td className="px-5 py-4 text-xl">{rankBadge(r.rank)}</td>
-                        <td className="px-5 py-4 text-sm font-semibold text-foreground">{r.horseName ?? r.horseId}</td>
+                        <td className="px-5 py-4 text-sm font-semibold text-foreground hover:text-primary transition">
+                          {r.horseName ?? r.horseId}
+                          <span className="block text-[10px] text-muted-foreground font-normal">Bấm xem hồ sơ & bảng vàng 🏆</span>
+                        </td>
                         <td className="px-5 py-4 text-center font-mono font-black text-primary text-lg">{r.totalPoints}</td>
                         <td className="px-5 py-4 text-center text-sm text-muted-foreground">{r.totalRaces}</td>
-                        <td className="px-5 py-4 text-center text-sm text-emerald-400 font-bold">{r.wins}</td>
+                        <td className="px-5 py-4 text-center text-sm text-yellow-400 font-bold">🏆 {r.wins}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -164,6 +179,14 @@ export default function AdminRankingsPage() {
           />
         </div>
       )}
+
+      {/* Horse Detail Modal */}
+      <HorseDetailModal
+        horseId={modalHorseId}
+        horseData={modalHorseData}
+        isOpen={!!modalHorseId}
+        onClose={() => setModalHorseId(null)}
+      />
     </main>
   );
 }
