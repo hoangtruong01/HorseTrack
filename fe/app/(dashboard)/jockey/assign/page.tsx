@@ -21,6 +21,7 @@ import {
   FileText,
   FileArchive,
   ImageIcon,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -54,6 +55,7 @@ type RaceInfoCompact = {
   lapCount?: number;
   location?: string;
   prize?: number;
+  image?: string;
 };
 
 type TournamentInfoCompact = {
@@ -123,18 +125,26 @@ function getTimeframeLabel(dateStr?: string): TimeframeGroup {
   return "Older";
 }
 
-function ExplorerItemIcon({ index }: { index: number }) {
-  const iconTypes = [
-    { bg: "bg-blue-500/10 border-blue-500/30 text-blue-400", icon: FileCode },
-    { bg: "bg-amber-500/10 border-amber-500/30 text-amber-400", icon: FileArchive },
-    { bg: "bg-red-500/10 border-red-500/30 text-red-400", icon: FileText },
-    { bg: "bg-purple-500/10 border-purple-500/30 text-purple-400", icon: ImageIcon },
-  ];
-  const item = iconTypes[index % iconTypes.length];
-  const IconComp = item.icon;
+function ExplorerItemAvatar({ image, name }: { image?: string; name: string }) {
+  const [imgError, setImgError] = useState(false);
+
+  if (image && !imgError) {
+    return (
+      <div className="relative size-9 shrink-0 overflow-hidden rounded-xl border border-amber-500/30 bg-amber-500/10 shadow-xs transition-transform group-hover:scale-105">
+        <Image
+          src={image}
+          alt={name || "Horse/Race image"}
+          fill
+          className="object-cover"
+          onError={() => setImgError(true)}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg border ${item.bg}`}>
-      <IconComp className="size-4" />
+    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 dark:text-amber-400 shadow-xs transition-transform group-hover:scale-105">
+      <Trophy className="size-4 text-amber-500 dark:text-amber-400" />
     </div>
   );
 }
@@ -163,13 +173,13 @@ export function JockeyAssignPage() {
   const getTimeframeTitle = (groupKey: TimeframeGroup) => {
     switch (groupKey) {
       case "Earlier this week":
-        return t("jockey.timeframe.thisWeek", isVi ? "Tuần này (Earlier this week)" : "Earlier this week");
+        return t("jockey.timeframe.thisWeek", isVi ? "Tuần này" : "Earlier this week");
       case "Last week":
-        return t("jockey.timeframe.lastWeek", isVi ? "Tuần trước (Last week)" : "Last week");
+        return t("jockey.timeframe.lastWeek", isVi ? "Tuần trước" : "Last week");
       case "Earlier this month":
-        return t("jockey.timeframe.thisMonth", isVi ? "Tháng này (Earlier this month)" : "Earlier this month");
+        return t("jockey.timeframe.thisMonth", isVi ? "Tháng này" : "Earlier this month");
       case "Older":
-        return t("jockey.timeframe.older", isVi ? "Cũ hơn (Older)" : "Older");
+        return t("jockey.timeframe.older", isVi ? "Cũ hơn" : "Older");
       default:
         return groupKey;
     }
@@ -344,7 +354,7 @@ export function JockeyAssignPage() {
                   {/* Group Items */}
                   {!isCollapsed && (
                     <div className="space-y-1 pl-2">
-                      {groupItems.map((inv, idx) => {
+                      {groupItems.map((inv) => {
                         const formattedDate = formatDateDDMMYYYY(inv.raceId?.startTime || inv.createdAt);
 
                         return (
@@ -353,9 +363,12 @@ export function JockeyAssignPage() {
                             onClick={() => handleViewHorseDetail(inv.horseId.id)}
                             className="group relative flex flex-wrap md:flex-nowrap items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/[0.08] transition text-xs select-none cursor-pointer"
                           >
-                            {/* Left Section: Icon + Title & Type subtitle */}
+                            {/* Left Section: Icon / Real Image + Title & Type subtitle */}
                             <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <ExplorerItemIcon index={idx} />
+                              <ExplorerItemAvatar
+                                image={inv.horseId?.image || inv.raceId?.image}
+                                name={inv.horseId?.name || inv.raceId?.name || "Chiến mã"}
+                              />
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
                                   <p className="font-semibold text-foreground truncate group-hover:text-primary transition">
