@@ -172,7 +172,7 @@ export const horsesApi = {
 // ─── Jockeys ────────────────────────────────────────────────────────────────
 export interface JockeyItem {
   _id: string;
-  userId?: { _id: string; fullName: string; email: string } | string;
+  userId?: { _id: string; fullName: string; email: string; phone?: string; avatar?: string } | string;
   licenseNumber?: string;
   experienceYears?: number;
   heightCm?: number;
@@ -182,6 +182,8 @@ export interface JockeyItem {
   specialty?: string;
   certificates?: string;
   licenseImage?: string;
+  portraitImage?: string;
+  certificateImages?: string[];
   status: string;
   approvalStatus?: "PENDING" | "APPROVED" | "REJECTED";
   rejectionReason?: string;
