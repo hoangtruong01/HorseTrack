@@ -13,6 +13,7 @@ import {
   X,
   HelpCircle,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Folder,
   LayoutGrid,
@@ -212,6 +213,10 @@ export function JockeyAssignPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("explorer");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
+  // Pagination state (10 items per page)
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Selected horse detail for Modal
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
   const [horseDetail, setHorseDetail] = useState<HorseDetail | null>(null);
@@ -297,6 +302,12 @@ export function JockeyAssignPage() {
   };
 
   const acceptedInvs = invitations.filter((inv) => inv.status === "ACCEPTED");
+  const totalItems = acceptedInvs.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+  const paginatedInvs = acceptedInvs.slice(startIndex, endIndex);
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
@@ -316,7 +327,10 @@ export function JockeyAssignPage() {
             <div className="flex items-center bg-card border border-border p-1 rounded-xl gap-1">
               <button
                 type="button"
-                onClick={() => setViewMode("explorer")}
+                onClick={() => {
+                  setViewMode("explorer");
+                  setCurrentPage(1);
+                }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                   viewMode === "explorer"
                     ? "bg-primary text-primary-foreground shadow-sm"
@@ -329,7 +343,10 @@ export function JockeyAssignPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode("grid")}
+                onClick={() => {
+                  setViewMode("grid");
+                  setCurrentPage(1);
+                }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                   viewMode === "grid"
                     ? "bg-primary text-primary-foreground shadow-sm"
@@ -342,7 +359,10 @@ export function JockeyAssignPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode("list")}
+                onClick={() => {
+                  setViewMode("list");
+                  setCurrentPage(1);
+                }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                   viewMode === "list"
                     ? "bg-primary text-primary-foreground shadow-sm"
@@ -357,7 +377,7 @@ export function JockeyAssignPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <StatusBadge label={t("jockey.assign.acceptedCount", "{{count}} Cuộc đua đã nhận", { count: acceptedInvs.length })} tone="green" />
+            <StatusBadge label={t("jockey.assign.acceptedCount", "{{count}} Cuộc đua đã nhận", { count: totalItems })} tone="green" />
           </div>
         </div>
 
@@ -367,7 +387,7 @@ export function JockeyAssignPage() {
               <div key={i} className="h-32 rounded-2xl bg-muted/50 animate-pulse border border-border" />
             ))}
           </div>
-        ) : acceptedInvs.length === 0 ? (
+        ) : totalItems === 0 ? (
           <div className="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-border bg-card max-w-lg mx-auto space-y-3">
             <div className="size-12 rounded-full border border-border flex items-center justify-center text-muted-foreground">
               <Calendar className="size-6" />
@@ -379,7 +399,7 @@ export function JockeyAssignPage() {
           /* OPTION LAYOUT: Windows File Explorer Details View (Kiểu như hình đính kèm) */
           <div className="space-y-4 rounded-2xl border border-border bg-card p-4 shadow-xl">
             {(["Earlier this week", "Last week", "Earlier this month", "Older"] as TimeframeGroup[]).map((groupKey) => {
-              const groupItems = acceptedInvs.filter(
+              const groupItems = paginatedInvs.filter(
                 (inv) => getTimeframeLabel(inv.raceId?.startTime || inv.createdAt) === groupKey
               );
               if (groupItems.length === 0) return null;
@@ -482,7 +502,7 @@ export function JockeyAssignPage() {
         ) : viewMode === "list" ? (
           /* OPTION LAYOUT: Compact List View */
           <div className="divide-y divide-border rounded-2xl border border-border bg-card overflow-hidden shadow-lg">
-            {acceptedInvs.map((inv) => {
+            {paginatedInvs.map((inv) => {
               const statusConfig = getRaceStatusConfig(inv.raceId?.status, isVi);
               return (
                 <div
@@ -521,7 +541,7 @@ export function JockeyAssignPage() {
         ) : (
           /* OPTION LAYOUT: Standard Grid Cards View */
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {acceptedInvs.map((inv) => {
+            {paginatedInvs.map((inv) => {
               const statusConfig = getRaceStatusConfig(inv.raceId?.status, isVi);
               return (
                 <div key={inv.id || inv._id} className="relative rounded-xl border border-border bg-card p-4 hover:border-teal-500/30 transition shadow-sm overflow-hidden flex flex-col justify-between h-full">
@@ -585,6 +605,66 @@ export function JockeyAssignPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Pagination Bar Controls */}
+        {totalItems > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border/60">
+            <div className="text-xs text-muted-foreground">
+              {isVi ? (
+                <>
+                  Hiển thị <span className="font-bold text-foreground">{totalItems > 0 ? startIndex + 1 : 0}</span> - <span className="font-bold text-foreground">{endIndex}</span> trong tổng số <span className="font-bold text-foreground">{totalItems}</span> cuộc đua
+                </>
+              ) : (
+                <>
+                  Showing <span className="font-bold text-foreground">{totalItems > 0 ? startIndex + 1 : 0}</span> - <span className="font-bold text-foreground">{endIndex}</span> of <span className="font-bold text-foreground">{totalItems}</span> races
+                </>
+              )}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="h-8 px-2.5 text-xs font-semibold"
+                >
+                  <ChevronLeft className="size-3.5 mr-1" />
+                  {isVi ? "Trang trước" : "Previous"}
+                </Button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`size-8 rounded-lg text-xs font-bold transition ${
+                        currentPage === pageNum
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="h-8 px-2.5 text-xs font-semibold"
+                >
+                  {isVi ? "Trang sau" : "Next"}
+                  <ChevronRight className="size-3.5 ml-1" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </section>
