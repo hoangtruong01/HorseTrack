@@ -339,7 +339,7 @@ export function JockeyAssignPage() {
                 title={t("jockey.assign.viewExplorer", "Explorer Chi Tiết (như hình)")}
               >
                 <Folder className="size-3.5" />
-                {t("jockey.assign.viewExplorer", "Explorer Chi Tiết")}
+                {t("jockey.assign.viewExplorer", "Chi Tiết")}
               </button>
               <button
                 type="button"

@@ -28,6 +28,8 @@ interface JockeyRanking {
   rank: number;
 }
 
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
+
 export default function OwnerRankingsPage() {
   const [activeTab, setActiveTab] = useState<"horses" | "jockeys">("horses");
   const [horseRankings, setHorseRankings] = useState<HorseRanking[]>([]);
@@ -35,6 +37,9 @@ export default function OwnerRankingsPage() {
   const [isLoadingHorses, setIsLoadingHorses] = useState(true);
   const [isLoadingJockeys, setIsLoadingJockeys] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Pagination state (10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Load Horse Rankings
   useEffect(() => {
@@ -100,6 +105,9 @@ export default function OwnerRankingsPage() {
     return map[level.toLowerCase()] || level;
   };
 
+  const paginatedHorses = horseRankings.slice((currentPage - 1) * 10, currentPage * 10);
+  const paginatedJockeys = jockeyRankings.slice((currentPage - 1) * 10, currentPage * 10);
+
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12">
       <PageHeader
@@ -117,7 +125,10 @@ export default function OwnerRankingsPage() {
       {/* Tab Triggers */}
       <div className="flex border-b border-border max-w-sm">
         <button
-          onClick={() => setActiveTab("horses")}
+          onClick={() => {
+            setActiveTab("horses");
+            setCurrentPage(1);
+          }}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "horses"
               ? "text-primary border-b-2 border-primary"
@@ -127,7 +138,10 @@ export default function OwnerRankingsPage() {
           🐎 Chiến Mã Vô Địch
         </button>
         <button
-          onClick={() => setActiveTab("jockeys")}
+          onClick={() => {
+            setActiveTab("jockeys");
+            setCurrentPage(1);
+          }}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "jockeys"
               ? "text-primary border-b-2 border-primary"
@@ -171,7 +185,7 @@ export default function OwnerRankingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  horseRankings.map((horse) => (
+                  paginatedHorses.map((horse) => (
                     <tr key={horse.horseId} className="transition duration-200 hover:bg-muted/40">
                       <td className="p-4 text-center">
                         <span
@@ -210,6 +224,13 @@ export default function OwnerRankingsPage() {
               </tbody>
             </table>
           </div>
+
+          <DataTablePagination
+            currentPage={currentPage}
+            totalItems={horseRankings.length}
+            pageSize={10}
+            onPageChange={setCurrentPage}
+          />
         </div>
       ) : (
         /* Jockeys Ranking Table */
@@ -243,7 +264,7 @@ export default function OwnerRankingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  jockeyRankings.map((jockey) => (
+                  paginatedJockeys.map((jockey) => (
                     <tr key={jockey.jockeyUserId} className="transition duration-200 hover:bg-muted/40">
                       <td className="p-4 text-center">
                         <span
@@ -281,6 +302,13 @@ export default function OwnerRankingsPage() {
               </tbody>
             </table>
           </div>
+
+          <DataTablePagination
+            currentPage={currentPage}
+            totalItems={jockeyRankings.length}
+            pageSize={10}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </main>

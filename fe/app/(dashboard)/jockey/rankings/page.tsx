@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Trophy, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 interface HorseRanking {
   horseId: string;
@@ -38,6 +39,9 @@ export default function JockeyRankingsPage() {
   const [isLoadingJockeys, setIsLoadingJockeys] = useState(true);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Pagination state (10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Load Current User Profile
   useEffect(() => {
@@ -121,87 +125,74 @@ export default function JockeyRankingsPage() {
     }
   }, [currentJockeyId, jockeyRankings]);
 
-  const formatAvgTime = (totalMs: number, totalRaces: number) => {
-    if (!totalMs || !totalRaces) return "—";
-    const avgMs = totalMs / totalRaces;
-    const totalSeconds = avgMs / 1000;
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = (totalSeconds % 60).toFixed(2);
-    return `${minutes}:${seconds.padStart(5, "0")}`;
+  const getSkillLevelText = (lvl?: string) => {
+    switch (lvl) {
+      case "PROFESSIONAL": return "Chuyên nghiệp";
+      case "SEMI_PRO": return "Bán chuyên";
+      case "AMATEUR": return "Nghiệp dư";
+      default: return lvl || "Chưa xếp cấp";
+    }
   };
 
-  const getSkillLevelText = (level?: string) => {
-    if (!level) return "Chưa xác định";
-    const map: Record<string, string> = {
-      beginner: "Nài tập sự",
-      intermediate: "Nài trung cấp",
-      advanced: "Nài cao cấp",
-      professional: "Chuyên nghiệp",
-    };
-    return map[level.toLowerCase()] || level;
+  const formatAvgTime = (totalTimeMs: number, races: number) => {
+    if (!races || races === 0 || !totalTimeMs) return "—";
+    const avgMs = totalTimeMs / races;
+    const totalSec = Math.floor(avgMs / 1000);
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    const ms = Math.floor((avgMs % 1000) / 10);
+    return `${mins > 0 ? `${mins}m ` : ""}${secs}.${ms < 10 ? `0${ms}` : ms}s`;
   };
+
+  const paginatedJockeys = jockeyRankings.slice((currentPage - 1) * 10, currentPage * 10);
+  const paginatedHorses = horseRankings.slice((currentPage - 1) * 10, currentPage * 10);
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12 px-4 sm:px-6">
       <PageHeader
-        eyebrow="Đại sảnh vinh danh"
-        title="Bảng Xếp Hạng Vô Địch"
-        description="Bảng xếp hạng hiệu suất thi đấu của toàn bộ nài ngựa và chiến mã dựa trên số lần giành ngôi vô địch (Hạng 1)."
+        eyebrow="Bảng Xếp Hạng & Điểm Số"
+        title="Xếp Hạng Nài Ngựa & Chiến Mã"
+        description="Xem bảng xếp hạng điểm tích lũy, số lần vô địch và hiệu suất thi đấu thực tế được tổng hợp từ các giải đua."
       />
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-xs text-destructive">
           {error}
         </div>
       )}
 
-      {/* Jockey Standing Summary Card */}
-      {!isLoadingJockeys && !isLoadingProfile && (
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-lg">
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(225,6,0,0.12),transparent_35%),radial-gradient(circle_at_85%_20%,rgba(6,126,106,0.1),transparent_25rem)]" />
-          
-          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <span className="inline-flex rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-                Thứ hạng của bạn
-              </span>
-              {myRankingInfo ? (
-                <div>
-                  <h2 className="flex items-center gap-2 text-xl font-black uppercase text-foreground sm:text-2xl">
-                    Bạn đang đứng thứ <span className="text-primary text-3xl font-black">#{myRankingInfo.rank}</span> trên {jockeyRankings.length} nài ngựa!
-                  </h2>
-                  <p className="max-w-xl text-xs leading-relaxed text-muted-foreground">
-                    Tiếp tục chấp nhận lời mời và cưỡi ngựa chiến thắng để nâng hạng của bạn trên Bảng xếp hạng Vô địch.
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <h2 className="text-lg font-black uppercase text-foreground">
-                    Bạn chưa có xếp hạng chính thức
-                  </h2>
-                  <p className="max-w-xl text-xs leading-relaxed text-muted-foreground">
-                    Hệ thống chỉ xếp hạng các nài ngựa đã hoàn thành trận đua và được công bố kết quả. Hãy tích cực tham gia đua nhé!
-                  </p>
-                </div>
-              )}
+      {/* Profile Card Summary for current Jockey */}
+      {currentJockeyId && myRankingInfo && (
+        <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-card p-6 shadow-xl">
+          <div className="absolute -right-12 -top-12 size-40 rounded-full bg-primary/10 blur-2xl" />
+          <div className="relative flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="rounded-md bg-primary/20 px-2 py-0.5 text-[10px] font-black uppercase text-primary border border-primary/30">
+                  Hồ sơ nài ngựa của bạn
+                </span>
+                <span className="text-xs text-muted-foreground">• Hạng #{myRankingInfo.rank} toàn quốc</span>
+              </div>
+              <h2 className="text-xl font-black text-foreground">{myRankingInfo.jockeyName}</h2>
+              <p className="text-xs text-muted-foreground">
+                Cấp độ: <span className="font-semibold text-foreground">{getSkillLevelText(myRankingInfo.skillLevel)}</span> • Kinh nghiệm: <span className="font-semibold text-foreground">{myRankingInfo.experienceYears || 0} năm</span>
+              </p>
             </div>
 
-            {myRankingInfo && (
-              <div className="flex gap-4 self-start md:self-auto">
-                <div className="min-w-[90px] rounded-xl border border-border bg-muted/50 px-4 py-3 text-center">
-                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Vô địch</span>
-                  <span className="text-lg font-black text-primary mt-1 block">{myRankingInfo.wins}</span>
-                </div>
-                <div className="min-w-[90px] rounded-xl border border-border bg-muted/50 px-4 py-3 text-center">
-                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Số trận</span>
-                  <span className="mt-1 block text-lg font-black text-foreground">{myRankingInfo.totalRaces}</span>
-                </div>
-                <div className="min-w-[90px] rounded-xl border border-border bg-muted/50 px-4 py-3 text-center">
-                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Điểm tích lũy</span>
-                  <span className="text-lg font-black text-teal-400 mt-1 block">{myRankingInfo.totalPoints}đ</span>
-                </div>
+            <div className="flex items-center gap-6 border-l border-border pl-6">
+              <div className="text-center">
+                <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Tổng trận cưỡi</span>
+                <span className="text-lg font-black text-foreground mt-1 block">{myRankingInfo.totalRaces}</span>
               </div>
-            )}
+              <div className="text-center">
+                <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Vô địch (Hạng 1)</span>
+                <span className="text-lg font-black text-primary mt-1 block">{myRankingInfo.wins}</span>
+              </div>
+              <div className="text-center">
+                <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">Điểm tích lũy</span>
+                <span className="text-lg font-black text-teal-400 mt-1 block">{myRankingInfo.totalPoints}đ</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -209,7 +200,10 @@ export default function JockeyRankingsPage() {
       {/* Tab Triggers */}
       <div className="flex max-w-sm border-b border-border">
         <button
-          onClick={() => setActiveTab("jockeys")}
+          onClick={() => {
+            setActiveTab("jockeys");
+            setCurrentPage(1);
+          }}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "jockeys"
               ? "text-primary border-b-2 border-primary"
@@ -219,7 +213,10 @@ export default function JockeyRankingsPage() {
           🏇 Nài Ngựa Hàng Đầu
         </button>
         <button
-          onClick={() => setActiveTab("horses")}
+          onClick={() => {
+            setActiveTab("horses");
+            setCurrentPage(1);
+          }}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${
             activeTab === "horses"
               ? "text-primary border-b-2 border-primary"
@@ -262,7 +259,7 @@ export default function JockeyRankingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  jockeyRankings.map((jockey) => {
+                  paginatedJockeys.map((jockey) => {
                     const isMe = jockey.jockeyUserId === currentJockeyId;
                     return (
                       <tr
@@ -316,6 +313,13 @@ export default function JockeyRankingsPage() {
               </tbody>
             </table>
           </div>
+
+          <DataTablePagination
+            currentPage={currentPage}
+            totalItems={jockeyRankings.length}
+            pageSize={10}
+            onPageChange={setCurrentPage}
+          />
         </div>
       ) : (
         /* Horses Ranking Table */
@@ -350,7 +354,7 @@ export default function JockeyRankingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  horseRankings.map((horse) => (
+                  paginatedHorses.map((horse) => (
                     <tr key={horse.horseId} className="hover:bg-white/[0.01] transition duration-200">
                       <td className="p-4 text-center">
                         <span
@@ -390,6 +394,13 @@ export default function JockeyRankingsPage() {
               </tbody>
             </table>
           </div>
+
+          <DataTablePagination
+            currentPage={currentPage}
+            totalItems={horseRankings.length}
+            pageSize={10}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </main>

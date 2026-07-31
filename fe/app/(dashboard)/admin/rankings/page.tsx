@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { rankingsApi, tournamentsApi, type RankingEntry, type JockeyRankingEntry, type TournamentItem } from "@/lib/api-client";
 
 export default function AdminRankingsPage() {
@@ -12,6 +13,10 @@ export default function AdminRankingsPage() {
   const [jockeyRankings, setJockeyRankings] = useState<JockeyRankingEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"horses" | "jockeys">("horses");
+
+  // Pagination state (10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     async function loadTournaments() {
       try {
@@ -26,6 +31,7 @@ export default function AdminRankingsPage() {
   useEffect(() => {
     if (!selectedTournament) return;
     setLoading(true);
+    setCurrentPage(1);
     Promise.all([
       rankingsApi.getHorseRankings(selectedTournament),
       rankingsApi.getJockeyRankings(selectedTournament),
@@ -42,6 +48,9 @@ export default function AdminRankingsPage() {
     if (rank === 3) return "🥉";
     return `#${rank}`;
   };
+
+  const paginatedHorses = horseRankings.slice((currentPage - 1) * 10, currentPage * 10);
+  const paginatedJockeys = jockeyRankings.slice((currentPage - 1) * 10, currentPage * 10);
 
   return (
     <main className="space-y-6">
@@ -63,13 +72,19 @@ export default function AdminRankingsPage() {
 
         <div className="flex rounded-xl border border-border bg-muted p-1">
           <button
-            onClick={() => setActiveTab("horses")}
+            onClick={() => {
+              setActiveTab("horses");
+              setCurrentPage(1);
+            }}
             className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${activeTab === "horses" ? "bg-primary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             🐎 Ngựa
           </button>
           <button
-            onClick={() => setActiveTab("jockeys")}
+            onClick={() => {
+              setActiveTab("jockeys");
+              setCurrentPage(1);
+            }}
             className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${activeTab === "jockeys" ? "bg-primary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             🏇 Jockey
@@ -82,62 +97,71 @@ export default function AdminRankingsPage() {
       ) : !selectedTournament ? (
         <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">Chọn giải đấu để xem ranking.</div>
       ) : (
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          {activeTab === "horses" ? (
-            horseRankings.length === 0 ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có kết quả race nào được công bố.</div>
-            ) : (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Hạng</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Races</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Wins</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {horseRankings.map((r) => (
-                    <tr key={r.horseId} className={`hover:bg-muted transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
-                      <td className="px-5 py-4 text-xl">{rankBadge(r.rank)}</td>
-                      <td className="px-5 py-4 text-sm font-semibold text-foreground">{r.horseName ?? r.horseId}</td>
-                      <td className="px-5 py-4 text-center font-mono font-black text-primary text-lg">{r.totalPoints}</td>
-                      <td className="px-5 py-4 text-center text-sm text-muted-foreground">{r.totalRaces}</td>
-                      <td className="px-5 py-4 text-center text-sm text-emerald-400 font-bold">{r.wins}</td>
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            {activeTab === "horses" ? (
+              horseRankings.length === 0 ? (
+                <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có kết quả race nào được công bố.</div>
+              ) : (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Hạng</th>
+                      <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Ngựa</th>
+                      <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
+                      <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Races</th>
+                      <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Wins</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )
-          ) : (
-            jockeyRankings.length === 0 ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có kết quả race nào được công bố.</div>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {paginatedHorses.map((r) => (
+                      <tr key={r.horseId} className={`hover:bg-muted transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
+                        <td className="px-5 py-4 text-xl">{rankBadge(r.rank)}</td>
+                        <td className="px-5 py-4 text-sm font-semibold text-foreground">{r.horseName ?? r.horseId}</td>
+                        <td className="px-5 py-4 text-center font-mono font-black text-primary text-lg">{r.totalPoints}</td>
+                        <td className="px-5 py-4 text-center text-sm text-muted-foreground">{r.totalRaces}</td>
+                        <td className="px-5 py-4 text-center text-sm text-emerald-400 font-bold">{r.wins}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )
             ) : (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Hạng</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Jockey</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Races</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Wins</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {jockeyRankings.map((r) => (
-                    <tr key={r.jockeyUserId} className={`hover:bg-muted transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
-                      <td className="px-5 py-4 text-xl">{rankBadge(r.rank)}</td>
-                      <td className="px-5 py-4 text-sm font-semibold text-foreground">{r.jockeyName ?? r.jockeyUserId}</td>
-                      <td className="px-5 py-4 text-center font-mono font-black text-primary text-lg">{r.totalPoints}</td>
-                      <td className="px-5 py-4 text-center text-sm text-muted-foreground">{r.totalRaces}</td>
-                      <td className="px-5 py-4 text-center text-sm text-emerald-400 font-bold">{r.wins}</td>
+              jockeyRankings.length === 0 ? (
+                <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có kết quả race nào được công bố.</div>
+              ) : (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Hạng</th>
+                      <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Jockey</th>
+                      <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm</th>
+                      <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Races</th>
+                      <th className="px-5 py-3.5 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Wins</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )
-          )}
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {paginatedJockeys.map((r) => (
+                      <tr key={r.jockeyUserId} className={`hover:bg-muted transition-colors ${r.rank && r.rank <= 3 ? "bg-primary/[0.03]" : ""}`}>
+                        <td className="px-5 py-4 text-xl">{rankBadge(r.rank)}</td>
+                        <td className="px-5 py-4 text-sm font-semibold text-foreground">{r.jockeyName ?? r.jockeyUserId}</td>
+                        <td className="px-5 py-4 text-center font-mono font-black text-primary text-lg">{r.totalPoints}</td>
+                        <td className="px-5 py-4 text-center text-sm text-muted-foreground">{r.totalRaces}</td>
+                        <td className="px-5 py-4 text-center text-sm text-emerald-400 font-bold">{r.wins}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )
+            )}
+          </div>
+
+          <DataTablePagination
+            currentPage={currentPage}
+            totalItems={activeTab === "horses" ? horseRankings.length : jockeyRankings.length}
+            pageSize={10}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </main>

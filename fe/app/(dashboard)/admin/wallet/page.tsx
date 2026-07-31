@@ -26,16 +26,16 @@ export default function AdminWalletPage() {
   const [transactions, setTransactions] = useState<WalletTxItem[]>([]);
   const [cashouts, setCashouts] = useState<CashoutItem[]>([]);
   const [failedCashouts, setFailedCashouts] = useState<CashoutItem[]>([]);
-  const [txMeta, setTxMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
-  const [cashoutMeta, setCashoutMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
-  const [failedMeta, setFailedMeta] = useState({ total: 0, page: 1, limit: 20, totalPages: 1 });
+  const [txMeta, setTxMeta] = useState({ total: 0, page: 1, limit: 10, totalPages: 1 });
+  const [cashoutMeta, setCashoutMeta] = useState({ total: 0, page: 1, limit: 10, totalPages: 1 });
+  const [failedMeta, setFailedMeta] = useState({ total: 0, page: 1, limit: 10, totalPages: 1 });
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchTransactions = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const res = await walletApi.allTransactions({ page, limit: 20 });
+      const res = await walletApi.allTransactions({ page, limit: 10 });
       setTransactions(res.data);
       setTxMeta(res.meta);
     } catch (e) { toast.error((e as Error).message); }
@@ -45,7 +45,7 @@ export default function AdminWalletPage() {
   const fetchCashouts = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const res = await walletApi.allCashouts({ page, limit: 20, status: "PENDING,APPROVED,PAID,REJECTED" });
+      const res = await walletApi.allCashouts({ page, limit: 10, status: "PENDING,APPROVED,PAID,REJECTED" });
       setCashouts(res.data);
       setCashoutMeta(res.meta);
     } catch (e) { toast.error((e as Error).message); }
@@ -55,7 +55,7 @@ export default function AdminWalletPage() {
   const fetchFailedCashouts = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const res = await walletApi.allCashouts({ page, limit: 20, status: "FAILED" });
+      const res = await walletApi.allCashouts({ page, limit: 10, status: "FAILED" });
       setFailedCashouts(res.data);
       setFailedMeta(res.meta);
     } catch (e) { toast.error((e as Error).message); }

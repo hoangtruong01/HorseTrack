@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Trophy, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 interface HorseRanking {
   horseId: string;
@@ -35,6 +36,9 @@ export default function RefereeRankingsPage() {
   const [isLoadingHorses, setIsLoadingHorses] = useState(true);
   const [isLoadingJockeys, setIsLoadingJockeys] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Pagination state (10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Load Horse Rankings
   useEffect(() => {
@@ -100,6 +104,9 @@ export default function RefereeRankingsPage() {
     return map[level.toLowerCase()] || level;
   };
 
+  const paginatedHorses = horseRankings.slice((currentPage - 1) * 10, currentPage * 10);
+  const paginatedJockeys = jockeyRankings.slice((currentPage - 1) * 10, currentPage * 10);
+
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12 px-4 sm:px-6">
       <PageHeader
@@ -117,7 +124,10 @@ export default function RefereeRankingsPage() {
       {/* Tab Triggers */}
       <div className="flex border-b border-border max-w-sm">
         <button
-          onClick={() => setActiveTab("horses")}
+          onClick={() => {
+            setActiveTab("horses");
+            setCurrentPage(1);
+          }}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${activeTab === "horses"
               ? "text-primary border-b-2 border-primary"
               : "text-muted-foreground hover:text-foreground"
@@ -126,7 +136,10 @@ export default function RefereeRankingsPage() {
           🐎 Chiến Mã Vô Địch
         </button>
         <button
-          onClick={() => setActiveTab("jockeys")}
+          onClick={() => {
+            setActiveTab("jockeys");
+            setCurrentPage(1);
+          }}
           className={`flex-1 pb-3 text-sm font-black uppercase tracking-wider transition ${activeTab === "jockeys"
               ? "text-primary border-b-2 border-primary"
               : "text-muted-foreground hover:text-foreground"
@@ -169,8 +182,8 @@ export default function RefereeRankingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  horseRankings.map((horse) => (
-                    <tr key={horse.horseId} className="hover:bg-muted/40 transition duration-200">
+                  paginatedHorses.map((horse) => (
+                    <tr key={horse.horseId} className="hover:bg-muted/30 transition duration-200">
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${horse.rank === 1
@@ -178,7 +191,7 @@ export default function RefereeRankingsPage() {
                               : horse.rank === 2
                                 ? "bg-slate-300 text-black"
                                 : horse.rank === 3
-                                  ? "bg-[#CD7F32] text-white"
+                                  ? "bg-[#CD7F32] text-foreground"
                                   : "bg-muted border border-border text-muted-foreground"
                             }`}
                         >
@@ -198,9 +211,8 @@ export default function RefereeRankingsPage() {
                       <td className="p-4 text-center font-mono text-muted-foreground">
                         {formatAvgTime(horse.totalFinishTimeMs, horse.totalRaces)}
                       </td>
-                      <td className="p-4 text-right font-black text-teal-400 text-sm">
-                        <span className="text-teal-700">{horse.totalPoints}</span>{" "}
-                        <span className="text-muted-foreground">điểm</span>
+                      <td className="p-4 text-right font-black text-teal-600 dark:text-teal-400 text-sm">
+                        {horse.totalPoints} điểm
                       </td>
                     </tr>
                   ))
@@ -208,6 +220,12 @@ export default function RefereeRankingsPage() {
               </tbody>
             </table>
           </div>
+          <DataTablePagination
+            currentPage={currentPage}
+            totalItems={horseRankings.length}
+            pageSize={10}
+            onPageChange={setCurrentPage}
+          />
         </div>
       ) : (
         /* Jockeys Ranking Table */
@@ -241,8 +259,8 @@ export default function RefereeRankingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  jockeyRankings.map((jockey) => (
-                    <tr key={jockey.jockeyUserId} className="hover:bg-muted/40 transition duration-200">
+                  paginatedJockeys.map((jockey) => (
+                    <tr key={jockey.jockeyUserId} className="hover:bg-muted/30 transition duration-200">
                       <td className="p-4 text-center">
                         <span
                           className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${jockey.rank === 1
@@ -250,7 +268,7 @@ export default function RefereeRankingsPage() {
                               : jockey.rank === 2
                                 ? "bg-slate-300 text-black"
                                 : jockey.rank === 3
-                                  ? "bg-[#CD7F32] text-white"
+                                  ? "bg-[#CD7F32] text-foreground"
                                   : "bg-muted border border-border text-muted-foreground"
                             }`}
                         >
@@ -269,9 +287,8 @@ export default function RefereeRankingsPage() {
                       </td>
                       <td className="p-4 text-center font-bold text-foreground">{jockey.totalRaces}</td>
                       <td className="p-4 text-center text-primary font-black text-sm">{jockey.wins}</td>
-                      <td className="p-4 text-right font-black text-teal-400 text-sm">
-                        <span className="text-teal-700">{jockey.totalPoints}</span>{" "}
-                        <span className="text-muted-foreground">điểm</span>
+                      <td className="p-4 text-right font-black text-teal-600 dark:text-teal-400 text-sm">
+                        {jockey.totalPoints} điểm
                       </td>
                     </tr>
                   ))
@@ -279,6 +296,13 @@ export default function RefereeRankingsPage() {
               </tbody>
             </table>
           </div>
+
+          <DataTablePagination
+            currentPage={currentPage}
+            totalItems={jockeyRankings.length}
+            pageSize={10}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </main>

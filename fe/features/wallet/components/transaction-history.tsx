@@ -1,11 +1,12 @@
 "use client";
 
 import { ArrowDownLeft, ArrowUpRight, Award, Coins, Copy, Search, Sparkles } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
 import { StatusBadge } from "@/components/ui/status-badge";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import type { WalletUiTransaction } from "../backend-wallet";
 
@@ -20,6 +21,13 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Pagination state (10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType, searchTerm]);
+
   const filteredTransactions = useMemo(() => {
     const query = searchTerm.toLowerCase();
     return transactions.filter((tx) => {
@@ -32,6 +40,10 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
       return matchesSearch;
     });
   }, [transactions, filterType, searchTerm]);
+
+  const paginatedTransactions = useMemo(() => {
+    return filteredTransactions.slice((currentPage - 1) * 10, currentPage * 10);
+  }, [filteredTransactions, currentPage]);
 
   const typeMeta: Record<
     WalletUiTransaction["type"],
@@ -125,7 +137,7 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
             </p>
           </div>
         ) : (
-          <div className="w-full overflow-hidden">
+          <div className="w-full overflow-hidden space-y-3">
             <table className="w-full table-auto border-collapse text-left text-xs">
               <thead className="border-b border-border bg-muted/[0.03] text-[9px] font-black uppercase tracking-wider text-muted-foreground">
                 <tr>
@@ -136,7 +148,7 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredTransactions.map((tx) => {
+                {paginatedTransactions.map((tx) => {
                   const meta = typeMeta[tx.type] || { icon: Coins, color: "text-muted-foreground bg-muted border-border", label: t("wallet.transactions.types.generic") };
                   const Icon = meta.icon;
                   const isPositive = ["deposit", "prize_owner", "prize_jockey", "prediction_win", "prediction_refund", "salary_bonus", "withdrawal_refund"].includes(tx.type);
@@ -251,6 +263,14 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
                 })}
               </tbody>
             </table>
+
+            <DataTablePagination
+              currentPage={currentPage}
+              totalItems={filteredTransactions.length}
+              pageSize={10}
+              onPageChange={setCurrentPage}
+              className="px-4 pb-3"
+            />
           </div>
         )}
       </div>

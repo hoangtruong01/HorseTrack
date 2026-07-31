@@ -5,6 +5,7 @@ import { Calendar, ArrowLeft, Siren, Timer, Search, ChevronRight } from "lucide-
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { tournamentsApi, raceResultsApi } from "@/lib/api-client";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 interface Tournament {
   id: string;
@@ -49,7 +50,7 @@ interface RaceGroup {
   raceNumber: number;
   results: RaceResultItem[];
 }
-
+ 
 export default function SpectatorResultsPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
@@ -60,6 +61,9 @@ export default function SpectatorResultsPage() {
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Pagination state (10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Load all tournaments
   useEffect(() => {
@@ -93,6 +97,7 @@ export default function SpectatorResultsPage() {
     }
 
     const tId = selectedTournament.id || (selectedTournament as unknown as { _id?: string })._id || '';
+    setCurrentPage(1);
 
     async function loadResults() {
       try {
@@ -161,6 +166,10 @@ export default function SpectatorResultsPage() {
     t.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const paginatedTournaments = filteredTournaments.slice((currentPage - 1) * 10, currentPage * 10);
+  const paginatedRaceGroups = raceGroups.slice((currentPage - 1) * 10, currentPage * 10);
+  const paginatedDetailedResults = selectedRaceGroup?.results.slice((currentPage - 1) * 10, currentPage * 10) || [];
+
   return (
     <main className="space-y-6 max-w-6xl mx-auto pb-12 px-4 sm:px-6">
       {!selectedTournament ? (
@@ -178,7 +187,10 @@ export default function SpectatorResultsPage() {
               type="text"
               placeholder="Tìm kiếm giải đấu..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="h-10 w-full rounded-xl border border-border bg-muted/40 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition"
             />
           </div>
@@ -201,40 +213,57 @@ export default function SpectatorResultsPage() {
               <p className="text-muted-foreground text-sm">Không tìm thấy giải đấu nào phù hợp.</p>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredTournaments.map((t) => (
-                <div
-                  key={t.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-muted/30 dark:hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44"
-                >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
-                  <div>
-                    <div className="flex justify-between items-start mb-3">
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase bg-muted border border-border text-foreground/70">
-                        {t.status}
-                      </span>
+            <div className="space-y-4">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {paginatedTournaments.map((t) => (
+                  <div
+                    key={t.id}
+                    onClick={() => {
+                      setSelectedTournament(t);
+                      setCurrentPage(1);
+                    }}
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-muted/30 dark:hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44 cursor-pointer"
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
+                    <div>
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase bg-muted border border-border text-foreground/70">
+                          {t.status}
+                        </span>
+                      </div>
+                      <h3 className="font-black uppercase text-foreground group-hover:text-primary transition duration-300 leading-tight tracking-tight line-clamp-2">
+                        {t.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+                        {t.description || "Không có mô tả chi tiết giải đấu."}
+                      </p>
                     </div>
-                    <h3 className="font-black uppercase text-foreground group-hover:text-primary transition duration-300 leading-tight tracking-tight line-clamp-2">
-                      {t.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-                      {t.description || "Không có mô tả chi tiết giải đấu."}
-                    </p>
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-[10px] font-mono text-muted-foreground/60 flex items-center gap-1">
+                        <Calendar className="size-3.5" />
+                        {t.startDate ? new Date(t.startDate).toLocaleDateString("vi-VN") : "N/A"}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTournament(t);
+                          setCurrentPage(1);
+                        }}
+                        className="text-xs font-bold uppercase tracking-wider text-foreground/80 group-hover:text-primary flex items-center gap-1 transition"
+                      >
+                        Xem Kết Quả <ChevronRight className="size-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between mt-4">
-                    <span className="text-[10px] font-mono text-muted-foreground/60 flex items-center gap-1">
-                      <Calendar className="size-3.5" />
-                      {t.startDate ? new Date(t.startDate).toLocaleDateString("vi-VN") : "N/A"}
-                    </span>
-                    <button
-                      onClick={() => setSelectedTournament(t)}
-                      className="text-xs font-bold uppercase tracking-wider text-foreground/80 group-hover:text-primary flex items-center gap-1 transition"
-                    >
-                      Xem Kết Quả <ChevronRight className="size-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <DataTablePagination
+                currentPage={currentPage}
+                totalItems={filteredTournaments.length}
+                pageSize={10}
+                onPageChange={setCurrentPage}
+              />
             </div>
           )}
         </>
@@ -242,7 +271,10 @@ export default function SpectatorResultsPage() {
         /* Race Selection View */
         <div className="space-y-6">
           <Button
-            onClick={() => setSelectedTournament(null)}
+            onClick={() => {
+              setSelectedTournament(null);
+              setCurrentPage(1);
+            }}
             variant="ghost"
             className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground -ml-2 rounded-xl"
           >
@@ -272,60 +304,72 @@ export default function SpectatorResultsPage() {
               <p className="text-muted-foreground text-sm">Chưa có trận đua nào được công bố kết quả trong giải đấu này.</p>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2">
-              {raceGroups.map((group) => {
-                const winner = group.results.find((r) => r.rank === 1);
-                const runnerUp = group.results.find((r) => r.rank === 2);
-                return (
-                  <div
-                    key={group.raceId}
-                    className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/20 transition duration-300 p-5 flex flex-col justify-between space-y-4"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] text-primary font-black uppercase tracking-wider">
-                          Trận #{group.raceNumber}
-                        </span>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-black uppercase bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 rounded-full">
-                          ● ĐÃ CÔNG BỐ
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-black uppercase text-foreground group-hover:text-primary transition duration-300">
-                        {group.name}
-                      </h3>
-                    </div>
-
-                    {/* Podium Preview */}
-                    <div className="grid grid-cols-2 gap-2 bg-muted/40 rounded-xl p-3 border border-border text-xs">
-                      <div>
-                        <span className="block text-[8px] uppercase tracking-wider text-primary font-bold">🏆 Vô Địch</span>
-                        <span className="font-bold text-foreground text-[11px] block truncate mt-0.5">
-                          {winner?.horseId?.name || "—"}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground block truncate">
-                          Nài: {winner?.jockeyUserId?.fullName || "—"}
-                        </span>
-                      </div>
-                      <div className="border-l border-border pl-3">
-                        <span className="block text-[8px] uppercase tracking-wider text-muted-foreground font-bold">Hạng 2</span>
-                        <span className="font-bold text-foreground text-[11px] block truncate mt-0.5">
-                          {runnerUp?.horseId?.name || "—"}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground block truncate">
-                          Nài: {runnerUp?.jockeyUserId?.fullName || "—"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={() => setSelectedRaceGroup(group)}
-                      className="w-full rounded-xl bg-muted border border-border text-foreground hover:bg-primary hover:text-foreground transition duration-300 text-xs font-black uppercase tracking-wider"
+            <div className="space-y-4">
+              <div className="grid gap-6 sm:grid-cols-2">
+                {paginatedRaceGroups.map((group) => {
+                  const winner = group.results.find((r) => r.rank === 1);
+                  const runnerUp = group.results.find((r) => r.rank === 2);
+                  return (
+                    <div
+                      key={group.raceId}
+                      className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/20 transition duration-300 p-5 flex flex-col justify-between space-y-4"
                     >
-                      Xem Bảng Điểm Chi Tiết
-                    </Button>
-                  </div>
-                );
-              })}
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-start">
+                          <span className="text-[10px] text-primary font-black uppercase tracking-wider">
+                            Trận #{group.raceNumber}
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-black uppercase bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 rounded-full">
+                            ● ĐÃ CÔNG BỐ
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-black uppercase text-foreground group-hover:text-primary transition duration-300">
+                          {group.name}
+                        </h3>
+                      </div>
+
+                      {/* Podium Preview */}
+                      <div className="grid grid-cols-2 gap-2 bg-muted/40 rounded-xl p-3 border border-border text-xs">
+                        <div>
+                          <span className="block text-[8px] uppercase tracking-wider text-primary font-bold">🏆 Vô Địch</span>
+                          <span className="font-bold text-foreground text-[11px] block truncate mt-0.5">
+                            {winner?.horseId?.name || "—"}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground block truncate">
+                            Nài: {winner?.jockeyUserId?.fullName || "—"}
+                          </span>
+                        </div>
+                        <div className="border-l border-border pl-3">
+                          <span className="block text-[8px] uppercase tracking-wider text-muted-foreground font-bold">Hạng 2</span>
+                          <span className="font-bold text-foreground text-[11px] block truncate mt-0.5">
+                            {runnerUp?.horseId?.name || "—"}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground block truncate">
+                            Nài: {runnerUp?.jockeyUserId?.fullName || "—"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={() => {
+                          setSelectedRaceGroup(group);
+                          setCurrentPage(1);
+                        }}
+                        className="w-full rounded-xl bg-muted border border-border text-foreground hover:bg-primary hover:text-foreground transition duration-300 text-xs font-black uppercase tracking-wider"
+                      >
+                        Xem Bảng Điểm Chi Tiết
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <DataTablePagination
+                currentPage={currentPage}
+                totalItems={raceGroups.length}
+                pageSize={10}
+                onPageChange={setCurrentPage}
+              />
             </div>
           )}
         </div>
@@ -333,7 +377,10 @@ export default function SpectatorResultsPage() {
         /* Detailed Table Result View */
         <div className="space-y-6">
           <Button
-            onClick={() => setSelectedRaceGroup(null)}
+            onClick={() => {
+              setSelectedRaceGroup(null);
+              setCurrentPage(1);
+            }}
             variant="ghost"
             className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground -ml-2 rounded-xl"
           >
@@ -354,7 +401,7 @@ export default function SpectatorResultsPage() {
             </div>
 
             {/* Results Table */}
-            <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl">
+            <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl space-y-4">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-border bg-muted/50 text-muted-foreground font-black uppercase tracking-wider">
@@ -376,7 +423,7 @@ export default function SpectatorResultsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {selectedRaceGroup.results.map((res) => (
+                  {paginatedDetailedResults.map((res) => (
                     <tr key={res.id} className="hover:bg-muted/30 transition duration-200">
                       <td className="p-4 text-center">
                         <span
@@ -409,6 +456,14 @@ export default function SpectatorResultsPage() {
                   ))}
                 </tbody>
               </table>
+
+              <DataTablePagination
+                currentPage={currentPage}
+                totalItems={selectedRaceGroup.results.length}
+                pageSize={10}
+                onPageChange={setCurrentPage}
+                className="px-4 pb-4"
+              />
             </div>
           </div>
         </div>
