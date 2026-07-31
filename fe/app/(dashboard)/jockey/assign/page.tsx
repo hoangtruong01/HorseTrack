@@ -2,6 +2,7 @@
 import Image from "next/image";
 
 import { useEffect, useState, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Calendar,
   Clock,
@@ -11,6 +12,15 @@ import {
   User,
   X,
   HelpCircle,
+  ChevronDown,
+  ChevronRight,
+  Folder,
+  LayoutGrid,
+  List,
+  FileCode,
+  FileText,
+  FileArchive,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -89,15 +99,94 @@ type HorseDetail = {
   staminaScore?: number;
 };
 
+type ViewMode = "explorer" | "grid" | "list";
+type TimeframeGroup = "Earlier this week" | "Last week" | "Earlier this month" | "Older";
+
+function getTimeframeLabel(dateStr?: string): TimeframeGroup {
+  if (!dateStr) return "Older";
+  const date = new Date(dateStr);
+  const now = new Date();
+  
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dayOfWeek = startOfToday.getDay();
+  const startOfWeek = new Date(startOfToday);
+  startOfWeek.setDate(startOfWeek.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  
+  const startOfLastWeek = new Date(startOfWeek);
+  startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+  
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  if (date >= startOfWeek) return "Earlier this week";
+  if (date >= startOfLastWeek) return "Last week";
+  if (date >= startOfMonth) return "Earlier this month";
+  return "Older";
+}
+
+function ExplorerItemIcon({ index }: { index: number }) {
+  const iconTypes = [
+    { bg: "bg-blue-500/10 border-blue-500/30 text-blue-400", icon: FileCode },
+    { bg: "bg-amber-500/10 border-amber-500/30 text-amber-400", icon: FileArchive },
+    { bg: "bg-red-500/10 border-red-500/30 text-red-400", icon: FileText },
+    { bg: "bg-purple-500/10 border-purple-500/30 text-purple-400", icon: ImageIcon },
+  ];
+  const item = iconTypes[index % iconTypes.length];
+  const IconComp = item.icon;
+  return (
+    <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg border ${item.bg}`}>
+      <IconComp className="size-4" />
+    </div>
+  );
+}
+
 export function JockeyAssignPage() {
+  const { t, i18n } = useTranslation();
+  const isVi = i18n.language?.startsWith("vi") ?? true;
+
   // State variables
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoadingInvs, setIsLoadingInvs] = useState(true);
+
+  // View Mode state (Explorer, Grid, List)
+  const [viewMode, setViewMode] = useState<ViewMode>("explorer");
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
   // Selected horse detail for Modal
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
   const [horseDetail, setHorseDetail] = useState<HorseDetail | null>(null);
   const [isLoadingHorse, setIsLoadingHorse] = useState(false);
+
+  const toggleGroupCollapse = (groupKey: string) => {
+    setCollapsedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
+  };
+
+  const getTimeframeTitle = (groupKey: TimeframeGroup) => {
+    switch (groupKey) {
+      case "Earlier this week":
+        return t("jockey.timeframe.thisWeek", isVi ? "Tuần này (Earlier this week)" : "Earlier this week");
+      case "Last week":
+        return t("jockey.timeframe.lastWeek", isVi ? "Tuần trước (Last week)" : "Last week");
+      case "Earlier this month":
+        return t("jockey.timeframe.thisMonth", isVi ? "Tháng này (Earlier this month)" : "Earlier this month");
+      case "Older":
+        return t("jockey.timeframe.older", isVi ? "Cũ hơn (Older)" : "Older");
+      default:
+        return groupKey;
+    }
+  };
+
+  // Format Date in DD/MM/YYYY HH:mm (Ngày / Tháng / Năm Giờ:Phút)
+  const formatDateDDMMYYYY = (dateStr?: string) => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "—";
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
 
   // Fetch initial data
   const fetchInvitations = async () => {
@@ -112,7 +201,7 @@ export function JockeyAssignPage() {
       }
     } catch (err) {
       console.error("Lỗi tải lịch thi đấu:", err);
-      toast.error("Không thể kết nối đến server.");
+      toast.error(t("common.serverError", "Không thể kết nối đến server."));
     } finally {
       setIsLoadingInvs(false);
     }
@@ -136,36 +225,79 @@ export function JockeyAssignPage() {
           setHorseDetail(data.data);
         }
       } else {
-        toast.error("Không thể lấy thông tin chi tiết của ngựa.");
+        toast.error(t("jockey.assign.horseFetchError", "Không thể lấy thông tin chi tiết của ngựa."));
       }
     } catch (err) {
       console.error("Lỗi lấy thông tin chiến mã:", err);
-      toast.error("Lỗi kết nối.");
+      toast.error(t("common.connectionError", "Lỗi kết nối."));
     } finally {
       setIsLoadingHorse(false);
     }
   };
 
   const acceptedInvs = invitations.filter((inv) => inv.status === "ACCEPTED");
-  
-  const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return "Chưa xác định";
-    const d = new Date(dateStr);
-    return `${d.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} ngày ${d.toLocaleDateString("vi-VN")}`;
-  };
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
       <PageHeader
-        eyebrow="Lịch Trình"
-        title="Lịch Thi Đấu Đã Nhận"
-        description="Xem chi tiết các cuộc đua bạn đã nhận lời tham gia, thông tin về chiến mã được phân công và tỷ lệ chia thưởng từ chủ chuồng."
+        eyebrow={t("jockey.assign.eyebrow", "Lịch Trình")}
+        title={t("jockey.assign.title", "Lịch Thi Đấu Đã Nhận")}
+        description={t("jockey.assign.description", "Xem chi tiết các cuộc đua bạn đã nhận lời tham gia, thông tin về chiến mã được phân công và tỷ lệ chia thưởng từ chủ chuồng.")}
       />
 
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-black uppercase tracking-wider text-foreground">Lịch trình thi đấu</h3>
-          <StatusBadge label={`${acceptedInvs.length} Cuộc đua sắp tới`} tone="green" />
+        {/* Layout Mode Control Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-3 rounded-2xl border border-border">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              {t("jockey.assign.layoutLabel", "Giao diện / Layout:")}
+            </span>
+            <div className="flex items-center bg-card border border-border p-1 rounded-xl gap-1">
+              <button
+                type="button"
+                onClick={() => setViewMode("explorer")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                  viewMode === "explorer"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+                title={t("jockey.assign.viewExplorer", "Explorer Chi Tiết (như hình)")}
+              >
+                <Folder className="size-3.5" />
+                {t("jockey.assign.viewExplorer", "Explorer Chi Tiết")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                  viewMode === "grid"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+                title={t("jockey.assign.viewGrid", "Thẻ Grid")}
+              >
+                <LayoutGrid className="size-3.5" />
+                {t("jockey.assign.viewGrid", "Thẻ Grid")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+                title={t("jockey.assign.viewList", "Danh Sách")}
+              >
+                <List className="size-3.5" />
+                {t("jockey.assign.viewList", "Danh Sách")}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <StatusBadge label={t("jockey.assign.acceptedCount", "{{count}} Cuộc đua đã nhận", { count: acceptedInvs.length })} tone="green" />
+          </div>
         </div>
 
         {isLoadingInvs ? (
@@ -179,10 +311,143 @@ export function JockeyAssignPage() {
             <div className="size-12 rounded-full border border-border flex items-center justify-center text-muted-foreground">
               <Calendar className="size-6" />
             </div>
-            <h4 className="font-bold text-foreground">Chưa có lịch trình</h4>
-            <p className="text-xs text-muted-foreground">Khi bạn chấp nhận lời mời, lịch đua sẽ xuất hiện tại đây.</p>
+            <h4 className="font-bold text-foreground">{t("jockey.assign.emptyTitle", isVi ? "Chưa có lịch trình" : "No Schedule Yet")}</h4>
+            <p className="text-xs text-muted-foreground">{t("jockey.assign.emptyDesc", isVi ? "Khi bạn chấp nhận lời mời, lịch đua sẽ xuất hiện tại đây." : "Accepted race invitations will appear here.")}</p>
+          </div>
+        ) : viewMode === "explorer" ? (
+          /* OPTION LAYOUT: Windows File Explorer Details View (Kiểu như hình đính kèm) */
+          <div className="space-y-4 rounded-2xl border border-border bg-card p-4 shadow-xl">
+            {(["Earlier this week", "Last week", "Earlier this month", "Older"] as TimeframeGroup[]).map((groupKey) => {
+              const groupItems = acceptedInvs.filter(
+                (inv) => getTimeframeLabel(inv.raceId?.startTime || inv.createdAt) === groupKey
+              );
+              if (groupItems.length === 0) return null;
+              const isCollapsed = collapsedGroups[groupKey];
+
+              return (
+                <div key={groupKey} className="space-y-1">
+                  {/* Group Header */}
+                  <button
+                    type="button"
+                    onClick={() => toggleGroupCollapse(groupKey)}
+                    className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-lg text-xs font-semibold text-muted-foreground/80 hover:bg-muted/50 hover:text-foreground transition"
+                  >
+                    {isCollapsed ? (
+                      <ChevronRight className="size-3.5" />
+                    ) : (
+                      <ChevronDown className="size-3.5" />
+                    )}
+                    <span>{getTimeframeTitle(groupKey)}</span>
+                    <span className="text-[10px] text-muted-foreground/50">({groupItems.length})</span>
+                  </button>
+
+                  {/* Group Items */}
+                  {!isCollapsed && (
+                    <div className="space-y-1 pl-2">
+                      {groupItems.map((inv, idx) => {
+                        const formattedDate = formatDateDDMMYYYY(inv.raceId?.startTime || inv.createdAt);
+
+                        return (
+                          <div
+                            key={inv.id || inv._id}
+                            onClick={() => handleViewHorseDetail(inv.horseId.id)}
+                            className="group relative flex flex-wrap md:flex-nowrap items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/[0.08] transition text-xs select-none cursor-pointer"
+                          >
+                            {/* Left Section: Icon + Title & Type subtitle */}
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <ExplorerItemIcon index={idx} />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-semibold text-foreground truncate group-hover:text-primary transition">
+                                    {inv.raceId?.name || t("jockey.assign.unnamedRace", "Cuộc đua chưa đặt tên")}
+                                  </p>
+                                  <StatusBadge
+                                    label={inv.raceId?.status === "LIVE" ? "LIVE" : inv.raceId?.status}
+                                    tone={inv.raceId?.status === "LIVE" ? "red" : "green"}
+                                    className="text-[9px] px-1.5 py-0"
+                                  />
+                                </div>
+                                <p className="text-[11px] text-muted-foreground/70 truncate mt-0.5">
+                                  {t("jockey.assign.type", "Type")}: {t("jockey.assign.raceEvent", isVi ? "Sự kiện đua" : "Race Event")} • {t("jockey.assign.horse", isVi ? "Chiến mã" : "Horse")}: {inv.horseId?.name} • {t("jockey.assign.owner", isVi ? "Chủ chuồng" : "Owner")}: {inv.ownerId?.fullName}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Right Section: Date modified (DD/MM/YYYY HH:mm) & Size / Share */}
+                            <div className="flex items-center gap-6 shrink-0 text-right text-[11px]">
+                              <div className="hidden sm:block text-muted-foreground/80">
+                                <span className="block text-[10px] text-muted-foreground/60">
+                                  {t("jockey.assign.dateModified", isVi ? "Ngày sửa đổi:" : "Date modified:")}
+                                </span>
+                                <span className="font-mono text-foreground font-semibold">{formattedDate}</span>
+                              </div>
+
+                              <div className="text-right min-w-[100px]">
+                                <span className="block text-[10px] text-muted-foreground/60">
+                                  {t("jockey.assign.sizeShare", isVi ? "Kích thước / Tỷ lệ:" : "Size / Share:")}
+                                </span>
+                                <span className="font-bold text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20 inline-block mt-0.5">
+                                  {t("jockey.assign.shareValue", isVi ? "Thưởng {{percent}}%" : "Share {{percent}}%", { percent: inv.jockeySharePercent })}
+                                </span>
+                              </div>
+
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewHorseDetail(inv.horseId.id);
+                                }}
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2.5 text-[11px] font-semibold border border-border hover:bg-muted"
+                              >
+                                <Eye className="size-3 mr-1" />
+                                {t("common.details", isVi ? "Chi tiết" : "Details")}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : viewMode === "list" ? (
+          /* OPTION LAYOUT: Compact List View */
+          <div className="divide-y divide-border rounded-2xl border border-border bg-card overflow-hidden shadow-lg">
+            {acceptedInvs.map((inv) => (
+              <div
+                key={inv.id || inv._id}
+                onClick={() => handleViewHorseDetail(inv.horseId.id)}
+                className="flex items-center justify-between px-4 py-3 hover:bg-muted/60 transition cursor-pointer text-xs"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Clock className="size-4 text-teal-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-bold text-foreground truncate">{inv.raceId?.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{inv.tournamentId?.name} • Chủ: {inv.ownerId?.fullName} • Mã ngựa: {inv.horseId?.name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 shrink-0">
+                  <span className="text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">Thưởng {inv.jockeySharePercent}%</span>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewHorseDetail(inv.horseId.id);
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                  >
+                    <Eye className="size-3 mr-1" /> Chi tiết
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
+          /* OPTION LAYOUT: Standard Grid Cards View */
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {acceptedInvs.map((inv) => (
               <div key={inv.id || inv._id} className="relative rounded-xl border border-border bg-card p-4 hover:border-teal-500/30 transition shadow-sm overflow-hidden flex flex-col justify-between h-full">
@@ -196,7 +461,7 @@ export function JockeyAssignPage() {
                       <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1.5" title="Giờ chạy">
                           <Clock className="size-3.5 text-teal-400" />
-                          <span className="font-medium">{formatDateTime(inv.raceId?.startTime)}</span>
+                          <span className="font-medium">{formatDateDDMMYYYY(inv.raceId?.startTime)}</span>
                         </span>
                       </div>
                     </div>
@@ -239,7 +504,7 @@ export function JockeyAssignPage() {
                     {/* Horse Action */}
                     <div className="flex justify-between items-center bg-muted/30 p-2 rounded-lg border border-border mt-1">
                        <span className="text-xs font-bold flex items-center gap-1.5 truncate pr-2">
-                         <Sparkles className="size-3 text-primary" /> {inv.horseId?.name}
+                          <Sparkles className="size-3 text-primary" /> {inv.horseId?.name}
                        </span>
                        <Button
                         onClick={() => handleViewHorseDetail(inv.horseId.id)}
