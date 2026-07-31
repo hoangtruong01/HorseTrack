@@ -374,17 +374,17 @@ export default function AdminRefereesPage() {
         /* TABLE VIEW LAYOUT */
         <div className="rounded-2xl border border-border bg-card/90 overflow-hidden shadow-2xl backdrop-blur-md">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-border bg-muted whitespace-nowrap">
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trọng tài</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">SĐT & Email</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Giấy phép</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kinh nghiệm</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Bằng cấp & Bio</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kiểm duyệt</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Hoạt động</th>
-                  <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Thao tác</th>
+                <tr className="border-b border-border bg-muted/80 whitespace-nowrap">
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trọng tài</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">SĐT & Email</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Giấy phép</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kinh nghiệm</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Bằng cấp & Bio</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kiểm duyệt</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Hoạt động</th>
+                  <th className="px-4 py-3.5 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -397,9 +397,9 @@ export default function AdminRefereesPage() {
                     <tr
                       key={p._id}
                       onClick={() => setSelectedRefereeDetail(p)}
-                      className="hover:bg-muted/80 transition-colors group cursor-pointer"
+                      className="hover:bg-muted/60 transition-colors group cursor-pointer"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className="size-9 rounded-full bg-primary/10 border border-primary/20 overflow-hidden shrink-0 flex items-center justify-center text-primary">
                             {portrait ? (
@@ -409,70 +409,67 @@ export default function AdminRefereesPage() {
                             )}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-foreground leading-none">{getUserName(p.userId)}</p>
+                            <p className="text-sm font-bold text-foreground leading-none">{getUserName(p.userId)}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-xs space-y-0.5">
-                        <p className="text-foreground/80 font-medium">{getUserPhone(p.userId) || "Chưa có SĐT"}</p>
-                        <p className="text-[11px] text-muted-foreground/70">{getUserEmail(p.userId)}</p>
+                      <td className="px-4 py-3.5 text-xs whitespace-nowrap space-y-0.5">
+                        <p className="text-foreground font-semibold">{getUserPhone(p.userId) || "Chưa có SĐT"}</p>
+                        <p className="text-[11px] text-muted-foreground">{getUserEmail(p.userId)}</p>
                       </td>
-                      <td className="px-6 py-4 text-xs font-mono text-foreground/70">{p.licenseNo ?? "—"}</td>
-                      <td className="px-6 py-4 text-xs text-foreground/70">{p.experienceYears ?? 0} năm</td>
-                      <td className="px-6 py-4 max-w-xs">
+                      <td className="px-4 py-3.5 text-xs font-mono text-foreground/80 whitespace-nowrap">{p.licenseNo ?? "—"}</td>
+                      <td className="px-4 py-3.5 text-xs font-semibold text-foreground whitespace-nowrap">{p.experienceYears ?? 0} năm</td>
+                      <td className="px-4 py-3.5 text-xs max-w-[200px]">
                         <div className="space-y-1">
                           {certPreview ? (
-                            <p className="text-xs text-teal-300 font-semibold flex items-center gap-1">
-                              <FileText className="size-3 shrink-0" />
+                            <p className="text-xs text-teal-300 font-semibold truncate" title={p.certificates}>
                               Bằng cấp: {certPreview}
                             </p>
                           ) : (
-                            <p className="text-[11px] text-foreground/30 italic">Chưa điền bằng cấp</p>
+                            <p className="text-[11px] text-muted-foreground/50 italic">Chưa điền bằng cấp</p>
                           )}
                           {p.bio && <p className="text-[11px] text-muted-foreground line-clamp-1">{p.bio}</p>}
-                          <div className="flex flex-wrap gap-2 pt-1">
-                            {certs.length > 0 && (
-                              <span className="inline-flex items-center gap-1 text-[10px] text-teal-400 font-bold bg-teal-400/10 px-2 py-0.5 rounded border border-teal-400/20">
-                                <Eye className="size-3" />
-                                {certs.length} ảnh bằng cấp
-                              </span>
-                            )}
-                          </div>
+                          {certs.length > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-teal-300 font-bold bg-teal-400/10 px-2 py-0.5 rounded border border-teal-400/20 whitespace-nowrap">
+                              <Eye className="size-3" />
+                              {certs.length} ảnh bằng cấp
+                            </span>
+                          )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${approvalColors[p.approvalStatus]}`}>
                           {p.approvalStatus === "PENDING" ? "Chờ duyệt" : p.approvalStatus === "APPROVED" ? "Đã duyệt" : "Từ chối"}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColors[p.status]}`}>
                           {p.status === "available" ? "Sẵn sàng" : p.status === "unavailable" ? "Bận" : "Tạm đình chỉ"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             onClick={() => setSelectedRefereeDetail(p)}
-                            className="flex items-center gap-1 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-xs font-semibold text-sky-400 transition hover:bg-sky-500/20"
+                            className="flex items-center gap-1 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-400 transition hover:bg-sky-500/20"
                           >
-                            <Eye className="size-3" />
+                            <Eye className="size-3.5" />
                             Chi tiết
                           </button>
                           {p.approvalStatus === "PENDING" ? (
-                            <div className="flex gap-2 justify-end">
+                            <div className="flex gap-1.5">
                               <button
                                 disabled={actionLoading !== null}
                                 onClick={() => setRejectingId(p._id)}
-                                className="h-8 px-3 rounded-lg border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 text-[11px] font-bold uppercase text-red-400 transition"
+                                className="h-8 px-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-xs font-bold uppercase text-red-400 transition"
                               >
                                 Từ chối
                               </button>
                               <button
                                 disabled={actionLoading !== null}
                                 onClick={() => void handleApprove(p._id)}
-                                className="h-8 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[11px] font-bold uppercase text-black transition"
+                                className="h-8 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-xs font-bold uppercase text-black transition shadow-sm"
                               >
                                 Duyệt
                               </button>
@@ -484,7 +481,7 @@ export default function AdminRefereesPage() {
                               onChange={(e) => {
                                 void handleChangeStatus(p._id, e.target.value as "available" | "unavailable" | "suspended");
                               }}
-                              className="rounded-lg border border-border bg-muted/80 px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
+                              className="rounded-xl border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
                             >
                               <option value="available">Sẵn sàng</option>
                               <option value="unavailable">Bận</option>

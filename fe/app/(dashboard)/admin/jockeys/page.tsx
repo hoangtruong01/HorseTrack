@@ -404,18 +404,18 @@ export default function AdminJockeysPage() {
         /* TABLE VIEW LAYOUT */
         <div className="rounded-2xl border border-border bg-card/90 overflow-hidden shadow-2xl backdrop-blur-md">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-border bg-muted whitespace-nowrap">
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Jockey</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">SĐT & Email</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Giấy phép</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kinh nghiệm & Thể chất</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Bằng cấp</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kiểm duyệt</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trận đua / Thắng</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-                  <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Thao tác</th>
+                <tr className="border-b border-border bg-muted/80 whitespace-nowrap">
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Jockey</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">SĐT & Email</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Giấy phép</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kinh nghiệm & Thể chất</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Bằng cấp</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kiểm duyệt</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trận đua / Thắng</th>
+                  <th className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trạng thái</th>
+                  <th className="px-4 py-3.5 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -428,9 +428,9 @@ export default function AdminJockeysPage() {
                     <tr
                       key={j._id}
                       onClick={() => setSelectedJockeyDetail(j)}
-                      className="hover:bg-muted/80 transition-colors group cursor-pointer"
+                      className="hover:bg-muted/60 transition-colors group cursor-pointer"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className="size-9 rounded-full bg-primary/10 border border-primary/20 overflow-hidden shrink-0 flex items-center justify-center text-primary">
                             {portrait ? (
@@ -440,75 +440,72 @@ export default function AdminJockeysPage() {
                             )}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-foreground leading-none">{getUserName(j.userId)}</p>
+                            <p className="text-sm font-bold text-foreground leading-none">{getUserName(j.userId)}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-xs space-y-0.5">
-                        <p className="text-foreground/80 font-medium">{getUserPhone(j.userId) || "Chưa có SĐT"}</p>
-                        <p className="text-[11px] text-muted-foreground/70">{getUserEmail(j.userId)}</p>
+                      <td className="px-4 py-3.5 text-xs whitespace-nowrap space-y-0.5">
+                        <p className="text-foreground font-semibold">{getUserPhone(j.userId) || "Chưa có SĐT"}</p>
+                        <p className="text-[11px] text-muted-foreground">{getUserEmail(j.userId)}</p>
                       </td>
-                      <td className="px-6 py-4 text-xs font-mono text-foreground/70">{j.licenseNumber ?? "—"}</td>
-                      <td className="px-6 py-4 text-xs text-foreground/70">
-                        <p>{j.experienceYears ?? 0} năm</p>
+                      <td className="px-4 py-3.5 text-xs font-mono text-foreground/80 whitespace-nowrap">{j.licenseNumber ?? "—"}</td>
+                      <td className="px-4 py-3.5 text-xs whitespace-nowrap">
+                        <p className="font-semibold text-foreground">{j.experienceYears ?? 0} năm</p>
                         <p className="text-[11px] text-muted-foreground">{j.heightCm ?? "?"}cm / {j.weightKg ?? "?"}kg</p>
                       </td>
-                      <td className="px-6 py-4 max-w-xs">
+                      <td className="px-4 py-3.5 text-xs max-w-[200px]">
                         <div className="space-y-1">
                           {certPreview ? (
-                            <p className="text-xs text-teal-300 font-semibold flex items-center gap-1">
-                              <FileText className="size-3 shrink-0" />
+                            <p className="text-xs text-teal-300 font-semibold truncate" title={j.certificates}>
                               Bằng cấp: {certPreview}
                             </p>
                           ) : (
-                            <p className="text-[11px] text-foreground/30 italic">Chưa điền bằng cấp</p>
+                            <p className="text-[11px] text-muted-foreground/50 italic">Chưa điền bằng cấp</p>
                           )}
-                          <div className="flex flex-wrap gap-2 pt-1">
-                            {certs.length > 0 && (
-                              <span className="inline-flex items-center gap-1 text-[10px] text-teal-400 font-bold bg-teal-400/10 px-2 py-0.5 rounded border border-teal-400/20">
-                                <Eye className="size-3" />
-                                {certs.length} ảnh bằng cấp
-                              </span>
-                            )}
-                          </div>
+                          {certs.length > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-teal-300 font-bold bg-teal-400/10 px-2 py-0.5 rounded border border-teal-400/20 whitespace-nowrap">
+                              <Eye className="size-3" />
+                              {certs.length} ảnh bằng cấp
+                            </span>
+                          )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${approvalColors[j.approvalStatus || "PENDING"]}`}>
                           {j.approvalStatus === "PENDING" ? "Chờ duyệt" : j.approvalStatus === "APPROVED" ? "Đã duyệt" : "Từ chối"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs">
-                        <span className="font-semibold text-emerald-400">{j.wins ?? 0}</span> / {j.totalRaces ?? 0} trận
+                      <td className="px-4 py-3.5 text-xs whitespace-nowrap">
+                        <span className="font-bold text-emerald-400">{j.wins ?? 0}</span> / {j.totalRaces ?? 0} trận
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColors[j.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
-                          {j.status === "available" || j.status === "ACTIVE" ? "Sẵn sàng" : j.status === "unavailable" ? "Bận" : "Tạm đình chỉ"}
+                          {j.status === "available" || j.status === "ACTIVE" ? "Sẵn sàng" : j.status === "unavailable" ? "Bận" : "Đình chỉ"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             onClick={() => setSelectedJockeyDetail(j)}
-                            className="flex items-center gap-1 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-xs font-semibold text-sky-400 transition hover:bg-sky-500/20"
+                            className="flex items-center gap-1 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-400 transition hover:bg-sky-500/20"
                           >
-                            <Eye className="size-3" />
+                            <Eye className="size-3.5" />
                             Chi tiết
                           </button>
                           {j.approvalStatus === "PENDING" ? (
-                            <div className="flex gap-2 justify-end">
+                            <div className="flex gap-1.5">
                               <button
                                 disabled={actionLoading !== null}
                                 onClick={() => setRejectingId(j._id)}
-                                className="h-8 px-3 rounded-lg border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 text-[11px] font-bold uppercase text-red-400 transition"
+                                className="h-8 px-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-xs font-bold uppercase text-red-400 transition"
                               >
                                 Từ chối
                               </button>
                               <button
                                 disabled={actionLoading !== null}
                                 onClick={() => void handleApprove(j._id)}
-                                className="h-8 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[11px] font-bold uppercase text-black transition"
+                                className="h-8 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-xs font-bold uppercase text-black transition shadow-sm"
                               >
                                 Duyệt
                               </button>
@@ -518,7 +515,7 @@ export default function AdminJockeysPage() {
                               value={j.status}
                               disabled={actionLoading !== null}
                               onChange={(e) => void handleChangeStatus(j._id, e.target.value)}
-                              className="rounded-lg border border-border bg-muted/80 px-3 py-1.5 text-xs text-foreground focus:border-primary/50 focus:outline-none disabled:opacity-50 cursor-pointer w-32"
+                              className="rounded-xl border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
                             >
                               <option value="available">Sẵn sàng</option>
                               <option value="unavailable">Bận</option>
