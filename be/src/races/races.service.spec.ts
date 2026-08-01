@@ -9,6 +9,7 @@ import { RaceCheck } from '../race-checks/schemas/race-check.schema';
 import { RefereeAssignment } from '../referee-assignments/schemas/referee-assignment.schema';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { PredictionsService } from '../predictions/predictions.service';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
 import { TournamentStatus } from '../tournaments/schemas/tournament.schema';
 
 describe('RacesService', () => {
@@ -87,6 +88,10 @@ describe('RacesService', () => {
         },
         { provide: TournamentsService, useValue: tournamentsService },
         { provide: PredictionsService, useValue: predictionsService },
+        {
+          provide: RewardPointLedgerService,
+          useValue: { credit: jest.fn().mockResolvedValue(undefined) },
+        },
       ],
     }).compile();
 
