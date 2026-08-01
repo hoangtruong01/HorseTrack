@@ -12,13 +12,18 @@ import {
   X,
   Upload,
   Eye,
+  Trophy,
+  Award,
+  Sparkles,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/layout/page-header";
-import { jockeysApi, type JockeyItem } from "@/lib/api-client";
+import { jockeysApi, type JockeyItem, raceResultsApi, type JockeyVictoryItem } from "@/lib/api-client";
 import { toast } from "sonner";
+
 
 const SKILL_LEVELS = [
   { value: "beginner", label: "Mới bắt đầu (Beginner)" },
@@ -47,6 +52,8 @@ export default function JockeyProfilePage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState("");
+  const [victories, setVictories] = useState<JockeyVictoryItem[]>([]);
+  const [loadingVictories, setLoadingVictories] = useState(false);
 
   const [form, setForm] = useState({
     heightCm: 165,
@@ -76,6 +83,20 @@ export default function JockeyProfilePage() {
       });
       setImagePreview(data.licenseImage ?? "");
       setNotFound(false);
+
+      const userIdObj = data.userId;
+      const uId = typeof userIdObj === "object" && userIdObj !== null ? (userIdObj as { _id?: string; id?: string })._id || (userIdObj as { _id?: string; id?: string }).id : userIdObj;
+      if (uId) {
+        setLoadingVictories(true);
+        try {
+          const res = await raceResultsApi.getByJockey(String(uId), 1);
+          setVictories(res.results || []);
+        } catch (err) {
+          console.error("Failed to load jockey victories:", err);
+        } finally {
+          setLoadingVictories(false);
+        }
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
       if (msg.toLowerCase().includes("not found") || msg.includes("404")) {
@@ -87,6 +108,7 @@ export default function JockeyProfilePage() {
       setLoading(false);
     }
   }, []);
+
 
   useEffect(() => {
     void loadProfile();
@@ -343,6 +365,82 @@ export default function JockeyProfilePage() {
               )}
             </div>
           </div>
+
+          {/* 🏆 BẢNG VÀNG THÀNH TÍCH TOP 1 */}
+          <div className="rounded-2xl border border-amber-500/20 bg-card shadow-lg p-6 space-y-4 relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="size-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                  <Trophy className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                    Bảng Vàng Thành Tích Top 1
+                    <Sparkles className="size-3.5 text-amber-400 fill-amber-400" />
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">Những trận đua xuất sắc giành cúp Quán quân (Hạng 1)</p>
+                </div>
+              </div>
+              <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-black text-xs">
+                {victories.length} Cúp
+              </span>
+            </div>
+
+            {loadingVictories ? (
+              <div className="py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                <Loader2 className="size-4 animate-spin text-amber-400" /> Đang tải lịch sử cúp...
+              </div>
+            ) : victories.length === 0 ? (
+              <div className="p-6 rounded-xl border border-dashed border-border text-center text-muted-foreground space-y-2">
+                <Award className="size-10 mx-auto text-muted-foreground/30" />
+                <p className="text-xs font-bold uppercase text-foreground/70">Chưa có danh hiệu Top 1 nào</p>
+                <p className="text-[11px]">Hãy tham gia các giải đua tiếp theo để chinh phục đỉnh cao!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {victories.map((v) => {
+                  const tournamentName = typeof v.tournamentId === "object" ? v.tournamentId?.name : "Giải đấu";
+                  const raceName = typeof v.raceId === "object" ? v.raceId?.name : "Trận đua";
+                  const raceTime = typeof v.raceId === "object" ? v.raceId?.startTime : v.createdAt;
+                  const horseName = typeof v.horseId === "object" ? v.horseId?.name : "Chiến mã";
+
+                  return (
+                    <div key={v._id || v.id} className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition space-y-2 relative group">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                          <Trophy className="size-3" /> TOP 1 WINNER
+                        </span>
+                        {v.prizeAmount ? (
+                          <span className="text-xs font-black text-teal-400 font-mono">
+                            +{v.prizeAmount.toLocaleString("vi-VN")} đ
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-black text-foreground truncate" title={raceName}>{raceName}</p>
+                        <p className="text-[11px] font-bold text-amber-400/90 truncate mt-0.5" title={tournamentName}>
+                          🏆 {tournamentName}
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-amber-500/10 flex items-center justify-between text-[10px] text-muted-foreground">
+                        <span className="font-bold text-foreground/80">🐴 {horseName}</span>
+                        {raceTime && (
+                          <span className="flex items-center gap-1 font-mono">
+                            <Calendar className="size-3" /> {new Date(raceTime).toLocaleDateString("vi-VN")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
 
           {/* Form chỉnh sửa */}
           {editing && (

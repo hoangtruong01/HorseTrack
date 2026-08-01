@@ -1049,4 +1049,48 @@ export class RaceResultsService {
       allResults,
     };
   }
+
+  async findByJockey(jockeyUserId: string, rank?: number) {
+    const filter: Record<string, unknown> = {
+      jockeyUserId: new Types.ObjectId(jockeyUserId),
+      status: { $in: [RaceResultStatus.CONFIRMED, RaceResultStatus.PUBLISHED] },
+    };
+    if (rank !== undefined) {
+      filter.rank = rank;
+    }
+
+    const rawResults = await this.resultModel
+      .find(filter)
+      .populate({
+        path: 'raceId',
+        select: 'name raceNumber startTime distanceMeters tournamentId status',
+        populate: {
+          path: 'tournamentId',
+          select: 'name startDate endDate status',
+        },
+      })
+      .populate('horseId', 'name breed avatar')
+      .populate('ownerId', 'fullName email')
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const allResults = rawResults.map((item) => {
+      const json = item.toJSON();
+      return {
+        ...json,
+        id: String(item._id),
+      };
+    });
+
+    const totalRaces = allResults.length;
+    const wins = allResults.filter((r) => r.rank === 1).length;
+
+    return {
+      jockeyUserId,
+      totalRaces,
+      wins,
+      results: allResults,
+    };
+  }
 }
+

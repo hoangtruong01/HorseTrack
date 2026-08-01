@@ -703,6 +703,30 @@ export interface RaceResultItem {
   note?: string;
 }
 
+export interface JockeyVictoryItem {
+  _id: string;
+  id?: string;
+  tournamentId?: { _id: string; name: string; status?: string } | string;
+  raceId?: { _id: string; name: string; startTime?: string; distanceMeters?: number; status?: string } | string;
+  horseId?: { _id: string; name: string; breed?: string; avatar?: string } | string;
+  ownerId?: { _id: string; fullName: string; email?: string } | string;
+  jockeyUserId?: string;
+  rank?: number;
+  finishTimeMs?: number;
+  points?: number;
+  prizeAmount?: number;
+  outcome?: string;
+  status?: string;
+  createdAt?: string;
+}
+
+export interface JockeyVictoriesSummary {
+  jockeyUserId: string;
+  totalRaces: number;
+  wins: number;
+  results: JockeyVictoryItem[];
+}
+
 export const raceResultsApi = {
   listByRace: (raceId: string) =>
     apiFetch<RaceResultItem[]>(`/race-results/race/${raceId}`),
@@ -710,7 +734,12 @@ export const raceResultsApi = {
     apiFetch<RaceResultItem[]>(`/race-results/tournament/${tournamentId}`),
   getByHorse: (horseId: string) =>
     apiFetch<HorseVictoriesSummary>(`/race-results/horse/${horseId}`),
+  getByJockey: (jockeyUserId: string, rank?: number) => {
+    const qs = rank !== undefined ? `?rank=${rank}` : "";
+    return apiFetch<JockeyVictoriesSummary>(`/race-results/jockey/${jockeyUserId}${qs}`);
+  },
 };
+
 
 // ─── AI Packages ─────────────────────────────────────────────────────────────
 export interface AiPackageItem {

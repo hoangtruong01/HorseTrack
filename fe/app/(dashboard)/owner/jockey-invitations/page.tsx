@@ -11,6 +11,8 @@ import {
   Star, Award, X, User,
 } from "lucide-react";
 import { toast } from "sonner";
+import { raceResultsApi, type JockeyVictoryItem } from "@/lib/api-client";
+
 
 /* ───────── Types ───────── */
 type JockeyProfile = {
@@ -65,6 +67,33 @@ export default function JockeyInvitationsPage() {
   const [selectedReg, setSelectedReg] = useState("");
   const [sharePercent, setSharePercent] = useState(30);
   const [invMessage, setInvMessage] = useState("");
+
+  const [detailVictories, setDetailVictories] = useState<JockeyVictoryItem[]>([]);
+  const [loadingDetailVictories, setLoadingDetailVictories] = useState(false);
+
+  useEffect(() => {
+    if (!selectedJockeyForDetail?.userId) {
+      setDetailVictories([]);
+      return;
+    }
+    let isMounted = true;
+    setLoadingDetailVictories(true);
+    raceResultsApi.getByJockey(selectedJockeyForDetail.userId, 1)
+      .then((res) => {
+        if (isMounted) {
+          setDetailVictories(res.results || []);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load jockey victories for owner view:", err);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingDetailVictories(false);
+      });
+
+    return () => { isMounted = false; };
+  }, [selectedJockeyForDetail]);
+
 
   const loadData = async () => {
     setIsLoading(true);
@@ -542,7 +571,55 @@ export default function JockeyInvitationsPage() {
               </div>
             </div>
 
+            {/* Victories / Achievements section */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                  <Trophy className="size-4 text-amber-400" />
+                  Lịch sử thắng giải (Top 1)
+                </label>
+                <span className="text-[10px] font-bold text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                  {detailVictories.length} Cúp Vô Địch
+                </span>
+              </div>
+
+              {loadingDetailVictories ? (
+                <div className="py-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2 bg-muted/20 rounded-xl border border-border">
+                  <Loader2 className="size-4 animate-spin text-amber-400" /> Đang tải danh sách giải đua...
+                </div>
+              ) : detailVictories.length === 0 ? (
+                <div className="p-3 text-center text-xs text-muted-foreground/60 bg-muted/20 rounded-xl border border-border italic">
+                  Chưa có cúp Vô địch Top 1 nào
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  {detailVictories.map((v) => {
+                    const tournamentName = typeof v.tournamentId === "object" ? v.tournamentId?.name : "Giải đấu";
+                    const raceName = typeof v.raceId === "object" ? v.raceId?.name : "Trận đua";
+                    const raceTime = typeof v.raceId === "object" ? v.raceId?.startTime : v.createdAt;
+                    const horseName = typeof v.horseId === "object" ? v.horseId?.name : "Chiến mã";
+
+                    return (
+                      <div key={v._id || v.id} className="p-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-center justify-between text-xs">
+                        <div className="min-w-0 flex-1 pr-2">
+                          <p className="font-bold text-foreground truncate">{raceName}</p>
+                          <p className="text-[10px] text-amber-400 font-semibold truncate">🏆 {tournamentName}</p>
+                          <p className="text-[10px] text-muted-foreground/70">Cùng chiến mã: <span className="text-foreground/90 font-medium">{horseName}</span></p>
+                        </div>
+                        {raceTime && (
+                          <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0">
+                            {new Date(raceTime).toLocaleDateString("vi-VN")}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-end gap-3 pt-2">
+
               <Button variant="outline" onClick={() => setSelectedJockeyForDetail(null)}
                 className="h-10 rounded-xl text-xs font-black uppercase tracking-wider border-border text-foreground bg-transparent hover:bg-muted">Đóng</Button>
               <Button onClick={() => { setSelectedJockey(selectedJockeyForDetail); setSelectedJockeyForDetail(null); setShowModal(true); setSelectedReg(""); setSharePercent(30); setInvMessage(""); }}

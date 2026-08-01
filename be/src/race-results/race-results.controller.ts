@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -81,6 +82,23 @@ export class RaceResultsController {
   findByHorse(@Param('horseId', ParseObjectIdPipe) horseId: string) {
     return this.raceResultsService.findByHorse(horseId);
   }
+
+  @Get('jockey/:jockeyUserId')
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get race results and victories for a jockey by user ID',
+  })
+  findByJockey(
+    @Param('jockeyUserId', ParseObjectIdPipe) jockeyUserId: string,
+    @Query('rank') rank?: string,
+  ) {
+    const parsedRank = rank ? parseInt(rank, 10) : undefined;
+    return this.raceResultsService.findByJockey(
+      jockeyUserId,
+      isNaN(parsedRank as number) ? undefined : parsedRank,
+    );
+  }
+
 
   @Patch('race/:raceId/confirm')
   @UseGuards(JwtAuthGuard, RolesGuard)
