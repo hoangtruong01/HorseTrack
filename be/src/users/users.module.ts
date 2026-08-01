@@ -9,6 +9,7 @@ import {
   RefereeProfile,
   RefereeProfileSchema,
 } from '../referee-profiles/schemas/referee-profile.schema';
+import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import {
       { name: Jockey.name, schema: JockeySchema },
       { name: RefereeProfile.name, schema: RefereeProfileSchema },
     ]),
+    RewardPointLedgerModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository],

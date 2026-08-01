@@ -1005,7 +1005,9 @@ export class RaceResultsService {
     const rawResults = await this.resultModel
       .find({
         horseId: new Types.ObjectId(horseId),
-        status: { $in: [RaceResultStatus.CONFIRMED, RaceResultStatus.PUBLISHED] },
+        status: {
+          $in: [RaceResultStatus.CONFIRMED, RaceResultStatus.PUBLISHED],
+        },
       })
       .populate({
         path: 'raceId',
@@ -1093,4 +1095,3 @@ export class RaceResultsService {
     };
   }
 }
-

@@ -21,6 +21,10 @@ type RaceRegistrationFormProps = {
     maxWeightKg?: number;
   };
   horses: Horse[];
+  /** Phí đăng ký (10% giải thưởng), điểm. */
+  fee?: number;
+  /** Số dư điểm hiện tại của owner (null = chưa tải được). */
+  balance?: number | null;
   onSubmit: (horseId: string) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
@@ -29,6 +33,8 @@ type RaceRegistrationFormProps = {
 export function RaceRegistrationForm({
   race,
   horses,
+  fee = 0,
+  balance = null,
   onSubmit,
   onCancel,
   isSubmitting,
@@ -92,6 +98,7 @@ export function RaceRegistrationForm({
   };
 
   const selectedHorse = horses.find((h) => h.id === selectedHorseId);
+  const insufficient = fee > 0 && balance !== null && balance < fee;
 
   return (
     <form
@@ -142,6 +149,38 @@ export function RaceRegistrationForm({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Registration Fee Card */}
+      <div
+        className={`rounded-xl border p-4 space-y-1 ${
+          insufficient
+            ? "border-destructive bg-destructive/10"
+            : "border-teal-500/20 bg-teal-500/5"
+        }`}
+      >
+        <div className="flex justify-between items-center">
+          <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">
+            Phí đăng ký (10% giải thưởng)
+          </span>
+          <span className="font-mono font-black text-teal-400">
+            {fee.toLocaleString("vi-VN")} điểm
+          </span>
+        </div>
+        <div className="flex justify-between items-center text-[11px] text-muted-foreground">
+          <span>Số dư hiện tại</span>
+          <span className="font-mono font-bold text-foreground">
+            {balance === null ? "—" : `${balance.toLocaleString("vi-VN")} điểm`}
+          </span>
+        </div>
+        <p className="text-[10px] text-muted-foreground/70 pt-1">
+          Phí bị trừ ngay khi đăng ký. Được hoàn 100% nếu admin từ chối hoặc bạn huỷ đơn.
+        </p>
+        {insufficient && (
+          <p className="text-[11px] font-bold text-destructive pt-1">
+            Số dư không đủ để trả phí đăng ký.
+          </p>
+        )}
       </div>
 
       {/* Horse Selection Section */}
@@ -218,7 +257,7 @@ export function RaceRegistrationForm({
         </Button>
         <Button
           type="submit"
-          disabled={isSubmitting || !selectedHorseId}
+          disabled={isSubmitting || !selectedHorseId || insufficient}
           className="rounded-xl px-6 h-11 bg-primary hover:bg-[#B80500] text-primary-foreground flex items-center gap-2 font-bold uppercase text-xs tracking-wider disabled:opacity-40"
         >
           {isSubmitting ? (

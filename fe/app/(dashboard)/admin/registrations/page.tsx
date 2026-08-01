@@ -44,6 +44,8 @@ export default function AdminRegistrationsPage() {
           tournament: (typeof item.tournamentId === "object" ? item.tournamentId?.name : null) || "Không rõ giải đấu",
           submittedAt: formattedDate,
           status: statusMapped,
+          feePaid: item.feePaid,
+          feeRefunded: item.feeRefunded,
           eligibility: `Trạng thái thực tế: ${statusVal}. ${item.note || ""}`,
           reviewNote: item.rejectedReason || "Không có ghi chú từ chối.",
           adminTrail: [

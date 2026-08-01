@@ -1,5 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ArrayMaxSize, IsArray, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateRefereeProfileDto {
   @ApiPropertyOptional({ example: 'Nguyễn Văn A' })
@@ -48,7 +55,9 @@ export class CreateRefereeProfileDto {
   @IsString()
   certificateImage?: string;
 
-  @ApiPropertyOptional({ description: 'Array of uploaded certificate image URLs (max 7)' })
+  @ApiPropertyOptional({
+    description: 'Array of uploaded certificate image URLs (max 7)',
+  })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(7)

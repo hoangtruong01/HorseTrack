@@ -25,8 +25,13 @@ import {
   RefereeApprovalStatus,
   RefereeProfileStatus,
 } from '../referee-profiles/schemas/referee-profile.schema';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
 const SALT_ROUNDS = 10;
+
+/** Điểm thưởng cấp một lần cho chủ ngựa mới để đăng ký ngựa vào race. */
+const OWNER_SIGNUP_BONUS = 1000;
 
 @Injectable()
 export class UsersService {
@@ -35,6 +40,7 @@ export class UsersService {
     @InjectModel(Jockey.name) private jockeyModel: Model<JockeyDocument>,
     @InjectModel(RefereeProfile.name)
     private refereeProfileModel: Model<RefereeProfileDocument>,
+    private ledgerService: RewardPointLedgerService,
   ) {}
 
   async create(dto: CreateUserDto): Promise<UserDocument> {
@@ -59,6 +65,10 @@ export class UsersService {
 
     if (user.roles && user.roles.includes(RoleName.REFEREE)) {
       await this.ensureRefereeProfile(String(user._id));
+    }
+
+    if (user.roles && user.roles.includes(RoleName.OWNER)) {
+      await this.grantOwnerSignupBonus(String(user._id));
     }
 
     return user;
@@ -174,6 +184,29 @@ export class UsersService {
     if (role === RoleName.REFEREE) {
       await this.ensureRefereeProfile(userId);
     }
+    if (role === RoleName.OWNER) {
+      await this.grantOwnerSignupBonus(userId);
+    }
+  }
+
+  /**
+   * Cấp một lần OWNER_SIGNUP_BONUS điểm cho chủ ngựa. Idempotent: nếu đã có bút
+   * toán SIGNUP_BONUS cho user này thì bỏ qua (không cấp trùng khi gán lại role).
+   */
+  private async grantOwnerSignupBonus(userId: string): Promise<void> {
+    const already = await this.ledgerService.exists(
+      userId,
+      LedgerSourceType.SIGNUP_BONUS,
+      userId,
+    );
+    if (already) return;
+    await this.ledgerService.credit({
+      userId,
+      points: OWNER_SIGNUP_BONUS,
+      sourceType: LedgerSourceType.SIGNUP_BONUS,
+      sourceId: userId,
+      note: 'Điểm khởi tạo tài khoản chủ ngựa',
+    });
   }
 
   async removeRole(userId: string, role: RoleName): Promise<void> {

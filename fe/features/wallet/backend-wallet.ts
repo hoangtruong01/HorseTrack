@@ -13,7 +13,10 @@ export type WalletUiTransaction = {
     | "prize_jockey"
     | "prediction_win"
     | "prediction_refund"
-    | "salary_bonus";
+    | "salary_bonus"
+    | "registration_fee"
+    | "registration_refund"
+    | "signup_bonus";
   amount: number;
   description: string;
   createdAt: string;
@@ -119,6 +122,12 @@ export function mapLedgerTransaction(ledger: LedgerEntryItem): WalletUiTransacti
     }
   } else if (ledger.sourceType === "referee_salary") {
     type = "salary_bonus";
+  } else if (ledger.sourceType === "registration_fee") {
+    type = "registration_fee";
+  } else if (ledger.sourceType === "registration_refund") {
+    type = "registration_refund";
+  } else if (ledger.sourceType === "signup_bonus") {
+    type = "signup_bonus";
   }
 
   return {

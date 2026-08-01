@@ -49,6 +49,14 @@ export class Registration {
 
   @Prop({ default: 30, min: 5, max: 50 })
   jockeySharePercent?: number;
+
+  /** Điểm phí đã trừ khi đăng ký (10% prize tại thời điểm tạo). */
+  @Prop({ default: 0 })
+  feePaid?: number;
+
+  /** Điểm phí đã hoàn lại (0 = chưa hoàn). Dùng làm cờ idempotent. */
+  @Prop({ default: 0 })
+  feeRefunded?: number;
 }
 
 export const RegistrationSchema = SchemaFactory.createForClass(Registration);

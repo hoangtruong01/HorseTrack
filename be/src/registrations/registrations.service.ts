@@ -5,8 +5,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { HorsesService } from '../horses/horses.service';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { RacesService } from '../races/races.service';
@@ -34,6 +34,11 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/schemas/notification.schema';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { PredictionsService } from '../predictions/predictions.service';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
+
+/** Phí đăng ký = 10% prize của race (làm tròn). */
+const REGISTRATION_FEE_RATE = 0.1;
 
 @Injectable()
 export class RegistrationsService {
@@ -48,7 +53,13 @@ export class RegistrationsService {
     private notificationsService: NotificationsService,
     private auditLogsService: AuditLogsService,
     private predictionsService: PredictionsService,
+    private ledgerService: RewardPointLedgerService,
+    @InjectConnection() private connection: Connection,
   ) {}
+
+  private computeFee(prize?: number): number {
+    return Math.round((prize ?? 0) * REGISTRATION_FEE_RATE);
+  }
 
   async create(
     dto: CreateRegistrationDto,
@@ -172,13 +183,88 @@ export class RegistrationsService {
       }
     }
 
-    return this.registrationModel.create({
+    // 7. Registration fee = 10% of race prize, charged immediately (escrow).
+    const fee = this.computeFee(race.prize);
+    const baseDoc = {
       ...dto,
-      raceId: new Types.ObjectId(dto.raceId),
+      raceId: raceObjectId,
       horseId: new Types.ObjectId(dto.horseId),
       tournamentId: new Types.ObjectId(tournamentId),
-      ownerId: new Types.ObjectId(ownerId),
-    });
+      ownerId: ownerObjectId,
+    };
+
+    if (fee <= 0) {
+      return this.registrationModel.create({ ...baseDoc, feePaid: 0 });
+    }
+
+    // Create registration and debit the fee atomically. debit() throws
+    // BadRequestException when the owner has insufficient points.
+    let created!: RegistrationDocument;
+    const session = await this.connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        const [reg] = await this.registrationModel.create(
+          [{ ...baseDoc, feePaid: fee }],
+          { session },
+        );
+        created = reg;
+        await this.ledgerService.debit({
+          userId: ownerId,
+          points: fee,
+          sourceType: LedgerSourceType.REGISTRATION_FEE,
+          sourceId: String(reg._id),
+          note: `Phí đăng ký ngựa vào race (10% giải thưởng)`,
+          session,
+        });
+      });
+    } finally {
+      await session.endSession();
+    }
+    return created;
+  }
+
+  /**
+   * Áp dụng thay đổi trạng thái registration kèm hoàn phí (nếu có).
+   * - Hoàn `Math.round(feePaid * ratio)` điểm cho owner, ghi bút toán
+   *   REGISTRATION_REFUND, và set feeRefunded — tất cả trong 1 transaction.
+   * - Idempotent: bỏ qua hoàn nếu chưa từng trừ phí hoặc đã hoàn trước đó.
+   * - Luôn lưu registration (kể cả khi không hoàn) để persist trạng thái mới.
+   */
+  private async applyStatusWithRefund(
+    reg: RegistrationDocument,
+    ratio: number,
+    note: string,
+  ): Promise<void> {
+    const feePaid = reg.feePaid ?? 0;
+    const shouldRefund =
+      ratio > 0 && feePaid > 0 && (reg.feeRefunded ?? 0) === 0;
+
+    if (!shouldRefund) {
+      await reg.save();
+      return;
+    }
+
+    const amount = Math.round(feePaid * ratio);
+    const ownerId = String(
+      (reg.ownerId as unknown as { _id?: string })._id ?? reg.ownerId,
+    );
+    const session = await this.connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await this.ledgerService.credit({
+          userId: ownerId,
+          points: amount,
+          sourceType: LedgerSourceType.REGISTRATION_REFUND,
+          sourceId: String(reg._id),
+          note,
+          session,
+        });
+        reg.feeRefunded = amount;
+        await reg.save({ session });
+      });
+    } finally {
+      await session.endSession();
+    }
   }
 
   async findAll(
@@ -311,7 +397,12 @@ export class RegistrationsService {
     }
     reg.status = RegistrationStatus.REJECTED;
     reg.rejectedReason = reason;
-    const saved = await reg.save();
+    // Full refund of the registration fee.
+    await this.applyStatusWithRefund(
+      reg,
+      1,
+      'Hoàn 100% phí đăng ký do đơn bị từ chối',
+    );
 
     // Notify the owner!
     const horse = reg.horseId as unknown as HorseDocument;
@@ -323,7 +414,7 @@ export class RegistrationsService {
       NotificationType.RACE,
     );
 
-    return saved;
+    return reg;
   }
 
   async cancel(id: string, ownerId: string): Promise<RegistrationDocument> {
@@ -337,7 +428,13 @@ export class RegistrationsService {
       throw new BadRequestException('Cannot cancel an approved registration');
     }
     reg.status = RegistrationStatus.CANCELLED;
-    return reg.save();
+    // Full refund of the registration fee.
+    await this.applyStatusWithRefund(
+      reg,
+      1,
+      'Hoàn 100% phí đăng ký do owner huỷ đơn',
+    );
+    return reg;
   }
 
   /** Owner withdraws an APPROVED registration (different semantic from cancel) */
@@ -354,7 +451,19 @@ export class RegistrationsService {
       );
     }
     reg.status = RegistrationStatus.WITHDRAWN;
-    const saved = await reg.save();
+
+    // Refund policy for an approved registration: 100% before the tournament
+    // start date, 50% on/after it.
+    const tournamentId = String(
+      (reg.tournamentId as unknown as { _id?: string })._id ?? reg.tournamentId,
+    );
+    const tournament = await this.tournamentsService.findOne(tournamentId);
+    const ratio = new Date() >= tournament.startDate ? 0.5 : 1;
+    await this.applyStatusWithRefund(
+      reg,
+      ratio,
+      `Hoàn ${Math.round(ratio * 100)}% phí đăng ký do owner rút lui`,
+    );
     try {
       const raceId = String(
         (reg.raceId as unknown as { _id?: string })._id ?? reg.raceId,
@@ -383,6 +492,6 @@ export class RegistrationsService {
         err,
       );
     }
-    return saved;
+    return reg;
   }
 }

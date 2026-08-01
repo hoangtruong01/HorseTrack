@@ -99,7 +99,6 @@ export class RaceResultsController {
     );
   }
 
-
   @Patch('race/:raceId/confirm')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.REFEREE)

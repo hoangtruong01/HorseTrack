@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { RaceRegistrationForm } from "@/features/registrations/components/race-registration-form";
 import type { Horse } from "@/features/horses/components/horse-card";
+import { rewardPointLedgerApi } from "@/lib/api-client";
 import { toast } from "sonner";
 
 type RaceDetail = {
@@ -21,6 +22,7 @@ type RaceDetail = {
   participantsCount?: number;
   minWeightKg?: number;
   maxWeightKg?: number;
+  prize?: number;
   tournamentId?: {
     id: string;
     name: string;
@@ -35,6 +37,7 @@ export default function RaceRegisterPage() {
 
   const [race, setRace] = useState<RaceDetail | null>(null);
   const [horses, setHorses] = useState<Horse[]>([]);
+  const [balance, setBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,6 +49,12 @@ export default function RaceRegisterPage() {
           fetch(`/api/owner/races/${raceId}`),
           fetch("/api/owner/horses"),
         ]);
+
+        // Số dư điểm của owner (không chặn luồng nếu lỗi)
+        void rewardPointLedgerApi
+          .myBalance()
+          .then((res) => setBalance(res.balance))
+          .catch(() => setBalance(null));
 
         if (raceRes.ok && horsesRes.ok) {
           const raceData = await raceRes.json();
@@ -167,6 +176,8 @@ export default function RaceRegisterPage() {
         <RaceRegistrationForm
           race={formattedRace}
           horses={horses}
+          fee={Math.round((race.prize ?? 0) * 0.1)}
+          balance={balance}
           onSubmit={handleSubmit}
           onCancel={() => router.push("/owner/races")}
           isSubmitting={isSubmitting}

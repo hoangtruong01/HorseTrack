@@ -19,6 +19,10 @@ export type RaceRegistration = {
   eligibility: string;
   reviewNote: string;
   adminTrail: string[];
+  /** Điểm phí đã trừ khi đăng ký. */
+  feePaid?: number;
+  /** Điểm phí đã hoàn (0/undefined = chưa hoàn). */
+  feeRefunded?: number;
 };
 
 export const mockRegistrations: RaceRegistration[] = [
