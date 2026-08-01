@@ -60,6 +60,9 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
     prediction_win: { icon: Sparkles, color: "text-purple-400 bg-purple-500/10 border-purple-500/20", label: t("wallet.transactions.types.predictionWin") },
     prediction_refund: { icon: Coins, color: "text-sky-400 bg-sky-500/10 border-sky-500/20", label: t("wallet.transactions.types.predictionRefund") },
     salary_bonus: { icon: Award, color: "text-violet-400 bg-violet-500/10 border-violet-500/20", label: t("wallet.transactions.types.generic") },
+    registration_fee: { icon: ArrowUpRight, color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: "Phí đăng ký" },
+    registration_refund: { icon: ArrowDownLeft, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Hoàn phí đăng ký" },
+    signup_bonus: { icon: Award, color: "text-teal-400 bg-teal-500/10 border-teal-500/20", label: "Điểm thưởng chào mừng" },
   };
 
   const filterOptions = useMemo(() => {
@@ -151,7 +154,7 @@ export function TransactionHistory({ transactions, role }: TransactionHistoryPro
                 {paginatedTransactions.map((tx) => {
                   const meta = typeMeta[tx.type] || { icon: Coins, color: "text-muted-foreground bg-muted border-border", label: t("wallet.transactions.types.generic") };
                   const Icon = meta.icon;
-                  const isPositive = ["deposit", "prize_owner", "prize_jockey", "prediction_win", "prediction_refund", "salary_bonus", "withdrawal_refund"].includes(tx.type);
+                  const isPositive = ["deposit", "prize_owner", "prize_jockey", "prediction_win", "prediction_refund", "salary_bonus", "withdrawal_refund", "registration_refund", "signup_bonus"].includes(tx.type);
                   const codeMatch = tx.description.match(/(RWD-[A-Z0-9]+)/);
                   const code = codeMatch ? codeMatch[1] : null;
 

@@ -616,6 +616,8 @@ export interface RegistrationItem {
   note?: string;
   rejectedReason?: string;
   approvedAt?: string;
+  feePaid?: number;
+  feeRefunded?: number;
   createdAt?: string;
   updatedAt?: string;
 }

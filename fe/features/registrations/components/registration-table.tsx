@@ -71,6 +71,7 @@ export function RegistrationTable({
               <th className="px-4 py-3">Owner</th>
               <th className="px-4 py-3">Race</th>
               <th className="px-4 py-3">Submitted</th>
+              <th className="px-4 py-3">Phí</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Review note</th>
               <th className="px-4 py-3">Actions</th>
@@ -106,6 +107,16 @@ export function RegistrationTable({
                 </td>
                 <td className="px-4 py-4 font-mono text-foreground/80">
                   {registration.submittedAt}
+                </td>
+                <td className="px-4 py-4 font-mono">
+                  <p className="text-foreground/90">
+                    {(registration.feePaid ?? 0).toLocaleString("vi-VN")} điểm
+                  </p>
+                  {(registration.feeRefunded ?? 0) > 0 && (
+                    <p className="text-[11px] text-emerald-400">
+                      Hoàn {registration.feeRefunded!.toLocaleString("vi-VN")} điểm
+                    </p>
+                  )}
                 </td>
                 <td className="px-4 py-4">
                   <StatusBadge

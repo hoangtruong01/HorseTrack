@@ -7,6 +7,9 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
+/** Các mốc điểm cố định được phép quy đổi (khớp với backend). */
+const REDEMPTION_TIERS = [5000, 10000, 20000, 50000, 100000];
+
 export type CashoutRequestFormProps = {
   availablePoints: number;
   onSubmit: (points: number) => void | Promise<void>;
@@ -19,22 +22,17 @@ export function CashoutRequestForm({
   onCancel,
 }: CashoutRequestFormProps) {
   const { t } = useTranslation();
-  const [points, setPoints] = useState<number>(Math.min(100, availablePoints));
+  const [points, setPoints] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const pointsStr = points === 0 ? "" : points.toString();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (points <= 0) {
+    if (points === null) {
       toast.error(t("wallet.cashoutForm.errInvalid"));
       return;
     }
     if (points > availablePoints) {
       toast.error(t("wallet.cashoutForm.errExceed"));
-      return;
-    }
-    if (points < 10) {
-      toast.error(t("wallet.cashoutForm.errMin"));
       return;
     }
 
@@ -72,47 +70,40 @@ export function CashoutRequestForm({
         </div>
 
         <div className="space-y-2">
-          <label
-            htmlFor="points-input"
-            className="block text-xs font-black uppercase tracking-wider text-muted-foreground"
-          >
+          <label className="block text-xs font-black uppercase tracking-wider text-muted-foreground">
             {t("wallet.cashoutForm.amountLabel")}
           </label>
-          <div className="relative">
-            <input
-              id="points-input"
-              type="number"
-              min={10}
-              max={availablePoints}
-              value={pointsStr}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (val === "") {
-                  setPoints(0);
-                  e.target.value = "";
-                  return;
-                }
-                const parsed = parseInt(val, 10);
-                if (Number.isNaN(parsed)) {
-                  setPoints(0);
-                  e.target.value = "0";
-                } else {
-                  setPoints(parsed);
-                  e.target.value = parsed.toString();
-                }
-              }}
-              required
-              className="h-12 w-full rounded-xl border border-border bg-muted px-4 font-mono font-black text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
-              placeholder={t("wallet.cashoutForm.inputPlaceholder")}
-            />
-            <button
-              type="button"
-              onClick={() => setPoints(availablePoints)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 rounded bg-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-primary hover:bg-primary/30"
-            >
-              {t("wallet.cashoutForm.btnMax")}
-            </button>
+          <div className="flex flex-col gap-2">
+            {REDEMPTION_TIERS.map((tier) => {
+              const disabled = tier > availablePoints;
+              const active = points === tier;
+              return (
+                <button
+                  key={tier}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => setPoints(tier)}
+                  className={`h-14 w-full rounded-xl border font-mono font-black transition ${
+                    disabled
+                      ? "cursor-not-allowed border-border bg-muted/[0.02] text-muted-foreground/40"
+                      : active
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-muted text-foreground hover:border-primary"
+                  }`}
+                >
+                  {tier.toLocaleString("vi-VN")}
+                  <span className="ml-1 text-[10px] font-bold uppercase tracking-wider">
+                    {t("wallet.cashoutForm.pointsSuffix")}
+                  </span>
+                </button>
+              );
+            })}
           </div>
+          {availablePoints < REDEMPTION_TIERS[0] && (
+            <p className="text-[11px] font-bold text-amber-500">
+              Số dư chưa đủ mốc tối thiểu ({REDEMPTION_TIERS[0].toLocaleString("vi-VN")} điểm).
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-primary/5 p-4">
@@ -150,7 +141,7 @@ export function CashoutRequestForm({
           </Button>
           <Button
             type="submit"
-            disabled={isLoading || points <= 0 || points > availablePoints}
+            disabled={isLoading || points === null || points > availablePoints}
             className="h-12 w-full rounded-full bg-primary font-black uppercase tracking-wider text-foreground shadow-[0_4px_16px_rgba(225,6,0,0.35)] hover:bg-[#B80500]"
           >
             {isLoading

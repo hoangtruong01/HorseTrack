@@ -3,7 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { RefereeAssignmentsService } from './referee-assignments.service';
-import { RefereeAssignment } from './schemas/referee-assignment.schema';
+import {
+  RefereeAssignment,
+  RefereeRole,
+} from './schemas/referee-assignment.schema';
 import { Race } from '../races/schemas/race.schema';
 import { UsersService } from '../users/users.service';
 import { RoleName } from '../users/schemas/user.schema';
@@ -63,7 +66,10 @@ describe('RefereeAssignmentsService', () => {
     });
 
     await expect(
-      service.create({ refereeUserId, raceId }, assignedBy),
+      service.create(
+        { refereeUserId, raceId, role: RefereeRole.MAIN },
+        assignedBy,
+      ),
     ).rejects.toThrow(BadRequestException);
     expect(assignmentModel.create).not.toHaveBeenCalled();
   });

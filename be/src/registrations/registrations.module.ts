@@ -16,6 +16,7 @@ import { RegistrationsService } from './registrations.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 import { PredictionsModule } from '../predictions/predictions.module';
+import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PredictionsModule } from '../predictions/predictions.module';
     NotificationsModule,
     AuditLogsModule,
     PredictionsModule,
+    RewardPointLedgerModule,
   ],
   controllers: [RegistrationsController],
   providers: [RegistrationsService],

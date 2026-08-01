@@ -32,6 +32,8 @@ import {
   RefereeAssignmentDocument,
   RefereeAssignmentStatus,
 } from '../referee-assignments/schemas/referee-assignment.schema';
+import { RewardPointLedgerService } from '../reward-point-ledger/reward-point-ledger.service';
+import { LedgerSourceType } from '../reward-point-ledger/schemas/reward-point-ledger.schema';
 
 const LOCKED_STATUSES = [
   RaceStatus.LIVE,
@@ -51,6 +53,7 @@ export class RacesService {
     private refereeAssignmentModel: Model<RefereeAssignmentDocument>,
     private tournamentsService: TournamentsService,
     private predictionsService: PredictionsService,
+    private ledgerService: RewardPointLedgerService,
   ) {}
 
   async create(dto: CreateRaceDto, createdBy: string): Promise<RaceDocument> {
@@ -305,10 +308,55 @@ export class RacesService {
 
     if (status === RaceStatus.CANCELLED) {
       await this.predictionsService.cancelPredictionsForRace(id);
+      await this.refundRegistrationFeesForCancelledRace(id);
     }
 
     race.status = status;
     return session ? race.save({ session }) : race.save();
+  }
+
+  /**
+   * Khi race bị huỷ: hoàn 100% phí đăng ký cho các owner có đơn PENDING/APPROVED
+   * đã bị trừ phí và chưa được hoàn. Best-effort (không chặn việc huỷ race);
+   * idempotent nhờ điều kiện feeRefunded = 0.
+   */
+  private async refundRegistrationFeesForCancelledRace(
+    raceId: string,
+  ): Promise<void> {
+    try {
+      const regs = await this.registrationModel.find({
+        raceId: new Types.ObjectId(raceId),
+        status: {
+          $in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED],
+        },
+        feePaid: { $gt: 0 },
+        $or: [{ feeRefunded: { $exists: false } }, { feeRefunded: 0 }],
+      });
+      for (const reg of regs) {
+        try {
+          const ownerId = String(reg.ownerId);
+          await this.ledgerService.credit({
+            userId: ownerId,
+            points: reg.feePaid ?? 0,
+            sourceType: LedgerSourceType.REGISTRATION_REFUND,
+            sourceId: String(reg._id),
+            note: 'Hoàn 100% phí đăng ký do race bị huỷ',
+          });
+          reg.feeRefunded = reg.feePaid ?? 0;
+          await reg.save();
+        } catch (err) {
+          console.error(
+            'Failed to refund registration fee for cancelled race:',
+            err,
+          );
+        }
+      }
+    } catch (err) {
+      console.error(
+        'Failed to query registrations for cancelled-race refund:',
+        err,
+      );
+    }
   }
 
   /**

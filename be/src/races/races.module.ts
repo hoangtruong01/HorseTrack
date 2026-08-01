@@ -17,6 +17,7 @@ import {
 } from '../referee-assignments/schemas/referee-assignment.schema';
 import { RacesController } from './races.controller';
 import { RacesService } from './races.service';
+import { RewardPointLedgerModule } from '../reward-point-ledger/reward-point-ledger.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { RacesService } from './races.service';
     ]),
     TournamentsModule,
     PredictionsModule,
+    RewardPointLedgerModule,
   ],
   controllers: [RacesController],
   providers: [RacesService],
