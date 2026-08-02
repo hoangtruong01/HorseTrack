@@ -4,7 +4,7 @@ import Image from "next/image";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { predictionsApi, walletApi, type PredictionItem } from "@/lib/api-client";
-import { Activity, Award, Bell, Coins, Loader2 } from "lucide-react";
+import { Activity, Award, Bell, ChevronLeft, ChevronRight, Coins, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +15,10 @@ export default function SpectatorPredictionsPage() {
   const [loading, setLoading] = useState(true);
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
+
+  // Pagination state (6 items per page)
+  const PREDICTIONS_PER_PAGE = 6;
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchBalance = useCallback(async () => {
     setLoadingBalance(true);
@@ -152,123 +156,178 @@ export default function SpectatorPredictionsPage() {
               <Bell className="mx-auto mb-2 size-10 text-muted-foreground/30" />
               Bạn chưa thực hiện lượt dự đoán nào.
             </div>
-          ) : (
-            <div className="space-y-4">
-              {myPredictions.map((p) => {
-                const raceName = typeof p.raceId === "object" ? p.raceId?.name : "Trận đua";
-                const horseName = typeof p.predictedHorseId === "object" ? p.predictedHorseId?.name : "Chiến mã";
-                const breedName = typeof p.predictedHorseId === "object" ? p.predictedHorseId?.breed : "";
-                const dateString = p.createdAt ? new Date(p.createdAt).toLocaleDateString("vi-VN", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit"
-                }) : "N/A";
+          ) : (() => {
+            const totalPages = Math.ceil(myPredictions.length / PREDICTIONS_PER_PAGE);
+            const currentPredictions = myPredictions.slice(
+              (currentPage - 1) * PREDICTIONS_PER_PAGE,
+              currentPage * PREDICTIONS_PER_PAGE
+            );
 
-                let statusLabel = "Đang chờ chạy";
-                if (p.status === "WON") statusLabel = "Đoán Đúng";
-                else if (p.status === "LOST") statusLabel = "Đoán Sai";
-                else if (p.status === "CANCELLED") statusLabel = "Đã Hủy";
+            return (
+              <div className="space-y-4">
+                {currentPredictions.map((p) => {
+                  const raceName = typeof p.raceId === "object" ? p.raceId?.name : "Trận đua";
+                  const horseName = typeof p.predictedHorseId === "object" ? p.predictedHorseId?.name : "Chiến mã";
+                  const breedName = typeof p.predictedHorseId === "object" ? p.predictedHorseId?.breed : "";
+                  const dateString = p.createdAt ? new Date(p.createdAt).toLocaleDateString("vi-VN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  }) : "N/A";
 
-                const isCancelable = (() => {
-                  if (p.status !== "PENDING") return false;
-                  if (!p.raceId || typeof p.raceId !== "object") return false;
-                  const raceStatus = p.raceId.status;
-                  if (raceStatus !== "SCHEDULED" && raceStatus !== "CHECKING" && raceStatus !== "READY") return false;
-                  
-                  const startTime = p.raceId.startTime;
-                  if (!startTime) return false;
-                  
-                  const start = new Date(startTime).getTime();
-                  const now = new Date().getTime();
-                  const twoHoursInMs = 2 * 60 * 60 * 1000;
-                  return (start - now) >= twoHoursInMs;
-                })();
+                  let statusLabel = "Đang chờ chạy";
+                  if (p.status === "WON") statusLabel = "Đoán Đúng";
+                  else if (p.status === "LOST") statusLabel = "Đoán Sai";
+                  else if (p.status === "CANCELLED") statusLabel = "Đã Hủy";
 
-                return (
-                  <div
-                    key={p._id}
-                    translate="no"
-                    className="group rounded-2xl border border-border bg-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-primary/20 transition duration-300 relative overflow-hidden notranslate"
-                  >
-                    {p.status === "PENDING" && (
-                      <div className="absolute top-0 left-0 w-full h-[2px] bg-yellow-400" />
-                    )}
-                    {p.status === "WON" && (
-                      <div className="absolute top-0 left-0 w-full h-[2px] bg-teal-500" />
-                    )}
-                    {p.status === "CANCELLED" && (
-                      <div className="absolute top-0 left-0 w-full h-[2px] bg-muted-foreground/30" />
-                    )}
+                  const isCancelable = (() => {
+                    if (p.status !== "PENDING") return false;
+                    if (!p.raceId || typeof p.raceId !== "object") return false;
+                    const raceStatus = p.raceId.status;
+                    if (raceStatus !== "SCHEDULED" && raceStatus !== "CHECKING" && raceStatus !== "READY") return false;
+                    
+                    const startTime = p.raceId.startTime;
+                    if (!startTime) return false;
+                    
+                    const start = new Date(startTime).getTime();
+                    const now = new Date().getTime();
+                    const twoHoursInMs = 2 * 60 * 60 * 1000;
+                    return (start - now) >= twoHoursInMs;
+                  })();
 
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-mono">{dateString}</span>
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${
-                          p.status === "WON"
-                            ? "bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400"
-                            : p.status === "LOST"
-                            ? "bg-primary/10 border border-primary/20 text-primary"
-                            : p.status === "PENDING"
-                            ? "bg-yellow-500/10 border border-yellow-500/20 text-amber-600 dark:text-yellow-400"
-                            : "bg-muted border border-border text-muted-foreground"
-                        }`}>
-                          {statusLabel}
-                        </span>
+                  return (
+                    <div
+                      key={p._id}
+                      translate="no"
+                      className="group rounded-2xl border border-border bg-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-primary/20 transition duration-300 relative overflow-hidden notranslate"
+                    >
+                      {p.status === "PENDING" && (
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-yellow-400" />
+                      )}
+                      {p.status === "WON" && (
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-teal-500" />
+                      )}
+                      {p.status === "CANCELLED" && (
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-muted-foreground/30" />
+                      )}
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-mono">{dateString}</span>
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${
+                            p.status === "WON"
+                              ? "bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400"
+                              : p.status === "LOST"
+                              ? "bg-primary/10 border border-primary/20 text-primary"
+                              : p.status === "PENDING"
+                              ? "bg-yellow-500/10 border border-yellow-500/20 text-amber-600 dark:text-yellow-400"
+                              : "bg-muted border border-border text-muted-foreground"
+                          }`}>
+                            {statusLabel}
+                          </span>
+                        </div>
+
+                        <h4 className="font-black text-foreground text-sm uppercase tracking-tight">{raceName}</h4>
+                        <p className="text-[10px] text-muted-foreground">
+                          Chiến mã chọn: <strong className="text-foreground">{horseName}</strong> {breedName && `(${breedName})`}
+                        </p>
                       </div>
 
-                      <h4 className="font-black text-foreground text-sm uppercase tracking-tight">{raceName}</h4>
-                      <p className="text-[10px] text-muted-foreground">
-                        Chiến mã chọn: <strong className="text-foreground">{horseName}</strong> {breedName && `(${breedName})`}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-border pt-2 sm:pt-0">
-                      <div className="text-right">
-                        <span className={`text-xs font-black block ${
-                          p.status === "WON" 
-                            ? "text-teal-600 dark:text-teal-400" 
-                            : p.status === "LOST" 
-                            ? "text-primary" 
-                            : p.status === "PENDING" 
-                            ? "text-amber-600 dark:text-yellow-400" 
-                            : "text-muted-foreground"
-                        }`}>
-                          {p.status === "WON" 
-                            ? `+${p.rewardPoints || 1} Điểm` 
-                            : p.status === "LOST" 
-                            ? `${p.rewardPoints || -1} Điểm` 
-                            : p.status === "PENDING" 
-                            ? "Chờ kết quả" 
-                            : "0 Điểm"}
-                        </span>
-                        {p.betPoints !== undefined && p.betPoints > 0 && (
-                          <span className="text-[9px] text-muted-foreground block font-mono">
-                            Cược: {p.betPoints.toLocaleString("vi-VN")} điểm
+                      <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-border pt-2 sm:pt-0">
+                        <div className="text-right">
+                          <span className={`text-xs font-black block ${
+                            p.status === "WON" 
+                              ? "text-teal-600 dark:text-teal-400" 
+                              : p.status === "LOST" 
+                              ? "text-primary" 
+                              : p.status === "PENDING" 
+                              ? "text-amber-600 dark:text-yellow-400" 
+                              : "text-muted-foreground"
+                          }`}>
+                            {p.status === "WON" 
+                              ? `+${p.rewardPoints || 1} Điểm` 
+                              : p.status === "LOST" 
+                              ? `${p.rewardPoints || -1} Điểm` 
+                              : p.status === "PENDING" 
+                              ? "Chờ kết quả" 
+                              : "0 Điểm"}
                           </span>
+                          {p.betPoints !== undefined && p.betPoints > 0 && (
+                            <span className="text-[9px] text-muted-foreground block font-mono">
+                              Cược: {p.betPoints.toLocaleString("vi-VN")} điểm
+                            </span>
+                          )}
+                        </div>
+
+                        {isCancelable && (
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleCancelPrediction(p._id)}
+                            disabled={cancelingId === p._id}
+                            className="h-8 rounded-xl text-[10px] font-black uppercase tracking-wider bg-primary hover:bg-[#B80500] text-white px-3.5 transition shadow-[0_2px_8px_rgba(225,6,0,0.2)]"
+                          >
+                            {cancelingId === p._id ? (
+                              <Loader2 className="size-3 animate-spin mr-1" />
+                            ) : null}
+                            Hoàn Cược
+                          </Button>
                         )}
                       </div>
+                    </div>
+                  );
+                })}
 
-                      {isCancelable && (
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-border">
+                    <p className="text-xs text-muted-foreground">
+                      Hiển thị <strong>{((currentPage - 1) * PREDICTIONS_PER_PAGE) + 1} - {Math.min(currentPage * PREDICTIONS_PER_PAGE, myPredictions.length)}</strong> trong <strong>{myPredictions.length}</strong> lượt dự đoán
+                    </p>
+
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        className="h-8 px-2.5 rounded-lg text-xs"
+                      >
+                        <ChevronLeft className="size-4" />
+                        <span className="sr-only">Trang trước</span>
+                      </Button>
+
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                         <Button
-                          variant="destructive"
-                          onClick={() => handleCancelPrediction(p._id)}
-                          disabled={cancelingId === p._id}
-                          className="h-8 rounded-xl text-[10px] font-black uppercase tracking-wider bg-primary hover:bg-[#B80500] text-white px-3.5 transition shadow-[0_2px_8px_rgba(225,6,0,0.2)]"
+                          key={page}
+                          variant={page === currentPage ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className={`h-8 w-8 rounded-lg text-xs font-bold ${
+                            page === currentPage ? "bg-primary text-primary-foreground" : ""
+                          }`}
                         >
-                          {cancelingId === p._id ? (
-                            <Loader2 className="size-3 animate-spin mr-1" />
-                          ) : null}
-                          Hoàn Cược
+                          {page}
                         </Button>
-                      )}
+                      ))}
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        className="h-8 px-2.5 rounded-lg text-xs"
+                      >
+                        <ChevronRight className="size-4" />
+                        <span className="sr-only">Trang sau</span>
+                      </Button>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </main>

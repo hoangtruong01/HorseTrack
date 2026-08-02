@@ -515,7 +515,8 @@ export default function SpectatorTournamentsPage() {
                 {filteredTournaments.map((tour) => (
                   <div
                     key={tour._id}
-                    className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition duration-300 flex flex-col h-full"
+                    onClick={() => handleSelectTournament(tour)}
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-xl transition duration-300 flex flex-col h-full cursor-pointer"
                   >
                     <div className="h-40 w-full overflow-hidden relative bg-muted">
                       {tour.imageUrl ? (
@@ -523,7 +524,7 @@ export default function SpectatorTournamentsPage() {
                           src={tour.imageUrl}
                           alt={tour.name}
                           fill
-                          className="object-cover group-hover:scale-102 transition-transform duration-500"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-muted/50">
@@ -571,9 +572,8 @@ export default function SpectatorTournamentsPage() {
 
                     <div className="px-5 pb-5">
                       <Button
-                        onClick={() => handleSelectTournament(tour)}
                         variant="outline"
-                        className="w-full rounded-xl text-xs font-black uppercase tracking-wider"
+                        className="w-full rounded-xl text-xs font-black uppercase tracking-wider group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                       >
                         Xem Lịch Trình & Chi Tiết
                       </Button>
