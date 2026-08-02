@@ -14,6 +14,7 @@ import {
   Search,
   Filter,
   X,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -21,12 +22,18 @@ import { toast } from "sonner";
 import { raceViolationsApi, type ViolationItem } from "@/lib/api-client";
 
 // Types
+type TournamentInfo = {
+  _id: string;
+  name: string;
+};
+
 type RaceInfo = {
   _id: string;
   id?: string;
   name: string;
   startTime: string;
   status: string;
+  tournamentId?: TournamentInfo | string;
 };
 
 type Assignment = {
@@ -90,8 +97,9 @@ export default function RefereeReportsPage() {
   const filteredAssignments = assignments.filter((a) => {
     if (!a.raceId) return false;
     const raceName = (a.raceId.name || "").toLowerCase();
+    const tourName = typeof a.raceId.tournamentId === "object" ? (a.raceId.tournamentId?.name || "").toLowerCase() : "";
     const query = searchQuery.trim().toLowerCase();
-    const matchQuery = !query || raceName.includes(query);
+    const matchQuery = !query || raceName.includes(query) || tourName.includes(query);
 
     const matchStatus = !filterStatus || a.raceId.status === filterStatus;
 
@@ -509,6 +517,12 @@ export default function RefereeReportsPage() {
                         className="p-4 flex items-center justify-between cursor-pointer bg-muted/50 hover:bg-muted transition select-none"
                       >
                         <div className="space-y-0.5">
+                          {typeof assignment.raceId.tournamentId === "object" && assignment.raceId.tournamentId?.name && (
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+                              <Trophy className="size-3 shrink-0" />
+                              <span>{assignment.raceId.tournamentId.name}</span>
+                            </div>
+                          )}
                           <h4 className="text-xs font-black uppercase text-foreground leading-tight">
                             {assignment.raceId.name}
                           </h4>

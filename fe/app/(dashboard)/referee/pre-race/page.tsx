@@ -3,7 +3,7 @@ import Image from "next/image";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, ShieldCheck } from "lucide-react";
+import { ArrowRight, Clock, ShieldCheck, Trophy } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
@@ -101,6 +101,12 @@ export default function RefereePreRaceWorkspacePage() {
                 </div>
 
                 <div className="space-y-1">
+                  {typeof race.tournamentId === "object" && (race.tournamentId as { name?: string })?.name && (
+                    <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+                      <Trophy className="size-3 shrink-0" />
+                      <span>{(race.tournamentId as { name: string }).name}</span>
+                    </div>
+                  )}
                   <h3 className="text-sm font-black uppercase text-foreground leading-tight group-hover:text-primary transition">
                     {race.name}
                   </h3>

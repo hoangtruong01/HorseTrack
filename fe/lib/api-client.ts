@@ -387,7 +387,7 @@ export const refereeProfilesApi = {
 // ─── Referee Assignments ─────────────────────────────────────────────────────
 export interface AssignmentItem {
   _id: string;
-  raceId?: { _id: string; name: string; startTime?: string; status?: string } | string;
+  raceId?: { _id: string; name: string; startTime?: string; status?: string; tournamentId?: { _id: string; name: string } | string } | string;
   refereeUserId?: { _id: string; fullName: string; email: string } | string;
   assignedBy?: { _id: string; fullName: string } | string;
   role: "main" | "assistant";

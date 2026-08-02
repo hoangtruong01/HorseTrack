@@ -271,7 +271,13 @@ export default function RefereeAssignmentsPage() {
                 </div>
 
                 {/* Race Title & Brief Info */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
+                  {typeof assignment.raceId.tournamentId === "object" && assignment.raceId.tournamentId?.name && (
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+                      <Trophy className="size-3.5 shrink-0" />
+                      <span>{assignment.raceId.tournamentId.name}</span>
+                    </div>
+                  )}
                   <h3 className="text-lg font-black uppercase text-foreground leading-tight group-hover:text-primary transition">
                     {assignment.raceId.name}
                   </h3>

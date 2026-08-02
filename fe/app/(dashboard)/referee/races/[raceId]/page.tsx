@@ -13,6 +13,7 @@ import {
   Save,
   ShieldAlert,
   Siren,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -20,6 +21,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // Types
+type TournamentInfo = {
+  _id: string;
+  name: string;
+};
+
 type Race = {
   _id: string;
   name: string;
@@ -32,7 +38,7 @@ type Race = {
     | "FINISHED"
     | "RESULT_PUBLISHED"
     | "CANCELLED";
-  tournamentId: string;
+  tournamentId: TournamentInfo | string;
   description?: string;
   distanceMeter: number;
   trackCondition?: string;
@@ -270,7 +276,11 @@ export default function RefereeRaceDetailPage() {
       </Link>
 
       <PageHeader
-        eyebrow="Tác nghiệp trọng tài"
+        eyebrow={
+          typeof race.tournamentId === "object" && race.tournamentId?.name
+            ? `🏆 Giải đấu: ${race.tournamentId.name}`
+            : "Tác nghiệp trọng tài"
+        }
         title={race.name}
         description={`Kiểm duyệt an toàn thiết bị bảo hộ, sức khỏe chiến mã và điểm danh nài ngựa trước khi xuất phát.`}
         actions={
