@@ -143,7 +143,15 @@ export default function RefereeReportsPage() {
     try {
       // 1. Fetch all accepted assignments for this referee
       const res = await fetch("/api/referee/referee-assignments/my-assignments?limit=100");
-      if (!res.ok) throw new Error("Không thể tải danh sách cuộc đua");
+      if (res.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        setIsLoading(false);
+        return;
+      }
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Không thể tải danh sách cuộc đua");
+      }
       const resData = await res.json();
       const rawData = resData.data;
       const rawArray = Array.isArray(rawData) ? rawData : (rawData?.data || []);
