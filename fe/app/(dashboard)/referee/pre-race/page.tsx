@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Clock, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { refereeAssignmentsApi, type AssignmentItem } from "@/lib/api-client";
@@ -74,12 +73,13 @@ export default function RefereePreRaceWorkspacePage() {
             if (!race) return null;
             const isChecking = race.status === "CHECKING";
             return (
-              <article
+              <Link
                 key={a._id}
-                className={`rounded-2xl border p-5 flex flex-col justify-between space-y-4 shadow-sm transition ${
+                href={`/referee/races/${race._id}`}
+                className={`group rounded-2xl border p-5 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-xl transition duration-200 cursor-pointer ${
                   isChecking
-                    ? "border-primary/20 bg-primary/5"
-                    : "border-border bg-card hover:border-primary/20"
+                    ? "border-primary/40 bg-primary/5 hover:border-primary"
+                    : "border-border bg-card hover:border-primary/40"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -101,7 +101,7 @@ export default function RefereePreRaceWorkspacePage() {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-sm font-black uppercase text-foreground leading-tight">
+                  <h3 className="text-sm font-black uppercase text-foreground leading-tight group-hover:text-primary transition">
                     {race.name}
                   </h3>
                   <p className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -110,19 +110,20 @@ export default function RefereePreRaceWorkspacePage() {
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-border flex justify-end">
-                  <Button
-                    asChild
-                    variant={isChecking ? "default" : "outline"}
-                    className="h-9 px-4 rounded-full text-xs font-black uppercase"
-                  >
-                    <Link href={`/referee/races/${race._id}`}>
-                      {isChecking ? "Bắt đầu kiểm duyệt" : "Xem chi tiết"}
-                      <ArrowRight className="size-3.5 ml-1" />
-                    </Link>
-                  </Button>
+                <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground font-medium">
+                    Bấm vào thẻ để vào kiểm duyệt
+                  </span>
+                  <div className={`h-9 px-4 rounded-full text-xs font-black uppercase flex items-center justify-center gap-1 transition ${
+                    isChecking
+                      ? "bg-primary text-primary-foreground group-hover:bg-primary/90"
+                      : "border border-border text-foreground group-hover:border-primary/50 group-hover:text-primary"
+                  }`}>
+                    <span>{isChecking ? "Bắt đầu kiểm duyệt" : "Xem chi tiết"}</span>
+                    <ArrowRight className="size-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </section>

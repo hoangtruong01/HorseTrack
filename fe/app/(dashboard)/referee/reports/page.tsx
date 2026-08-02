@@ -8,7 +8,12 @@ import {
   PlusCircle,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   AlertTriangle,
+  Search,
+  Filter,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -68,6 +73,50 @@ export default function RefereeReportsPage() {
   const [violations, setViolations] = useState<Record<string, ViolationItem[]>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  // Search & Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterType, setFilterType] = useState("");
+
+  // Reset page on search or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterStatus, filterType]);
+
+  // Filtered assignments calculation
+  const filteredAssignments = assignments.filter((a) => {
+    if (!a.raceId) return false;
+    const raceName = (a.raceId.name || "").toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
+    const matchQuery = !query || raceName.includes(query);
+
+    const matchStatus = !filterStatus || a.raceId.status === filterStatus;
+
+    const rId = a.raceId._id || a.raceId.id || "";
+    const raceReps = reports[rId] || [];
+    const raceVios = violations[rId] || [];
+
+    let matchType = true;
+    if (filterType === "PRE_RACE") {
+      matchType = raceReps.some((r) => r.type === "PRE_RACE");
+    } else if (filterType === "POST_RACE") {
+      matchType = raceReps.some((r) => r.type === "POST_RACE");
+    } else if (filterType === "HAS_VIOLATIONS") {
+      matchType = raceVios.length > 0;
+    }
+
+    return matchQuery && matchStatus && matchType;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredAssignments.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const currentAssignments = filteredAssignments.slice(
+    (safePage - 1) * ITEMS_PER_PAGE,
+    safePage * ITEMS_PER_PAGE
+  );
 
   // Expanded race IDs for viewing reports
   const [expandedRaces, setExpandedRaces] = useState<Record<string, boolean>>({});
@@ -336,206 +385,342 @@ export default function RefereeReportsPage() {
           </form>
         </section>
 
-        {/* Reports Queue List */}
-        <section className="space-y-4">
-          <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
-            Hồ sơ biên bản theo cuộc đua ({assignments.length})
-          </h3>
+        {/* Right Column: Search & Filter + Reports Archive List */}
+        <div className="space-y-6">
+          {/* Search & Filter Controls */}
+          <section className="bg-card border border-border rounded-2xl p-4 space-y-3 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="text-xs font-black uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                <Filter className="size-3.5 text-primary" /> Bộ lọc & Tìm kiếm nhanh
+              </h4>
+              {(searchQuery || filterStatus || filterType) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setFilterStatus("");
+                    setFilterType("");
+                  }}
+                  className="text-[10px] text-red-500 font-bold uppercase hover:underline flex items-center gap-1"
+                >
+                  <X className="size-3" /> Xóa bộ lọc
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="size-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Tìm theo tên cuộc đua..."
+                  className="w-full pl-9 pr-8 py-2 rounded-xl border border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary text-xs"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Filter Status */}
+              <div>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="w-full py-2 px-3 rounded-xl border border-border bg-muted/40 text-foreground focus:outline-none focus:border-primary text-xs cursor-pointer"
+                >
+                  <option value="">Tất cả trạng thái cuộc đua</option>
+                  <option value="SCHEDULED">Lên lịch (SCHEDULED)</option>
+                  <option value="CHECKING">Đang kiểm duyệt (CHECKING)</option>
+                  <option value="READY">Sẵn sàng (READY)</option>
+                  <option value="LIVE">Trực tiếp (LIVE)</option>
+                  <option value="FINISHED">Đã kết thúc (FINISHED)</option>
+                  <option value="RESULT_PUBLISHED">Đã công bố (RESULT_PUBLISHED)</option>
+                </select>
+              </div>
+
+              {/* Filter Report Type / Violations */}
+              <div>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="w-full py-2 px-3 rounded-xl border border-border bg-muted/40 text-foreground focus:outline-none focus:border-primary text-xs cursor-pointer"
+                >
+                  <option value="">Tất cả loại biên bản / vi phạm</option>
+                  <option value="PRE_RACE">Có biên bản Trước trận (PRE_RACE)</option>
+                  <option value="POST_RACE">Có biên bản Sau trận (POST_RACE)</option>
+                  <option value="HAS_VIOLATIONS">Có lịch sử ghi lỗi vi phạm</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          {/* Reports Queue List */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-black uppercase tracking-wider text-foreground">
+                Hồ sơ biên bản theo cuộc đua
+              </h3>
+              <span className="text-xs font-black uppercase tracking-wider text-muted-foreground bg-muted/50 border border-border px-3 py-1.5 rounded-full">
+                (<strong className="text-primary">{filteredAssignments.length}</strong> / {assignments.length})
+              </span>
+            </div>
+
+            {(searchQuery || filterStatus || filterType) && (
+              <div className="text-[11px] text-amber-500 font-bold">
+                Đang lọc kết quả ({filteredAssignments.length} cuộc đua phù hợp)
+              </div>
+            )}
 
           {assignments.length === 0 ? (
             <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/30 text-muted-foreground text-xs">
               Bạn chưa chấp nhận giám sát cuộc đua nào nên chưa có biên bản lưu trữ.
             </div>
+          ) : filteredAssignments.length === 0 ? (
+            <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/30 text-muted-foreground text-xs space-y-2">
+              <p className="font-bold uppercase text-foreground">Không tìm thấy cuộc đua phù hợp</p>
+              <p className="text-[11px]">Vui lòng thử tìm kiếm từ khóa khác hoặc xóa bộ lọc.</p>
+            </div>
           ) : (
-            <div className="space-y-3">
-              {assignments.map((assignment) => {
-                if (!assignment.raceId) return null;
-                const raceId = assignment.raceId._id || assignment.raceId.id || "";
-                const raceReports = reports[raceId] || [];
-                const raceViolations = violations[raceId] || [];
-                const isExpanded = expandedRaces[raceId] || false;
-                const assignmentId = assignment._id || assignment.id || raceId;
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {currentAssignments.map((assignment) => {
+                  if (!assignment.raceId) return null;
+                  const raceId = assignment.raceId._id || assignment.raceId.id || "";
+                  const raceReports = reports[raceId] || [];
+                  const raceViolations = violations[raceId] || [];
+                  const isExpanded = expandedRaces[raceId] || false;
+                  const assignmentId = assignment._id || assignment.id || raceId;
 
-                return (
-                  <article
-                    key={assignmentId}
-                    className="rounded-xl border border-border bg-card/95 shadow overflow-hidden"
-                  >
-                    {/* Header bar click to toggle expansion */}
-                    <div
-                      onClick={() => toggleExpand(raceId)}
-                      className="p-4 flex items-center justify-between cursor-pointer bg-muted/50 hover:bg-muted transition select-none"
+                  return (
+                    <article
+                      key={assignmentId}
+                      className="rounded-xl border border-border bg-card/95 shadow overflow-hidden"
                     >
-                      <div className="space-y-0.5">
-                        <h4 className="text-xs font-black uppercase text-foreground leading-tight">
-                          {assignment.raceId.name}
-                        </h4>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase flex items-center gap-3">
-                          <span>
-                            Biên bản: <strong className="text-teal-600 dark:text-teal-400">{raceReports.length} bản</strong>
+                      {/* Header bar click to toggle expansion */}
+                      <div
+                        onClick={() => toggleExpand(raceId)}
+                        className="p-4 flex items-center justify-between cursor-pointer bg-muted/50 hover:bg-muted transition select-none"
+                      >
+                        <div className="space-y-0.5">
+                          <h4 className="text-xs font-black uppercase text-foreground leading-tight">
+                            {assignment.raceId.name}
+                          </h4>
+                          <p className="text-[10px] text-muted-foreground font-bold uppercase flex items-center gap-3">
+                            <span>
+                              Biên bản: <strong className="text-teal-600 dark:text-teal-400">{raceReports.length} bản</strong>
+                            </span>
+                            <span>
+                              Vi phạm: <strong className={raceViolations.length > 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground"}>{raceViolations.length} lỗi</strong>
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-muted-foreground uppercase font-black">
+                            {assignment.raceId.status}
                           </span>
-                          <span>
-                            Vi phạm: <strong className={raceViolations.length > 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground"}>{raceViolations.length} lỗi</strong>
-                          </span>
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-muted-foreground uppercase font-black">
-                          {assignment.raceId.status}
-                        </span>
-                        {isExpanded ? (
-                          <ChevronUp className="size-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="size-4 text-muted-foreground" />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Reports & Violations List for this race */}
-                    {isExpanded && (
-                      <div className="p-4 border-t border-border space-y-5 bg-muted/40">
-                        {/* Biên bản section */}
-                        <div className="space-y-3">
-                          <h5 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                            Biên bản lưu vết ({raceReports.length})
-                          </h5>
-                          {raceReports.length === 0 ? (
-                            <p className="text-xs text-muted-foreground italic py-2">
-                              Cuộc đua này chưa có biên bản nào được lập.
-                            </p>
+                          {isExpanded ? (
+                            <ChevronUp className="size-4 text-muted-foreground" />
                           ) : (
-                            <div className="space-y-3">
-                              {raceReports.map((rep) => (
-                                <div
-                                  key={rep._id}
-                                  className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
-                                >
-                                  <div className="flex justify-between items-center gap-2">
-                                    <span className={`px-2 py-0.5 rounded text-[8px] font-bold border ${
-                                      rep.type === "PRE_RACE" 
-                                        ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" 
-                                        : "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
-                                    }`}>
-                                      {rep.type === "PRE_RACE" ? "TRƯỚC TRẬN" : "SAU TRẬN"}
-                                    </span>
-                                    <span className="text-[9px] text-muted-foreground">
-                                      {new Date(rep.createdAt).toLocaleString("vi-VN")}
-                                    </span>
-                                  </div>
-
-                                  {rep.horseId && (
-                                    <p className="text-[10px] font-bold text-foreground">
-                                      Chiến mã liên quan: <span className="text-teal-600 dark:text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
-                                    </p>
-                                  )}
-
-                                  <p className="text-foreground leading-relaxed font-medium">
-                                    {rep.description}
-                                  </p>
-
-                                  {(rep.violation || rep.penalty) && (
-                                    <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-muted/50 text-[10px]">
-                                      {rep.violation && (
-                                        <p className="text-muted-foreground">
-                                          Lỗi vi phạm: <strong className="text-amber-600 dark:text-yellow-400 font-bold">{rep.violation}</strong>
-                                        </p>
-                                      )}
-                                      {rep.penalty && (
-                                        <p className="text-muted-foreground">
-                                          Hình phạt: <strong className="text-red-600 dark:text-red-400 font-bold">{rep.penalty}</strong>
-                                        </p>
-                                      )}
-                                    </div>
-                                  )}
-
-                                  <p className="text-[9px] text-muted-foreground pt-1.5 border-t border-border text-right uppercase font-bold">
-                                    Ký tên: {rep.refereeId?.fullName}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
+                            <ChevronDown className="size-4 text-muted-foreground" />
                           )}
                         </div>
+                      </div>
 
-                        {/* Vi phạm / Ghi lỗi section */}
-                        <div className="space-y-3">
-                          <h5 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                            <AlertTriangle className="size-3.5 text-amber-500" />
-                            Lịch sử ghi lỗi vi phạm ({raceViolations.length})
-                          </h5>
-                          {raceViolations.length === 0 ? (
-                            <p className="text-xs text-muted-foreground italic py-2">
-                              Chưa có vi phạm nào được ghi nhận cho cuộc đua này.
-                            </p>
-                          ) : (
-                            <div className="space-y-3">
-                              {raceViolations.map((v) => (
-                                <div
-                                  key={v._id}
-                                  className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
-                                >
-                                  <div className="flex justify-between items-start gap-2">
-                                    <div className="flex flex-wrap items-center gap-1.5">
-                                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${
-                                        v.severity === "critical" ? "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20" :
-                                        v.severity === "major" ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" :
-                                        "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
+                      {/* Reports & Violations List for this race */}
+                      {isExpanded && (
+                        <div className="p-4 border-t border-border space-y-5 bg-muted/40">
+                          {/* Biên bản section */}
+                          <div className="space-y-3">
+                            <h5 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                              Biên bản lưu vết ({raceReports.length})
+                            </h5>
+                            {raceReports.length === 0 ? (
+                              <p className="text-xs text-muted-foreground italic py-2">
+                                Cuộc đua này chưa có biên bản nào được lập.
+                              </p>
+                            ) : (
+                              <div className="space-y-3">
+                                {raceReports.map((rep) => (
+                                  <div
+                                    key={rep._id}
+                                    className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
+                                  >
+                                    <div className="flex justify-between items-center gap-2">
+                                      <span className={`px-2 py-0.5 rounded text-[8px] font-bold border ${
+                                        rep.type === "PRE_RACE" 
+                                          ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" 
+                                          : "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
                                       }`}>
-                                        {v.severity === "critical" ? "CRITICAL" : v.severity === "major" ? "MAJOR" : "MINOR"}
+                                        {rep.type === "PRE_RACE" ? "TRƯỚC TRẬN" : "SAU TRẬN"}
                                       </span>
-                                      <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">
-                                        · {v.type === "track_violation" ? "LỖI ĐƯỜNG ĐUA" :
-                                           v.type === "false_start" ? "XUẤT PHÁT SAI" :
-                                           v.type === "dangerous_riding" ? "KỴ SĨ ÉP LÀN" :
-                                           v.type === "equipment_violation" ? "LỖI TRANG THIẾT BỊ" : "VI PHẠM KHÁC"}
+                                      <span className="text-[9px] text-muted-foreground">
+                                        {new Date(rep.createdAt).toLocaleString("vi-VN")}
                                       </span>
                                     </div>
-                                    <span className="text-[10px] text-muted-foreground font-bold uppercase bg-muted border border-border px-2 py-0.5 rounded shrink-0">
-                                      {v.penalty === "time_penalty" ? "Phạt cộng giây" :
-                                       v.penalty === "warning" ? "Cảnh cáo" :
-                                       v.penalty === "disqualified" ? "TRUẤT QUYỀN" : "Không phạt"}
-                                    </span>
-                                  </div>
 
-                                  <div className="space-y-1">
-                                    <p className="text-xs font-bold text-foreground uppercase">
-                                      Chiến mã: {v.horseId?.name || "N/A"}
-                                    </p>
-                                    {v.jockeyUserId && (
-                                      <p className="text-[10px] text-muted-foreground">
-                                        Kỵ sĩ: <strong className="text-foreground">{v.jockeyUserId?.fullName}</strong>
+                                    {rep.horseId && (
+                                      <p className="text-[10px] font-bold text-foreground">
+                                        Chiến mã liên quan: <span className="text-teal-600 dark:text-teal-400 font-bold uppercase">{rep.horseId.name}</span>
                                       </p>
                                     )}
-                                    {v.description && (
-                                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">{v.description}</p>
+
+                                    <p className="text-foreground leading-relaxed font-medium">
+                                      {rep.description}
+                                    </p>
+
+                                    {(rep.violation || rep.penalty) && (
+                                      <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-muted/50 text-[10px]">
+                                        {rep.violation && (
+                                          <p className="text-muted-foreground">
+                                            Lỗi vi phạm: <strong className="text-amber-600 dark:text-yellow-400 font-bold">{rep.violation}</strong>
+                                          </p>
+                                        )}
+                                        {rep.penalty && (
+                                          <p className="text-muted-foreground">
+                                            Hình phạt: <strong className="text-red-600 dark:text-red-400 font-bold">{rep.penalty}</strong>
+                                          </p>
+                                        )}
+                                      </div>
                                     )}
-                                  </div>
 
-                                  <div className="flex justify-between items-center text-[9px] text-muted-foreground font-bold uppercase pt-1.5 border-t border-border">
-                                    <span>Ghi nhận bởi: {v.reportedBy?.fullName || "—"}</span>
-                                    <span>{v.createdAt ? new Date(v.createdAt).toLocaleString("vi-VN") : "—"}</span>
+                                    <p className="text-[9px] text-muted-foreground pt-1.5 border-t border-border text-right uppercase font-bold">
+                                      Ký tên: {rep.refereeId?.fullName}
+                                    </p>
                                   </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
 
-                        <div className="pt-2 flex justify-end">
-                          <Button asChild variant="outline" className="h-9 px-4 rounded-full text-xs font-bold uppercase">
-                            <Link href={`/referee/races/${assignment.raceId._id || assignment.raceId.id || ""}`}>
-                              Đi tới Cuộc Đua <ArrowRight className="size-3.5 ml-1" />
-                            </Link>
-                          </Button>
+                          {/* Vi phạm / Ghi lỗi section */}
+                          <div className="space-y-3">
+                            <h5 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                              <AlertTriangle className="size-3.5 text-amber-500" />
+                              Lịch sử ghi lỗi vi phạm ({raceViolations.length})
+                            </h5>
+                            {raceViolations.length === 0 ? (
+                              <p className="text-xs text-muted-foreground italic py-2">
+                                Chưa có vi phạm nào được ghi nhận cho cuộc đua này.
+                              </p>
+                            ) : (
+                              <div className="space-y-3">
+                                {raceViolations.map((v) => (
+                                  <div
+                                    key={v._id}
+                                    className="p-3.5 rounded-lg border border-border bg-card space-y-2 text-xs"
+                                  >
+                                    <div className="flex justify-between items-start gap-2">
+                                      <div className="flex flex-wrap items-center gap-1.5">
+                                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${
+                                          v.severity === "critical" ? "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20" :
+                                          v.severity === "major" ? "bg-amber-50 dark:bg-yellow-500/10 text-amber-700 dark:text-yellow-400 border-amber-200 dark:border-yellow-500/20" :
+                                          "bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20"
+                                        }`}>
+                                          {v.severity === "critical" ? "CRITICAL" : v.severity === "major" ? "MAJOR" : "MINOR"}
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">
+                                          · {v.type === "track_violation" ? "LỖI ĐƯỜNG ĐUA" :
+                                             v.type === "false_start" ? "XUẤT PHÁT SAI" :
+                                             v.type === "dangerous_riding" ? "KỴ SĨ ÉP LÀN" :
+                                             v.type === "equipment_violation" ? "LỖI TRANG THIẾT BỊ" : "VI PHẠM KHÁC"}
+                                        </span>
+                                      </div>
+                                      <span className="text-[10px] text-muted-foreground font-bold uppercase bg-muted border border-border px-2 py-0.5 rounded shrink-0">
+                                        {v.penalty === "time_penalty" ? "Phạt cộng giây" :
+                                         v.penalty === "warning" ? "Cảnh cáo" :
+                                         v.penalty === "disqualified" ? "TRUẤT QUYỀN" : "Không phạt"}
+                                      </span>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                      <p className="text-xs font-bold text-foreground uppercase">
+                                        Chiến mã: {v.horseId?.name || "N/A"}
+                                      </p>
+                                      {v.jockeyUserId && (
+                                        <p className="text-[10px] text-muted-foreground">
+                                          Kỵ sĩ: <strong className="text-foreground">{v.jockeyUserId?.fullName}</strong>
+                                        </p>
+                                      )}
+                                      {v.description && (
+                                        <p className="text-xs text-muted-foreground leading-relaxed mt-1">{v.description}</p>
+                                      )}
+                                    </div>
+
+                                    <div className="flex justify-between items-center text-[9px] text-muted-foreground font-bold uppercase pt-1.5 border-t border-border">
+                                      <span>Ghi nhận bởi: {v.reportedBy?.fullName || "—"}</span>
+                                      <span>{v.createdAt ? new Date(v.createdAt).toLocaleString("vi-VN") : "—"}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="pt-2 flex justify-end">
+                            <Button asChild variant="outline" className="h-9 px-4 rounded-full text-xs font-bold uppercase">
+                              <Link href={`/referee/races/${assignment.raceId._id || assignment.raceId.id || ""}`}>
+                                Đi tới Cuộc Đua <ArrowRight className="size-3.5 ml-1" />
+                              </Link>
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </article>
-                );
-              })}
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-border text-xs">
+                  <span className="text-muted-foreground font-medium">
+                    Trang <strong className="text-primary">{safePage}</strong> / {totalPages} (Tổng {filteredAssignments.length} cuộc đua phù hợp)
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={safePage === 1}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      className="h-8 text-xs px-2.5"
+                    >
+                      <ChevronLeft className="size-3.5 mr-1" /> Trước
+                    </Button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`size-8 rounded-lg text-xs font-bold transition ${
+                          page === safePage
+                            ? "bg-primary text-primary-foreground shadow-md"
+                            : "bg-muted hover:bg-muted/80 text-foreground border border-border"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={safePage === totalPages}
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      className="h-8 text-xs px-2.5"
+                    >
+                      Tiếp <ChevronRight className="size-3.5 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>
+        </div>
       </div>
     </main>
   );

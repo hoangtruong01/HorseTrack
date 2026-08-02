@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Award, ArrowRight, Clock } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { refereeAssignmentsApi, type AssignmentItem } from "@/lib/api-client";
@@ -74,14 +73,15 @@ export default function RefereeResultEntryWorkspacePage() {
             const isSelectable = isFinished || isLive || isPublished;
 
             return (
-              <article
+              <Link
                 key={a._id}
-                className={`rounded-2xl border p-5 flex flex-col justify-between space-y-4 shadow-sm transition ${
+                href={`/referee/races/${race._id}/result-entry`}
+                className={`group rounded-2xl border p-5 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-xl transition duration-200 cursor-pointer ${
                   isFinished
-                    ? "border-teal-500/20 bg-teal-500/5"
+                    ? "border-teal-500/30 bg-teal-500/5 hover:border-teal-500/60"
                     : isLive
-                      ? "border-red-500/20 bg-red-500/5"
-                      : "border-border bg-card hover:border-primary/20"
+                      ? "border-red-500/30 bg-red-500/5 hover:border-red-500/60"
+                      : "border-border bg-card hover:border-primary/40"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -106,7 +106,7 @@ export default function RefereeResultEntryWorkspacePage() {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-sm font-black uppercase text-foreground leading-tight">
+                  <h3 className="text-sm font-black uppercase text-foreground leading-tight group-hover:text-primary transition">
                     {race.name}
                   </h3>
                   <p className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -115,19 +115,20 @@ export default function RefereeResultEntryWorkspacePage() {
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-border flex justify-end">
-                  <Button
-                    asChild
-                    variant={isSelectable ? "default" : "outline"}
-                    className="h-9 px-4 rounded-full text-xs font-black uppercase"
-                  >
-                    <Link href={`/referee/races/${race._id}/result-entry`}>
-                      {isFinished ? "Nhập kết quả ngay" : isPublished ? "Xem kết quả đã khóa" : "Nhập kết quả nháp"}
-                      <ArrowRight className="size-3.5 ml-1" />
-                    </Link>
-                  </Button>
+                <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground font-medium">
+                    Bấm vào thẻ để nhập kết quả
+                  </span>
+                  <div className={`h-9 px-4 rounded-full text-xs font-black uppercase flex items-center justify-center gap-1 transition ${
+                    isSelectable
+                      ? "bg-primary text-primary-foreground group-hover:bg-primary/90"
+                      : "border border-border text-foreground group-hover:border-primary/50 group-hover:text-primary"
+                  }`}>
+                    <span>{isFinished ? "Nhập kết quả ngay" : isPublished ? "Xem kết quả đã khóa" : "Nhập kết quả nháp"}</span>
+                    <ArrowRight className="size-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </section>
