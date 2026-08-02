@@ -16,6 +16,8 @@ import {
   Award,
   Sparkles,
   Calendar,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +56,8 @@ export default function JockeyProfilePage() {
   const [imagePreview, setImagePreview] = useState("");
   const [victories, setVictories] = useState<JockeyVictoryItem[]>([]);
   const [loadingVictories, setLoadingVictories] = useState(false);
+  const [victoryPage, setVictoryPage] = useState(1);
+  const VICTORIES_PER_PAGE = 6;
 
   const [form, setForm] = useState({
     heightCm: 165,
@@ -398,47 +402,96 @@ export default function JockeyProfilePage() {
                 <p className="text-xs font-bold uppercase text-foreground/70">Chưa có danh hiệu Top 1 nào</p>
                 <p className="text-[11px]">Hãy tham gia các giải đua tiếp theo để chinh phục đỉnh cao!</p>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                {victories.map((v) => {
-                  const tournamentName = typeof v.tournamentId === "object" ? v.tournamentId?.name : "Giải đấu";
-                  const raceName = typeof v.raceId === "object" ? v.raceId?.name : "Trận đua";
-                  const raceTime = typeof v.raceId === "object" ? v.raceId?.startTime : v.createdAt;
-                  const horseName = typeof v.horseId === "object" ? v.horseId?.name : "Chiến mã";
+            ) : (() => {
+              const totalPages = Math.ceil(victories.length / VICTORIES_PER_PAGE);
+              const safePage = Math.min(victoryPage, totalPages || 1);
+              const currentVictories = victories.slice((safePage - 1) * VICTORIES_PER_PAGE, safePage * VICTORIES_PER_PAGE);
 
-                  return (
-                    <div key={v._id || v.id} className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition space-y-2 relative group">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full">
-                          <Trophy className="size-3" /> TOP 1 WINNER
-                        </span>
-                        {v.prizeAmount ? (
-                          <span className="text-xs font-black text-teal-400 font-mono">
-                            +{v.prizeAmount.toLocaleString("vi-VN")} đ
-                          </span>
-                        ) : null}
-                      </div>
+              return (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                    {currentVictories.map((v) => {
+                      const tournamentName = typeof v.tournamentId === "object" ? v.tournamentId?.name : "Giải đấu";
+                      const raceName = typeof v.raceId === "object" ? v.raceId?.name : "Trận đua";
+                      const raceTime = typeof v.raceId === "object" ? v.raceId?.startTime : v.createdAt;
+                      const horseName = typeof v.horseId === "object" ? v.horseId?.name : "Chiến mã";
 
-                      <div>
-                        <p className="text-xs font-black text-foreground truncate" title={raceName}>{raceName}</p>
-                        <p className="text-[11px] font-bold text-amber-400/90 truncate mt-0.5" title={tournamentName}>
-                          🏆 {tournamentName}
-                        </p>
-                      </div>
+                      return (
+                        <div key={v._id || v.id} className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition space-y-2 relative group">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                              <Trophy className="size-3" /> TOP 1 WINNER
+                            </span>
+                            {v.prizeAmount ? (
+                              <span className="text-xs font-black text-teal-400 font-mono">
+                                +{v.prizeAmount.toLocaleString("vi-VN")} đ
+                              </span>
+                            ) : null}
+                          </div>
 
-                      <div className="pt-2 border-t border-amber-500/10 flex items-center justify-between text-[10px] text-muted-foreground">
-                        <span className="font-bold text-foreground/80">🐴 {horseName}</span>
-                        {raceTime && (
-                          <span className="flex items-center gap-1 font-mono">
-                            <Calendar className="size-3" /> {new Date(raceTime).toLocaleDateString("vi-VN")}
-                          </span>
-                        )}
+                          <div>
+                            <p className="text-xs font-black text-foreground truncate" title={raceName}>{raceName}</p>
+                            <p className="text-[11px] font-bold text-amber-400/90 truncate mt-0.5" title={tournamentName}>
+                              🏆 {tournamentName}
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-amber-500/10 flex items-center justify-between text-[10px] text-muted-foreground">
+                            <span className="font-bold text-foreground/80">🐴 {horseName}</span>
+                            {raceTime && (
+                              <span className="flex items-center gap-1 font-mono">
+                                <Calendar className="size-3" /> {new Date(raceTime).toLocaleDateString("vi-VN")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-amber-500/10 text-xs">
+                      <span className="text-[11px] text-muted-foreground font-medium">
+                        Trang <strong className="text-amber-400">{safePage}</strong> / {totalPages} (Tổng {victories.length} cúp Top 1)
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={safePage === 1}
+                          onClick={() => setVictoryPage((p) => Math.max(1, p - 1))}
+                          className="h-8 border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-400 disabled:opacity-40 text-xs px-2.5"
+                        >
+                          <ChevronLeft className="size-3.5 mr-1" /> Trước
+                        </Button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => setVictoryPage(page)}
+                            className={`size-8 rounded-lg text-xs font-bold transition ${
+                              page === safePage
+                                ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
+                                : "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={safePage === totalPages}
+                          onClick={() => setVictoryPage((p) => Math.min(totalPages, p + 1))}
+                          className="h-8 border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-400 disabled:opacity-40 text-xs px-2.5"
+                        >
+                          Tiếp <ChevronRight className="size-3.5 ml-1" />
+                        </Button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
 

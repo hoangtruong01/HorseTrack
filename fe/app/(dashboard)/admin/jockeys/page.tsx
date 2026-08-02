@@ -17,9 +17,12 @@ import {
   CheckCircle,
   Award,
   Trophy,
+  Loader2,
+  Sparkles,
+  Calendar,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
-import { jockeysApi, type JockeyItem } from "@/lib/api-client";
+import { jockeysApi, type JockeyItem, raceResultsApi, type JockeyVictoryItem } from "@/lib/api-client";
 import { toast } from "sonner";
 
 const STATUSES = ["available", "unavailable", "suspended"];
@@ -59,6 +62,38 @@ export default function AdminJockeysPage() {
 
   // Detail Modal State
   const [selectedJockeyDetail, setSelectedJockeyDetail] = useState<JockeyItem | null>(null);
+  const [jockeyVictories, setJockeyVictories] = useState<JockeyVictoryItem[]>([]);
+  const [loadingVictories, setLoadingVictories] = useState(false);
+  const [victoryPage, setVictoryPage] = useState(1);
+  const VICTORIES_PER_PAGE = 6;
+
+  useEffect(() => {
+    if (!selectedJockeyDetail) {
+      setJockeyVictories([]);
+      setVictoryPage(1);
+      return;
+    }
+    const uId =
+      typeof selectedJockeyDetail.userId === "object" && selectedJockeyDetail.userId !== null
+        ? selectedJockeyDetail.userId._id
+        : selectedJockeyDetail.userId;
+
+    if (uId) {
+      setLoadingVictories(true);
+      setVictoryPage(1);
+      raceResultsApi
+        .getByJockey(String(uId), 1)
+        .then((res) => {
+          setJockeyVictories(res.results || []);
+        })
+        .catch((err) => {
+          console.error("Failed to load jockey victories for admin view:", err);
+        })
+        .finally(() => {
+          setLoadingVictories(false);
+        });
+    }
+  }, [selectedJockeyDetail]);
 
   // Rejection Modal State
   const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -676,6 +711,120 @@ export default function AdminJockeysPage() {
                   </span>
                 </div>
               </div>
+            </div>
+
+            {/* 🏆 BẢNG VÀNG THÀNH TÍCH TOP 1 */}
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="size-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                    <Trophy className="size-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-foreground flex items-center gap-1">
+                      Bảng Vàng Thành Tích Top 1
+                      <Sparkles className="size-3 text-amber-400 fill-amber-400" />
+                    </h4>
+                    <p className="text-[10px] text-muted-foreground">Các giải đấu & trận đua giành cúp Quán quân (Hạng 1)</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-[11px]">
+                  {jockeyVictories.length} Cúp
+                </span>
+              </div>
+
+              {loadingVictories ? (
+                <div className="py-6 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                  <Loader2 className="size-4 animate-spin text-amber-400" /> Đang tải lịch sử cúp vô địch...
+                </div>
+              ) : jockeyVictories.length === 0 ? (
+                <div className="p-4 rounded-xl border border-dashed border-border/60 text-center text-muted-foreground text-xs italic">
+                  Chưa có danh hiệu vô địch Top 1 nào được ghi nhận.
+                </div>
+              ) : (() => {
+                const totalPages = Math.ceil(jockeyVictories.length / VICTORIES_PER_PAGE);
+                const safePage = Math.min(victoryPage, totalPages || 1);
+                const currentVictories = jockeyVictories.slice((safePage - 1) * VICTORIES_PER_PAGE, safePage * VICTORIES_PER_PAGE);
+
+                return (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {currentVictories.map((v) => {
+                        const tournamentName = typeof v.tournamentId === "object" ? v.tournamentId?.name : "Giải đấu";
+                        const raceName = typeof v.raceId === "object" ? v.raceId?.name : "Trận đua";
+                        const raceTime = typeof v.raceId === "object" ? v.raceId?.startTime : v.createdAt;
+                        const horseName = typeof v.horseId === "object" ? v.horseId?.name : "Chiến mã";
+
+                        return (
+                          <div key={v._id || v.id} className="p-3 rounded-xl border border-amber-500/20 bg-background/60 hover:bg-amber-500/10 transition space-y-1.5 text-xs">
+                            <div className="flex items-center justify-between gap-1.5">
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                                <Trophy className="size-2.5" /> TOP 1 WINNER
+                              </span>
+                              {v.prizeAmount ? (
+                                <span className="text-[11px] font-black text-teal-400 font-mono">
+                                  +{v.prizeAmount.toLocaleString("vi-VN")} đ
+                                </span>
+                              ) : null}
+                            </div>
+                            <div>
+                              <p className="font-bold text-foreground truncate" title={raceName}>{raceName}</p>
+                              <p className="text-[10px] font-semibold text-amber-400/90 truncate" title={tournamentName}>
+                                🏆 {tournamentName}
+                              </p>
+                            </div>
+                            <div className="pt-1 border-t border-border/40 flex items-center justify-between text-[10px] text-muted-foreground">
+                              <span className="font-medium text-foreground/80">🐴 {horseName}</span>
+                              {raceTime && (
+                                <span className="flex items-center gap-1 font-mono">
+                                  <Calendar className="size-2.5" /> {new Date(raceTime).toLocaleDateString("vi-VN")}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between pt-2 border-t border-amber-500/10 text-[11px]">
+                        <span className="text-muted-foreground">
+                          Trang <strong className="text-amber-400">{safePage}</strong> / {totalPages}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            disabled={safePage === 1}
+                            onClick={() => setVictoryPage((p) => Math.max(1, p - 1))}
+                            className="px-2 py-1 rounded border border-amber-500/20 bg-amber-500/5 text-amber-400 disabled:opacity-40 text-[10px] font-bold"
+                          >
+                            Trước
+                          </button>
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <button
+                              key={page}
+                              onClick={() => setVictoryPage(page)}
+                              className={`size-6 rounded text-[10px] font-bold transition ${
+                                page === safePage
+                                  ? "bg-amber-500 text-black"
+                                  : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                          <button
+                            disabled={safePage === totalPages}
+                            onClick={() => setVictoryPage((p) => Math.min(totalPages, p + 1))}
+                            className="px-2 py-1 rounded border border-amber-500/20 bg-amber-500/5 text-amber-400 disabled:opacity-40 text-[10px] font-bold"
+                          >
+                            Tiếp
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Complete Certificates List (Hiển thị đầy đủ tất cả bằng cấp) */}

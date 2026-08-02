@@ -17,10 +17,12 @@ import {
   jockeysApi,
   refereeProfilesApi,
   horsesApi,
+  raceResultsApi,
   type UserItem,
   type JockeyItem,
   type RefereeProfileItem,
   type HorseItem,
+  type JockeyVictoryItem,
 } from "@/lib/api-client";
 import {
   Ban,
@@ -42,6 +44,8 @@ import {
   CheckCircle,
   FileText,
   Camera,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -99,6 +103,10 @@ export default function AdminUsersPage() {
 
   const [loadingSubProfiles, setLoadingSubProfiles] = useState(false);
   const [jockeyProfile, setJockeyProfile] = useState<JockeyItem | null>(null);
+  const [jockeyVictories, setJockeyVictories] = useState<JockeyVictoryItem[]>([]);
+  const [loadingVictories, setLoadingVictories] = useState(false);
+  const [victoryPage, setVictoryPage] = useState(1);
+  const VICTORIES_PER_PAGE = 6;
   const [refereeProfile, setRefereeProfile] = useState<RefereeProfileItem | null>(null);
   const [ownerHorses, setOwnerHorses] = useState<HorseItem[]>([]);
 
@@ -106,6 +114,8 @@ export default function AdminUsersPage() {
     setSelectedUserDetail(u);
     setLoadingSubProfiles(true);
     setJockeyProfile(null);
+    setJockeyVictories([]);
+    setVictoryPage(1);
     setRefereeProfile(null);
     setOwnerHorses([]);
 
@@ -113,6 +123,7 @@ export default function AdminUsersPage() {
       const promises: Promise<void>[] = [];
 
       if (u.roles.includes("jockey")) {
+        setLoadingVictories(true);
         promises.push(
           jockeysApi
             .listAdmin({ limit: 100 })
@@ -124,6 +135,19 @@ export default function AdminUsersPage() {
               if (found) setJockeyProfile(found);
             })
             .catch(() => {})
+        );
+        promises.push(
+          raceResultsApi
+            .getByJockey(u.id, 1)
+            .then((res) => {
+              setJockeyVictories(res.results || []);
+            })
+            .catch((err) => {
+              console.error("Failed to load jockey victories:", err);
+            })
+            .finally(() => {
+              setLoadingVictories(false);
+            })
         );
       }
 
@@ -606,6 +630,91 @@ export default function AdminUsersPage() {
                       <div><span className="text-muted-foreground">Số trận thắng:</span> <span className="font-semibold text-emerald-400">{jockeyProfile.wins ?? 0} trận</span></div>
                       <div><span className="text-muted-foreground">Tỷ lệ thắng:</span> <span className="font-semibold text-emerald-400">{jockeyProfile.totalRaces ? Math.round(((jockeyProfile.wins ?? 0) / jockeyProfile.totalRaces) * 100) : 0}%</span></div>
                     </div>
+                  </div>
+
+                  {/* 🏆 BẢNG VÀNG THÀNH TÍCH TOP 1 */}
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                        <Trophy className="size-3.5" /> Bảng Vàng Thành Tích Top 1
+                        <Sparkles className="size-3 text-amber-400 fill-amber-400" />
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-[10px]">
+                        {jockeyVictories.length} Cúp
+                      </span>
+                    </div>
+
+                    {loadingVictories ? (
+                      <div className="py-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                        <Loader2 className="size-3.5 animate-spin text-amber-400" /> Đang tải lịch sử cúp...
+                      </div>
+                    ) : jockeyVictories.length === 0 ? (
+                      <p className="text-[11px] text-muted-foreground/60 italic p-2 bg-background/40 rounded-lg text-center">
+                        Chưa có cúp Vô địch Top 1 nào
+                      </p>
+                    ) : (() => {
+                      const totalPages = Math.ceil(jockeyVictories.length / VICTORIES_PER_PAGE);
+                      const safePage = Math.min(victoryPage, totalPages || 1);
+                      const currentVictories = jockeyVictories.slice((safePage - 1) * VICTORIES_PER_PAGE, safePage * VICTORIES_PER_PAGE);
+
+                      return (
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {currentVictories.map((v) => {
+                              const tournamentName = typeof v.tournamentId === "object" ? v.tournamentId?.name : "Giải đấu";
+                              const raceName = typeof v.raceId === "object" ? v.raceId?.name : "Trận đua";
+                              const raceTime = typeof v.raceId === "object" ? v.raceId?.startTime : v.createdAt;
+                              const horseName = typeof v.horseId === "object" ? v.horseId?.name : "Chiến mã";
+
+                              return (
+                                <div key={v._id || v.id} className="p-2.5 rounded-lg border border-amber-500/20 bg-background/60 space-y-1 text-xs">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <span className="inline-flex items-center gap-0.5 text-[9px] font-black uppercase text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                                      <Trophy className="size-2.5" /> TOP 1
+                                    </span>
+                                    {v.prizeAmount ? (
+                                      <span className="text-[10px] font-bold text-teal-400 font-mono">
+                                        +{v.prizeAmount.toLocaleString("vi-VN")}đ
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-foreground text-[11px] truncate" title={raceName}>{raceName}</p>
+                                    <p className="text-[10px] text-amber-400 font-semibold truncate" title={tournamentName}>🏆 {tournamentName}</p>
+                                  </div>
+                                  <div className="pt-1 border-t border-border/40 flex items-center justify-between text-[9px] text-muted-foreground">
+                                    <span>🐴 {horseName}</span>
+                                    {raceTime && <span>{new Date(raceTime).toLocaleDateString("vi-VN")}</span>}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between pt-1 text-[10px]">
+                              <span className="text-muted-foreground">Trang {safePage}/{totalPages}</span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  disabled={safePage === 1}
+                                  onClick={() => setVictoryPage((p) => Math.max(1, p - 1))}
+                                  className="px-2 py-0.5 rounded border border-amber-500/20 bg-amber-500/5 text-amber-400 disabled:opacity-40 font-bold"
+                                >
+                                  Trước
+                                </button>
+                                <button
+                                  disabled={safePage === totalPages}
+                                  onClick={() => setVictoryPage((p) => Math.min(totalPages, p + 1))}
+                                  className="px-2 py-0.5 rounded border border-amber-500/20 bg-amber-500/5 text-amber-400 disabled:opacity-40 font-bold"
+                                >
+                                  Tiếp
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Certificates List */}
