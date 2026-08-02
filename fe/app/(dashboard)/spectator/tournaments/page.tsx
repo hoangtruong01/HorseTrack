@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Trophy, Calendar, MapPin, Award, Users, Search,
   ArrowLeft, Flag, Loader2, Compass, Layers, Activity, User, ShieldCheck, ChevronRight,
-  CheckCircle, Coins, Brain, Lock, ChevronDown
+  CheckCircle, Coins, Brain, Lock, ChevronDown, Info, X
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -115,6 +115,7 @@ export default function SpectatorTournamentsPage() {
   const [balance, setBalance] = useState(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [betPointsInput, setBetPointsInput] = useState<string>("1");
+  const [selectedParticipantProfile, setSelectedParticipantProfile] = useState<RegistrationItem | null>(null);
 
   // AI prediction states
   const [aiPrediction, setAiPrediction] = useState<AiPredictionItem | null>(null);
@@ -1017,23 +1018,56 @@ export default function SpectatorTournamentsPage() {
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            <select
-                              value={selectedHorseId}
-                              onChange={(e) => setSelectedHorseId(e.target.value)}
-                              className="w-full h-11 rounded-xl border border-border bg-muted px-3 text-xs text-foreground outline-none focus:border-primary cursor-pointer"
-                            >
-                              <option value="" className="bg-card">-- Chọn chiến mã dự kiến về nhất --</option>
-                              {selectedRaceRegistrations.map((p) => {
-                                const horseId = typeof p.horseId === "object" ? p.horseId?._id : p.horseId;
-                                const horseName = typeof p.horseId === "object" ? p.horseId?.name : "Chiến mã";
-                                const jockeyName = typeof p.jockeyUserId === "object" ? p.jockeyUserId?.fullName : "Chưa đăng ký";
-                                return (
-                                  <option key={p._id} value={horseId} className="bg-card">
-                                    {horseName} (Nài: {jockeyName})
-                                  </option>
-                                );
-                              })}
-                            </select>
+                            {/* Interactive Roster Cards */}
+                            <div className="space-y-2">
+                              <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                                Danh sách Đội Đua ({selectedRaceRegistrations.length})
+                              </p>
+                              <div className="max-h-48 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                                {selectedRaceRegistrations.map((p) => {
+                                  const horseId = typeof p.horseId === "object" ? p.horseId?._id : p.horseId;
+                                  const horseName = typeof p.horseId === "object" ? p.horseId?.name : "Chiến mã";
+                                  const breed = typeof p.horseId === "object" ? p.horseId?.breed : "";
+                                  const jockeyName = typeof p.jockeyUserId === "object" ? p.jockeyUserId?.fullName : "Chưa đăng ký";
+                                  const ownerName = typeof p.ownerId === "object" ? p.ownerId?.fullName : "Chưa đăng ký";
+                                  const isSelected = selectedHorseId === horseId;
+
+                                  return (
+                                    <div
+                                      key={p._id}
+                                      onClick={() => {
+                                        if (horseId) setSelectedHorseId(horseId);
+                                        setSelectedParticipantProfile(p);
+                                      }}
+                                      className={`p-3 rounded-xl border text-xs cursor-pointer transition duration-200 flex items-center justify-between gap-3 ${
+                                        isSelected
+                                          ? "border-primary bg-primary/10 shadow-sm"
+                                          : "border-border bg-card hover:border-primary/40 hover:bg-muted/30"
+                                      }`}
+                                    >
+                                      <div className="min-w-0 flex-1 space-y-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-black text-foreground uppercase truncate">{horseName}</span>
+                                          {breed && (
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                                              {breed}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground">
+                                          <span className="flex items-center gap-1">
+                                            🏇 Nài: <strong className="text-foreground font-semibold">{jockeyName}</strong>
+                                          </span>
+                                          <span className="flex items-center gap-1">
+                                            👑 Chủ: <strong className="text-foreground font-semibold">{ownerName}</strong>
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
 
                             <div className="space-y-1.5">
                               <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-wider text-muted-foreground">
@@ -1232,10 +1266,14 @@ export default function SpectatorTournamentsPage() {
                           const jockeyName = typeof p.jockeyUserId === "object" ? p.jockeyUserId?.fullName : "Chưa đăng ký";
                           const ownerName = typeof p.ownerId === "object" ? p.ownerId?.fullName : "Chủ ngựa";
                           return (
-                            <tr key={p._id} className="hover:bg-muted/50 transition duration-200">
+                            <tr
+                              key={p._id}
+                              onClick={() => setSelectedParticipantProfile(p)}
+                              className="hover:bg-primary/5 hover:border-primary/30 transition duration-200 cursor-pointer group select-none"
+                            >
                               <td className="p-4 font-mono font-black text-[#E10600] text-sm">{idx + 1}</td>
                               <td className="p-4 font-bold text-foreground">
-                                <span className="block">{horseName}</span>
+                                <span className="block group-hover:text-primary transition-colors">{horseName}</span>
                                 <span className="text-[9px] font-mono text-muted-foreground">{horseBreed}</span>
                               </td>
                               <td className="p-4 font-bold text-foreground">{jockeyName}</td>
@@ -1254,6 +1292,105 @@ export default function SpectatorTournamentsPage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Chi tiết Hồ Sơ Đội Đua & Thông Số Nài/Chủ Ngựa */}
+      {selectedParticipantProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in">
+          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-in zoom-in-95">
+            <button
+              onClick={() => setSelectedParticipantProfile(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="size-5" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-border pb-3">
+              <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+                <Trophy className="size-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-black uppercase text-foreground leading-tight">Hồ Sơ Đội Đua & Thông Số</h3>
+                <p className="text-[11px] text-muted-foreground">Thông số chi tiết Chiến mã, Nài ngựa & Chủ sở hữu</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {/* 1. Chiến Mã Info */}
+              <div className="space-y-2 p-3.5 rounded-xl bg-muted/40 border border-border">
+                <div className="flex items-center justify-between text-xs font-black uppercase text-primary">
+                  <span className="flex items-center gap-1.5">🐴 Chiến Mã</span>
+                  <span className="text-foreground text-sm font-black">
+                    {typeof selectedParticipantProfile.horseId === "object" ? selectedParticipantProfile.horseId.name : "Chiến mã"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-2 border-t border-border/60">
+                  <div>
+                    <span className="text-[9px] text-muted-foreground block uppercase font-bold">Giống ngựa</span>
+                    <span className="font-bold text-foreground">{(typeof selectedParticipantProfile.horseId === "object" && selectedParticipantProfile.horseId.breed) || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] text-muted-foreground block uppercase font-bold">Tuổi</span>
+                    <span className="font-bold text-foreground">{(typeof selectedParticipantProfile.horseId === "object" && selectedParticipantProfile.horseId.age) ? `${selectedParticipantProfile.horseId.age} tuổi` : "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] text-muted-foreground block uppercase font-bold">Cân nặng</span>
+                    <span className="font-bold text-foreground">{(typeof selectedParticipantProfile.horseId === "object" && selectedParticipantProfile.horseId.weight) ? `${selectedParticipantProfile.horseId.weight} kg` : "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] text-muted-foreground block uppercase font-bold">Thành tích</span>
+                    <span className="font-bold text-teal-600 dark:text-teal-400">
+                      {(typeof selectedParticipantProfile.horseId === "object" && selectedParticipantProfile.horseId.wins !== undefined) 
+                        ? `${selectedParticipantProfile.horseId.wins}/${selectedParticipantProfile.horseId.totalRaces || 0} trận` 
+                        : "N/A"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Nài Ngựa Info */}
+              <div className="space-y-2 p-3.5 rounded-xl bg-muted/40 border border-border">
+                <div className="flex items-center justify-between text-xs font-black uppercase text-primary">
+                  <span className="flex items-center gap-1.5">🏇 Nài Ngựa (Jockey)</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">Đã kiểm duyệt</span>
+                </div>
+                <div className="space-y-1 text-xs pt-1">
+                  <p className="font-bold text-foreground text-sm">
+                    {typeof selectedParticipantProfile.jockeyUserId === "object" ? selectedParticipantProfile.jockeyUserId.fullName : "Chưa đăng ký"}
+                  </p>
+                  {typeof selectedParticipantProfile.jockeyUserId === "object" && selectedParticipantProfile.jockeyUserId.email && (
+                    <p className="text-[11px] text-muted-foreground">Email: {selectedParticipantProfile.jockeyUserId.email}</p>
+                  )}
+                  {typeof selectedParticipantProfile.jockeyUserId === "object" && selectedParticipantProfile.jockeyUserId.phone && (
+                    <p className="text-[11px] text-muted-foreground">Điện thoại: {selectedParticipantProfile.jockeyUserId.phone}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* 3. Chủ Ngựa Info */}
+              <div className="space-y-2 p-3.5 rounded-xl bg-muted/40 border border-border">
+                <div className="flex items-center justify-between text-xs font-black uppercase text-primary">
+                  <span className="flex items-center gap-1.5">👑 Chủ Sở Hữu (Horse Owner)</span>
+                </div>
+                <div className="space-y-1 text-xs pt-1">
+                  <p className="font-bold text-foreground text-sm">
+                    {typeof selectedParticipantProfile.ownerId === "object" ? selectedParticipantProfile.ownerId.fullName : "Chưa đăng ký"}
+                  </p>
+                  {typeof selectedParticipantProfile.ownerId === "object" && selectedParticipantProfile.ownerId.email && (
+                    <p className="text-[11px] text-muted-foreground">Email: {selectedParticipantProfile.ownerId.email}</p>
+                  )}
+                  {typeof selectedParticipantProfile.ownerId === "object" && selectedParticipantProfile.ownerId.phone && (
+                    <p className="text-[11px] text-muted-foreground">Điện thoại: {selectedParticipantProfile.ownerId.phone}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Button onClick={() => setSelectedParticipantProfile(null)} className="w-full rounded-xl text-xs font-bold uppercase tracking-wider">
+              Đóng Hồ Sơ
+            </Button>
           </div>
         </div>
       )}

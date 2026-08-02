@@ -609,9 +609,9 @@ export interface RegistrationItem {
   _id: string;
   tournamentId?: { _id: string; name: string; status: string } | string;
   raceId?: { _id: string; name: string; startTime: string; status: string } | string;
-  horseId?: { _id: string; name: string; breed: string } | string;
-  ownerId?: { _id: string; fullName: string; email: string } | string;
-  jockeyUserId?: { _id: string; fullName: string; email: string } | string;
+  horseId?: { _id: string; name: string; breed: string; age?: number; weight?: number; gender?: string; totalRaces?: number; wins?: number } | string;
+  ownerId?: { _id: string; fullName: string; email?: string; phone?: string; avatar?: string } | string;
+  jockeyUserId?: { _id: string; fullName: string; email?: string; phone?: string; avatar?: string } | string;
   status: string;
   note?: string;
   rejectedReason?: string;
