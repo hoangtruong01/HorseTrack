@@ -20,25 +20,25 @@ export type StatusBadgeProps = {
 };
 
 const toneClass: Record<StatusBadgeTone, string> = {
-  red: "border-red-500/50 bg-red-500/15 text-red-600 dark:border-red-500/50 dark:bg-red-500/20 dark:text-red-300",
+  red: "border-red-500/40 bg-red-500/15 text-red-800 dark:border-red-500/50 dark:bg-red-500/20 dark:text-red-300",
   yellow:
-    "border-amber-500/40 bg-amber-50 text-amber-900 dark:border-[#F8CD46]/50 dark:bg-[#F8CD46] dark:text-[#1C1C25]",
+    "border-amber-500/40 bg-amber-500/15 text-amber-900 dark:border-[#F8CD46]/50 dark:bg-[#F8CD46] dark:text-[#1C1C25]",
   amber:
-    "border-amber-500/50 bg-amber-500/15 text-amber-700 dark:border-amber-400/50 dark:bg-amber-400/20 dark:text-amber-300",
+    "border-amber-500/50 bg-amber-500/15 text-amber-900 dark:border-amber-400/50 dark:bg-amber-400/20 dark:text-amber-300",
   green:
-    "border-emerald-600/35 bg-emerald-50 text-emerald-800 dark:border-emerald-400/40 dark:bg-emerald-400/15 dark:text-emerald-200",
+    "border-emerald-600/40 bg-emerald-500/15 text-emerald-900 dark:border-emerald-400/40 dark:bg-emerald-400/15 dark:text-emerald-200",
   blue:
-    "border-blue-500/40 bg-blue-50 text-blue-800 dark:border-blue-400/50 dark:bg-blue-500/20 dark:text-blue-300",
+    "border-blue-500/40 bg-blue-500/15 text-blue-900 dark:border-blue-400/50 dark:bg-blue-500/20 dark:text-blue-300",
   purple:
-    "border-purple-500/40 bg-purple-50 text-purple-800 dark:border-purple-400/50 dark:bg-purple-500/20 dark:text-purple-300",
+    "border-purple-500/40 bg-purple-500/15 text-purple-900 dark:border-purple-400/50 dark:bg-purple-500/20 dark:text-purple-300",
   rose:
-    "border-rose-500/40 bg-rose-50 text-rose-800 dark:border-rose-500/40 dark:bg-rose-500/20 dark:text-rose-300",
+    "border-rose-500/40 bg-rose-500/15 text-rose-900 dark:border-rose-500/40 dark:bg-rose-500/20 dark:text-rose-300",
   orange:
-    "border-orange-500/40 bg-orange-50 text-orange-800 dark:border-orange-500/40 dark:bg-orange-500/20 dark:text-orange-300",
+    "border-orange-500/40 bg-orange-500/15 text-orange-900 dark:border-orange-500/40 dark:bg-orange-500/20 dark:text-orange-300",
   slate:
-    "border-border bg-muted text-muted-foreground dark:border-white/15 dark:bg-white/10 dark:text-white/80",
+    "border-border bg-muted text-foreground/80 dark:border-white/15 dark:bg-white/10 dark:text-white/80",
   teal:
-    "border-[#067E6A]/40 bg-teal-50 text-teal-900 dark:border-[#067E6A]/50 dark:bg-[#067E6A]/25 dark:text-teal-100",
+    "border-[#067E6A]/40 bg-teal-500/15 text-teal-900 dark:border-[#067E6A]/50 dark:bg-[#067E6A]/25 dark:text-teal-100",
 };
 
 export function StatusBadge({

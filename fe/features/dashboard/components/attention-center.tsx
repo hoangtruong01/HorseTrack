@@ -49,10 +49,10 @@ const severityConfig: Record<
   warning: {
     label: "Warning",
     icon: AlertTriangle,
-    border: "border-l-2 border-l-yellow-400",
-    dot: "bg-yellow-400",
-    badge: "border-yellow-400/20 bg-yellow-400/10 text-yellow-300",
-    iconColor: "text-yellow-400",
+    border: "border-l-2 border-l-amber-500",
+    dot: "bg-amber-500",
+    badge: "border-amber-500/40 bg-amber-500/15 text-amber-900 dark:border-yellow-400/20 dark:bg-yellow-400/10 dark:text-yellow-300 font-bold",
+    iconColor: "text-amber-600 dark:text-yellow-400",
   },
   info: {
     label: "Info",

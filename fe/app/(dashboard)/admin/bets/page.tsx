@@ -8,10 +8,10 @@ import { PageHeader } from "@/components/layout/page-header";
 import { predictionsApi, type PredictionItem } from "@/lib/api-client";
 
 const statusColors: Record<string, string> = {
-  PENDING: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  WON: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  LOST: "text-red-400 bg-red-400/10 border-red-400/20",
-  CANCELLED: "text-gray-400 bg-gray-400/10 border-gray-400/20",
+  PENDING: "text-amber-700 dark:text-yellow-400 bg-amber-500/15 dark:bg-yellow-400/10 border-amber-500/30 dark:border-yellow-400/20",
+  WON: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
+  LOST: "text-rose-700 dark:text-red-400 bg-rose-500/15 dark:bg-red-400/10 border-rose-500/30 dark:border-red-400/20",
+  CANCELLED: "text-slate-700 dark:text-slate-400 bg-slate-500/15 dark:bg-slate-400/10 border-slate-500/30 dark:border-slate-400/20",
 };
 
 export default function AdminBetsPage() {

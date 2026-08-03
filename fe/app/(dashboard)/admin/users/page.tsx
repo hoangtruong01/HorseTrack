@@ -54,19 +54,19 @@ const ROLES = ["admin", "owner", "jockey", "referee", "spectator", "counter_staf
 const STATUSES = ["active", "inactive", "banned"];
 
 const statusColors: Record<string, string> = {
-  active: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  inactive: "text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
-  banned: "text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20",
-  deleted: "text-gray-600 dark:text-gray-400 bg-gray-500/10 border-gray-500/20",
+  active: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-500/10 border-emerald-500/30 dark:border-emerald-500/20",
+  inactive: "text-amber-700 dark:text-yellow-400 bg-amber-500/15 dark:bg-yellow-500/10 border-amber-500/30 dark:border-yellow-500/20",
+  banned: "text-rose-700 dark:text-red-400 bg-rose-500/15 dark:bg-red-500/10 border-rose-500/30 dark:border-red-500/20",
+  deleted: "text-slate-700 dark:text-slate-400 bg-slate-500/15 dark:bg-slate-500/10 border-slate-500/30 dark:border-slate-500/20",
 };
 
 const roleColors: Record<string, string> = {
-  admin: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-  owner: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  jockey: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
-  referee: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
-  spectator: "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20",
-  counter_staff: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
+  admin: "bg-purple-500/15 dark:bg-purple-500/10 text-purple-800 dark:text-purple-400 border-purple-500/30 dark:border-purple-500/20",
+  owner: "bg-blue-500/15 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 border-blue-500/30 dark:border-blue-500/20",
+  jockey: "bg-orange-500/15 dark:bg-orange-500/10 text-orange-800 dark:text-orange-400 border-orange-500/30 dark:border-orange-500/20",
+  referee: "bg-cyan-500/15 dark:bg-cyan-500/10 text-cyan-800 dark:text-cyan-400 border-cyan-500/30 dark:border-cyan-500/20",
+  spectator: "bg-slate-500/15 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/30 dark:border-slate-500/20",
+  counter_staff: "bg-pink-500/15 dark:bg-pink-500/10 text-pink-800 dark:text-pink-400 border-pink-500/30 dark:border-pink-500/20",
 };
 
 const formatCertificatesList = (raw?: string): string[] => {
@@ -109,6 +109,8 @@ export default function AdminUsersPage() {
   const VICTORIES_PER_PAGE = 6;
   const [refereeProfile, setRefereeProfile] = useState<RefereeProfileItem | null>(null);
   const [ownerHorses, setOwnerHorses] = useState<HorseItem[]>([]);
+  const [ownerHorsePage, setOwnerHorsePage] = useState(1);
+  const HORSES_PER_PAGE = 6;
 
   const handleOpenUserDetail = useCallback(async (u: UserItem) => {
     setSelectedUserDetail(u);
@@ -118,6 +120,7 @@ export default function AdminUsersPage() {
     setVictoryPage(1);
     setRefereeProfile(null);
     setOwnerHorses([]);
+    setOwnerHorsePage(1);
 
     try {
       const promises: Promise<void>[] = [];
@@ -852,27 +855,85 @@ export default function AdminUsersPage() {
               {!loadingSubProfiles && (ownerHorses.length > 0 || selectedUserDetail.roles.includes("owner")) && (
                 <div className="bg-muted/40 p-4 rounded-xl border border-blue-500/20 space-y-3">
                   <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
                       <Trophy className="size-4" /> Danh Sách Chiến Mã Sở Hữu ({ownerHorses.length})
                     </h4>
                   </div>
 
-                  {ownerHorses.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {ownerHorses.map((h) => (
-                        <div key={h._id} className="bg-background/60 p-3 rounded-lg border border-border/50 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <h5 className="font-bold text-sm text-foreground">{h.name}</h5>
-                            <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${h.approvalStatus === "approved" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"}`}>
-                              {h.approvalStatus === "approved" ? "Đã duyệt" : "Chờ duyệt"}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-muted-foreground">Giống: <strong className="text-foreground">{h.breed || "Chưa rõ"}</strong> • Giới tính: <strong className="text-foreground">{h.gender || "—"}</strong> • Tuổi: <strong className="text-foreground">{h.age ?? "?"}</strong></p>
-                          <p className="text-[11px] text-muted-foreground">Tốc độ ban đầu: <strong className="text-emerald-400">{h.baseSpeed ?? 0} km/h</strong> • Thể lực: <strong className="text-sky-400">{h.staminaScore ?? 0}/100</strong></p>
+                  {ownerHorses.length > 0 ? (() => {
+                    const totalPages = Math.ceil(ownerHorses.length / HORSES_PER_PAGE);
+                    const safePage = Math.min(ownerHorsePage, totalPages || 1);
+                    const currentHorses = ownerHorses.slice((safePage - 1) * HORSES_PER_PAGE, safePage * HORSES_PER_PAGE);
+
+                    return (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {currentHorses.map((h) => {
+                            const status = (h.approvalStatus || "").toUpperCase();
+                            const isApproved = status === "APPROVED";
+                            const isRejected = status === "REJECTED";
+
+                            const badgeStyle = isApproved
+                              ? "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20"
+                              : isRejected
+                              ? "text-rose-700 dark:text-red-400 bg-rose-500/15 dark:bg-red-400/10 border-rose-500/30 dark:border-red-400/20"
+                              : "text-amber-700 dark:text-yellow-400 bg-amber-500/15 dark:bg-yellow-400/10 border-amber-500/30 dark:border-yellow-400/20";
+
+                            const statusLabel = isApproved
+                              ? "Đã duyệt"
+                              : isRejected
+                              ? "Bị từ chối"
+                              : "Chờ duyệt";
+
+                            return (
+                              <div key={h._id} className="bg-background/60 p-3 rounded-lg border border-border/50 space-y-1">
+                                <div className="flex items-center justify-between gap-1">
+                                  <h5 className="font-bold text-sm text-foreground truncate">{h.name}</h5>
+                                  <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border shrink-0 ${badgeStyle}`}>
+                                    {statusLabel}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground">Giống: <strong className="text-foreground">{h.breed || "Chưa rõ"}</strong> • Giới tính: <strong className="text-foreground">{h.gender || "—"}</strong> • Tuổi: <strong className="text-foreground">{h.age ?? "?"}</strong></p>
+                                <p className="text-[11px] text-muted-foreground">Tốc độ ban đầu: <strong className="text-emerald-700 dark:text-emerald-400 font-bold">{h.baseSpeed ?? 0} km/h</strong> • Thể lực: <strong className="text-sky-700 dark:text-sky-400 font-bold">{h.staminaScore ?? 0}/100</strong></p>
+                              </div>
+                            );
+                          })}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
+
+                        {/* Pagination for Owner Horses */}
+                        {totalPages > 1 && (
+                          <div className="flex items-center justify-between pt-2 border-t border-border/40 text-xs">
+                            <span className="text-[11px] text-muted-foreground font-medium">
+                              Trang {safePage} / {totalPages} (Tổng {ownerHorses.length} chiến mã)
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={safePage <= 1}
+                                onClick={() => setOwnerHorsePage((prev) => Math.max(1, prev - 1))}
+                                className="inline-flex items-center justify-center p-1 rounded-md border border-border bg-background hover:bg-muted text-foreground disabled:opacity-30 disabled:hover:bg-background transition"
+                                title="Trang trước"
+                              >
+                                <ChevronLeft className="size-3.5" />
+                              </button>
+                              <span className="px-2 font-mono font-bold text-xs text-foreground">
+                                {safePage} / {totalPages}
+                              </span>
+                              <button
+                                type="button"
+                                disabled={safePage >= totalPages}
+                                onClick={() => setOwnerHorsePage((prev) => Math.min(totalPages, prev + 1))}
+                                className="inline-flex items-center justify-center p-1 rounded-md border border-border bg-background hover:bg-muted text-foreground disabled:opacity-30 disabled:hover:bg-background transition"
+                                title="Trang tiếp"
+                              >
+                                <ChevronRight className="size-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })() : (
                     <p className="text-[11px] text-muted-foreground/60 italic">Chưa sở hữu chiến mã nào trên hệ thống.</p>
                   )}
                 </div>

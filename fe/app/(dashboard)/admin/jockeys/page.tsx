@@ -27,10 +27,10 @@ import { toast } from "sonner";
 
 const STATUSES = ["available", "unavailable", "suspended"];
 const statusColors: Record<string, string> = {
-  ACTIVE: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  available: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  unavailable: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  suspended: "text-red-400 bg-red-400/10 border-red-400/20",
+  ACTIVE: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
+  available: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
+  unavailable: "text-amber-700 dark:text-yellow-400 bg-amber-500/15 dark:bg-yellow-400/10 border-amber-500/30 dark:border-yellow-400/20",
+  suspended: "text-rose-700 dark:text-red-400 bg-rose-500/15 dark:bg-red-400/10 border-rose-500/30 dark:border-red-400/20",
 };
 
 const APPROVAL_STATUSES = [
@@ -41,9 +41,9 @@ const APPROVAL_STATUSES = [
 ];
 
 const approvalColors: Record<string, string> = {
-  PENDING: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  APPROVED: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  REJECTED: "text-rose-400 bg-rose-400/10 border-rose-400/20",
+  PENDING: "text-amber-700 dark:text-amber-400 bg-amber-500/15 dark:bg-amber-400/10 border-amber-500/30 dark:border-amber-400/20",
+  APPROVED: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
+  REJECTED: "text-rose-700 dark:text-red-400 bg-rose-500/15 dark:bg-red-400/10 border-rose-500/30 dark:border-red-400/20",
 };
 
 export default function AdminJockeysPage() {

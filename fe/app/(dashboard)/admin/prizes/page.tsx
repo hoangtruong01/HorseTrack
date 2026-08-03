@@ -8,8 +8,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { prizesApi, type PrizeItem } from "@/lib/api-client";
 
 const statusColors: Record<string, string> = {
-  PENDING: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  PAID: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+  PENDING: "text-amber-700 dark:text-yellow-400 bg-amber-500/15 dark:bg-yellow-400/10 border-amber-500/30 dark:border-yellow-400/20",
+  PAID: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
 };
 
 export default function AdminPrizesPage() {

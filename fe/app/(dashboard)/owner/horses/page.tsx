@@ -108,7 +108,7 @@ export default function HorsesStablePage() {
         count: approvedHorses.length,
         icon: <ShieldCheck className="size-4" />,
         color: "text-muted-foreground",
-        activeColor: "text-emerald-400 border-emerald-500 bg-emerald-500/5",
+        activeColor: "text-emerald-700 dark:text-emerald-400 border-emerald-500 bg-emerald-500/10",
       },
       {
         key: "pending",
@@ -116,7 +116,7 @@ export default function HorsesStablePage() {
         count: pendingOrRejectedHorses.length,
         icon: <Clock className="size-4" />,
         color: "text-muted-foreground",
-        activeColor: "text-yellow-400 border-yellow-500 bg-yellow-500/5",
+        activeColor: "text-amber-700 dark:text-yellow-400 border-amber-500 bg-amber-500/10",
       },
     ];
 
@@ -164,9 +164,9 @@ export default function HorsesStablePage() {
                 text-[11px] font-black tabular-nums
                 ${isActive
                     ? tab.key === "approved"
-                      ? "bg-emerald-500/20 text-emerald-300"
-                      : "bg-yellow-500/20 text-yellow-300"
-                    : "bg-muted06] text-muted-foreground/60"
+                      ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300"
+                      : "bg-amber-500/20 text-amber-900 dark:text-yellow-300"
+                    : "bg-muted text-muted-foreground"
                   }
               `}
               >

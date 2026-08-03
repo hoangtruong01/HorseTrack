@@ -20,18 +20,18 @@ const semanticConfig: Record<
 > = {
   danger: {
     rail: "from-red-500 via-red-400",
-    icon: "border-red-500/30 bg-red-500/10 text-red-400",
-    badge: "border-red-500/20 bg-red-500/10 text-red-400",
+    icon: "border-red-500/40 bg-red-500/15 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400",
+    badge: "border-red-500/30 bg-red-500/15 text-red-800 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 font-bold",
   },
   warning: {
-    rail: "from-yellow-400 via-yellow-300",
-    icon: "border-yellow-400/30 bg-yellow-400/10 text-yellow-300",
-    badge: "border-yellow-400/20 bg-yellow-400/10 text-yellow-300",
+    rail: "from-amber-500 via-amber-400",
+    icon: "border-amber-500/40 bg-amber-500/15 text-amber-900 dark:border-yellow-400/30 dark:bg-yellow-400/10 dark:text-yellow-300",
+    badge: "border-amber-500/30 bg-amber-500/15 text-amber-900 dark:border-yellow-400/20 dark:bg-yellow-400/10 dark:text-yellow-300 font-bold",
   },
   success: {
     rail: "from-emerald-500 via-emerald-400",
-    icon: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-    badge: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+    icon: "border-emerald-500/40 bg-emerald-500/15 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400",
+    badge: "border-emerald-500/30 bg-emerald-500/15 text-emerald-900 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 font-bold",
   },
   neutral: {
     rail: "from-border via-border/50",

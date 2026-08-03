@@ -18,12 +18,12 @@ const toneConfig: Record<
     hover: "hover:border-primary/40 hover:bg-primary/5",
   },
   teal: {
-    icon: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    icon: "border-emerald-500/40 bg-emerald-500/15 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400",
     hover: "hover:border-emerald-500/30 hover:bg-emerald-500/5",
   },
   yellow: {
-    icon: "border-yellow-400/30 bg-yellow-400/10 text-yellow-300",
-    hover: "hover:border-yellow-400/30 hover:bg-yellow-400/5",
+    icon: "border-amber-500/40 bg-amber-500/15 text-amber-900 dark:border-yellow-400/30 dark:bg-yellow-400/10 dark:text-yellow-300",
+    hover: "hover:border-amber-500/30 hover:bg-amber-500/5",
   },
   neutral: {
     icon: "border-border bg-muted/50 text-muted-foreground",

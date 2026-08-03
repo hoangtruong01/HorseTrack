@@ -8,8 +8,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { aiApi, type AiPackageItem } from "@/lib/api-client";
 
 const statusColors: Record<string, string> = {
-  ACTIVE: "text-emerald-600 dark:text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  INACTIVE: "text-slate-500 dark:text-slate-400 bg-slate-400/10 border-slate-400/20",
+  ACTIVE: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
+  INACTIVE: "text-slate-700 dark:text-slate-400 bg-slate-500/15 dark:bg-slate-400/10 border-slate-500/30 dark:border-slate-400/20",
 };
 
 const defaultForm = { name: "", description: "", price: "", durationDays: "", accuracyRate: "" };

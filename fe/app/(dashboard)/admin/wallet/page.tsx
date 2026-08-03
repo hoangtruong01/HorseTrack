@@ -8,17 +8,17 @@ import { PageHeader } from "@/components/layout/page-header";
 import { walletApi, type WalletTxItem, type CashoutItem } from "@/lib/api-client";
 
 const txTypeColors: Record<string, string> = {
-  DEPOSIT: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  REWARD_CASHOUT: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-  RACE_WIN_REWARD: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  BET_WIN: "text-purple-400 bg-purple-400/10 border-purple-400/20",
+  DEPOSIT: "text-blue-700 dark:text-blue-400 bg-blue-500/15 dark:bg-blue-400/10 border-blue-500/30 dark:border-blue-400/20",
+  REWARD_CASHOUT: "text-orange-700 dark:text-orange-400 bg-orange-500/15 dark:bg-orange-400/10 border-orange-500/30 dark:border-orange-400/20",
+  RACE_WIN_REWARD: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
+  BET_WIN: "text-purple-700 dark:text-purple-400 bg-purple-500/15 dark:bg-purple-400/10 border-purple-500/30 dark:border-purple-400/20",
 };
 const cashoutStatusColors: Record<string, string> = {
-  PENDING: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  APPROVED: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  PAID: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  REJECTED: "text-red-400 bg-red-400/10 border-red-400/20",
-  FAILED: "text-red-500 bg-red-500/10 border-red-500/20",
+  PENDING: "text-amber-700 dark:text-yellow-400 bg-amber-500/15 dark:bg-yellow-400/10 border-amber-500/30 dark:border-yellow-400/20",
+  APPROVED: "text-blue-700 dark:text-blue-400 bg-blue-500/15 dark:bg-blue-400/10 border-blue-500/30 dark:border-blue-400/20",
+  PAID: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
+  REJECTED: "text-rose-700 dark:text-red-400 bg-rose-500/15 dark:bg-red-400/10 border-rose-500/30 dark:border-red-400/20",
+  FAILED: "text-rose-700 dark:text-red-500 bg-rose-500/15 dark:bg-red-500/10 border-rose-500/30 dark:border-red-500/20",
 };
 
 export default function AdminWalletPage() {

@@ -14,10 +14,10 @@ import {
 
 /* ── status colors ── */
 const statusColors: Record<string, string> = {
-  assigned: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  accepted: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  declined: "text-red-400 bg-red-400/10 border-red-400/20",
-  removed:  "text-gray-400 bg-gray-400/10 border-gray-400/20",
+  assigned: "text-amber-700 dark:text-yellow-400 bg-amber-500/15 dark:bg-yellow-400/10 border-amber-500/30 dark:border-yellow-400/20",
+  accepted: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
+  declined: "text-rose-700 dark:text-red-400 bg-rose-500/15 dark:bg-red-400/10 border-rose-500/30 dark:border-red-400/20",
+  removed:  "text-slate-700 dark:text-slate-400 bg-slate-500/15 dark:bg-slate-400/10 border-slate-500/30 dark:border-slate-400/20",
 };
 const statusLabel: Record<string, string> = {
   assigned: "Chờ phản hồi", accepted: "Đã nhận", declined: "Đã từ chối", removed: "Đã xóa",

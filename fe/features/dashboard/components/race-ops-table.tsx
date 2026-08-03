@@ -32,15 +32,15 @@ const statusOrder: Record<string, number> = {
 const getStatusBadge = (status: string) => {
   const s = status.toUpperCase();
   if (s === "LIVE") {
-    return { label: "LIVE", className: "border-red-500/30 bg-red-500/15 text-red-400" };
+    return { label: "LIVE", className: "border-red-500/40 bg-red-500/15 text-red-800 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400 font-black" };
   }
   if (["SCHEDULED", "READY", "CHECKING"].includes(s)) {
-    return { label: "SẮP ĐẾN", className: "border-yellow-400/30 bg-yellow-400/10 text-yellow-300" };
+    return { label: "SẮP ĐẾN", className: "border-amber-500/40 bg-amber-500/15 text-amber-900 dark:border-yellow-400/30 dark:bg-yellow-400/10 dark:text-yellow-300 font-black" };
   }
   if (s === "CANCELLED") {
-    return { label: "ĐÃ HỦY", className: "border-red-400/30 bg-red-400/10 text-red-300 opacity-60" };
+    return { label: "ĐÃ HỦY", className: "border-rose-500/40 bg-rose-500/15 text-rose-800 dark:border-red-400/30 dark:bg-red-400/10 dark:text-red-300 opacity-60 font-black" };
   }
-  return { label: "XONG", className: "border-border bg-muted/50 text-muted-foreground" };
+  return { label: "XONG", className: "border-border bg-muted/50 text-muted-foreground font-black" };
 };
 
 function SortIcon({

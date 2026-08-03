@@ -601,7 +601,7 @@ export default function RefereeReportsPage() {
                                       <div className="mt-2 grid grid-cols-2 gap-2 p-2 rounded bg-muted/50 text-[10px]">
                                         {rep.violation && (
                                           <p className="text-muted-foreground">
-                                            Lỗi vi phạm: <strong className="text-amber-600 dark:text-yellow-400 font-bold">{rep.violation}</strong>
+                                            Lỗi vi phạm: <strong className="text-amber-700 dark:text-yellow-400 font-bold">{rep.violation}</strong>
                                           </p>
                                         )}
                                         {rep.penalty && (
