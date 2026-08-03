@@ -13,9 +13,9 @@ const sourceLabels: Record<string, string> = {
 };
 
 const sourceColors: Record<string, string> = {
-  LLM: "text-purple-400 bg-purple-400/10 border-purple-400/20",
-  RULE_BASED: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  MANUAL: "text-slate-400 bg-slate-400/10 border-slate-400/20",
+  LLM: "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20",
+  RULE_BASED: "text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20",
+  MANUAL: "text-slate-600 dark:text-slate-400 bg-slate-500/10 border-slate-500/20",
 };
 
 function getHorseName(field: AiPredictionItem["rankings"][number]["horseId"]): string {
@@ -153,7 +153,7 @@ export default function SpectatorAiPredictionsPage() {
                   <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">Điểm sức mạnh</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {[...prediction.rankings]
                   .sort((a, b) => a.predictedRank - b.predictedRank)
                   .map((r) => {
@@ -161,7 +161,7 @@ export default function SpectatorAiPredictionsPage() {
                     return (
                       <tr key={key} className="hover:bg-muted transition-colors">
                         <td className="px-5 py-4 text-center">
-                          <span className={`inline-flex size-8 items-center justify-center rounded-full text-sm font-black ${r.predictedRank === 1 ? "bg-yellow-400/20 text-yellow-400" : r.predictedRank === 2 ? "bg-slate-400/20 text-slate-300" : r.predictedRank === 3 ? "bg-orange-400/20 text-orange-400" : "bg-muted text-muted-foreground"}`}>
+                          <span className={`inline-flex size-8 items-center justify-center rounded-full text-sm font-black ${r.predictedRank === 1 ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400" : r.predictedRank === 2 ? "bg-slate-500/20 text-slate-700 dark:text-slate-200" : r.predictedRank === 3 ? "bg-orange-500/20 text-orange-600 dark:text-orange-400" : "bg-muted text-muted-foreground"}`}>
                             {r.predictedRank}
                           </span>
                         </td>

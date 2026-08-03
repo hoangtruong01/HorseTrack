@@ -175,8 +175,8 @@ export class RaceChecksService {
     return this.checkModel
       .find({ raceId: new Types.ObjectId(raceId) })
       .populate('raceRegistrationId', 'status jockeyUserId')
-      .populate('horseId', 'name breed image avatar imageUrl')
-      .populate('checkedBy', 'fullName')
+      .populate('horseId', 'name breed image images')
+      .populate('checkedBy', 'fullName avatar')
       .sort({ createdAt: -1 })
       .exec();
   }

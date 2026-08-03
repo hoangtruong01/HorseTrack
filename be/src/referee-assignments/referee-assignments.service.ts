@@ -252,7 +252,7 @@ export class RefereeAssignmentsService {
     const [data, total] = await Promise.all([
       this.assignmentModel
         .find(filter)
-        .populate('refereeUserId', 'fullName email')
+        .populate('refereeUserId', 'fullName email avatar')
         .populate('assignedBy', 'fullName')
         .skip((page - 1) * limit)
         .limit(limit)

@@ -72,9 +72,9 @@ export class RaceViolationsService {
   async findByRace(raceId: string) {
     return this.violationModel
       .find({ raceId: new Types.ObjectId(raceId) })
-      .populate('horseId', 'name breed')
-      .populate('jockeyUserId', 'fullName')
-      .populate('reportedBy', 'fullName')
+      .populate('horseId', 'name breed image images')
+      .populate('jockeyUserId', 'fullName avatar')
+      .populate('reportedBy', 'fullName avatar')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -84,8 +84,8 @@ export class RaceViolationsService {
       this.violationModel
         .find()
         .populate('raceId', 'name')
-        .populate('horseId', 'name breed')
-        .populate('reportedBy', 'fullName')
+        .populate('horseId', 'name breed image images')
+        .populate('reportedBy', 'fullName avatar')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })

@@ -429,6 +429,7 @@ export interface RankingEntry {
   wins: number;
   totalFinishTimeMs?: number;
   rank?: number;
+  avatar?: string;
 }
 
 export interface JockeyRankingEntry {
@@ -441,6 +442,7 @@ export interface JockeyRankingEntry {
   wins: number;
   totalFinishTimeMs?: number;
   rank?: number;
+  avatar?: string;
 }
 
 export const rankingsApi = {

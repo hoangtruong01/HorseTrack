@@ -288,7 +288,7 @@ export class RegistrationsService {
         .find(filter)
         .populate('tournamentId', 'name status')
         .populate('raceId', 'name startTime status')
-        .populate('horseId', 'name breed age weight gender totalRaces wins')
+        .populate('horseId', 'name breed age weight gender totalRaces wins image images')
         .populate('ownerId', 'fullName email phone avatar')
         .populate('jockeyUserId', 'fullName email phone avatar')
         .skip((page - 1) * limit)
@@ -310,8 +310,8 @@ export class RegistrationsService {
         .find(filter)
         .populate('tournamentId', 'name status')
         .populate('raceId', 'name startTime status')
-        .populate('horseId', 'name breed')
-        .populate('jockeyUserId', 'fullName email')
+        .populate('horseId', 'name breed image images')
+        .populate('jockeyUserId', 'fullName email avatar')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -329,9 +329,9 @@ export class RegistrationsService {
       .findById(id)
       .populate('tournamentId', 'name status')
       .populate('raceId', 'name startTime status')
-      .populate('horseId', 'name breed')
-      .populate('ownerId', 'fullName email')
-      .populate('jockeyUserId', 'fullName email')
+      .populate('horseId', 'name breed image images')
+      .populate('ownerId', 'fullName email avatar')
+      .populate('jockeyUserId', 'fullName email avatar')
       .exec();
     if (!reg) throw new NotFoundException('Registration not found');
     return reg;

@@ -26,7 +26,7 @@ export function MobileBottomNav({
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#15151E]/95 px-3 py-2 backdrop-blur lg:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 py-2 backdrop-blur lg:hidden",
         className,
       )}
       aria-label="Mobile dashboard navigation"
@@ -41,8 +41,8 @@ export function MobileBottomNav({
               key={item.href + item.title}
               href={item.href}
               className={cn(
-                "flex min-h-11 flex-col items-center justify-center rounded-lg px-2 py-1 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground",
-                active && "bg-primary/15 text-white",
+                "flex min-h-11 flex-col items-center justify-center rounded-lg px-2 py-1 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground",
+                active && "bg-primary/15 text-primary font-black",
               )}
             >
               {Icon ? (

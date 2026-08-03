@@ -321,9 +321,9 @@ export class RaceResultsService {
 
     return this.resultModel
       .find({ raceId: new Types.ObjectId(raceId) })
-      .populate('horseId', 'name breed')
-      .populate('jockeyUserId', 'fullName')
-      .populate('recordedBy', 'fullName')
+      .populate('horseId', 'name breed image images')
+      .populate('jockeyUserId', 'fullName avatar')
+      .populate('recordedBy', 'fullName avatar')
       .sort({ rank: 1 })
       .exec();
   }
@@ -444,9 +444,9 @@ export class RaceResultsService {
         raceId: new Types.ObjectId(raceId),
         status: statusFilter,
       })
-      .populate('horseId', 'name breed')
-      .populate('jockeyUserId', 'fullName')
-      .populate('recordedBy', 'fullName')
+      .populate('horseId', 'name breed image images')
+      .populate('jockeyUserId', 'fullName avatar')
+      .populate('recordedBy', 'fullName avatar')
       .sort({ rank: 1 })
       .exec();
   }
@@ -474,8 +474,8 @@ export class RaceResultsService {
         status: statusFilter,
       })
       .populate('raceId', 'name raceNumber')
-      .populate('horseId', 'name breed')
-      .populate('jockeyUserId', 'fullName')
+      .populate('horseId', 'name breed image images')
+      .populate('jockeyUserId', 'fullName avatar')
       .sort({ raceId: 1, rank: 1 })
       .exec();
   }
@@ -994,9 +994,9 @@ export class RaceResultsService {
 
     return this.resultModel
       .find({ raceId: new Types.ObjectId(raceId) })
-      .populate('horseId', 'name breed')
-      .populate('jockeyUserId', 'fullName')
-      .populate('recordedBy', 'fullName')
+      .populate('horseId', 'name breed image images')
+      .populate('jockeyUserId', 'fullName avatar')
+      .populate('recordedBy', 'fullName avatar')
       .sort({ rank: 1 })
       .exec();
   }
@@ -1017,8 +1017,8 @@ export class RaceResultsService {
           select: 'name startDate endDate status',
         },
       })
-      .populate('jockeyUserId', 'fullName email')
-      .populate('ownerId', 'fullName email')
+      .populate('jockeyUserId', 'fullName email avatar')
+      .populate('ownerId', 'fullName email avatar')
       .sort({ createdAt: -1 })
       .exec();
 
@@ -1071,8 +1071,8 @@ export class RaceResultsService {
           select: 'name startDate endDate status',
         },
       })
-      .populate('horseId', 'name breed avatar')
-      .populate('ownerId', 'fullName email')
+      .populate('horseId', 'name breed image images')
+      .populate('ownerId', 'fullName email avatar')
       .sort({ createdAt: -1 })
       .exec();
 

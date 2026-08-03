@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Trophy, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -177,19 +178,38 @@ export default function SpectatorRankingsPage() {
                             horse.rank === 1
                               ? "bg-yellow-500 text-black shadow-[0_0_12px_rgba(234,179,8,0.3)] animate-pulse"
                               : horse.rank === 2
-                                ? "bg-slate-300 text-black"
+                                ? "bg-slate-200 text-slate-900 border border-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
                                 : horse.rank === 3
-                                  ? "bg-[#CD7F32] text-foreground"
+                                  ? "bg-amber-700 text-amber-100 dark:bg-[#CD7F32] dark:text-white"
                                   : "border border-border bg-muted text-muted-foreground"
                           }`}
                         >
                           {horse.rank}
                         </span>
                       </td>
-                      <td className="flex items-center gap-2 p-4 font-black text-foreground hover:text-primary transition">
-                        {horse.horseName || "Chiến mã ẩn danh"}
-                        {horse.rank === 1 && <Flame className="size-3.5 animate-bounce text-primary" />}
-                        <span className="block text-[10px] text-muted-foreground font-normal">Bấm xem hồ sơ 🏆</span>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2.5 font-black text-foreground hover:text-primary transition">
+                          {horse.avatar ? (
+                            <Image
+                              src={horse.avatar}
+                              alt={horse.horseName || "Horse"}
+                              width={32}
+                              height={32}
+                              className="size-8 rounded-full border border-border object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="size-8 rounded-full border border-border bg-primary/10 flex items-center justify-center text-primary text-xs font-black shrink-0">
+                              🐴
+                            </div>
+                          )}
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span>{horse.horseName || "Chiến mã ẩn danh"}</span>
+                              {horse.rank === 1 && <Flame className="size-3.5 animate-bounce text-primary" />}
+                            </div>
+                            <span className="block text-[10px] text-muted-foreground font-normal">Bấm xem hồ sơ 🏆</span>
+                          </div>
+                        </div>
                       </td>
                       <td className="p-4 text-muted-foreground">{horse.breed || "Chưa rõ"}</td>
                       <td className="p-4 text-muted-foreground font-medium">{horse.ownerName || "—"}</td>
@@ -252,18 +272,35 @@ export default function SpectatorRankingsPage() {
                             jockey.rank === 1
                               ? "bg-yellow-500 text-black shadow-[0_0_12px_rgba(234,179,8,0.3)] animate-pulse"
                               : jockey.rank === 2
-                                ? "bg-slate-300 text-black"
+                                ? "bg-slate-200 text-slate-900 border border-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
                                 : jockey.rank === 3
-                                  ? "bg-[#CD7F32] text-foreground"
+                                  ? "bg-amber-700 text-amber-100 dark:bg-[#CD7F32] dark:text-white"
                                   : "border border-border bg-muted text-muted-foreground"
                           }`}
                         >
                           {jockey.rank}
                         </span>
                       </td>
-                      <td className="flex items-center gap-2 p-4 font-black text-foreground">
-                        {jockey.jockeyName || "Jockey ẩn danh"}
-                        {jockey.rank === 1 && <Trophy className="size-3.5 animate-bounce text-primary" />}
+                      <td className="p-4">
+                        <div className="flex items-center gap-2.5 font-black text-foreground">
+                          {jockey.avatar ? (
+                            <Image
+                              src={jockey.avatar}
+                              alt={jockey.jockeyName || "Jockey"}
+                              width={32}
+                              height={32}
+                              className="size-8 rounded-full border border-border object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="size-8 rounded-full border border-border bg-secondary flex items-center justify-center text-foreground font-bold text-xs shrink-0">
+                              {(jockey.jockeyName || "J")[0]}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1.5">
+                            <span>{jockey.jockeyName || "Jockey ẩn danh"}</span>
+                            {jockey.rank === 1 && <Trophy className="size-3.5 animate-bounce text-primary" />}
+                          </div>
+                        </div>
                       </td>
                       <td className="p-4 text-muted-foreground">{getSkillLevelText(jockey.skillLevel)}</td>
                       <td className="p-4 text-center font-medium text-foreground">

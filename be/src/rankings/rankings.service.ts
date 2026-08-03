@@ -72,7 +72,9 @@ export class RankingsService {
           horseId: '$_id',
           horseName: '$horse.name',
           breed: '$horse.breed',
-          avatar: { $arrayElemAt: ['$horse.images', 0] },
+          avatar: {
+            $ifNull: [{ $arrayElemAt: ['$horse.images', 0] }, '$horse.image'],
+          },
           totalPoints: 1,
           totalRaces: 1,
           wins: 1,
@@ -203,7 +205,9 @@ export class RankingsService {
           horseId: '$_id',
           horseName: '$horse.name',
           breed: '$horse.breed',
-          avatar: { $arrayElemAt: ['$horse.images', 0] },
+          avatar: {
+            $ifNull: [{ $arrayElemAt: ['$horse.images', 0] }, '$horse.image'],
+          },
           ownerName: '$owner.fullName',
           totalPoints: 1,
           totalRaces: 1,

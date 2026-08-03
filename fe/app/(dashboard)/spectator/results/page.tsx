@@ -1,11 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Calendar, ArrowLeft, Siren, Timer, Search, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { tournamentsApi, raceResultsApi } from "@/lib/api-client";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { getHorseImage, getUserAvatar } from "@/lib/utils";
 
 interface Tournament {
   id: string;
@@ -30,11 +32,15 @@ interface RaceResultItem {
     _id?: string;
     name?: string;
     breed?: string;
+    image?: string;
+    images?: string[];
+    avatar?: string;
   };
   jockeyUserId?: {
     id?: string;
     _id?: string;
     fullName?: string;
+    avatar?: string;
   };
   raceId?: {
     id?: string;
@@ -222,7 +228,7 @@ export default function SpectatorResultsPage() {
                       setSelectedTournament(t);
                       setCurrentPage(1);
                     }}
-                    className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-muted/30 dark:hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44 cursor-pointer"
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-muted/40 transition duration-300 p-5 flex flex-col justify-between h-44 cursor-pointer"
                   >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
                     <div>
@@ -431,18 +437,44 @@ export default function SpectatorResultsPage() {
                             res.rank === 1
                               ? "bg-yellow-500 text-black shadow-[0_0_12px_rgba(234,179,8,0.3)]"
                               : res.rank === 2
-                              ? "bg-slate-300 text-black"
+                              ? "bg-slate-200 text-slate-900 border border-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
                               : res.rank === 3
-                              ? "bg-[#CD7F32] text-foreground"
+                              ? "bg-amber-700 text-amber-100 dark:bg-[#CD7F32] dark:text-white"
                               : "bg-muted border border-border text-muted-foreground"
                           }`}
                         >
                           {res.rank || "—"}
                         </span>
                       </td>
-                      <td className="p-4 font-black text-foreground">{res.horseId?.name || "Chiến mã ẩn"}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2 font-black text-foreground">
+                          {getHorseImage(res.horseId) ? (
+                            <Image
+                              src={getHorseImage(res.horseId)}
+                              alt={res.horseId?.name || "Horse"}
+                              width={28}
+                              height={28}
+                              className="size-7 rounded-full border border-border object-cover shrink-0"
+                            />
+                          ) : null}
+                          <span>{res.horseId?.name || "Chiến mã ẩn"}</span>
+                        </div>
+                      </td>
                       <td className="p-4 text-muted-foreground">{res.horseId?.breed || "Chưa xác định"}</td>
-                      <td className="p-4 font-bold text-foreground">{res.jockeyUserId?.fullName || "Nài ngựa ẩn"}</td>
+                      <td className="p-4 font-bold text-foreground">
+                        <div className="flex items-center gap-2">
+                          {getUserAvatar(res.jockeyUserId) ? (
+                            <Image
+                              src={getUserAvatar(res.jockeyUserId)}
+                              alt={res.jockeyUserId?.fullName || "Jockey"}
+                              width={24}
+                              height={24}
+                              className="size-6 rounded-full border border-border object-cover shrink-0"
+                            />
+                          ) : null}
+                          <span>{res.jockeyUserId?.fullName || "Nài ngựa ẩn"}</span>
+                        </div>
+                      </td>
                       <td className="p-4 font-mono font-black text-foreground text-sm">
                         {res.outcome === "finished" ? formatTime(res.finishTimeMs) : "Không hoàn thành"}
                       </td>

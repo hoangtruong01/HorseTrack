@@ -18,6 +18,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { raceResultsApi, type HorseVictoriesSummary } from "@/lib/api-client";
+import { getHorseImage } from "@/lib/utils";
 
 interface HorseDetailModalProps {
   horseId: string | null;
@@ -76,10 +77,7 @@ export function HorseDetailModal({
   if (!isOpen) return null;
 
   const horseName = horseData?.name || "Chiến mã";
-  const horseImage =
-    horseData?.images && horseData.images.length > 0
-      ? horseData.images[0]
-      : horseData?.image || horseData?.imageUrl || "";
+  const horseImage = getHorseImage(horseData);
 
   const formatTime = (ms?: number) => {
     if (!ms) return "—";
@@ -96,7 +94,7 @@ export function HorseDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border bg-[#14141A] p-6 text-foreground shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border bg-card p-6 text-card-foreground shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
         <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-2">
             <div className="flex size-9 items-center justify-center rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">
@@ -310,9 +308,9 @@ export function HorseDetailModal({
                                 res.rank === 1
                                   ? "bg-yellow-500 text-black font-extrabold"
                                   : res.rank === 2
-                                  ? "bg-slate-300 text-black"
+                                  ? "bg-slate-200 text-slate-900 border border-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
                                   : res.rank === 3
-                                  ? "bg-[#CD7F32] text-foreground"
+                                  ? "bg-amber-700 text-amber-100 dark:bg-[#CD7F32] dark:text-white"
                                   : "bg-muted text-muted-foreground"
                               }`}
                             >
@@ -326,7 +324,7 @@ export function HorseDetailModal({
                           <td className="p-3 font-mono font-bold text-foreground">
                             {res.outcome === "finished" ? formatTime(res.finishTimeMs) : "Không hoàn thành"}
                           </td>
-                          <td className="p-3 text-right font-black text-teal-400">
+                          <td className="p-3 text-right font-black text-teal-600 dark:text-teal-400">
                             +{res.points || 0}
                           </td>
                         </tr>

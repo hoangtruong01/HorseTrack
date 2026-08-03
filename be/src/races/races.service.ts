@@ -146,7 +146,7 @@ export class RacesService {
       this.raceModel
         .find(filter)
         .populate('tournamentId', 'name')
-        .populate('createdBy', 'fullName')
+        .populate('createdBy', 'fullName avatar')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ startTime: -1, createdAt: -1 })
@@ -168,7 +168,7 @@ export class RacesService {
     const [races, total] = await Promise.all([
       this.raceModel
         .find(filter)
-        .populate('createdBy', 'fullName')
+        .populate('createdBy', 'fullName avatar')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ startTime: -1, createdAt: -1 })
@@ -186,7 +186,7 @@ export class RacesService {
     const race = await this.raceModel
       .findById(id)
       .populate('tournamentId', 'name startDate endDate')
-      .populate('createdBy', 'fullName')
+      .populate('createdBy', 'fullName avatar')
       .exec();
     if (!race || race.deletedAt) {
       throw new NotFoundException('Race not found');

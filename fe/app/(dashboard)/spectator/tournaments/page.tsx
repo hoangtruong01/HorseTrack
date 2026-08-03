@@ -627,7 +627,7 @@ export default function SpectatorTournamentsPage() {
                           </h3>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground bg-white/[0.01] rounded-xl p-3 border border-border">
+                        <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground bg-muted/40 rounded-xl p-3 border border-border">
                           <div>
                             <span className="block text-[8px] uppercase tracking-wider text-muted-foreground/60 font-black">Cự ly</span>
                             <span className="font-bold text-foreground text-xs">{race.distanceMeters}m</span>
@@ -766,7 +766,7 @@ export default function SpectatorTournamentsPage() {
                   {selectedTourRaces.map((race) => (
                     <div
                       key={race._id}
-                      className="group rounded-2xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-primary/20 hover:bg-white/[0.01] transition duration-300"
+                      className="group rounded-2xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-primary/20 hover:bg-muted/40 transition duration-300"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -1013,7 +1013,7 @@ export default function SpectatorTournamentsPage() {
                         </div>
 
                         {selectedRaceRegistrations.length === 0 ? (
-                          <div className="text-center py-4 border border-dashed border-border rounded-xl bg-white/[0.01]">
+                          <div className="text-center py-4 border border-dashed border-border rounded-xl bg-muted/30">
                             <p className="text-[10px] text-muted-foreground italic">Chưa có danh sách chiến mã chính thức</p>
                           </div>
                         ) : (
@@ -1178,7 +1178,7 @@ export default function SpectatorTournamentsPage() {
                         )}
                       </div>
                     ) : (
-                      <div className="rounded-xl border border-dashed border-border bg-white/[0.01] p-3 text-center text-muted-foreground text-[10px]">
+                      <div className="rounded-xl border border-dashed border-border bg-muted/30 p-3 text-center text-muted-foreground text-[10px]">
                         Cổng dự đoán đã đóng cho cuộc đua này (LIVE hoặc Đã kết thúc).
                       </div>
                     )

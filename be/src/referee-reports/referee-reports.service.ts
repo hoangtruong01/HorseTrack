@@ -46,8 +46,8 @@ export class RefereeReportsService {
   async findByRace(raceId: string) {
     return this.reportModel
       .find({ raceId: new Types.ObjectId(raceId) })
-      .populate('refereeId', 'fullName email')
-      .populate('horseId', 'name breed')
+      .populate('refereeId', 'fullName email avatar')
+      .populate('horseId', 'name breed image images')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -57,8 +57,8 @@ export class RefereeReportsService {
       this.reportModel
         .find()
         .populate('raceId', 'name')
-        .populate('refereeId', 'fullName email')
-        .populate('horseId', 'name breed')
+        .populate('refereeId', 'fullName email avatar')
+        .populate('horseId', 'name breed image images')
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 })

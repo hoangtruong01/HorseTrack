@@ -124,22 +124,22 @@ export function RaceSimulationModal({
       <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-4xl rounded-3xl border border-white/10 bg-[#0D0D14] shadow-2xl overflow-hidden race-modal-content">
+      <div className="relative w-full max-w-4xl rounded-3xl border border-border bg-card p-0 text-card-foreground shadow-2xl overflow-hidden race-modal-content">
         {/* Decorative gradient glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-64 h-32 bg-yellow-500/5 rounded-full blur-[80px] pointer-events-none" />
 
         {/* Header */}
         <div className="relative px-6 pt-6 pb-4 text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[10px] font-black uppercase tracking-[0.2em]">
-            <span className="size-1.5 rounded-full bg-yellow-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 dark:text-yellow-400 text-[10px] font-black uppercase tracking-[0.2em]">
+            <span className="size-1.5 rounded-full bg-yellow-500 dark:bg-yellow-400 animate-pulse" />
             Đang giả lập
           </div>
-          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
+          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground">
             {isFinished ? "✅ Giả Lập Hoàn Tất!" : "Cuộc Đua Đang Diễn Ra..."}
           </h2>
           <p
-            className="text-sm text-white/50 font-medium transition-all duration-500"
+            className="text-sm text-muted-foreground font-medium transition-all duration-500"
             key={messageIndex}
           >
             {isFinished
@@ -150,13 +150,13 @@ export function RaceSimulationModal({
 
         {/* Race Track */}
         <div className="relative px-4 sm:px-6 pb-2">
-          <div className="rounded-2xl border border-white/5 bg-gradient-to-b from-emerald-950/20 to-[#0A0A10] overflow-hidden">
+          <div className="rounded-2xl border border-border bg-card/80 overflow-hidden">
             {/* Track Header */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/[0.02]">
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/40">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">
                 🚩 Start
               </span>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-yellow-400/60">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-yellow-600 dark:text-yellow-400/80">
                 🏁 Finish Line
               </span>
             </div>
@@ -189,14 +189,14 @@ export function RaceSimulationModal({
                         LANE_BG[index % LANE_BG.length]
                       } ${
                         index < horses.length - 1
-                          ? "border-b border-dashed border-white/[0.06]"
+                          ? "border-b border-dashed border-border/40"
                           : ""
                       }`}
                       style={{ height: "56px" }}
                     >
                       {/* Lane number badge */}
                       <div
-                        className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black bg-white/[0.06] border border-white/10 ${
+                        className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black bg-muted border border-border ${
                           LANE_ACCENT[index % LANE_ACCENT.length]
                         }`}
                       >
@@ -205,11 +205,11 @@ export function RaceSimulationModal({
 
                       {/* Horse name */}
                       <div className="shrink-0 w-28 sm:w-36 overflow-hidden">
-                        <p className="text-xs font-bold text-white/90 truncate leading-tight">
+                        <p className="text-xs font-bold text-foreground truncate leading-tight">
                           {horse.name}
                         </p>
                         {horse.breed && (
-                          <p className="text-[9px] text-white/30 truncate leading-tight mt-0.5">
+                          <p className="text-[9px] text-muted-foreground truncate leading-tight mt-0.5">
                             {horse.breed}
                           </p>
                         )}
@@ -248,7 +248,7 @@ export function RaceSimulationModal({
                               unoptimized
                               className="object-contain"
                               style={{
-                                filter: "drop-shadow(0 0 8px rgba(255,255,255,0.2)) brightness(1.2)",
+                                filter: "drop-shadow(0 0 8px rgba(225,6,0,0.25)) brightness(1.1)",
                               }}
                             />
                           </div>
@@ -264,7 +264,7 @@ export function RaceSimulationModal({
 
         {/* Progress Bar */}
         <div className="relative px-6 pt-3 pb-6 space-y-2">
-          <div className="h-2 rounded-full bg-white/5 overflow-hidden border border-white/5">
+          <div className="h-2 rounded-full bg-muted overflow-hidden border border-border">
             <div
               className="h-full rounded-full transition-all duration-500 ease-out"
               style={{
@@ -280,9 +280,9 @@ export function RaceSimulationModal({
               }}
             />
           </div>
-          <p className="text-center text-[11px] font-bold text-white/40 uppercase tracking-wider">
+          <p className="text-center text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
             {progress >= 100 ? (
-              <span className="text-emerald-400">Hoàn tất! 100%</span>
+              <span className="text-emerald-600 dark:text-emerald-400">Hoàn tất! 100%</span>
             ) : (
               <>Đang xử lý... {Math.round(progress)}%</>
             )}

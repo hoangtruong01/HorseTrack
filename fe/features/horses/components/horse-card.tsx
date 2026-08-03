@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Trash2, Edit2, ShieldAlert, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { getHorseImage } from "@/lib/utils";
 
 export type HorseGender = "MALE" | "FEMALE" | "GELDING";
 export type HorseHealthStatus = "HEALTHY" | "INJURED" | "RECOVERING" | "RETIRED";
@@ -48,6 +49,7 @@ const healthMeta: Record<
 
 export function HorseCard({ horse, onDelete }: HorseCardProps) {
   const meta = healthMeta[horse.healthStatus] || { label: horse.healthStatus, tone: "slate" };
+  const mainImage = getHorseImage(horse);
 
   const getRemainingTimeText = (rejectedAtStr?: string) => {
     if (!rejectedAtStr) return "Sắp bị xóa";
@@ -66,9 +68,9 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
       
       {/* Horse Image background blur or thumbnail */}
       <div className="relative mb-4 flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/50">
-        {horse.image ? (
+        {mainImage ? (
           <Image
-            src={horse.image}
+            src={mainImage}
             alt={horse.name}
             fill
             className="object-contain transition duration-300 group-hover:scale-105"

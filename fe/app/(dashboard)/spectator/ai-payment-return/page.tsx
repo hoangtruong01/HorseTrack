@@ -51,7 +51,7 @@ function PaymentReturnContent() {
             </div>
             <Link
               href="/spectator/ai-packages"
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-muted px-6 py-2.5 text-sm font-semibold text-foreground hover:bg-white/[0.06] transition"
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-muted px-6 py-2.5 text-sm font-semibold text-foreground hover:bg-accent/80 hover:text-accent-foreground transition"
             >
               Quay lại trang gói AI
             </Link>
