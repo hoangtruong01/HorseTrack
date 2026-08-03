@@ -28,12 +28,38 @@ export default function AdminHorsesPage() {
   // View mode
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Search & Detail States
+  // Search & Filter States
   const [search, setSearch] = useState("");
+  const [filterApproval, setFilterApproval] = useState("");
+  const [filterHealth, setFilterHealth] = useState("");
+  const [filterGender, setFilterGender] = useState("");
   const [selectedHorse, setSelectedHorse] = useState<HorseItem | null>(null);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionInput, setRejectionInput] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const filteredHorses = horses.filter((h) => {
+    if (filterApproval && (h.approvalStatus || "").toUpperCase() !== filterApproval.toUpperCase()) {
+      return false;
+    }
+    if (filterHealth && (h.healthStatus || "").toUpperCase() !== filterHealth.toUpperCase()) {
+      return false;
+    }
+    if (filterGender && (h.gender || "").toUpperCase() !== filterGender.toUpperCase()) {
+      return false;
+    }
+    return true;
+  });
+
+  const hasActiveFilters = Boolean(search || filterApproval || filterHealth || filterGender);
+
+  const resetFilters = () => {
+    setSearch("");
+    setFilterApproval("");
+    setFilterHealth("");
+    setFilterGender("");
+    void fetchHorses(1, "");
+  };
 
   const handleSelectHorse = (h: HorseItem | null) => {
     setSelectedHorse(h);
@@ -125,53 +151,117 @@ export default function AdminHorsesPage() {
         description="Xem toàn bộ danh sách ngựa trong hệ thống. Admin kiểm duyệt hồ sơ và xử lý các chiến mã đăng ký mới."
       />
 
-      {/* Search and Metadata grid */}
-      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
-        <form onSubmit={handleSearchSubmit} className="relative max-w-md w-full group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70 group-focus-within:text-[#E10600] transition-colors" />
-          <input
-            type="text"
-            placeholder="Tìm tên ngựa, giống ngựa, tên chủ..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full rounded-xl border border-border bg-card/70 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-[#E10600] focus:ring-4 focus:ring-[#E10600]/15"
-          />
-        </form>
+      {/* Search & Filters bar */}
+      <div className="flex flex-col gap-4 bg-card/60 p-4 rounded-2xl border border-border backdrop-blur-md shadow-sm">
+        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 group">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70 group-focus-within:text-primary transition-colors" />
+            <input
+              type="text"
+              placeholder="Tìm tên ngựa, giống ngựa, tên chủ sở hữu..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background/80 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
+            />
+          </form>
 
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-muted-foreground self-center">
-            Tổng: <strong className="text-foreground">{meta.total}</strong> ngựa
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-muted-foreground">
+              Hiển thị: <strong className="text-foreground font-bold">{filteredHorses.length}</strong> / {meta.total} ngựa
+            </div>
+            <div className="flex items-center bg-background border border-border rounded-lg p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-md transition ${viewMode === "grid" ? "bg-muted text-foreground shadow-sm" : "text-muted-foreground/70 hover:text-foreground/80"}`}
+                title="Lưới"
+              >
+                <LayoutGrid className="size-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded-md transition ${viewMode === "list" ? "bg-muted text-foreground shadow-sm" : "text-muted-foreground/70 hover:text-foreground/80"}`}
+                title="Danh sách"
+              >
+                <List className="size-4" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center bg-card/90 border border-border rounded-lg p-1">
+        </div>
+
+        {/* Filter Selects */}
+        <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-border/40">
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mr-1">Bộ lọc:</span>
+
+          {/* Approval Filter */}
+          <select
+            value={filterApproval}
+            onChange={(e) => setFilterApproval(e.target.value)}
+            className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
+          >
+            <option value="">Tất cả xét duyệt</option>
+            <option value="APPROVED">Đã duyệt</option>
+            <option value="PENDING">Chờ duyệt</option>
+            <option value="REJECTED">Bị từ chối</option>
+          </select>
+
+          {/* Health Filter */}
+          <select
+            value={filterHealth}
+            onChange={(e) => setFilterHealth(e.target.value)}
+            className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
+          >
+            <option value="">Tất cả sức khỏe</option>
+            <option value="HEALTHY">Khỏe mạnh</option>
+            <option value="INJURED">Chấn thương</option>
+            <option value="RECOVERING">Hồi phục</option>
+            <option value="RETIRED">Giải nghệ</option>
+          </select>
+
+          {/* Gender Filter */}
+          <select
+            value={filterGender}
+            onChange={(e) => setFilterGender(e.target.value)}
+            className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
+          >
+            <option value="">Tất cả giới tính</option>
+            <option value="MALE">Đực</option>
+            <option value="FEMALE">Cái</option>
+            <option value="GELDING">Hoạn</option>
+          </select>
+
+          {/* Reset Filters button */}
+          {hasActiveFilters && (
             <button
-              onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-md transition ${viewMode === "grid" ? "bg-muted text-foreground shadow-sm" : "text-muted-foreground/70 hover:text-foreground/80"}`}
-              title="Lưới"
+              onClick={resetFilters}
+              className="h-8 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 text-xs font-semibold text-rose-700 dark:text-red-400 hover:bg-rose-500/20 transition"
             >
-              <LayoutGrid className="size-4" />
+              Xóa bộ lọc
             </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-md transition ${viewMode === "list" ? "bg-muted text-foreground shadow-sm" : "text-muted-foreground/70 hover:text-foreground/80"}`}
-              title="Danh sách"
-            >
-              <List className="size-4" />
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
       <div>
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-foreground/55">
-  <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
-  <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
-</div>
-        ) : horses.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có ngựa nào.</div>
+            <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
+            <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
+          </div>
+        ) : filteredHorses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-sm space-y-2">
+            <p>Không tìm thấy chiến mã nào phù hợp với bộ lọc.</p>
+            {hasActiveFilters && (
+              <button
+                onClick={resetFilters}
+                className="text-xs text-primary underline hover:text-primary/80 transition"
+              >
+                Xóa tất cả bộ lọc
+              </button>
+            )}
+          </div>
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {horses.map((h) => (
+            {filteredHorses.map((h) => (
               <div
                 key={`grid-${h._id}`}
                 className="bg-card border border-border rounded-2xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 flex flex-col group shadow-lg"
@@ -271,7 +361,7 @@ export default function AdminHorsesPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {horses.map((h) => (
+            {filteredHorses.map((h) => (
               <div
                 key={`list-${h._id}`}
                 className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-5 hover:scale-[1.01] transition-transform duration-300 shadow-lg group"

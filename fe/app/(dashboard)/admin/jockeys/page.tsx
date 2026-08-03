@@ -20,6 +20,7 @@ import {
   Loader2,
   Sparkles,
   Calendar,
+  Search,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { jockeysApi, type JockeyItem, raceResultsApi, type JockeyVictoryItem } from "@/lib/api-client";
@@ -55,9 +56,21 @@ export default function AdminJockeysPage() {
     totalPages: 1,
   });
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterApproval, setFilterApproval] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const filteredJockeys = jockeys.filter((j) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    const uName = typeof j.userId === "object" && j.userId ? (j.userId.fullName || "").toLowerCase() : "";
+    const uEmail = typeof j.userId === "object" && j.userId ? (j.userId.email || "").toLowerCase() : "";
+    const uPhone = typeof j.userId === "object" && j.userId ? (j.userId.phone || "").toLowerCase() : "";
+    const lic = (j.licenseNumber || "").toLowerCase();
+    const spec = (j.specialty || "").toLowerCase();
+    return uName.includes(q) || uEmail.includes(q) || uPhone.includes(q) || lic.includes(q) || spec.includes(q);
+  });
   const [viewMode, setViewMode] = useState<"card" | "table">("card");
 
   // Detail Modal State
@@ -214,15 +227,57 @@ export default function AdminJockeysPage() {
         description="Xem danh sách, kiểm tra thông tin bằng cấp, chỉ số thi đấu và thực hiện phê duyệt / từ chối hồ sơ Kỵ mã."
       />
 
-      {/* Filter Bar & View Mode Toggle */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-card/60 p-4 rounded-2xl border border-border backdrop-blur-md shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
+      {/* Filter Bar & Search Input */}
+      <div className="flex flex-col gap-3 bg-card/60 p-4 rounded-2xl border border-border backdrop-blur-md shadow-sm">
+        <div className="flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
+          {/* Search Bar */}
+          <div className="relative flex-1 group">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70 group-focus-within:text-primary transition-colors" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm nài ngựa theo tên, sđt, email, số giấy phép..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background/80 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 justify-between md:justify-end">
+            <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border">
+              <button
+                onClick={() => setViewMode("card")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "card"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                <LayoutGrid className="size-3.5" /> Dạng Thẻ Card
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "table"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                <TableIcon className="size-3.5" /> Dạng Bảng
+              </button>
+            </div>
+
+            <div className="text-xs text-muted-foreground font-mono">
+              Hiển thị: <span className="text-foreground font-bold">{filteredJockeys.length}</span> / {meta.total}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/40">
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mr-1">Bộ lọc:</span>
           {APPROVAL_STATUSES.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setFilterApproval(tab.value)}
-              className={`rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${filterApproval === tab.value
-                ? "bg-primary text-foreground shadow-lg"
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${filterApproval === tab.value
+                ? "bg-primary text-foreground shadow-md"
                 : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
             >
@@ -231,7 +286,7 @@ export default function AdminJockeysPage() {
           ))}
 
           <select
-            className="rounded-xl border border-border bg-muted/80 px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
+            className="rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -242,33 +297,15 @@ export default function AdminJockeysPage() {
               </option>
             ))}
           </select>
-        </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-          <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border">
+          {(search || filterApproval || filterStatus) && (
             <button
-              onClick={() => setViewMode("card")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "card"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-                }`}
+              onClick={() => { setSearch(""); setFilterApproval(""); setFilterStatus(""); }}
+              className="h-7 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 text-xs font-semibold text-rose-700 dark:text-red-400 hover:bg-rose-500/20 transition"
             >
-              <LayoutGrid className="size-3.5" /> Dạng Thẻ Card
+              Xóa bộ lọc
             </button>
-            <button
-              onClick={() => setViewMode("table")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "table"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              <TableIcon className="size-3.5" /> Dạng Bảng
-            </button>
-          </div>
-
-          <div className="text-xs text-muted-foreground font-mono">
-            Tổng: <span className="text-foreground font-bold">{meta.total}</span>
-          </div>
+          )}
         </div>
       </div>
 
@@ -278,16 +315,16 @@ export default function AdminJockeysPage() {
           <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
           <p className="text-xs font-mono uppercase tracking-widest">Đang tải danh sách Jockey...</p>
         </div>
-      ) : jockeys.length === 0 ? (
+      ) : filteredJockeys.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-muted-foreground/70 space-y-3 bg-card/40 rounded-2xl border border-border">
           <ShieldAlert className="size-10 text-foreground/20" />
           <p className="text-sm font-bold uppercase">Không tìm thấy hồ sơ nào</p>
-          <p className="text-xs text-muted-foreground">Các jockey đăng ký hồ sơ sẽ xuất hiện tại đây.</p>
+          <p className="text-xs text-muted-foreground">Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc.</p>
         </div>
       ) : viewMode === "card" ? (
         /* CARD GRID LAYOUT (Bố trí dạng Thẻ Card chỉn chu) */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {jockeys.map((j) => {
+          {filteredJockeys.map((j) => {
             const portrait = getPortraitPhoto(j);
             const certs = getCertPhotos(j);
             const certPreview = formatCertificatePreview(j.certificates);
@@ -454,7 +491,7 @@ export default function AdminJockeysPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {jockeys.map((j) => {
+                {filteredJockeys.map((j) => {
                   const portrait = getPortraitPhoto(j);
                   const certs = getCertPhotos(j);
                   const certPreview = formatCertificatePreview(j.certificates);

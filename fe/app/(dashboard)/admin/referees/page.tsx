@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   Table as TableIcon,
   CheckCircle,
+  Search,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { refereeProfilesApi, type RefereeProfileItem } from "@/lib/api-client";
@@ -26,6 +27,8 @@ const APPROVAL_STATUSES = [
   { value: "APPROVED", label: "Đã duyệt" },
   { value: "REJECTED", label: "Bị từ chối" },
 ];
+
+const STATUSES = ["available", "unavailable", "suspended"];
 
 const statusColors: Record<string, string> = {
   available: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
@@ -44,7 +47,23 @@ export default function AdminRefereesPage() {
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [filterApproval, setFilterApproval] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [search, setSearch] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const filteredProfiles = profiles.filter((p) => {
+    if (filterStatus && (p.status || "").toLowerCase() !== filterStatus.toLowerCase()) {
+      return false;
+    }
+    if (!search) return true;
+    const q = search.toLowerCase();
+    const uName = typeof p.userId === "object" && p.userId ? (p.userId.fullName || "").toLowerCase() : "";
+    const uEmail = typeof p.userId === "object" && p.userId ? (p.userId.email || "").toLowerCase() : "";
+    const uPhone = typeof p.userId === "object" && p.userId ? (p.userId.phone || "").toLowerCase() : "";
+    const lic = (p.licenseNo || "").toLowerCase();
+    const cert = (p.certificates || "").toLowerCase();
+    return uName.includes(q) || uEmail.includes(q) || uPhone.includes(q) || lic.includes(q) || cert.includes(q);
+  });
   const [viewMode, setViewMode] = useState<"card" | "table">("card");
 
   // Detail Modal State
@@ -171,48 +190,85 @@ export default function AdminRefereesPage() {
         description="Xem danh sách, kiểm tra thông tin bằng cấp và thực hiện phê duyệt / từ chối hồ sơ đăng ký làm trọng tài giám sát cuộc đua."
       />
 
-      {/* Filter Bar & View Mode Toggle */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-card/60 p-4 rounded-2xl border border-border backdrop-blur-md shadow-sm">
-        <div className="flex flex-wrap gap-2">
+      {/* Filter Bar & Search Input */}
+      <div className="flex flex-col gap-3 bg-card/60 p-4 rounded-2xl border border-border backdrop-blur-md shadow-sm">
+        <div className="flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
+          {/* Search Bar */}
+          <div className="relative flex-1 group">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70 group-focus-within:text-primary transition-colors" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm trọng tài theo tên, sđt, email, số bằng cấp..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background/80 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 justify-between md:justify-end">
+            <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border">
+              <button
+                onClick={() => setViewMode("card")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "card"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                <LayoutGrid className="size-3.5" /> Dạng Thẻ Card
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "table"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                <TableIcon className="size-3.5" /> Dạng Bảng
+              </button>
+            </div>
+
+            <div className="text-xs text-muted-foreground font-mono">
+              Hiển thị: <span className="text-foreground font-bold">{filteredProfiles.length}</span> / {meta.total}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/40">
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mr-1">Bộ lọc:</span>
           {APPROVAL_STATUSES.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setFilterApproval(tab.value)}
-              className={`rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${filterApproval === tab.value
-                  ? "bg-primary text-foreground shadow-lg"
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${filterApproval === tab.value
+                  ? "bg-primary text-foreground shadow-md"
                   : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
             >
               {tab.label}
             </button>
           ))}
-        </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-          <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border">
-            <button
-              onClick={() => setViewMode("card")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "card"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              <LayoutGrid className="size-3.5" /> Dạng Thẻ Card
-            </button>
-            <button
-              onClick={() => setViewMode("table")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "table"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              <TableIcon className="size-3.5" /> Dạng Bảng
-            </button>
-          </div>
+          <select
+            className="rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="" className="bg-card text-foreground">Tất cả Status</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s} className="bg-card text-foreground">
+                {s === "available" ? "Sẵn sàng" : s === "unavailable" ? "Bận" : "Đình chỉ"}
+              </option>
+            ))}
+          </select>
 
-          <div className="text-xs text-muted-foreground font-mono">
-            Tổng: <span className="text-foreground font-bold">{meta.total}</span>
-          </div>
+          {(search || filterApproval || filterStatus) && (
+            <button
+              onClick={() => { setSearch(""); setFilterApproval(""); setFilterStatus(""); }}
+              className="h-7 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 text-xs font-semibold text-rose-700 dark:text-red-400 hover:bg-rose-500/20 transition"
+            >
+              Xóa bộ lọc
+            </button>
+          )}
         </div>
       </div>
 
@@ -222,16 +278,16 @@ export default function AdminRefereesPage() {
           <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
           <p className="text-xs font-mono uppercase tracking-widest">Đang tải danh sách trọng tài...</p>
         </div>
-      ) : profiles.length === 0 ? (
+      ) : filteredProfiles.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-muted-foreground/70 space-y-3 bg-card/40 rounded-2xl border border-border">
           <ShieldAlert className="size-10 text-foreground/20" />
           <p className="text-sm font-bold uppercase">Không tìm thấy hồ sơ nào</p>
-          <p className="text-xs text-muted-foreground">Các trọng tài đăng ký hồ sơ sẽ xuất hiện tại đây.</p>
+          <p className="text-xs text-muted-foreground">Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc.</p>
         </div>
       ) : viewMode === "card" ? (
         /* CARD GRID LAYOUT (Bố trí dạng Thẻ Card dễ nhìn) */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {profiles.map((p) => {
+          {filteredProfiles.map((p) => {
             const portrait = getPortraitPhoto(p);
             const certs = getCertPhotos(p);
             const certPreview = formatCertificatePreview(p.certificates);
@@ -388,7 +444,7 @@ export default function AdminRefereesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {profiles.map((p) => {
+                {filteredProfiles.map((p) => {
                   const portrait = getPortraitPhoto(p);
                   const certs = getCertPhotos(p);
                   const certPreview = formatCertificatePreview(p.certificates);
