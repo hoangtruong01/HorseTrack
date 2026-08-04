@@ -32,6 +32,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { formatTournamentStatus, formatRaceStatus } from "@/lib/utils";
 
 const raceStatusColors: Record<string, string> = {
   SCHEDULED: "text-blue-700 dark:text-blue-400 bg-blue-500/15 dark:bg-blue-400/10 border-blue-500/30 dark:border-blue-400/20",
@@ -54,6 +56,7 @@ const raceStatusOptions = [
 ];
 
 export default function AdminTournamentDetailPage() {
+  const { i18n } = useTranslation();
   const params = useParams();
   const tournamentId = params.tournamentId as string;
 
@@ -162,7 +165,7 @@ export default function AdminTournamentDetailPage() {
     setActionLoading(id);
     try {
       await racesApi.updateStatus(id, newStatus);
-      toast.success(`Cập nhật trạng thái vòng đua thành: ${newStatus}`);
+      toast.success(`Cập nhật trạng thái vòng đua thành: ${formatRaceStatus(newStatus, i18n.language)}`);
       void loadDetails();
     } catch (e) {
       toast.error(
@@ -274,7 +277,7 @@ export default function AdminTournamentDetailPage() {
                     : "text-muted-foreground border-border bg-muted/50"
                 }`}
               >
-                {tournament.status}
+                {formatTournamentStatus(tournament.status, i18n.language)}
               </span>
             </div>
 
@@ -520,7 +523,7 @@ export default function AdminTournamentDetailPage() {
                                 value={opt}
                                 className="bg-card text-foreground"
                               >
-                                {opt}
+                                {formatRaceStatus(opt, i18n.language)}
                               </option>
                             ))}
                           </select>

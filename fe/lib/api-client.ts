@@ -424,6 +424,9 @@ export interface RankingEntry {
   horseName?: string;
   breed?: string;
   ownerName?: string;
+  jockeyUserId?: string;
+  jockeyName?: string;
+  jockeyAvatar?: string;
   totalPoints: number;
   totalRaces: number;
   wins: number;
@@ -446,8 +449,10 @@ export interface JockeyRankingEntry {
 }
 
 export const rankingsApi = {
-  getHorseRankings: (tournamentId: string) =>
-    apiFetch<RankingEntry[]>(`/rankings/tournament/${tournamentId}/horses`),
+  getHorseRankings: (tournamentId: string, raceId?: string) => {
+    const qs = raceId ? `?raceId=${raceId}` : "";
+    return apiFetch<RankingEntry[]>(`/rankings/tournament/${tournamentId}/horses${qs}`);
+  },
   getJockeyRankings: (tournamentId: string) =>
     apiFetch<JockeyRankingEntry[]>(`/rankings/tournament/${tournamentId}/jockeys`),
   getGlobalHorseRankings: () =>
@@ -843,7 +848,7 @@ export interface HorseVictoryResultItem {
   note?: string;
   createdAt?: string;
   horseId?: { _id?: string; id?: string; name?: string; breed?: string } | string;
-  jockeyUserId?: { _id?: string; id?: string; fullName?: string; email?: string } | string;
+  jockeyUserId?: { _id?: string; id?: string; fullName?: string; email?: string; avatar?: string } | string;
   ownerId?: { _id?: string; id?: string; fullName?: string; email?: string } | string;
   raceId?: {
     _id?: string;

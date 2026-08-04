@@ -23,6 +23,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { formatRaceStatus } from "@/lib/utils";
 
 const STATUS_COLORS: Record<string, string> = {
   SCHEDULED: "text-blue-400 bg-blue-400/10 border-blue-400/20",
@@ -47,6 +49,7 @@ const STATUS_OPTIONS = [
 const LOCKED_STATUSES = ["LIVE", "FINISHED", "RESULT_PUBLISHED"];
 
 export default function AdminRaceDetailPage() {
+  const { i18n } = useTranslation();
   const params = useParams();
   const raceId = params.raceId as string;
 
@@ -95,7 +98,7 @@ export default function AdminRaceDetailPage() {
     setChangingStatus(true);
     try {
       await racesApi.updateStatus(race._id, newStatus);
-      toast.success(`Trạng thái đã đổi thành: ${newStatus}`);
+      toast.success(`Trạng thái đã đổi thành: ${formatRaceStatus(newStatus, i18n.language)}`);
       await loadData();
     } catch (e) {
       toast.error(
@@ -301,7 +304,7 @@ export default function AdminRaceDetailPage() {
                   value={opt}
                   className="bg-card text-foreground"
                 >
-                  {opt}
+                  {formatRaceStatus(opt, i18n.language)}
                 </option>
               ))}
             </select>

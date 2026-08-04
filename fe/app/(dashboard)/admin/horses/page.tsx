@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Trash2, User, LayoutGrid, List, Search, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { formatHorseApprovalStatus } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   AlertDialog,
@@ -19,6 +21,7 @@ import { horsesApi, raceResultsApi, type HorseItem, type HorseVictoriesSummary }
 
 
 export default function AdminHorsesPage() {
+  const { i18n } = useTranslation();
   const [horses, setHorses] = useState<HorseItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -312,8 +315,7 @@ export default function AdminHorsesPage() {
                         h.approvalStatus === "REJECTED" ? "text-red-400 bg-red-400/20 border-red-400/30" :
                           "text-yellow-400 bg-yellow-400/20 border-yellow-400/30"
                       }`}>
-                      {h.approvalStatus === "APPROVED" ? "Đã duyệt" :
-                        h.approvalStatus === "REJECTED" ? "Bị từ chối" : "Chờ duyệt"}
+                      {formatHorseApprovalStatus(h.approvalStatus, i18n.language)}
                     </span>
 
                     {/* Badge Trạng thái sức khỏe */}
@@ -322,9 +324,9 @@ export default function AdminHorsesPage() {
                           h.healthStatus === "INJURED" ? "text-orange-400 bg-orange-400/20 border-orange-400/30" :
                             "text-gray-400 bg-gray-400/20 border-gray-400/30"
                       }`}>
-                      {h.healthStatus === "HEALTHY" ? "Khỏe mạnh" :
-                        h.healthStatus === "SICK" ? "Đang bệnh" :
-                          h.healthStatus === "INJURED" ? "Chấn thương" : "Nghỉ hưu"}
+                      {h.healthStatus === "HEALTHY" ? "Khỏe mạnh (Healthy)" :
+                        h.healthStatus === "SICK" ? "Đang bệnh (Sick)" :
+                          h.healthStatus === "INJURED" ? "Chấn thương (Injured)" : "Nghỉ hưu (Retired)"}
                     </span>
                   </div>
                 </div>
@@ -423,17 +425,16 @@ export default function AdminHorsesPage() {
                         h.approvalStatus === "REJECTED" ? "text-red-400 bg-red-400/10 border-red-400/20" :
                           "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
                       }`}>
-                      {h.approvalStatus === "APPROVED" ? "Đã duyệt" :
-                        h.approvalStatus === "REJECTED" ? "Từ chối" : "Chờ duyệt"}
+                      {formatHorseApprovalStatus(h.approvalStatus, i18n.language)}
                     </span>
                     <span className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase ${h.healthStatus === "HEALTHY" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" :
                         h.healthStatus === "SICK" ? "text-red-400 bg-red-400/10 border-red-400/20" :
                           h.healthStatus === "INJURED" ? "text-orange-400 bg-orange-400/10 border-orange-400/20" :
                             "text-gray-400 bg-gray-400/10 border-gray-400/20"
                       }`}>
-                      {h.healthStatus === "HEALTHY" ? "Khỏe" :
-                        h.healthStatus === "SICK" ? "Bệnh" :
-                          h.healthStatus === "INJURED" ? "Đau" : "Nghỉ"}
+                      {h.healthStatus === "HEALTHY" ? "Khỏe mạnh (Healthy)" :
+                        h.healthStatus === "SICK" ? "Bệnh (Sick)" :
+                          h.healthStatus === "INJURED" ? "Chấn thương (Injured)" : "Nghỉ hưu (Retired)"}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">
@@ -629,6 +630,34 @@ export default function AdminHorsesPage() {
                   )}
                 </div>
 
+                {/* Jockey Information */}
+                {(() => {
+                  const latestJockey = victoriesSummary?.allResults?.find(
+                    (res) => typeof res.jockeyUserId === "object" && res.jockeyUserId?.fullName
+                  )?.jockeyUserId as { fullName?: string; email?: string; avatar?: string } | undefined;
+
+                  return (
+                    <div className="rounded-xl border border-border bg-muted p-4 space-y-1.5 text-xs">
+                      <h5 className="font-bold text-primary uppercase tracking-wider text-[10px]">Nài ngựa điều khiển</h5>
+                      {latestJockey ? (
+                        <div className="flex items-center gap-3 pt-0.5">
+                          {latestJockey.avatar && (
+                            <div className="relative size-8 rounded-full overflow-hidden border border-border shrink-0">
+                              <Image src={latestJockey.avatar} alt={latestJockey.fullName || "Jockey"} fill className="object-cover" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-bold text-foreground text-sm">{latestJockey.fullName}</p>
+                            {latestJockey.email && <p className="text-muted-foreground text-[11px]">{latestJockey.email}</p>}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground italic text-[11px]">Chưa ghi nhận thông tin nài ngựa thi đấu</p>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* Approval Status & Date */}
                 <div className="rounded-xl border border-border bg-muted p-4 space-y-1 text-xs">
                   <h5 className="font-bold text-muted-foreground/70 uppercase tracking-widest text-[9px]">Tình trạng kiểm duyệt</h5>
@@ -637,8 +666,7 @@ export default function AdminHorsesPage() {
                       selectedHorse.approvalStatus === "REJECTED" ? "text-red-400 bg-red-400/10 border-red-400/20" :
                         "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
                       }`}>
-                      {selectedHorse.approvalStatus === "APPROVED" ? "Đã duyệt" :
-                        selectedHorse.approvalStatus === "REJECTED" ? "Từ chối" : "Chờ kiểm duyệt"}
+                      {formatHorseApprovalStatus(selectedHorse.approvalStatus, i18n.language)}
                     </span>
                   </div>
                   {selectedHorse.approvalStatus === "APPROVED" && selectedHorse.approvedAt && (

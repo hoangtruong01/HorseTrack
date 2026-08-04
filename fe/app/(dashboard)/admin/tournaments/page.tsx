@@ -24,6 +24,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { formatTournamentStatus } from "@/lib/utils";
 
 const TOURNAMENT_STATUS_FLOW: Record<string, string[]> = {
   DRAFT: ["OPEN_REGISTRATION", "CANCELLED"],
@@ -44,6 +46,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminTournamentsPage() {
+  const { i18n } = useTranslation();
   const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
   const [meta, setMeta] = useState({
     total: 0,
@@ -76,7 +79,7 @@ export default function AdminTournamentsPage() {
     setActionLoading(id);
     try {
       await tournamentsApi.updateStatus(id, status);
-      toast.success(`Đã cập nhật trạng thái → ${status}`);
+      toast.success(`Đã cập nhật trạng thái giải đấu thành: ${formatTournamentStatus(status, i18n.language)}`);
       await fetchTournaments(meta.page);
     } catch (e) {
       toast.error(
@@ -166,7 +169,7 @@ export default function AdminTournamentsPage() {
                     <span
                       className={`shrink-0 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${statusColors[t.status] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}
                     >
-                      {t.status}
+                      {formatTournamentStatus(t.status, i18n.language)}
                     </span>
                   </div>
                   {t.description && (
@@ -212,15 +215,15 @@ export default function AdminTournamentsPage() {
                     }
                   >
                     <SelectTrigger className="flex-1">
-                      <SelectValue />
+                      <SelectValue>{formatTournamentStatus(t.status, i18n.language)}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={t.status} disabled>
-                        {t.status}
+                        {formatTournamentStatus(t.status, i18n.language)}
                       </SelectItem>
                       {(TOURNAMENT_STATUS_FLOW[t.status] ?? []).map((s) => (
                         <SelectItem key={s} value={s}>
-                          {s}
+                          {formatTournamentStatus(s, i18n.language)}
                         </SelectItem>
                       ))}
                     </SelectContent>

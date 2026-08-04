@@ -187,6 +187,42 @@ export function HorseDetailModal({
             </div>
           </div>
 
+          {/* Jockey Information Card */}
+          {(() => {
+            const latestJockeyRes = summary?.allResults?.find(
+              (r) => typeof r.jockeyUserId === "object" && r.jockeyUserId?.fullName
+            );
+            const jockeyObj = latestJockeyRes && typeof latestJockeyRes.jockeyUserId === "object" ? latestJockeyRes.jockeyUserId : null;
+
+            return (
+              <div className="rounded-2xl border border-border bg-muted/40 p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative size-10 rounded-full overflow-hidden bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    {jockeyObj?.avatar ? (
+                      <Image src={jockeyObj.avatar} alt={jockeyObj.fullName || "Jockey"} fill className="object-cover" />
+                    ) : (
+                      <User className="size-5 text-primary" />
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-primary block">
+                      Nài Ngựa Điều Khiển
+                    </span>
+                    <h4 className="text-sm font-extrabold text-foreground">
+                      {jockeyObj?.fullName || "Chưa ghi nhận thông tin nài ngựa thi đấu"}
+                    </h4>
+                    {jockeyObj?.email && (
+                      <p className="text-[11px] text-muted-foreground">{jockeyObj.email}</p>
+                    )}
+                  </div>
+                </div>
+                <span className="rounded-lg bg-background border border-border px-2.5 py-1 text-[10px] font-bold uppercase text-muted-foreground">
+                  Jockey Thi Đấu
+                </span>
+              </div>
+            );
+          })()}
+
           {/* Navigation Tabs */}
           <div className="flex border-b border-border">
             <button

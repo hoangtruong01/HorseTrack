@@ -8,6 +8,8 @@ import { Eye, Flag, RefreshCw, Search, Trash2, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { formatRaceStatus } from "@/lib/utils";
 
 const statusColors: Record<string, string> = {
   SCHEDULED: "text-blue-700 dark:text-blue-400 bg-blue-500/15 dark:bg-blue-400/10 border-blue-500/30 dark:border-blue-400/20",
@@ -41,6 +43,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function AdminRacesPage() {
+  const { i18n } = useTranslation();
   const [races, setRaces] = useState<RaceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -74,7 +77,7 @@ export default function AdminRacesPage() {
     setActionLoading(id);
     try {
       await racesApi.updateStatus(id, newStatus);
-      toast.success(`Đã cập nhật trạng thái: ${newStatus}`);
+      toast.success(`Đã cập nhật trạng thái: ${formatRaceStatus(newStatus, i18n.language)}`);
       void fetchRaces(page);
     } catch (e) {
       toast.error((e as Error).message || "Cập nhật trạng thái thất bại");
@@ -143,7 +146,7 @@ export default function AdminRacesPage() {
                   : "bg-muted border border-border text-muted-foreground hover:text-foreground"
               }`}
             >
-              {s === "ALL" ? "Tất cả" : s}
+              {s === "ALL" ? (i18n.language?.startsWith("en") ? "All" : "Tất cả") : formatRaceStatus(s, i18n.language)}
             </button>
           ))}
         </div>
@@ -278,7 +281,7 @@ export default function AdminRacesPage() {
                               value={opt}
                               className="bg-card text-foreground"
                             >
-                              {opt}
+                              {formatRaceStatus(opt, i18n.language)}
                             </option>
                           ))}
                         </select>

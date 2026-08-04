@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RankingsService } from './rankings.service';
 
@@ -9,8 +9,11 @@ export class RankingsController {
 
   @Get('tournament/:tournamentId/horses')
   @ApiOperation({ summary: 'Horse rankings for a tournament (public)' })
-  getHorseRankings(@Param('tournamentId') tournamentId: string) {
-    return this.rankingsService.getHorseRankings(tournamentId);
+  getHorseRankings(
+    @Param('tournamentId') tournamentId: string,
+    @Query('raceId') raceId?: string,
+  ) {
+    return this.rankingsService.getHorseRankings(tournamentId, raceId);
   }
 
   @Get('tournament/:tournamentId/jockeys')

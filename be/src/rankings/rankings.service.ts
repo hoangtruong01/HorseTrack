@@ -12,6 +12,9 @@ export interface RankingEntry {
   horseName?: string;
   breed?: string;
   ownerName?: string;
+  jockeyUserId?: string;
+  jockeyName?: string;
+  jockeyAvatar?: string;
   totalPoints: number;
   totalRaces: number;
   wins: number;
@@ -40,24 +43,39 @@ export class RankingsService {
     private resultModel: Model<RaceResultDocument>,
   ) {}
 
-  async getHorseRankings(tournamentId: string): Promise<RankingEntry[]> {
+  async getHorseRankings(
+    tournamentId: string,
+    raceId?: string,
+  ): Promise<RankingEntry[]> {
+    const matchFilter: Record<string, any> = {
+      tournamentId: new Types.ObjectId(tournamentId),
+      status: RaceResultStatus.PUBLISHED,
+    };
+    if (raceId) {
+      matchFilter.raceId = new Types.ObjectId(raceId);
+    }
+
     const pipeline = [
       {
-        $match: {
-          tournamentId: new Types.ObjectId(tournamentId),
-          status: RaceResultStatus.PUBLISHED,
-        },
+        $match: matchFilter,
       },
       {
         $group: {
           _id: '$horseId',
+          jockeyUserId: { $last: '$jockeyUserId' },
           totalPoints: { $sum: '$points' },
           totalRaces: { $sum: 1 },
           wins: { $sum: { $cond: [{ $eq: ['$rank', 1] }, 1, 0] } },
           totalFinishTimeMs: { $sum: { $ifNull: ['$finishTimeMs', 0] } },
         },
       },
-      { $sort: { totalPoints: -1 as const, totalFinishTimeMs: 1 as const } },
+      {
+        $sort: {
+          wins: -1 as const,
+          totalPoints: -1 as const,
+          totalFinishTimeMs: 1 as const,
+        },
+      },
       {
         $lookup: {
           from: 'horses',
@@ -68,6 +86,15 @@ export class RankingsService {
       },
       { $unwind: { path: '$horse', preserveNullAndEmptyArrays: true } },
       {
+        $lookup: {
+          from: 'users',
+          localField: 'jockeyUserId',
+          foreignField: '_id',
+          as: 'jockeyUser',
+        },
+      },
+      { $unwind: { path: '$jockeyUser', preserveNullAndEmptyArrays: true } },
+      {
         $project: {
           horseId: '$_id',
           horseName: '$horse.name',
@@ -75,6 +102,9 @@ export class RankingsService {
           avatar: {
             $ifNull: [{ $arrayElemAt: ['$horse.images', 0] }, '$horse.image'],
           },
+          jockeyUserId: '$jockeyUserId',
+          jockeyName: '$jockeyUser.fullName',
+          jockeyAvatar: '$jockeyUser.avatar',
           totalPoints: 1,
           totalRaces: 1,
           wins: 1,
@@ -91,6 +121,9 @@ export class RankingsService {
         horseName: entry.horseName,
         breed: entry.breed,
         avatar: entry.avatar,
+        jockeyUserId: entry.jockeyUserId ? String(entry.jockeyUserId) : undefined,
+        jockeyName: entry.jockeyName,
+        jockeyAvatar: entry.jockeyAvatar,
         totalPoints: entry.totalPoints,
         totalRaces: entry.totalRaces,
         wins: entry.wins,
