@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -67,6 +68,7 @@ const tournamentStatusLabel: Record<
 };
 
 export default function OwnerRacesBrowserPage() {
+  const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [races, setRaces] = useState<Race[]>([]);
   const [selectedTournamentId, setSelectedTournamentId] = useState<
@@ -459,7 +461,13 @@ export default function OwnerRacesBrowserPage() {
                       return (
                         <article
                           key={raceId}
-                          className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/40 hover:bg-muted/50 flex flex-col justify-between min-h-[260px]"
+                          onClick={(e) => {
+                            const target = e.target as HTMLElement;
+                            if (target.closest("button") || target.closest("a")) return;
+                            router.push(`/owner/races/${raceId}/register`);
+                          }}
+                          className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[0_18px_56px_rgba(0,0,0,0.28)] transition duration-200 hover:border-primary/60 hover:bg-muted/50 flex flex-col justify-between min-h-[260px] cursor-pointer"
+                          title="Bấm để đăng ký chiến mã vào trận đua này"
                         >
                           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-white/20 to-transparent" />
                           <div className="absolute -right-12 -top-12 size-36 rounded-full bg-primary/5 blur-3xl transition group-hover:bg-primary/15" />

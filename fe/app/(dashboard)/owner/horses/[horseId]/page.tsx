@@ -230,11 +230,11 @@ export default function HorseDetailPage() {
 
       {/* Horse KPI Victories Bar */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 via-card to-card p-4 shadow-sm">
-          <p className="text-[10px] font-black uppercase tracking-wider text-yellow-400 flex items-center gap-1">
+        <div className="rounded-2xl border border-amber-500/40 dark:border-yellow-500/30 bg-gradient-to-br from-amber-500/10 dark:from-yellow-500/10 via-card to-card p-4 shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-yellow-400 flex items-center gap-1">
             <Trophy className="size-3.5" /> Số lần Vô Địch
           </p>
-          <p className="mt-1 font-mono text-2xl font-black text-yellow-400">
+          <p className="mt-1 font-mono text-2xl font-black text-amber-600 dark:text-yellow-400">
             {totalWinsCount} lần
           </p>
         </div>
@@ -242,7 +242,7 @@ export default function HorseDetailPage() {
           <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
             Tỷ lệ thắng
           </p>
-          <p className="mt-1 font-mono text-2xl font-black text-emerald-400">
+          <p className="mt-1 font-mono text-2xl font-black text-emerald-600 dark:text-emerald-400">
             {winRatePercent}%
           </p>
         </div>
@@ -258,7 +258,7 @@ export default function HorseDetailPage() {
           <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
             Tổng điểm tích lũy
           </p>
-          <p className="mt-1 font-mono text-2xl font-black text-teal-400">
+          <p className="mt-1 font-mono text-2xl font-black text-emerald-600 dark:text-teal-400">
             +{summary?.totalPoints ?? 0} điểm
           </p>
         </div>
@@ -441,23 +441,23 @@ export default function HorseDetailPage() {
               return (
                 <div
                   key={res.id}
-                  className="group relative overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-r from-yellow-500/10 via-card to-card p-5 shadow-[0_4px_24px_rgba(234,179,8,0.08)] transition duration-300 hover:border-yellow-500/60"
+                  className="group relative overflow-hidden rounded-2xl border border-amber-500/40 dark:border-yellow-500/30 bg-gradient-to-r from-amber-500/10 dark:from-yellow-500/10 via-card to-card p-5 shadow-sm transition duration-300 hover:border-amber-500/60 dark:hover:border-yellow-500/60"
                 >
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-yellow-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase text-yellow-400 border border-yellow-500/30">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 dark:bg-yellow-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-700 dark:text-yellow-400 border border-amber-500/30 dark:border-yellow-500/30">
                           🏆 VÔ ĐỊCH (HANG 1)
                         </span>
                         <span className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
-                          <Calendar className="size-3.5 text-yellow-500" />
+                          <Calendar className="size-3.5 text-amber-500 dark:text-yellow-500" />
                           {raceObj?.startTime
                             ? new Date(raceObj.startTime).toLocaleDateString("vi-VN")
                             : "N/A"}
                         </span>
                       </div>
 
-                      <h4 className="text-base font-black uppercase text-foreground group-hover:text-yellow-400 transition">
+                      <h4 className="text-base font-black uppercase text-foreground group-hover:text-amber-600 dark:group-hover:text-yellow-400 transition">
                         {tourObj?.name ? `${tourObj.name} · ` : ""}{raceObj?.name || "Giải đấu chính thức"}
                       </h4>
 
@@ -470,7 +470,7 @@ export default function HorseDetailPage() {
                       <span className="text-sm font-mono font-black text-foreground">
                         {formatTimeMs(res.finishTimeMs)}
                       </span>
-                      <span className="text-xs font-bold text-teal-400 mt-0.5">
+                      <span className="text-xs font-bold text-emerald-600 dark:text-teal-400 mt-0.5">
                         +{res.points || 10} điểm thưởng
                       </span>
                     </div>
@@ -505,21 +505,21 @@ export default function HorseDetailPage() {
                 const rank = rec.rank || 0;
                 const isPodium = rank > 0 && rank <= 3;
                 const podiumColors = [
-                  "border-yellow-500/40 bg-yellow-500/5 text-yellow-400 shadow-[0_4px_20px_rgba(234,179,8,0.08)]", // 1st
-                  "border-slate-300/40 bg-slate-300/5 text-slate-300 shadow-[0_4px_20px_rgba(203,213,225,0.08)]", // 2nd
-                  "border-amber-600/40 bg-amber-600/5 text-amber-500 shadow-[0_4px_20px_rgba(217,119,6,0.08)]", // 3rd
+                  "border-amber-500/50 dark:border-yellow-500/40 bg-amber-500/10 dark:bg-yellow-500/5 text-foreground shadow-sm", // 1st
+                  "border-slate-300 dark:border-slate-300/40 bg-slate-100/70 dark:bg-slate-300/5 text-foreground shadow-sm", // 2nd
+                  "border-amber-600/40 dark:border-amber-600/40 bg-amber-600/10 dark:bg-amber-600/5 text-foreground shadow-sm", // 3rd
                 ];
-                const cardBorder = isPodium ? podiumColors[rank - 1] : "border-border bg-card text-foreground/80";
+                const cardBorder = isPodium ? podiumColors[rank - 1] : "border-border bg-card text-foreground";
 
                 return (
                   <article
                     key={rec.id}
-                    className={`relative rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition duration-200 hover:border-primary/40 ${cardBorder}`}
+                    className={`relative rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition duration-200 hover:border-primary/50 ${cardBorder}`}
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 flex items-center gap-1">
-                          <Calendar className="size-3 text-muted-foreground/60" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                          <Calendar className="size-3 text-muted-foreground" />
                           {raceObj?.startTime
                             ? new Date(raceObj.startTime).toLocaleDateString("vi-VN", {
                                 day: "2-digit",
@@ -541,24 +541,24 @@ export default function HorseDetailPage() {
 
                     <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 border-border pt-3 sm:pt-0">
                       <div className="text-left sm:text-right">
-                        <span className="text-[10px] uppercase text-muted-foreground/60 font-bold block">Thời gian cán đích</span>
+                        <span className="text-[10px] uppercase text-muted-foreground font-bold block">Thời gian cán đích</span>
                         <span className="font-mono font-black text-sm text-foreground flex items-center gap-1 mt-0.5">
                           <Timer className="size-3.5 text-primary" /> {formatTimeMs(rec.finishTimeMs)}
                         </span>
                       </div>
 
                       <div className="text-left sm:text-right">
-                        <span className="text-[10px] uppercase text-muted-foreground/60 font-bold block">Điểm thưởng</span>
-                        <span className="font-mono font-black text-sm text-teal-400 mt-0.5 block">
+                        <span className="text-[10px] uppercase text-muted-foreground font-bold block">Điểm thưởng</span>
+                        <span className="font-mono font-black text-sm text-emerald-600 dark:text-emerald-400 mt-0.5 block">
                           +{rec.points || 0} điểm
                         </span>
                       </div>
 
                       <div className={`size-10 rounded-xl flex items-center justify-center border font-black text-base shrink-0 ${
-                        rank === 1 ? "bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_12px_rgba(234,179,8,0.2)]" :
-                        rank === 2 ? "bg-slate-300/20 border-slate-300 text-slate-200" :
-                        rank === 3 ? "bg-amber-600/20 border-amber-600 text-amber-500" :
-                        "bg-black/35 border-border text-muted-foreground"
+                        rank === 1 ? "bg-amber-500/15 dark:bg-yellow-500/20 border-amber-500 dark:border-yellow-500 text-amber-700 dark:text-yellow-400 shadow-sm" :
+                        rank === 2 ? "bg-slate-200 dark:bg-slate-300/20 border-slate-400 dark:border-slate-300 text-slate-700 dark:text-slate-200" :
+                        rank === 3 ? "bg-amber-600/15 dark:bg-amber-600/20 border-amber-600 dark:border-amber-600 text-amber-800 dark:text-amber-500" :
+                        "bg-muted/80 dark:bg-black/35 border-border text-muted-foreground"
                       }`}>
                         {rank > 0 ? `#${rank}` : "—"}
                       </div>

@@ -242,9 +242,27 @@ export function OwnerDashboard() {
 
           {/* Stats Block (2/3) */}
           <div className="lg:w-2/3 grid sm:grid-cols-3 gap-4">
-            {statsCards.map((stat, i) => (
-              <StatCard key={i} {...stat} />
-            ))}
+            <div
+              onClick={() => router.push("/owner/horses")}
+              className="cursor-pointer transition duration-200 hover:scale-[1.02]"
+              title="Xem danh sách chiến mã"
+            >
+              <StatCard {...statsCards[0]} />
+            </div>
+            <div
+              onClick={() => router.push("/owner/races")}
+              className="cursor-pointer transition duration-200 hover:scale-[1.02]"
+              title="Xem lịch đăng ký trận đua"
+            >
+              <StatCard {...statsCards[1]} />
+            </div>
+            <div
+              onClick={() => router.push("/owner/results")}
+              className="cursor-pointer transition duration-200 hover:scale-[1.02]"
+              title="Xem giải thưởng & thu nhập"
+            >
+              <StatCard {...statsCards[2]} />
+            </div>
           </div>
         </div>
 
@@ -285,7 +303,9 @@ export function OwnerDashboard() {
                   {recentInvs.map((inv) => (
                     <div
                       key={inv.id || inv._id}
-                      className="p-3 rounded-xl border border-border bg-muted/20 flex justify-between items-center hover:bg-muted/40 transition"
+                      onClick={() => router.push("/owner/jockey-invitations")}
+                      className="p-3 rounded-xl border border-border bg-muted/20 flex justify-between items-center hover:bg-muted/50 hover:border-primary/40 transition cursor-pointer"
+                      title="Bấm để quản lý lời mời nài ngựa"
                     >
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center gap-2 text-xs">
@@ -392,7 +412,9 @@ export function OwnerDashboard() {
                     {upcomingRaces.map((reg) => (
                       <div
                         key={reg.id || reg._id}
-                        className="relative overflow-hidden rounded-xl border border-border bg-muted/20 p-3 hover:border-teal-500/30 transition"
+                        onClick={() => router.push("/owner/registrations")}
+                        className="relative overflow-hidden rounded-xl border border-border bg-muted/20 p-3 hover:border-teal-500/50 hover:bg-muted/50 transition cursor-pointer"
+                        title="Bấm để xem danh sách đăng ký thi đấu"
                       >
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-teal-500" />
                         <div className="pl-2 flex flex-col gap-2">

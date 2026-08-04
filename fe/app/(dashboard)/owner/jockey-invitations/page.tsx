@@ -294,7 +294,16 @@ export default function JockeyInvitationsPage() {
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {availableJockeys.map(j => (
-                    <div key={j.id} className="group relative rounded-2xl border border-border bg-card p-5 hover:border-[#E10600]/30 hover:bg-muted/50 dark:hover:bg-[#1C1C25] transition shadow-xl flex flex-col justify-between">
+                    <div
+                      key={j.id}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest("button") || target.closest("a")) return;
+                        setSelectedJockeyForDetail(j);
+                      }}
+                      className="group relative rounded-2xl border border-border bg-card p-5 hover:border-[#E10600]/50 hover:bg-muted/50 dark:hover:bg-[#1C1C25] transition shadow-xl flex flex-col justify-between cursor-pointer"
+                      title="Bấm để xem hồ sơ chi tiết Jockey"
+                    >
                       {/* Header */}
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, AlertCircle, XOctagon, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -41,6 +42,7 @@ export function OwnerRegistrationTable({
   registrations,
   onRefresh,
 }: OwnerRegistrationTableProps) {
+  const router = useRouter();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleAction = async (id: string, actionType: "cancel" | "withdraw") => {
@@ -99,7 +101,15 @@ export function OwnerRegistrationTable({
               return (
                 <tr
                   key={registration.id}
-                  className="transition hover:bg-muted/[0.02]"
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.closest("button") || target.closest("a")) return;
+                    if (registration.horseId) {
+                      router.push(`/owner/horses/${registration.horseId}`);
+                    }
+                  }}
+                  className="transition hover:bg-muted/40 cursor-pointer"
+                  title="Bấm để xem thông tin chi tiết chiến mã"
                 >
                   <td className="px-5 py-4 font-black uppercase text-foreground">
                     {registration.horseName || "Không rõ tên"}

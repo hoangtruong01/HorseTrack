@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Trash2, Edit2, ShieldAlert, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -48,6 +49,7 @@ const healthMeta: Record<
 };
 
 export function HorseCard({ horse, onDelete }: HorseCardProps) {
+  const router = useRouter();
   const meta = healthMeta[horse.healthStatus] || { label: horse.healthStatus, tone: "slate" };
   const mainImage = getHorseImage(horse);
 
@@ -63,7 +65,15 @@ export function HorseCard({ horse, onDelete }: HorseCardProps) {
   };
 
   return (
-    <article className="group relative flex min-h-[380px] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-lg transition duration-200 hover:border-primary/40 hover:bg-muted/30">
+    <article
+      onClick={(e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest("button") || target.closest("a")) return;
+        router.push(`/owner/horses/${horse.id}`);
+      }}
+      className="group relative flex min-h-[380px] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-lg transition duration-200 hover:border-primary/60 hover:bg-muted/30 cursor-pointer"
+      title="Bấm để xem chi tiết chiến mã"
+    >
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#E10600] via-white/20 to-transparent" />
       
       {/* Horse Image background blur or thumbnail */}

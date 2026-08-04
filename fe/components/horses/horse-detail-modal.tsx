@@ -302,7 +302,7 @@ export function HorseDetailModal({
                           <span className="text-xs font-mono font-black text-foreground block">
                             {formatTime(res.finishTimeMs)}
                           </span>
-                          <span className="text-[10px] font-bold text-teal-400 block mt-1">
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block mt-1">
                             +{res.points || 10} điểm
                           </span>
                         </div>
@@ -360,7 +360,7 @@ export function HorseDetailModal({
                           <td className="p-3 font-mono font-bold text-foreground">
                             {res.outcome === "finished" ? formatTime(res.finishTimeMs) : "Không hoàn thành"}
                           </td>
-                          <td className="p-3 text-right font-black text-teal-600 dark:text-teal-400">
+                          <td className="p-3 text-right font-black text-emerald-600 dark:text-emerald-400">
                             +{res.points || 0}
                           </td>
                         </tr>
