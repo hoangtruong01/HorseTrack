@@ -616,7 +616,7 @@ export interface RegistrationItem {
   _id: string;
   tournamentId?: { _id: string; name: string; status: string } | string;
   raceId?: { _id: string; name: string; startTime: string; status: string } | string;
-  horseId?: { _id: string; name: string; breed: string; age?: number; weight?: number; gender?: string; totalRaces?: number; wins?: number } | string;
+  horseId?: { _id: string; name: string; breed: string; image?: string; images?: string[]; avatar?: string; imageUrl?: string; age?: number; weight?: number; gender?: string; totalRaces?: number; wins?: number } | string;
   ownerId?: { _id: string; fullName: string; email?: string; phone?: string; avatar?: string } | string;
   jockeyUserId?: { _id: string; fullName: string; email?: string; phone?: string; avatar?: string } | string;
   status: string;
@@ -646,6 +646,27 @@ export const registrationsApi = {
       method: "PATCH",
       body: JSON.stringify({ reason }),
     }),
+  bulkApprove: async (ids: string[]) => {
+    const results = await Promise.allSettled(
+      ids.map((id) => apiFetch(`/registrations/${id}/approve`, { method: "PATCH" }))
+    );
+    const successful = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
+    return { successful, failed, total: ids.length };
+  },
+  bulkReject: async (ids: string[], reason?: string) => {
+    const results = await Promise.allSettled(
+      ids.map((id) =>
+        apiFetch(`/registrations/${id}/reject`, {
+          method: "PATCH",
+          body: JSON.stringify({ reason }),
+        })
+      )
+    );
+    const successful = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
+    return { successful, failed, total: ids.length };
+  },
 };
 
 // ─── Race Checks ─────────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { racesApi, type RaceItem } from "@/lib/api-client";
 import { Eye, Flag, RefreshCw, Search, Trash2, Trophy } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -43,6 +44,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function AdminRacesPage() {
+  const router = useRouter();
   const { i18n } = useTranslation();
   const [races, setRaces] = useState<RaceItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -222,7 +224,13 @@ export default function AdminRacesPage() {
                   return (
                     <tr
                       key={race._id}
-                      className="hover:bg-white/[0.01] transition duration-200"
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest("select") || target.closest("button") || target.closest("a")) return;
+                        router.push(`/admin/races/${race._id}`);
+                      }}
+                      className="hover:bg-muted/40 cursor-pointer transition duration-200"
+                      title="Bấm để xem chi tiết trận đua"
                     >
                       <td className="p-4 font-mono font-bold text-muted-foreground/70">
                         {(meta.page - 1) * 20 + index + 1}
