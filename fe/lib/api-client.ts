@@ -833,6 +833,7 @@ export const aiApi = {
 // ─── Race Results & Victories ───────────────────────────────────────────────
 export interface HorseVictoryResultItem {
   id: string;
+  _id?: string;
   rank?: number;
   finishTimeMs?: number;
   outcome: string;

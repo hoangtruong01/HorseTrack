@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Trash2, User, LayoutGrid, List, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, User, LayoutGrid, List, Search, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import {
@@ -15,7 +15,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { horsesApi, type HorseItem } from "@/lib/api-client";
+import { horsesApi, raceResultsApi, type HorseItem, type HorseVictoriesSummary } from "@/lib/api-client";
 
 
 export default function AdminHorsesPage() {
@@ -37,6 +37,11 @@ export default function AdminHorsesPage() {
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionInput, setRejectionInput] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  // Championship History States
+  const [victoriesSummary, setVictoriesSummary] = useState<HorseVictoriesSummary | null>(null);
+  const [loadingVictories, setLoadingVictories] = useState(false);
+  const [champPage, setChampPage] = useState(1);
 
   const filteredHorses = horses.filter((h) => {
     if (filterApproval && (h.approvalStatus || "").toUpperCase() !== filterApproval.toUpperCase()) {
@@ -64,7 +69,27 @@ export default function AdminHorsesPage() {
   const handleSelectHorse = (h: HorseItem | null) => {
     setSelectedHorse(h);
     setActiveImageIndex(0);
+    setChampPage(1);
+    setVictoriesSummary(null);
   };
+
+  useEffect(() => {
+    if (selectedHorse?._id) {
+      setLoadingVictories(true);
+      raceResultsApi
+        .getByHorse(selectedHorse._id)
+        .then((res) => {
+          setVictoriesSummary(res);
+        })
+        .catch((err) => {
+          console.error("Lỗi lấy lịch sử giải vô địch:", err);
+          setVictoriesSummary(null);
+        })
+        .finally(() => {
+          setLoadingVictories(false);
+        });
+    }
+  }, [selectedHorse?._id]);
 
   const fetchHorses = useCallback(async (page = 1, currentSearch = search) => {
     setLoading(true);
@@ -264,7 +289,8 @@ export default function AdminHorsesPage() {
             {filteredHorses.map((h) => (
               <div
                 key={`grid-${h._id}`}
-                className="bg-card border border-border rounded-2xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 flex flex-col group shadow-lg"
+                onClick={() => handleSelectHorse(h)}
+                className="bg-card border border-border rounded-2xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 flex flex-col group shadow-lg cursor-pointer"
               >
                 {/* Phần ảnh đầu Card */}
                 <div className="relative aspect-video w-full bg-muted/80 overflow-hidden border-b border-border flex items-center justify-center">
@@ -341,13 +367,19 @@ export default function AdminHorsesPage() {
                   {/* Phần Action (Nút bấm) */}
                   <div className="flex items-center gap-2 mt-5 pt-3 border-t border-border">
                     <button
-                      onClick={() => handleSelectHorse(h)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectHorse(h);
+                      }}
                       className="flex-1 h-9 rounded-xl border border-border bg-muted text-foreground hover:bg-white/[0.08] text-xs font-bold transition flex items-center justify-center"
                     >
                       Xem chi tiết
                     </button>
                     <button
-                      onClick={() => handleDelete(h)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(h);
+                      }}
                       disabled={actionLoading === h._id || h.status === "DELETED"}
                       className="size-9 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/30 transition flex items-center justify-center shrink-0 disabled:opacity-40"
                       title="Xóa ngựa"
@@ -364,7 +396,8 @@ export default function AdminHorsesPage() {
             {filteredHorses.map((h) => (
               <div
                 key={`list-${h._id}`}
-                className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-5 hover:scale-[1.01] transition-transform duration-300 shadow-lg group"
+                onClick={() => handleSelectHorse(h)}
+                className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-5 hover:scale-[1.01] transition-transform duration-300 shadow-lg group cursor-pointer"
               >
                 {/* Ảnh ngựa dẹt */}
                 <div className="relative h-24 w-32 shrink-0 bg-muted/80 overflow-hidden rounded-xl border border-border flex items-center justify-center">
@@ -420,13 +453,19 @@ export default function AdminHorsesPage() {
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0 sm:ml-4 w-full sm:w-auto mt-4 sm:mt-0">
                   <button
-                    onClick={() => handleSelectHorse(h)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectHorse(h);
+                    }}
                     className="flex-1 sm:flex-none h-10 px-4 rounded-xl border border-border bg-muted text-foreground hover:bg-white/[0.08] text-xs font-bold transition flex items-center justify-center"
                   >
                     Xem chi tiết
                   </button>
                   <button
-                    onClick={() => handleDelete(h)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(h);
+                    }}
                     disabled={actionLoading === h._id || h.status === "DELETED"}
                     className="size-10 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/30 transition flex items-center justify-center shrink-0 disabled:opacity-40"
                     title="Xóa ngựa"
@@ -621,6 +660,125 @@ export default function AdminHorsesPage() {
               <div className="mt-5 text-xs text-foreground/70 space-y-1">
                 <span className="text-muted-foreground/70 block font-bold uppercase tracking-wider">Mô tả đặc điểm:</span>
                 <p className="bg-white/[0.01] border border-border rounded-xl p-3.5 leading-relaxed italic">{selectedHorse.description}</p>
+              </div>
+            )}
+
+            {/* Lịch sử giải vô địch (5 cái 1 trang) cho chiến mã đã được duyệt */}
+            {selectedHorse.approvalStatus === "APPROVED" && (
+              <div className="mt-6 border-t border-border pt-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="size-4 text-yellow-500" />
+                    <h4 className="text-xs font-black uppercase text-foreground tracking-wider">
+                      Lịch Sử Giải Vô Địch ({victoriesSummary?.championships?.length ?? 0})
+                    </h4>
+                  </div>
+                  {victoriesSummary && (
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      Tổng {victoriesSummary.totalRaces} trận · <strong className="text-yellow-400">{victoriesSummary.wins} Quán quân</strong>
+                    </span>
+                  )}
+                </div>
+
+                {loadingVictories ? (
+                  <div className="py-6 text-center text-xs text-muted-foreground animate-pulse">
+                    Đang tải lịch sử giải vô địch...
+                  </div>
+                ) : !victoriesSummary || victoriesSummary.championships.length === 0 ? (
+                  <div className="rounded-xl border border-border bg-muted/30 p-4 text-center text-xs text-muted-foreground">
+                    Chiến mã chưa có giải vô địch nào được ghi nhận.
+                  </div>
+                ) : (
+                  <>
+                    {(() => {
+                      const pageSize = 5;
+                      const champs = victoriesSummary.championships;
+                      const totalPages = Math.ceil(champs.length / pageSize) || 1;
+                      const startIndex = (champPage - 1) * pageSize;
+                      const currentChamps = champs.slice(startIndex, startIndex + pageSize);
+
+                      return (
+                        <div className="space-y-3">
+                          <div className="space-y-2">
+                            {currentChamps.map((item, idx) => {
+                              const raceObj = typeof item.raceId === "object" ? item.raceId : null;
+                              const tourObj = raceObj && typeof raceObj.tournamentId === "object" ? raceObj.tournamentId : null;
+                              const jockeyObj = typeof item.jockeyUserId === "object" ? item.jockeyUserId : null;
+
+                              const formatTime = (ms?: number) => {
+                                if (!ms) return "—";
+                                const totalSec = ms / 1000;
+                                const mins = Math.floor(totalSec / 60);
+                                const secs = (totalSec % 60).toFixed(2);
+                                return `${mins}:${secs.padStart(5, "0")}`;
+                              };
+
+                              return (
+                                <div
+                                  key={item._id || item.id || idx}
+                                  className="flex items-center justify-between rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3 text-xs"
+                                >
+                                  <div className="space-y-1 min-w-0 flex-1 pr-3">
+                                    <div className="flex items-center gap-2">
+                                      <span className="rounded-md bg-yellow-500/20 px-2 py-0.5 text-[9px] font-bold uppercase text-yellow-400 border border-yellow-500/30">
+                                        🏆 QUÁN QUÂN (HẠNG 1)
+                                      </span>
+                                      {raceObj?.startTime && (
+                                        <span className="text-[10px] text-muted-foreground font-mono">
+                                          {new Date(raceObj.startTime).toLocaleDateString("vi-VN")}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <h5 className="font-bold text-foreground truncate">
+                                      {tourObj?.name ? `${tourObj.name} - ` : ""}{raceObj?.name || "Giải đấu chính thức"}
+                                    </h5>
+                                    <p className="text-[11px] text-muted-foreground">
+                                      Nài ngựa: <span className="font-medium text-foreground">{jockeyObj?.fullName || "—"}</span>
+                                    </p>
+                                  </div>
+
+                                  <div className="text-right shrink-0">
+                                    <span className="font-mono font-bold text-foreground block">
+                                      {formatTime(item.finishTimeMs)}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-teal-400 block mt-0.5">
+                                      +{item.points || 0} điểm
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Pagination controls for 5 items per page */}
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between pt-2 text-xs">
+                              <span className="text-muted-foreground">
+                                Trang {champPage} / {totalPages} (Tổng {champs.length} giải)
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setChampPage((p) => Math.max(1, p - 1))}
+                                  disabled={champPage <= 1}
+                                  className="rounded-lg border border-border bg-muted px-2.5 py-1 text-xs text-foreground hover:bg-white/[0.08] disabled:opacity-40 transition"
+                                >
+                                  Trước
+                                </button>
+                                <button
+                                  onClick={() => setChampPage((p) => Math.min(totalPages, p + 1))}
+                                  disabled={champPage >= totalPages}
+                                  className="rounded-lg border border-border bg-muted px-2.5 py-1 text-xs text-foreground hover:bg-white/[0.08] disabled:opacity-40 transition"
+                                >
+                                  Sau
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </>
+                )}
               </div>
             )}
 
