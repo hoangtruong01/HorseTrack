@@ -566,11 +566,12 @@ export const walletApi = {
     if (params?.limit) qs.set("limit", String(params.limit));
     return apiFetch<PaginatedResult<WalletTxItem>>(`/wallet/all-transactions?${qs}`);
   },
-  allCashouts: (params?: { page?: number; limit?: number; status?: string }) => {
+  allCashouts: (params?: { page?: number; limit?: number; status?: string; date?: string }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set("page", String(params.page));
     if (params?.limit) qs.set("limit", String(params.limit));
     if (params?.status) qs.set("status", params.status);
+    if (params?.date) qs.set("date", params.date);
     return apiFetch<PaginatedResult<CashoutItem>>(`/wallet/cashout/all?${qs}`);
   },
   lookupCashout: (code: string) =>
