@@ -36,13 +36,15 @@ const TOURNAMENT_STATUS_FLOW: Record<string, string[]> = {
   CANCELLED: [],
 };
 const statusColors: Record<string, string> = {
-  DRAFT: "text-slate-700 dark:text-slate-400 bg-slate-500/15 dark:bg-slate-400/10 border-slate-500/30 dark:border-slate-400/20",
-  UPCOMING: "text-blue-700 dark:text-blue-400 bg-blue-500/15 dark:bg-blue-400/10 border-blue-500/30 dark:border-blue-400/20",
-  OPEN_REGISTRATION: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-400/10 border-emerald-500/30 dark:border-emerald-400/20",
-  REGISTRATION_CLOSED: "text-amber-700 dark:text-yellow-400 bg-amber-500/15 dark:bg-yellow-400/10 border-amber-500/30 dark:border-yellow-400/20",
-  ONGOING: "text-primary bg-primary/10 border-primary/20",
-  COMPLETED: "text-purple-700 dark:text-purple-400 bg-purple-500/15 dark:bg-purple-400/10 border-purple-500/30 dark:border-purple-400/20",
-  CANCELLED: "text-rose-700 dark:text-red-400 bg-rose-500/15 dark:bg-red-400/10 border-rose-500/30 dark:border-red-400/20",
+  DRAFT: "text-slate-800 dark:text-slate-400 bg-slate-500/20 dark:bg-slate-400/10 border-slate-500/40 dark:border-slate-400/20 font-bold",
+  UPCOMING: "text-blue-800 dark:text-blue-400 bg-blue-500/20 dark:bg-blue-400/10 border-blue-500/40 dark:border-blue-400/20 font-bold",
+  OPEN_REGISTRATION: "text-emerald-800 dark:text-emerald-400 bg-emerald-500/20 dark:bg-emerald-400/10 border-emerald-500/40 dark:border-emerald-400/20 font-bold",
+  CLOSED_REGISTRATION: "text-amber-900 dark:text-yellow-400 bg-amber-500/20 dark:bg-yellow-400/10 border-amber-500/40 dark:border-yellow-400/20 font-bold",
+  REGISTRATION_CLOSED: "text-amber-900 dark:text-yellow-400 bg-amber-500/20 dark:bg-yellow-400/10 border-amber-500/40 dark:border-yellow-400/20 font-bold",
+  ONGOING: "text-red-700 dark:text-primary bg-red-500/20 dark:bg-primary/10 border-red-500/40 dark:border-primary/20 font-bold",
+  COMPLETED: "text-purple-800 dark:text-purple-400 bg-purple-500/20 dark:bg-purple-400/10 border-purple-500/40 dark:border-purple-400/20 font-bold",
+  FINISHED: "text-purple-800 dark:text-purple-400 bg-purple-500/20 dark:bg-purple-400/10 border-purple-500/40 dark:border-purple-400/20 font-bold",
+  CANCELLED: "text-rose-800 dark:text-red-400 bg-rose-500/20 dark:bg-red-400/10 border-rose-500/40 dark:border-red-400/20 font-bold",
 };
 
 export default function AdminTournamentsPage() {

@@ -271,10 +271,14 @@ export default function AdminTournamentDetailPage() {
                 <Trophy className="size-4 animate-pulse" /> Hồ Sơ Giải Đấu Chính
               </h3>
               <span
-                className={`inline-flex rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase ${
+                className={`inline-flex rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase ${
                   tournament.status === "OPEN_REGISTRATION"
-                    ? "text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
-                    : "text-muted-foreground border-border bg-muted/50"
+                    ? "text-emerald-800 dark:text-emerald-400 border-emerald-500/40 bg-emerald-500/20 dark:border-emerald-500/20 dark:bg-emerald-500/10"
+                    : tournament.status === "CLOSED_REGISTRATION" || tournament.status === "REGISTRATION_CLOSED"
+                    ? "text-amber-900 dark:text-yellow-400 border-amber-500/40 bg-amber-500/20 dark:border-yellow-400/20 dark:bg-yellow-400/10"
+                    : tournament.status === "ONGOING"
+                    ? "text-red-700 dark:text-primary border-red-500/40 bg-red-500/20 dark:border-primary/20 dark:bg-primary/10"
+                    : "text-slate-800 dark:text-slate-300 border-slate-500/40 bg-slate-500/20 dark:border-white/15 dark:bg-white/10"
                 }`}
               >
                 {formatTournamentStatus(tournament.status, i18n.language)}

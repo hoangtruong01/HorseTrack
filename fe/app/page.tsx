@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, formatTournamentStatus } from "@/lib/utils";
 import {
   ArrowRight,
   Compass,
@@ -951,17 +951,21 @@ export default function Home() {
                         {/* Status Badge */}
                         <div className="flex items-center justify-between mb-5">
                           {isOngoing ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 border border-red-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-red-500">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 border border-red-500/30 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-red-700 dark:text-red-400">
                               <span className="size-1.5 rounded-full bg-red-500 animate-ping" />
                               Đang diễn ra
                             </span>
                           ) : isOpenReg ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-500">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-emerald-800 dark:text-emerald-400">
                               Mở đăng ký
                             </span>
+                          ) : tour.status === "CLOSED_REGISTRATION" || tour.status === "REGISTRATION_CLOSED" ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-amber-900 dark:text-yellow-300">
+                              Đóng đăng ký
+                            </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-muted/50 border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                              {tour.status}
+                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/15 border border-slate-500/30 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-800 dark:text-slate-300">
+                              {formatTournamentStatus(tour.status)}
                             </span>
                           )}
 

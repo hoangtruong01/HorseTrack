@@ -35,15 +35,15 @@ const SKILL_LEVELS = [
 ];
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  available: { label: "Đang hoạt động", color: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10" },
-  unavailable: { label: "Không khả dụng", color: "text-amber-400 border-amber-500/20 bg-amber-500/10" },
-  suspended: { label: "Bị tạm khóa", color: "text-red-400 border-red-500/20 bg-red-500/10" },
+  available: { label: "Đang hoạt động", color: "text-emerald-900 border-emerald-500/40 bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/10 font-bold" },
+  unavailable: { label: "Không khả dụng", color: "text-amber-950 border-amber-500/40 bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/20 dark:bg-amber-500/10 font-bold" },
+  suspended: { label: "Bị tạm khóa", color: "text-red-900 border-red-500/40 bg-red-500/20 dark:text-red-400 dark:border-red-500/20 dark:bg-red-500/10 font-bold" },
 };
 
 const APPROVAL_MAP: Record<string, { label: string; color: string }> = {
-  PENDING: { label: "Đang chờ duyệt", color: "text-amber-400 border-amber-500/20 bg-amber-500/10" },
-  APPROVED: { label: "Đã duyệt", color: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10" },
-  REJECTED: { label: "Bị từ chối", color: "text-red-400 border-red-500/20 bg-red-500/10" },
+  PENDING: { label: "Đang chờ duyệt", color: "text-amber-950 border-amber-500/40 bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/20 dark:bg-amber-500/10 font-bold" },
+  APPROVED: { label: "Đã duyệt", color: "text-emerald-900 border-emerald-500/40 bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/10 font-bold" },
+  REJECTED: { label: "Bị từ chối", color: "text-red-900 border-red-500/40 bg-red-500/20 dark:text-red-400 dark:border-red-500/20 dark:bg-red-500/10 font-bold" },
 };
 
 export default function JockeyProfilePage() {

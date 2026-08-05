@@ -27,30 +27,40 @@ import {
 import { toast } from "sonner";
 
 const getStatusLabel = (status: string) => {
-  switch (status) {
+  switch (status?.toUpperCase()) {
     case "DRAFT": return "Nháp";
     case "UPCOMING": return "Sắp diễn ra";
     case "OPEN_REGISTRATION": return "Mở đăng ký";
+    case "CLOSED_REGISTRATION":
     case "REGISTRATION_CLOSED": return "Đóng đăng ký";
     case "ONGOING": return "Đang diễn ra";
-    case "COMPLETED": return "Đã kết thúc";
+    case "COMPLETED":
+    case "FINISHED": return "Đã kết thúc";
     case "CANCELLED": return "Đã hủy";
     default: return status;
   }
 };
 
 const getStatusColor = (status: string) => {
-  switch (status) {
+  switch (status?.toUpperCase()) {
     case "ONGOING":
-      return "bg-[#E10600]/80 border-[#E10600] text-white";
+      return "bg-red-600 border-red-700 text-white dark:bg-[#E10600]/80 dark:border-[#E10600]";
     case "OPEN_REGISTRATION":
-      return "bg-teal-500/80 border-teal-500 text-white";
+      return "bg-emerald-600 border-emerald-700 text-white dark:bg-teal-500/80 dark:border-teal-500";
     case "UPCOMING":
-      return "bg-blue-500/80 border-blue-500 text-white";
+      return "bg-blue-600 border-blue-700 text-white dark:bg-blue-500/80 dark:border-blue-500";
+    case "CLOSED_REGISTRATION":
+    case "REGISTRATION_CLOSED":
+      return "bg-amber-700 border-amber-800 text-white dark:bg-amber-600/80 dark:border-amber-500";
+    case "DRAFT":
+      return "bg-slate-700 border-slate-800 text-white dark:bg-slate-700/80 dark:border-slate-600";
     case "COMPLETED":
-      return "bg-purple-500/80 border-purple-500 text-white";
+    case "FINISHED":
+      return "bg-purple-600 border-purple-700 text-white dark:bg-purple-500/80 dark:border-purple-500";
+    case "CANCELLED":
+      return "bg-rose-700 border-rose-800 text-white dark:bg-rose-900/80 dark:border-rose-700";
     default:
-      return "bg-muted border border-border text-foreground";
+      return "bg-slate-800 border-slate-700 text-white dark:bg-slate-800/90 dark:border-slate-600";
   }
 };
 
@@ -535,7 +545,7 @@ export default function SpectatorTournamentsPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
                       
                       {/* Status Badge */}
-                      <span className={`absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white border backdrop-blur-md ${getStatusColor(tour.status)}`}>
+                      <span className={`absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider border backdrop-blur-md shadow-sm ${getStatusColor(tour.status)}`}>
                         {getStatusLabel(tour.status)}
                       </span>
                     </div>
@@ -700,7 +710,7 @@ export default function SpectatorTournamentsPage() {
                 )}
 
                 <div className="space-y-3">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white border ${getStatusColor(selectedTour.status)}`}>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider border shadow-sm ${getStatusColor(selectedTour.status)}`}>
                     {getStatusLabel(selectedTour.status)}
                   </span>
                   <h2 className="text-xl font-black uppercase tracking-tight text-foreground leading-tight">{selectedTour.name}</h2>

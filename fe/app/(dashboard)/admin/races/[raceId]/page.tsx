@@ -27,13 +27,13 @@ import { useTranslation } from "react-i18next";
 import { formatRaceStatus } from "@/lib/utils";
 
 const STATUS_COLORS: Record<string, string> = {
-  SCHEDULED: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  CHECKING: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  READY: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  LIVE: "text-rose-400 bg-rose-400/10 border-rose-400/20 animate-pulse",
-  FINISHED: "text-purple-400 bg-purple-400/10 border-purple-400/20",
-  RESULT_PUBLISHED: "text-teal-400 bg-teal-400/10 border-teal-400/20",
-  CANCELLED: "text-red-400 bg-red-400/10 border-red-400/20",
+  SCHEDULED: "text-blue-800 dark:text-blue-400 bg-blue-500/20 dark:bg-blue-400/10 border-blue-500/40 dark:border-blue-400/20 font-bold",
+  CHECKING: "text-amber-900 dark:text-amber-400 bg-amber-500/20 dark:bg-amber-400/10 border-amber-500/40 dark:border-amber-400/20 font-bold",
+  READY: "text-emerald-800 dark:text-emerald-400 bg-emerald-500/20 dark:bg-emerald-400/10 border-emerald-500/40 dark:border-emerald-400/20 font-bold",
+  LIVE: "text-rose-800 dark:text-rose-400 bg-rose-500/20 dark:bg-rose-400/10 border-rose-500/40 dark:border-rose-400/20 animate-pulse font-bold",
+  FINISHED: "text-purple-800 dark:text-purple-400 bg-purple-500/20 dark:bg-purple-400/10 border-purple-500/40 dark:border-purple-400/20 font-bold",
+  RESULT_PUBLISHED: "text-teal-800 dark:text-teal-400 bg-teal-500/20 dark:bg-teal-400/10 border-teal-500/40 dark:border-teal-400/20 font-bold",
+  CANCELLED: "text-red-800 dark:text-red-400 bg-red-500/20 dark:bg-red-400/10 border-red-500/40 dark:border-red-400/20 font-bold",
 };
 
 const STATUS_OPTIONS = [
