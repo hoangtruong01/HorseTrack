@@ -23,6 +23,8 @@ import {
   FileArchive,
   ImageIcon,
   Trophy,
+  Search,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -217,6 +219,10 @@ export function JockeyAssignPage() {
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Filter and Search states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("ALL"); // ALL, SCHEDULED, LIVE, FINISHED, CANCELLED
+
   // Selected horse detail for Modal
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
   const [horseDetail, setHorseDetail] = useState<HorseDetail | null>(null);
@@ -301,7 +307,29 @@ export function JockeyAssignPage() {
     }
   };
 
-  const acceptedInvs = invitations.filter((inv) => inv.status === "ACCEPTED");
+  const acceptedInvs = invitations.filter((inv) => {
+    if (inv.status !== "ACCEPTED") return false;
+
+    // Apply Search Filter
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase();
+      const matchHorse = inv.horseId?.name?.toLowerCase().includes(q) || false;
+      const matchRace = inv.raceId?.name?.toLowerCase().includes(q) || false;
+      const matchTournament = (inv as any).tournamentId?.name?.toLowerCase().includes(q) || false;
+      if (!matchHorse && !matchRace && !matchTournament) return false;
+    }
+
+    // Apply Status Filter
+    if (filterStatus !== "ALL" && inv.raceId?.status) {
+      const upperStatus = inv.raceId.status.toUpperCase();
+      if (filterStatus === "SCHEDULED" && !["SCHEDULED", "PENDING", "READY"].includes(upperStatus)) return false;
+      if (filterStatus === "LIVE" && !["LIVE", "IN_PROGRESS"].includes(upperStatus)) return false;
+      if (filterStatus === "FINISHED" && !["FINISHED", "COMPLETED", "RESULT_PUBLISHED"].includes(upperStatus)) return false;
+      if (filterStatus === "CANCELLED" && !["CANCELLED", "CANCELED"].includes(upperStatus)) return false;
+    }
+
+    return true;
+  });
   const totalItems = acceptedInvs.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
 
@@ -318,6 +346,42 @@ export function JockeyAssignPage() {
       />
 
       <section className="space-y-4">
+        {/* Search & Filter Toolbar (Glassmorphism) */}
+        <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70" />
+            <input
+              type="text"
+              placeholder={t("jockey.assign.searchPlaceholder", "Tìm tên cuộc đua, chiến mã...")}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-10 pl-9 pr-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
+            />
+          </div>
+          
+          <div className="flex items-center gap-2 shrink-0">
+            <Filter className="size-4 text-muted-foreground/70 hidden sm:block" />
+            <select
+              value={filterStatus}
+              onChange={(e) => {
+                setFilterStatus(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="h-10 px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none pr-8 relative cursor-pointer"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' className='lucide lucide-chevron-down'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1rem' }}
+            >
+              <option value="ALL" className="bg-background text-foreground">{t("common.allStatus", "Tất cả trạng thái")}</option>
+              <option value="SCHEDULED" className="bg-background text-foreground">{t("jockey.assign.statusScheduled", "Sắp chạy")}</option>
+              <option value="LIVE" className="bg-background text-foreground">{t("jockey.assign.statusLive", "Đang diễn ra")}</option>
+              <option value="FINISHED" className="bg-background text-foreground">{t("jockey.assign.statusFinished", "Đã hoàn thành")}</option>
+              <option value="CANCELLED" className="bg-background text-foreground">{t("jockey.assign.statusCancelled", "Đã hủy")}</option>
+            </select>
+          </div>
+        </div>
+
         {/* Layout Mode Control Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-3 rounded-2xl border border-border">
           <div className="flex items-center gap-2">
