@@ -1001,8 +1001,8 @@ export default function Home() {
                             <span>
                               {tour.startDate
                                 ? new Date(tour.startDate).toLocaleDateString(
-                                    "vi-VN",
-                                  )
+                                  "vi-VN",
+                                )
                                 : "---"}
                             </span>
                           </div>
