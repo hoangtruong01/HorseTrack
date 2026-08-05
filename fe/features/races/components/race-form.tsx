@@ -54,7 +54,7 @@ export function RaceForm() {
   const [uploading, setUploading] = useState(false);
 
   const [existingRaces, setExistingRaces] = useState<{ prize?: number }[]>([]);
-  const [loadingRaces, setLoadingRaces] = useState(false);
+  const [, setLoadingRaces] = useState(false);
 
   useEffect(() => {
     async function loadTournaments() {
@@ -235,7 +235,7 @@ export function RaceForm() {
     ? selectedTournament.prizePool || selectedTournament.prize || 0
     : 0;
   const usedPrize = existingRaces.reduce((sum, r) => sum + (r.prize || 0), 0);
-  const remainingPrize = totalPrizePool - usedPrize;
+  const _remainingPrize = totalPrizePool - usedPrize;
 
   return (
     <form

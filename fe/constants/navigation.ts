@@ -12,7 +12,6 @@ import {
   ListChecks,
   Medal,
   ShieldCheck,
-  Siren,
   Sparkles,
   Star,
   Trophy,

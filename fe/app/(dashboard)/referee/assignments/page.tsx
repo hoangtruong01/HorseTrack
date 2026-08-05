@@ -17,7 +17,6 @@ import {
   Award,
   ShieldCheck,
   CheckCircle2,
-  AlertCircle,
   ChevronRight,
   ExternalLink,
 } from "lucide-react";

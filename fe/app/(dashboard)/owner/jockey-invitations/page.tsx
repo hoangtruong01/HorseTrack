@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Users, Loader2, Send, Calendar, Clock, XCircle, PlusCircle,
-  Sparkles, Eye, Trophy, Flag, Percent, Search, Filter,
+  Sparkles, Eye, Trophy, Flag, Percent, Search,
   Star, Award, X, User,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -58,9 +58,6 @@ export default function JockeyInvitationsPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterSkill, setFilterSkill] = useState("ALL"); // ALL, beginner, intermediate, advanced, professional
-  const [searchHistory, setSearchHistory] = useState("");
-  const [filterStatus, setFilterStatus] = useState("ALL"); // ALL, PENDING, ACCEPTED, REJECTED, CANCELLED, EXPIRED
 
   // Modal states
   const [selectedJockey, setSelectedJockey] = useState<JockeyProfile | null>(null);
@@ -242,10 +239,6 @@ export default function JockeyInvitationsPage() {
   };
 
   const filtered = jockeys.filter((j) => {
-    // Skill Filter
-    if (filterSkill !== "ALL" && j.skillLevel !== filterSkill) return false;
-
-    // Search Filter
     if (!search) return true;
     const q = search.toLowerCase();
     return j.fullName.toLowerCase().includes(q) || j.email.toLowerCase().includes(q)
@@ -253,17 +246,6 @@ export default function JockeyInvitationsPage() {
   });
 
   const availableJockeys = filtered.filter(j => j.status === "available");
-
-  const filteredHistory = invitations.filter((inv) => {
-    // Search History
-    if (searchHistory.trim() !== "") {
-      const q = searchHistory.toLowerCase();
-      if (!inv.jockeyName.toLowerCase().includes(q)) return false;
-    }
-    // Status Filter
-    if (filterStatus !== "ALL" && inv.status !== filterStatus) return false;
-    return true;
-  });
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto">
@@ -296,36 +278,12 @@ export default function JockeyInvitationsPage() {
           {/* ── TAB 1: MARKETPLACE ── */}
           {tab === "marketplace" && (
             <div className="space-y-4">
-              {/* Search & Filter Toolbar (Glassmorphism) */}
-              <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70" />
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm tên nài ngựa, email, kỹ năng..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full h-10 pl-9 pr-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
-                  />
-                </div>
-                
-                <div className="flex items-center gap-2 shrink-0">
-                  <Filter className="size-4 text-muted-foreground/70 hidden sm:block" />
-                  <select
-                    value={filterSkill}
-                    onChange={(e) => setFilterSkill(e.target.value)}
-                    className="h-10 px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none pr-8 relative cursor-pointer"
-                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' className='lucide lucide-chevron-down'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1rem' }}
-                  >
-                    <option value="ALL" className="bg-background text-foreground">Trình độ: Tất cả</option>
-                    <option value="beginner" className="bg-background text-foreground">Tập sự</option>
-                    <option value="intermediate" className="bg-background text-foreground">Trung cấp</option>
-                    <option value="advanced" className="bg-background text-foreground">Nâng cao</option>
-                    <option value="professional" className="bg-background text-foreground">Chuyên nghiệp</option>
-                  </select>
-                </div>
+              {/* Search */}
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm kiếm tên, sở trường, tính tình..."
+                  className="w-full h-10 rounded-xl border border-border bg-muted/40 pl-10 pr-4 text-xs text-foreground outline-none focus:border-[#E10600] transition placeholder:text-foreground/25" />
               </div>
-              
               <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">{availableJockeys.length} Jockey đang sẵn sàng</p>
 
               {availableJockeys.length === 0 ? (
@@ -402,48 +360,16 @@ export default function JockeyInvitationsPage() {
 
           {/* ── TAB 2: HISTORY ── */}
           {tab === "history" && (
-            <div className="rounded-2xl border border-border bg-card/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-4">
+            <div className="rounded-2xl border border-border bg-card/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
+              <div className="flex items-center justify-between border-b border-border pb-4 mb-5">
                 <h2 className="text-xl font-black uppercase tracking-tight text-foreground flex items-center gap-2">
                   <Send className="size-5 text-[#E10600]" /> Lời mời đã gửi
                 </h2>
               </div>
-
-              {/* Search & Filter Toolbar for History */}
-              <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70" />
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm tên nài ngựa..."
-                    value={searchHistory}
-                    onChange={(e) => setSearchHistory(e.target.value)}
-                    className="w-full h-10 pl-9 pr-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
-                  />
-                </div>
-                
-                <div className="flex items-center gap-2 shrink-0">
-                  <Filter className="size-4 text-muted-foreground/70 hidden sm:block" />
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="h-10 px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none pr-8 relative cursor-pointer"
-                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' className='lucide lucide-chevron-down'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1rem' }}
-                  >
-                    <option value="ALL" className="bg-background text-foreground">Trạng thái: Tất cả</option>
-                    <option value="PENDING" className="bg-background text-foreground">Chờ phản hồi (PENDING)</option>
-                    <option value="ACCEPTED" className="bg-background text-foreground">Đã chấp nhận (ACCEPTED)</option>
-                    <option value="REJECTED" className="bg-background text-foreground">Đã từ chối (REJECTED)</option>
-                    <option value="CANCELLED" className="bg-background text-foreground">Đã hủy (CANCELLED)</option>
-                    <option value="EXPIRED" className="bg-background text-foreground">Hết hạn (EXPIRED)</option>
-                  </select>
-                </div>
-              </div>
-
-              {filteredHistory.length === 0 ? (
+              {invitations.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <Users className="size-16 mx-auto mb-4 opacity-20" />
-                  <p className="font-bold text-foreground uppercase tracking-wider text-sm">Chưa có lời mời phù hợp</p>
+                  <p className="font-bold text-foreground uppercase tracking-wider text-sm">Hòm thư trống</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -458,7 +384,7 @@ export default function JockeyInvitationsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {filteredHistory.map(inv => {
+                      {invitations.map(inv => {
                         const st = statusTone(inv.status);
                         return (
                           <tr key={inv.id} className="transition hover:bg-muted/15">

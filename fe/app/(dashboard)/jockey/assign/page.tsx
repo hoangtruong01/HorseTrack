@@ -23,8 +23,6 @@ import {
   FileArchive,
   ImageIcon,
   Trophy,
-  Search,
-  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -111,15 +109,15 @@ function getTimeframeLabel(dateStr?: string): TimeframeGroup {
   if (!dateStr) return "Older";
   const date = new Date(dateStr);
   const now = new Date();
-  
+
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dayOfWeek = startOfToday.getDay();
   const startOfWeek = new Date(startOfToday);
   startOfWeek.setDate(startOfWeek.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  
+
   const startOfLastWeek = new Date(startOfWeek);
   startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
-  
+
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   if (date >= startOfWeek) return "Earlier this week";
@@ -219,10 +217,6 @@ export function JockeyAssignPage() {
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter and Search states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("ALL"); // ALL, SCHEDULED, LIVE, FINISHED, CANCELLED
-
   // Selected horse detail for Modal
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
   const [horseDetail, setHorseDetail] = useState<HorseDetail | null>(null);
@@ -307,29 +301,7 @@ export function JockeyAssignPage() {
     }
   };
 
-  const acceptedInvs = invitations.filter((inv) => {
-    if (inv.status !== "ACCEPTED") return false;
-
-    // Apply Search Filter
-    if (searchQuery.trim() !== "") {
-      const q = searchQuery.toLowerCase();
-      const matchHorse = inv.horseId?.name?.toLowerCase().includes(q) || false;
-      const matchRace = inv.raceId?.name?.toLowerCase().includes(q) || false;
-      const matchTournament = (inv as any).tournamentId?.name?.toLowerCase().includes(q) || false;
-      if (!matchHorse && !matchRace && !matchTournament) return false;
-    }
-
-    // Apply Status Filter
-    if (filterStatus !== "ALL" && inv.raceId?.status) {
-      const upperStatus = inv.raceId.status.toUpperCase();
-      if (filterStatus === "SCHEDULED" && !["SCHEDULED", "PENDING", "READY"].includes(upperStatus)) return false;
-      if (filterStatus === "LIVE" && !["LIVE", "IN_PROGRESS"].includes(upperStatus)) return false;
-      if (filterStatus === "FINISHED" && !["FINISHED", "COMPLETED", "RESULT_PUBLISHED"].includes(upperStatus)) return false;
-      if (filterStatus === "CANCELLED" && !["CANCELLED", "CANCELED"].includes(upperStatus)) return false;
-    }
-
-    return true;
-  });
+  const acceptedInvs = invitations.filter((inv) => inv.status === "ACCEPTED");
   const totalItems = acceptedInvs.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
 
@@ -346,42 +318,6 @@ export function JockeyAssignPage() {
       />
 
       <section className="space-y-4">
-        {/* Search & Filter Toolbar (Glassmorphism) */}
-        <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70" />
-            <input
-              type="text"
-              placeholder={t("jockey.assign.searchPlaceholder", "Tìm tên cuộc đua, chiến mã...")}
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full h-10 pl-9 pr-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
-            />
-          </div>
-          
-          <div className="flex items-center gap-2 shrink-0">
-            <Filter className="size-4 text-muted-foreground/70 hidden sm:block" />
-            <select
-              value={filterStatus}
-              onChange={(e) => {
-                setFilterStatus(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="h-10 px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none pr-8 relative cursor-pointer"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' className='lucide lucide-chevron-down'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1rem' }}
-            >
-              <option value="ALL" className="bg-background text-foreground">{t("common.allStatus", "Tất cả trạng thái")}</option>
-              <option value="SCHEDULED" className="bg-background text-foreground">{t("jockey.assign.statusScheduled", "Sắp chạy")}</option>
-              <option value="LIVE" className="bg-background text-foreground">{t("jockey.assign.statusLive", "Đang diễn ra")}</option>
-              <option value="FINISHED" className="bg-background text-foreground">{t("jockey.assign.statusFinished", "Đã hoàn thành")}</option>
-              <option value="CANCELLED" className="bg-background text-foreground">{t("jockey.assign.statusCancelled", "Đã hủy")}</option>
-            </select>
-          </div>
-        </div>
-
         {/* Layout Mode Control Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-3 rounded-2xl border border-border">
           <div className="flex items-center gap-2">
@@ -395,11 +331,10 @@ export function JockeyAssignPage() {
                   setViewMode("explorer");
                   setCurrentPage(1);
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  viewMode === "explorer"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "explorer"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
+                  }`}
                 title={t("jockey.assign.viewExplorer", "Explorer Chi Tiết (như hình)")}
               >
                 <Folder className="size-3.5" />
@@ -411,11 +346,10 @@ export function JockeyAssignPage() {
                   setViewMode("grid");
                   setCurrentPage(1);
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  viewMode === "grid"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "grid"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
+                  }`}
                 title={t("jockey.assign.viewGrid", "Thẻ Grid")}
               >
                 <LayoutGrid className="size-3.5" />
@@ -427,11 +361,10 @@ export function JockeyAssignPage() {
                   setViewMode("list");
                   setCurrentPage(1);
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  viewMode === "list"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === "list"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
+                  }`}
                 title={t("jockey.assign.viewList", "Danh Sách")}
               >
                 <List className="size-3.5" />
@@ -611,7 +544,7 @@ export function JockeyAssignPage() {
                 <div key={inv.id || inv._id} className="relative rounded-xl border border-border bg-card p-4 hover:border-teal-500/30 transition shadow-sm overflow-hidden flex flex-col justify-between h-full">
                   {/* Status accent line */}
                   <div className={`absolute left-0 top-0 bottom-0 w-1 ${inv.raceId?.status === "LIVE" ? "bg-red-500" : inv.raceId?.status === "RESULT_PUBLISHED" ? "bg-amber-500" : inv.raceId?.status === "CANCELLED" ? "bg-rose-500" : "bg-blue-500"}`} />
-                  
+
                   <div className="pl-3 space-y-3 flex-1">
                     <div className="flex justify-between items-start gap-3">
                       <div className="flex-1">
@@ -651,10 +584,10 @@ export function JockeyAssignPage() {
 
                       {/* Horse Action */}
                       <div className="flex justify-between items-center bg-muted/30 p-2 rounded-lg border border-border mt-1">
-                         <span className="text-xs font-bold flex items-center gap-1.5 truncate pr-2">
-                            <Sparkles className="size-3 text-primary" /> {inv.horseId?.name}
-                         </span>
-                         <Button
+                        <span className="text-xs font-bold flex items-center gap-1.5 truncate pr-2">
+                          <Sparkles className="size-3 text-primary" /> {inv.horseId?.name}
+                        </span>
+                        <Button
                           onClick={() => handleViewHorseDetail(inv.horseId.id)}
                           variant="ghost" size="sm"
                           className="h-6 text-[10px] font-bold bg-background hover:bg-muted border border-border px-2"
@@ -706,11 +639,10 @@ export function JockeyAssignPage() {
                       key={pageNum}
                       type="button"
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`size-8 rounded-lg text-xs font-bold transition ${
-                        currentPage === pageNum
+                      className={`size-8 rounded-lg text-xs font-bold transition ${currentPage === pageNum
                           ? "bg-primary text-primary-foreground shadow-sm"
                           : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>
@@ -737,12 +669,12 @@ export function JockeyAssignPage() {
       {selectedHorseId && (
         <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl animate-scale-up">
-            
+
             <div className="relative flex h-28 items-end bg-muted/50 p-5">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-teal-500/10" />
               <div className="absolute inset-x-0 bottom-0 h-px bg-muted/50" />
-              
-              <button 
+
+              <button
                 onClick={() => setSelectedHorseId(null)}
                 className="absolute top-4 right-4 size-8 rounded-full bg-background/80 hover:bg-background flex items-center justify-center text-muted-foreground hover:text-foreground transition shadow-sm backdrop-blur-md"
               >
@@ -827,7 +759,7 @@ export function JockeyAssignPage() {
                       <div>
                         <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">Sức khỏe</p>
                         <div className="inline-flex px-2 py-1 items-center gap-1.5 rounded-md border text-xs font-bold bg-green-500/10 text-green-500 border-green-500/20">
-                           {horseDetail.healthStatus === "HEALTHY" ? "Khỏe mạnh" : horseDetail.healthStatus === "INJURED" ? "Chấn thương" : "Bị ốm"}
+                          {horseDetail.healthStatus === "HEALTHY" ? "Khỏe mạnh" : horseDetail.healthStatus === "INJURED" ? "Chấn thương" : "Bị ốm"}
                         </div>
                       </div>
 

@@ -61,11 +61,10 @@ export function DataTablePagination({
                 key={pageNum}
                 type="button"
                 onClick={() => onPageChange(pageNum)}
-                className={`size-8 rounded-lg text-xs font-bold transition ${
-                  currentPage === pageNum
+                className={`size-8 rounded-lg text-xs font-bold transition ${currentPage === pageNum
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
+                  }`}
               >
                 {pageNum}
               </button>

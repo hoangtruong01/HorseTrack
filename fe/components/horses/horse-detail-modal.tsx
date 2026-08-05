@@ -4,17 +4,11 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Trophy,
-  Zap,
-  Heart,
-  Timer,
   Award,
   Calendar,
   User,
-  X,
-  Sparkles,
   Flame,
-  ShieldCheck,
-} from "lucide-react";
+  } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { raceResultsApi, type HorseVictoriesSummary } from "@/lib/api-client";

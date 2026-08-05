@@ -409,7 +409,7 @@ export default function RefereeDashboardPage() {
                   <div className="flex items-center gap-3">
                     {portraitImage ? (
                       <div className="relative size-16 rounded-xl overflow-hidden border border-border shrink-0">
-                        <img src={portraitImage} alt="Ảnh chân dung" className="w-full h-full object-cover" />
+                        <Image width={500} height={500} src={portraitImage} alt="Ảnh chân dung" className="w-full h-full object-cover" />
                       </div>
                     ) : (
                       <div className="size-16 rounded-xl border border-dashed border-border bg-background/50 flex flex-col items-center justify-center text-muted-foreground text-xs shrink-0">
@@ -446,7 +446,7 @@ export default function RefereeDashboardPage() {
                   <div className="flex flex-wrap gap-3">
                     {certificateImages.map((imgUrl, idx) => (
                       <div key={idx} className="relative size-20 rounded-xl overflow-hidden border border-border group bg-background shrink-0">
-                        <img src={imgUrl} alt={`Ảnh bằng cấp ${idx + 1}`} className="w-full h-full object-cover" />
+                        <Image width={500} height={500} src={imgUrl} alt={`Ảnh bằng cấp ${idx + 1}`} className="w-full h-full object-cover" />
                         <button
                           type="button"
                           onClick={() => handleRemoveCertImage(idx)}
@@ -517,7 +517,7 @@ export default function RefereeDashboardPage() {
             <div className="flex items-center gap-4">
               <div className="relative size-14 rounded-2xl bg-primary/10 overflow-hidden border border-primary/20 shrink-0 flex items-center justify-center">
                 {portraitImage ? (
-                  <img src={portraitImage} alt={user?.fullName} className="w-full h-full object-cover" />
+                  <Image width={500} height={500} src={portraitImage} alt={user?.fullName || ""} className="w-full h-full object-cover" />
                 ) : (
                   <User className="size-6 text-primary" />
                 )}
@@ -625,7 +625,7 @@ export default function RefereeDashboardPage() {
                   <div className="flex items-center gap-3">
                     {portraitImage ? (
                       <div className="relative size-14 rounded-xl overflow-hidden border border-border shrink-0">
-                        <img src={portraitImage} alt="Ảnh chân dung" className="w-full h-full object-cover" />
+                        <Image width={500} height={500} src={portraitImage} alt="Ảnh chân dung" className="w-full h-full object-cover" />
                       </div>
                     ) : (
                       <div className="size-14 rounded-xl border border-dashed border-border bg-background/50 flex flex-col items-center justify-center text-muted-foreground text-xs shrink-0">
@@ -662,7 +662,7 @@ export default function RefereeDashboardPage() {
                   <div className="flex flex-wrap gap-3">
                     {certificateImages.map((imgUrl, idx) => (
                       <div key={idx} className="relative size-20 rounded-xl overflow-hidden border border-border group bg-background shrink-0">
-                        <img src={imgUrl} alt={`Ảnh bằng cấp ${idx + 1}`} className="w-full h-full object-cover" />
+                        <Image width={500} height={500} src={imgUrl} alt={`Ảnh bằng cấp ${idx + 1}`} className="w-full h-full object-cover" />
                         <button
                           type="button"
                           onClick={() => handleRemoveCertImage(idx)}

@@ -9,7 +9,6 @@ import {
   Compass,
   UserCheck,
   Trophy,
-  Target,
   CalendarClock,
   Sparkles,
   Users,
