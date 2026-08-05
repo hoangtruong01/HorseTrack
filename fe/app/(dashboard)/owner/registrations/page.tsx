@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, Filter } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { OwnerRegistrationTable, type Registration } from "@/features/registrations/components/owner-registration-table";
 import { toast } from "sonner";
@@ -10,6 +10,10 @@ import { toast } from "sonner";
 export default function OwnerRegistrationsPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Filter and Search states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("ALL"); // ALL, PENDING, APPROVED, REJECTED, CANCELLED
 
   const fetchRegistrations = async () => {
     setIsLoading(true);
@@ -71,10 +75,56 @@ export default function OwnerRegistrationsPage() {
           <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải lịch sử ghi danh...</p>
         </div>
       ) : (
-        <OwnerRegistrationTable
-          registrations={registrations}
-          onRefresh={fetchRegistrations}
-        />
+        <div className="space-y-4">
+          {/* Search & Filter Toolbar (Glassmorphism) */}
+          <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70" />
+              <input
+                type="text"
+                placeholder="Tìm tên chiến mã, giải đấu, trận đua..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 pl-9 pr-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
+              />
+            </div>
+            
+            <div className="flex items-center gap-2 shrink-0">
+              <Filter className="size-4 text-muted-foreground/70 hidden sm:block" />
+              
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="h-10 px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none pr-8 relative cursor-pointer"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' className='lucide lucide-chevron-down'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1rem' }}
+              >
+                <option value="ALL" className="bg-background text-foreground">Trạng thái: Tất cả</option>
+                <option value="PENDING" className="bg-background text-foreground">Chờ duyệt (PENDING)</option>
+                <option value="APPROVED" className="bg-background text-foreground">Đã duyệt (APPROVED)</option>
+                <option value="REJECTED" className="bg-background text-foreground">Bị từ chối (REJECTED)</option>
+                <option value="CANCELLED" className="bg-background text-foreground">Đã hủy (CANCELLED)</option>
+                <option value="WITHDRAWN" className="bg-background text-foreground">Đã rút lui (WITHDRAWN)</option>
+              </select>
+            </div>
+          </div>
+
+          <OwnerRegistrationTable
+            registrations={registrations.filter(r => {
+              // Search
+              if (searchQuery.trim() !== "") {
+                const q = searchQuery.toLowerCase();
+                const matchHorse = r.horseName?.toLowerCase().includes(q) || false;
+                const matchRace = r.raceName?.toLowerCase().includes(q) || false;
+                const matchTournament = r.tournamentName?.toLowerCase().includes(q) || false;
+                if (!matchHorse && !matchRace && !matchTournament) return false;
+              }
+              // Status
+              if (filterStatus !== "ALL" && r.status !== filterStatus) return false;
+              return true;
+            })}
+            onRefresh={fetchRegistrations}
+          />
+        </div>
       )}
     </main>
   );

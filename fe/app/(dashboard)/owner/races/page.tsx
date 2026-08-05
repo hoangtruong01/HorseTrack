@@ -20,6 +20,7 @@ import {
   Timer,
   Trophy,
   Users,
+  Filter,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -80,6 +81,9 @@ export default function OwnerRacesBrowserPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [activeTab, setActiveTab] = useState<"browse" | "requests">("browse");
+
+  // Race Filter State
+  const [filterStatus, setFilterStatus] = useState("ALL"); // ALL, OPEN_REGISTRATION, SCHEDULED, COMPLETED
 
   // Fetch my registrations
   const fetchRegistrations = useCallback(async () => {
@@ -451,9 +455,36 @@ export default function OwnerRacesBrowserPage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {races.map((race) => {
-                      const raceId = race._id || race.id!;
+                  <div className="space-y-4">
+                    {/* Filter Toolbar for Races */}
+                    <div className="flex justify-end p-2 bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <Filter className="size-4 text-muted-foreground/70" />
+                        <select
+                          value={filterStatus}
+                          onChange={(e) => setFilterStatus(e.target.value)}
+                          className="h-9 px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none pr-8 relative cursor-pointer"
+                          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' className='lucide lucide-chevron-down'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1rem' }}
+                        >
+                          <option value="ALL" className="bg-background text-foreground">Tất cả trận đua</option>
+                          <option value="OPEN_REGISTRATION" className="bg-background text-foreground">Đang mở đăng ký</option>
+                          <option value="SCHEDULED" className="bg-background text-foreground">Đã lên lịch (SCHEDULED/LIVE)</option>
+                          <option value="COMPLETED" className="bg-background text-foreground">Đã kết thúc (FINISHED)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {races
+                        .filter((race) => {
+                          if (filterStatus === "ALL") return true;
+                          if (filterStatus === "OPEN_REGISTRATION") return isOpenRegistration;
+                          if (filterStatus === "SCHEDULED") return ["SCHEDULED", "LIVE"].includes(race.status);
+                          if (filterStatus === "COMPLETED") return ["FINISHED", "COMPLETED"].includes(race.status);
+                          return true;
+                        })
+                        .map((race) => {
+                          const raceId = race._id || race.id!;
                       const isFull =
                         (race.participantsCount || 0) >=
                         (race.maxParticipants || 20);
@@ -577,6 +608,7 @@ export default function OwnerRacesBrowserPage() {
                       );
                     })}
                   </div>
+                </div>
                 )}
               </>
             )}
