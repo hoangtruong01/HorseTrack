@@ -104,7 +104,7 @@ export function CashoutApprovalQueue({
     (item) => item.status === "PAID" || item.status === "REJECTED" || item.status === "FAILED"
   ).length;
 
-  const pendingQueueCount = historyItems.filter(
+  const _pendingQueueCount = historyItems.filter(
     (item) => item.status === "PENDING"
   ).length;
 

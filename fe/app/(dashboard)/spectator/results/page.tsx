@@ -56,7 +56,7 @@ interface RaceGroup {
   raceNumber: number;
   results: RaceResultItem[];
 }
- 
+
 export default function SpectatorResultsPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
@@ -139,7 +139,7 @@ export default function SpectatorResultsPage() {
 
         // Sort groups by raceNumber
         const sortedGroups = Object.values(groups).sort((a, b) => a.raceNumber - b.raceNumber);
-        
+
         // Sort results within each group by rank
         sortedGroups.forEach((group) => {
           group.results.sort((a, b) => {
@@ -433,15 +433,14 @@ export default function SpectatorResultsPage() {
                     <tr key={res.id} className="hover:bg-muted/30 transition duration-200">
                       <td className="p-4 text-center">
                         <span
-                          className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${
-                            res.rank === 1
+                          className={`inline-flex items-center justify-center size-6 rounded-full font-black text-xs ${res.rank === 1
                               ? "bg-yellow-500 text-black shadow-[0_0_12px_rgba(234,179,8,0.3)]"
                               : res.rank === 2
-                              ? "bg-slate-200 text-slate-900 border border-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
-                              : res.rank === 3
-                              ? "bg-amber-700 text-amber-100 dark:bg-[#CD7F32] dark:text-white"
-                              : "bg-muted border border-border text-muted-foreground"
-                          }`}
+                                ? "bg-slate-200 text-slate-900 border border-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600"
+                                : res.rank === 3
+                                  ? "bg-amber-700 text-amber-100 dark:bg-[#CD7F32] dark:text-white"
+                                  : "bg-muted border border-border text-muted-foreground"
+                            }`}
                         >
                           {res.rank || "—"}
                         </span>

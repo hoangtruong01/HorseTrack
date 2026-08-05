@@ -13,8 +13,7 @@ import {
   Save,
   ShieldAlert,
   Siren,
-  Trophy,
-} from "lucide-react";
+  } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";

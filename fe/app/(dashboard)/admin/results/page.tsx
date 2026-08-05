@@ -215,6 +215,7 @@ export default function AdminResultsPage() {
               {filteredTournaments.map((t) => (
                 <div
                   key={t.id}
+                  onClick={() => setSelectedTournament(t)}
                   className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-muted/30 dark:hover:bg-[#1C1C25] transition duration-300 p-5 flex flex-col justify-between h-44"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />

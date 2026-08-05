@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Trophy, Calendar, MapPin, Award, Users, Search,
   ArrowLeft, Flag, Loader2, Compass, Layers, Activity, User, ShieldCheck, ChevronRight,
-  CheckCircle, Coins, Brain, Lock, ChevronDown, Info, X
+  CheckCircle, Coins, Brain, Lock, ChevronDown, X
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";

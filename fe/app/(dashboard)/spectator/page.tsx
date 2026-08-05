@@ -3,7 +3,7 @@ import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Trophy, MapPin, Award, Flag, Loader2, TrendingUp, Zap } from "lucide-react";
+import { Trophy, MapPin, Flag, Loader2, TrendingUp, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   tournamentsApi, racesApi, predictionsApi, 

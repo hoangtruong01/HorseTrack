@@ -2,7 +2,7 @@
 import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { prizesApi, type PrizeItem } from "@/lib/api-client";
@@ -16,12 +16,15 @@ export default function AdminPrizesPage() {
   const [prizes, setPrizes] = useState<PrizeItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 15, totalPages: 1 });
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [rankFilter, setRankFilter] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchPrizes = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const res = await prizesApi.list({ page, limit: 15 });
+      const res = await prizesApi.list({ page, limit: 100 });
       setPrizes(res.data);
       setMeta(res.meta);
     } catch (e) { toast.error((e as Error).message ?? "Lỗi tải dữ liệu"); }
@@ -49,6 +52,29 @@ export default function AdminPrizesPage() {
     return String(field);
   };
 
+  const filteredPrizes = prizes.filter((p) => {
+    if (statusFilter && (p.status || "").toUpperCase() !== statusFilter.toUpperCase()) {
+      return false;
+    }
+    if (rankFilter && String(p.rank) !== rankFilter) {
+      return false;
+    }
+    if (!search) return true;
+    const q = search.toLowerCase();
+    const ownerName = getName(p.ownerId).toLowerCase();
+    const raceName = getName(p.raceId).toLowerCase();
+    const horseName = getName(p.horseId).toLowerCase();
+    return ownerName.includes(q) || raceName.includes(q) || horseName.includes(q);
+  });
+
+  const hasActiveFilters = Boolean(search || statusFilter || rankFilter);
+
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("");
+    setRankFilter("");
+  };
+
   return (
     <main className="space-y-6">
       <PageHeader
@@ -57,7 +83,68 @@ export default function AdminPrizesPage() {
         description="Xem tất cả prizes được tạo tự động (70% owner / 30% jockey) sau khi race kết thúc. Admin có thể cập nhật trạng thái thanh toán."
       />
 
-      <div className="text-sm text-muted-foreground">Tổng: <strong className="text-foreground">{meta.total}</strong> prizes</div>
+      {/* Toolbar bộ lọc */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Tìm theo người nhận, trận đua, ngựa..."
+              className="w-full rounded-xl border border-border bg-muted/50 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Status Dropdown */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full sm:w-44 rounded-xl border border-border bg-muted/50 px-3.5 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="PENDING">PENDING (Chờ chi)</option>
+            <option value="PAID">PAID (Đã thanh toán)</option>
+          </select>
+
+          {/* Rank Dropdown */}
+          <select
+            value={rankFilter}
+            onChange={(e) => setRankFilter(e.target.value)}
+            className="w-full sm:w-40 rounded-xl border border-border bg-muted/50 px-3.5 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+          >
+            <option value="">Tất cả thứ hạng</option>
+            <option value="1">🥇 Hạng 1</option>
+            <option value="2">🥈 Hạng 2</option>
+            <option value="3">🥉 Hạng 3</option>
+          </select>
+        </div>
+
+        {/* Reset Filter Button */}
+        {hasActiveFilters && (
+          <button
+            onClick={resetFilters}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-border bg-muted px-3.5 py-2.5 text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition"
+          >
+            <X className="size-3.5" />
+            Xóa bộ lọc
+          </button>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div>Hiển thị: <strong className="text-foreground font-semibold">{filteredPrizes.length}</strong> / {meta.total} giải thưởng</div>
+      </div>
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {loading ? (
@@ -65,8 +152,8 @@ export default function AdminPrizesPage() {
   <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
   <p className="mt-4 text-xs font-mono uppercase tracking-widest">Đang tải...</p>
 </div>
-        ) : prizes.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Chưa có prize nào.</div>
+        ) : filteredPrizes.length === 0 ? (
+          <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">Không tìm thấy giải thưởng phù hợp.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -81,7 +168,7 @@ export default function AdminPrizesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {prizes.map((p) => (
+                {filteredPrizes.map((p) => (
                   <tr key={p._id} className="hover:bg-muted transition-colors">
                     <td className="px-5 py-4 text-sm text-foreground">{getName(p.ownerId)}</td>
                     <td className="px-5 py-4 text-sm text-muted-foreground">{getName(p.raceId)}</td>
