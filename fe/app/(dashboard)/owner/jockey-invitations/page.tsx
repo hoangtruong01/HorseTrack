@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Users, Loader2, Send, Calendar, Clock, XCircle, PlusCircle,
   Sparkles, Eye, Trophy, Flag, Percent, Search,
-  Star, Award, X, User,
+  Star, Award, X, User, Filter, RotateCcw, SlidersHorizontal, ArrowUpDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { raceResultsApi, type JockeyVictoryItem } from "@/lib/api-client";
@@ -58,6 +58,14 @@ export default function JockeyInvitationsPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [skillFilter, setSkillFilter] = useState<string>("all");
+  const [expFilter, setExpFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("default");
+
+  // History tab filter states
+  const [historySearch, setHistorySearch] = useState("");
+  const [historyStatusFilter, setHistoryStatusFilter] = useState("ALL");
+  const [historySortBy, setHistorySortBy] = useState("newest");
 
   // Modal states
   const [selectedJockey, setSelectedJockey] = useState<JockeyProfile | null>(null);
@@ -238,14 +246,74 @@ export default function JockeyInvitationsPage() {
     } catch { toast.error("Lỗi kết nối."); }
   };
 
-  const filtered = jockeys.filter((j) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return j.fullName.toLowerCase().includes(q) || j.email.toLowerCase().includes(q)
-      || (j.specialty?.toLowerCase().includes(q)) || (j.personality?.toLowerCase().includes(q));
-  });
+  const resetMarketplaceFilters = () => {
+    setSearch("");
+    setSkillFilter("all");
+    setExpFilter("all");
+    setSortBy("default");
+  };
 
-  const availableJockeys = filtered.filter(j => j.status === "available");
+  const isMarketplaceFilterActive = search !== "" || skillFilter !== "all" || expFilter !== "all" || sortBy !== "default";
+
+  const availableJockeys = jockeys
+    .filter((j) => {
+      if (j.status !== "available") return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const match = j.fullName.toLowerCase().includes(q) || j.email.toLowerCase().includes(q)
+          || (j.specialty?.toLowerCase().includes(q)) || (j.personality?.toLowerCase().includes(q));
+        if (!match) return false;
+      }
+      if (skillFilter !== "all" && j.skillLevel !== skillFilter) return false;
+      if (expFilter !== "all") {
+        const minYears = parseInt(expFilter, 10);
+        if (j.experienceYears < minYears) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "wins_desc") return b.wins - a.wins;
+      if (sortBy === "exp_desc") return b.experienceYears - a.experienceYears;
+      if (sortBy === "races_desc") return b.totalRaces - a.totalRaces;
+      if (sortBy === "winrate_desc") {
+        const rateA = a.totalRaces > 0 ? a.wins / a.totalRaces : 0;
+        const rateB = b.totalRaces > 0 ? b.wins / b.totalRaces : 0;
+        return rateB - rateA;
+      }
+      return 0;
+    });
+
+  const resetHistoryFilters = () => {
+    setHistorySearch("");
+    setHistoryStatusFilter("ALL");
+    setHistorySortBy("newest");
+  };
+
+  const isHistoryFilterActive = historySearch !== "" || historyStatusFilter !== "ALL" || historySortBy !== "newest";
+
+  const filteredInvitations = invitations
+    .filter((inv) => {
+      if (historyStatusFilter !== "ALL" && inv.status !== historyStatusFilter) return false;
+      if (historySearch) {
+        const q = historySearch.toLowerCase();
+        const match = inv.jockeyName.toLowerCase().includes(q)
+          || inv.jockeyEmail.toLowerCase().includes(q)
+          || inv.horseName.toLowerCase().includes(q)
+          || inv.tournamentName.toLowerCase().includes(q)
+          || inv.raceName.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (historySortBy === "oldest") {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+      if (historySortBy === "share_desc") {
+        return b.jockeySharePercent - a.jockeySharePercent;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   return (
     <main className="space-y-6 max-w-6xl mx-auto">
@@ -278,18 +346,93 @@ export default function JockeyInvitationsPage() {
           {/* ── TAB 1: MARKETPLACE ── */}
           {tab === "marketplace" && (
             <div className="space-y-4">
-              {/* Search */}
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm kiếm tên, sở trường, tính tình..."
-                  className="w-full h-10 rounded-xl border border-border bg-muted/40 pl-10 pr-4 text-xs text-foreground outline-none focus:border-[#E10600] transition placeholder:text-foreground/25" />
+              {/* Filter Bar */}
+              <div className="p-4 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-border/50">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase text-foreground">
+                    <Filter className="size-4 text-[#E10600]" />
+                    Bộ lọc nài ngựa
+                  </div>
+                  {isMarketplaceFilterActive && (
+                    <Button
+                      onClick={resetMarketplaceFilters}
+                      variant="ghost"
+                      className="h-7 px-2.5 text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg cursor-pointer"
+                    >
+                      <RotateCcw className="size-3 mr-1" /> Đặt lại bộ lọc
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Tìm tên, sở trường..."
+                      className="w-full h-9 rounded-xl border border-border bg-muted/40 pl-9 pr-3 text-xs text-foreground outline-none focus:border-[#E10600] transition placeholder:text-muted-foreground/50"
+                    />
+                  </div>
+
+                  {/* Skill level */}
+                  <div className="relative">
+                    <select
+                      value={skillFilter}
+                      onChange={(e) => setSkillFilter(e.target.value)}
+                      className="w-full h-9 rounded-xl border border-border bg-muted/40 px-3 text-xs text-foreground outline-none focus:border-[#E10600] transition cursor-pointer"
+                    >
+                      <option value="all" className="bg-card">Trình độ: Tất cả</option>
+                      <option value="beginner" className="bg-card">Tập sự</option>
+                      <option value="intermediate" className="bg-card">Trung cấp</option>
+                      <option value="advanced" className="bg-card">Nâng cao</option>
+                      <option value="professional" className="bg-card">Chuyên nghiệp</option>
+                    </select>
+                  </div>
+
+                  {/* Experience */}
+                  <div className="relative">
+                    <select
+                      value={expFilter}
+                      onChange={(e) => setExpFilter(e.target.value)}
+                      className="w-full h-9 rounded-xl border border-border bg-muted/40 px-3 text-xs text-foreground outline-none focus:border-[#E10600] transition cursor-pointer"
+                    >
+                      <option value="all" className="bg-card">Kinh nghiệm: Tất cả</option>
+                      <option value="1" className="bg-card">Từ 1 năm trở lên</option>
+                      <option value="3" className="bg-card">Từ 3 năm trở lên</option>
+                      <option value="5" className="bg-card">Từ 5 năm trở lên</option>
+                    </select>
+                  </div>
+
+                  {/* Sort */}
+                  <div className="relative">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full h-9 rounded-xl border border-border bg-muted/40 px-3 text-xs text-foreground outline-none focus:border-[#E10600] transition font-medium cursor-pointer"
+                    >
+                      <option value="default" className="bg-card">Sắp xếp: Mặc định</option>
+                      <option value="wins_desc" className="bg-card">Chiến thắng (Cao ➔ Thấp)</option>
+                      <option value="winrate_desc" className="bg-card">Tỷ lệ thắng (Cao ➔ Thấp)</option>
+                      <option value="exp_desc" className="bg-card">Kinh nghiệm (Nhiều ➔ Ít)</option>
+                      <option value="races_desc" className="bg-card">Tổng số trận (Nhiều ➔ Ít)</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">{availableJockeys.length} Jockey đang sẵn sàng</p>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold px-1">
+                <span>{availableJockeys.length} Jockey sẵn sàng</span>
+                {isMarketplaceFilterActive && (
+                  <span className="text-[#E10600] font-bold">Đang áp dụng bộ lọc</span>
+                )}
+              </div>
 
               {availableJockeys.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground rounded-2xl border border-dashed border-border bg-card">
                   <Users className="size-12 mx-auto mb-3 opacity-20" />
-                  <p className="font-bold text-sm">Không tìm thấy Jockey</p>
+                  <p className="font-bold text-sm">Không tìm thấy Jockey phù hợp</p>
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -342,12 +485,12 @@ export default function JockeyInvitationsPage() {
                       {/* CTA */}
                       <div className="mt-4 pt-3 border-t border-border grid grid-cols-2 gap-2">
                         <Button onClick={() => setSelectedJockeyForDetail(j)} variant="outline"
-                          className="rounded-full border-border hover:bg-muted text-[10px] h-9 uppercase font-bold text-foreground">
+                          className="rounded-full border-border hover:bg-muted text-[10px] h-9 uppercase font-bold text-foreground cursor-pointer">
                           <Eye className="size-3.5 mr-1" /> Chi tiết
                         </Button>
                         <Button onClick={() => { setSelectedJockey(j); setShowModal(true); setSelectedReg(""); setSharePercent(30); setInvMessage(""); }}
                           disabled={registrations.length === 0}
-                          className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-[10px] h-9 uppercase font-bold text-foreground">
+                          className="rounded-full bg-[#E10600] hover:bg-[#B80500] text-[10px] h-9 uppercase font-bold text-foreground cursor-pointer">
                           <PlusCircle className="size-3.5 mr-1" /> Mời
                         </Button>
                       </div>
@@ -360,16 +503,71 @@ export default function JockeyInvitationsPage() {
 
           {/* ── TAB 2: HISTORY ── */}
           {tab === "history" && (
-            <div className="rounded-2xl border border-border bg-card/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6">
-              <div className="flex items-center justify-between border-b border-border pb-4 mb-5">
+            <div className="rounded-2xl border border-border bg-card/85 p-5 shadow-[0_24px_64px_rgba(0,0,0,0.48)] sm:p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-border pb-4 flex-wrap gap-2">
                 <h2 className="text-xl font-black uppercase tracking-tight text-foreground flex items-center gap-2">
                   <Send className="size-5 text-[#E10600]" /> Lời mời đã gửi
                 </h2>
+                {isHistoryFilterActive && (
+                  <Button
+                    onClick={resetHistoryFilters}
+                    variant="ghost"
+                    className="h-8 px-3 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl cursor-pointer"
+                  >
+                    <RotateCcw className="size-3.5 mr-1.5" /> Đặt lại bộ lọc
+                  </Button>
+                )}
               </div>
-              {invitations.length === 0 ? (
+
+              {/* History Filter Bar */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
+                  <input
+                    value={historySearch}
+                    onChange={(e) => setHistorySearch(e.target.value)}
+                    placeholder="Tìm tên nài, ngựa, giải..."
+                    className="w-full h-9 rounded-xl border border-border bg-card pl-9 pr-3 text-xs text-foreground outline-none focus:border-[#E10600] transition placeholder:text-muted-foreground/50"
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <div className="relative">
+                  <select
+                    value={historyStatusFilter}
+                    onChange={(e) => setHistoryStatusFilter(e.target.value)}
+                    className="w-full h-9 rounded-xl border border-border bg-card px-3 text-xs text-foreground outline-none focus:border-[#E10600] transition cursor-pointer"
+                  >
+                    <option value="ALL" className="bg-card">Trạng thái: Tất cả</option>
+                    <option value="PENDING" className="bg-card">Chờ phản hồi</option>
+                    <option value="ACCEPTED" className="bg-card">Đã chấp nhận</option>
+                    <option value="REJECTED" className="bg-card">Từ chối</option>
+                    <option value="CANCELLED" className="bg-card">Đã hủy</option>
+                    <option value="EXPIRED" className="bg-card">Hết hạn</option>
+                  </select>
+                </div>
+
+                {/* Sort By */}
+                <div className="relative">
+                  <select
+                    value={historySortBy}
+                    onChange={(e) => setHistorySortBy(e.target.value)}
+                    className="w-full h-9 rounded-xl border border-border bg-card px-3 text-xs text-foreground outline-none focus:border-[#E10600] transition cursor-pointer"
+                  >
+                    <option value="newest" className="bg-card">Thời gian: Mới nhất</option>
+                    <option value="oldest" className="bg-card">Thời gian: Cũ nhất</option>
+                    <option value="share_desc" className="bg-card">% Chia thưởng: Cao ➔ Thấp</option>
+                  </select>
+                </div>
+              </div>
+
+              {filteredInvitations.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <Users className="size-16 mx-auto mb-4 opacity-20" />
-                  <p className="font-bold text-foreground uppercase tracking-wider text-sm">Hòm thư trống</p>
+                  <p className="font-bold text-foreground uppercase tracking-wider text-sm">
+                    {invitations.length === 0 ? "Hòm thư trống" : "Không tìm thấy lời mời phù hợp bộ lọc"}
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -384,7 +582,7 @@ export default function JockeyInvitationsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {invitations.map(inv => {
+                      {filteredInvitations.map(inv => {
                         const st = statusTone(inv.status);
                         return (
                           <tr key={inv.id} className="transition hover:bg-muted/15">
