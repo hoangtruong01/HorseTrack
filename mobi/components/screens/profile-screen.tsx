@@ -4,7 +4,7 @@ import { useRouter, Stack, Tabs, useSegments } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { usersApi, uploadsApi, rewardPointLedgerApi, jockeyInvitationsApi, refereeAssignmentsApi, refereeProfilesApi } from '@/lib/api-client';
+import { usersApi, uploadsApi, rewardPointLedgerApi, jockeyInvitationsApi, refereeAssignmentsApi, refereeProfilesApi, jockeysApi } from '@/lib/api-client';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColors, formatDate } from '@/components/ui/shared';
@@ -42,15 +42,34 @@ export default function ProfileScreen() {
   const [editDob, setEditDob] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Jockey Edit Profile modal state
+  const [isJockeyEditModalVisible, setIsJockeyEditModalVisible] = useState(false);
+  const [jockeyEditLicense, setJockeyEditLicense] = useState('');
+  const [jockeyEditHeight, setJockeyEditHeight] = useState('');
+  const [jockeyEditWeight, setJockeyEditWeight] = useState('');
+  const [jockeyEditExperience, setJockeyEditExperience] = useState('');
+  const [jockeyEditSkillLevel, setJockeyEditSkillLevel] = useState('');
+  const [jockeyEditCertificates, setJockeyEditCertificates] = useState('');
+  const [jockeyEditBio, setJockeyEditBio] = useState('');
+  const [isJockeySaving, setIsJockeySaving] = useState(false);
+
+  // Referee Edit Profile modal state
+  const [isRefereeEditModalVisible, setIsRefereeEditModalVisible] = useState(false);
+  const [refereeEditLicense, setRefereeEditLicense] = useState('');
+  const [refereeEditExperience, setRefereeEditExperience] = useState('');
+  const [refereeEditCertificates, setRefereeEditCertificates] = useState('');
+  const [refereeEditBio, setRefereeEditBio] = useState('');
+  const [isRefereeSaving, setIsRefereeSaving] = useState(false);
+
   const translateY = useRef(new Animated.Value(0)).current;
   const keyboardHeight = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (isEditModalVisible) {
+    if (isEditModalVisible || isJockeyEditModalVisible || isRefereeEditModalVisible) {
       translateY.setValue(0);
       keyboardHeight.setValue(0);
     }
-  }, [isEditModalVisible]);
+  }, [isEditModalVisible, isJockeyEditModalVisible, isRefereeEditModalVisible]);
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener(
@@ -105,6 +124,8 @@ export default function ProfileScreen() {
             useNativeDriver: true,
           }).start(() => {
             setIsEditModalVisible(false);
+            setIsJockeyEditModalVisible(false);
+            setIsRefereeEditModalVisible(false);
           });
         } else {
           Animated.spring(translateY, {
@@ -207,12 +228,85 @@ export default function ProfileScreen() {
     }
   };
 
+  const openJockeyEditModal = () => {
+    setJockeyEditLicense(jockeyProfile?.licenseNumber || '');
+    setJockeyEditHeight(jockeyProfile?.heightCm ? String(jockeyProfile.heightCm) : '');
+    setJockeyEditWeight(jockeyProfile?.weightKg ? String(jockeyProfile.weightKg) : '');
+    setJockeyEditExperience(jockeyProfile?.experienceYears ? String(jockeyProfile.experienceYears) : '');
+    setJockeyEditSkillLevel(jockeyProfile?.skillLevel || '');
+    setJockeyEditCertificates(jockeyProfile?.certificates || '');
+    setJockeyEditBio(jockeyProfile?.bio || '');
+    setIsJockeyEditModalVisible(true);
+  };
+
+  const handleSaveJockeyProfile = async () => {
+    setIsJockeySaving(true);
+    try {
+      const jockeyId = jockeyProfile?._id || jockeyProfile?.id;
+      if (!jockeyId) throw new Error('Không tìm thấy ID nài ngựa');
+
+      const updatedData = {
+        licenseNumber: jockeyEditLicense.trim() || undefined,
+        heightCm: jockeyEditHeight ? parseInt(jockeyEditHeight, 10) : undefined,
+        weightKg: jockeyEditWeight ? parseInt(jockeyEditWeight, 10) : undefined,
+        experienceYears: jockeyEditExperience ? parseInt(jockeyEditExperience, 10) : undefined,
+        skillLevel: jockeyEditSkillLevel.trim() || undefined,
+        certificates: jockeyEditCertificates.trim() || undefined,
+        bio: jockeyEditBio.trim() || undefined,
+      };
+
+      const res = await jockeysApi.updateProfile(jockeyId, updatedData);
+      setJockeyProfile((res as any).data || res);
+
+      Alert.alert('Thành công', 'Cập nhật hồ sơ chuyên môn thành công');
+      setIsJockeyEditModalVisible(false);
+    } catch (error: any) {
+      Alert.alert('Lỗi', error.message || 'Không thể cập nhật hồ sơ chuyên môn');
+    } finally {
+      setIsJockeySaving(false);
+    }
+  };
+
+  const openRefereeEditModal = () => {
+    setRefereeEditLicense(refereeProfile?.licenseNo || '');
+    setRefereeEditExperience(refereeProfile?.experienceYears ? String(refereeProfile.experienceYears) : '');
+    setRefereeEditCertificates(refereeProfile?.certificates || '');
+    setRefereeEditBio(refereeProfile?.bio || '');
+    setIsRefereeEditModalVisible(true);
+  };
+
+  const handleSaveRefereeProfile = async () => {
+    setIsRefereeSaving(true);
+    try {
+      const refereeId = refereeProfile?._id || refereeProfile?.id;
+      if (!refereeId) throw new Error('Không tìm thấy ID trọng tài');
+
+      const updatedData = {
+        licenseNo: refereeEditLicense.trim() || undefined,
+        experienceYears: refereeEditExperience ? parseInt(refereeEditExperience, 10) : undefined,
+        certificates: refereeEditCertificates.trim() || undefined,
+        bio: refereeEditBio.trim() || undefined,
+      };
+
+      const res = await refereeProfilesApi.updateProfile(refereeId, updatedData);
+      setRefereeProfile((res as any).data || res);
+
+      Alert.alert('Thành công', 'Cập nhật hồ sơ chuyên môn thành công');
+      setIsRefereeEditModalVisible(false);
+    } catch (error: any) {
+      Alert.alert('Lỗi', error.message || 'Không thể cập nhật hồ sơ chuyên môn');
+    } finally {
+      setIsRefereeSaving(false);
+    }
+  };
+
   // Wallet state
   const [balance, setBalance] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
 
   // Jockey performance state
   const [jockeyData, setJockeyData] = useState<any[]>([]);
+  const [jockeyProfile, setJockeyProfile] = useState<any>(null);
 
   // Referee performance state
   const [refereeAssignments, setRefereeAssignments] = useState<any[]>([]);
@@ -229,13 +323,15 @@ export default function ProfileScreen() {
       if (currentGroup === '(jockey)') {
         Promise.all([
           rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
-          jockeyInvitationsApi.listReceived({ limit: 50 }).catch(() => ({ data: [] }))
+          jockeyInvitationsApi.listReceived({ limit: 50 }).catch(() => ({ data: [] })),
+          jockeysApi.getMe().catch(() => (null))
         ])
-          .then(([balRes, invRes]) => {
+          .then(([balRes, invRes, profRes]) => {
             setBalance((balRes as any).balance || 0);
             const list = (invRes as any).data || [];
             const accepted = list.filter((i: any) => i.status === 'ACCEPTED');
             setJockeyData(accepted);
+            if (profRes) setJockeyProfile((profRes as any).data || profRes);
           })
           .catch(() => { })
           .finally(() => setLoadingStats(false));
@@ -475,7 +571,7 @@ export default function ProfileScreen() {
               <View style={styles.perfGrid}>
                 <View style={styles.perfItem}>
                   <View style={styles.perfIconWrap}>
-                    <MaterialIcons name="emoji-events" size={16} color="#000" />
+                    <MaterialIcons name="emoji-events" size={16} color={isDark ? '#FFF' : '#000'} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.perfLabel}>LỜI MỜI ĐÃ NHẬN:</Text>
@@ -486,6 +582,49 @@ export default function ProfileScreen() {
               <Text style={{ color: theme.textMuted, fontSize: 11, marginTop: 12, fontStyle: 'italic' }}>
                 * Chưa có dữ liệu thành tích chính thức từ ban tổ chức.
               </Text>
+            </View>
+          )}
+
+          {/* Jockey Profile */}
+          {currentGroup === '(jockey)' && jockeyProfile && (
+            <View style={[styles.perfCard, { marginTop: 16 }]}>
+              <Text style={styles.perfSub}>HỒ SƠ CHUYÊN MÔN</Text>
+              <Text style={styles.perfTitle}>Thông Tin Nài Ngựa</Text>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Số Giấy Phép:</Text>
+                <Text style={styles.detailValue}>{jockeyProfile.licenseNumber || 'Chưa cập nhật'}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Chiều Cao / Cân Nặng:</Text>
+                <Text style={styles.detailValue}>
+                  {jockeyProfile.heightCm ? `${jockeyProfile.heightCm} cm` : '-'} / {jockeyProfile.weightKg ? `${jockeyProfile.weightKg} kg` : '-'}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Kinh Nghiệm:</Text>
+                <Text style={styles.detailValue}>{jockeyProfile.experienceYears ? `${jockeyProfile.experienceYears} năm` : 'Chưa cập nhật'}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Cấp Độ Kỹ Năng:</Text>
+                <Text style={[styles.detailValue, { textTransform: 'capitalize' }]}>{jockeyProfile.skillLevel || 'Chưa cập nhật'}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Chứng Chỉ:</Text>
+                <Text style={styles.detailValue}>{jockeyProfile.certificates || 'Chưa cập nhật'}</Text>
+              </View>
+              <View style={[styles.detailRow, { borderBottomWidth: 0, flexDirection: 'column', alignItems: 'flex-start' }]}>
+                <Text style={styles.detailLabel}>Tiểu sử:</Text>
+                <Text style={[styles.detailValue, { marginTop: 8 }]}>{jockeyProfile.bio || 'Chưa cập nhật'}</Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.editBtn}
+                activeOpacity={0.8}
+                onPress={openJockeyEditModal}
+              >
+                <Text style={styles.editBtnText}>SỬA HỒ SƠ CHUYÊN MÔN</Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -526,22 +665,30 @@ export default function ProfileScreen() {
               <Text style={styles.perfSub}>HỒ SƠ CHUYÊN MÔN</Text>
               <Text style={styles.perfTitle}>Thông Tin Trọng Tài</Text>
 
-              <View style={styles.refereeInfoRow}>
-                <Text style={styles.refereeInfoLabel}>Số Giấy Phép:</Text>
-                <Text style={styles.refereeInfoValue}>{refereeProfile.licenseNo || 'Chưa cập nhật'}</Text>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Số Giấy Phép:</Text>
+                <Text style={styles.detailValue}>{refereeProfile.licenseNo || 'Chưa cập nhật'}</Text>
               </View>
-              <View style={styles.refereeInfoRow}>
-                <Text style={styles.refereeInfoLabel}>Kinh Nghiệm:</Text>
-                <Text style={styles.refereeInfoValue}>{refereeProfile.experienceYears ? `${refereeProfile.experienceYears} năm` : 'Chưa cập nhật'}</Text>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Kinh Nghiệm:</Text>
+                <Text style={styles.detailValue}>{refereeProfile.experienceYears ? `${refereeProfile.experienceYears} năm` : 'Chưa cập nhật'}</Text>
               </View>
-              <View style={styles.refereeInfoRow}>
-                <Text style={styles.refereeInfoLabel}>Chứng Chỉ:</Text>
-                <Text style={styles.refereeInfoValue}>{refereeProfile.certificates || 'Chưa cập nhật'}</Text>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Chứng Chỉ:</Text>
+                <Text style={styles.detailValue}>{refereeProfile.certificates || 'Chưa cập nhật'}</Text>
               </View>
-              <View style={[styles.refereeInfoRow, { borderBottomWidth: 0, flexDirection: 'column', alignItems: 'flex-start' }]}>
-                <Text style={styles.refereeInfoLabel}>Tiểu sử:</Text>
-                <Text style={[styles.refereeInfoValue, { marginTop: 8 }]}>{refereeProfile.bio || 'Chưa cập nhật'}</Text>
+              <View style={[styles.detailRow, { borderBottomWidth: 0, flexDirection: 'column', alignItems: 'flex-start' }]}>
+                <Text style={styles.detailLabel}>Tiểu sử:</Text>
+                <Text style={[styles.detailValue, { marginTop: 8 }]}>{refereeProfile.bio || 'Chưa cập nhật'}</Text>
               </View>
+
+              <TouchableOpacity
+                style={styles.editBtn}
+                activeOpacity={0.8}
+                onPress={openRefereeEditModal}
+              >
+                <Text style={styles.editBtnText}>SỬA HỒ SƠ CHUYÊN MÔN</Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -666,6 +813,261 @@ export default function ProfileScreen() {
                   disabled={isSaving}
                 >
                   {isSaving ? (
+                    <ActivityIndicator size="small" color="#FFF" />
+                  ) : (
+                    <Text style={styles.saveBtnText}>Lưu thay đổi</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Jockey Edit Profile Modal */}
+      <Modal
+        visible={isJockeyEditModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => {
+          Keyboard.dismiss();
+          setIsJockeyEditModalVisible(false);
+        }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalEditOverlay}>
+            <TouchableOpacity
+              style={StyleSheet.absoluteFillObject}
+              activeOpacity={1}
+              onPress={() => {
+                Keyboard.dismiss();
+                setIsJockeyEditModalVisible(false);
+              }}
+            />
+            <Animated.View
+              style={[
+                styles.modalEditContent,
+                { transform: [{ translateY: combinedTranslateY }] }
+              ]}
+            >
+              <View {...panResponder.panHandlers} style={styles.dragIndicatorWrap}>
+                <View style={styles.dragIndicator} />
+              </View>
+
+              <Text style={styles.modalTitle}>HỒ SƠ CHUYÊN MÔN</Text>
+
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: Dimensions.get('window').height * 0.6 }}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Số Giấy Phép</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={jockeyEditLicense}
+                    onChangeText={setJockeyEditLicense}
+                    placeholder="Nhập số giấy phép"
+                    placeholderTextColor={theme.textMuted}
+                  />
+                </View>
+
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <View style={[styles.inputGroup, { flex: 1 }]}>
+                    <Text style={styles.inputLabel}>Chiều Cao (cm)</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={jockeyEditHeight}
+                      onChangeText={setJockeyEditHeight}
+                      placeholder="170"
+                      placeholderTextColor={theme.textMuted}
+                      keyboardType="numeric"
+                    />
+                  </View>
+
+                  <View style={[styles.inputGroup, { flex: 1 }]}>
+                    <Text style={styles.inputLabel}>Cân Nặng (kg)</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={jockeyEditWeight}
+                      onChangeText={setJockeyEditWeight}
+                      placeholder="65"
+                      placeholderTextColor={theme.textMuted}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <View style={[styles.inputGroup, { flex: 1 }]}>
+                    <Text style={styles.inputLabel}>Kinh Nghiệm (năm)</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={jockeyEditExperience}
+                      onChangeText={setJockeyEditExperience}
+                      placeholder="5"
+                      placeholderTextColor={theme.textMuted}
+                      keyboardType="numeric"
+                    />
+                  </View>
+
+                  <View style={[styles.inputGroup, { flex: 1 }]}>
+                    <Text style={styles.inputLabel}>Kỹ Năng</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={jockeyEditSkillLevel}
+                      onChangeText={setJockeyEditSkillLevel}
+                      placeholder="beginner/pro/..."
+                      placeholderTextColor={theme.textMuted}
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Chứng Chỉ</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={jockeyEditCertificates}
+                    onChangeText={setJockeyEditCertificates}
+                    placeholder="Nhập chứng chỉ"
+                    placeholderTextColor={theme.textMuted}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Tiểu Sử</Text>
+                  <TextInput
+                    style={[styles.textInput, { minHeight: 80, textAlignVertical: 'top' }]}
+                    value={jockeyEditBio}
+                    onChangeText={setJockeyEditBio}
+                    placeholder="Giới thiệu bản thân..."
+                    placeholderTextColor={theme.textMuted}
+                    multiline
+                  />
+                </View>
+              </ScrollView>
+
+              <View style={styles.modalActionRow}>
+                <TouchableOpacity
+                  style={styles.cancelBtn}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setIsJockeyEditModalVisible(false);
+                  }}
+                  disabled={isJockeySaving}
+                >
+                  <Text style={styles.cancelBtnText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.saveBtn}
+                  onPress={handleSaveJockeyProfile}
+                  disabled={isJockeySaving}
+                >
+                  {isJockeySaving ? (
+                    <ActivityIndicator size="small" color="#FFF" />
+                  ) : (
+                    <Text style={styles.saveBtnText}>Lưu thay đổi</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Referee Edit Profile Modal */}
+      <Modal
+        visible={isRefereeEditModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => {
+          Keyboard.dismiss();
+          setIsRefereeEditModalVisible(false);
+        }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalEditOverlay}>
+            <TouchableOpacity
+              style={StyleSheet.absoluteFillObject}
+              activeOpacity={1}
+              onPress={() => {
+                Keyboard.dismiss();
+                setIsRefereeEditModalVisible(false);
+              }}
+            />
+            <Animated.View
+              style={[
+                styles.modalEditContent,
+                { transform: [{ translateY: combinedTranslateY }] }
+              ]}
+            >
+              <View {...panResponder.panHandlers} style={styles.dragIndicatorWrap}>
+                <View style={styles.dragIndicator} />
+              </View>
+
+              <Text style={styles.modalTitle}>HỒ SƠ CHUYÊN MÔN</Text>
+
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: Dimensions.get('window').height * 0.6 }}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Số Giấy Phép</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={refereeEditLicense}
+                    onChangeText={setRefereeEditLicense}
+                    placeholder="Nhập số giấy phép"
+                    placeholderTextColor={theme.textMuted}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Kinh Nghiệm (năm)</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={refereeEditExperience}
+                    onChangeText={setRefereeEditExperience}
+                    placeholder="5"
+                    placeholderTextColor={theme.textMuted}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Chứng Chỉ</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={refereeEditCertificates}
+                    onChangeText={setRefereeEditCertificates}
+                    placeholder="Nhập chứng chỉ"
+                    placeholderTextColor={theme.textMuted}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Tiểu Sử</Text>
+                  <TextInput
+                    style={[styles.textInput, { minHeight: 80, textAlignVertical: 'top' }]}
+                    value={refereeEditBio}
+                    onChangeText={setRefereeEditBio}
+                    placeholder="Giới thiệu bản thân..."
+                    placeholderTextColor={theme.textMuted}
+                    multiline
+                  />
+                </View>
+              </ScrollView>
+
+              <View style={styles.modalActionRow}>
+                <TouchableOpacity
+                  style={styles.cancelBtn}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setIsRefereeEditModalVisible(false);
+                  }}
+                  disabled={isRefereeSaving}
+                >
+                  <Text style={styles.cancelBtnText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.saveBtn}
+                  onPress={handleSaveRefereeProfile}
+                  disabled={isRefereeSaving}
+                >
+                  {isRefereeSaving ? (
                     <ActivityIndicator size="small" color="#FFF" />
                   ) : (
                     <Text style={styles.saveBtnText}>Lưu thay đổi</Text>
@@ -1099,18 +1501,18 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     gap: 12,
     marginTop: 24,
   },
-  refereeInfoRow: {
+  detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
-  refereeInfoLabel: {
+  detailLabel: {
     color: theme.textMuted,
     fontSize: 13,
   },
-  refereeInfoValue: {
+  detailValue: {
     color: theme.textPrimary,
     fontSize: 13,
     fontWeight: '600',
