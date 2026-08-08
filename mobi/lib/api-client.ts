@@ -469,6 +469,9 @@ export const jockeysApi = {
     return apiFetch<any>(`/jockeys?${qs}`);
   },
   get: (id: string) => apiFetch<any>(`/jockeys/${id}`),
+  getMe: () => apiFetch<any>('/jockeys/me'),
+  updateProfile: (id: string, dto: any) =>
+    apiFetch<any>(`/jockeys/${id}`, { method: 'PATCH', body: JSON.stringify(dto) }),
 };
 
 export const dashboardApi = {
