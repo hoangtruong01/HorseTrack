@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: CHI TIẾT TRẬN ĐUA (RACE DETAIL)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Xem chi tiết thông số kỹ thuật của một trận đua cụ thể.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { PageHeader } from "@/components/layout/page-header";

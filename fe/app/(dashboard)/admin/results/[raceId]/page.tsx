@@ -66,6 +66,7 @@ export default function AdminResultDetailPage({
   const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // CHỨC NĂNG: Tải thông tin cuộc đua và kết quả đua của trận đấu từ API, sau đó sắp xếp theo thứ tự xếp hạng
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -81,7 +82,7 @@ export default function AdminResultDetailPage({
       const resultsData = await resultsRes.json();
 
       const rawResults: RaceResultItem[] = resultsData.data || [];
-      // Sort by rank
+      // Sắp xếp kết quả theo thứ hạng tăng dần
       rawResults.sort((a, b) => {
         const rA = a.rank ?? 999;
         const rB = b.rank ?? 999;
@@ -102,6 +103,7 @@ export default function AdminResultDetailPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
+  // CHỨC NĂNG: Gọi API phê duyệt và công bố kết quả trận đấu chính thức (Kích hoạt chia giải thưởng và cập nhật xếp hạng)
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
@@ -128,6 +130,7 @@ export default function AdminResultDetailPage({
     }
   };
 
+  // CHỨC NĂNG PHỤ TRỢ: Định dạng thời gian chạy từ mili-giây sang chuỗi mm:ss.SS để hiển thị
   const formatTime = (ms?: number) => {
     if (!ms) return "—";
     const totalSeconds = ms / 1000;

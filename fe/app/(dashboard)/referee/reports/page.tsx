@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: BÁO CÁO CỦA TRỌNG TÀI (REFEREE REPORTS)
+ * QUYỀN SỬ DỤNG: REFEREE
+ * MÔ TẢ:
+ * - Tạo và gửi báo cáo tổng hợp sau khi cuộc đua kết thúc lên Ban tổ chức.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState } from "react";

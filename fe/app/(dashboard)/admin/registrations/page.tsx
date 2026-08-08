@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ ĐƠN ĐĂNG KÝ THI ĐẤU (REGISTRATIONS MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Danh sách đơn đăng ký tham gia thi đấu của các chủ ngựa gửi lên để xin phép cho ngựa tham gia giải đấu.
+ * ====================================================================
+ */
+
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";

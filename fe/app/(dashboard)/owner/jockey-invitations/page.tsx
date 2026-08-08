@@ -102,7 +102,7 @@ export default function JockeyInvitationsPage() {
     return () => { isMounted = false; };
   }, [selectedJockeyForDetail]);
 
-
+  // CHỨC NĂNG: Tải đồng thời danh sách lời mời đã gửi, danh sách nài ngựa (Jockeys) và danh sách ngựa đã được duyệt đăng ký trận đua
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -205,6 +205,7 @@ export default function JockeyInvitationsPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  // CHỨC NĂNG: Gửi lời mời và thương lượng chia sẻ giải thưởng với nài ngựa (gửi POST yêu cầu tạo lời mời)
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReg || !selectedJockey) { toast.error("Vui lòng chọn đầy đủ."); return; }

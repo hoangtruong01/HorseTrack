@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ TRỌNG TÀI (REFEREES MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Quản lý thông tin tài khoản trọng tài, xét duyệt bằng cấp chứng chỉ hành nghề của trọng tài.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import {

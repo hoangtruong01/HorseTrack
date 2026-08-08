@@ -105,7 +105,7 @@ export function JockeyInvitePage() {
   // Invitation detail modal
   const [detailInv, setDetailInv] = useState<Invitation | null>(null);
 
-  // Fetch initial data
+  // CHỨC NĂNG: Tải danh sách tất cả các lời mời đua ngựa gửi tới Jockey hiện tại từ API
   const fetchInvitations = async () => {
     setIsLoadingInvs(true);
     try {
@@ -128,7 +128,7 @@ export function JockeyInvitePage() {
     fetchInvitations();
   }, []);
 
-  // Handle invitation response (ACCEPT / REJECT)
+  // CHỨC NĂNG: Xử lý chấp nhận (ACCEPT) hoặc từ chối (REJECT) lời mời từ chủ ngựa qua PATCH API
   const handleRespondInvitation = async (id: string, responseStatus: "ACCEPTED" | "REJECTED") => {
     setSubmittingId(id);
     const actionLabel = responseStatus === "ACCEPTED" ? "Chấp nhận" : "Từ chối";

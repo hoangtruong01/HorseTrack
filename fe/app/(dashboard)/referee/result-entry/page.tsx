@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: DANH SÁCH TRẬN ĐUA CHỜ NHẬP KẾT QUẢ (RESULTS TO BE ENTERED)
+ * QUYỀN SỬ DỤNG: REFEREE
+ * MÔ TẢ:
+ * - Danh sách các cuộc đua đã chạy xong nhưng chưa được trọng tài nhập kết quả về đích.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState } from "react";

@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: CHI TIẾT GIẢI ĐẤU (TOURNAMENT DETAIL)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Xem thông tin chi tiết giải đấu, quản lý các vòng đua và các con ngựa tham gia giải đấu đó.
+ * ====================================================================
+ */
+
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: PHÊ DUYỆT KẾT QUẢ THI ĐẤU (RESULTS APPROVAL LIST)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Danh sách các cuộc đua đã kết thúc, đang chờ Admin phê duyệt kết quả chung cuộc để tiến hành trả thưởng.
+ * ====================================================================
+ */
+
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";

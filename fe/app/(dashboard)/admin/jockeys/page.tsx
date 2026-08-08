@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ NÀI NGỰA (JOCKEYS MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Quản lý hồ sơ nài ngựa, theo dõi thông số cân nặng, chiều cao, tỉ lệ thắng và gán tài khoản nài ngựa.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import {

@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: BẢNG XẾP HẠNG CHO SPECTATOR (SPECTATOR RANKINGS)
+ * QUYỀN SỬ DỤNG: SPECTATOR
+ * MÔ TẢ:
+ * - Tra cứu thành tích ngựa và jockey để phân tích trước khi cá cược.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Trophy, Flame } from "lucide-react";

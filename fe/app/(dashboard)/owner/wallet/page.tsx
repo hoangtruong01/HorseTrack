@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: VÍ CỦA CHỦ NGỰA (OWNER WALLET)
+ * QUYỀN SỬ DỤNG: OWNER
+ * MÔ TẢ:
+ * - Quản lý ví tiền, xem biến động số dư nhận thưởng giải đấu và nạp/rút tiền.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";

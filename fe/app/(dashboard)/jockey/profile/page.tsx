@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: HỒ SƠ NÀI NGỰA (JOCKEY PROFILE)
+ * QUYỀN SỬ DỤNG: JOCKEY
+ * MÔ TẢ:
+ * - Cập nhật hồ sơ cá nhân, chỉ số chiều cao, cân nặng định kỳ để bảo đảm điều kiện thi đấu.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";

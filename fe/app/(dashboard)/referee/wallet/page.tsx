@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: VÍ TRỌNG TÀI (REFEREE WALLET)
+ * QUYỀN SỬ DỤNG: REFEREE
+ * MÔ TẢ:
+ * - Theo dõi thù lao làm nhiệm vụ trọng tài của từng trận đấu.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";

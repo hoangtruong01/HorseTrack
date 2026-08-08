@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ DỰ ĐOÁN AI (AI PREDICTIONS MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Theo dõi kết quả dự đoán của mô hình AI, quản lý tỷ lệ chính xác và cấu hình dự đoán cho các trận đấu.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";

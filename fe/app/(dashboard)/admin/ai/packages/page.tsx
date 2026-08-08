@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ GÓI CƯỚC AI (AI PACKAGES MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Cấu hình, chỉnh sửa và tạo mới các gói dịch vụ dự đoán kết quả bằng AI cung cấp cho khán giả.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";

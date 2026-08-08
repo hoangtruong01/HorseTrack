@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: BẢNG XẾP HẠNG NGỰA ĐUA (HORSE RANKINGS)
+ * QUYỀN SỬ DỤNG: OWNER
+ * MÔ TẢ:
+ * - Xem xếp hạng thành tích của các ngựa đua trên toàn hệ thống.
+ * ====================================================================
+ */
+
 import { useEffect, useState } from "react";
 import { Trophy, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";

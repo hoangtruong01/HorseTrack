@@ -21,6 +21,7 @@ export default function SpectatorWalletPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCashoutForm, setShowCashoutForm] = useState(false);
 
+  // CHỨC NĂNG: Tải lịch sử giao dịch ví, số dư ví và các chỉ số thống kê thắng cược từ API
   const fetchWalletData = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
     try {
@@ -49,6 +50,7 @@ export default function SpectatorWalletPage() {
     return () => clearInterval(interval);
   }, [fetchWalletData]);
 
+  // CHỨC NĂNG: Gửi yêu cầu rút điểm thưởng/tiền thắng cược qua API (tạo phiếu Cashout chờ duyệt)
   const handleCashoutSubmit = async (points: number) => {
     try {
       await walletApi.requestCashout({ pointsToRedeem: points });

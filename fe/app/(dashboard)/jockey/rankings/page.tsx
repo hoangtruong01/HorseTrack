@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: XẾP HẠNG NÀI NGỰA (JOCKEY RANKINGS)
+ * QUYỀN SỬ DỤNG: JOCKEY
+ * MÔ TẢ:
+ * - Xem vị trí xếp hạng của mình cùng tỉ lệ thắng, số trận đã đua so với các Jockey khác.
+ * ====================================================================
+ */
+
 import { useEffect, useState } from "react";
 import { Trophy, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";

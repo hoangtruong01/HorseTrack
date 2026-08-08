@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ ĐẶT CƯỢC (BETTING MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Giám sát tất cả vé cược của khán giả, thống kê doanh thu cược và quản lý tỷ lệ cược của từng trận.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";

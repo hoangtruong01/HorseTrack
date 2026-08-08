@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: CHI TIẾT ĐƠN ĐĂNG KÝ THI ĐẤU (REGISTRATION DETAIL & APPROVAL)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Xem chi tiết thông tin ngựa, nài ngựa đăng ký và thực hiện Duyệt hoặc Từ chối đơn đăng ký.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import Link from "next/link";

@@ -1,5 +1,15 @@
 "use client";
+/**
+ * ====================================================================
+ * CHỨC NĂNG: TẠO TRẬN ĐUA MỚI (CREATE NEW RACE)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Giao diện để Admin thiết lập thông tin trận đua mới (Race).
+ * - Cho phép chọn giải đấu (Tournament), cự ly đua (Distance), cấu trúc giải thưởng, thời gian bắt đầu.
+ * ====================================================================
+ */
 import Image from "next/image";
+
 
 import Link from "next/link";
 import { Suspense } from "react";
@@ -11,6 +21,7 @@ import { RaceForm } from "@/features/races/components/race-form";
 export default function NewAdminRacePage() {
   return (
     <main className="space-y-6 max-w-4xl mx-auto">
+      {/* TIÊU ĐỀ TRANG: Tiêu đề thiết lập trận đua mới và nút quay lại danh sách trận đua */}
       <PageHeader
         eyebrow="Tạo trận đua"
         title="Khởi Tạo Trận Đua Mới"
@@ -21,11 +32,13 @@ export default function NewAdminRacePage() {
           </Button>
         }
       />
+      {/* BỘ LỌC TẢI TRANG (SUSPENSE): Hiển thị skeleton chú ngựa chạy khi đang tải form */}
       <Suspense fallback={
         <div className="flex items-center justify-center py-12">
           <Image src="/skeletonHorse.gif" alt="Đang tải..." width={80} height={80} unoptimized className="object-contain mx-auto" />
         </div>
       }>
+        {/* FORM NHẬP THÔNG TIN: Biểu mẫu điền các thông số kỹ thuật của cuộc đua */}
         <RaceForm />
       </Suspense>
     </main>

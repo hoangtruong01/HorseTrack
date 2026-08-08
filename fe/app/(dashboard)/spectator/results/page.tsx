@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: XEM KẾT QUẢ TRẬN ĐUA (RACE RESULTS FOR SPECTATOR)
+ * QUYỀN SỬ DỤNG: SPECTATOR
+ * MÔ TẢ:
+ * - Xem chi tiết kết quả về đích của các trận đua đã hoàn thành.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Calendar, ArrowLeft, Siren, Timer, Search, ChevronRight } from "lucide-react";

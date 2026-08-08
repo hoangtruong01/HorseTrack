@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: KẾT QUẢ THI ĐẤU CỦA NGỰA (RACE RESULTS)
+ * QUYỀN SỬ DỤNG: OWNER
+ * MÔ TẢ:
+ * - Xem thành tích, bảng xếp hạng về đích của các ngựa thuộc sở hữu của mình.
+ * ====================================================================
+ */
+
 import { useEffect, useState } from "react";
 import { Calendar, ArrowLeft, Siren, Timer, Search, ChevronRight, Filter, RotateCcw, Trophy, Flag } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";

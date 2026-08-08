@@ -54,6 +54,7 @@ export default function RefereeViolationsPage() {
   const [violationPenalty, setViolationPenalty] = useState("time_penalty");
   const [description, setDescription] = useState("");
 
+  // CHỨC NĂNG: Tải thông tin cuộc đua, danh sách ngựa đua đã được duyệt, và danh sách lỗi vi phạm hiện tại từ API
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -82,6 +83,7 @@ export default function RefereeViolationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
+  // CHỨC NĂNG: Xử lý ghi nhận lỗi vi phạm mới (xác định ngựa vi phạm, lỗi, mức độ và hình phạt, sau đó gửi API POST)
   const handleSubmitViolation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedHorseId) {

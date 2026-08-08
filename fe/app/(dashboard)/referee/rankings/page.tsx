@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: XẾP HẠNG HỆ THỐNG (SYSTEM RANKINGS)
+ * QUYỀN SỬ DỤNG: REFEREE
+ * MÔ TẢ:
+ * - Xem bảng xếp hạng ngựa và nài ngựa toàn hệ thống dưới góc nhìn trọng tài.
+ * ====================================================================
+ */
+
 import { useEffect, useState } from "react";
 import { Trophy, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";

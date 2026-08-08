@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: DANH SÁCH GIẢI ĐẤU (TOURNAMENTS LIST)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Hiển thị toàn bộ danh sách các giải đấu đua ngựa trong hệ thống.
+ * ====================================================================
+ */
+
 import { PageHeader } from "@/components/layout/page-header";
 import {
   AlertDialog,

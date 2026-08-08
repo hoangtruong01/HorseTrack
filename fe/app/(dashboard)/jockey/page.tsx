@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: TRANG CHỦ TỔNG QUAN NÀI NGỰA (JOCKEY DASHBOARD)
+ * QUYỀN SỬ DỤNG: JOCKEY
+ * MÔ TẢ:
+ * - Tổng quan lịch đua sắp tới, trạng thái lời mời và số dư tài khoản của nài ngựa.
+ * ====================================================================
+ */
+
 import { StatCard } from "@/components/data-display/stat-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";

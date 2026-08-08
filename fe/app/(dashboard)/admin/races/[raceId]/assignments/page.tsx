@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: PHÂN CÔNG NHÂN SỰ TRẬN ĐUA (RACE ASSIGNMENTS)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Phân công trọng tài chính, trọng tài biên và các nài ngựa tham gia điều khiển trong cuộc đua.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";

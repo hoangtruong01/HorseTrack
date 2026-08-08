@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: TRANG CHỦ TỔNG QUAN CHỦ NGỰA (OWNER DASHBOARD)
+ * QUYỀN SỬ DỤNG: OWNER
+ * MÔ TẢ:
+ * - Thống kê số lượng ngựa, nài ngựa đang thuê, kết quả thi đấu gần đây và tổng số giải thưởng đạt được.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { StatCard } from "@/components/data-display/stat-card";
 import { PageHeader } from "@/components/layout/page-header";

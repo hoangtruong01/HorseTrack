@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: CHI TIẾT TRẬN ĐẤU CỦA TRỌNG TÀI (RACE DETAIL FOR REFEREE)
+ * QUYỀN SỬ DỤNG: REFEREE
+ * MÔ TẢ:
+ * - Xem thông số kỹ thuật và trạng thái của trận đua đang giám sát.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { PageHeader } from "@/components/layout/page-header";

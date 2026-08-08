@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: DANH SÁCH ĐƠN ĐĂNG KÝ THI ĐẤU (REGISTRATION APPLICATIONS)
+ * QUYỀN SỬ DỤNG: OWNER
+ * MÔ TẢ:
+ * - Theo dõi tiến độ duyệt các đơn đăng ký thi đấu của ngựa mình gửi lên Ban tổ chức.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";

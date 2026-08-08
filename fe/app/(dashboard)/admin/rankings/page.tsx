@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ BẢNG XẾP HẠNG (RANKINGS MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Cập nhật, thống kê và quản lý bảng xếp hạng điểm số của ngựa và nài ngựa toàn hệ thống.
+ * ====================================================================
+ */
+
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Flag, Trophy, User } from "lucide-react";

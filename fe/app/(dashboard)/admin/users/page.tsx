@@ -1,5 +1,18 @@
 "use client";
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ NGƯỜI DÙNG (USER MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Hiển thị danh sách tất cả tài khoản người dùng trong hệ thống (chủ ngựa, nài ngựa, trọng tài, khách...).
+ * - Tìm kiếm người dùng bằng tên, email, số điện thoại.
+ * - Bộ lọc người dùng theo Vai trò (Role) và Trạng thái (Status).
+ * - Xem chi tiết thông tin và hồ sơ đính kèm (bằng cấp của trọng tài, thông tin nài ngựa...).
+ * - Thay đổi trạng thái tài khoản (Hoạt động, Bị chặn, v.v.).
+ * ====================================================================
+ */
 import Image from "next/image";
+
 
 import { PageHeader } from "@/components/layout/page-header";
 import {
@@ -112,6 +125,7 @@ export default function AdminUsersPage() {
   const [ownerHorsePage, setOwnerHorsePage] = useState(1);
   const HORSES_PER_PAGE = 6;
 
+  // CHỨC NĂNG: Lấy chi tiết thông tin và hồ sơ đi kèm của người dùng (nài ngựa, trọng tài, chủ ngựa) khi click chọn
   const handleOpenUserDetail = useCallback(async (u: UserItem) => {
     setSelectedUserDetail(u);
     setLoadingSubProfiles(true);
@@ -192,6 +206,7 @@ export default function AdminUsersPage() {
     }
   }, []);
 
+  // CHỨC NĂNG: Tải danh sách người dùng từ API dựa theo trang, từ khóa tìm kiếm và bộ lọc vai trò, trạng thái
   const fetchUsers = useCallback(async (page = 1) => {
     setLoading(true);
     try {
@@ -213,6 +228,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => { void fetchUsers(1); }, [fetchUsers]);
 
+  // CHỨC NĂNG: Khóa (Ban) hoặc mở khóa (Unban) tài khoản người dùng
   const handleBan = async (u: UserItem) => {
     setActionLoading(u.id);
     try {
@@ -235,6 +251,7 @@ export default function AdminUsersPage() {
     setDeleteTarget(u);
   };
 
+  // CHỨC NĂNG: Xác nhận và gọi API xóa người dùng ra khỏi hệ thống
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     setActionLoading(deleteTarget.id);
@@ -250,6 +267,7 @@ export default function AdminUsersPage() {
     }
   };
 
+  // CHỨC NĂNG: Gán (cấp) thêm một vai trò mới cho tài khoản người dùng
   const handleAssignRole = async (userId: string, role: string) => {
     setRolesActionLoading(`${role}-add`);
     try {
@@ -292,6 +310,7 @@ export default function AdminUsersPage() {
     }
   };
 
+  // GIAO DIỆN (UI): Render khung layout chính của trang quản lý, bao gồm bộ lọc, bảng danh sách người dùng và modal chi tiết
   return (
     <main className="space-y-6">
       <PageHeader

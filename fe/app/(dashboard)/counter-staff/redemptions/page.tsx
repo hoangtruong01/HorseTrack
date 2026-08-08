@@ -28,6 +28,7 @@ export default function RedemptionsQueuePage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
+  // CHỨC NĂNG: Tải danh sách lịch sử các giao dịch rút tiền/đổi thưởng đã thực hiện tại quầy
   const fetchCashouts = useCallback(
     async (currentPage: number, statusParam = filterStatus) => {
       setLoading(true);
@@ -57,6 +58,7 @@ export default function RedemptionsQueuePage() {
     void fetchCashouts(1);
   }, [fetchCashouts]);
 
+  // CHỨC NĂNG: Tra cứu chi tiết thông tin giao dịch rút tiền/đổi thưởng của khách thông qua mã đổi thưởng
   const handleLookup = async (code: string) => {
     setIsSearching(true);
     setSearchError(null);
@@ -81,6 +83,7 @@ export default function RedemptionsQueuePage() {
     setSearchError(null);
   };
 
+  // CHỨC NĂNG: Cập nhật trạng thái giao dịch (Duyệt chi tiền mặt cho khách / Từ chối / Báo lỗi)
   const handleAction = async (id: string, action: "APPROVED" | "PAID" | "REJECTED" | "FAILED", reason?: string) => {
     try {
       await walletApi.processCashout(id, action, reason);

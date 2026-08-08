@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: MUA GÓI DỰ ĐOÁN AI (AI PACKAGES SHOP)
+ * QUYỀN SỬ DỤNG: SPECTATOR
+ * MÔ TẢ:
+ * - Xem thông tin và mua các gói cước phân tích, dự đoán kết quả đua từ AI.
+ * ====================================================================
+ */
+
 import { useEffect, useState } from "react";
 import { Brain, CheckCircle, Clock, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 import { toast } from "sonner";

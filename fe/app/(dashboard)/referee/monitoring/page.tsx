@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: GIÁM SÁT TRẬN ĐẤU THỜI GIAN THỰC (REALTIME MONITORING)
+ * QUYỀN SỬ DỤNG: REFEREE
+ * MÔ TẢ:
+ * - Màn hình theo dõi vị trí và tốc độ các con ngựa trên đường đua trong lúc trận đấu đang diễn ra.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState } from "react";

@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ VÍ HỆ THỐNG (SYSTEM WALLET)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Theo dõi doanh thu, số dư, dòng tiền nạp/rút hệ thống và thống kê tài chính.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";

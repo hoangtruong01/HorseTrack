@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: XEM DỰ ĐOÁN TỪ AI (AI PREDICTIONS LIST)
+ * QUYỀN SỬ DỤNG: SPECTATOR
+ * MÔ TẢ:
+ * - Hiển thị kết quả gợi ý dự đoán từ AI dành cho các trận đua sắp tới sau khi mua gói cước.
+ * ====================================================================
+ */
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Brain, Lock } from "lucide-react";

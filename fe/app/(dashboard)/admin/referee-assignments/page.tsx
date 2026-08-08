@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ PHÂN CÔNG TRỌNG TÀI (REFEREE ASSIGNMENTS)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Xem lịch sử phân công trọng tài giám sát cho các giải đấu và trận đấu.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";

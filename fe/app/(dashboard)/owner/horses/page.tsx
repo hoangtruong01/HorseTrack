@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: DANH SÁCH CHIẾN MÃ CỦA TÔI (OWNER HORSES)
+ * QUYỀN SỬ DỤNG: OWNER
+ * MÔ TẢ:
+ * - Hiển thị danh sách toàn bộ ngựa đua thuộc sở hữu của chủ ngựa.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { PageHeader } from "@/components/layout/page-header";
 import {

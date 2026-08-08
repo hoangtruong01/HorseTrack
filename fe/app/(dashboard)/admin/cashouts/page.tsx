@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ YÊU CẦU RÚT TIỀN (CASHOUTS MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Xét duyệt hoặc từ chối các yêu cầu rút tiền thắng cược/số dư từ ví của người chơi về tài khoản ngân hàng.
+ * ====================================================================
+ */
+
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";

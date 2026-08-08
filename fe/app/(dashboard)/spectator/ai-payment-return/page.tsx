@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: KẾT QUẢ THANH TOÁN GÓI AI (AI PAYMENT RETURN)
+ * QUYỀN SỬ DỤNG: SPECTATOR
+ * MÔ TẢ:
+ * - Trang trung gian xử lý phản hồi kết quả giao dịch thanh toán mua gói AI.
+ * ====================================================================
+ */
+
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import Link from "next/link";

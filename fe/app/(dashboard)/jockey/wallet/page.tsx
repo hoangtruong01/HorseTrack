@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: VÍ CỦA NÀI NGỰA (JOCKEY WALLET)
+ * QUYỀN SỬ DỤNG: JOCKEY
+ * MÔ TẢ:
+ * - Quản lý thu nhập từ các cuộc đua, tiền thưởng và thực hiện rút tiền.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";

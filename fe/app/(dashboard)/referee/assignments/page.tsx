@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: DANH SÁCH TRẬN ĐẤU ĐƯỢC PHÂN CÔNG (ASSIGNED RACES)
+ * QUYỀN SỬ DỤNG: REFEREE
+ * MÔ TẢ:
+ * - Danh sách các cuộc đua được Ban tổ chức phân công trọng tài giám sát chính thức.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState } from "react";

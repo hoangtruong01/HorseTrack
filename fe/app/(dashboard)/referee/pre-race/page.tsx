@@ -13,6 +13,7 @@ export default function RefereePreRaceWorkspacePage() {
   const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // CHỨC NĂNG: Tải danh sách phân công trọng tài (Assignments) được chấp nhận và có trạng thái trận đấu đang là SCHEDULED hoặc CHECKING
   useEffect(() => {
     const fetchAssignments = async () => {
       try {

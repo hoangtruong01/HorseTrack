@@ -1,5 +1,16 @@
 "use client";
+/**
+ * ====================================================================
+ * CHỨC NĂNG: NHẬP KẾT QUẢ TRẬN ĐẤU (RACE RESULT ENTRY)
+ * QUYỀN SỬ DỤNG: REFEREE (TRỌNG TÀI)
+ * MÔ TẢ:
+ * - Cho phép trọng tài nhập vị trí hoàn thành (hạng 1, 2, 3,...) và thời gian chạy của từng con ngựa.
+ * - Cho phép chạy mô phỏng trận đấu (simulation).
+ * - Lưu kết quả nháp hoặc xác nhận gửi phê duyệt chính thức lên hệ thống.
+ * ====================================================================
+ */
 import Image from "next/image";
+
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -85,17 +96,17 @@ export default function RefereeResultEntryPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch race info
+      // 1. TẢI THÔNG TIN CUỘC ĐUA: Lấy dữ liệu chi tiết của trận đua dựa trên raceId
       const raceData = await racesApi.get(raceId);
       setRace(raceData as unknown as Race);
 
-      // 2. Fetch horses (pre-race checks list represents the approved horses list)
+      // 2. TẢI DANH SÁCH NGỰA ĐUA: Lấy danh sách ngựa đã qua bước kiểm tra tiền trận đấu (Pre-race checks)
       let horsesList: RaceCheck[] = [];
       const checksData = await raceChecksApi.listByRace(raceId);
       horsesList = (checksData || []) as unknown as RaceCheck[];
       setHorses(horsesList);
 
-      // 3. Fetch race violations
+      // 3. TẢI DANH SÁCH LỖI VI PHẠM: Lấy các hành vi vi phạm đã ghi nhận trong trận đua này
       let violationsList: ViolationItem[] = [];
       try {
         violationsList = await raceViolationsApi.listByRace(raceId) || [];
@@ -104,7 +115,7 @@ export default function RefereeResultEntryPage() {
         violationsList = [];
       }
 
-      // 4. Fetch current race results
+      // 4. TẢI KẾT QUẢ ĐÃ LƯU: Lấy danh sách kết quả trận đấu đã được lưu nháp từ trước (nếu có)
       let existingResults: RaceResultItem[] = [];
       try {
         existingResults = await raceResultsApi.listByRace(raceId) || [];
@@ -113,19 +124,23 @@ export default function RefereeResultEntryPage() {
         existingResults = [];
       }
 
-      // 5. Map existing results or initialize blank rows
+      // 5. KHỚP DỮ LIỆU HOẶC KHỞI TẠO BẢNG NHẬP ĐIỂM:
+      // Duyệt qua từng con ngựa trong danh sách thi đấu để gán kết quả đã có hoặc tạo dòng mới
       const rows = horsesList.map((h) => {
+        // Tìm xem con ngựa này đã có kết quả được lưu từ trước chưa
         const existing = existingResults.find((r) => {
           const rHorseId = typeof r.horseId === "object" ? r.horseId?._id : r.horseId;
           return rHorseId === h.horseId?._id;
         });
 
-        // Check if horse has a disqualified violation
+        // KIỂM TRA LỖI TRUẤT QUYỀN THI ĐẤU:
+        // Lọc danh sách vi phạm của con ngựa này để xem có bị lỗi "disqualified" (truất quyền) hay không
         const horseViolations = violationsList.filter((v) => {
           const vHorseId = typeof v.horseId === "object" ? v.horseId?._id : v.horseId;
           return vHorseId === h.horseId?._id;
         });
         const hasDqViolation = horseViolations.some((v) => v.penalty === "disqualified");
+        // Nếu bị truất quyền thì kết quả mặc định là "disqualified", ngược lại là "finished" (hoàn thành)
         const defaultOutcome = hasDqViolation ? "disqualified" : "finished";
 
         return {
@@ -135,6 +150,7 @@ export default function RefereeResultEntryPage() {
           horseBreed: h.horseId?.breed,
           outcome: existing?.outcome || defaultOutcome,
           incident: existing?.incident || "none",
+          // Đổi thời gian hoàn thành từ mili-giây (ms) sang giây (s) để hiển thị trong ô nhập liệu
           finishTimeSecs: existing?.rawFinishTimeMs 
             ? (existing.rawFinishTimeMs / 1000).toString() 
             : (existing?.finishTimeMs ? (existing.finishTimeMs / 1000).toString() : ""),
@@ -142,12 +158,14 @@ export default function RefereeResultEntryPage() {
           note: existing?.note || "",
         };
       });
-      // Sort by rank ascending; rows without rank go to the bottom
+      // SẮP XẾP BẢNG THEO THỨ TỰ XẾP HẠNG (RANK):
+      // Các con ngựa đã xếp hạng (1, 2, 3...) được đưa lên đầu, các con chưa xếp hạng đưa xuống cuối
       rows.sort((a, b) => {
         const rankA = a.rank ? parseInt(a.rank) : Infinity;
         const rankB = b.rank ? parseInt(b.rank) : Infinity;
         return rankA - rankB;
       });
+      // Cập nhật State để render ra giao diện bảng nhập kết quả cho trọng tài
       setEntryRows(rows);
     } catch (err) {
       console.error(err);

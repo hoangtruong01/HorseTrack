@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: HỒ SƠ CÁ NHÂN (USER PROFILE)
+ * QUYỀN SỬ DỤNG: ALL ROLES
+ * MÔ TẢ:
+ * - Trang cá nhân dùng chung để cập nhật thông tin liên hệ, avatar và đổi mật khẩu.
+ * ====================================================================
+ */
+
 import { useRef, useState, useEffect } from "react";
 
 import Link from "next/link";

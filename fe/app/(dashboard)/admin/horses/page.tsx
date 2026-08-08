@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ CHIẾN MÃ TOÀN HỆ THỐNG (HORSES MANAGEMENT)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Xem danh sách ngựa đua, cập nhật trạng thái sức khỏe, phê duyệt chiến mã mới đăng ký bởi chủ ngựa.
+ * ====================================================================
+ */
+
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Trash2, User, LayoutGrid, List, Search, Trophy } from "lucide-react";

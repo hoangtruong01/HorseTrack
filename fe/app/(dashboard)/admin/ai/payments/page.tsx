@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: LỊCH SỬ THANH TOÁN GÓI AI (AI PAYMENTS HISTORY)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Xem danh sách và trạng thái các giao dịch mua gói dự đoán AI của người dùng.
+ * ====================================================================
+ */
 import Image from "next/image";
 import Link from "next/link";
 

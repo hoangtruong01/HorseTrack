@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: QUẢN LÝ NGỰA ĐUA THAM GIA (RACE PARTICIPANTS)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Danh sách và quản lý các con ngựa chính thức được duyệt tham gia thi đấu trong trận đua này.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";

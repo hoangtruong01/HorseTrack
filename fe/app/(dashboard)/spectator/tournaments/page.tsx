@@ -1,3 +1,14 @@
+/**
+ * ====================================================================
+ * CHỨC NĂNG: XEM GIẢI ĐẤU & CHI TIẾT TRẬN ĐẤU (TOURNAMENTS & RACES VIEW)
+ * QUYỀN SỬ DỤNG: SPECTATOR (KHÁN GIẢ / NGƯỜI CHƠI)
+ * MÔ TẢ:
+ * - Hiển thị danh sách các giải đấu (đang diễn ra, sắp diễn ra, đã kết thúc).
+ * - Cho phép chuyển tab để xem danh sách các trận đua (Races).
+ * - Xem chi tiết thông số từng trận đấu, các con ngựa tham gia, nài ngựa điều khiển.
+ * - Hỗ trợ phân tích thông tin và thực hiện đặt cược trực tiếp.
+ * ====================================================================
+ */
 "use client";
 
 import { useEffect, useState, useCallback } from "react";

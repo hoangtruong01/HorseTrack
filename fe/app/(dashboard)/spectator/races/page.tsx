@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: DANH SÁCH TRẬN ĐUA & ĐẶT CƯỢC (RACES & BETTING)
+ * QUYỀN SỬ DỤNG: SPECTATOR
+ * MÔ TẢ:
+ * - Xem lịch đua trực tiếp và thực hiện các lệnh đặt cược (Betting) vào các con ngựa yêu thích.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect } from "react";

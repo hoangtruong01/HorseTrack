@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: CHI TIẾT CHIẾN MÃ (HORSE DETAIL)
+ * QUYỀN SỬ DỤNG: OWNER
+ * MÔ TẢ:
+ * - Xem chi tiết chỉ số sức khỏe, độ tuổi, cân nặng và lịch sử thi đấu của một con ngựa cụ thể.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";

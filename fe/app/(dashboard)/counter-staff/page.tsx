@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: TRANG CHỦ TỔNG QUAN NHÂN VIÊN QUẦY (COUNTER DASHBOARD)
+ * QUYỀN SỬ DỤNG: COUNTER STAFF
+ * MÔ TẢ:
+ * - Giao diện chính hiển thị các phím tắt nạp/rút tiền vật lý cho khách hàng tại quầy.
+ * ====================================================================
+ */
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Gift, ArrowRight, CheckCircle2, Clock, Sparkles } from "lucide-react";

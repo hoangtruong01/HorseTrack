@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: DANH SÁCH CUỘC ĐUA (RACES LIST)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Hiển thị danh sách tất cả các trận đua ngựa trong hệ thống, bộ lọc tìm kiếm theo giải đấu và trạng thái.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { PageHeader } from "@/components/layout/page-header";

@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: TRANG CHỦ TỔNG QUAN TRỌNG TÀI (REFEREE DASHBOARD)
+ * QUYỀN SỬ DỤNG: REFEREE
+ * MÔ TẢ:
+ * - Danh sách công việc giám sát trong ngày và thống kê số trận đã điều hành.
+ * ====================================================================
+ */
+
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Link from "next/link";

@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: LỊCH PHÂN CÔNG ĐUA (RACE ASSIGNMENTS)
+ * QUYỀN SỬ DỤNG: JOCKEY
+ * MÔ TẢ:
+ * - Danh sách chi tiết các cuộc đua được Ban tổ chức phân công lái ngựa thi đấu.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState, Suspense } from "react";

@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: LỊCH SỬ DỰ ĐOÁN CÁ NHÂN (MY PREDICTIONS)
+ * QUYỀN SỬ DỤNG: SPECTATOR
+ * MÔ TẢ:
+ * - Xem lại lịch sử các dự đoán cá nhân của spectator.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { PageHeader } from "@/components/layout/page-header";

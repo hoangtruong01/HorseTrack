@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: TRANG CHỦ KHÁN GIẢ (SPECTATOR DASHBOARD)
+ * QUYỀN SỬ DỤNG: SPECTATOR
+ * MÔ TẢ:
+ * - Trang chủ dành cho khán giả, xem các trận đấu nổi bật và gợi ý đặt cược.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";

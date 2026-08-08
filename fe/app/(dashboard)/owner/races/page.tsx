@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: DANH SÁCH TRẬN ĐUA MỞ ĐĂNG KÝ (RACES FOR REGISTRATION)
+ * QUYỀN SỬ DỤNG: OWNER
+ * MÔ TẢ:
+ * - Xem các cuộc đua sắp diễn ra và chuẩn bị làm đơn đăng ký tham gia thi đấu.
+ * ====================================================================
+ */
+
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";

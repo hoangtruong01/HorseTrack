@@ -1,4 +1,13 @@
 "use client";
+
+/**
+ * ====================================================================
+ * CHỨC NĂNG: CẤU HÌNH GIẢI THƯỞNG (PRIZES CONFIGURATION)
+ * QUYỀN SỬ DỤNG: ADMIN
+ * MÔ TẢ:
+ * - Cấu hình cơ cấu giải thưởng cho các vị trí Top 1, Top 2, Top 3 trong từng trận đấu và giải đấu.
+ * ====================================================================
+ */
 import Image from "next/image";
 
 import { useEffect, useState, useCallback } from "react";

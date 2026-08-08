@@ -41,6 +41,7 @@ export default function RaceRegisterPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // CHỨC NĂNG: Tải thông tin chi tiết trận đua, danh sách ngựa của chủ sở hữu và số dư ví điểm thưởng khi load trang
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -84,6 +85,7 @@ export default function RaceRegisterPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceId]);
 
+  // CHỨC NĂNG: Gửi yêu cầu đăng ký một con ngựa tham gia trận đua (gửi POST request đến API registrations)
   const handleSubmit = async (horseId: string) => {
     setIsSubmitting(true);
     try {

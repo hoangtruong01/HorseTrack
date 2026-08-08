@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ====================================================================
+ * CHỨC NĂNG: NẠP TIỀN TẠI QUẦY (COUNTER DEPOSIT - ĐÃ BỊ VÔ HIỆU HÓA)
+ * QUYỀN SỬ DỤNG: COUNTER STAFF (NHÂN VIÊN QUẦY)
+ * MÔ TẢ:
+ * - Từng dùng để nạp điểm/tiền trực tiếp cho khách hàng tại quầy.
+ * - Hiện tại đã bị khóa hoàn toàn theo quy chế nghiệp vụ mới của hệ thống để bảo đảm an toàn tài chính.
+ * ====================================================================
+ */
 import Link from "next/link";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
