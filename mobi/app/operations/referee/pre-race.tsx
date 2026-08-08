@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { raceChecksApi, racesApi, type RaceItem } from '../../../lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ErrorState, useThemeColors } from '../../../components/ui/shared';
+import { HorseDetailModal } from '../../../components/ui/horse-detail-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { premiumColors as defaultPremiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '@/components/ui/premium-tokens';
@@ -36,6 +37,10 @@ export default function PreRaceChecksScreen() {
   // Failure note state per check item ID
   const [failNotes, setFailNotes] = useState<Record<string, string>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Modal State
+  const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
+  const [isHorseModalVisible, setIsHorseModalVisible] = useState(false);
 
   // Conditions and status state
   const [trackCondition, setTrackCondition] = useState('');
@@ -159,7 +164,14 @@ export default function PreRaceChecksScreen() {
 
     return (
       <View style={[styles.card, isPassed && styles.cardPassed, isFailed && styles.cardFailed]}>
-        <View style={styles.cardHeader}>
+        <TouchableOpacity 
+          style={styles.cardHeader} 
+          activeOpacity={0.7}
+          onPress={() => {
+            setSelectedHorseId(horse._id);
+            setIsHorseModalVisible(true);
+          }}
+        >
           <View style={{ flex: 1 }}>
             <Text style={styles.horseName}>{horse.name.toUpperCase()}</Text>
             <Text style={styles.breedText}>{horse.breed || 'Thuần chủng'}</Text>
@@ -169,7 +181,7 @@ export default function PreRaceChecksScreen() {
               {getStatusText(item.status)}
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.cardBody}>
           <Text style={styles.bodyText}>Nài ngựa (Jockey): <Text style={styles.whiteBold}>{item.jockeyUserId?.fullName || 'Chưa gán'}</Text></Text>
@@ -214,6 +226,11 @@ export default function PreRaceChecksScreen() {
             )}
           </View>
         )}
+        <HorseDetailModal
+          visible={isHorseModalVisible}
+          onClose={() => setIsHorseModalVisible(false)}
+          horseId={selectedHorseId}
+        />
       </View>
     );
   };
