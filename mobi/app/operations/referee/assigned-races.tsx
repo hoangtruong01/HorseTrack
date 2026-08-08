@@ -217,7 +217,7 @@ export default function AssignedRacesScreen() {
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         onRefresh={onRefresh}
-        refreshing={refreshing}
+        refreshing={refreshing} 
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           error ? (

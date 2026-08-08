@@ -7,6 +7,7 @@ import { LoadingState, EmptyState, statusLabel, useThemeColors } from '@/compone
 import { tournamentsApi, racesApi, registrationsApi, predictionsApi, rewardPointLedgerApi, aiApi } from '@/lib/api-client';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import RaceResultsModal from '@/components/ui/race-results-modal';
+import { HorseDetailModal } from '@/components/ui/horse-detail-modal';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Stack, Tabs } from 'expo-router';
 
@@ -62,6 +63,10 @@ export default function SpectatorTournaments() {
   const [showResultsModal, setShowResultsModal] = useState(false);
   const [resultsRaceId, setResultsRaceId] = useState<string | null>(null);
   const [resultsRaceName, setResultsRaceName] = useState<string | null>(null);
+
+  // Horse Detail Modal State
+  const [infoHorseId, setInfoHorseId] = useState<string | null>(null);
+  const [isHorseModalVisible, setIsHorseModalVisible] = useState(false);
 
   const openResultsModal = (race: any) => {
     setResultsRaceId(race._id || race.id);
@@ -555,9 +560,22 @@ export default function SpectatorTournaments() {
                 return (
                   <View key={reg._id} style={s.tableRow}>
                     <Text style={[s.laneText, { flex: 0.15 }]}>{idx + 1}</Text>
-                    <View style={{ flex: 0.5 }}>
-                      <Text style={s.horseNameText}>{horseName}</Text>
-                      <Text style={s.jockeyNameText}>Nài: {jockeyName}</Text>
+                    <View style={{ flex: 0.5, flexDirection: 'row', alignItems: 'center' }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.horseNameText}>{horseName}</Text>
+                        <Text style={s.jockeyNameText}>Nài: {jockeyName}</Text>
+                      </View>
+                      {typeof reg.horseId === 'object' && reg.horseId && (
+                        <TouchableOpacity 
+                          style={{ padding: 4 }} 
+                          onPress={() => {
+                            setInfoHorseId(reg.horseId._id || reg.horseId.id);
+                            setIsHorseModalVisible(true);
+                          }}
+                        >
+                          <MaterialIcons name="info-outline" size={20} color={pc.brand} />
+                        </TouchableOpacity>
+                      )}
                     </View>
                     <View style={{ flex: 0.35, alignItems: 'flex-end' }}>
                       <View style={s.approvedBadge}>
@@ -570,6 +588,11 @@ export default function SpectatorTournaments() {
             </View>
           )}
         </ScrollView>
+        <HorseDetailModal
+          visible={isHorseModalVisible}
+          onClose={() => setIsHorseModalVisible(false)}
+          horseId={infoHorseId}
+        />
       </View>
     );
   };

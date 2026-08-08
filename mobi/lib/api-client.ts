@@ -251,6 +251,7 @@ export const horsesApi = {
     if (params?.limit) qs.set('limit', String(params.limit));
     return apiFetch<PaginatedResult<HorseItem>>(`/horses/my-horses?${qs}`);
   },
+  get: (id: string) => apiFetch<HorseItem>(`/horses/${id}`),
   create: (body: FormData | { name: string; breed?: string; age?: number; gender?: string; color?: string; weightKg?: number; heightCm?: number; baseSpeed?: number; staminaScore?: number; description?: string }) =>
     apiFetch<HorseItem>('/horses', {
       method: 'POST',
@@ -286,6 +287,39 @@ export const racesApi = {
     apiFetch(`/races/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   updateConditions: (id: string, dto: { trackCondition?: string; weatherSnapshot?: string }) =>
     apiFetch(`/races/${id}/conditions`, { method: 'PATCH', body: JSON.stringify(dto) }),
+};
+
+export interface RefereeProfileItem {
+  _id: string;
+  userId?: { _id: string; fullName: string; email: string; phone?: string; avatar?: string } | string;
+  licenseNo?: string;
+  experienceYears?: number;
+  status: "available" | "unavailable" | "suspended";
+  approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason?: string;
+  certificates?: string;
+  bio?: string;
+  licenseImage?: string;
+  portraitImage?: string;
+  certificateImage?: string;
+  certificateImages?: string[];
+  createdAt?: string;
+}
+
+export const refereeProfilesApi = {
+  getMe: () => apiFetch<RefereeProfileItem>('/referee-profiles/me'),
+  updateProfile: (id: string, dto: {
+    fullName?: string;
+    phone?: string;
+    licenseNo?: string;
+    experienceYears?: number;
+    certificates?: string;
+    bio?: string;
+    licenseImage?: string;
+    portraitImage?: string;
+    certificateImage?: string;
+    certificateImages?: string[];
+  }) => apiFetch<RefereeProfileItem>(`/referee-profiles/${id}`, { method: 'PATCH', body: JSON.stringify(dto) }),
 };
 
 export const refereeAssignmentsApi = {

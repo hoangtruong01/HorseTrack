@@ -9,6 +9,7 @@ import { premiumColors, premiumSpacing, premiumRadius, usePremiumColors } from '
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'react-native';
 import { useThemeColors } from '@/components/ui/shared';
+import { HorseDetailModal } from '@/components/ui/horse-detail-modal';
 
 export default function SpectatorRaceDetail() {
   const insets = useSafeAreaInsets();
@@ -30,6 +31,10 @@ export default function SpectatorRaceDetail() {
   const [selectedHorseId, setSelectedHorseId] = useState('');
   const [betPoints, setBetPoints] = useState('10');
   const [placingPrediction, setPlacingPrediction] = useState(false);
+
+  // Modal State
+  const [infoHorseId, setInfoHorseId] = useState<string | null>(null);
+  const [isHorseModalVisible, setIsHorseModalVisible] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!id) return;
@@ -201,6 +206,15 @@ export default function SpectatorRaceDetail() {
                         <Text style={[styles.radioName, isSelected && styles.radioNameSelected]}>{horse.name.toUpperCase()}</Text>
                         <Text style={styles.radioBreed}>{horse.breed || 'Thuần chủng'}</Text>
                       </View>
+                      <TouchableOpacity 
+                        style={{ padding: 4 }} 
+                        onPress={() => {
+                          setInfoHorseId(horse._id);
+                          setIsHorseModalVisible(true);
+                        }}
+                      >
+                        <MaterialIcons name="info-outline" size={24} color={premiumColors.brand} />
+                      </TouchableOpacity>
                     </TouchableOpacity>
                   );
                 })}
@@ -235,6 +249,12 @@ export default function SpectatorRaceDetail() {
         </View>
 
       </View>
+      
+      <HorseDetailModal
+        visible={isHorseModalVisible}
+        onClose={() => setIsHorseModalVisible(false)}
+        horseId={infoHorseId}
+      />
     </AppScreen>
   );
 }

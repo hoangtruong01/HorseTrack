@@ -4,7 +4,7 @@ import { useRouter, Stack, Tabs, useSegments } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/providers/auth-provider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { usersApi, uploadsApi, rewardPointLedgerApi, jockeyInvitationsApi, refereeAssignmentsApi } from '@/lib/api-client';
+import { usersApi, uploadsApi, rewardPointLedgerApi, jockeyInvitationsApi, refereeAssignmentsApi, refereeProfilesApi } from '@/lib/api-client';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColors, formatDate } from '@/components/ui/shared';
@@ -29,7 +29,7 @@ export default function ProfileScreen() {
   const isDark = colorScheme === 'dark';
   const theme = useThemeColors();
   const styles = React.useMemo(() => getStyles(isDark, theme, insets), [isDark, theme, insets]);
-  
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
@@ -176,7 +176,7 @@ export default function ProfileScreen() {
         Alert.alert('Lỗi', 'Ngày sinh không thể ở tương lai');
         return;
       }
-      
+
       dobToSave = `${year}-${parts[1]}-${parts[0]}`;
     }
 
@@ -216,13 +216,14 @@ export default function ProfileScreen() {
 
   // Referee performance state
   const [refereeAssignments, setRefereeAssignments] = useState<any[]>([]);
+  const [refereeProfile, setRefereeProfile] = useState<any>(null);
 
   const hasNotification = true;
 
   // Check if current layout is owner, spectator, jockey, or referee to show wallet
   const currentGroup = segments[0] as string;
   const showWallet = currentGroup === '(owner)' || currentGroup === '(spectator)' || currentGroup === '(jockey)' || currentGroup === '(referee)';
-  
+
   useEffect(() => {
     if (showWallet) {
       if (currentGroup === '(jockey)') {
@@ -241,11 +242,13 @@ export default function ProfileScreen() {
       } else if (currentGroup === '(referee)') {
         Promise.all([
           rewardPointLedgerApi.myBalance().catch(() => ({ balance: 0 })),
-          refereeAssignmentsApi.myAssignments({ limit: 100 }).catch(() => ({ data: [] }))
+          refereeAssignmentsApi.myAssignments({ limit: 100 }).catch(() => ({ data: [] })),
+          refereeProfilesApi.getMe().catch(() => (null))
         ])
-          .then(([balRes, assRes]) => {
+          .then(([balRes, assRes, profRes]) => {
             setBalance((balRes as any).balance || 0);
             setRefereeAssignments((assRes as any).data || []);
+            if (profRes) setRefereeProfile((profRes as any).data || profRes);
           })
           .catch(() => { })
           .finally(() => setLoadingStats(false));
@@ -364,8 +367,8 @@ export default function ProfileScreen() {
         </View>
         <View style={styles.headerLeft} />
         <View style={styles.headerRight}>
-          <TouchableOpacity 
-            style={styles.settingsBtn} 
+          <TouchableOpacity
+            style={styles.settingsBtn}
             onPress={() => router.push('/settings')}
             activeOpacity={0.8}
           >
@@ -375,8 +378,8 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.mainWrapperCard}>
@@ -397,12 +400,12 @@ export default function ProfileScreen() {
                   </View>
                 )}
               </TouchableOpacity>
-              
+
               <TouchableOpacity style={styles.cameraBadge} onPress={pickAndUploadAvatar} disabled={isUploading}>
                 <MaterialIcons name="camera-alt" size={14} color="#FFF" />
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.nameRow}>
               <Text style={styles.nameText}>{user?.fullName || 'Người dùng'}</Text>
               <View style={styles.roleBadge}>
@@ -416,24 +419,24 @@ export default function ProfileScreen() {
           {/* Info Card with Edit Profile */}
           <View style={styles.carbonCard}>
             <Text style={styles.cardHeader}>HỒ SƠ CÁ NHÂN</Text>
-            
+
             <View style={styles.infoRow}>
               <MaterialIcons name="phone" size={18} color={theme.textMuted} />
               <Text style={styles.infoText}>Số điện thoại: <Text style={styles.infoValue}>{user?.phone || 'Chưa cập nhật'}</Text></Text>
             </View>
-            
+
             <View style={styles.infoRow}>
               <MaterialIcons name="location-on" size={18} color={theme.textMuted} />
               <Text style={styles.infoText}>Địa chỉ: <Text style={styles.infoValue}>{user?.address || 'Nhấn để cập nhật'}</Text></Text>
             </View>
-            
+
             <View style={styles.infoRow}>
               <MaterialIcons name="cake" size={18} color={theme.textMuted} />
               <Text style={styles.infoText}>Ngày sinh: <Text style={styles.infoValue}>{user?.dob ? formatDate(user.dob) : 'Chưa cập nhật'}</Text></Text>
             </View>
 
-            <TouchableOpacity 
-              style={styles.editBtn} 
+            <TouchableOpacity
+              style={styles.editBtn}
               activeOpacity={0.8}
               onPress={openEditModal}
             >
@@ -443,8 +446,8 @@ export default function ProfileScreen() {
 
           {/* Wallet */}
           {showWallet && (
-            <TouchableOpacity 
-              style={styles.walletCard} 
+            <TouchableOpacity
+              style={styles.walletCard}
               activeOpacity={0.9}
               onPress={handleWalletPress}
             >
@@ -468,7 +471,7 @@ export default function ProfileScreen() {
             <View style={styles.perfCard}>
               <Text style={styles.perfSub}>BÁO CÁO VẬN ĐỘNG VIÊN</Text>
               <Text style={styles.perfTitle}>Thành Tích Thi Đấu</Text>
-              
+
               <View style={styles.perfGrid}>
                 <View style={styles.perfItem}>
                   <View style={styles.perfIconWrap}>
@@ -514,6 +517,30 @@ export default function ProfileScreen() {
                     <Text style={styles.perfValue}>{loadingStats ? '-' : refereeAssignments.filter(a => a.status === 'accepted').length}</Text>
                   </View>
                 </View>
+              </View>
+            </View>
+          )}
+
+          {currentGroup === '(referee)' && refereeProfile && (
+            <View style={[styles.perfCard, { marginTop: 16 }]}>
+              <Text style={styles.perfSub}>HỒ SƠ CHUYÊN MÔN</Text>
+              <Text style={styles.perfTitle}>Thông Tin Trọng Tài</Text>
+
+              <View style={styles.refereeInfoRow}>
+                <Text style={styles.refereeInfoLabel}>Số Giấy Phép:</Text>
+                <Text style={styles.refereeInfoValue}>{refereeProfile.licenseNo || 'Chưa cập nhật'}</Text>
+              </View>
+              <View style={styles.refereeInfoRow}>
+                <Text style={styles.refereeInfoLabel}>Kinh Nghiệm:</Text>
+                <Text style={styles.refereeInfoValue}>{refereeProfile.experienceYears ? `${refereeProfile.experienceYears} năm` : 'Chưa cập nhật'}</Text>
+              </View>
+              <View style={styles.refereeInfoRow}>
+                <Text style={styles.refereeInfoLabel}>Chứng Chỉ:</Text>
+                <Text style={styles.refereeInfoValue}>{refereeProfile.certificates || 'Chưa cập nhật'}</Text>
+              </View>
+              <View style={[styles.refereeInfoRow, { borderBottomWidth: 0, flexDirection: 'column', alignItems: 'flex-start' }]}>
+                <Text style={styles.refereeInfoLabel}>Tiểu sử:</Text>
+                <Text style={[styles.refereeInfoValue, { marginTop: 8 }]}>{refereeProfile.bio || 'Chưa cập nhật'}</Text>
               </View>
             </View>
           )}
@@ -659,7 +686,7 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     flex: 1,
     backgroundColor: isDark ? '#09090B' : '#F4F4F5',
   },
-  
+
   customHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -898,7 +925,7 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
 
   // Perf Card
   perfCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: isDark ? '#18181B' : '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     marginBottom: 24,
@@ -906,13 +933,13 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
   perfSub: {
-    color: '#52525B',
+    color: isDark ? '#A1A1AA' : '#52525B',
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   perfTitle: {
-    color: '#09090B',
+    color: isDark ? '#FAFAFA' : '#09090B',
     fontSize: 20,
     fontWeight: '900',
     marginBottom: 16,
@@ -941,18 +968,18 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   perfLabel: {
-    color: '#71717A',
+    color: isDark ? '#A1A1AA' : '#71717A',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   perfValue: {
-    color: '#09090B',
+    color: isDark ? '#FAFAFA' : '#09090B',
     fontSize: 24,
     fontWeight: '900',
   },
@@ -977,21 +1004,21 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
   },
 
   // Modal
-  modalOverlay: { 
-    flex: 1, 
-    backgroundColor: isDark ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.6)', 
-    justifyContent: 'center', 
-    alignItems: 'center' 
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: isDark ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  modalContent: { 
-    width: width * 0.8, 
-    aspectRatio: 1, 
-    backgroundColor: isDark ? '#18181B' : '#FFFFFF', 
-    borderRadius: 24, 
-    overflow: 'hidden', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    borderWidth: 1, 
+  modalContent: {
+    width: width * 0.8,
+    aspectRatio: 1,
+    backgroundColor: isDark ? '#18181B' : '#FFFFFF',
+    borderRadius: 24,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
     borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
@@ -999,17 +1026,17 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     shadowRadius: 20,
     elevation: 10,
   },
-  modalAvatarImage: { 
-    width: '100%', 
-    height: '100%' 
+  modalAvatarImage: {
+    width: '100%',
+    height: '100%'
   },
-  modalCloseBtn: { 
-    position: 'absolute', 
-    top: 16, 
-    right: 16, 
-    backgroundColor: 'rgba(0,0,0,0.6)', 
-    borderRadius: 20, 
-    padding: 6 
+  modalCloseBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 20,
+    padding: 6
   },
   modalEditOverlay: {
     flex: 1,
@@ -1071,6 +1098,22 @@ const getStyles = (isDark: boolean, theme: any, insets: any) => StyleSheet.creat
     flexDirection: 'row',
     gap: 12,
     marginTop: 24,
+  },
+  refereeInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+  },
+  refereeInfoLabel: {
+    color: theme.textMuted,
+    fontSize: 13,
+  },
+  refereeInfoValue: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    fontWeight: '600',
   },
   cancelBtn: {
     flex: 1,
